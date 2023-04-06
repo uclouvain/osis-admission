@@ -69,7 +69,7 @@ from admission.tests.factories.curriculum import EducationalExperienceFactory, E
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.community import CommunityEnum
@@ -78,6 +78,7 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
+from osis_notification.models import WebNotification
 from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
@@ -973,6 +974,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
+        manager = ProgramManagerRoleFactory(education_group_id=admission.training.education_group_id)
 
         self.client.force_authenticate(user=self.first_candidate.user)
 
@@ -1017,6 +1019,8 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                 },
             },
         )
+        self.assertEqual(WebNotification.objects.count(), 1)
+        self.assertEqual(WebNotification.objects.first().person, manager.person)
 
     def test_submit_valid_proposition_using_api_but_too_much_submitted_propositions(self):
         DoctorateAdmissionFactory(

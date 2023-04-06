@@ -42,9 +42,9 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
-            permission = 'admission.view_doctorateadmission_{}'.format(self.permission_suffix)
+            permission = 'admission.view_admission_{}'.format(self.permission_suffix)
         else:
-            permission = 'admission.change_doctorateadmission_{}'.format(self.permission_suffix)
+            permission = 'admission.change_admission_{}'.format(self.permission_suffix)
         return request.user.has_perm(permission, obj)
 
 

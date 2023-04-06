@@ -82,7 +82,7 @@ class SupervisionAPIView(
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_supervision',
+        'GET': 'admission.view_admission_supervision',
         'PUT': 'admission.add_supervision_member',
         'POST': 'admission.remove_supervision_member',
         'PATCH': 'admission.edit_external_supervision_member',

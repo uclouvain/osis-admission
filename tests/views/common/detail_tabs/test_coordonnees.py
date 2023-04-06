@@ -23,16 +23,15 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.shortcuts import resolve_url
 from django.test import TestCase
-from django.urls import reverse
 
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
+from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, SicManagerRoleFactory, CddManagerFactory
+from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
@@ -40,7 +39,7 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person_address import PersonAddressFactory
 
 
-class ContinuingAdmissionCoordonneesDetailViewTestCase(TestCase):
+class CoordonneesDetailViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -48,135 +47,47 @@ class ContinuingAdmissionCoordonneesDetailViewTestCase(TestCase):
         first_doctoral_commission = EntityFactory()
         EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
 
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
+        cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
+        cls.central_manager = CentralManagerRoleFactory(entity=first_doctoral_commission)
 
-        cls.admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+        cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__private_email='john.doe@example.com',
             candidate__phone_mobile='0123456789',
         )
 
-        cls.residential_address = PersonAddressFactory(
-            person=cls.admission.candidate,
-            label=PersonAddressType.RESIDENTIAL.name,
-        )
-        cls.contact_address = PersonAddressFactory(
-            person=cls.admission.candidate,
-            label=PersonAddressType.CONTACT.name,
-        )
-
-        cls.url = reverse('admission:continuing-education:coordonnees', args=[cls.admission.uuid])
-
-    def test_coordonnees_detail_candidate_user(self):
-        self.client.force_login(user=self.admission.candidate.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['coordonnees']['contact'], self.contact_address)
-        self.assertEqual(response.context['coordonnees']['residential'], self.residential_address)
-        self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
-        self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
-
-    def test_coordonnees_detail_other_candidate_user(self):
-        self.client.force_login(user=CandidateFactory().person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_coordonnees_detail_sic_manager(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['coordonnees']['contact'], self.contact_address)
-        self.assertEqual(response.context['coordonnees']['residential'], self.residential_address)
-        self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
-        self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
-
-
-class GeneralAdmissionCoordonneesDetailViewTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
-
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
-
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
-
-        cls.admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__private_email='john.doe@example.com',
             candidate__phone_mobile='0123456789',
         )
 
-        cls.url = reverse('admission:general-education:coordonnees', args=[cls.admission.uuid])
+        cls.general_url = resolve_url('admission:general-education:coordonnees', uuid=cls.general_admission.uuid)
 
-    def test_coordonnees_detail_candidate_user(self):
-        self.client.force_login(user=self.admission.candidate.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['coordonnees']['contact'], None)
-        self.assertEqual(response.context['coordonnees']['residential'], None)
-        self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
-        self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
-
-    def test_coordonnees_detail_other_candidate_user(self):
-        self.client.force_login(user=CandidateFactory().person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_coordonnees_detail_sic_manager_without_address(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['coordonnees']['contact'], None)
-        self.assertEqual(response.context['coordonnees']['residential'], None)
-        self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
-        self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
-
-    def test_coordonnees_detail_sic_manager_with_contact_address(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        contact_address = PersonAddressFactory(
-            person=self.admission.candidate,
-            label=PersonAddressType.CONTACT.name,
+        cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
+            candidate__private_email='john.doe@example.com',
+            candidate__phone_mobile='0123456789',
         )
 
-        response = self.client.get(self.url)
+        cls.doctorate_url = resolve_url('admission:doctorate:coordonnees', uuid=cls.doctorate_admission.uuid)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['coordonnees']['contact'], contact_address)
-        self.assertEqual(response.context['coordonnees']['residential'], None)
-        self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
-        self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
-
-    def test_coordonnees_detail_sic_manager_with_residential_and_contact_addresses(self):
+    def test_continuing_coordonnees_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
-
-        contact_address = PersonAddressFactory(
-            person=self.admission.candidate,
-            label=PersonAddressType.CONTACT.name,
-        )
         residential_address = PersonAddressFactory(
-            person=self.admission.candidate,
+            person=self.continuing_admission.candidate,
             label=PersonAddressType.RESIDENTIAL.name,
         )
+        contact_address = PersonAddressFactory(
+            person=self.continuing_admission.candidate,
+            label=PersonAddressType.CONTACT.name,
+        )
 
-        response = self.client.get(self.url)
+        url = resolve_url('admission:continuing-education:coordonnees', uuid=self.continuing_admission.uuid)
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['coordonnees']['contact'], contact_address)
@@ -184,79 +95,76 @@ class GeneralAdmissionCoordonneesDetailViewTestCase(TestCase):
         self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
         self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
 
+    def test_general_coordonnees_detail_sic_manager_without_address(self):
+        self.client.force_login(user=self.sic_manager_user)
 
-class DoctorateAdmissionCoordonneesDetailViewTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+        response = self.client.get(self.general_url)
 
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['coordonnees']['contact'], None)
+        self.assertEqual(response.context['coordonnees']['residential'], None)
+        self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
+        self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
 
-        cls.cdd_manager = CddManagerFactory(
-            entity=first_doctoral_commission,
-        )
+    def test_general_coordonnees_detail_sic_manager_with_contact_address(self):
+        self.client.force_login(user=self.sic_manager_user)
 
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
-
-        cls.admission: DoctorateAdmission = DoctorateAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
-            training__academic_year=academic_years[0],
-            candidate__private_email='john.doe@example.com',
-            candidate__phone_mobile='0123456789',
-        )
-
-        cls.residential_address = PersonAddressFactory(
-            person=cls.admission.candidate,
-            label=PersonAddressType.RESIDENTIAL.name,
-        )
-        cls.contact_address = PersonAddressFactory(
-            person=cls.admission.candidate,
+        contact_address = PersonAddressFactory(
+            person=self.general_admission.candidate,
             label=PersonAddressType.CONTACT.name,
         )
 
-        cls.url = reverse('admission:doctorate:coordonnees', args=[cls.admission.uuid])
-
-    def test_coordonnees_detail_candidate_user(self):
-        self.client.force_login(user=self.admission.candidate.user)
-
-        response = self.client.get(self.url)
+        response = self.client.get(self.general_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['coordonnees']['contact'], self.contact_address)
-        self.assertEqual(response.context['coordonnees']['residential'], self.residential_address)
+        self.assertEqual(response.context['coordonnees']['contact'], contact_address)
+        self.assertEqual(response.context['coordonnees']['residential'], None)
         self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
         self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
 
-    def test_coordonnees_detail_cdd_manager_user(self):
-        self.client.force_login(user=self.cdd_manager.person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['coordonnees']['contact'], self.contact_address)
-        self.assertEqual(response.context['coordonnees']['residential'], self.residential_address)
-        self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
-        self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
-
-    def test_coordonnees_detail_other_candidate_user(self):
-        self.client.force_login(user=CandidateFactory().person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_coordonnees_detail_sic_manager(self):
+    def test_general_coordonnees_detail_sic_manager_with_residential_and_contact_addresses(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.get(self.url)
+        contact_address = PersonAddressFactory(
+            person=self.general_admission.candidate,
+            label=PersonAddressType.CONTACT.name,
+        )
+        residential_address = PersonAddressFactory(
+            person=self.general_admission.candidate,
+            label=PersonAddressType.RESIDENTIAL.name,
+        )
+
+        response = self.client.get(self.general_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['admission'].uuid, self.admission.uuid)
-        self.assertEqual(response.context['coordonnees']['contact'], self.contact_address)
-        self.assertEqual(response.context['coordonnees']['residential'], self.residential_address)
+        self.assertEqual(response.context['coordonnees']['contact'], contact_address)
+        self.assertEqual(response.context['coordonnees']['residential'], residential_address)
+        self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
+        self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
+
+    def test_doctorate_coordonnees_detail_central_manager_user(self):
+        self.client.force_login(user=self.central_manager.person.user)
+
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_doctorate_coordonnees_detail_sic_manager(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        residential_address = PersonAddressFactory(
+            person=self.doctorate_admission.candidate,
+            label=PersonAddressType.RESIDENTIAL.name,
+        )
+        contact_address = PersonAddressFactory(
+            person=self.doctorate_admission.candidate,
+            label=PersonAddressType.CONTACT.name,
+        )
+
+        response = self.client.get(self.doctorate_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['admission'].uuid, self.doctorate_admission.uuid)
+        self.assertEqual(response.context['coordonnees']['contact'], contact_address)
+        self.assertEqual(response.context['coordonnees']['residential'], residential_address)
         self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
         self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')

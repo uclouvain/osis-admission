@@ -24,38 +24,32 @@
 #
 # ##############################################################################
 import datetime
-from unittest.mock import patch
 
-from django.conf import settings
+from django.shortcuts import resolve_url
 from django.test import TestCase
-from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
-from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission
+from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe, ChoixGenre
-from admission.forms.admission.coordonnees import AdmissionCoordonneesForm, AdmissionAddressForm
-from admission.forms.admission.person import AdmissionPersonForm, IdentificationType
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre, ChoixSexe
+from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, SicManagerRoleFactory, CddManagerFactory
+from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.entity import EntityFactory
-from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.person import PersonFactory
+from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.person_address import PersonAddressFactory
 from reference.models.country import Country
 from reference.tests.factories.country import CountryFactory
 
 
-class BaseCoordonneesFormTestCase(TestCase):
+class CoordonneesFormTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.belgium_country = CountryFactory(iso_code=BE_ISO_CODE)
@@ -74,8 +68,45 @@ class BaseCoordonneesFormTestCase(TestCase):
             'national_number': '01234567899',
         }
 
+        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
-class AdmissionCoordonneesFormTestCase(TestCase):
+        first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
+
+        cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
+        cls.cdd_manager = CentralManagerRoleFactory(entity=first_doctoral_commission).person.user
+
+        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
+            candidate__phone_mobile='987654321',
+            candidate__private_email='joe.foe@example.com',
+        )
+
+        cls.general_url = resolve_url('admission:general-education:update:coordonnees', uuid=cls.general_admission.uuid)
+        cls.general_redirect_url = resolve_url(
+            'admission:general-education:coordonnees', uuid=cls.general_admission.uuid
+        )
+
+        cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
+            candidate__phone_mobile='987654321',
+            candidate__private_email='joe.foe@example.com',
+        )
+
+        cls.continuing_url = resolve_url(
+            'admission:continuing-education:update:coordonnees', uuid=cls.continuing_admission.uuid
+        )
+
+        cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training__management_entity=first_doctoral_commission,
+            training__academic_year=academic_years[0],
+            candidate__phone_mobile='987654321',
+            candidate__private_email='joe.foe@example.com',
+        )
+
+        cls.doctorate_url = resolve_url('admission:doctorate:update:coordonnees', uuid=cls.doctorate_admission.uuid)
+
     def test_form_initialization(self):
         form = AdmissionCoordonneesForm(
             show_contact=True,
@@ -94,8 +125,6 @@ class AdmissionCoordonneesFormTestCase(TestCase):
         )
         self.assertTrue(form.is_valid())
 
-
-class AdmissionAddressFormTestCase(BaseCoordonneesFormTestCase):
     def test_country_field_initialization(self):
         # Without country
         form = AdmissionAddressForm(
@@ -305,54 +334,17 @@ class AdmissionAddressFormTestCase(BaseCoordonneesFormTestCase):
             },
         )
 
+    def test_general_person_form_on_get_sic_manager(self):
+        self.client.force_login(user=self.sic_manager_user)
 
-class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-
-        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
-
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
-
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
-
-        cls.admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
-            training__academic_year=academic_years[0],
-            candidate__phone_mobile='987654321',
-            candidate__private_email='joe.foe@example.com',
-        )
-
-        cls.url = reverse('admission:general-education:update:coordonnees', args=[cls.admission.uuid])
-        cls.redirect_url = reverse('admission:general-education:coordonnees', args=[cls.admission.uuid])
-
-    def test_person_form_on_get_candidate_user(self):
-        self.client.force_login(user=self.admission.candidate.user)
-
-        response = self.client.get(self.url)
+        response = self.client.get(self.general_url)
 
         self.assertEqual(response.status_code, 200)
 
-    def test_person_form_on_get_other_candidate_user(self):
-        self.client.force_login(user=CandidateFactory().person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_person_form_on_get_sic_manager(self):
+    def test_general_person_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-
-    def test_person_form_on_get(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        response = self.client.get(self.url)
+        response = self.client.get(self.general_url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
@@ -361,31 +353,31 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
         self.assertTrue(response.context['force_form'])
 
-    def test_person_form_post_main_form(self):
+    def test_general_person_form_post_main_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(
-            self.url,
+            self.general_url,
             {
                 'phone_mobile': '0123456789',
                 'private_email': 'john.doe@example.com',
             },
         )
 
-        self.assertRedirects(response, self.redirect_url)
+        self.assertRedirects(response, self.general_redirect_url)
 
-        candidate = Person.objects.get(pk=self.admission.candidate.pk)
+        candidate = Person.objects.get(pk=self.general_admission.candidate.pk)
         self.assertEqual(candidate.phone_mobile, '0123456789')
         self.assertEqual(candidate.private_email, 'joe.foe@example.com')  # Not updated (disabled field)
 
-    def test_person_form_post_residential_address(self):
+    def test_general_person_form_post_residential_address(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        PersonAddress.objects.filter(person=self.admission.candidate).delete()
+        PersonAddress.objects.filter(person=self.general_admission.candidate).delete()
 
         # The candidate has no address and specifies a new one
         response = self.client.post(
-            self.url,
+            self.general_url,
             {
                 'residential-country': self.belgium_country.pk,
                 'residential-be_postal_code': '1348',
@@ -395,10 +387,10 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
             },
         )
 
-        self.assertRedirects(response, self.redirect_url)
+        self.assertRedirects(response, self.general_redirect_url)
 
         residential_addresses = PersonAddress.objects.filter(
-            person=self.admission.candidate,
+            person=self.general_admission.candidate,
             label=PersonAddressType.RESIDENTIAL.name,
         )
 
@@ -411,7 +403,7 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
 
         # The candidate has an existing address and specifies a new one
         response = self.client.post(
-            self.url,
+            self.general_url,
             {
                 'residential-country': self.france_country.pk,
                 'residential-postal_code': '92000',
@@ -421,10 +413,10 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
             },
         )
 
-        self.assertRedirects(response, self.redirect_url)
+        self.assertRedirects(response, self.general_redirect_url)
 
         residential_addresses = PersonAddress.objects.filter(
-            person=self.admission.candidate,
+            person=self.general_admission.candidate,
             label=PersonAddressType.RESIDENTIAL.name,
         )
 
@@ -437,14 +429,14 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
 
         # The candidate has an existing address and no specifies a new one -> reset address
         response = self.client.post(
-            self.url,
+            self.general_url,
             {},
         )
 
-        self.assertRedirects(response, self.redirect_url)
+        self.assertRedirects(response, self.general_redirect_url)
 
         residential_addresses = PersonAddress.objects.filter(
-            person=self.admission.candidate,
+            person=self.general_admission.candidate,
             label=PersonAddressType.RESIDENTIAL.name,
         )
 
@@ -455,14 +447,14 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
         self.assertEqual(residential_addresses[0].street, '')
         self.assertEqual(residential_addresses[0].street_number, '')
 
-    def test_person_form_post_contact_address(self):
+    def test_general_person_form_post_contact_address(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        PersonAddress.objects.filter(person=self.admission.candidate).delete()
+        PersonAddress.objects.filter(person=self.general_admission.candidate).delete()
 
         # The candidate has no address and specifies a new one
         response = self.client.post(
-            self.url,
+            self.general_url,
             {
                 'show_contact': True,
                 'contact-country': self.belgium_country.pk,
@@ -473,10 +465,10 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
             },
         )
 
-        self.assertRedirects(response, self.redirect_url)
+        self.assertRedirects(response, self.general_redirect_url)
 
         contact_addresses = PersonAddress.objects.filter(
-            person=self.admission.candidate,
+            person=self.general_admission.candidate,
             label=PersonAddressType.CONTACT.name,
         )
 
@@ -488,7 +480,7 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
 
         # The candidate has an existing address and specifies a new one
         response = self.client.post(
-            self.url,
+            self.general_url,
             {
                 'show_contact': True,
                 'contact-country': self.france_country.pk,
@@ -499,10 +491,10 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
             },
         )
 
-        self.assertRedirects(response, self.redirect_url)
+        self.assertRedirects(response, self.general_redirect_url)
 
         contact_addresses = PersonAddress.objects.filter(
-            person=self.admission.candidate,
+            person=self.general_admission.candidate,
             label=PersonAddressType.CONTACT.name,
         )
 
@@ -515,79 +507,41 @@ class GeneralAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
 
         # The candidate has an existing address and no specifies a new one -> delete the existing one
         response = self.client.post(
-            self.url,
+            self.general_url,
             data={
                 'show_contact': False,
             },
         )
 
-        self.assertRedirects(response, self.redirect_url)
+        self.assertRedirects(response, self.general_redirect_url)
         self.assertFalse(
             PersonAddress.objects.filter(
-                person=self.admission.candidate,
+                person=self.general_admission.candidate,
                 label=PersonAddressType.CONTACT.name,
             ).exists()
         )
 
-    def test_person_form_post_with_invalid_data(self):
+    def test_general_person_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
         max_pk = Country.objects.latest('pk').pk
         response = self.client.post(
-            self.url,
+            self.general_url,
             {
                 "residential-country": max_pk + 1,  # Invalid country
             },
         )
         self.assertEqual(response.status_code, 200)
 
-
-class ContinuingAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-
-        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
-
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
-
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
-
-        cls.admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
-            training__academic_year=academic_years[0],
-            candidate__phone_mobile='987654321',
-            candidate__private_email='joe.foe@example.com',
-        )
-
-        cls.url = reverse('admission:continuing-education:update:coordonnees', args=[cls.admission.uuid])
-        cls.redirect_url = reverse('admission:continuing-education:coordonnees', args=[cls.admission.uuid])
-
-    def test_person_form_on_get_candidate_user(self):
-        self.client.force_login(user=self.admission.candidate.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-
-    def test_person_form_on_get_other_candidate_user(self):
-        self.client.force_login(user=CandidateFactory().person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_person_form_on_get_sic_manager(self):
+    def test_continuing_person_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.get(self.url)
-
+        response = self.client.get(self.continuing_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_person_form_on_get(self):
+    def test_continuing_person_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.get(self.url)
+        response = self.client.get(self.continuing_url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
@@ -596,92 +550,49 @@ class ContinuingAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
         self.assertTrue(response.context['force_form'])
 
-    def test_person_form_post_main_form(self):
+    def test_continuing_person_form_post_main_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(
-            self.url,
+            self.continuing_url,
             {
                 'phone_mobile': '0123456789',
                 'private_email': 'john.doe@example.com',
             },
         )
+        redirect_url = resolve_url('admission:continuing-education:coordonnees', uuid=self.continuing_admission.uuid)
+        self.assertRedirects(response, redirect_url)
 
-        self.assertRedirects(response, self.redirect_url)
-
-        candidate = Person.objects.get(pk=self.admission.candidate.pk)
+        candidate = Person.objects.get(pk=self.continuing_admission.candidate.pk)
         self.assertEqual(candidate.phone_mobile, '0123456789')
 
-    def test_person_form_post_with_invalid_data(self):
+    def test_continuing_person_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
         max_pk = Country.objects.latest('pk').pk
         response = self.client.post(
-            self.url,
+            self.continuing_url,
             {
                 "residential-country": max_pk + 1,  # Invalid country
             },
         )
         self.assertEqual(response.status_code, 200)
 
-
-class DoctorateAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-
-        academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
-
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
-
-        cls.sic_manager_user = SicManagerRoleFactory().person.user
-
-        cls.cdd_manager = CddManagerFactory(
-            entity=first_doctoral_commission,
-        )
-
-        cls.admission: DoctorateAdmission = DoctorateAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
-            training__academic_year=academic_years[0],
-            candidate__phone_mobile='987654321',
-            candidate__private_email='joe.foe@example.com',
-        )
-
-        cls.url = reverse('admission:doctorate:update:coordonnees', args=[cls.admission.uuid])
-        cls.redirect_url = reverse('admission:doctorate:coordonnees', args=[cls.admission.uuid])
-
-    def test_person_form_on_get_candidate_user(self):
-        self.client.force_login(user=self.admission.candidate.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 200)
-
-    def test_person_form_on_get_other_candidate_user(self):
-        self.client.force_login(user=CandidateFactory().person.user)
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, 403)
-
-    def test_person_form_on_get_sic_manager(self):
+    def test_doctoral_person_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.get(self.url)
-
+        response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_person_form_on_get_cdd_manager(self):
+    def test_doctoral_person_form_on_get_cdd_manager(self):
         self.client.force_login(user=self.cdd_manager.person.user)
 
-        response = self.client.get(self.url)
-
+        response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_person_form_on_get(self):
+    def test_doctoral_person_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.get(self.url)
+        response = self.client.get(self.doctorate_url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
@@ -690,27 +601,28 @@ class DoctorateAdmissionPersonFormViewTestCase(BaseCoordonneesFormTestCase):
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
         self.assertTrue(response.context['force_form'])
 
-    def test_person_form_post_main_form(self):
+    def test_doctoral_person_form_post_main_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(
-            self.url,
+            self.doctorate_url,
             {
                 'phone_mobile': '0123456789',
                 'private_email': 'john.doe@example.com',
             },
         )
 
-        self.assertRedirects(response, self.redirect_url)
+        redirect_url = resolve_url('admission:doctorate:coordonnees', uuid=self.doctorate_admission.uuid)
+        self.assertRedirects(response, redirect_url)
 
-        candidate = Person.objects.get(pk=self.admission.candidate.pk)
+        candidate = Person.objects.get(pk=self.doctorate_admission.candidate.pk)
         self.assertEqual(candidate.phone_mobile, '0123456789')
 
-    def test_person_form_post_with_invalid_data(self):
+    def test_doctoral_person_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
         max_pk = Country.objects.latest('pk').pk
         response = self.client.post(
-            self.url,
+            self.doctorate_url,
             {
                 "residential-country": max_pk + 1,  # Invalid country
             },

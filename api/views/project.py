@@ -184,8 +184,8 @@ class PropositionViewSet(
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_project',
-        'PUT': 'admission.change_doctorateadmission_project',
+        'GET': 'admission.view_admission_project',
+        'PUT': 'admission.change_admission_project',
         'DELETE': 'admission.delete_doctorateadmission',
     }
 
