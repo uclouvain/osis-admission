@@ -53,6 +53,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator import exceptions as general_education_exceptions
+from admission.tests import QueriesAssertionsMixin
 from admission.tests.api.views.test_project import DoctorateAdmissionApiTestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -67,11 +68,13 @@ from admission.tests.factories.form_item import (
     TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.scholarship import (
     DoubleDegreeScholarshipFactory,
     ErasmusMundusScholarshipFactory,
     InternationalScholarshipFactory,
 )
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -517,15 +520,47 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class DoctorateEducationAdmissionTypeUpdateApiTestCase(DoctorateAdmissionApiTestCase):
+class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, APITestCase):
     file_uuid = str(uuid.uuid4())
 
     @classmethod
     def setUpTestData(cls):
-        super().setUpTestData()
+        # Create supervision group members
+        promoter = PromoterFactory()
+        committee_member = CaMemberFactory(process=promoter.process)
+
+        # Create doctorate management entity
+        root = EntityVersionFactory(parent=None).entity
+        cls.sector = EntityVersionFactory(
+            parent=root,
+            entity_type=EntityType.SECTOR.name,
+            acronym='SST',
+        ).entity
+        cls.commission = EntityVersionFactory(
+            parent=cls.sector,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+            acronym='CDA',
+        ).entity
+        cls.admission = DoctorateAdmissionFactory(
+            training__management_entity=cls.commission,
+            supervision_group=promoter.process,
+            with_answers_to_specific_questions=True,
+        )
+
+        # Users
+        cls.candidate = cls.admission.candidate
+        cls.other_candidate_user = CandidateFactory().person.user
+        cls.no_role_user = PersonFactory().user
+        cls.promoter_user = promoter.person.user
+        cls.other_promoter_user = PromoterFactory().person.user
+        cls.committee_member_user = committee_member.person.user
+        cls.other_committee_member_user = CaMemberFactory().person.user
+
         cls.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
         cls.update_data = {
             'uuid_proposition': cls.admission.uuid,
+            "sigle_formation": cls.admission.training.acronym,
+            "annee_formation": cls.admission.training.academic_year.year,
             'type_admission': ChoixTypeAdmission.PRE_ADMISSION.name,
             'justification': 'Justification',
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),

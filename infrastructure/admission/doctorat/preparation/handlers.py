@@ -223,6 +223,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         bourse_translator=BourseTranslator(),
+        doctorat_translator=DoctoratTranslator(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

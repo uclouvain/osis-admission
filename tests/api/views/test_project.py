@@ -360,7 +360,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
+class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Create supervision group members
@@ -385,6 +385,19 @@ class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
             with_answers_to_specific_questions=True,
         )
 
+        cls.update_data = {
+            "uuid": cls.admission.uuid,
+            "type_admission": ChoixTypeAdmission.ADMISSION.name,
+            "titre_projet": "A new title",
+            "commission_proximite": '',
+            "bourse_preuve": [],
+            "documents_projet": [],
+            "graphe_gantt": [],
+            "proposition_programme_doctoral": [],
+            "projet_formation_complementaire": [],
+            "lettres_recommandation": [],
+        }
+
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory().person.user
@@ -396,8 +409,6 @@ class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # Targeted url
         cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
 
-
-class DoctorateAdmissionCancelApiTestCase(DoctorateAdmissionApiTestCase):
     def test_admission_doctorate_cancel_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.delete(self.url, format="json")
@@ -444,8 +455,6 @@ class DoctorateAdmissionCancelApiTestCase(DoctorateAdmissionApiTestCase):
         response = self.client.delete(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-
-class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmissionApiTestCase):
     def test_admission_doctorate_get_proximity_commission(self):
         self.client.force_authenticate(user=self.other_candidate_user)
         admission = DoctorateAdmissionFactory(
@@ -568,22 +577,6 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
         self.client.force_authenticate(user=None)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
-class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
-    def setUp(self):
-        self.update_data = {
-            "uuid": self.admission.uuid,
-            "type_admission": ChoixTypeAdmission.ADMISSION.name,
-            "titre_projet": "A new title",
-            "commission_proximite": '',
-            "bourse_preuve": [],
-            "documents_projet": [],
-            "graphe_gantt": [],
-            "proposition_programme_doctoral": [],
-            "projet_formation_complementaire": [],
-            "lettres_recommandation": [],
-        }
 
     def test_admission_doctorate_update_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)

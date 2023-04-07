@@ -453,16 +453,25 @@ class Proposition(interface.RootEntity):
 
     def modifier_type_admission(
         self,
+        formation_id: FormationIdentity,
         type_admission: str,
         justification: Optional[str],
         bourse_erasmus_mundus: Optional[BourseIdentity],
         reponses_questions_specifiques: Dict,
+        commission_proximite: Optional[str],
     ):
         ModifierTypeAdmissionValidatorList(
             type_admission=type_admission,
             justification=justification,
         ).validate()
+        if commission_proximite and commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
+            self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
+        elif commission_proximite and commission_proximite in ChoixCommissionProximiteCDSS.get_names():
+            self.commission_proximite = ChoixCommissionProximiteCDSS[commission_proximite]
+        elif commission_proximite and commission_proximite in ChoixSousDomaineSciences.get_names():
+            self.commission_proximite = ChoixSousDomaineSciences[commission_proximite]
 
+        self.formation_id = formation_id
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self.bourse_erasmus_mundus_id = bourse_erasmus_mundus
