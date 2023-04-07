@@ -329,6 +329,10 @@ class ModifierTypeAdmissionCommand(interface.CommandRequest):
     uuid_proposition: str
 
     type_admission: str
+    sigle_formation: str
+    annee_formation: int
+    commission_proximite: Optional[str] = ''
+
     justification: Optional[str] = ''
 
     bourse_erasmus_mundus: Optional[str] = ''
