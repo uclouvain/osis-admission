@@ -27,9 +27,9 @@
 # Association between a read-only tab name (path name) and a permission
 READ_ACTIONS_BY_TAB = {
     # Personal data
-    'coordonnees': 'admission.view_%([context])s_coordinates',
+    'coordonnees': 'admission.view_admission_coordinates',
     'cotutelle': 'admission.view_admission_cotutelle',
-    'person': 'admission.view_%([context])s_person',
+    'person': 'admission.view_admission_person',
     # Previous experience
     'curriculum': 'admission.view_admission_curriculum',
     'education': 'admission.view_admission_secondary_studies',
@@ -53,14 +53,15 @@ READ_ACTIONS_BY_TAB = {
     # Management
     'internal-note': 'admission.view_internalnote',
     'debug': 'admission.view_debug_info',
+    'comments': 'admission.view_enrolment_application',
 }
 
 # Association between a write-only tab name (path name) and a permission
 UPDATE_ACTIONS_BY_TAB = {
     # Personal data
-    'coordonnees': 'admission.change_%([context])s_coordinates',
+    'coordonnees': 'admission.change_admission_coordinates',
     'cotutelle': 'admission.change_admission_cotutelle',
-    'person': 'admission.change_%([context])s_person',
+    'person': 'admission.change_admission_person',
     # Previous experience
     'curriculum': 'admission.change_admission_curriculum',
     'education': 'admission.change_admission_secondary_studies',

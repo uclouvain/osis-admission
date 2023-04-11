@@ -1096,6 +1096,10 @@ msgstr "Commentaire à destination du candidat :"
 msgid "Comments"
 msgstr "Commentaires"
 
+msgctxt "tab"
+msgid "Comments"
+msgstr "Commentaires"
+
 msgid "Communication attestation"
 msgstr "Attestation de communication"
 
@@ -1820,6 +1824,9 @@ msgstr "Demande de prolongation non complète."
 msgid "Extension request not defined."
 msgstr "Demande de prolongation non définie."
 
+msgid "FAC/CDD processing"
+msgstr "Traitement FAC/CDD"
+
 msgid "FNRS"
 msgstr "FNRS"
 
@@ -2008,6 +2015,12 @@ msgstr ""
 
 msgid "German"
 msgstr "Allemand"
+
+msgid "Global FAC/CDD comments"
+msgstr "Commentaires globaux FAC/CDD"
+
+msgid "Global SIC comments"
+msgstr "Commentaires globaux SIC"
 
 msgid "Graduate degree"
 msgstr "Diplôme"
