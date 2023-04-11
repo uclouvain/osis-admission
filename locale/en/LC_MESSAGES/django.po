@@ -1005,6 +1005,10 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
+msgctxt "tab"
+msgid "Comments"
+msgstr ""
+
 msgid "Communication attestation"
 msgstr ""
 
@@ -1683,6 +1687,9 @@ msgstr ""
 msgid "Extension request not defined."
 msgstr ""
 
+msgid "FAC/CDD processing"
+msgstr ""
+
 msgid "FNRS"
 msgstr ""
 
@@ -1842,6 +1849,12 @@ msgid "Generic mail that can be manually sent once the candidate is admitted"
 msgstr ""
 
 msgid "German"
+msgstr ""
+
+msgid "Global FAC/CDD comments"
+msgstr ""
+
+msgid "Global SIC comments"
 msgstr ""
 
 msgid "Graduate degree"

@@ -46,6 +46,7 @@ from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_E
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
 from base.utils.cte import CTESubquery
+from osis_comment.models import CommentDeleteMixin
 from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -171,7 +172,7 @@ class BaseAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
         )
 
 
-class BaseAdmission(models.Model):
+class BaseAdmission(CommentDeleteMixin, models.Model):
     uuid = models.UUIDField(
         default=uuid.uuid4,
         editable=False,
