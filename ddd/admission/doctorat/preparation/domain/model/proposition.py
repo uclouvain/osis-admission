@@ -211,6 +211,9 @@ class Proposition(interface.RootEntity):
     ):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
+        self._definir_commission(commission_proximite)
+
+    def _definir_commission(self, commission_proximite):
         self.commission_proximite = None
         if commission_proximite and commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
             self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
@@ -464,13 +467,7 @@ class Proposition(interface.RootEntity):
             type_admission=type_admission,
             justification=justification,
         ).validate()
-        if commission_proximite and commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
-            self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
-        elif commission_proximite and commission_proximite in ChoixCommissionProximiteCDSS.get_names():
-            self.commission_proximite = ChoixCommissionProximiteCDSS[commission_proximite]
-        elif commission_proximite and commission_proximite in ChoixSousDomaineSciences.get_names():
-            self.commission_proximite = ChoixSousDomaineSciences[commission_proximite]
-
+        self._definir_commission(commission_proximite)
         self.formation_id = formation_id
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
