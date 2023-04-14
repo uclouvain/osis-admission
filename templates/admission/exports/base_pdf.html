@@ -1,66 +1,88 @@
 {% load static i18n admission %}<!doctype html>{% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}">
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}{{ admission.reference }}{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'admission/admission.css' %}">
   <style>
-      @page {
-          size: A4 portrait;
-          margin: 150px 1cm 120px 1cm;
-          padding: 1em 0;
+    @page {
+      size: A4 portrait;
+      margin: 150px 1cm 120px 1cm;
+      padding: 1em 0;
 
-          @top-left {
-              content: element(header);
-              width: 100%;
-              height: 150px;
-              border-bottom: solid 1px #ccc;
-          }
-
-          @bottom-left {
-              content: element(footer);
-              width: 100%;
-              height: 120px;
-              border-top: solid 1px #ccc;
-          }
+      @top-left {
+        content: element(header);
+        width: 100%;
+        height: 150px;
+        border-bottom: solid 1px #ccc;
       }
 
-      @media print {
-
-          header {
-              position: running(header);
-          }
-
-          header, header *, footer, footer * {
-              color: #000066 !important;
-          }
-
-          header img {
-              height: 1.5cm;
-              width: auto;
-          }
-
-          header img:first-child {
-              margin-left: -1em;
-          }
-
-          header img:last-child {
-              float: right;
-          }
-
-          footer {
-              position: running(footer);
-              padding-bottom: 1em;
-              padding-left: 2.5em;
-              background: url("{% static "img/l-background.png" %}") left 70% no-repeat !important;
-          }
-
-          body {
-              font-family: Calibri, Arial, sans-serif;
-              font-size: 11pt;
-          }
+      @bottom-left {
+        content: element(footer);
+        width: 100%;
+        height: 120px;
+        border-top: solid 1px #ccc;
       }
+    }
+
+    @media print {
+      header {
+        position: running(header);
+      }
+
+      header, header *, footer, footer * {
+        color: #000066 !important;
+      }
+
+      header img {
+        height: 1.5cm;
+        width: auto;
+      }
+
+      header p {
+        padding-left: 1.5em;
+      }
+
+      footer {
+        position: running(footer);
+        padding-bottom: 1em;
+        padding-left: 2.5em;
+        background: url("{% static "img/l-background.png" %}") left 70% no-repeat !important;
+      }
+
+      body {
+        font-family: Calibri, Arial, sans-serif;
+        font-size: 11pt;
+      }
+
+      h1, h2 {
+        color: #3399cc !important;
+      }
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -69,13 +91,12 @@
   <header>
     {% block header %}
       <div>
-        <img src="{% static 'img/logo_uclouvain.png' %}"/>
-        <img src="{% static 'img/valo_doc_louvain.png' %}"/>
+        <img src="{% static 'img/logo_uclouvain.png' %}" />
       </div>
       <p>
         <strong>{{ cdd_version.title }}</strong>
         {% if admission.proximity_commission %}
-          <br/>
+          <br />
           <strong>{{ admission.get_proximity_commission_display }}</strong>
         {% endif %}
       </p>
@@ -84,8 +105,8 @@
   <footer>
     {% block footer %}
       <p>
-        <strong>LOUVAIN-LA-NEUVE</strong> | BRUXELLES | MONS | TOURNAI | CHARLEROI | NAMUR<br/>
-        {{ cdd.location }} {{ cdd.postal_code }} {{ cdd.city }}, Belgique<br/>
+        <strong>LOUVAIN-LA-NEUVE</strong> | BRUXELLES | MONS | TOURNAI | CHARLEROI | NAMUR<br />
+        {{ cdd.location }} {{ cdd.postal_code }} {{ cdd.city }}, Belgique<br />
         Tél: +32 {{ cdd.phone|phone_spaced:True }} www.uclouvain.be
       </p>
     {% endblock %}
