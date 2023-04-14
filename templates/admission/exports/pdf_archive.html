@@ -1,5 +1,5 @@
 {% extends 'admission/exports/base_pdf.html' %}
-{% load admission i18n enums %}
+{% load admission i18n enums static %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -28,6 +28,23 @@
 {% block extra_head %}
   <style>
     @media print {
+      h1 {
+        text-align: center;
+        font-size: 1.3em;
+      }
+
+      h2 {
+        font-size: 1.15em;
+      }
+
+      h1, h2 {
+        text-transform: uppercase;
+      }
+
+      p, p strong, p u {
+        color: #003366 !important;
+      }
+
       .table th {
         background: #8ac3df !important;
       }
@@ -38,230 +55,125 @@
 
 {% block content %}
   <div class="container">
-    <table class="table table-bordered table-condensed">
-      <tbody>
-      <tr>
-        <th class="info" colspan="2">{% trans "Data related to the thesis" %}</th>
-      </tr>
-      <tr>
-        <td>{% trans "Doctorate" %}</td>
-        <td>
-          {% if LANGUAGE_CODE == 'en' %}
-            {{ admission.doctorate.title_english }}
+    <h1>{% trans "Application form" %}</h1>
+
+    {# -------- #}
+    <h2>{% trans "General data" %}</h2>
+
+    <p>
+      {% trans "Doctorate candidate" context 'inclusive' %} :
+      {{ admission.candidate.last_name|upper }}
+      {{ admission.candidate.first_name }}
+    </p>
+
+    <p>Noma : {{ noma }}</p>
+
+    <p>
+      {% trans "Doctorate" %} :
+      {% if LANGUAGE_CODE == 'en' %}
+        {{ admission.doctorate.title_english }}
+      {% else %}
+        {{ admission.doctorate.title }}
+      {% endif %}
+    </p>
+
+    <p>
+      {% trans "Sector" %} :
+      {{ admission.intitule_secteur_formation }}
+    </p>
+
+    <p>
+      {{ admission.doctorate.management_entity.most_recent_entity_version.title }}
+    </p>
+
+    {% if admission.proximity_commission %}
+      <p>
+        {{ admission.get_proximity_commission_display }}
+      </p>
+    {% endif %}
+
+    {# -------- #}
+    <h2>{% trans "Diploma" %}</h2>
+
+    {% for experience in experiences %}
+      <p><strong>
+        {{ experience.first_year }} - {{ experience.last_year|add:1 }}
+        {{ experience.education_name|default:experience.program }}
+        {{ experience.institute_name|default:experience.institute }}
+      </strong></p>
+
+      {% if experience.expected_graduation_date %}
+        <p>
+          {% trans "Expected date of graduation" %} :
+          {{ experience.expected_graduation_date }}
+        </p>
+      {% endif %}
+
+      <p>{% trans "Obtained grade" %} : {{ experience.educationalexperienceyear_set.last.get_result_display }}</p>
+
+      <p>{% trans "Acquired credit number" %} : {{ experience.credits }}</p>
+    {% endfor %}
+
+    {# -------- #}
+    <h2>{% trans "Thesis-related data" %}</h2>
+
+    <p>
+      {% trans "Thesis project title" %} :
+      {{ admission.project_title }}
+    </p>
+
+    <p>
+      {% trans "Abstract" %} :
+      {{ admission.project_abstract }}
+    </p>
+
+    <p>
+      {% trans "Thesis redacting language" %} :
+      {{ admission.get_thesis_language_display }}
+    </p>
+    <p>
+      {{ allocated_time_label }} :
+      {{ admission.dedicated_time }}
+    </p>
+
+    <p>
+      {% trans "Date the application is sent to the supervision group" %} :
+      {{ date_envoi_supervision|date:'d/m/Y H:i' }}
+    </p>
+
+    <p>
+      {% trans "Estimated time to complete the doctorate (in months)" %} :
+      {{ admission.planned_duration }}
+    </p>
+
+    <p>
+      {% trans "Thesis with cotutelle" %} :
+      {{ admission.cotutelle|yesno }}
+    </p>
+    {% if admission.cotutelle %}
+      <p>
+        {% trans "Cotutelle institution" %} :
+        {{ admission.cotutelle_institution }}
+      </p>
+    {% endif %}
+
+    {# -------- #}
+    <h2>{% trans "Supervisory panel proposition" %}</h2>
+    {% for actor in actors %}
+      {% ifchanged actor.type %}
+        <p><u>
+          {% if actor.type == 'PROMOTER' %}
+            {% trans "Promotion" %} :
           {% else %}
-            {{ admission.doctorate.title }}
+            {% trans "Other members of the supervisory panel" %} :
           {% endif %}
-        </td>
-      </tr>
-      {% if admission.thesis_institute %}
-        <tr>
-        <tr>
-          <td>{% trans "Institute of the thesis" %}</td>
-          <td>{{ admission.thesis_institute.title }}</td>
-        </tr>
-      {% endif %}
-      {% if admission.proximity_commission %}
-        <tr>
-          <td>{% trans "Office" %}</td>
-          <td>{{ admission.get_proximity_commission_display }}</td>
-        </tr>
-      {% endif %}
-      {% if admission.thesis_institute %}
-        <tr>
-        <tr>
-          <td>{% trans "Institute email" %}</td>
-          <td>president-{{ admission.thesis_institute.acronym }}@uclouvain.be</td>
-        </tr>
-      {% endif %}
-      {% if admission.financing_type == 'SEARCH_SCHOLARSHIP' %}
-        {% if admission.international_scholarship %}
-          {% display admission.international_scholarship.short_name '-' admission.international_scholarship.long_name as scholarship_name %}
-        {% else %}
-          {% display admission.other_international_scholarship as scholarship_name %}
-        {% endif %}
-        <tr>
-          <td>{% trans "Scholarship" %}</td>
-          <td>{{ scholarship_name }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Scholarship date" %}</td>
-          <td>
-            {{ admission.scholarship_start_date|date:'d/m/Y' }} -
-            {{ admission.scholarship_end_date|date:'d/m/Y' }}
-          </td>
-        </tr>
-        <tr>
-          <td>{% trans "Scholarship proof" %}</td>
-          <td>{{ admission.scholarship_proof }}</td>
-        </tr>
-      {% endif %}
-      {% if admission.cotutelle %}
-        <tr>
-          <td>{% trans "Cotutelle" %}</td>
-          <td>{{ admission.cotutelle_institution }}</td>
-        </tr>
-      {% endif %}
-      </tbody>
-      <tbody>
-      <tr>
-        <th colspan="2">{% trans "Identification" %}</th>
-      </tr>
-      <tr>
-        <td>{% trans "Name" %}</td>
-        <td>{{ admission.candidate.last_name }}</td>
-      </tr>
-      <tr>
-        <td>{% trans "First name" %}</td>
-        <td>{{ admission.candidate.first_name }}</td>
-      </tr>
-      <tr>
-        <td>{% trans "Date of birth" %}</td>
-        <td>{{ admission.candidate.birth_date|date:'d/m/Y' }}</td>
-      </tr>
-      <tr>
-        <td>{% trans "Country of citizenship" %}</td>
-        <td>{{ admission.candidate.birth_country }}</td>
-      </tr>
-      <tr>
-        <td>{% trans "Sex" %}</td>
-        <td>{{ admission.candidate.get_sex_display }}</td>
-      </tr>
-      <tr>
-        <td>{% trans "Contact language" %}</td>
-        <td>{{ admission.candidate.get_language_display }}</td>
-      </tr>
-      <tr>
-        <td>{% trans "Email" %}</td>
-        <td>{{ admission.candidate.email }}</td>
-      </tr>
-      <tbody>
-      {% if contact_address %}
-        <tr>
-          <td colspan="2"><strong>&gt; {% trans "Contact details" %}</strong></td>
-        </tr>
-        <tr>
-          <td>{% trans "Street" %}</td>
-          <td>{{ contact_address.street }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Street number" %}</td>
-          <td>{{ contact_address.street_number }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Postal box" %}</td>
-          <td>{{ contact_address.box }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Place" context 'address' %}</td>
-          <td>{{ contact_address.location }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Zip code" %}</td>
-          <td>{{ contact_address.zip_code }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "City" %}</td>
-          <td>{{ contact_address.coty }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Country" %}</td>
-          <td>{{ contact_address.country }}</td>
-        </tr>
-        </tbody>
-        <tbody>
-      {% endif %}
-      {% if residential_address %}
-        </tbody>
-        <tbody>
-        <tr>
-          <td colspan="2"><strong>&gt; {% trans "Legal residence" %}</strong></td>
-        </tr>
-        <tr>
-          <td>{% trans "Street" %}</td>
-          <td>{{ residential_address.street }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Street number" %}</td>
-          <td>{{ residential_address.street_number }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Postal box" %}</td>
-          <td>{{ residential_address.box }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Place" context 'address' %}</td>
-          <td>{{ residential_address.location }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Zip code" %}</td>
-          <td>{{ residential_address.zip_code }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "City" %}</td>
-          <td>{{ residential_address.coty }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Country" %}</td>
-          <td>{{ residential_address.country }}</td>
-        </tr>
-      {% endif %}
-      <tr>
-        <td>{% trans "Mobile phone" %}</td>
-        <td>{{ admission.candidate.phone }}</td>
-      </tr>
-      </tbody>
-      <tbody>
-      <tr>
-        <th colspan="2">{% trans "Diploma" %}</th>
-      </tr>
-      <tr>
-        <td>{% trans "Title of diploma or training" %}</td>
-        <td>{# TODO #}TODO</td>
-      </tr>
-      </tbody>
-      <tbody>
-      <tr>
-        <th colspan="2">{% trans "Admission" %}</th>
-      </tr>
-      <tr>
-        <td>{% trans "Type" %}</td>
-        <td>{{ admission.get_type_display }}</td>
-      </tr>
-      {% if admission.comment %}
-        <tr>
-          <td>{% trans "Brief justification" %}</td>
-          <td>{{ admission.comment|linebreaks }}</td>
-        </tr>
-      {% endif %}
-      <tr>
-        <td>{% trans "Pre-admission date" %}</td>
-        <td>{{ admission.pre_admission_submission_date|date:'d/m/Y' }}</td>
-      </tr>
-      </tbody>
-      <tbody>
-      <tr>
-        <th colspan="2">{% trans "Supervisory panel" %}</th>
-      </tr>
-      <tr>
-        <th>{% trans "Type" %}</th>
-        <th>{% trans "Name" %}</th>
-      </tr>
-      {% for actor in admission.supervision_group.actors.all %}
-        <tr>
-          <td>{{ actor.supervisionactor.get_type_display }}</td>
-          <td>
-            <strong>
-              {% if actor.supervisionactor.is_doctor %}{% trans "Dr." %} {% endif %}
-              {{ actor.first_name }} {{ actor.last_name }}
-            </strong>
-            (<em>{{ actor.email }}</em>)
-            {% if actor.institute %} - {{ actor.institute }} {% endif %}
-            {% if actor.city %} - {{ actor.city }} {% endif %}
-            {% if actor.country %}({{ actor.country }}){% endif %}
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+        </u></p>
+      {% endifchanged %}
+
+      <p>
+        {% if actor.supervisionactor.is_doctor %}{% trans "Dr." %} {% endif %}
+        {% display actor.first_name ' ' actor.last_name '-' actor.institute '-' actor.city '-' actor.country %}
+      </p>
+    {% endfor %}
   </div>
 {% endblock %}

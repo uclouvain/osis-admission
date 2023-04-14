@@ -33,6 +33,7 @@ from admission.contrib.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from osis_async.models import AsyncTask
 from osis_async.models.enums import TaskState
+from osis_document.contrib.post_processing.post_processing_enums import PostProcessingEnums
 
 
 class ExportPdfTestCase(TestCase):
@@ -46,13 +47,17 @@ class ExportPdfTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+    @patch('osis_document.api.utils.launch_post_processing')
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.utils.save_raw_content_remotely')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_pdf_archive(self, confirm, save, get_metadata):
+    def test_pdf_archive(self, confirm, save, get_metadata, post_processing):
         get_metadata.return_value = {"name": "test.pdf"}
         save.return_value = 'a-token'
         confirm.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        post_processing.return_value = {
+            PostProcessingEnums.MERGE_PDF.name: {'output': ['4bdffb42-552d-415d-9e4c-725f10dce228']}
+        }
         async_task = AsyncTask.objects.create(name="Export pdf")
         AdmissionTask.objects.create(
             admission=self.admission,
@@ -61,7 +66,7 @@ class ExportPdfTestCase(TestCase):
         )
         call_command("process_admission_tasks")
         save.assert_called()
-        confirm.assert_called_with(token='a-token', upload_to=ANY)
+        confirm.assert_called_with('a-token')
         async_task.refresh_from_db()
         self.assertEqual(async_task.state, TaskState.DONE.name)
 
