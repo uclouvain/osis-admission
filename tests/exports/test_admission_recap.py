@@ -41,13 +41,10 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
+from admission.constants import JPEG_MIME_TYPE, PDF_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutSignatureGroupeDeSupervision,
-    ChoixTypeFinancement,
-    ChoixEtatSignature,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature, ChoixTypeFinancement
 from admission.ddd.admission.doctorat.preparation.dtos import (
     AnneeExperienceAcademiqueDTO,
     ConnaissanceLangueDTO,
@@ -96,7 +93,6 @@ from admission.ddd.admission.formation_generale.dtos import (
 from admission.exports.admission_recap.attachments import (
     Attachment,
 )
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.exports.admission_recap.constants import ACCOUNTING_LABEL, CURRICULUM_ACTIVITY_LABEL
 from admission.exports.admission_recap.section import (
     get_accounting_section,

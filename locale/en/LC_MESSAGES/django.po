@@ -271,6 +271,9 @@ msgstr ""
 msgid "Achieved additional training"
 msgstr ""
 
+msgid "Acquired credit number"
+msgstr ""
+
 msgid "Acquired credits"
 msgstr ""
 
@@ -472,6 +475,9 @@ msgid "Application fees"
 msgstr ""
 
 msgid "Application for a study allowance from the French Community of Belgium"
+msgstr ""
+
+msgid "Application form"
 msgstr ""
 
 msgid "Application no."
@@ -1328,12 +1334,6 @@ msgstr "Doctoral training"
 msgid "Data protection"
 msgstr ""
 
-msgid "Data related to the thesis"
-msgstr ""
-
-msgid "Date of birth"
-msgstr ""
-
 msgid "Date of confirmation"
 msgstr ""
 
@@ -1350,6 +1350,9 @@ msgid "Date of the confirmation paper (DD/MM/YYYY)"
 msgstr ""
 
 msgid "Date of the publication"
+msgstr ""
+
+msgid "Date the application is sent to the supervision group"
 msgstr ""
 
 msgid "Deadline extended"
@@ -1479,6 +1482,10 @@ msgstr ""
 msgid "Doctorate admissions"
 msgstr ""
 
+msgctxt "inclusive"
+msgid "Doctorate candidate"
+msgstr ""
+
 msgid "Doctorate enrolment applications"
 msgstr ""
 
@@ -1579,9 +1586,6 @@ msgstr ""
 msgid "Education you are applying for"
 msgstr ""
 
-msgid "Email"
-msgstr ""
-
 msgid "Employer"
 msgstr ""
 
@@ -1675,6 +1679,9 @@ msgid "Excel export of admission applications"
 msgstr ""
 
 msgid "Exit without saving"
+msgstr ""
+
+msgid "Expected date of graduation"
 msgstr ""
 
 msgid "Expected date of graduation (signed document)"
@@ -1846,6 +1853,9 @@ msgid "General"
 msgstr ""
 
 msgid "General Study Regulations"
+msgstr ""
+
+msgid "General data"
 msgstr ""
 
 msgid "General education admission"
@@ -2156,13 +2166,7 @@ msgstr ""
 msgid "Institute address"
 msgstr ""
 
-msgid "Institute email"
-msgstr ""
-
 msgid "Institute name"
-msgstr ""
-
-msgid "Institute of the thesis"
 msgstr ""
 
 msgid "Institution"
@@ -2295,9 +2299,6 @@ msgid "Leave the page?"
 msgstr ""
 
 msgid "Legal cohabitation certificate"
-msgstr ""
-
-msgid "Legal residence"
 msgstr ""
 
 msgid "Linguistic regime"
@@ -2583,9 +2584,6 @@ msgstr ""
 msgid "Message subject"
 msgstr ""
 
-msgid "Mobile phone"
-msgstr ""
-
 msgctxt "admission"
 msgid "Mobile phone"
 msgstr ""
@@ -2784,9 +2782,6 @@ msgstr ""
 msgid "Offer:"
 msgstr ""
 
-msgid "Office"
-msgstr ""
-
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr ""
 
@@ -2835,6 +2830,9 @@ msgid "Other documents concerning cotutelle"
 msgstr ""
 
 msgid "Other international scholarship"
+msgstr ""
+
+msgid "Other members of the supervisory panel"
 msgstr ""
 
 msgid "Other names"
@@ -3516,9 +3514,6 @@ msgstr ""
 msgid "Scholarship certificate"
 msgstr ""
 
-msgid "Scholarship date"
-msgstr ""
-
 msgid "Scholarship end date"
 msgstr ""
 
@@ -3719,9 +3714,6 @@ msgstr ""
 msgid "Street"
 msgstr ""
 
-msgid "Street number"
-msgstr ""
-
 msgid "Student profile"
 msgstr ""
 
@@ -3778,6 +3770,9 @@ msgid "Supervision group not found."
 msgstr ""
 
 msgid "Supervisory panel"
+msgstr ""
+
+msgid "Supervisory panel proposition"
 msgstr ""
 
 msgid "Supervisory panel report of the confirmation paper"
@@ -4062,10 +4057,19 @@ msgstr ""
 msgid "Thesis location"
 msgstr ""
 
+msgid "Thesis project title"
+msgstr ""
+
 msgid "Thesis redacting language"
 msgstr ""
 
 msgid "Thesis title"
+msgstr ""
+
+msgid "Thesis with cotutelle"
+msgstr ""
+
+msgid "Thesis-related data"
 msgstr ""
 
 msgid "This activity and potential sub-activities will be deleted"
@@ -4143,9 +4147,6 @@ msgid "Timetable"
 msgstr ""
 
 msgid "Title"
-msgstr ""
-
-msgid "Title of diploma or training"
 msgstr ""
 
 msgid "Title of the communication"
@@ -4565,9 +4566,6 @@ msgid "Your previous NOMA (registration id)"
 msgstr ""
 
 msgid "Your professional e-mail address"
-msgstr ""
-
-msgid "Zip code"
 msgstr ""
 
 msgid "academic year"

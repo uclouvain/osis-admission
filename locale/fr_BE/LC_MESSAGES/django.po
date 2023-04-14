@@ -326,6 +326,9 @@ msgstr "Comptabilité"
 msgid "Achieved additional training"
 msgstr "Formation complémentaire réalisée"
 
+msgid "Acquired credit number"
+msgstr "Crédits acquis"
+
 msgid "Acquired credits"
 msgstr "Crédits acquis"
 
@@ -544,6 +547,9 @@ msgstr "Frais de dossier"
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 "Demande d'allocation d'études auprès de la Communauté française de Belgique"
+
+msgid "Application form"
+msgstr "Dossier de candidature"
 
 msgid "Application no."
 msgstr "N° de demande"
@@ -1460,12 +1466,6 @@ msgstr "Formation doctorale"
 msgid "Data protection"
 msgstr "Protection des données"
 
-msgid "Data related to the thesis"
-msgstr "Données relatives à la thèse"
-
-msgid "Date of birth"
-msgstr "Date de naissance"
-
 msgid "Date of confirmation"
 msgstr "Date de l'épreuve de confirmation"
 
@@ -1483,6 +1483,9 @@ msgstr "Date de l'épreuve de confirmation (JJ/MM/AAAA)"
 
 msgid "Date of the publication"
 msgstr "Date de publication"
+
+msgid "Date the application is sent to the supervision group"
+msgstr "Date d’envoi de la demande au comité d’accompagnement"
 
 msgid "Deadline extended"
 msgstr "Nouvelle échéance"
@@ -1616,6 +1619,10 @@ msgstr "Admission en doctorat"
 msgid "Doctorate admissions"
 msgstr "Admissions en doctorat"
 
+msgctxt "inclusive"
+msgid "Doctorate candidate"
+msgstr "Candidat.e doctorant.e"
+
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
 
@@ -1716,9 +1723,6 @@ msgstr "Type d'enseignement"
 msgid "Education you are applying for"
 msgstr "Formation à laquelle vous vous inscrivez"
 
-msgid "Email"
-msgstr "Email"
-
 msgid "Employer"
 msgstr "Employeur"
 
@@ -1815,6 +1819,9 @@ msgstr "Export excel des demandes d'admission"
 
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
+
+msgid "Expected date of graduation"
+msgstr "Date (prévue) de délivrance du diplôme"
 
 msgid "Expected date of graduation (signed document)"
 msgstr "Date (prévue) de délivrance du diplôme (document signé)"
@@ -2012,6 +2019,9 @@ msgstr "Général"
 
 msgid "General Study Regulations"
 msgstr "Règlement général des études"
+
+msgid "General data"
+msgstr "Données générales"
 
 msgid "General education admission"
 msgstr "Admission en formation générale"
@@ -2411,14 +2421,8 @@ msgstr "Établissement"
 msgid "Institute address"
 msgstr "Adresse de l'établissement"
 
-msgid "Institute email"
-msgstr "Email de l'institut"
-
 msgid "Institute name"
 msgstr "Nom de l'établissement"
-
-msgid "Institute of the thesis"
-msgstr "Institut de la thèse"
 
 msgid "Institution"
 msgstr "Institution"
@@ -2555,9 +2559,6 @@ msgstr "Quitter la page ?"
 
 msgid "Legal cohabitation certificate"
 msgstr "Attestation de cohabitation légale"
-
-msgid "Legal residence"
-msgstr "Résidence légale"
 
 msgid "Linguistic regime"
 msgstr "Régime linguistique"
@@ -2912,9 +2913,6 @@ msgstr "Message envoyé avec succès"
 msgid "Message subject"
 msgstr "Sujet du message"
 
-msgid "Mobile phone"
-msgstr "Téléphone mobile (GSM)"
-
 msgctxt "admission"
 msgid "Mobile phone"
 msgstr "Téléphone mobile"
@@ -3118,9 +3116,6 @@ msgstr "Grade obtenu"
 msgid "Offer:"
 msgstr "Offre :"
 
-msgid "Office"
-msgstr "Bureau"
-
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
 
@@ -3171,6 +3166,9 @@ msgstr "Autres documents relatifs à la cotutelle"
 
 msgid "Other international scholarship"
 msgstr "Autre bourse internationale"
+
+msgid "Other members of the supervisory panel"
+msgstr "Autres membres du comité d’accompagnement"
 
 msgid "Other names"
 msgstr "Autres prénoms"
@@ -3894,9 +3892,6 @@ msgstr "Bourse"
 msgid "Scholarship certificate"
 msgstr "Attestation de boursier"
 
-msgid "Scholarship date"
-msgstr "Dates de la bourse"
-
 msgid "Scholarship end date"
 msgstr "Date de fin de la bourse"
 
@@ -4115,9 +4110,6 @@ msgstr "État :"
 msgid "Street"
 msgstr "Rue"
 
-msgid "Street number"
-msgstr "Numéro de la rue"
-
 msgid "Student profile"
 msgstr "Profil de l'étudiant"
 
@@ -4175,6 +4167,9 @@ msgstr "Groupe de supervision non trouvé."
 
 msgid "Supervisory panel"
 msgstr "Comité d'accompagnement"
+
+msgid "Supervisory panel proposition"
+msgstr "Proposition de comité d'accompagnement"
 
 msgid "Supervisory panel report of the confirmation paper"
 msgstr "Procès-verbal de l'épreuve de confirmation"
@@ -4500,11 +4495,20 @@ msgstr "Langue de la thèse"
 msgid "Thesis location"
 msgstr "Lieu de la thèse"
 
+msgid "Thesis project title"
+msgstr "Titre du projet de thèse"
+
 msgid "Thesis redacting language"
 msgstr "Langue de rédaction de la thèse"
 
 msgid "Thesis title"
 msgstr "Titre de la thèse"
+
+msgid "Thesis with cotutelle"
+msgstr "Thèse réalisée en cotutelle"
+
+msgid "Thesis-related data"
+msgstr "Données relatives à la thèse"
 
 msgid "This activity and potential sub-activities will be deleted"
 msgstr "Cette activité et ses potentielles sous-activités seront supprimées"
@@ -4592,9 +4596,6 @@ msgstr "Grille horaire"
 
 msgid "Title"
 msgstr "Titre"
-
-msgid "Title of diploma or training"
-msgstr "Nom du diplôme ou de la formation"
 
 msgid "Title of the communication"
 msgstr "Titre de la communication"
@@ -5070,9 +5071,6 @@ msgstr "Votre ancien NOMA (numéro de matricule)"
 
 msgid "Your professional e-mail address"
 msgstr "Votre adresse e-mail professionnelle"
-
-msgid "Zip code"
-msgstr "Code postal"
 
 msgid "academic year"
 msgstr "année académique"
