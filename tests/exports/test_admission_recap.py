@@ -1016,6 +1016,10 @@ class SectionsAttachmentsTestCase(TestCase):
             formulaire_modification_inscription=['uuid-formulaire-modification-inscription'],
             documents_demandes={},
             login_candidat='candidate',
+            documents_libres_sic_candidats=[],
+            documents_libres_sic_uclouvain=[],
+            documents_libres_fac_candidats=[],
+            documents_libres_fac_uclouvain=[],
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',

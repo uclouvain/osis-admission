@@ -77,7 +77,7 @@ def admission_pdf_recap(
 
         # Get a read token and metadata of all attachments
         all_file_uuids = [
-            str(file_uuid)
+            file_uuid
             for section in pdf_sections
             for attachment in section.attachments
             for file_uuid in attachment.uuids

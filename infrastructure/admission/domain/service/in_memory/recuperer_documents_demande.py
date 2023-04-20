@@ -55,6 +55,7 @@ class RecupererDocumentsDemandeInMemoryTranslator(IRecupererDocumentsDemandeTran
                 document_id = f'{section.identifier}.{attachment.identifier}'
                 requested_document = requested_documents.get(document_id, {})
                 document = DocumentDTO(
+                    uuid_proposition=resume_dto.proposition.uuid,
                     identifiant=document_id,
                     onglet=section.identifier,
                     nom_onglet=section.label,

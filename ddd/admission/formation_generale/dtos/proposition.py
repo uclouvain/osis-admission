@@ -75,6 +75,10 @@ class PropositionDTO(interface.DTO):
     pdf_recapitulatif: List[str]
 
     documents_demandes: Dict
+    documents_libres_fac_candidats: List[str]
+    documents_libres_sic_candidats: List[str]
+    documents_libres_fac_uclouvain: List[str]
+    documents_libres_sic_uclouvain: List[str]
 
 
 @attr.dataclass(frozen=True, slots=True)

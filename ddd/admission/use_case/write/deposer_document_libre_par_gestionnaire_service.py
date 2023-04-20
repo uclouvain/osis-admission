@@ -23,44 +23,26 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
 
-import attr
-
-from admission.ddd.interface import SortedQueryRequest
-from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ListerToutesDemandesQuery(SortedQueryRequest):
-    annee_academique: Optional[int] = None
-    numero: Optional[int] = None
-    noma: Optional[str] = ''
-    matricule_candidat: Optional[str] = ''
-    etats: Optional[List[str]] = None
-    type: Optional[str] = ''
-    site_inscription: Optional[str] = ''
-    entites: Optional[List[str]] = None
-    types_formation: Optional[List[str]] = None
-    formation: Optional[str] = ''
-    bourse_internationale: Optional[str] = ''
-    bourse_erasmus_mundus: Optional[str] = ''
-    bourse_double_diplomation: Optional[str] = ''
-    demandeur: Optional[str] = ''
+from admission.ddd.admission.commands import DeposerDocumentLibreParGestionnaireCommand
+from admission.ddd.admission.domain.builder.document_builder import DocumentBuilder
+from admission.ddd.admission.enums.document import StatutDocument
+from admission.ddd.admission.repository.i_document import IDocumentRepository
 
 
-@attr.dataclass(frozen=True, slots=True)
-class RecupererQuestionsSpecifiquesQuery(interface.QueryRequest):
-    uuid_proposition: str
-    type: Optional[str] = None
-    requis: Optional[bool] = None
-    onglets: List[str] = None
+def deposer_document_libre_par_gestionnaire(
+    cmd: 'DeposerDocumentLibreParGestionnaireCommand',
+    document_repository: 'IDocumentRepository',
+) -> str:
+    document = DocumentBuilder().initier_document(
+        statut_document=StatutDocument.VALIDE.name,
+        uuid_proposition=cmd.uuid_proposition,
+        auteur=cmd.auteur,
+        token_document=cmd.token_document,
+        type_document=cmd.type_document,
+        nom_document=cmd.nom_document,
+    )
 
+    document_repository.save_document_gestionnaire(document)
 
-@attr.dataclass(frozen=True, slots=True)
-class DeposerDocumentLibreParGestionnaireCommand(interface.QueryRequest):
-    uuid_proposition: str
-    auteur: str
-    token_document: str
-    type_document: str
-    nom_document: str
+    return document.entity_id.identifiant

@@ -23,33 +23,35 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
-from typing import List, Optional
+from typing import Optional, List
 
-import attr
-
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.enums.document import TypeDocument, StatutDocument, OngletsDemande
-from osis_common.ddd import interface
+from admission.ddd.admission.domain.model.document import Document, DocumentIdentity
+from admission.ddd.admission.repository.i_document import IDocumentRepository
+from osis_common.ddd.interface import EntityIdentity, ApplicationService
 
 
-@attr.dataclass(frozen=True, slots=True)
-class DocumentIdentity(interface.EntityIdentity):
-    identifiant: str
+class DocumentInMemoryRepository(IDocumentRepository):
+    entities: List[Document] = []
 
+    @classmethod
+    def reset(cls):
+        cls.entities = []
 
-@attr.dataclass(frozen=True, slots=True)
-class Document(interface.Entity):
-    entity_id: DocumentIdentity
-    proposition: PropositionIdentity
-    libelle: str
-    onglet: OngletsDemande
-    uuids: List[str]
-    auteur: str
-    type: TypeDocument
-    statut: StatutDocument
-    justification_gestionnaire: str
-    soumis_le: Optional[datetime] = None
-    reclame_le: Optional[datetime] = None
-    a_echeance_le: Optional[datetime] = None
-    derniere_action_le: Optional[datetime] = None
+    @classmethod
+    def search(cls, entity_ids: Optional[List[DocumentIdentity]] = None, **kwargs) -> List[Document]:
+        return [entity for entity in cls.entities if entity.entity_id in entity_ids]
+
+    @classmethod
+    def delete(cls, entity_id: EntityIdentity, **kwargs: ApplicationService) -> None:
+        for entity in cls.entities:
+            if entity.entity_id == entity_id:
+                cls.entities.remove(entity)
+                break
+
+    @classmethod
+    def save_document_gestionnaire(cls, document: Document) -> None:
+        cls.entities.append(document)
+
+    @classmethod
+    def get(cls, entity_id: DocumentIdentity) -> Document:
+        return next(entity for entity in cls.entities if entity.entity_id == entity_id)

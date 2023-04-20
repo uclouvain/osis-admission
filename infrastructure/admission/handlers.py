@@ -26,11 +26,17 @@
 
 from admission.ddd.admission.commands import *
 from admission.ddd.admission.use_case.read import *
+from admission.ddd.admission.use_case.write import deposer_document_libre_par_gestionnaire
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
+from admission.infrastructure.admission.repository.document import DocumentRepository
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
         cmd,
         lister_toutes_demandes_service=ListerToutesDemandes(),
+    ),
+    DeposerDocumentLibreParGestionnaireCommand: lambda msg_bus, cmd: deposer_document_libre_par_gestionnaire(
+        cmd,
+        document_repository=DocumentRepository(),
     ),
 }

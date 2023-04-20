@@ -84,9 +84,11 @@ class Onglets(ChoiceEnum):
     CURRICULUM = _('Curriculum')
     CHOIX_FORMATION = _('Training choice')
     INFORMATIONS_ADDITIONNELLES = _('Additional information')
+    DOCUMENTS = _('Documents')
 
 
 class CritereItemFormulaireFormation(ChoiceEnum):
     TOUTE_FORMATION = _('Every education')
     TYPE_DE_FORMATION = _('An education type')
     UNE_FORMATION = _('A specific education')
+    UNE_SEULE_ADMISSION = _('Only one admission')
