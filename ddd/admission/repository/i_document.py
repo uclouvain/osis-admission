@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,22 +22,18 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-from admission.ddd.admission.commands import *
-from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.write import deposer_document_libre_par_gestionnaire
-from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_demandes import (
-    ListerToutesDemandesInMemory,
-)
-from admission.infrastructure.admission.repository.in_memory.document import DocumentInMemoryRepository
+# ##############################################################################
+from abc import ABCMeta
 
-COMMAND_HANDLERS = {
-    ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
-        cmd,
-        lister_toutes_demandes_service=ListerToutesDemandesInMemory(),
-    ),
-    DeposerDocumentLibreParGestionnaireCommand: lambda msg_bus, cmd: deposer_document_libre_par_gestionnaire(
-        cmd,
-        document_repository=DocumentInMemoryRepository(),
-    ),
-}
+from admission.ddd.admission.domain.model.document import Document
+from osis_common.ddd import interface
+
+
+class IDocumentRepository(interface.AbstractRepository, metaclass=ABCMeta):
+    @classmethod
+    def save_document_gestionnaire(cls, entity: Document) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def save(cls, entity: Document) -> None:
+        raise NotImplementedError

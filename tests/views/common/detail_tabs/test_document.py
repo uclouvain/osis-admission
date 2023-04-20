@@ -23,15 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from unittest.mock import patch
 
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 
-from admission.constants import PDF_MIME_TYPE
+from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.forms import AdmissionFileUploadField
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -58,8 +60,42 @@ class DocumentViewTestCase(TestCase):
             candidate__language=settings.LANGUAGE_CODE_EN,
         )
 
+        cls.file_uuid = uuid.uuid4()
+
     def setUp(self):
         # Mock documents
+        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            'osis_document.api.utils.change_remote_metadata',
+            return_value='foobar',
+        )
+        self.change_remote_metadata_patcher = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        file_metadata = {
+            'name': 'myfile',
+            'mimetype': PDF_MIME_TYPE,
+            'explicit_name': 'My file',
+            'author': self.sic_manager_user.username,
+        }
+
+        patcher = patch(
+            'osis_document.api.utils.get_remote_metadata',
+            return_value=file_metadata,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            'osis_document.api.utils.confirm_remote_upload',
+            side_effect=lambda token, upload_to: self.file_uuid,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
         patcher = patch(
             'admission.infrastructure.admission.domain.service.recuperer_documents_demande.get_remote_tokens'
         )
@@ -71,21 +107,96 @@ class DocumentViewTestCase(TestCase):
             'admission.infrastructure.admission.domain.service.recuperer_documents_demande.get_several_remote_metadata'
         )
         patched = patcher.start()
-        patched.side_effect = lambda tokens: {
-            token: {
-                'name': 'myfile',
-                'mimetype': PDF_MIME_TYPE,
-            }
-            for token in tokens
-        }
+        patched.side_effect = lambda tokens: {token: file_metadata for token in tokens}
         self.addCleanup(patcher.stop)
 
     def test_general_document_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        url = resolve_url('admission:general-education:document', uuid=self.general_admission.uuid)
+        url = resolve_url('admission:general-education:document:document', uuid=self.general_admission.uuid)
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['admission'].uuid, self.general_admission.uuid)
         self.assertTrue(len(response.context['documents']) > 0)
+
+    def test_general_document_upload_free_candidate_document_on_get(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-upload',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['admission'].uuid, self.general_admission.uuid)
+
+    def test_general_document_upload_free_candidate_document_on_post_invalid_form(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-upload',
+            uuid=self.general_admission.uuid,
+        )
+
+        # Empty data
+        response = self.client.post(
+            url,
+            data={},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(
+            AdmissionFileUploadField.default_error_messages['min_files'],
+            response.context['form'].errors.get('file', []),
+        )
+
+        # Too much files
+        response = self.client.post(
+            url,
+            data={
+                'file_0': ['file_0-token'],
+                'file_1': ['file_1-token'],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            AdmissionFileUploadField.default_error_messages['max_files'],
+            response.context['form'].errors.get('file', []),
+        )
+
+    def test_general_document_upload_free_candidate_document_on_post_valid_form(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-upload',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            data={
+                'file_name': 'My file name',
+                'file_0': ['file_0-token'],
+            },
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['admission'].uuid, self.general_admission.uuid)
+        self.assertEqual(response.context['form'].data, {})
+
+        # Save the file into the admission
+        admission: GeneralEducationAdmission = GeneralEducationAdmission.objects.get(uuid=self.general_admission.uuid)
+        self.assertEqual(admission.sic_documents, [self.file_uuid])
+
+        # Save the author and the explicit name into the file
+        self.change_remote_metadata_patcher.assert_called_once_with(
+            token='file_0-token',
+            metadata={
+                'author': self.sic_manager_user.username,
+                'explicit_name': 'My file name',
+            },
+        )

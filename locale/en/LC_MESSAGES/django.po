@@ -378,6 +378,9 @@ msgstr ""
 msgid "Add an internal note"
 msgstr ""
 
+msgid "Additional documents"
+msgstr ""
+
 msgid "Additional information"
 msgstr ""
 
@@ -900,6 +903,12 @@ msgid "Cancelled application"
 msgstr ""
 
 msgid "Candidate"
+msgstr ""
+
+msgid "Candidate FAC"
+msgstr ""
+
+msgid "Candidate SIC"
 msgstr ""
 
 msgid "Candidate nationality"
@@ -1520,6 +1529,9 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
+msgid "Document uploaded"
+msgstr ""
+
 msgid "Documents"
 msgstr ""
 
@@ -1775,11 +1787,17 @@ msgctxt "admission sex"
 msgid "Female"
 msgstr ""
 
+msgid "File"
+msgstr ""
+
 msgid "File MIME types"
 msgstr ""
 
 msgctxt "tab"
 msgid "Finalization"
+msgstr ""
+
+msgid "File name"
 msgstr ""
 
 msgid "Filter by documents"
@@ -2866,6 +2884,9 @@ msgstr ""
 msgid "Online or in person"
 msgstr ""
 
+msgid "Only one admission"
+msgstr ""
+
 msgid "Opinion of the CA following the format provided by the CDD"
 msgstr ""
 
@@ -3402,12 +3423,6 @@ msgid "Request of a new deadline for the confirmation paper"
 msgstr ""
 
 msgid "Requested"
-msgstr ""
-
-msgid "Requested by FAC"
-msgstr ""
-
-msgid "Requested by SIC"
 msgstr ""
 
 msgid "Requested documents"
@@ -4428,13 +4443,13 @@ msgstr ""
 msgid "Update doctorate admission"
 msgstr ""
 
+msgid "Upload a document"
+msgstr ""
+
 msgid "Upload the opinion on the renewal of the research mandate"
 msgstr ""
 
-msgid "Uploaded by FAC"
-msgstr ""
-
-msgid "Uploaded by SIC"
+msgid "Uploaded"
 msgstr ""
 
 msgid "VAE"
