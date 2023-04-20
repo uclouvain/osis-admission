@@ -28,10 +28,10 @@ from django.utils.translation import gettext as _
 from django.views.generic import TemplateView, FormView
 
 from admission.auth.roles.program_manager import ProgramManager
-from admission.ddd.admission.commands import DeposerDocumentLibreParGestionnaireCommand
+from admission.ddd.admission.commands import DeposerDocumentLibreParGestionnaireCommand, ReclamerDocumentLibreCommand
 from admission.ddd.admission.enums.document import DOCUMENTS_UCLOUVAIN, TypeDocument
 from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.forms.admission.document import UploadFreeDocumentForm
+from admission.forms.admission.document import UploadFreeDocumentForm, RequestFreeDocumentForm
 from admission.templatetags.admission import CONTEXT_GENERAL
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from base.utils.htmx import HtmxMixin, HtmxPermissionRequiredMixin
@@ -41,6 +41,7 @@ __namespace__ = 'document'
 __all__ = [
     'DocumentView',
     'UploadFreeCandidateDocumentView',
+    'RequestFreeCandidateDocumentView',
 ]
 
 
@@ -94,7 +95,36 @@ class UploadFreeCandidateDocumentView(LoadDossierViewMixin, HtmxPermissionRequir
         )
         return self.render_to_response(
             self.get_context_data(
-                form=UploadFreeDocumentForm(),
+                form=self.form_class(),
                 message=_('Document uploaded'),
+            )
+        )
+
+
+class RequestFreeCandidateDocumentView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
+    form_class = RequestFreeDocumentForm
+    template_name = 'admission/document/request_free_document.html'
+    htmx_template_name = 'admission/document/request_free_document.html'
+    urlpatterns = 'free-candidate-request'
+    permission_required = 'admission.view_documents_management'
+
+    def form_valid(self, form) -> HttpResponse:
+        message_bus_instance.invoke(
+            ReclamerDocumentLibreCommand(
+                uuid_proposition=self.kwargs.get('uuid'),
+                auteur=self.request.user.username,
+                type_document=(
+                    TypeDocument.CANDIDAT_FAC.name
+                    if getattr(self.request.user, 'person', None) and ProgramManager.belong_to(self.request.user.person)
+                    else TypeDocument.CANDIDAT_SIC.name
+                ),
+                nom_document=form.cleaned_data['file_name'],
+                raison=form.cleaned_data['reason'],
+            ),
+        )
+        return self.render_to_response(
+            self.get_context_data(
+                form=self.form_class(),
+                message=_('Document requested'),
             )
         )

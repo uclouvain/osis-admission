@@ -55,6 +55,7 @@ from admission.exports.admission_recap.attachments import (
     get_languages_attachments,
     get_cotutelle_attachments,
     get_supervision_group_attachments,
+    get_documents_attachments,
 )
 from admission.exports.admission_recap.constants import (
     TRAINING_TYPES_WITH_EQUIVALENCE,
@@ -450,6 +451,26 @@ def get_confirmation_section(context: ResumePropositionDTO, load_content: bool) 
     )
 
 
+def get_document_section(
+    context: ResumePropositionDTO,
+    specific_questions_by_tab: Dict[str, List[QuestionSpecifiqueDTO]],
+    load_content: bool,
+) -> Section:
+    """Returns the additional document section."""
+    return Section(
+        identifier=OngletsDemande.DOCUMENTS_ADDITIONNELS,
+        content_template='admission/exports/recap/includes/documents.html',
+        context=context,
+        extra_context={
+            'specific_questions': specific_questions_by_tab[Onglets.DOCUMENTS.name],
+        },
+        attachments=get_documents_attachments(
+            specific_questions_by_tab[Onglets.DOCUMENTS.name],
+        ),
+        load_content=load_content,
+    )
+
+
 def get_sections(context: ResumePropositionDTO, specific_questions: List[QuestionSpecifiqueDTO], load_content=False):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
@@ -488,6 +509,10 @@ def get_sections(context: ResumePropositionDTO, specific_questions: List[Questio
         ]
 
     pdf_sections.append(get_confirmation_section(context, load_content))
+
+    if not load_content:
+        # Section containing the additional requested documents
+        pdf_sections.append(get_document_section(context, specific_questions_by_tab, load_content))
 
     return pdf_sections
 

@@ -25,10 +25,16 @@
 # ##############################################################################
 from typing import Optional, List
 
+from django.db import transaction
+from django.utils.text import slugify
+
+from admission.contrib.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.form_item import TRANSLATION_LANGUAGES
 from admission.ddd.admission.domain.model.document import Document
 from admission.ddd.admission.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.enums.document import TypeDocument
+from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
+from admission.ddd.admission.enums.document import TypeDocument, DocumentsInterOnglets
 from admission.ddd.admission.repository.i_document import IDocumentRepository
 from osis_common.ddd.interface import EntityIdentity, ApplicationService, RootEntity
 
@@ -70,6 +76,43 @@ class DocumentRepository(IDocumentRepository):
 
             getattr(admission, field_name).append(document.uuids[0])
             admission.save(update_fields=[field_name])
+
+        except BaseAdmission.DoesNotExist:
+            raise PropositionNonTrouveeException
+
+    @classmethod
+    def save_document_candidat(cls, document: Document):
+        try:
+            with transaction.atomic():
+                admission: BaseAdmission = BaseAdmission.objects.get(uuid=document.proposition.uuid)
+
+                # Create a specific question related to the admission
+                form_item = AdmissionFormItem.objects.create(
+                    internal_label=f'{admission.reference}.{slugify(document.libelle)}',
+                    type=TypeItemFormulaire.DOCUMENT.name,
+                    title={language: document.libelle for language in TRANSLATION_LANGUAGES},
+                    uuid=document.entity_id.identifiant.split('.')[-1],
+                )
+                AdmissionFormItemInstantiation.objects.create(
+                    form_item=form_item,
+                    academic_year_id=admission.determined_academic_year_id,
+                    weight=1,
+                    required=True,
+                    display_according_education=CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+                    admission=admission,
+                    tab=Onglets.DOCUMENTS.name,
+                )
+
+                # Save information about the request
+                admission.requested_documents[
+                    f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{str(form_item.uuid)}'
+                ] = {
+                    'author': document.auteur,
+                    'reason': document.justification_gestionnaire,
+                    'type': document.type.name,
+                    'last_action_at': document.derniere_action_le,
+                }
+                admission.save(update_fields=['requested_documents'])
 
         except BaseAdmission.DoesNotExist:
             raise PropositionNonTrouveeException

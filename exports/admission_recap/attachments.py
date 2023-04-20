@@ -623,3 +623,8 @@ def get_dynamic_questions_attachments(specific_questions: List[QuestionSpecifiqu
 def get_training_choice_attachments(specific_questions: List[QuestionSpecifiqueDTO]) -> List[Attachment]:
     """Returns the training choice attachments."""
     return get_dynamic_questions_attachments(specific_questions)
+
+
+def get_documents_attachments(specific_questions: List[QuestionSpecifiqueDTO]) -> List[Attachment]:
+    """Returns the additional attachments."""
+    return get_dynamic_questions_attachments(specific_questions)
