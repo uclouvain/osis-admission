@@ -68,6 +68,10 @@ textarea {
   gap: 1em;
 }
 
+.align-items-baseline {
+  align-items: baseline;
+}
+
 .border-right {
   border-right: 1px solid #ddd;
 }

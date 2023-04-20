@@ -37,7 +37,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 
 
 @freezegun.freeze_time('2023-01-01')
-class TestDeposerDocumentLibreCandidat(TestCase):
+class TestDeposerDocumentLibreParGestionnaire(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
         self.repository = DocumentInMemoryRepository()
@@ -60,7 +60,7 @@ class TestDeposerDocumentLibreCandidat(TestCase):
 
         self.assertIsNotNone(document)
 
-        self.assertEqual(document.entity_id.identifiant, 'token-file')
+        self.assertEqual(document.entity_id.identifiant, f'{OngletsDemande.DOCUMENTS_ADDITIONNELS.name}.token-file')
         self.assertEqual(document.proposition.uuid, self.uuid_proposition)
         self.assertEqual(document.libelle, 'Nom du document')
         self.assertEqual(document.onglet, OngletsDemande.DOCUMENTS_ADDITIONNELS)
@@ -89,7 +89,7 @@ class TestDeposerDocumentLibreCandidat(TestCase):
 
         self.assertIsNotNone(document)
 
-        self.assertEqual(document.entity_id.identifiant, 'token-file')
+        self.assertEqual(document.entity_id.identifiant, f'{OngletsDemande.DOCUMENTS_ADDITIONNELS.name}.token-file')
         self.assertEqual(document.proposition.uuid, self.uuid_proposition)
         self.assertEqual(document.libelle, 'Nom du document')
         self.assertEqual(document.onglet, OngletsDemande.DOCUMENTS_ADDITIONNELS)

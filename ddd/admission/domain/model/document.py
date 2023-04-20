@@ -38,7 +38,7 @@ class DocumentIdentity(interface.EntityIdentity):
     identifiant: str
 
 
-@attr.dataclass(frozen=True, slots=True)
+@attr.dataclass(slots=True)
 class Document(interface.Entity):
     entity_id: DocumentIdentity
     proposition: PropositionIdentity
@@ -53,3 +53,8 @@ class Document(interface.Entity):
     reclame_le: Optional[datetime] = None
     a_echeance_le: Optional[datetime] = None
     derniere_action_le: Optional[datetime] = None
+
+    def definir_a_reclamer(self, raison):
+        self.justification_gestionnaire = raison
+        self.derniere_action_le = datetime.now()
+        self.statut = StatutDocument.A_RECLAMER

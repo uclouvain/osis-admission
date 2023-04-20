@@ -24,15 +24,17 @@
 #
 # ##############################################################################
 import uuid
-from unittest.mock import patch
+from unittest.mock import patch, ANY
 
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 
 from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
-from admission.contrib.models import GeneralEducationAdmission
+from admission.contrib.models import GeneralEducationAdmission, AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
+from admission.ddd.admission.enums.document import TypeDocument
 from admission.forms import AdmissionFileUploadField
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
@@ -198,5 +200,88 @@ class DocumentViewTestCase(TestCase):
             metadata={
                 'author': self.sic_manager_user.username,
                 'explicit_name': 'My file name',
+            },
+        )
+
+    def test_general_document_request_free_candidate_document_on_get(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['admission'].uuid, self.general_admission.uuid)
+
+    def test_general_document_request_free_candidate_document_on_post_invalid_form(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(url, data={})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
+
+    def test_general_document_request_free_candidate_document_on_post_valid_form(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.post(
+            url,
+            data={
+                'file_name': 'My file name',
+                'reason': 'My reason',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Create a specific question linked to the admission
+        form_item_instantiation: AdmissionFormItemInstantiation = (
+            AdmissionFormItemInstantiation.objects.select_related('form_item', 'admission')
+            .filter(
+                admission=self.general_admission,
+            )
+            .first()
+        )
+        self.assertIsNotNone(form_item_instantiation)
+
+        self.assertEqual(form_item_instantiation.form_item.type, TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(
+            form_item_instantiation.form_item.title,
+            {
+                'en': 'My file name',
+                'fr-be': 'My file name',
+            },
+        )
+
+        self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
+        self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
+        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(
+            form_item_instantiation.display_according_education,
+            CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+        )
+        self.assertEqual(form_item_instantiation.tab, Onglets.DOCUMENTS.name)
+
+        # Save information about the request into the admission
+        self.assertEqual(
+            form_item_instantiation.admission.requested_documents,
+            {
+                f'DOCUMENTS_ADDITIONNELS.QUESTION_SPECIFIQUE.{form_item_instantiation.form_item.uuid}': {
+                    'author': self.sic_manager_user.username,
+                    'reason': 'My reason',
+                    'type': TypeDocument.CANDIDAT_SIC.name,
+                    'last_action_at': ANY,
+                }
             },
         )

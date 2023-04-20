@@ -41,14 +41,14 @@
         {% if not document.uuids and document.type not in DOCUMENTS_UCLOUVAIN %}
           {% ifchanged document.onglet %}
             <tr class="active">
-              <td colspan="3">> {{ document.nom_onglet }}</td>
+              <td colspan="3">> {{ document.nom_onglet|default:_('Additional documents') }}</td>
             </tr>
           {% endifchanged %}
           <tr
               {% if document.statut == 'A_RECLAMER' %}
                 class="bg-danger"
               {% else %}
-                class="bg-info"
+                class="bg-warning"
               {% endif %}
           >
             <td class="auto-width">
@@ -59,17 +59,19 @@
               {{ document.libelle }}
             </td>
             <td class="min-width">
-              {% if document.auteur %}
-                {% if document.statut == 'A_RECLAMER' %}
-                  {{ document.auteur }}
-                  <i class="fa-solid fa-file-circle-exclamation"></i>
-                {% elif document.statut == 'RECLAME' %}
-                  <i class="fa-solid fa-envelope"></i>
+              <span class="flex-content-no-wrap align-items-baseline">
+                {% if document.auteur %}
+                  {% if document.statut == 'A_RECLAMER' %}
+                    {{ document.auteur }}
+                    <i class="fa-solid fa-file-circle-exclamation" title="{% translate 'To be requested' %}"></i>
+                  {% elif document.statut == 'RECLAME' %}
+                    <i class="fa-solid fa-envelope" title="{% translate 'Requested' %}"></i>
+                  {% endif %}
+                {% else %}
+                  {% translate 'System' %}
+                  <i class="fa-solid fa-gear"></i>
                 {% endif %}
-              {% else %}
-                {% translate 'System' %}
-                <i class="fa-solid fa-gear"></i>
-              {% endif %}
+              </span>
             </td>
             <td class="min-width">
               {% if document.statut == 'RECLAME' %}
@@ -84,4 +86,22 @@
       {% endfor %}
     </tbody>
   </table>
+
+  <button
+      class="btn btn-primary"
+      data-toggle="collapse"
+      data-target="#request-document-form"
+      hx-get="{% url request.resolver_match.namespace|add:':free-candidate-request' uuid=view.kwargs.uuid %}"
+      hx-target="#request-document-form"
+      hx-trigger="click once"
+      hx-indicator="#htmx-overlay"
+  >
+    <i class="fa-solid fa-plus"></i>
+    {% translate 'List a missing document' %}
+    <i class="fa-solid fa-paperclip"></i>
+  </button>
+
+  <div id="request-document-form" class="collapse mt-1 media">
+  </div>
+
 </div>
