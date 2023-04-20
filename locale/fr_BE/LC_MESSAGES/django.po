@@ -444,6 +444,9 @@ msgstr "Ajouter une activité"
 msgid "Add an internal note"
 msgstr "Ajouter une note interne"
 
+msgid "Additional documents"
+msgstr "Documents additionnels"
+
 msgid "Additional information"
 msgstr "Informations complémentaires"
 
@@ -993,6 +996,12 @@ msgstr "Demande annulée"
 
 msgid "Candidate"
 msgstr "Candidat"
+
+msgid "Candidate FAC"
+msgstr "Candidat FAC"
+
+msgid "Candidate SIC"
+msgstr "Candidat SIC"
 
 msgid "Candidate nationality"
 msgstr "Nationalité du candidat"
@@ -1668,6 +1677,9 @@ msgstr "Demandes d'inscription en doctorat"
 msgid "Document"
 msgstr "Document"
 
+msgid "Document uploaded"
+msgstr "Document téléversé"
+
 msgid "Documents"
 msgstr "Documents"
 
@@ -1925,12 +1937,18 @@ msgctxt "admission sex"
 msgid "Female"
 msgstr "Féminin"
 
+msgid "File"
+msgstr "Fichier"
+
 msgid "File MIME types"
 msgstr "Types de fichier MIME"
 
 msgctxt "tab"
 msgid "Finalization"
 msgstr "Finalisation"
+
+msgid "File name"
+msgstr "Nom du fichier"
 
 msgid "Filter by documents"
 msgstr "Filtrer par documents"
@@ -3211,6 +3229,9 @@ msgstr "Événement en ligne"
 msgid "Online or in person"
 msgstr "En ligne ou en présentiel"
 
+msgid "Only one admission"
+msgstr "Une seule admission"
+
 msgid "Opinion of the CA following the format provided by the CDD"
 msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
 
@@ -3786,12 +3807,6 @@ msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 
 msgid "Requested"
 msgstr "Réclamé"
-
-msgid "Requested by FAC"
-msgstr "Réclamé par FAC"
-
-msgid "Requested by SIC"
-msgstr "Réclamé par SIC"
 
 msgid "Requested documents"
 msgstr "Documents réclamés"
@@ -4906,14 +4921,14 @@ msgstr "Mettre à jour"
 msgid "Update doctorate admission"
 msgstr "Mettre à jour admission en doctorat"
 
+msgid "Upload a document"
+msgstr "Téléverser un document"
+
 msgid "Upload the opinion on the renewal of the research mandate"
 msgstr "Téléverser l'avis sur le renouvellement du mandat de recherche"
 
-msgid "Uploaded by FAC"
-msgstr "Téléverser par FAC"
-
-msgid "Uploaded by SIC"
-msgstr "Téléverser par SIC"
+msgid "Uploaded"
+msgstr "Téléversé"
 
 msgid "VAE"
 msgstr "Valorisation des acquis de l'expérience"

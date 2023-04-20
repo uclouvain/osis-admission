@@ -55,3 +55,4 @@ class DocumentDTO(interface.Entity):
     a_echeance_le: Optional[datetime.datetime]
     onglet: str
     nom_onglet: str
+    uuid_proposition: str
