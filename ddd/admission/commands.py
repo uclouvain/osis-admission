@@ -64,3 +64,12 @@ class DeposerDocumentLibreParGestionnaireCommand(interface.QueryRequest):
     token_document: str
     type_document: str
     nom_document: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ReclamerDocumentLibreCommand(interface.QueryRequest):
+    uuid_proposition: str
+    auteur: str
+    type_document: str
+    nom_document: str
+    raison: str

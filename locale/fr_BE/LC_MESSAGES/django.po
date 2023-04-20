@@ -1639,6 +1639,9 @@ msgstr "Demandes d'inscription en doctorat"
 msgid "Document"
 msgstr "Document"
 
+msgid "Document requested"
+msgstr "Document réclamé"
+
 msgid "Document uploaded"
 msgstr "Document téléversé"
 
@@ -2632,6 +2635,9 @@ msgstr "Lien vers la page liée à la formation doctorale (front-office)"
 
 msgid "List"
 msgstr "Liste"
+
+msgid "List a missing document"
+msgstr "Lister un document manquant"
 
 msgid "List of the values that the Selection elements can take (one per row)."
 msgstr ""
@@ -3656,6 +3662,9 @@ msgstr "Boutons radios"
 
 msgid "Rank in diploma"
 msgstr "Rang dans le diplôme"
+
+msgid "Reason"
+msgstr "Raison"
 
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"

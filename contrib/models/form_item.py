@@ -390,6 +390,7 @@ class AdmissionFormItemInstantiationManager(models.Manager):
                 Q(display_according_education=CritereItemFormulaireFormation.TOUTE_FORMATION.name)
                 | Q(education_group__pk=admission.training.education_group_id)
                 | Q(education_group_type__pk=admission.training.education_group_type_id)
+                | Q(admission_id=admission.pk)
             )
             .select_related('form_item')
         )
@@ -443,6 +444,13 @@ class AdmissionFormItemInstantiation(models.Model):
         on_delete=models.CASCADE,
         to='base.EducationGroup',
         verbose_name=pgettext_lazy('admission', 'Education'),
+    )
+    admission = models.ForeignKey(
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        to='admission.BaseAdmission',
+        verbose_name=_('Admission'),
     )
     candidate_nationality = models.CharField(
         choices=CritereItemFormulaireNationaliteCandidat.choices(),

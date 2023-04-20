@@ -62,12 +62,13 @@ class DocumentBuilder(interface.RootEntityBuilder):
         cls,
         uuid_proposition: str,
         auteur: str,
-        token_document: str,
         type_document: str,
         nom_document: str,
         statut_document: str,
+        token_document: str = '',
         identifiant_document: str = '',
         identifiant_question_specifique: str = '',
+        onglet: OngletsDemande = OngletsDemande.DOCUMENTS_ADDITIONNELS,
     ) -> 'Document':
         heure_initiation = datetime.datetime.now()
         return Document(
@@ -76,10 +77,11 @@ class DocumentBuilder(interface.RootEntityBuilder):
                 identifiant_document=identifiant_document,
                 token_document=token_document,
                 identifiant_question_specifique=identifiant_question_specifique,
+                onglet_document=onglet,
             ),
             proposition=PropositionIdentity(uuid=uuid_proposition),
             libelle=nom_document,
-            uuids=[token_document],
+            uuids=[token_document] if token_document else [],
             auteur=auteur,
             type=TypeDocument[type_document],
             statut=StatutDocument[statut_document],

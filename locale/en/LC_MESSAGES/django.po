@@ -1502,6 +1502,9 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
+msgid "Document requested"
+msgstr ""
+
 msgid "Document uploaded"
 msgstr ""
 
@@ -2372,6 +2375,9 @@ msgid "Link to the doctoral training panel (front-office)"
 msgstr ""
 
 msgid "List"
+msgstr ""
+
+msgid "List a missing document"
 msgstr ""
 
 msgid "List of the values that the Selection elements can take (one per row)."
@@ -3286,6 +3292,9 @@ msgid "Radio buttons"
 msgstr ""
 
 msgid "Rank in diploma"
+msgstr ""
+
+msgid "Reason"
 msgstr ""
 
 msgid "Reason for exceeding the deadline"

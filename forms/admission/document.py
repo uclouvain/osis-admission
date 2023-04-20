@@ -39,3 +39,14 @@ class UploadFreeDocumentForm(forms.Form):
         max_files=1,
         min_files=1,
     )
+
+
+class RequestFreeDocumentForm(forms.Form):
+    file_name = forms.CharField(
+        label=_('File name'),
+    )
+
+    reason = forms.CharField(
+        label=_('Reason'),
+        widget=forms.Textarea,
+    )

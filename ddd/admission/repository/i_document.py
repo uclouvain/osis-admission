@@ -31,7 +31,11 @@ from osis_common.ddd import interface
 
 class IDocumentRepository(interface.AbstractRepository, metaclass=ABCMeta):
     @classmethod
-    def save_document_gestionnaire(cls, entity: Document) -> None:
+    def save_document_gestionnaire(cls, document: Document) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def save_document_candidat(cls, document: Document) -> None:
         raise NotImplementedError
 
     @classmethod

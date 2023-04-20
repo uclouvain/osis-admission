@@ -25,7 +25,7 @@
 # ##############################################################################
 
 from admission.ddd.admission.domain.model.document import DocumentIdentity
-from admission.ddd.admission.enums.document import TypeDocument
+from admission.ddd.admission.enums.document import TypeDocument, OngletsDemande, DocumentsInterOnglets
 from osis_common.ddd import interface
 
 
@@ -34,17 +34,28 @@ class DocumentIdentityBuilder(interface.EntityIdentityBuilder):
     def build(
         cls,
         type_document: TypeDocument,
+        onglet_document: OngletsDemande,
         identifiant_document: str = '',
         token_document: str = '',
         identifiant_question_specifique: str = '',
     ) -> DocumentIdentity:
+        if identifiant_question_specifique:
+            return DocumentIdentity(
+                identifiant='{}.{}.{}'.format(
+                    onglet_document.name,
+                    DocumentsInterOnglets.QUESTION_SPECIFIQUE.name,
+                    identifiant_question_specifique,
+                ),
+            )
+
         return DocumentIdentity(
-            identifiant={
+            identifiant=f'{onglet_document.name}.'
+            + {
                 TypeDocument.INTERNE_FAC: token_document,
                 TypeDocument.INTERNE_SIC: token_document,
                 TypeDocument.NON_LIBRE: identifiant_document,
-                TypeDocument.CANDIDAT_FAC: identifiant_question_specifique or token_document,
-                TypeDocument.CANDIDAT_SIC: identifiant_question_specifique or token_document,
+                TypeDocument.CANDIDAT_FAC: token_document,
+                TypeDocument.CANDIDAT_SIC: token_document,
                 TypeDocument.SYSTEME: identifiant_document,
             }[type_document]
         )
