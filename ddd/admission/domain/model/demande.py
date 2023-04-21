@@ -29,5 +29,5 @@ from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
-class PropositionIdentity(interface.EntityIdentity):
+class DemandeIdentity(interface.EntityIdentity):
     uuid: str

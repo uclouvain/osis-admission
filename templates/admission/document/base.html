@@ -1,4 +1,5 @@
 {% extends base_template %}
+{% load static %}
 {% load enums i18n admission %}
 
 {% comment "License" %}
@@ -28,55 +29,135 @@
 {% block actions-group %}{% endblock %}
 
 {% block tab_content %}
-  <div id="document-tabs">
-    {% translate 'Filter by documents' %}
-    <div
-        class="btn-group"
-    >
-      <a
-          class="btn btn-primary"
-          href="#received"
-          data-toggle="tab"
-      >
-        <i class="fa-solid fa-paperclip"></i>
-        {% translate 'Received' %}
-      </a>
-      <a
-          class="btn btn-primary"
-          href="#missing"
-          data-toggle="tab"
-      >
-        <i class="fa-solid fa-link-slash"></i>
-        {% translate 'Missing' %}
-      </a>
-      <a
-          class="btn btn-primary"
-          href="#uclouvain"
-          data-toggle="tab"
-      >
-        <i class="fa-solid fa-school"></i>
-        {% translate 'UCLouvain' %}</a>
+  <div
+      id="document-container"
+      hx-indicator="#htmx-overlay"
+  >
+    <div id="document-lists">
+      <div id="document-tabs">
+        {% translate 'Filter by documents' %}
+        <div
+            class="btn-group"
+        >
+          <a
+              class="btn btn-primary"
+              href="#received"
+              data-toggle="tab"
+          >
+            <i class="fa-solid fa-paperclip"></i>
+            {% translate 'Received' %}
+          </a>
+          <a
+              class="btn btn-primary"
+              href="#missing"
+              data-toggle="tab"
+          >
+            <i class="fa-solid fa-link-slash"></i>
+            {% translate 'Missing' %}
+          </a>
+          <a
+              class="btn btn-primary"
+              href="#uclouvain"
+              data-toggle="tab"
+          >
+            <i class="fa-solid fa-school"></i>
+            {% translate 'UCLouvain' %}</a>
+        </div>
+      </div>
+
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="received">
+          {% include 'admission/document/received_documents.html' %}
+        </div>
+        <div role="tabpanel" class="tab-pane" id="missing">
+          {% include 'admission/document/missing_documents.html' %}
+        </div>
+        <div role="tabpanel" class="tab-pane" id="uclouvain">
+          {% include 'admission/document/uclouvain_documents.html' %}
+        </div>
+      </div>
+    </div>
+
+    <div id="document-details">
     </div>
   </div>
 
-  <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="received">
-      {% include 'admission/document/received_documents.html' %}
-    </div>
-    <div role="tabpanel" class="tab-pane" id="missing">
-      {% include 'admission/document/missing_documents.html' %}
-    </div>
-    <div role="tabpanel" class="tab-pane" id="uclouvain">
-      {% include 'admission/document/uclouvain_documents.html' %}
-    </div>
-  </div>
 {% endblock %}
 
 {% block style %}
   {{ block.super }}
   <style>
+    #document-container {
+      display: flex;
+    }
+
+    {# Document lists #}
+    #document-lists {
+      padding-right: 1em;
+      width: 70%;
+      max-width: calc(100% - 5px);
+    }
+
     #document-tabs {
       margin-bottom: 1em;
     }
+
+    .ui-resizable-handle {
+      background: #ddd;
+    }
+
+    #document-lists tbody tr:not(.tab-name) {
+      cursor: pointer;
+    }
+
+    #document-lists tbody tr.selected {
+      box-shadow: 1px 1px 6px 2px rgb(100, 100, 100);
+      position: relative;
+      pointer-events: none;
+    }
+
+    #document-lists tbody tr.selected i {
+      pointer-events: initial;
+      cursor: default;
+    }
+
+    #document-lists tbody tr.tab-name {
+      background-color: #f5f5f5;
+    }
+
+    {# Document details #}
+    #document-details {
+      padding-left: 1em;
+      padding-right: 1em;
+      width: 30%;
+      flex: 1;
+    }
+
   </style>
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+
+  <script src="{% static 'js/dependsOn.min.js' %}"></script>
+
+  <script>
+    $(document).ready(function () {
+      {# Make the div resizable #}
+      $("#document-lists").resizable({
+        containment: "#document-container",
+        handles: "e",
+      })
+
+      {# Select a document #}
+      $("#document-lists tbody.selectable tr:not(.tab-name)").on('click', function(){
+        if(!$(this).hasClass('selected')) {
+          {# Select a row #}
+          $(this).siblings('.selected').removeClass('selected');
+          $(this).addClass('selected');
+        }
+      })
+    });
+  </script>
+
 {% endblock %}

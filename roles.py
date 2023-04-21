@@ -32,16 +32,16 @@ from admission.auth.predicates import (
 )
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
+from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_configurator import CddConfigurator
+from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.jury_secretary import JurySecretary
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
-from admission.auth.roles.central_manager import CentralManager
 from osis_role import role
-from admission.auth.roles.candidate import Candidate
 
 role.role_manager.register(Candidate)
 role.role_manager.register(AdreSecretary)

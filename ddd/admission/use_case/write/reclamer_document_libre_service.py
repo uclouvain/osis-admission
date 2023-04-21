@@ -27,17 +27,17 @@ import uuid
 
 from admission.ddd.admission.commands import ReclamerDocumentLibreCommand
 from admission.ddd.admission.domain.builder.document_builder import DocumentBuilder
-from admission.ddd.admission.enums.document import StatutDocument
-from admission.ddd.admission.repository.i_document import IDocumentRepository
+from admission.ddd.admission.enums.emplacement_document import StatutDocument
+from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
 def reclamer_document_libre(
     cmd: 'ReclamerDocumentLibreCommand',
-    document_repository: 'IDocumentRepository',
+    emplacement_document_repository: 'IEmplacementDocumentRepository',
 ) -> str:
     document = DocumentBuilder().initier_document(
         statut_document=StatutDocument.A_RECLAMER.name,
-        uuid_proposition=cmd.uuid_proposition,
+        uuid_demande=cmd.uuid_demande,
         auteur=cmd.auteur,
         type_document=cmd.type_document,
         nom_document=cmd.nom_document,
@@ -46,6 +46,6 @@ def reclamer_document_libre(
 
     document.definir_a_reclamer(raison=cmd.raison)
 
-    document_repository.save_document_candidat(document)
+    emplacement_document_repository.save_emplacement_document_candidat(entity=document)
 
     return document.entity_id.identifiant

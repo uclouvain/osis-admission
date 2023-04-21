@@ -40,7 +40,7 @@ from admission.ddd.admission.domain.service.verifier_curriculum import VerifierC
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import Onglets
-from admission.ddd.admission.enums.document import OngletsDemande
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.exports.admission_recap.attachments import (
     Attachment,
     get_identification_attachments,
@@ -80,6 +80,7 @@ class Section:
         attachments: Optional[List[Attachment]] = None,
         load_content=False,
     ):
+        self.base_identifier = identifier
         self.identifier = f'{identifier.name}.{sub_identifier}' if sub_identifier else identifier.name
         self.label = (
             label
@@ -471,7 +472,12 @@ def get_document_section(
     )
 
 
-def get_sections(context: ResumePropositionDTO, specific_questions: List[QuestionSpecifiqueDTO], load_content=False):
+def get_sections(
+    context: ResumePropositionDTO,
+    specific_questions: List[QuestionSpecifiqueDTO],
+    load_content=False,
+    additional_documents=False,
+):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
     # The PDF contains several sections, each one containing the data following by the related attachments
@@ -510,7 +516,7 @@ def get_sections(context: ResumePropositionDTO, specific_questions: List[Questio
 
     pdf_sections.append(get_confirmation_section(context, load_content))
 
-    if not load_content:
+    if additional_documents:
         # Section containing the additional requested documents
         pdf_sections.append(get_document_section(context, specific_questions_by_tab, load_content))
 

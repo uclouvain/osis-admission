@@ -467,7 +467,11 @@ msgid ""
 "to the others. Important point: the questions are displayed together "
 "according to the field \"Display according to training\" (the elements for "
 "all trainings, then the elements for a type of training, then the elements "
-"for a specific training)."
+"for a specific training and finally the elements associated with a single "
+"admission)."
+msgstr ""
+
+msgid "Analysis folder"
 msgstr ""
 
 msgid "Ancient languages"
@@ -479,6 +483,12 @@ msgstr ""
 msgid ""
 "Annex 25 or 26 or the A/B card mentioning the refugee status or the decision "
 "confirming the protection of the parent"
+msgstr ""
+
+msgid "Annual transcript"
+msgstr ""
+
+msgid "Annual transcript translation"
 msgstr ""
 
 msgid "Another address"
@@ -1048,6 +1058,12 @@ msgstr ""
 msgid "Communication attestation"
 msgstr ""
 
+#, python-format
+msgid ""
+"Communication to the candidate, in <span class=\"label label-admission-"
+"primary\">%s</span>"
+msgstr ""
+
 msgid "Communication with Host Hospitals"
 msgstr ""
 
@@ -1191,6 +1207,16 @@ msgid "Copy of both sides of the residence permit in Belgium"
 msgstr ""
 
 msgid "Copy of both sides of the residence permit valid for more than 3 months"
+msgstr ""
+
+msgid ""
+"Copy of both sides of the residence permit valid for more than 3 months "
+"(professional)"
+msgstr ""
+
+msgid ""
+"Copy of both sides of the residence permit valid for more than 3 months "
+"(replacement)"
 msgstr ""
 
 #, python-format
@@ -1452,6 +1478,9 @@ msgstr ""
 msgid "Desired training"
 msgstr ""
 
+msgid "Designate the document as to be requested"
+msgstr ""
+
 msgid "Detailed curriculum vitae"
 msgstr ""
 
@@ -1529,7 +1558,15 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
+#, fuzzy
+#| msgid "Membre CA not found."
+msgid "Document not found."
+msgstr "Supervisory panel member not found."
+
 msgid "Document requested"
+msgstr ""
+
+msgid "Document to be requested"
 msgstr ""
 
 msgid "Document uploaded"
@@ -1752,10 +1789,10 @@ msgstr ""
 msgid "External reorientation"
 msgstr ""
 
-msgid "FAC/CDD processing"
+msgid "FAC free documents"
 msgstr ""
 
-msgid "FAC free documents"
+msgid "FAC/CDD processing"
 msgstr ""
 
 msgid "FNRS"
@@ -2800,6 +2837,9 @@ msgstr ""
 msgid "No languages knowledge provided."
 msgstr ""
 
+msgid "No longer designate the document as to be requested"
+msgstr ""
+
 msgid "No one invited"
 msgstr ""
 
@@ -3095,6 +3135,11 @@ msgid ""
 "Please indicate your other first names in accordance with your identity "
 "document. If no other first name is mentioned on your identity document, you "
 "don't need to indicate anything."
+msgstr ""
+
+msgid ""
+"Please note that this document will be removed from the list of the missing "
+"documents."
 msgstr ""
 
 msgid "Please provide a copy of your curriculum."
@@ -4040,6 +4085,12 @@ msgctxt "male gender"
 msgid "The doctoral student"
 msgstr ""
 
+msgid "The document has been designated as to be requested"
+msgstr ""
+
+msgid "The document is no longer designated as to be requested"
+msgstr ""
+
 msgid "The dossier has been confirmed as:"
 msgstr ""
 
@@ -4260,6 +4311,9 @@ msgstr ""
 msgid ""
 "This choice will define the language of communication throughout your "
 "admission process."
+msgstr ""
+
+msgid "This document cannot be requested"
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."

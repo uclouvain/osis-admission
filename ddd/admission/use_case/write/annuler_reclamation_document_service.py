@@ -23,38 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
-from typing import List, Optional
-
-import attr
-
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.enums.document import TypeDocument, StatutDocument, OngletsDemande
-from osis_common.ddd import interface
+from admission.ddd.admission.commands import AnnulerReclamationDocumentCommand
+from admission.ddd.admission.domain.model.demande import DemandeIdentity
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
+from admission.ddd.admission.enums.emplacement_document import TypeDocument
+from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
-@attr.dataclass(frozen=True, slots=True)
-class DocumentIdentity(interface.EntityIdentity):
-    identifiant: str
+def annuler_reclamation_document(
+    cmd: 'AnnulerReclamationDocumentCommand',
+    emplacement_document_repository: 'IEmplacementDocumentRepository',
+) -> EmplacementDocumentIdentity:
+    emplacement_document_entity_id = EmplacementDocumentIdentity(identifiant=cmd.identifiant_document)
+    demande_entity_id = DemandeIdentity(uuid=cmd.uuid_demande)
 
+    emplacement_document_repository.delete_emplacement_candidat(
+        entity_id=emplacement_document_entity_id,
+        demande_entity_id=demande_entity_id,
+        type_document=TypeDocument[cmd.type_document],
+    )
 
-@attr.dataclass(slots=True)
-class Document(interface.Entity):
-    entity_id: DocumentIdentity
-    proposition: PropositionIdentity
-    libelle: str
-    onglet: OngletsDemande
-    uuids: List[str]
-    auteur: str
-    type: TypeDocument
-    statut: StatutDocument
-    justification_gestionnaire: str
-    soumis_le: Optional[datetime] = None
-    reclame_le: Optional[datetime] = None
-    a_echeance_le: Optional[datetime] = None
-    derniere_action_le: Optional[datetime] = None
-
-    def definir_a_reclamer(self, raison):
-        self.justification_gestionnaire = raison
-        self.derniere_action_le = datetime.now()
-        self.statut = StatutDocument.A_RECLAMER
+    return emplacement_document_entity_id

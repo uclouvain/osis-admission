@@ -24,23 +24,25 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.model.document import DocumentIdentity
-from admission.ddd.admission.enums.document import TypeDocument, OngletsDemande, DocumentsInterOnglets
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande, DocumentsInterOnglets
 from osis_common.ddd import interface
 
 
-class DocumentIdentityBuilder(interface.EntityIdentityBuilder):
+class EmplacementDocumentIdentityBuilder(interface.EntityIdentityBuilder):
     @classmethod
     def build(
         cls,
-        type_document: TypeDocument,
         onglet_document: OngletsDemande,
         identifiant_document: str = '',
         token_document: str = '',
         identifiant_question_specifique: str = '',
-    ) -> DocumentIdentity:
+    ) -> EmplacementDocumentIdentity:
+        if identifiant_document:
+            return EmplacementDocumentIdentity(identifiant=identifiant_document)
+
         if identifiant_question_specifique:
-            return DocumentIdentity(
+            return EmplacementDocumentIdentity(
                 identifiant='{}.{}.{}'.format(
                     onglet_document.name,
                     DocumentsInterOnglets.QUESTION_SPECIFIQUE.name,
@@ -48,14 +50,5 @@ class DocumentIdentityBuilder(interface.EntityIdentityBuilder):
                 ),
             )
 
-        return DocumentIdentity(
-            identifiant=f'{onglet_document.name}.'
-            + {
-                TypeDocument.INTERNE_FAC: token_document,
-                TypeDocument.INTERNE_SIC: token_document,
-                TypeDocument.NON_LIBRE: identifiant_document,
-                TypeDocument.CANDIDAT_FAC: token_document,
-                TypeDocument.CANDIDAT_SIC: token_document,
-                TypeDocument.SYSTEME: identifiant_document,
-            }[type_document]
-        )
+        if token_document:
+            return EmplacementDocumentIdentity(identifiant=f'{onglet_document.name}.{token_document}')

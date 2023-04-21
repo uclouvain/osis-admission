@@ -178,3 +178,11 @@ class PropositionNonTrouveeException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Proposition not found.")
         super().__init__(message, **kwargs)
+
+
+class DocumentNonTrouveException(BusinessException):
+    status_code = "ADMISSION-17"
+
+    def __init__(self, **kwargs):
+        message = _("Document not found.")
+        super().__init__(message, **kwargs)

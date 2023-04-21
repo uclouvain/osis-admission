@@ -86,7 +86,7 @@ from admission.ddd.admission.enums import (
     TypeItemFormulaire,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.enums.document import (
+from admission.ddd.admission.enums.emplacement_document import (
     DocumentsIdentification,
     DocumentsInterOnglets,
     DocumentsEtudesSecondaires,

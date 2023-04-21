@@ -24,20 +24,52 @@
 #
 # ##############################################################################
 from abc import ABCMeta
+from typing import List
 
-from admission.ddd.admission.domain.model.document import Document
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.demande import DemandeIdentity
+from admission.ddd.admission.enums.emplacement_document import TypeDocument
 from osis_common.ddd import interface
 
 
-class IDocumentRepository(interface.AbstractRepository, metaclass=ABCMeta):
+class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABCMeta):
     @classmethod
-    def save_document_gestionnaire(cls, document: Document) -> None:
+    def get_document_admission(
+        cls,
+        proposition_identity: DemandeIdentity,
+        entity_id: EmplacementDocumentIdentity,
+    ) -> EmplacementDocument:
         raise NotImplementedError
 
     @classmethod
-    def save_document_candidat(cls, document: Document) -> None:
+    def save_emplacement_document_gestionnaire(cls, entity: EmplacementDocument) -> None:
         raise NotImplementedError
 
     @classmethod
-    def save(cls, entity: Document) -> None:
+    def save_emplacement_document_candidat(cls, entity: EmplacementDocument) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def save(cls, entity: EmplacementDocument) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def delete_emplacement_candidat(
+        cls,
+        entity_id: EmplacementDocumentIdentity,
+        demande_entity_id: DemandeIdentity,
+        type_document: TypeDocument,
+    ) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def save_multiple_emplacements_documents_candidat(cls, entities: List[EmplacementDocument]) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def reinitialiser_emplacements_documents_candidat(
+        cls,
+        demande_identity: DemandeIdentity,
+        entities: List[EmplacementDocument],
+    ) -> None:
         raise NotImplementedError

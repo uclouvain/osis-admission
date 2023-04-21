@@ -34,7 +34,7 @@ from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission, AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
-from admission.ddd.admission.enums.document import TypeDocument
+from admission.ddd.admission.enums.emplacement_document import TypeDocument
 from admission.forms import AdmissionFileUploadField
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
