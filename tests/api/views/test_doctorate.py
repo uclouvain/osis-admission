@@ -34,7 +34,7 @@ from rest_framework.test import APITestCase
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
 )
 
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -76,7 +76,7 @@ class DoctorateAPIViewTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=cls.commission,
             supervision_group=promoter.process,
@@ -87,7 +87,7 @@ class DoctorateAPIViewTestCase(APITestCase):
             candidate=cls.doctorate.candidate,
         )
         cls.other_doctorate = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=cls.commission,
         )

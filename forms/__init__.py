@@ -23,15 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+from functools import partial
 from typing import List, Optional
 
+from dal import autocomplete
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from admission.constants import DEFAULT_MIME_TYPES
 from base.forms.utils.datefield import DATE_FORMAT
+from base.models.academic_year import AcademicYear
+from education_group.templatetags.education_group_extra import format_to_academic_year
+from osis_document.contrib import FileUploadField
+from reference.models.country import Country
 
 EMPTY_CHOICE = (('', ' - '),)
 NONE_CHOICE = ((None, ' - '),)
+ALL_EMPTY_CHOICE = (('', _('All')),)
+MINIMUM_SELECTABLE_YEAR = 2004
+MAXIMUM_SELECTABLE_YEAR = 2031
 
 
 class SelectOrOtherWidget(forms.MultiWidget):
@@ -110,5 +121,44 @@ class CustomDateInput(forms.DateInput):
             attrs = {
                 'placeholder': _("dd/mm/yyyy"),
                 'data-mask': '00/00/0000',
+                'autocomplete': 'off',
             }
         super().__init__(attrs, format)
+
+    class Media:
+        js = ('jquery.mask.min.js',)
+
+
+def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM_SELECTABLE_YEAR):
+    """Return the list of choices of academic years between min_year and max_year"""
+    academic_years = AcademicYear.objects.min_max_years(
+        min_year=min_year,
+        max_year=max_year,
+    ).order_by('-year')
+    return [(academic_year.year, format_to_academic_year(academic_year.year)) for academic_year in academic_years]
+
+
+def get_example_text(example: str):
+    return _("e.g.: %(example)s") % {'example': example}
+
+
+class AdmissionFileUploadField(FileUploadField):
+    def __init__(self, **kwargs):
+        kwargs.setdefault('mimetypes', DEFAULT_MIME_TYPES)
+        super().__init__(**kwargs)
+
+
+RadioBooleanField = partial(
+    forms.TypedChoiceField,
+    coerce=lambda value: value == 'True',
+    choices=((True, _('Yes')), (False, _('No'))),
+    widget=forms.RadioSelect,
+    empty_value=None,
+)
+
+
+class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('widget', autocomplete.ListSelect2(url="country-autocomplete"))
+        kwargs.setdefault('queryset', Country.objects.none())
+        super().__init__(*args, **kwargs)

@@ -44,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._signature_promot
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixStatutSignatureGroupeDeSupervision,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
@@ -151,7 +151,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             ),
             cotutelle=cotutelle,
             statut_signature=ChoixStatutSignatureGroupeDeSupervision.SIGNING_IN_PROGRESS
-            if proposition.status == ChoixStatutProposition.SIGNING_IN_PROGRESS.name
+            if proposition.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
             else None,
         )
 
@@ -172,15 +172,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     def get_cotutelle_dto(cls, uuid_proposition: str) -> 'CotutelleDTO':
         proposition_id = PropositionIdentityBuilder.build_from_uuid(uuid_proposition)
         groupe = cls.get_by_proposition_id(proposition_id=proposition_id)
-        return CotutelleDTO(
-            cotutelle=None if groupe.cotutelle is None else groupe.cotutelle != pas_de_cotutelle,
-            motivation=groupe.cotutelle and groupe.cotutelle.motivation or '',
-            institution_fwb=groupe.cotutelle and groupe.cotutelle.institution_fwb,
-            institution=groupe.cotutelle and groupe.cotutelle.institution or '',
-            demande_ouverture=groupe.cotutelle and groupe.cotutelle.demande_ouverture or [],
-            convention=groupe.cotutelle and groupe.cotutelle.convention or [],
-            autres_documents=groupe.cotutelle and groupe.cotutelle.autres_documents or [],
-        )
+        return cls.get_cotutelle_dto_from_model(cotutelle=groupe.cotutelle)
 
     @classmethod
     def search(
@@ -344,3 +336,28 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                 )
             )
         return members
+
+    @classmethod
+    def edit_external_member(
+        cls,
+        groupe_id: 'GroupeDeSupervisionIdentity',
+        membre_id: 'SignataireIdentity',
+        first_name: Optional[str] = '',
+        last_name: Optional[str] = '',
+        email: Optional[str] = '',
+        is_doctor: Optional[bool] = False,
+        institute: Optional[str] = '',
+        city: Optional[str] = '',
+        country_code: Optional[str] = '',
+        language: Optional[str] = '',
+    ) -> None:
+        SupervisionActor.objects.filter(process__uuid=groupe_id.uuid, uuid=membre_id.uuid).update(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            is_doctor=is_doctor,
+            institute=institute,
+            city=city,
+            country=Country.objects.get(iso_code=country_code) if country_code else None,
+            language=language,
+        )

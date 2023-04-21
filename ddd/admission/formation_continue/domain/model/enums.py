@@ -24,18 +24,16 @@
 #
 # ##############################################################################
 
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from base.models.utils.utils import ChoiceEnum
 
 
-class ChoixStatutProposition(ChoiceEnum):
-    CANCELLED = _('CANCELLED')
-    # During the enrolment step
-    IN_PROGRESS = _('IN_PROGRESS')
-    SUBMITTED = _('SUBMITTED')
-    # After the enrolment step
-    ENROLLED = _('ENROLLED')
+class ChoixStatutPropositionContinue(ChoiceEnum):
+    EN_BROUILLON = _('In draft')
+    CONFIRMEE = _('Confirmed application (by student)')
+    ANNULEE = _('Cancelled application')
+    INSCRIPTION_AUTORISEE = _('Enrollment allowed')
 
 
 class ChoixInscriptionATitre(ChoiceEnum):
@@ -45,5 +43,5 @@ class ChoixInscriptionATitre(ChoiceEnum):
 
 class ChoixTypeAdresseFacturation(ChoiceEnum):
     RESIDENTIEL = _("Residential address")
-    CONTACT = _("Contact address")
+    CONTACT = pgettext_lazy("admission", "Contact address")
     AUTRE = _("Another address")

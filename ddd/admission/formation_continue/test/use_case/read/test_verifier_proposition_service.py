@@ -35,7 +35,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
 )
 from admission.ddd.admission.dtos import EtudesSecondairesDTO
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ExperiencesCurriculumNonRenseigneesException,
@@ -79,10 +79,10 @@ class TestVerifierPropositionService(TestCase):
     def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
         propositions = self.proposition_repository.search(matricule_candidat='0123456789')
         for proposition in propositions:
-            proposition.statut = ChoixStatutProposition.IN_PROGRESS
+            proposition.statut = ChoixStatutPropositionContinue.EN_BROUILLON
 
         for proposition_index in range(2):
-            propositions[proposition_index].statut = ChoixStatutProposition.SUBMITTED
+            propositions[proposition_index].statut = ChoixStatutPropositionContinue.CONFIRMEE
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))

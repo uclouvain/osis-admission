@@ -1,54 +1,54 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from unittest.mock import patch
 from uuid import UUID
 
 from django.shortcuts import resolve_url
 from django.test import override_settings
-from osis_notification.models import WebNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import ConfirmationPaper
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationDateIncorrecteException,
     EpreuveConfirmationNonTrouveeException,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition,
-)
-
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
-from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.program_manager import ProgramManagerFactory
+from osis_notification.models import WebNotification
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -72,7 +72,7 @@ class ConfirmationAPIViewTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=commission,
             supervision_group=promoter.process,
@@ -82,7 +82,7 @@ class ConfirmationAPIViewTestCase(APITestCase):
             candidate=cls.doctorate.candidate,
         )
         other_doctorate = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=commission,
             supervision_group=other_promoter.process,
@@ -93,7 +93,7 @@ class ConfirmationAPIViewTestCase(APITestCase):
         cls.other_student = other_doctorate.candidate
         cls.promoter = promoter.person.user
         cls.other_promoter = other_promoter.person.user
-        cls.cdd_person = CddManagerFactory(entity=commission).person
+        cls.manager = ProgramManagerFactory(education_group=cls.doctorate.training.education_group).person
 
         cls.doctorate_url = resolve_url('admission_api_v1:confirmation', uuid=cls.doctorate.uuid)
         cls.other_doctorate_url = resolve_url('admission_api_v1:confirmation', uuid=other_doctorate.uuid)
@@ -229,7 +229,7 @@ class ConfirmationAPIViewTestCase(APITestCase):
         # Check the notifications
         self.assertEqual(WebNotification.objects.count(), 1)
         notification = WebNotification.objects.first()
-        self.assertEqual(notification.person, self.cdd_person)
+        self.assertEqual(notification.person, self.manager)
 
     def test_put_confirmation_by_promoter_with_invalid_doctorate_status(self):
         self.client.force_authenticate(user=self.promoter)
@@ -311,7 +311,7 @@ class LastConfirmationAPIViewTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=commission,
             supervision_group=promoter.process,
@@ -321,7 +321,7 @@ class LastConfirmationAPIViewTestCase(APITestCase):
             candidate=cls.doctorate.candidate,
         )
         other_doctorate = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=commission,
         )
@@ -329,7 +329,7 @@ class LastConfirmationAPIViewTestCase(APITestCase):
         # Users
         cls.student = cls.doctorate.candidate
         cls.other_student = other_doctorate.candidate
-        cls.cdd_person = CddManagerFactory(entity=commission).person
+        cls.manager = ProgramManagerFactory(education_group=cls.doctorate.training.education_group).person
 
         cls.doctorate_url = resolve_url('admission_api_v1:last_confirmation', uuid=cls.doctorate.uuid)
         cls.other_doctorate_url = resolve_url('admission_api_v1:last_confirmation', uuid=other_doctorate.uuid)
@@ -461,7 +461,7 @@ class LastConfirmationAPIViewTestCase(APITestCase):
         # Check the notifications
         self.assertEqual(WebNotification.objects.count(), 1)
         notification = WebNotification.objects.first()
-        self.assertEqual(notification.person, self.cdd_person)
+        self.assertEqual(notification.person, self.manager)
 
     def test_put_confirmation_with_doctorate_invalid_status(self):
         self.client.force_authenticate(user=self.student.user)
@@ -581,7 +581,7 @@ class LastConfirmationAPIViewTestCase(APITestCase):
         # Check the notifications
         self.assertEqual(WebNotification.objects.count(), 1)
         notification = WebNotification.objects.first()
-        self.assertEqual(notification.person, self.cdd_person)
+        self.assertEqual(notification.person, self.manager)
 
     def test_post_confirmation_with_doctorate_invalid_status(self):
         self.client.force_authenticate(user=self.student.user)
@@ -651,7 +651,7 @@ class LastConfirmationCanvasAPIViewTestCase(APITestCase):
             acronym='CDA',
         ).entity
         cls.doctorate = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=commission,
             supervision_group=promoter.process,
@@ -661,7 +661,7 @@ class LastConfirmationCanvasAPIViewTestCase(APITestCase):
             candidate=cls.doctorate.candidate,
         )
         other_doctorate = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.ENROLLED.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             training__management_entity=commission,
         )
@@ -691,12 +691,17 @@ class LastConfirmationCanvasAPIViewTestCase(APITestCase):
         patched = cls.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
 
+        # Mock weasyprint
+        cls.get_pdf = patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
+        cls.get_pdf.start()
+
     @classmethod
     def tearDownClass(cls):
         cls.confirm_remote_upload_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.get_remote_token_patcher.stop()
         cls.save_raw_content_remotely_patcher.stop()
+        cls.get_pdf.stop()
         super().tearDownClass()
 
     def setUp(self):

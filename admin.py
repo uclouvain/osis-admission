@@ -27,6 +27,7 @@
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
@@ -36,21 +37,24 @@ from hijack.contrib.admin import HijackUserAdminMixin
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
-from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.jury_secretary import JurySecretary
+from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
-from admission.auth.roles.sic_director import SicDirector
-from admission.auth.roles.sic_manager import SicManager
+from admission.auth.roles.sic_management import SicManagement
+from admission.auth.roles.central_manager import CentralManager
 from admission.contrib.models import (
     AdmissionTask,
+    AdmissionViewer,
     CddMailTemplate,
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
     Scholarship,
 )
+from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
@@ -60,10 +64,12 @@ from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
+from education_group.auth.scope import Scope
+from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
-from osis_role.contrib.admin import RoleModelAdmin
+from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
 
 # ##############################################################################
@@ -82,7 +88,7 @@ class AdmissionAdminForm(forms.ModelForm):
         self.fields['valuated_secondary_studies_person'].queryset = Person.objects.filter(pk=self.instance.candidate.pk)
 
 
-class BaseAdmissionAdmin(admin.ModelAdmin):
+class AdmissionAdminMixin(admin.ModelAdmin):
     form = AdmissionAdminForm
 
     list_display = [
@@ -99,6 +105,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     readonly_fields = [
         'detailed_status',
         "submitted_at",
+        "last_update_author",
     ]
     filter_horizontal = [
         "professional_valuated_experiences",
@@ -109,6 +116,10 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'training__academic_year',
     ]
     list_filter = ['status', 'type_demande']
+
+    def has_add_permission(self, request):
+        # Prevent adding from admin site as we lose all business checks
+        return False
 
     def get_readonly_fields(self, request, obj=None):
         # Also mark all FileField as readonly (since we don't have admin widget yet)
@@ -126,7 +137,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Candidate on portal")}</a>')
 
 
-class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
+class DoctorateAdmissionAdmin(AdmissionAdminMixin):
     autocomplete_fields = [
         'training',
         'thesis_institute',
@@ -140,6 +151,7 @@ class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
         "submitted_profile",
         "pre_admission_submission_date",
         "submitted_at",
+        "last_update_author",
     ]
     exclude = ["valuated_experiences"]
 
@@ -148,7 +160,7 @@ class DoctorateAdmissionAdmin(BaseAdmissionAdmin):
         return resolve_url(f'admission:doctorate', uuid=obj.uuid)
 
 
-class ContinuingEducationAdmissionAdmin(BaseAdmissionAdmin):
+class ContinuingEducationAdmissionAdmin(AdmissionAdminMixin):
     autocomplete_fields = ['training']
 
     @staticmethod
@@ -156,7 +168,7 @@ class ContinuingEducationAdmissionAdmin(BaseAdmissionAdmin):
         return resolve_url(f'admission:continuing-education', uuid=obj.uuid)
 
 
-class GeneralEducationAdmissionAdmin(ContinuingEducationAdmissionAdmin):
+class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
     autocomplete_fields = [
         'training',
         'double_degree_scholarship',
@@ -329,6 +341,29 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
             return obj.education_group.most_recent_acronym
 
 
+class AdmissionViewerAdmin(admin.ModelAdmin):
+    list_display = ['admission', 'person', 'viewed_at']
+    search_fields = ['admission__reference']
+    autocomplete_fields = [
+        'person',
+        'admission',
+    ]
+    readonly_fields = [
+        'viewed_at',
+    ]
+
+
+class BaseAdmissionAdmin(admin.ModelAdmin):
+    # Only used to search admissions through autocomplete fields
+    search_fields = ['reference']
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
@@ -337,6 +372,8 @@ admin.site.register(AdmissionFormItem, AdmissionFormItemAdmin)
 admin.site.register(AdmissionFormItemInstantiation, AdmissionFormItemInstantiationAdmin)
 admin.site.register(GeneralEducationAdmission, GeneralEducationAdmissionAdmin)
 admin.site.register(ContinuingEducationAdmission, ContinuingEducationAdmissionAdmin)
+admin.site.register(BaseAdmission, BaseAdmissionAdmin)
+admin.site.register(AdmissionViewer, AdmissionViewerAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
@@ -475,7 +512,7 @@ class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
         return obj.person.user
 
 
-class CDDRoleModelAdmin(HijackRoleModelAdmin):
+class CddConfiguratorAdmin(HijackRoleModelAdmin):
     list_display = ('person', 'most_recent_acronym')
     search_fields = [
         'person__first_name',
@@ -516,14 +553,44 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
         return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Search on portal")}</a>')
 
 
+class TypeField(forms.CheckboxSelectMultiple):
+    def format_value(self, value):
+        if isinstance(value, str):
+            value = value.split(',')
+        return super().format_value(value)
+
+
+class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
+    list_select_related = ['person__user']
+    list_display = ('person', 'entity', 'scopes')
+    search_fields = ['person__first_name', 'person__last_name', 'entity__entityversion__acronym']
+    raw_id_fields = (
+        'person',
+        'entity',
+    )
+    formfield_overrides = {ArrayField: {'widget': TypeField(choices=Scope.choices())}}
+
+    def get_hijack_user(self, obj):
+        return obj.person.user
+
+
+class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
+    list_select_related = ['person__user']
+    list_display = ['person', 'education_group_most_recent_acronym']
+
+    def get_hijack_user(self, obj):
+        return obj.person.user
+
+
 admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
 admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
 admin.site.register(Candidate, FrontOfficeRoleModelAdmin)
 
-admin.site.register(CddManager, CDDRoleModelAdmin)
+admin.site.register(CddConfigurator, CddConfiguratorAdmin)
 
-admin.site.register(SicManager, HijackRoleModelAdmin)
-admin.site.register(SicDirector, HijackRoleModelAdmin)
+admin.site.register(CentralManager, CentralManagerAdmin)
+admin.site.register(ProgramManager, ProgramManagerAdmin)
+admin.site.register(SicManagement, HijackRoleModelAdmin)
 admin.site.register(AdreSecretary, HijackRoleModelAdmin)
 admin.site.register(JurySecretary, HijackRoleModelAdmin)
 admin.site.register(Sceb, HijackRoleModelAdmin)

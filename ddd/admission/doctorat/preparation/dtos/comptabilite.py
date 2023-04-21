@@ -36,17 +36,17 @@ class ComptabiliteDTO(interface.DTO):
     attestation_absence_dette_etablissement: List[str]
 
     # Assimilation
-    type_situation_assimilation: Optional[str]
+    type_situation_assimilation: str
 
     # Assimilation 1
-    sous_type_situation_assimilation_1: Optional[str]
+    sous_type_situation_assimilation_1: str
     carte_resident_longue_duree: List[str]
     carte_cire_sejour_illimite_etranger: List[str]
     carte_sejour_membre_ue: List[str]
     carte_sejour_permanent_membre_ue: List[str]
 
     # Assimilation 2
-    sous_type_situation_assimilation_2: Optional[str]
+    sous_type_situation_assimilation_2: str
     carte_a_b_refugie: List[str]
     annexe_25_26_refugies_apatrides: List[str]
     attestation_immatriculation: List[str]
@@ -55,7 +55,7 @@ class ComptabiliteDTO(interface.DTO):
     decision_protection_temporaire: List[str]
 
     # Assimilation 3
-    sous_type_situation_assimilation_3: Optional[str]
+    sous_type_situation_assimilation_3: str
     titre_sejour_3_mois_professionel: List[str]
     fiches_remuneration: List[str]
     titre_sejour_3_mois_remplacement: List[str]
@@ -65,8 +65,8 @@ class ComptabiliteDTO(interface.DTO):
     attestation_cpas: List[str]
 
     # Assimilation 5
-    relation_parente: Optional[str]
-    sous_type_situation_assimilation_5: Optional[str]
+    relation_parente: str
+    sous_type_situation_assimilation_5: str
     composition_menage_acte_naissance: List[str]
     acte_tutelle: List[str]
     composition_menage_acte_mariage: List[str]
@@ -79,7 +79,7 @@ class ComptabiliteDTO(interface.DTO):
     attestation_cpas_parent: List[str]
 
     # Assimilation 6
-    sous_type_situation_assimilation_6: Optional[str]
+    sous_type_situation_assimilation_6: str
     decision_bourse_cfwb: List[str]
     attestation_boursier: List[str]
 
@@ -91,13 +91,13 @@ class ComptabiliteDTO(interface.DTO):
     etudiant_solidaire: Optional[bool]
 
     # Compte bancaire
-    type_numero_compte: Optional[str]
-    numero_compte_iban: Optional[str]
+    type_numero_compte: str
+    numero_compte_iban: str
     iban_valide: Optional[bool]
-    numero_compte_autre_format: Optional[str]
-    code_bic_swift_banque: Optional[str]
-    prenom_titulaire_compte: Optional[str]
-    nom_titulaire_compte: Optional[str]
+    numero_compte_autre_format: str
+    code_bic_swift_banque: str
+    prenom_titulaire_compte: str
+    nom_titulaire_compte: str
 
 
 @attr.dataclass(frozen=True, slots=True)

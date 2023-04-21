@@ -98,6 +98,13 @@ COMMAND_HANDLERS = {
         membre_ca_translator=_membre_ca_translator,
         historique=_historique,
     ),
+    ModifierMembreSupervisionExterneCommand: lambda msg_bus, cmd: modifier_membre_supervision_externe(
+        cmd,
+        proposition_repository=_proposition_repository,
+        groupe_supervision_repository=_groupe_supervision_repository,
+        promoteur_translator=_promoteur_translator,
+        membre_ca_translator=_membre_ca_translator,
+    ),
     DemanderSignaturesCommand: lambda msg_bus, cmd: demander_signatures(
         cmd,
         proposition_repository=_proposition_repository,
@@ -232,6 +239,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         bourse_translator=_bourse_translator,
+        doctorat_translator=_doctorat_translator,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -249,5 +257,15 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmationInMemory(),
         formation_translator=_doctorat_translator,
         profil_candidat_translator=_profil_candidat_translator,
+    ),
+    RecupererResumePropositionQuery: lambda msg_bus, cmd: recuperer_resume_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        i_profil_candidat_translator=_profil_candidat_translator,
+        i_comptabilite_translator=_comptabilite_translator,
+        groupe_supervision_repository=_groupe_supervision_repository,
+        promoteur_translator=_promoteur_translator,
+        membre_ca_translator=_membre_ca_translator,
+        academic_year_repository=_academic_year_repository,
     ),
 }

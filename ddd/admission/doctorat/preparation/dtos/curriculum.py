@@ -24,7 +24,7 @@
 #
 ##############################################################################
 import datetime
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import attr
 
@@ -45,7 +45,13 @@ class AnneeExperienceAcademiqueDTO(interface.DTO):
 class ExperienceAcademiqueDTO(interface.DTO):
     uuid: str
     pays: str
+    nom_pays: str
+    nom_institut: str
+    adresse_institut: str
+    code_institut: str
+    communaute_institut: str
     regime_linguistique: str
+    nom_regime_linguistique: str
     type_releve_notes: str
     releve_notes: List[str]
     traduction_releve_notes: List[str]
@@ -61,17 +67,32 @@ class ExperienceAcademiqueDTO(interface.DTO):
     grade_obtenu: str
     systeme_evaluation: str
     nom_formation: str
+    type_enseignement: str
 
     def __str__(self):
         return self.nom_formation
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ExperienceNonAcademiqueDTO(interface.DTO):
+    uuid: str
+    employeur: str
+    date_debut: datetime.date
+    date_fin: datetime.date
+    type: str
+    certificat: List[str]
+    fonction: str
+    secteur: str
+    autre_activite: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class CurriculumDTO(interface.DTO):
-    dates_experiences_non_academiques: List[Tuple[datetime.date, datetime.date]]
+    experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires: Optional[int]
+    annee_minimum_a_remplir: Optional[int]
 
 
 @attr.dataclass(frozen=True, slots=True)

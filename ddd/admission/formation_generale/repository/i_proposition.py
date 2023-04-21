@@ -31,6 +31,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
     PropositionIdentity,
 )
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
 from osis_common.ddd.interface import ApplicationService
 
@@ -72,4 +73,9 @@ class IPropositionRepository(IGlobalPropositionRepository):
     @classmethod
     @abc.abstractmethod
     def save(cls, entity: 'Proposition') -> None:  # type: ignore[override]
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def get_dto_for_gestionnaire(cls, entity_id: 'PropositionIdentity') -> 'PropositionGestionnaireDTO':
         raise NotImplementedError

@@ -30,7 +30,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from base.tests.factories.user import UserFactory
@@ -61,7 +61,7 @@ class ApprovalMixin:
 
         # Create the admission
         cls.admission = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=cls.promoter.process,
             cotutelle=False,
         )

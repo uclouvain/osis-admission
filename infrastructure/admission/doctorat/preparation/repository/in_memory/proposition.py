@@ -272,4 +272,7 @@ class PropositionInMemoryRepository(
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             bourse_erasmus_mundus=bourse_erasmus_dto,
             curriculum=proposition.curriculum,
+            elements_confirmation=proposition.elements_confirmation,
+            pdf_recapitulatif=[],
+            soumise_le=None,
         )

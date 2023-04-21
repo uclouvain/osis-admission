@@ -38,15 +38,14 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
 )
 from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionContinue,
-)
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionGenerale,
+    ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
+from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -66,7 +65,7 @@ from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
 @freezegun.freeze_time("1980-02-25")
-class GeneralPropositionSubmissionTestCase(APITestCase):
+class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
@@ -148,7 +147,8 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
 
     def test_general_proposition_verification_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        response = self.client.get(self.ok_url)
+        with self.assertNumQueriesLessThan(61):
+            response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ret = response.json()
         self.assertEqual(len(ret['errors']), 0)
@@ -224,12 +224,31 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
 
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.IN_PROGRESS.name)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
         response = self.client.post(self.ok_url, self.data_ok)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
-        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.SUBMITTED.name)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
+        self.assertEqual(self.admission_ok.late_enrollment, False)
+
+    @freezegun.freeze_time("1980-10-22")
+    def test_general_proposition_submission_with_late_enrollment(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+
+        # The submission is in October so we need to valuate September
+        ProfessionalExperienceFactory(
+            person=self.candidate_ok,
+            start_date=datetime.date(1980, 9, 1),
+            end_date=datetime.date(1980, 9, 30),
+        )
+
+        response = self.client.post(self.ok_url, self.data_ok)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        self.admission_ok.refresh_from_db()
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+        self.assertEqual(self.admission_ok.late_enrollment, True)
 
     @freezegun.freeze_time("1980-11-25")
     def test_general_proposition_submission_ok_hors_delai(self):
@@ -263,7 +282,7 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
         response = self.client.post(self.ok_url, data_ok)
         self.admission_ok.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.SUBMITTED.name)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
         self.assertEqual(self.admission_ok.training, training)
 
     def test_general_proposition_submission_bad_pool(self):
@@ -278,11 +297,11 @@ class GeneralPropositionSubmissionTestCase(APITestCase):
     def test_general_proposition_verification_too_much_submitted_propositions(self):
         GeneralEducationAdmissionFactory(
             candidate=self.candidate_ok,
-            status=ChoixStatutPropositionGenerale.SUBMITTED.name,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
         GeneralEducationAdmissionFactory(
             candidate=self.candidate_ok,
-            status=ChoixStatutPropositionGenerale.SUBMITTED.name,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
         self.client.force_authenticate(user=self.candidate_ok.user)
         response = self.client.get(self.ok_url)
@@ -385,11 +404,11 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
 
     def test_continuing_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.IN_PROGRESS.name)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.EN_BROUILLON.name)
         response = self.client.post(self.ok_url, self.submitted_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()
-        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.SUBMITTED.name)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
@@ -443,11 +462,11 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
     def test_continuing_proposition_verification_too_much_submitted_propositions(self):
         ContinuingEducationAdmissionFactory(
             candidate=self.candidate_ok,
-            status=ChoixStatutPropositionContinue.SUBMITTED.name,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
         ContinuingEducationAdmissionFactory(
             candidate=self.candidate_ok,
-            status=ChoixStatutPropositionContinue.SUBMITTED.name,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
         self.client.force_authenticate(user=self.candidate_ok.user)
         response = self.client.get(self.ok_url)

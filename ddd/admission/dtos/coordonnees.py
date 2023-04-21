@@ -32,17 +32,20 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True)
 class AdressePersonnelleDTO(interface.DTO):
-    rue: Optional[str]
-    code_postal: Optional[str]
-    ville: Optional[str]
-    pays: Optional[str]
-    lieu_dit: Optional[str]
-    numero_rue: Optional[str]
-    boite_postale: Optional[str]
-    destinataire: Optional[str] = ''
+    rue: str
+    code_postal: str
+    ville: str
+    pays: str
+    nom_pays: str
+    lieu_dit: str
+    numero_rue: str
+    boite_postale: str
+    destinataire: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)
 class CoordonneesDTO(interface.DTO):
     domicile_legal: Optional[AdressePersonnelleDTO]
     adresse_correspondance: Optional[AdressePersonnelleDTO]
+    numero_mobile: str
+    adresse_email_privee: str

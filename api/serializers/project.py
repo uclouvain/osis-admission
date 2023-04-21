@@ -145,6 +145,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
     # This is to prevent schema from breaking on JSONField
     erreurs = None
     reponses_questions_specifiques = None
+    elements_confirmation = None
 
     class Meta:
         source = DoctoratPropositionDTO
@@ -162,6 +163,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
             'creee_le',
             'statut',
             'links',
+            'pdf_recapitulatif',
         ]
 
 
@@ -196,6 +198,7 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
     # This is to prevent schema from breaking on JSONField
     erreurs = None
     reponses_questions_specifiques = None
+    elements_confirmation = None
 
     class Meta:
         source = FormationGeneralePropositionDTO
@@ -210,6 +213,7 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
             'creee_le',
             'statut',
             'links',
+            'pdf_recapitulatif',
         ]
 
 
@@ -242,6 +246,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
     # This is to prevent schema from breaking on JSONField
     erreurs = None
     reponses_questions_specifiques = None
+    elements_confirmation = None
 
     class Meta:
         source = FormationContinuePropositionDTO
@@ -255,6 +260,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
             'creee_le',
             'statut',
             'links',
+            'pdf_recapitulatif',
         ]
 
 
@@ -301,6 +307,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             # Supervision
             'add_approval': DOCTORATE_ACTION_LINKS['add_approval'],
             'add_member': DOCTORATE_ACTION_LINKS['add_member'],
+            'edit_external_member': DOCTORATE_ACTION_LINKS['edit_external_member'],
             'remove_member': DOCTORATE_ACTION_LINKS['remove_member'],
             'set_reference_promoter': DOCTORATE_ACTION_LINKS['set_reference_promoter'],
             'retrieve_supervision': DOCTORATE_ACTION_LINKS['retrieve_supervision'],
@@ -322,7 +329,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
         }
     )
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
-
+    elements_confirmation = None
     # The schema is explicit in PropositionSchema
     erreurs = serializers.JSONField()
 
@@ -373,6 +380,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'bourse_erasmus_mundus',
             'reponses_questions_specifiques',
             'curriculum',
+            'pdf_recapitulatif',
         ]
 
 
@@ -405,6 +413,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
     )
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
+    elements_confirmation = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -433,6 +442,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             'reponses_questions_specifiques',
             'curriculum',
             'equivalence_diplome',
+            'pdf_recapitulatif',
         ]
 
 
@@ -462,8 +472,8 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
         }
     )
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
-
     erreurs = serializers.JSONField()
+    elements_confirmation = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -498,6 +508,7 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'pays_nationalite_candidat',
             'pays_nationalite_ue_candidat',
             'copie_titre_sejour',
+            'pdf_recapitulatif',
         ]
 
 

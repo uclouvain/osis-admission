@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cddconfiguration',
             name='category_labels',
-            field=models.JSONField(default=admission.contrib.models.cdd_config.default_category_labels, verbose_name='Category labels'),
+            field=admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_category_labels, verbose_name='Category labels'),
         ),
     ]

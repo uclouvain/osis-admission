@@ -31,11 +31,9 @@ from rest_framework import status
 
 from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.ddd import BE_ISO_CODE
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionFormationGenerale,
-)
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionFormationContinue,
+    ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
@@ -87,6 +85,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             'code_domaine': self.admission.training.main_domain.code,
             'campus_inscription': self.admission.training.enrollment_campus.name,
             'sigle_entite_gestion': self.commission.acronym,
+            'code': self.admission.training.partial_acronym,
         }
         double_degree_scholarship_json = {
             'uuid': str(self.admission.double_degree_scholarship.uuid),
@@ -155,7 +154,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
 
         # Create a new admission
         admission = GeneralEducationAdmissionFactory(candidate=self.candidate)
-        self.assertEqual(admission.status, ChoixStatutPropositionFormationGenerale.IN_PROGRESS.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
 
         # Cancel it
         admission_to_cancel_url = resolve_url("admission_api_v1:general_propositions", uuid=str(admission.uuid))
@@ -164,7 +163,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
         self.assertEqual(response.json()['uuid'], str(admission.uuid))
 
         admission = GeneralEducationAdmission.objects.get(pk=admission.pk)
-        self.assertEqual(admission.status, ChoixStatutPropositionFormationGenerale.CANCELLED.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionGenerale.ANNULEE.name)
 
     def test_delete_proposition_other_candidate_is_forbidden(self):
         self.client.force_authenticate(user=self.other_candidate.user)
@@ -239,6 +238,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             'code_domaine': self.admission.training.main_domain.code,
             'campus_inscription': self.admission.training.enrollment_campus.name,
             'sigle_entite_gestion': self.commission.acronym,
+            'code': self.admission.training.partial_acronym,
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
         self.assertEqual(json_response['reference'], f'M-CMC22-{str(self.admission)}')
@@ -371,7 +371,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
 
         # Create a new admission
         admission = ContinuingEducationAdmissionFactory(candidate=self.candidate)
-        self.assertEqual(admission.status, ChoixStatutPropositionFormationContinue.IN_PROGRESS.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionContinue.EN_BROUILLON.name)
 
         # Cancel it
         admission_to_cancel_url = resolve_url("admission_api_v1:continuing_propositions", uuid=str(admission.uuid))
@@ -380,7 +380,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         self.assertEqual(response.json()['uuid'], str(admission.uuid))
 
         admission = ContinuingEducationAdmission.objects.get(pk=admission.pk)
-        self.assertEqual(admission.status, ChoixStatutPropositionFormationContinue.CANCELLED.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionContinue.ANNULEE.name)
 
     def test_delete_proposition_other_candidate_is_forbidden(self):
         self.client.force_authenticate(user=self.other_candidate.user)

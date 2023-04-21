@@ -61,6 +61,13 @@ textarea {
   flex-wrap: wrap;
 }
 
+.flex-content-no-wrap {
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+  gap: 1em;
+}
+
 .border-right {
   border-right: 1px solid #ddd;
 }
@@ -153,4 +160,68 @@ textarea {
 
 .tooltip .tooltip-inner {
   width: auto;
+}
+
+@media print {
+  .inline-field-data {
+    display: block;
+  }
+
+  .inline-field-data dd, .inline-field-data dt {
+    display: inline;
+  }
+}
+
+.mt-1 {
+  margin-top: 1em;
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+.default-cursor {
+  cursor: default;
+}
+
+.copy-button {
+  position: relative;
+  display: inline-block;
+}
+
+.copy-button > .copy-tooltip {
+  visibility: hidden;
+  width: 140px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -75px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.copy-button .copy-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.copy-button:hover .copy-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.label-admission-primary {
+  background-color: #269abc;
 }

@@ -1,50 +1,50 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
-from osis_signature.enums import SignatureState
 from rules import predicate
 from waffle import switch_is_active
-
-from admission.ddd.parcours_doctoral.domain.model.enums import (
-    ChoixStatutDoctorat,
-    STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition,
-    ChoixTypeAdmission,
-    STATUTS_PROPOSITION_AVANT_SOUMISSION,
-    STATUTS_PROPOSITION_AVANT_INSCRIPTION,
-)
-from osis_role.cache import predicate_cache
-from osis_role.errors import predicate_failed_msg
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.enums.actor_type import ActorType
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
+    STATUTS_PROPOSITION_AVANT_INSCRIPTION,
+    STATUTS_PROPOSITION_AVANT_SOUMISSION,
+)
+from admission.ddd.parcours_doctoral.domain.model.enums import (
+    ChoixStatutDoctorat,
+    STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS,
+)
+from osis_role.cache import predicate_cache
+from osis_role.errors import predicate_failed_msg
+from osis_signature.enums import SignatureState
 
 
 @predicate(bind=True)
@@ -56,13 +56,13 @@ def is_admission_request_author(self, user: User, obj: BaseAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Invitations must have been sent"))
 def in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutProposition.IN_PROGRESS.name
+    return obj.status == ChoixStatutPropositionDoctorale.EN_BROUILLON.name
 
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Invitations have not been sent"))
 def signing_in_progress(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutProposition.SIGNING_IN_PROGRESS.name
+    return obj.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
 
 
 @predicate(bind=True)
@@ -74,7 +74,7 @@ def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Must be enrolled"))
 def is_enrolled(self, user: User, obj: DoctorateAdmission):
-    return obj.status == ChoixStatutProposition.ENROLLED.name
+    return obj.status == ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name
 
 
 @predicate(bind=True)
@@ -134,7 +134,10 @@ def is_admission_reference_promoter(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("You must be a member of the doctoral commission to access this admission"))
 @predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
 def is_part_of_doctoral_commission(self, user: User, obj: DoctorateAdmission):
-    return obj.doctorate.management_entity_id in self.context['role_qs'].get_entities_ids()
+    return (
+        isinstance(obj, DoctorateAdmission)
+        and obj.doctorate.management_entity_id in self.context['role_qs'].get_entities_ids()
+    )
 
 
 @predicate(bind=True)
@@ -156,3 +159,31 @@ def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
 @predicate
 def is_debug(*args):
     return switch_is_active("debug")
+
+
+def has_scope(*scopes):
+    assert len(scopes) > 0, 'You must provide at least one scope name'
+
+    name = 'has_scope:%s' % ','.join(s.name for s in scopes)
+
+    @predicate(name, bind=True)
+    def fn(self, user):
+        if not hasattr(user, '_admission_scopes'):
+            user._admission_scopes = set(
+                scope for scope_list in self.context['role_qs'].values_list('scopes', flat=True) for scope in scope_list
+            )
+        return set([s.name for s in scopes]) <= user._admission_scopes
+
+    return fn
+
+
+@predicate(bind=True)
+@predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
+def is_part_of_education_group(self, user: User, obj: BaseAdmission):
+    return obj.training.education_group_id in self.context['role_qs'].get_education_groups_affected()
+
+
+@predicate(bind=True)
+@predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
+def is_entity_manager(self, user: User, obj: BaseAdmission):
+    return obj.training.management_entity_id in self.context['role_qs'].get_entities_ids()

@@ -57,7 +57,7 @@ class BaseSecondaryStudiesViewSet(
         if current_admission:
             current_admission.specific_question_answers = request.data.get('specific_question_answers')
             current_admission.save(update_fields=['specific_question_answers'])
-            current_admission.update_detailed_status()
+            current_admission.update_detailed_status(request.user.person)
         return response
 
 

@@ -30,6 +30,7 @@ import attr
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseCorrespondanceNonCompleteeException,
     AdresseDomicileLegalNonCompleteeException,
+    CoordonneesNonCompleteesException,
 )
 from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
 from base.ddd.utils.business_validator import BusinessValidator
@@ -51,3 +52,12 @@ class ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.adresse and not self.adresse.est_complete():
             raise AdresseCorrespondanceNonCompleteeException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldAdresseEmailPriveeEtreCompletee(BusinessValidator):
+    adresse_email: str
+
+    def validate(self, *args, **kwargs):
+        if not self.adresse_email:
+            raise CoordonneesNonCompleteesException

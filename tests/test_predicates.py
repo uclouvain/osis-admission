@@ -1,28 +1,29 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from unittest import mock
 
 from django.test import TestCase
@@ -35,11 +36,11 @@ from admission.auth.predicates import (
     is_being_enrolled,
     confirmation_paper_in_progress,
 )
-from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory, PromoterRoleFactory
+from admission.tests.factories.roles import CandidateFactory, CddConfiguratorFactory, PromoterRoleFactory
 from admission.tests.factories.supervision import PromoterFactory as PromoterActorFactory, _ProcessFactory
 from base.tests.factories.entity import EntityFactory
 
@@ -92,13 +93,17 @@ class PredicatesTestCase(TestCase):
     def test_is_part_of_doctoral_commission(self):
         doctoral_commission = EntityFactory()
         request = DoctorateAdmissionFactory(training__management_entity=doctoral_commission)
-        manager1 = CddManagerFactory(entity=doctoral_commission)
-        manager2 = CddManagerFactory()
+        manager1 = CddConfiguratorFactory(entity=doctoral_commission)
+        manager2 = CddConfiguratorFactory()
 
-        self.predicate_context_patcher.target.context['role_qs'] = CddManager.objects.filter(person=manager1.person)
+        self.predicate_context_patcher.target.context['role_qs'] = CddConfigurator.objects.filter(
+            person=manager1.person
+        )
         self.assertTrue(predicates.is_part_of_doctoral_commission(manager1.person.user, request))
 
-        self.predicate_context_patcher.target.context['role_qs'] = CddManager.objects.filter(person=manager2.person)
+        self.predicate_context_patcher.target.context['role_qs'] = CddConfigurator.objects.filter(
+            person=manager2.person
+        )
         self.assertFalse(predicates.is_part_of_doctoral_commission(manager2.person.user, request))
 
     def test_is_part_of_committee(self):
@@ -111,13 +116,13 @@ class PredicatesTestCase(TestCase):
         admission = DoctorateAdmissionFactory()
 
         valid_status = [
-            ChoixStatutProposition.IN_PROGRESS.name,
-            ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
         ]
         invalid_status = [
-            ChoixStatutProposition.CANCELLED.name,
-            ChoixStatutProposition.SUBMITTED.name,
-            ChoixStatutProposition.ENROLLED.name,
+            ChoixStatutPropositionDoctorale.ANNULEE.name,
+            ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
         ]
 
         for status in valid_status:
@@ -138,13 +143,13 @@ class PredicatesTestCase(TestCase):
         admission = DoctorateAdmissionFactory()
 
         valid_status = [
-            ChoixStatutProposition.ENROLLED.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
         ]
         invalid_status = [
-            ChoixStatutProposition.IN_PROGRESS.name,
-            ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
-            ChoixStatutProposition.SUBMITTED.name,
-            ChoixStatutProposition.CANCELLED.name,
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+            ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            ChoixStatutPropositionDoctorale.ANNULEE.name,
         ]
 
         for status in valid_status:
@@ -163,13 +168,13 @@ class PredicatesTestCase(TestCase):
         admission = DoctorateAdmissionFactory()
 
         valid_status = [
-            ChoixStatutProposition.IN_PROGRESS.name,
-            ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
-            ChoixStatutProposition.SUBMITTED.name,
+            ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+            ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         ]
         invalid_status = [
-            ChoixStatutProposition.ENROLLED.name,
-            ChoixStatutProposition.CANCELLED.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionDoctorale.ANNULEE.name,
         ]
 
         for status in valid_status:

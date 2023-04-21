@@ -140,16 +140,6 @@ class PropositionInMemoryRepository(
             proposition.formation_id.annee,
         )
 
-        formation_dto = FormationDTO(
-            sigle=proposition.formation_id.sigle,
-            annee=proposition.formation_id.annee,
-            intitule=formation.intitule,
-            campus=formation.campus,
-            type=formation.type,
-            code_domaine=formation.code_domaine,
-            sigle_entite_gestion=formation.sigle_entite_gestion,
-            campus_inscription=formation.campus_inscription,
-        )
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,
             reference=formater_reference(
@@ -167,7 +157,7 @@ class PropositionInMemoryRepository(
             creee_le=proposition.creee_le,
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
-            formation=formation_dto,
+            formation=formation,
             annee_calculee=proposition.annee_calculee,
             pot_calcule=proposition.pot_calcule and proposition.pot_calcule.name or '',
             soumise_le=None,
@@ -192,5 +182,8 @@ class PropositionInMemoryRepository(
                 destinataire=proposition.adresse_facturation.destinataire,
                 boite_postale=proposition.adresse_facturation.boite_postale,
                 lieu_dit=proposition.adresse_facturation.lieu_dit,
+                nom_pays='',
             ),
+            elements_confirmation=proposition.elements_confirmation,
+            pdf_recapitulatif=[],
         )

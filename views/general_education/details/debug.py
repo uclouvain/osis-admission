@@ -23,31 +23,28 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import logging
 from io import StringIO
 
 import freezegun
 from django.utils.timezone import now
-from django.views.generic import DetailView
+from django.views.generic import TemplateView
 
-from admission.contrib.models import GeneralEducationAdmission
+from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.commands import DeterminerAnneeAcademiqueEtPotQuery
+from admission.views.doctorate.mixins import LoadDossierViewMixin
 from osis_common.ddd.interface import BusinessException
-from osis_role.contrib.views import PermissionRequiredMixin
 
 __all__ = ["GeneralDebugView"]
 
 
 # TODO Move to 'common' once we have the same logic as frontoffice
-class GeneralDebugView(PermissionRequiredMixin, DetailView):
+class GeneralDebugView(LoadDossierViewMixin, TemplateView):
     urlpatterns = 'debug'
     template_name = 'admission/debug.html'
-    model = GeneralEducationAdmission
-    slug_field = "uuid"
-    slug_url_kwarg = "uuid"
     permission_required = "admission.view_debug_info"
     cmd = DeterminerAnneeAcademiqueEtPotQuery
-    extra_context = {'base_template': 'admission/general/tab_layout.html'}
 
     def get_context_data(self, **kwargs):
         from infrastructure.messages_bus import message_bus_instance
@@ -63,7 +60,7 @@ class GeneralDebugView(PermissionRequiredMixin, DetailView):
             logger.addHandler(handler)
 
             try:
-                cmd = self.cmd(self.kwargs.get('uuid'))
+                cmd = self.cmd(self.admission_uuid)
                 dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(cmd)
                 data['determined_academic_year'] = dto.annee
                 data['determined_pool'] = dto.pool.name

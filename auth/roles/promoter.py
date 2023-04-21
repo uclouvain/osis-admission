@@ -40,6 +40,14 @@ from osis_role.contrib.models import RoleModel
 
 
 class Promoter(RoleModel):
+    """
+    Promoteur
+
+    Le promoteur intervient dans plusieurs processus.
+    Un promoteur peut être dit "de référence" pour un doctorat donné, il a alors des actions supplémentaires
+    à réaliser (spécifier l'institut de la thèse, donner son accord sur les activités de formation doctorale, etc.).
+    """
+
     class Meta:
         verbose_name = _("Role: Promoter")
         verbose_name_plural = _("Role: Promoters")
@@ -56,24 +64,22 @@ class Promoter(RoleModel):
             'admission.fill_thesis': is_admission_request_promoter,
             'admission.check_publication_authorisation': is_admission_request_promoter,
             # A promoter can view as long as he is one of the admission promoters and the registration is ongoing
-            'admission.view_doctorateadmission_person': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_doctorateadmission_coordinates': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_doctorateadmission_secondary_studies': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_doctorateadmission_languages': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_doctorateadmission_curriculum': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_doctorateadmission_accounting': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_admission_person': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_admission_coordinates': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_admission_secondary_studies': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_admission_languages': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_admission_curriculum': is_admission_request_promoter & is_being_enrolled,
+            'admission.view_admission_accounting': is_admission_request_promoter & is_being_enrolled,
             # A promoter can view as long as he is one of the admission promoters
-            'admission.view_doctorateadmission_project': is_admission_request_promoter,
-            'admission.view_doctorateadmission_training_choice': is_admission_request_promoter,
-            'admission.view_doctorateadmission_cotutelle': is_admission_request_promoter,
-            'admission.view_doctorateadmission_supervision': is_admission_request_promoter,
+            'admission.view_admission_project': is_admission_request_promoter,
+            'admission.view_admission_training_choice': is_admission_request_promoter,
+            'admission.view_admission_cotutelle': is_admission_request_promoter,
+            'admission.view_admission_supervision': is_admission_request_promoter,
             # A promoter can approve as long as he is invited to the admission committee
             'admission.approve_proposition': is_part_of_committee_and_invited,
             # Once the candidate is enrolling, a promoter can
-            'admission.view_doctorateadmission_confirmation': is_admission_request_promoter & is_enrolled,
-            'admission.change_doctorateadmission_confirmation': (
-                is_admission_request_promoter & confirmation_paper_in_progress
-            ),
+            'admission.view_admission_confirmation': is_admission_request_promoter & is_enrolled,
+            'admission.change_admission_confirmation': is_admission_request_promoter & confirmation_paper_in_progress,
             'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
             # Doctoral training
             'admission.view_doctoral_training': promoter_and_enrolled & ~is_pre_admission,

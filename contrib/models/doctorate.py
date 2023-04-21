@@ -31,7 +31,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.db.models import OuterRef
-from django.db.models.functions import Cast
+from django.db.models.fields.json import KeyTextTransform, KeyTransform
 from django.utils.datetime_safe import date
 from django.utils.translation import get_language, gettext_lazy as _
 from rest_framework.settings import api_settings
@@ -42,7 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
@@ -51,6 +51,7 @@ from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctor
 from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
+from base.models.person import Person
 from base.utils.cte import CTESubquery
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
@@ -262,9 +263,9 @@ class DoctorateAdmission(BaseAdmission):
     )
 
     status = models.CharField(
-        choices=ChoixStatutProposition.choices(),
+        choices=ChoixStatutPropositionDoctorale.choices(),
         max_length=30,
-        default=ChoixStatutProposition.IN_PROGRESS.name,
+        default=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
     )
     status_cdd = models.CharField(
         choices=ChoixStatutCDD.choices(),
@@ -359,37 +360,37 @@ class DoctorateAdmission(BaseAdmission):
             ('sign_diploma', _("Can sign diploma")),
             ('request_signatures', _("Can request signatures")),
             ('approve_proposition', _("Can approve proposition")),
-            ('view_doctorateadmission_person', _("Can view the information related to the admission request author")),
+            ('view_admission_person', _("Can view the information related to the admission request author")),
             (
-                'change_doctorateadmission_person',
+                'change_admission_person',
                 _("Can update the information related to the admission request author"),
             ),
-            ('view_doctorateadmission_coordinates', _("Can view the coordinates of the admission request author")),
-            ('change_doctorateadmission_coordinates', _("Can update the coordinates of the admission request author")),
+            ('view_admission_coordinates', _("Can view the coordinates of the admission request author")),
+            ('change_admission_coordinates', _("Can update the coordinates of the admission request author")),
             (
-                'view_doctorateadmission_secondary_studies',
+                'view_admission_secondary_studies',
                 _("Can view the information related to the secondary studies"),
             ),
             (
-                'change_doctorateadmission_secondary_studies',
+                'change_admission_secondary_studies',
                 _("Can update the information related to the secondary studies"),
             ),
-            ('view_doctorateadmission_languages', _("Can view the information related to language knowledge")),
-            ('change_doctorateadmission_languages', _("Can update the information related to language knowledge")),
-            ('view_doctorateadmission_curriculum', _("Can view the information related to the curriculum")),
-            ('change_doctorateadmission_curriculum', _("Can update the information related to the curriculum")),
-            ('view_doctorateadmission_project', _("Can view the information related to the admission project")),
-            ('change_doctorateadmission_project', _("Can update the information related to the admission project")),
-            ('view_doctorateadmission_cotutelle', _("Can view the information related to the admission cotutelle")),
-            ('change_doctorateadmission_cotutelle', _("Can update the information related to the admission cotutelle")),
-            ('view_doctorateadmission_supervision', _("Can view the information related to the admission supervision")),
+            ('view_admission_languages', _("Can view the information related to language knowledge")),
+            ('change_admission_languages', _("Can update the information related to language knowledge")),
+            ('view_admission_curriculum', _("Can view the information related to the curriculum")),
+            ('change_admission_curriculum', _("Can update the information related to the curriculum")),
+            ('view_admission_project', _("Can view the information related to the admission project")),
+            ('change_admission_project', _("Can update the information related to the admission project")),
+            ('view_admission_cotutelle', _("Can view the information related to the admission cotutelle")),
+            ('change_admission_cotutelle', _("Can update the information related to the admission cotutelle")),
+            ('view_admission_supervision', _("Can view the information related to the admission supervision")),
             (
-                'change_doctorateadmission_supervision',
+                'change_admission_supervision',
                 _("Can update the information related to the admission supervision"),
             ),
-            ('view_doctorateadmission_confirmation', _("Can view the information related to the confirmation paper")),
+            ('view_admission_confirmation', _("Can view the information related to the confirmation paper")),
             (
-                'change_doctorateadmission_confirmation',
+                'change_admission_confirmation',
                 _("Can update the information related to the confirmation paper"),
             ),
             ('add_supervision_member', _("Can add a member to the supervision group")),
@@ -401,7 +402,7 @@ class DoctorateAdmission(BaseAdmission):
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
-    def update_detailed_status(self):
+    def update_detailed_status(self, author: 'Person' = None):
         from admission.ddd.admission.doctorat.preparation.commands import (
             VerifierProjetQuery,
             VerifierPropositionQuery,
@@ -414,12 +415,24 @@ class DoctorateAdmission(BaseAdmission):
         project_errors = gather_business_exceptions(VerifierProjetQuery(self.uuid)).get(error_key, [])
         submission_errors = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
         self.detailed_status = project_errors + submission_errors
+        self.last_update_author = author
+
+        update_fields = [
+            'detailed_status',
+            'determined_academic_year',
+            'determined_pool',
+        ]
+
+        if author:
+            self.last_update_author = author
+            update_fields.append('last_update_author')
 
         with suppress(BusinessException):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
             self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
             self.determined_pool = dto.pool.name
-        self.save(update_fields=['detailed_status', 'determined_academic_year', 'determined_pool'])
+
+        self.save(update_fields=update_fields)
 
 
 class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
@@ -453,6 +466,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate_campus()
             .annotate_pool_end_date()
             .annotate_training_management_entity()
+            .annotate_with_reference(with_management_faculty=False)
         )
 
 
@@ -481,21 +495,27 @@ class DemandeManager(models.Manager):
                 'status_sic',
             )
             .annotate(
-                nationalite_iso_code=Cast(
-                    'submitted_profile__identification__country_of_citizenship', output_field=models.CharField()
+                # TODO to be simplified with the KT operator (>= Django 4.2)
+                nationalite_iso_code=KeyTextTransform(
+                    'country_of_citizenship',
+                    KeyTransform('identification', 'submitted_profile'),
                 ),
                 nom_pays_nationalite=models.Subquery(
                     Country.objects.filter(iso_code=OuterRef('nationalite_iso_code')).values(country_title_field)[:1]
                 ),
-                pays_iso_code=Cast('submitted_profile__coordinates__country', models.CharField()),
+                # TODO to be simplified with the KT operator (>= Django 4.2)
+                pays_iso_code=KeyTextTransform(
+                    'country',
+                    KeyTransform('coordinates', 'submitted_profile'),
+                ),
                 nom_pays=models.Subquery(
                     Country.objects.filter(iso_code=OuterRef('pays_iso_code')).values(country_title_field)[:1]
                 ),
             )
             .filter(
                 status__in=[
-                    ChoixStatutProposition.SUBMITTED.name,
-                    ChoixStatutProposition.ENROLLED.name,
+                    ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+                    ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
                 ]
             )
         )
@@ -531,6 +551,7 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 'financing_type',
                 'international_scholarship',
                 'other_international_scholarship',
+                'supervision_group_id',
             )
             .select_related(
                 'candidate',
@@ -542,6 +563,7 @@ class DoctorateManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 post_enrolment_status=ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name,
             )
             .annotate_training_management_entity()
+            .annotate_with_reference(with_management_faculty=False)
         )
 
 

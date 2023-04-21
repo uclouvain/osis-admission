@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.68
+  version: 1.0.72
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1483,6 +1483,37 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/doctorate/{uuid}/pdf-recap:
+    get:
+      operationId: retrieve_doctorate_education_proposition_pdf_recap
+      description: Generate the proposition recap and return a file read token
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PDFRecap'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/doctorate/{uuid}/supervision:
     get:
       operationId: retrieve_supervision
@@ -1569,6 +1600,41 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/IdentifierSupervisionActor'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    patch:
+      operationId: edit_external_member
+      description: Edit an external supervision group member for a proposition
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifierMembreSupervisionExterne'
       responses:
         200:
           content:
@@ -2594,6 +2660,37 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/general-education/{uuid}/pdf-recap:
+    get:
+      operationId: retrieve_general_education_proposition_pdf_recap
+      description: Generate the proposition recap and return a file read token
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PDFRecap'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/general-education/{uuid}/accounting:
     get:
       operationId: retrieve_general_accounting
@@ -3302,6 +3399,37 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SpecificQuestion'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/continuing-education/{uuid}/pdf-recap:
+    get:
+      operationId: retrieve_continuing_education_proposition_pdf_recap
+      description: Generate the proposition recap and return a file read token
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PDFRecap'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -5136,6 +5264,10 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
+              pdf_recapitulatif:
+                type: array
+                items:
+                  type: string
             required:
             - uuid
             - reference
@@ -5148,6 +5280,7 @@ components:
             - intitule_secteur_formation
             - creee_le
             - statut
+            - pdf_recapitulatif
         general_education_propositions:
           type: array
           items:
@@ -5159,6 +5292,8 @@ components:
                 type: object
                 properties:
                   sigle:
+                    type: string
+                  code:
                     type: string
                   annee:
                     type: integer
@@ -5176,6 +5311,7 @@ components:
                     type: string
                 required:
                 - sigle
+                - code
                 - annee
                 - intitule
                 - campus
@@ -5233,6 +5369,10 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
+              pdf_recapitulatif:
+                type: array
+                items:
+                  type: string
             required:
             - uuid
             - formation
@@ -5242,6 +5382,7 @@ components:
             - nom_candidat
             - creee_le
             - statut
+            - pdf_recapitulatif
         continuing_education_propositions:
           type: array
           items:
@@ -5255,6 +5396,8 @@ components:
                 type: object
                 properties:
                   sigle:
+                    type: string
+                  code:
                     type: string
                   annee:
                     type: integer
@@ -5272,6 +5415,7 @@ components:
                     type: string
                 required:
                 - sigle
+                - code
                 - annee
                 - intitule
                 - campus
@@ -5323,6 +5467,10 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
+              pdf_recapitulatif:
+                type: array
+                items:
+                  type: string
             required:
             - uuid
             - reference
@@ -5332,6 +5480,7 @@ components:
             - nom_candidat
             - creee_le
             - statut
+            - pdf_recapitulatif
       required:
       - doctorate_propositions
       - general_education_propositions
@@ -5442,6 +5591,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
+        pdf_recapitulatif:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - reference
@@ -5454,6 +5607,7 @@ components:
       - intitule_secteur_formation
       - creee_le
       - statut
+      - pdf_recapitulatif
     PersonIdentification:
       type: object
       properties:
@@ -5495,11 +5649,7 @@ components:
           - en
           type: string
         sex:
-          enum:
-          - ''
-          - F
-          - M
-          type: string
+          $ref: '#/components/schemas/ChoixSexe'
         gender:
           $ref: '#/components/schemas/ChoixGenre'
         civil_state:
@@ -5562,6 +5712,12 @@ components:
         - url
       - required:
         - error
+    ChoixSexe:
+      enum:
+      - ''
+      - F
+      - M
+      type: string
     ChoixGenre:
       enum:
       - ''
@@ -5644,14 +5800,15 @@ components:
               type: string
               maxLength: 255
           nullable: true
-        email:
+        private_email:
           type: string
-          readOnly: true
+          format: email
         phone_mobile:
           type: string
       required:
       - contact
       - residential
+      - private_email
       - phone_mobile
     HighSchoolDiploma:
       type: object
@@ -6425,6 +6582,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             add_member:
               $ref: '#/components/schemas/ActionLink'
+            edit_external_member:
+              $ref: '#/components/schemas/ActionLink'
             remove_member:
               $ref: '#/components/schemas/ActionLink'
             set_reference_promoter:
@@ -6487,6 +6646,10 @@ components:
           type: array
           items:
             type: string
+        pdf_recapitulatif:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - type_admission
@@ -6508,6 +6671,7 @@ components:
       - statut
       - erreurs
       - curriculum
+      - pdf_recapitulatif
     PropositionErrors:
       type: object
       properties:
@@ -6760,21 +6924,27 @@ components:
           nullable: true
       required:
       - attestation_absence_dette_etablissement
+      - type_situation_assimilation
+      - sous_type_situation_assimilation_1
       - carte_resident_longue_duree
       - carte_cire_sejour_illimite_etranger
       - carte_sejour_membre_ue
       - carte_sejour_permanent_membre_ue
+      - sous_type_situation_assimilation_2
       - carte_a_b_refugie
       - annexe_25_26_refugies_apatrides
       - attestation_immatriculation
       - carte_a_b
       - decision_protection_subsidiaire
       - decision_protection_temporaire
+      - sous_type_situation_assimilation_3
       - titre_sejour_3_mois_professionel
       - fiches_remuneration
       - titre_sejour_3_mois_remplacement
       - preuve_allocations_chomage_pension_indemnite
       - attestation_cpas
+      - relation_parente
+      - sous_type_situation_assimilation_5
       - composition_menage_acte_naissance
       - acte_tutelle
       - composition_menage_acte_mariage
@@ -6785,10 +6955,17 @@ components:
       - titre_sejour_3_mois_parent
       - fiches_remuneration_parent
       - attestation_cpas_parent
+      - sous_type_situation_assimilation_6
       - decision_bourse_cfwb
       - attestation_boursier
       - titre_identite_sejour_longue_duree_ue
       - titre_sejour_belgique
+      - type_numero_compte
+      - numero_compte_iban
+      - numero_compte_autre_format
+      - code_bic_swift_banque
+      - prenom_titulaire_compte
+      - nom_titulaire_compte
     SpecificQuestion:
       type: object
       properties:
@@ -6818,6 +6995,13 @@ components:
       - help_text
       - configuration
       - values
+    PDFRecap:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+      - token
     SupervisionDTO:
       type: object
       properties:
@@ -6845,6 +7029,8 @@ components:
                     type: string
                   ville:
                     type: string
+                  code_pays:
+                    type: string
                   pays:
                     type: string
                   est_externe:
@@ -6857,6 +7043,7 @@ components:
                 - est_docteur
                 - institution
                 - ville
+                - code_pays
                 - pays
                 - est_externe
               statut:
@@ -6903,6 +7090,8 @@ components:
                     type: string
                   ville:
                     type: string
+                  code_pays:
+                    type: string
                   pays:
                     type: string
                   est_externe:
@@ -6915,6 +7104,7 @@ components:
                 - est_docteur
                 - institution
                 - ville
+                - code_pays
                 - pays
                 - est_externe
               statut:
@@ -7036,6 +7226,8 @@ components:
                         type: string
                       ville:
                         type: string
+                      code_pays:
+                        type: string
                       pays:
                         type: string
                       est_externe:
@@ -7048,6 +7240,7 @@ components:
                     - est_docteur
                     - institution
                     - ville
+                    - code_pays
                     - pays
                     - est_externe
                   statut:
@@ -7094,6 +7287,8 @@ components:
                         type: string
                       ville:
                         type: string
+                      code_pays:
+                        type: string
                       pays:
                         type: string
                       est_externe:
@@ -7106,6 +7301,7 @@ components:
                     - est_docteur
                     - institution
                     - ville
+                    - code_pays
                     - pays
                     - est_externe
                   statut:
@@ -8348,11 +8544,7 @@ components:
           type: boolean
           readOnly: true
         type:
-          enum:
-          - CONFIRMATION_PAPER
-          - PRIVATE_DEFENSE
-          - PUBLIC_DEFENSE
-          type: string
+          $ref: '#/components/schemas/ChoixTypeEpreuve'
         ects:
           type: number
           nullable: true
@@ -8442,6 +8634,12 @@ components:
       - COMPLEMENTARY_TRAINING
       - FREE_COURSE
       type: string
+    ChoixTypeEpreuve:
+      enum:
+      - CONFIRMATION_PAPER
+      - PRIVATE_DEFENSE
+      - PUBLIC_DEFENSE
+      type: string
     GeneralEducationPropositionDTO:
       type: object
       properties:
@@ -8453,6 +8651,8 @@ components:
           type: object
           properties:
             sigle:
+              type: string
+            code:
               type: string
             annee:
               type: integer
@@ -8470,6 +8670,7 @@ components:
               type: string
           required:
           - sigle
+          - code
           - annee
           - intitule
           - campus
@@ -8604,6 +8805,10 @@ components:
           type: array
           items:
             type: string
+        pdf_recapitulatif:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - reference
@@ -8616,6 +8821,7 @@ components:
       - erreurs
       - curriculum
       - equivalence_diplome
+      - pdf_recapitulatif
     PoolQuestions:
       type: object
       properties:
@@ -8877,6 +9083,8 @@ components:
           properties:
             sigle:
               type: string
+            code:
+              type: string
             annee:
               type: integer
             intitule:
@@ -8893,6 +9101,7 @@ components:
               type: string
           required:
           - sigle
+          - code
           - annee
           - intitule
           - campus
@@ -8995,6 +9204,8 @@ components:
               type: string
             pays:
               type: string
+            nom_pays:
+              type: string
             lieu_dit:
               type: string
             numero_rue:
@@ -9003,6 +9214,16 @@ components:
               type: string
             destinataire:
               type: string
+          required:
+          - rue
+          - code_postal
+          - ville
+          - pays
+          - nom_pays
+          - lieu_dit
+          - numero_rue
+          - boite_postale
+          - destinataire
           nullable: true
         pays_nationalite_candidat:
           type: string
@@ -9010,6 +9231,10 @@ components:
           type: boolean
           nullable: true
         copie_titre_sejour:
+          type: array
+          items:
+            type: string
+        pdf_recapitulatif:
           type: array
           items:
             type: string
@@ -9027,6 +9252,7 @@ components:
       - equivalence_diplome
       - pays_nationalite_candidat
       - copie_titre_sejour
+      - pdf_recapitulatif
     SectorDTO:
       type: object
       properties:
@@ -9066,6 +9292,8 @@ components:
       properties:
         sigle:
           type: string
+        code:
+          type: string
         annee:
           type: integer
         intitule:
@@ -9082,6 +9310,7 @@ components:
           type: string
       required:
       - sigle
+      - code
       - annee
       - intitule
       - campus
@@ -9094,6 +9323,8 @@ components:
       properties:
         sigle:
           type: string
+        code:
+          type: string
         annee:
           type: integer
         intitule:
@@ -9110,6 +9341,7 @@ components:
           type: string
       required:
       - sigle
+      - code
       - annee
       - intitule
       - campus
@@ -9728,6 +9960,12 @@ components:
           type: string
         type_admission:
           type: string
+        sigle_formation:
+          type: string
+        annee_formation:
+          type: integer
+        commission_proximite:
+          type: string
         justification:
           type: string
         bourse_erasmus_mundus:
@@ -9737,6 +9975,8 @@ components:
       required:
       - uuid_proposition
       - type_admission
+      - sigle_formation
+      - annee_formation
     IdentifierSupervisionActor:
       type: object
       properties:
@@ -10151,6 +10391,33 @@ components:
             type: string
       required:
       - copie_titre_sejour
+    ModifierMembreSupervisionExterne:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+        uuid_membre:
+          type: string
+        prenom:
+          type: string
+        nom:
+          type: string
+        email:
+          type: string
+        est_docteur:
+          type: boolean
+          nullable: true
+        institution:
+          type: string
+        ville:
+          type: string
+        pays:
+          type: string
+        langue:
+          type: string
+      required:
+      - uuid_proposition
+      - uuid_membre
     Error:
       type: object
       properties:

@@ -27,7 +27,7 @@
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.formation_continue.commands import ListerPropositionsCandidatQuery
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
@@ -43,7 +43,7 @@ class TestListerPropositionsCandidatService(SimpleTestCase):
         self.assertEqual(results[0].formation.annee, 2020)
         self.assertEqual(results[0].formation.intitule, 'Formation USCC4')
         self.assertEqual(results[0].formation.campus, 'Louvain-La-Neuve')
-        self.assertEqual(results[0].statut, ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(results[0].statut, ChoixStatutPropositionContinue.EN_BROUILLON.name)
         self.assertEqual(results[0].matricule_candidat, '0123456789')
         self.assertEqual(results[0].prenom_candidat, 'Jean')
         self.assertEqual(results[0].nom_candidat, 'Dupont')

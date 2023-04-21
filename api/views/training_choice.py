@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -74,7 +74,7 @@ class GeneralTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        get_cached_general_education_admission_perm_obj(result.uuid).update_detailed_status()
+        get_cached_general_education_admission_perm_obj(result.uuid).update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -109,7 +109,7 @@ class ContinuingTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        get_cached_continuing_education_admission_perm_obj(result.uuid).update_detailed_status()
+        get_cached_continuing_education_admission_perm_obj(result.uuid).update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -141,7 +141,7 @@ class DoctorateTrainingChoiceAPIView(
         serializer = serializers.InitierPropositionCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(doctorate_education_commands.InitierPropositionCommand(**serializer.data))
-        get_cached_admission_perm_obj(result.uuid).update_detailed_status()
+        get_cached_admission_perm_obj(result.uuid).update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -170,7 +170,7 @@ class GeneralUpdateTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -182,8 +182,8 @@ class DoctorateUpdateAdmissionTypeAPIView(
     name = "doctorate_admission_type_update"
     schema = DoctorateTrainingChoiceSchema()
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_training_choice',
-        'PUT': 'admission.change_doctorateadmission_training_choice',
+        'GET': 'admission.view_admission_training_choice',
+        'PUT': 'admission.change_admission_training_choice',
     }
     pagination_class = None
     filter_backends = []
@@ -199,7 +199,7 @@ class DoctorateUpdateAdmissionTypeAPIView(
                 **serializer.data,
             )
         )
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -227,6 +227,6 @@ class ContinuingUpdateTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

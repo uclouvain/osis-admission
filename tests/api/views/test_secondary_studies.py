@@ -1,29 +1,29 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
+
 from unittest.mock import patch
 from uuid import UUID
 
@@ -35,9 +35,10 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
     ForeignHighSchoolDiplomaFactory,
@@ -66,6 +67,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
+        AdmissionAcademicCalendarFactory.produce_all_required(cls.academic_year.year)
         cls.high_school = HighSchoolFactory()
 
         EntityVersionAddressFactory(entity_version__entity=EntityFactory(organization=cls.high_school))
@@ -131,7 +133,6 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         cls.candidate_user = doctorate_admission.candidate.user
         cls.candidate_user_without_admission = CandidateFactory().person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory(entity=doctoral_commission).person.user
         cls.promoter_user = promoter.person.user
         cls.committee_member_user = CaMemberFactory(process=promoter.process).person.user
         cls.doctorate_admission_uuid = doctorate_admission.uuid
@@ -322,20 +323,6 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         response = self.client.put(self.doctorate_admission_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_diploma_get_with_cdd_manager_user(self):
-        self.create_belgian_diploma_with_doctorate_admission(self.diploma_data)
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.get(self.agnostic_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_diploma_update_with_cdd_manager_user(self):
-        self.create_belgian_diploma_with_doctorate_admission(self.diploma_data)
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.put(self.agnostic_url, self.diploma_updated_data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        response = self.client.put(self.doctorate_admission_url, self.diploma_updated_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
     def test_diploma_get_with_promoter_user(self):
         self.create_belgian_diploma_with_doctorate_admission(self.diploma_data)
         self.client.force_authenticate(user=self.promoter_user)
@@ -347,12 +334,6 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.client.force_authenticate(user=self.promoter_user)
         response = self.client.put(self.doctorate_admission_url, self.diploma_updated_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_diploma_get_with_cdd_member_user(self):
-        self.create_belgian_diploma_with_doctorate_admission(self.diploma_data)
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.get(self.doctorate_admission_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_diploma_update_is_partially_working_if_already_valuated_by_admission(self):
         self.create_belgian_diploma_with_general_admission(self.diploma_data)

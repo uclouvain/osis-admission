@@ -42,6 +42,7 @@ class ProfilCandidat(interface.ValueObject):
     # Coordonnees
     email: Optional[str] = ''
     pays: Optional[str] = ''
+    nom_pays: Optional[str] = ''
     code_postal: Optional[str] = ''
     ville: Optional[str] = ''
     lieu_dit: Optional[str] = ''

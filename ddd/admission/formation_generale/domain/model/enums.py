@@ -30,13 +30,20 @@ from base.models.enums.got_diploma import GotDiploma
 from base.models.utils.utils import ChoiceEnum
 
 
-class ChoixStatutProposition(ChoiceEnum):
-    CANCELLED = _('CANCELLED')
-    # During the enrolment step
-    IN_PROGRESS = _('IN_PROGRESS')
-    SUBMITTED = _('SUBMITTED')
-    # After the enrolment step
-    ENROLLED = _('ENROLLED')
+class ChoixStatutPropositionGenerale(ChoiceEnum):
+    EN_BROUILLON = _('In draft')
+    CONFIRMEE = _('Confirmed application (by student)')
+    COMPLETEE = _('Completed application')
+    ANNULEE = _('Cancelled application')
+    A_COMPLETER_POUR_SIC = _('To be completed (by student) for SIC')
+    A_COMPLETER_POUR_FAC_CDD = _('To be completed (by student) for FAC/CDD')
+    TRAITEMENT_SIC = _('Processing by SIC')
+    TRAITEMENT_FAC_CDD = _('Processing by Fac/CDD')
+    ATTENTE_VALIDATION_DIRECTION = _('Pending validation from management')
+    INSCRIPTION_AUTORISEE = _('Enrollment allowed')
+    INSCRIPTION_REFUSEE = _('Enrollment denied')
+    CLOTUREE = _('Closed')
+    EN_RECOURS = _('Under appeal')
 
 
 CHOIX_DIPLOME_OBTENU = {GotDiploma.YES.name, GotDiploma.THIS_YEAR.name}

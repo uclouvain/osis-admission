@@ -1,55 +1,79 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import re
 from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
+from typing import Union, Optional
 
 from django import template
+from django.conf import settings
+from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
-from django.utils.translation import gettext_lazy as _, pgettext
+from django.utils.translation import gettext_lazy as _, pgettext, get_language
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    STATUTS_PROPOSITION_AVANT_INSCRIPTION,
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.enums import TYPES_ITEMS_LECTURE_SEULE, TypeItemFormulaire
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixTypeEpreuve,
     StatutActivite,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_INSCRIPTION
+from admission.constants import IMAGE_MIME_TYPES
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+    ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
+)
+from admission.utils import get_uuid_value, format_academic_year
+from osis_document.api.utils import get_remote_token, get_remote_metadata
 from osis_role.templatetags.osis_role import has_perm
+from reference.models.country import Country
 
 CONTEXT_ADMISSION = 'admission'
 CONTEXT_DOCTORATE = 'doctorate'
 CONTEXT_GENERAL = 'general-education'
 CONTEXT_CONTINUING = 'continuing-education'
+
+PERMISSION_BY_ADMISSION_CLASS = {
+    DoctorateAdmission: 'doctorateadmission',
+    GeneralEducationAdmission: 'generaleducationadmission',
+    ContinuingEducationAdmission: 'continuingeducationadmission',
+}
 
 register = template.Library()
 
@@ -230,11 +254,15 @@ TAB_TREES = {
             Tab('internal-note', _('Internal notes'), 'note-sticky'),
             Tab('debug', _('Debug'), 'bug'),
         ],
+        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        ],
         # TODO Documents
     },
     CONTEXT_DOCTORATE: {
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Personal data'), 'user'),
+            Tab('coordonnees', _('Contact details')),
         ],
         Tab('education', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Previous experience'), 'list-alt'),
@@ -264,21 +292,40 @@ TAB_TREES = {
             Tab('internal-note', _('Internal notes'), 'note-sticky'),
             Tab('debug', _('Debug'), 'bug'),
         ],
+        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        ],
         # TODO Documents
     },
     CONTEXT_GENERAL: {
         Tab('person', _('Personal data'), 'user'): [
-            Tab('person', _('Personal data'), 'user'),
+            Tab('person', _('Identification'), 'user'),
+            Tab('coordonnees', _('Contact details'), 'user'),
         ],
         Tab('education', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Previous experience'), 'list-alt'),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
+            Tab('debug', _('Debug'), 'bug'),
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
             Tab('internal-note', _('Internal notes'), 'note-sticky'),
+        ],
+        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        ],
+    },
+    CONTEXT_CONTINUING: {
+        Tab('person', _('Personal data'), 'user'): [
+            Tab('person', _('Identification'), 'user'),
+            Tab('coordonnees', _('Contact details'), 'user'),
+        ],
+        Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('debug', _('Debug'), 'bug'),
+        ],
+        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext('tab', 'Comments'), 'comments')
         ],
     },
 }
@@ -354,10 +401,15 @@ def current_subtabs(context):
     return tab_context
 
 
-def get_current_context(admission: DoctorateAdmission):
-    if admission.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION:
-        return CONTEXT_ADMISSION
-    return CONTEXT_DOCTORATE
+def get_current_context(admission: Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]):
+    if isinstance(admission, DoctorateAdmission):
+        if admission.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION:
+            return CONTEXT_ADMISSION
+        return CONTEXT_DOCTORATE
+    elif isinstance(admission, GeneralEducationAdmission):
+        return CONTEXT_GENERAL
+    elif isinstance(admission, ContinuingEducationAdmission):
+        return CONTEXT_CONTINUING
 
 
 @register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
@@ -398,20 +450,36 @@ def detail_tab_path_from_update(context, admission_uuid):
     )
 
 
-@register.inclusion_tag('admission/includes/field_data.html')
-def field_data(name, data=None, css_class=None, hide_empty=False, translate_data=False, inline=False, html_tag=''):
+@register.inclusion_tag('admission/includes/field_data.html', takes_context=True)
+def field_data(
+    context,
+    name,
+    data=None,
+    css_class=None,
+    hide_empty=False,
+    translate_data=False,
+    inline=False,
+    html_tag='',
+):
+    for_pdf = context.get('for_pdf')
+
     if isinstance(data, list):
-        if data:
+        if for_pdf:
+            data = _('Specified') if data else _('Not specified')
+        elif data:
             template_string = "{% load osis_document %}{% document_visualizer files %}"
             template_context = {'files': data}
             data = template.Template(template_string).render(template.Context(template_context))
         else:
             data = ''
+    elif type(data) == bool:
+        data = _('Yes') if data else _('No')
     elif translate_data is True:
         data = _(data)
 
-    if inline is True:
-        name = _("%(label)s:") % {'label': name}
+    if inline is True or for_pdf:
+        if name and name[-1] not in ':?!.':
+            name = _("%(label)s:") % {'label': name}
         css_class = (css_class + ' inline-field-data') if css_class else 'inline-field-data'
 
     return {
@@ -420,7 +488,20 @@ def field_data(name, data=None, css_class=None, hide_empty=False, translate_data
         'css_class': css_class,
         'hide_empty': hide_empty,
         'html_tag': html_tag,
+        'inline': inline,
     }
+
+
+@register.simple_tag
+def get_image_file_url(file_uuids):
+    """Returns the url of the file whose uuid is the first of the specified ones, if it is an image."""
+    if file_uuids:
+        token = get_remote_token(file_uuids[0])
+        if token:
+            metadata = get_remote_metadata(token)
+            if metadata and metadata.get('mimetype') in IMAGE_MIME_TYPES:
+                return metadata.get('url')
+    return ''
 
 
 @register.filter
@@ -470,6 +551,7 @@ def bootstrap_field_with_tooltip(field, classes='', show_help=False):
 def has_perm(context, perm, obj=None):
     if not obj:
         obj = context['view'].get_permission_object()
+    perm = perm % {'[context]': PERMISSION_BY_ADMISSION_CLASS[type(obj)]}
     return rules.has_perm(perm, context['request'].user, obj)
 
 
@@ -561,3 +643,118 @@ def formatted_reference(admission: BaseAdmission):
         sigle_entite_gestion=admission.training_management_faculty or admission.sigle_entite_gestion,  # From annotation
         annee=admission.training.academic_year.year,
     )
+
+
+@register.filter
+def formatted_language(language: str):
+    return language[:2].upper() if language else ''
+
+
+@register.filter
+def get_academic_year(year: Union[int, str, float]):
+    """Return the academic year related to a specific year."""
+    return format_academic_year(year)
+
+
+@register.filter
+def get_short_academic_year(year: Union[int, str, float]):
+    """Return the academic year related to a specific year with only two digits for the end year."""
+    return format_academic_year(year, short=True)
+
+
+@register.filter(is_safe=False)
+def default_if_none_or_empty(value, arg):
+    """If value is None or empty, use given default."""
+    return value if value not in EMPTY_VALUES else arg
+
+
+@register.simple_tag
+def concat(*args):
+    """Concatenate a list of strings."""
+    return ''.join(args)
+
+
+@register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
+def multiple_field_data(context, configurations, data, title=_('Specific questions')):
+    """Display the answers of the specific questions based on a list of configurations and a data dictionary"""
+    current_language = get_language()
+
+    if not data:
+        data = {}
+
+    for field_instantiation in configurations:
+        field = field_instantiation.form_item
+        if field.type in TYPES_ITEMS_LECTURE_SEULE:
+            value = field.text.get(current_language, '')
+        elif field.type == TypeItemFormulaire.DOCUMENT.name:
+            value = [get_uuid_value(token) for token in data.get(str(field.uuid), [])]
+        elif field.type == TypeItemFormulaire.SELECTION.name:
+            current_value = data.get(str(field.uuid))
+            selected_options = set(current_value) if isinstance(current_value, list) else {current_value}
+            value = ', '.join(
+                [value.get(current_language) for value in field.values if value.get('key') in selected_options]
+            )
+        else:
+            value = data.get(str(field.uuid))
+        setattr(field, 'value', value)
+        setattr(field, 'translated_title', field.title.get(current_language))
+
+    return {
+        'fields': configurations,
+        'title': title,
+        'for_pdf': context.get('for_pdf'),
+    }
+
+
+@register.filter
+def admission_training_type(osis_training_type: str):
+    """Returns the admission training type based on the osis training type."""
+    return AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.get(osis_training_type)
+
+
+@register.simple_tag
+def get_first_truthy_value(*args):
+    """Returns the first truthy value"""
+    return next((arg for arg in args if arg), None)
+
+
+@register.filter
+def get_item(dictionary, value):
+    """Returns the value of a key in a dictionary if it exists else the value itself"""
+    return dictionary.get(value, value)
+
+
+@register.simple_tag
+def interpolate(string, **kwargs):
+    """Interpolate variables inside a string"""
+    return string % kwargs
+
+
+@register.simple_tag
+def admission_url(admission_uuid: str, osis_education_type: str):
+    """Get the base URL of a specific admission"""
+    admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+    return reverse(f'admission:{admission_context}', kwargs={'uuid': admission_uuid})
+
+
+@register.simple_tag
+def admission_status(status: str, osis_education_type: str):
+    """Get the status of a specific admission"""
+    admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+    return (
+        {
+            'general-education': ChoixStatutPropositionGenerale,
+            'continuing-education': ChoixStatutPropositionContinue,
+            'doctorate': ChoixStatutPropositionDoctorale,
+        }
+        .get(admission_context)
+        .get_value(status)
+    )
+
+
+@register.simple_tag
+def get_country_name(country: Optional[Country]):
+    """Return the country name."""
+    if not country:
+        return ''
+    return getattr(country, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')

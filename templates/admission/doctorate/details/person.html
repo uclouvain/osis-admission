@@ -1,4 +1,4 @@
-{% extends "admission/doctorate/details/tab_layout.html" %}
+{% extends "admission/details/person.html" %}
 {% load i18n static admission enums %}
 
 {% comment "License" %}
@@ -34,4 +34,5 @@
       {{ dossier.profil_candidat.nom_pays_nationalite }}
     </p>
   {% endif %}
+  {{ block.super }}
 {% endblock %}

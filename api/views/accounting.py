@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -88,7 +88,7 @@ class BaseAccountingView(
         serializer = self.put_serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(self.put_accounting_cmd_class(**serializer.data))
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(author=request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -97,8 +97,8 @@ class DoctorateAccountingView(BaseAccountingView):
     name = 'doctorate_accounting'
     schema = DoctorateAccountingSchema()
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_accounting',
-        'PUT': 'admission.change_doctorateadmission_accounting',
+        'GET': 'admission.view_admission_accounting',
+        'PUT': 'admission.change_admission_accounting',
     }
     get_serializer_class = serializers.DoctorateEducationAccountingDTOSerializer
     put_serializer_class = serializers.CompleterComptabilitePropositionDoctoraleCommandSerializer

@@ -24,18 +24,22 @@
 #
 # ##############################################################################
 import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
+from django.conf import settings
 from django.db import models
-from django.db.models import Exists, OuterRef, Subquery
+from django.db.models import Exists, OuterRef, Subquery, Prefetch
 from django.db.models.functions import ExtractYear, ExtractMonth
+from django.utils.translation import get_language
 
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     AnneeExperienceAcademiqueDTO,
     ExperienceAcademiqueDTO,
     CurriculumAExperiencesDTO,
+    ExperienceNonAcademiqueDTO,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
@@ -44,6 +48,11 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
+    GrilleHoraireDTO,
+)
+from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
 )
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
@@ -61,9 +70,348 @@ from osis_profile.models.education import LanguageKnowledge
 
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
+    def has_default_language(cls) -> bool:
+        """Returns True if the current language is the default one."""
+        return get_language() == settings.LANGUAGE_CODE
+
+    @classmethod
+    def _get_identification_dto(
+        cls,
+        candidate: Person,
+        residential_country: str,
+        has_default_language: bool,
+    ) -> IdentificationDTO:
+        """Returns the DTO of the identification data of the given candidate."""
+        country_of_citizenship = (
+            {
+                'pays_nationalite': candidate.country_of_citizenship.iso_code,
+                'nom_pays_nationalite': getattr(
+                    candidate.country_of_citizenship,
+                    'name' if has_default_language else 'name_en',
+                ),
+                'pays_nationalite_europeen': candidate.country_of_citizenship.european_union,
+            }
+            if candidate.country_of_citizenship_id
+            else {
+                'pays_nationalite': '',
+                'nom_pays_nationalite': '',
+                'pays_nationalite_europeen': None,
+            }
+        )
+        birth_country = (
+            {
+                'pays_naissance': candidate.birth_country.iso_code,
+                'nom_pays_naissance': getattr(candidate.birth_country, 'name' if has_default_language else 'name_en'),
+            }
+            if candidate.birth_country_id
+            else {
+                'pays_naissance': '',
+                'nom_pays_naissance': '',
+            }
+        )
+
+        return IdentificationDTO(
+            matricule=candidate.global_id,
+            nom=candidate.last_name,
+            prenom=candidate.first_name,
+            date_naissance=candidate.birth_date,
+            annee_naissance=candidate.birth_year,
+            langue_contact=candidate.language,
+            nom_langue_contact=dict(settings.LANGUAGES).get(candidate.language),
+            sexe=candidate.sex,
+            genre=candidate.gender,
+            photo_identite=candidate.id_photo,
+            carte_identite=candidate.id_card,
+            passeport=candidate.passport,
+            numero_registre_national_belge=candidate.national_number,
+            numero_carte_identite=candidate.id_card_number,
+            numero_passeport=candidate.passport_number,
+            email=candidate.email,
+            lieu_naissance=candidate.birth_place,
+            etat_civil=candidate.civil_state,
+            annee_derniere_inscription_ucl=candidate.last_registration_year and candidate.last_registration_year.year,
+            noma_derniere_inscription_ucl=candidate.last_registration_id,
+            pays_residence=residential_country,
+            prenom_d_usage=candidate.first_name_in_use,
+            autres_prenoms=candidate.middle_name,
+            **country_of_citizenship,
+            **birth_country,
+        )
+
+    @classmethod
+    def _get_address_dto(
+        cls,
+        address: Optional[PersonAddress],
+        has_default_language: bool,
+    ) -> Optional[AdressePersonnelleDTO]:
+        """Returns the DTO of the given address."""
+        return (
+            AdressePersonnelleDTO(
+                rue=address.street,
+                code_postal=address.postal_code or '',
+                ville=address.city or '',
+                pays=address.country.iso_code if address.country else '',
+                nom_pays=getattr(address.country, 'name' if has_default_language else 'name_en')
+                if address.country
+                else '',
+                boite_postale=address.postal_box,
+                numero_rue=address.street_number,
+                lieu_dit=address.place,
+            )
+            if address
+            else None
+        )
+
+    @classmethod
+    def _get_coordonnees_dto(cls, candidate: Person, has_default_language: bool) -> 'CoordonneesDTO':
+        """Returns the DTO of the coordinates of the given candidate."""
+        adresses = {a.label: a for a in candidate.personaddress_set.all()}
+
+        residential_address = adresses.get(PersonAddressType.RESIDENTIAL.name)
+        contact_address = adresses.get(PersonAddressType.CONTACT.name)
+
+        return CoordonneesDTO(
+            numero_mobile=candidate.phone_mobile,
+            adresse_email_privee=candidate.private_email,
+            domicile_legal=cls._get_address_dto(residential_address, has_default_language),
+            adresse_correspondance=cls._get_address_dto(contact_address, has_default_language),
+        )
+
+    @classmethod
+    def _get_language_knowledge_dto(cls, candidate: Person, has_default_language: bool) -> List[ConnaissanceLangueDTO]:
+        """Returns the DTO of the language knowledge data of the given candidate."""
+        return [
+            ConnaissanceLangueDTO(
+                nom_langue=getattr(langue.language, 'name' if has_default_language else 'name_en')
+                if langue.language
+                else '',
+                langue=langue.language.code if langue.language else '',
+                comprehension_orale=langue.listening_comprehension or '',
+                capacite_orale=langue.speaking_ability or '',
+                capacite_ecriture=langue.writing_ability or '',
+                certificat=langue.certificate or '',
+            )
+            for langue in candidate.languages_knowledge.all()
+        ]
+
+    @classmethod
+    def _get_secondary_studies_dto(
+        cls,
+        candidate: Person,
+        has_default_language: bool,
+        valuated_secondary_studies: Optional[bool],
+        formation: str,
+    ):
+        if formation == TrainingType.BACHELOR.name:
+            belgian_high_school_diploma = getattr(candidate, 'belgianhighschooldiploma', None)
+            foreign_high_school_diploma = getattr(candidate, 'foreignhighschooldiploma', None)
+            high_school_diploma_alternative = getattr(candidate, 'highschooldiplomaalternative', None)
+        else:
+            belgian_high_school_diploma = None
+            foreign_high_school_diploma = None
+            high_school_diploma_alternative = None
+
+        return EtudesSecondairesDTO(
+            diplome_etudes_secondaires=candidate.graduated_from_high_school,
+            valorisees=valuated_secondary_studies,
+            annee_diplome_etudes_secondaires=candidate.graduated_from_high_school_year.year
+            if candidate.graduated_from_high_school_year
+            else None,
+            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                diplome=belgian_high_school_diploma.high_school_diploma,
+                certificat_inscription=belgian_high_school_diploma.enrolment_certificate,
+                resultat=belgian_high_school_diploma.result or '',
+                type_enseignement=belgian_high_school_diploma.educational_type,
+                autre_type_enseignement=belgian_high_school_diploma.educational_other,
+                nom_institut=belgian_high_school_diploma.institute.name
+                if belgian_high_school_diploma.institute_id
+                else belgian_high_school_diploma.other_institute_name,
+                adresse_institut=belgian_high_school_diploma.other_institute_address,
+                communaute=belgian_high_school_diploma.community or '',
+                grille_horaire=GrilleHoraireDTO(
+                    latin=belgian_high_school_diploma.schedule.latin,
+                    grec=belgian_high_school_diploma.schedule.greek,
+                    chimie=belgian_high_school_diploma.schedule.chemistry,
+                    physique=belgian_high_school_diploma.schedule.physic,
+                    biologie=belgian_high_school_diploma.schedule.biology,
+                    allemand=belgian_high_school_diploma.schedule.german,
+                    francais=belgian_high_school_diploma.schedule.french,
+                    espagnol=belgian_high_school_diploma.schedule.spanish,
+                    neerlandais=belgian_high_school_diploma.schedule.dutch,
+                    anglais=belgian_high_school_diploma.schedule.english,
+                    mathematique=belgian_high_school_diploma.schedule.mathematics,
+                    informatique=belgian_high_school_diploma.schedule.it,
+                    sciences_sociales=belgian_high_school_diploma.schedule.social_sciences,
+                    sciences_economiques=belgian_high_school_diploma.schedule.economic_sciences,
+                    autre_langue_moderne_label=belgian_high_school_diploma.schedule.modern_languages_other_label,
+                    autre_label=belgian_high_school_diploma.schedule.other_label,
+                    autre_langue_moderne_duree=belgian_high_school_diploma.schedule.modern_languages_other_hours,
+                    autre_duree=belgian_high_school_diploma.schedule.other_hours,
+                )
+                if belgian_high_school_diploma.schedule_id
+                else None,
+            )
+            if belgian_high_school_diploma
+            else None,
+            diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
+                type_diplome=foreign_high_school_diploma.foreign_diploma_type,
+                regime_linguistique=foreign_high_school_diploma.linguistic_regime.code
+                if foreign_high_school_diploma.linguistic_regime
+                else foreign_high_school_diploma.other_linguistic_regime,
+                pays_regime_linguistique=getattr(
+                    foreign_high_school_diploma.linguistic_regime,
+                    'name' if has_default_language else 'name_en',
+                )
+                if foreign_high_school_diploma.linguistic_regime
+                else foreign_high_school_diploma.other_linguistic_regime,
+                pays_membre_ue=foreign_high_school_diploma.country.european_union,
+                pays_iso_code=foreign_high_school_diploma.country.iso_code,
+                pays_nom=getattr(foreign_high_school_diploma.country, 'name' if has_default_language else 'name_en'),
+                releve_notes=foreign_high_school_diploma.high_school_transcript,
+                traduction_releve_notes=foreign_high_school_diploma.high_school_transcript_translation,
+                diplome=foreign_high_school_diploma.high_school_diploma,
+                traduction_diplome=foreign_high_school_diploma.high_school_diploma_translation,
+                certificat_inscription=foreign_high_school_diploma.enrolment_certificate,
+                traduction_certificat_inscription=foreign_high_school_diploma.enrolment_certificate_translation,
+                equivalence=foreign_high_school_diploma.equivalence,
+                decision_final_equivalence_ue=foreign_high_school_diploma.final_equivalence_decision_ue,
+                decision_final_equivalence_hors_ue=foreign_high_school_diploma.final_equivalence_decision_not_ue,
+                preuve_decision_equivalence=foreign_high_school_diploma.equivalence_decision_proof,
+                resultat=foreign_high_school_diploma.result or '',
+            )
+            if foreign_high_school_diploma
+            else None,
+            alternative_secondaires=AlternativeSecondairesDTO(
+                examen_admission_premier_cycle=high_school_diploma_alternative.first_cycle_admission_exam,
+            )
+            if high_school_diploma_alternative
+            else None,
+        )
+
+    @classmethod
+    def _get_non_academic_experiences_dtos(
+        cls,
+        experiences_non_academiques: List[ProfessionalExperience],
+    ) -> List[ExperienceNonAcademiqueDTO]:
+        return [
+            ExperienceNonAcademiqueDTO(
+                date_debut=experience.start_date,
+                date_fin=experience.end_date,
+                employeur=experience.institute_name,
+                type=experience.type,
+                certificat=experience.certificate,
+                fonction=experience.role,
+                secteur=experience.sector,
+                autre_activite=experience.activity,
+                uuid=experience.uuid,
+            )
+            for experience in experiences_non_academiques
+        ]
+
+    @classmethod
+    def _get_academic_experience_year_dto(cls, educational_experience_year: EducationalExperienceYear):
+        return AnneeExperienceAcademiqueDTO(
+            resultat=educational_experience_year.result,
+            annee=educational_experience_year.academic_year.year,
+            releve_notes=educational_experience_year.transcript,
+            traduction_releve_notes=educational_experience_year.transcript_translation,
+            credits_inscrits=educational_experience_year.registered_credit_number,
+            credits_acquis=educational_experience_year.acquired_credit_number,
+        )
+
+    @classmethod
+    def _get_academic_experiences_dtos(
+        cls,
+        matricule: str,
+        has_default_language: bool,
+    ) -> List[ExperienceAcademiqueDTO]:
+        """Returns the DTO of the academic experiences of the given candidate."""
+
+        educational_experience_years: List[EducationalExperienceYear] = EducationalExperienceYear.objects.filter(
+            educational_experience__person__global_id=matricule,
+        ).select_related(
+            'academic_year',
+            'educational_experience__country',
+            'educational_experience__linguistic_regime',
+            'educational_experience__program',
+            'educational_experience__institute',
+        )
+        educational_experience_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
+        for experience_year in educational_experience_years:
+            experience_year_dto = cls._get_academic_experience_year_dto(experience_year)
+            if experience_year.educational_experience.pk not in educational_experience_dtos:
+                institute = (
+                    {
+                        'nom_institut': experience_year.educational_experience.institute.name,
+                        'code_institut': experience_year.educational_experience.institute.code,
+                        'communaute_institut': experience_year.educational_experience.institute.community,
+                        'adresse_institut': '',
+                    }
+                    if experience_year.educational_experience.institute
+                    else {
+                        'nom_institut': experience_year.educational_experience.institute_name,
+                        'code_institut': '',
+                        'communaute_institut': '',
+                        'adresse_institut': experience_year.educational_experience.institute_address,
+                    }
+                )
+                linguistic_regime = (
+                    {
+                        'regime_linguistique': experience_year.educational_experience.linguistic_regime.code,
+                        'nom_regime_linguistique': getattr(
+                            experience_year.educational_experience.linguistic_regime,
+                            'name' if has_default_language else 'name_en',
+                        ),
+                    }
+                    if experience_year.educational_experience.linguistic_regime
+                    else {
+                        'regime_linguistique': '',
+                        'nom_regime_linguistique': '',
+                    }
+                )
+
+                educational_experience_dtos[experience_year.educational_experience.pk] = ExperienceAcademiqueDTO(
+                    uuid=experience_year.educational_experience.uuid,
+                    pays=experience_year.educational_experience.country.iso_code,
+                    nom_pays=getattr(
+                        experience_year.educational_experience.country,
+                        'name' if has_default_language else 'name_en',
+                    ),
+                    a_obtenu_diplome=experience_year.educational_experience.obtained_diploma,
+                    rang_diplome=experience_year.educational_experience.rank_in_diploma,
+                    date_prevue_delivrance_diplome=experience_year.educational_experience.expected_graduation_date,
+                    titre_memoire=experience_year.educational_experience.dissertation_title,
+                    note_memoire=experience_year.educational_experience.dissertation_score,
+                    resume_memoire=experience_year.educational_experience.dissertation_summary,
+                    releve_notes=experience_year.educational_experience.transcript,
+                    traduction_releve_notes=experience_year.educational_experience.transcript_translation,
+                    diplome=experience_year.educational_experience.graduate_degree,
+                    traduction_diplome=experience_year.educational_experience.graduate_degree_translation,
+                    type_releve_notes=experience_year.educational_experience.transcript_type,
+                    annees=[experience_year_dto],
+                    grade_obtenu=experience_year.educational_experience.obtained_grade,
+                    systeme_evaluation=experience_year.educational_experience.evaluation_type,
+                    nom_formation=experience_year.educational_experience.program.title
+                    if experience_year.educational_experience.program
+                    else experience_year.educational_experience.education_name,
+                    type_enseignement=experience_year.educational_experience.study_system,
+                    **institute,
+                    **linguistic_regime,
+                )
+            else:
+                educational_experience_dtos[experience_year.educational_experience.pk].annees.append(
+                    experience_year_dto
+                )
+        return list(educational_experience_dtos.values())
+
+    @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
         person = (
-            Person.objects.select_related('country_of_citizenship', 'birth_country', 'last_registration_year')
+            Person.objects.select_related(
+                'country_of_citizenship',
+                'birth_country',
+                'last_registration_year',
+            )
             .annotate(
                 residential_country_iso_code=Subquery(
                     PersonAddress.objects.filter(
@@ -75,70 +423,28 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .get(global_id=matricule)
         )
 
-        return IdentificationDTO(
-            matricule=matricule,
-            nom=person.last_name,
-            prenom=person.first_name,
-            date_naissance=person.birth_date,
-            annee_naissance=person.birth_year,
-            pays_nationalite=person.country_of_citizenship.iso_code if person.country_of_citizenship_id else None,
-            pays_nationalite_europeen=(
-                person.country_of_citizenship.european_union if person.country_of_citizenship_id else False
-            ),
-            langue_contact=person.language,
-            sexe=person.sex,
-            genre=person.gender,
-            photo_identite=person.id_photo,
-            carte_identite=person.id_card,
-            passeport=person.passport,
-            numero_registre_national_belge=person.national_number,
-            numero_carte_identite=person.id_card_number,
-            numero_passeport=person.passport_number,
-            email=person.email,
-            pays_naissance=person.birth_country.iso_code if person.birth_country_id else None,
-            lieu_naissance=person.birth_place,
-            etat_civil=person.civil_state,
-            annee_derniere_inscription_ucl=person.last_registration_year and person.last_registration_year.year,
-            noma_derniere_inscription_ucl=person.last_registration_id,
-            pays_residence=person.residential_country_iso_code,
+        return cls._get_identification_dto(
+            candidate=person,
+            residential_country=person.residential_country_iso_code or '',
+            has_default_language=cls.has_default_language(),
         )
 
     @classmethod
     def get_coordonnees(cls, matricule: str) -> 'CoordonneesDTO':
-        adresses = {
-            a.label: a
-            for a in PersonAddress.objects.select_related('country').filter(
-                person__global_id=matricule,
-                label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name],
+        candidat = (
+            Person.objects.prefetch_related(
+                Prefetch(
+                    "personaddress_set",
+                    queryset=PersonAddress.objects.filter(
+                        label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name]
+                    ).select_related("country"),
+                )
             )
-        }
-        domicile_legal = adresses.get(PersonAddressType.RESIDENTIAL.name)
-        adresse_correspondance = adresses.get(PersonAddressType.CONTACT.name)
-
-        return CoordonneesDTO(
-            domicile_legal=AdressePersonnelleDTO(
-                rue=domicile_legal.street,
-                code_postal=domicile_legal.postal_code,
-                ville=domicile_legal.city,
-                pays=domicile_legal.country.iso_code if domicile_legal.country else None,
-                boite_postale=domicile_legal.postal_box,
-                numero_rue=domicile_legal.street_number,
-                lieu_dit=domicile_legal.place,
-            )
-            if domicile_legal
-            else None,
-            adresse_correspondance=AdressePersonnelleDTO(
-                rue=adresse_correspondance.street,
-                code_postal=adresse_correspondance.postal_code,
-                ville=adresse_correspondance.city,
-                pays=adresse_correspondance.country.iso_code if adresse_correspondance.country else None,
-                boite_postale=adresse_correspondance.postal_box,
-                numero_rue=adresse_correspondance.street_number,
-                lieu_dit=adresse_correspondance.place,
-            )
-            if adresse_correspondance
-            else None,
+            .only('private_email', 'phone_mobile')
+            .get(global_id=matricule)
         )
+
+        return cls._get_coordonnees_dto(candidate=candidat, has_default_language=cls.has_default_language())
 
     @classmethod
     def get_langues_connues(cls, matricule: str) -> List[str]:
@@ -152,133 +458,51 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
-        etudes_secondaires_valorisees = cls.etudes_secondaires_valorisees(matricule)
+        valuated_secondary_studies = cls.etudes_secondaires_valorisees(matricule)
 
-        if type_formation != TrainingType.BACHELOR:
-            candidat: Person = Person.objects.select_related('graduated_from_high_school_year').get(global_id=matricule)
-            return EtudesSecondairesDTO(
-                diplome_etudes_secondaires=candidat.graduated_from_high_school,
-                annee_diplome_etudes_secondaires=candidat.graduated_from_high_school_year.year
-                if candidat.graduated_from_high_school_year
-                else None,
-                valorisees=etudes_secondaires_valorisees,
-            )
-
-        candidat: Person = Person.objects.select_related(
-            'highschooldiplomaalternative',
-            'belgianhighschooldiploma',
-            'foreignhighschooldiploma__country',
-            'foreignhighschooldiploma__linguistic_regime',
+        queryset = Person.objects.select_related(
             'graduated_from_high_school_year',
-        ).get(global_id=matricule)
+        )
 
-        return EtudesSecondairesDTO(
-            diplome_etudes_secondaires=candidat.graduated_from_high_school,
-            valorisees=etudes_secondaires_valorisees,
-            annee_diplome_etudes_secondaires=candidat.graduated_from_high_school_year.year
-            if candidat.graduated_from_high_school_year
-            else None,
-            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                diplome=candidat.belgianhighschooldiploma.high_school_diploma,
-                certificat_inscription=candidat.belgianhighschooldiploma.enrolment_certificate,
+        if type_formation == TrainingType.BACHELOR:
+            queryset = queryset.select_related(
+                'highschooldiplomaalternative',
+                'belgianhighschooldiploma__schedule',
+                'belgianhighschooldiploma__institute',
+                'foreignhighschooldiploma__country',
+                'foreignhighschooldiploma__linguistic_regime',
             )
-            if getattr(candidat, 'belgianhighschooldiploma', None)
-            else None,
-            diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
-                type_diplome=candidat.foreignhighschooldiploma.foreign_diploma_type,
-                regime_linguistique=getattr(
-                    candidat.foreignhighschooldiploma.linguistic_regime,
-                    'code',
-                    candidat.foreignhighschooldiploma.other_linguistic_regime,
-                ),
-                pays_membre_ue=candidat.foreignhighschooldiploma.country.european_union,
-                pays_iso_code=candidat.foreignhighschooldiploma.country.iso_code,
-                releve_notes=candidat.foreignhighschooldiploma.high_school_transcript,
-                traduction_releve_notes=candidat.foreignhighschooldiploma.high_school_transcript_translation,
-                diplome=candidat.foreignhighschooldiploma.high_school_diploma,
-                traduction_diplome=candidat.foreignhighschooldiploma.high_school_diploma_translation,
-                certificat_inscription=candidat.foreignhighschooldiploma.enrolment_certificate,
-                traduction_certificat_inscription=candidat.foreignhighschooldiploma.enrolment_certificate_translation,
-                equivalence=candidat.foreignhighschooldiploma.equivalence,
-                decision_final_equivalence_ue=candidat.foreignhighschooldiploma.final_equivalence_decision_ue,
-                decision_final_equivalence_hors_ue=candidat.foreignhighschooldiploma.final_equivalence_decision_not_ue,
-                preuve_decision_equivalence=candidat.foreignhighschooldiploma.equivalence_decision_proof,
-            )
-            if getattr(candidat, 'foreignhighschooldiploma', None)
-            else None,
-            alternative_secondaires=AlternativeSecondairesDTO(
-                examen_admission_premier_cycle=candidat.highschooldiplomaalternative.first_cycle_admission_exam,
-            )
-            if getattr(candidat, 'highschooldiplomaalternative', None)
-            else None,
+
+        candidate: Person = queryset.get(global_id=matricule)
+
+        return cls._get_secondary_studies_dto(
+            candidate,
+            cls.has_default_language(),
+            valuated_secondary_studies,
+            type_formation.name,
         )
 
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
         minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
-        date_maximale = cls.get_date_maximale_curriculum()
+        maximal_date = cls.get_date_maximale_curriculum()
 
-        annees_experiences_academiques: List[EducationalExperienceYear] = EducationalExperienceYear.objects.filter(
-            educational_experience__person__global_id=matricule,
-        ).select_related(
-            'academic_year',
-            'educational_experience__country',
-            'educational_experience__linguistic_regime',
-            'educational_experience__program',
+        academic_experiences_dtos = cls._get_academic_experiences_dtos(matricule, cls.has_default_language())
+
+        non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
+            person__global_id=matricule,
+            start_date__lte=maximal_date,
+            end_date__gte=minimal_years.get('minimal_date'),
         )
 
-        experiences_academiques_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
-
-        for annee_experience in annees_experiences_academiques:
-            annee_experience_dto = AnneeExperienceAcademiqueDTO(
-                resultat=annee_experience.result,
-                annee=annee_experience.academic_year.year,
-                releve_notes=annee_experience.transcript,
-                traduction_releve_notes=annee_experience.transcript_translation,
-                credits_inscrits=annee_experience.registered_credit_number,
-                credits_acquis=annee_experience.acquired_credit_number,
-            )
-            if annee_experience.educational_experience.pk not in experiences_academiques_dtos:
-                experiences_academiques_dtos[annee_experience.educational_experience.pk] = ExperienceAcademiqueDTO(
-                    uuid=annee_experience.educational_experience.uuid,
-                    pays=annee_experience.educational_experience.country.iso_code,
-                    a_obtenu_diplome=annee_experience.educational_experience.obtained_diploma,
-                    rang_diplome=annee_experience.educational_experience.rank_in_diploma,
-                    date_prevue_delivrance_diplome=annee_experience.educational_experience.expected_graduation_date,
-                    titre_memoire=annee_experience.educational_experience.dissertation_title,
-                    note_memoire=annee_experience.educational_experience.dissertation_score,
-                    resume_memoire=annee_experience.educational_experience.dissertation_summary,
-                    regime_linguistique=annee_experience.educational_experience.linguistic_regime.code
-                    if annee_experience.educational_experience.linguistic_regime
-                    else '',
-                    releve_notes=annee_experience.educational_experience.transcript,
-                    traduction_releve_notes=annee_experience.educational_experience.transcript_translation,
-                    diplome=annee_experience.educational_experience.graduate_degree,
-                    traduction_diplome=annee_experience.educational_experience.graduate_degree_translation,
-                    type_releve_notes=annee_experience.educational_experience.transcript_type,
-                    annees=[annee_experience_dto],
-                    grade_obtenu=annee_experience.educational_experience.obtained_grade,
-                    systeme_evaluation=annee_experience.educational_experience.evaluation_type,
-                    nom_formation=annee_experience.educational_experience.program.title
-                    if annee_experience.educational_experience.program
-                    else annee_experience.educational_experience.education_name,
-                )
-            else:
-                experiences_academiques_dtos[annee_experience.educational_experience.pk].annees.append(
-                    annee_experience_dto
-                )
-
-        dates_experiences_non_academiques = ProfessionalExperience.objects.filter(
-            person__global_id=matricule,
-            start_date__lte=date_maximale,
-            end_date__gte=minimal_years.get('minimal_date'),
-        ).values_list('start_date', 'end_date')
+        non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
 
         return CurriculumDTO(
-            experiences_academiques=list(experiences_academiques_dtos.values()),
+            experiences_academiques=academic_experiences_dtos,
             annee_diplome_etudes_secondaires=minimal_years.get('highschool_diploma_year'),
             annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
-            dates_experiences_non_academiques=list(dates_experiences_non_academiques),
+            experiences_non_academiques=non_academic_experiences_dtos,
+            annee_minimum_a_remplir=minimal_years.get('minimal_date').year,
         )
 
     @classmethod
@@ -342,7 +566,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             current_year=annee_courante,
         )
 
-        person = Person.objects.only('pk', 'country_of_citizenship').get(global_id=matricule)
+        person = (
+            Person.objects.only('pk', 'country_of_citizenship')
+            .select_related('country_of_citizenship')
+            .get(global_id=matricule)
+        )
 
         is_ue_country = (
             person.country_of_citizenship.european_union if getattr(person, 'country_of_citizenship') else None
@@ -402,3 +630,87 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .aggregate(total=models.Sum('nombre_mois'))
         ).get('total')
         return nombre_mois >= cls.NB_MOIS_MIN_VAE if nombre_mois else False
+
+    @classmethod
+    def recuperer_toutes_informations_candidat(
+        cls,
+        matricule: str,
+        formation: str,
+        annee_courante: int,
+    ) -> ResumeCandidatDTO:
+        has_default_language = cls.has_default_language()
+
+        queryset = Person.objects.prefetch_related(
+            Prefetch(
+                'professionalexperience_set',
+                queryset=ProfessionalExperience.objects.all().order_by('-start_date', '-end_date'),
+            ),
+            Prefetch(
+                'personaddress_set',
+                queryset=PersonAddress.objects.filter(
+                    label__in=[PersonAddressType.RESIDENTIAL.name, PersonAddressType.CONTACT.name],
+                ).select_related('country'),
+            ),
+        ).select_related(
+            'country_of_citizenship',
+            'birth_country',
+            'last_registration_year',
+            'graduated_from_high_school_year',
+        )
+
+        is_doctorate = formation in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
+        if is_doctorate:
+            queryset = queryset.prefetch_related(
+                Prefetch(
+                    'languages_knowledge',
+                    queryset=LanguageKnowledge.objects.select_related('language').all(),
+                ),
+            )
+
+        if formation == TrainingType.BACHELOR.name:
+            queryset = queryset.select_related(
+                'highschooldiplomaalternative',
+                'belgianhighschooldiploma__schedule',
+                'belgianhighschooldiploma__institute',
+                'foreignhighschooldiploma__country',
+                'foreignhighschooldiploma__linguistic_regime',
+            )
+
+        candidate: Person = queryset.get(global_id=matricule)
+
+        last_registration_year = candidate.last_registration_year.year if candidate.last_registration_year else None
+        graduated_from_high_school_year = (
+            candidate.graduated_from_high_school_year.year if candidate.graduated_from_high_school_year else None
+        )
+        coordonnees_dto = cls._get_coordonnees_dto(candidate=candidate, has_default_language=has_default_language)
+
+        return ResumeCandidatDTO(
+            identification=cls._get_identification_dto(
+                candidate=candidate,
+                residential_country=coordonnees_dto.domicile_legal.pays if coordonnees_dto.domicile_legal else '',
+                has_default_language=has_default_language,
+            ),
+            coordonnees=coordonnees_dto,
+            curriculum=CurriculumDTO(
+                annee_derniere_inscription_ucl=last_registration_year,
+                annee_diplome_etudes_secondaires=graduated_from_high_school_year,
+                experiences_academiques=cls._get_academic_experiences_dtos(matricule, has_default_language),
+                experiences_non_academiques=cls._get_non_academic_experiences_dtos(
+                    candidate.professionalexperience_set.all(),
+                ),
+                annee_minimum_a_remplir=cls.get_annee_minimale_a_completer_cv(
+                    annee_courante=annee_courante,
+                    annee_diplome_etudes_secondaires=graduated_from_high_school_year,
+                    annee_derniere_inscription_ucl=last_registration_year,
+                ),
+            ),
+            etudes_secondaires=cls._get_secondary_studies_dto(
+                candidate=candidate,
+                has_default_language=has_default_language,
+                valuated_secondary_studies=None,
+                formation=formation,
+            ),
+            connaissances_langues=cls._get_language_knowledge_dto(candidate, has_default_language)
+            if is_doctorate
+            else None,
+        )

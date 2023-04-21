@@ -32,7 +32,7 @@ from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import SoumettrePropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import IdentificationNonCompleteeException
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
@@ -97,7 +97,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
         # Command result
         self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
         # Updated proposition
-        self.assertEqual(updated_proposition.statut, ChoixStatutProposition.SUBMITTED)
+        self.assertEqual(updated_proposition.statut, ChoixStatutPropositionDoctorale.CONFIRMEE)
 
     def test_should_soumettre_proposition_etre_ok_si_preadmission_complete(self):
         proposition = PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
@@ -111,7 +111,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
         # Command result
         self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
         # Updated proposition
-        self.assertEqual(updated_proposition.statut, ChoixStatutProposition.SUBMITTED)
+        self.assertEqual(updated_proposition.statut, ChoixStatutPropositionDoctorale.CONFIRMEE)
 
     def test_should_retourner_erreur_si_identification_non_completee(self):
         with mock.patch.multiple(ProfilCandidatInMemoryTranslator.profil_candidats[0], pays_naissance=''):

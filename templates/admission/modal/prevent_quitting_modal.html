@@ -1,0 +1,134 @@
+{% extends "admission/modal/modal.html" %}
+{% load i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+
+{% block modal_id %}prevent-quitting-modal{% endblock %}
+
+{% block modal_title %}{% trans "Leave the page?" %}{% endblock %}
+
+{% block modal_body %}
+  <p>
+    {% trans "You seem to have unsaved modifications, they will be lost." %}
+  </p>
+{% endblock %}
+
+{% block modal_footer %}
+  <a class="btn btn-danger" id="continue-link" href="#">
+    {% trans "Exit without saving" %}
+  </a>
+  <button type="button" class="btn btn-primary" id="save-link">
+    <i class="fas fa-floppy-disk"></i>
+    {% trans "Save" context 'admission' %}
+  </button>
+{% endblock %}
+
+
+{% block extra %}
+  <script type="text/javascript">
+  (function () {
+    // Notify user when something in a form has changed
+    const initialData = {};
+    let doCheckForm = true;
+    let doBrowserPrevent = true;
+    let allForms;
+
+    /**
+     * Save initial data of each form on page load
+     *
+     * Allows initialData refresh by triggering 'refreshFormInitial' event.
+     * Does not store form with 'no-prevent-quitting' css class
+     */
+    const refreshFormInitial = function () {
+      allForms = document.querySelectorAll('form:not(.no-prevent-quitting)');
+      allForms.forEach(function (form) {
+        const formData = new URLSearchParams(new FormData(form));
+        initialData[form.getAttribute('action')] = formData.toString();
+        form.addEventListener('submit', function () {
+          // Prevent any checking if a form is being submitted
+          doCheckForm = false;
+        });
+      });
+    };
+    document.addEventListener('DOMContentLoaded', refreshFormInitial);
+    document.addEventListener('refreshFormInitial', refreshFormInitial);
+
+    /**
+     * Checks if a form data has changed compared to the initial data
+     *
+     * @param form
+     * @returns {boolean}
+     */
+    function formHasChanged(form) {
+      const formData = new URLSearchParams(new FormData(form));
+      if (initialData[form.getAttribute('action')] !== formData.toString()) {
+        return true;
+      }
+    }
+
+    window.addEventListener('click', function (e) {
+      // If the click is an opening anchor refreshing the window
+      const isOpeningAnchor = e.target.tagName === 'A' && ['', '_self'].includes(e.target.target);
+      // But not continue link (from modal) itself
+      if (isOpeningAnchor && e.target.id !== 'continue-link') {
+        allForms.forEach(function (form) {
+          // Check the link is not part of the form
+          if (!(form.querySelector('.quitting-context-excluded') || form).contains(e.target)) {
+            if (formHasChanged(form)) {
+              e.preventDefault();
+              // Show modal and change its 'continue' link so that it link to the same link that clicked
+              $('#prevent-quitting-modal').modal('show');
+              document.querySelector('a#continue-link').setAttribute('href', e.target.href)
+              document.querySelector('button#save-link').addEventListener('click', function () {
+                const event = new MouseEvent('click', {
+                  view: window,
+                  bubbles: true,
+                  cancelable: true,
+                });
+                form.querySelector('button[type="submit"]').dispatchEvent(event);
+              });
+              // Do not show browser popup
+              doBrowserPrevent = false;
+              return false;
+            }
+          }
+        });
+      }
+    });
+    window.addEventListener('beforeunload', function (e) {
+      allForms.forEach(function (form) {
+        if (doCheckForm && doBrowserPrevent && formHasChanged(form, e)) {
+          loadingCompleted = true;
+          // Cancel the event
+          e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+          // Chrome requires returnValue to be set
+          return e.returnValue = "{% trans "Leave the page?" %} {% trans "You seem to have unsaved modifications, they will be lost." %}"
+        }
+      });
+    });
+  })();
+  </script>
+{% endblock %}

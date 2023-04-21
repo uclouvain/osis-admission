@@ -17,8 +17,8 @@ class Migration(migrations.Migration):
             name='CddConfiguration',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('service_types', models.JSONField(default=admission.contrib.models.cdd_config.default_service_types, verbose_name='SERVICE types')),
-                ('seminar_types', models.JSONField(default=admission.contrib.models.cdd_config.default_seminar_types, verbose_name='SEMINAR types')),
+                ('service_types', admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_service_types, verbose_name='SERVICE types')),
+                ('seminar_types', admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_seminar_types, verbose_name='SEMINAR types')),
                 ('cdd', models.OneToOneField(limit_choices_to={'entityversion__entity_type': 'DOCTORAL_COMMISSION'}, on_delete=django.db.models.deletion.CASCADE, related_name='admission_config', to='base.entity')),
             ],
         ),

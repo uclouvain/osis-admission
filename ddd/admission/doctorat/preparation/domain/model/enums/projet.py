@@ -29,22 +29,20 @@ from django.utils.translation import gettext_lazy as _
 from base.models.utils.utils import ChoiceEnum
 
 
-class ChoixStatutProposition(ChoiceEnum):
-    CANCELLED = _('CANCELLED')
-    # During the enrolment step
-    IN_PROGRESS = _('IN_PROGRESS')
-    SUBMITTED = _('SUBMITTED')
-    SIGNING_IN_PROGRESS = _('SIGNING_IN_PROGRESS')
-    # After the enrolment step
-    ENROLLED = _('ENROLLED')
+class ChoixStatutPropositionDoctorale(ChoiceEnum):
+    EN_BROUILLON = _('In draft')
+    EN_ATTENTE_DE_SIGNATURE = _('Waiting for signature')
+    CONFIRMEE = _('Confirmed application (by student)')
+    ANNULEE = _('Cancelled application')
+    INSCRIPTION_AUTORISEE = _('Enrollment allowed')
 
 
 STATUTS_PROPOSITION_AVANT_SOUMISSION = {
-    ChoixStatutProposition.IN_PROGRESS.name,
-    ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+    ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+    ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
 }
 STATUTS_PROPOSITION_AVANT_INSCRIPTION = STATUTS_PROPOSITION_AVANT_SOUMISSION | {
-    ChoixStatutProposition.SUBMITTED.name,
+    ChoixStatutPropositionDoctorale.CONFIRMEE.name,
 }
 
 

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from collections import defaultdict
 from functools import partial
 from typing import Union
@@ -92,11 +93,11 @@ CONTINUING_EDUCATION_PERMISSIONS_MAPPING = {
 }
 
 DOCTORATE_PERMISSIONS_MAPPING = {
-    'GET': 'admission.view_doctorateadmission_curriculum',
-    'POST': 'admission.change_doctorateadmission_curriculum',
-    'PUT': 'admission.change_doctorateadmission_curriculum',
-    'PATCH': 'admission.change_doctorateadmission_curriculum',
-    'DELETE': 'admission.change_doctorateadmission_curriculum',
+    'GET': 'admission.view_admission_curriculum',
+    'POST': 'admission.change_admission_curriculum',
+    'PUT': 'admission.change_admission_curriculum',
+    'PATCH': 'admission.change_admission_curriculum',
+    'DELETE': 'admission.change_admission_curriculum',
 }
 
 
@@ -186,7 +187,7 @@ class CurriculumView(BaseCurriculumView):
         serializer = self.get_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
         message_bus_instance.invoke(self.complete_command_class(**serializer.data))
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -270,7 +271,7 @@ class ExperienceViewSet(
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
+            self.get_permission_object().update_detailed_status(request.user.person)
         return response
 
     def _check_perms_update(self):
@@ -281,7 +282,7 @@ class ExperienceViewSet(
         self._check_perms_update()
         response = super().update(request, *args, **kwargs)
         if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
+            self.get_permission_object().update_detailed_status(request.user.person)
         return response
 
     def destroy(self, request, *args, **kwargs):
@@ -290,7 +291,7 @@ class ExperienceViewSet(
 
         response = super().destroy(request, *args, **kwargs)
         if self.get_permission_object():
-            self.get_permission_object().update_detailed_status()
+            self.get_permission_object().update_detailed_status(request.user.person)
         return response
 
 

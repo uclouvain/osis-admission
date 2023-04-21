@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cddconfiguration',
             name='complementary_course_types',
-            field=models.JSONField(default=admission.contrib.models.cdd_config.default_complementary_course_types, verbose_name='COURSE types for complementary training'),
+            field=admission.contrib.models.cdd_config.TranslatedMultilineField(default=admission.contrib.models.cdd_config.default_complementary_course_types, verbose_name='COURSE types for complementary training'),
         ),
         migrations.AddField(
             model_name='cddconfiguration',

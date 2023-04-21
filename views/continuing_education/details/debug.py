@@ -35,4 +35,3 @@ __all__ = ["ContinuingDebugView"]
 class ContinuingDebugView(GeneralDebugView):
     model = ContinuingEducationAdmission
     cmd = DeterminerAnneeAcademiqueEtPotQuery
-    extra_context = {'base_template': 'admission/continuing/tab_layout.html'}

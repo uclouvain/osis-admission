@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import filecmp
 import sys
 from unittest import SkipTest
 
@@ -51,14 +52,28 @@ class ApiSchemaTestCase(TestCase):
                 'compilemessages',
                 verbosity=0,
                 locale='fr_BE',
-                ignore_patterns=['*/node_modules', '.git', '*/__pycache__', 'uploads', 'ddd'],
+                ignore_patterns=[
+                    '.git',
+                    '*/.git',
+                    '.*',
+                    '*/.*',
+                    '__pycache__',
+                    'node_modules',
+                    'uploads',
+                    'ddd',
+                    '*/ddd',
+                    'infrastructure',
+                    '*/infrastructure',
+                    '*/migrations',
+                    '*/static',
+                    '*/tests',
+                    '*/templates',
+                ],
             )
             call_command(
                 'generateschema',
-                '--skip-checks',
                 urlconf='admission.api.url_v1',
                 generator_class='admission.api.schema.AdmissionSchemaGenerator',
                 file=temp.name,
             )
-            with open('admission/schema.yml') as f:
-                self.assertEqual(f.read(), temp.read(), msg="Schema has not been re-generated")
+            self.assertTrue(filecmp.cmp('admission/schema.yml', temp.name), msg="Schema has not been re-generated")

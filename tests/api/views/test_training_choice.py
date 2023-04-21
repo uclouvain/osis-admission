@@ -37,7 +37,7 @@ from rest_framework.test import APITestCase
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import REFERENCE_SEQ_NAME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionDoctorale,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator import exceptions as doctorate_education_exceptions
@@ -46,13 +46,14 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 )
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionContinue,
+    ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_continue.domain.validator import exceptions as continuing_education_exceptions
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutProposition as ChoixStatutPropositionGenerale,
+    ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator import exceptions as general_education_exceptions
+from admission.tests import QueriesAssertionsMixin
 from admission.tests.api.views.test_project import DoctorateAdmissionApiTestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -67,11 +68,13 @@ from admission.tests.factories.form_item import (
     TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.scholarship import (
     DoubleDegreeScholarshipFactory,
     ErasmusMundusScholarshipFactory,
     InternationalScholarshipFactory,
 )
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -79,11 +82,11 @@ from base.tests.factories.person import PersonFactory
 
 
 def create_default_propositions_in_progress(candidate):
-    DoctorateAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionDoctorale.IN_PROGRESS.name)
-    DoctorateAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionDoctorale.SIGNING_IN_PROGRESS.name)
-    GeneralEducationAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionGenerale.IN_PROGRESS.name)
-    GeneralEducationAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionGenerale.IN_PROGRESS.name)
-    ContinuingEducationAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionContinue.IN_PROGRESS.name)
+    DoctorateAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
+    DoctorateAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name)
+    GeneralEducationAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionGenerale.EN_BROUILLON.name)
+    GeneralEducationAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionGenerale.EN_BROUILLON.name)
+    ContinuingEducationAdmissionFactory(candidate=candidate, status=ChoixStatutPropositionContinue.EN_BROUILLON.name)
 
 
 class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
@@ -130,7 +133,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         admissions = DoctorateAdmission.objects.all()
         self.assertEqual(admissions.count(), 1)
         first_admission = admissions[0]
-        first_admission.status = ChoixStatutPropositionDoctorale.CANCELLED.name
+        first_admission.status = ChoixStatutPropositionDoctorale.ANNULEE.name
         first_admission.save()
         admission = admissions.get(uuid=response.data["uuid"])
         self.assertEqual(admission.type, self.create_data["type_admission"])
@@ -208,7 +211,7 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
         self.assertEqual(admission.international_scholarship_id, self.international_scholarship.pk)
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
-        self.assertEqual(admission.status, ChoixStatutPropositionGenerale.IN_PROGRESS.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
 
     def test_training_choice_initialization_using_api_candidate_with_wrong_training(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -252,6 +255,7 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
         }
 
         cls.url = resolve_url('admission_api_v1:continuing_training_choice')
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
     def test_training_choice_initialization_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -265,7 +269,7 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
         admission = admissions.get(uuid=response.data['uuid'])
         self.assertEqual(admission.training_id, self.training.pk)
         self.assertEqual(admission.candidate_id, self.candidate.pk)
-        self.assertEqual(admission.status, ChoixStatutPropositionContinue.IN_PROGRESS.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionContinue.EN_BROUILLON.name)
 
     def test_training_choice_initialization_using_api_candidate_with_wrong_training(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -370,7 +374,7 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(admission.international_scholarship_id, self.international_scholarship.pk)
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
-        self.assertEqual(admission.status, ChoixStatutPropositionGenerale.IN_PROGRESS.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
         expected = {
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
@@ -416,6 +420,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
+        AdmissionAcademicCalendarFactory.produce_all_required()
         cls.admission = ContinuingEducationAdmissionFactory()
         cls.candidate = cls.admission.candidate
         cls.training = ContinuingEducationTrainingFactory()
@@ -481,7 +486,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         admission = admissions.get(uuid=response.data['uuid'])
         self.assertEqual(admission.training_id, self.training.pk)
         self.assertEqual(admission.candidate_id, self.candidate.pk)
-        self.assertEqual(admission.status, ChoixStatutPropositionContinue.IN_PROGRESS.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionContinue.EN_BROUILLON.name)
         expected = {
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
@@ -515,15 +520,47 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class DoctorateEducationAdmissionTypeUpdateApiTestCase(DoctorateAdmissionApiTestCase):
+class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, APITestCase):
     file_uuid = str(uuid.uuid4())
 
     @classmethod
     def setUpTestData(cls):
-        super().setUpTestData()
+        # Create supervision group members
+        promoter = PromoterFactory()
+        committee_member = CaMemberFactory(process=promoter.process)
+
+        # Create doctorate management entity
+        root = EntityVersionFactory(parent=None).entity
+        cls.sector = EntityVersionFactory(
+            parent=root,
+            entity_type=EntityType.SECTOR.name,
+            acronym='SST',
+        ).entity
+        cls.commission = EntityVersionFactory(
+            parent=cls.sector,
+            entity_type=EntityType.DOCTORAL_COMMISSION.name,
+            acronym='CDA',
+        ).entity
+        cls.admission = DoctorateAdmissionFactory(
+            training__management_entity=cls.commission,
+            supervision_group=promoter.process,
+            with_answers_to_specific_questions=True,
+        )
+
+        # Users
+        cls.candidate = cls.admission.candidate
+        cls.other_candidate_user = CandidateFactory().person.user
+        cls.no_role_user = PersonFactory().user
+        cls.promoter_user = promoter.person.user
+        cls.other_promoter_user = PromoterFactory().person.user
+        cls.committee_member_user = committee_member.person.user
+        cls.other_committee_member_user = CaMemberFactory().person.user
+
         cls.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
         cls.update_data = {
             'uuid_proposition': cls.admission.uuid,
+            "sigle_formation": cls.admission.training.acronym,
+            "annee_formation": cls.admission.training.academic_year.year,
             'type_admission': ChoixTypeAdmission.PRE_ADMISSION.name,
             'justification': 'Justification',
             'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
@@ -584,7 +621,7 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(DoctorateAdmissionApiTest
         admission: DoctorateAdmission = admissions.get(uuid=response.data['uuid'])
 
         self.assertEqual(admission.candidate_id, self.candidate.pk)
-        self.assertEqual(admission.status, ChoixStatutPropositionDoctorale.IN_PROGRESS.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
         self.assertEqual(admission.type, ChoixTypeAdmission.PRE_ADMISSION.name)
         self.assertEqual(admission.comment, 'Justification')
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)

@@ -88,6 +88,11 @@ class RechercherDoctoratQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RecupererResumePropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class IdentifierPromoteurCommand(interface.CommandRequest):
     uuid_proposition: str
     matricule: Optional[str]
@@ -105,6 +110,20 @@ class IdentifierPromoteurCommand(interface.CommandRequest):
 class IdentifierMembreCACommand(interface.CommandRequest):
     uuid_proposition: str
     matricule: Optional[str]
+    prenom: Optional[str]
+    nom: Optional[str]
+    email: Optional[str]
+    est_docteur: Optional[bool]
+    institution: Optional[str]
+    ville: Optional[str]
+    pays: Optional[str]
+    langue: Optional[str]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierMembreSupervisionExterneCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_membre: str
     prenom: Optional[str]
     nom: Optional[str]
     email: Optional[str]
@@ -310,6 +329,10 @@ class ModifierTypeAdmissionCommand(interface.CommandRequest):
     uuid_proposition: str
 
     type_admission: str
+    sigle_formation: str
+    annee_formation: int
+    commission_proximite: Optional[str] = ''
+
     justification: Optional[str] = ''
 
     bourse_erasmus_mundus: Optional[str] = ''

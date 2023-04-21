@@ -52,19 +52,20 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
             TrainingType.BACHELOR.name,
         ],
         TypeFormation.MASTER.name: [
+            TrainingType.MASTER_MC.name,
             TrainingType.MASTER_MA_120.name,
             TrainingType.MASTER_MD_120.name,
             TrainingType.MASTER_MS_120.name,
             TrainingType.MASTER_MS_180_240.name,
             TrainingType.MASTER_M1.name,
-            TrainingType.MASTER_MC.name,
-        ],
-        TypeFormation.DOCTORAT.name: [
-            TrainingType.PHD.name,
         ],
         TypeFormation.AGREGATION_CAPES.name: [
             TrainingType.AGGREGATION.name,
             TrainingType.CAPAES.name,
+        ],
+        TypeFormation.CERTIFICAT.name: [
+            TrainingType.RESEARCH_CERTIFICATE.name,
+            TrainingType.CERTIFICATE.name,
         ],
         TypeFormation.FORMATION_CONTINUE.name: [
             TrainingType.CERTIFICATE_OF_PARTICIPATION.name,
@@ -72,9 +73,8 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
             TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
             TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.name,
         ],
-        TypeFormation.CERTIFICAT.name: [
-            TrainingType.CERTIFICATE.name,
-            TrainingType.RESEARCH_CERTIFICATE.name,
+        TypeFormation.DOCTORAT.name: [
+            TrainingType.PHD.name,
         ],
     }
 
@@ -118,3 +118,11 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
 
         if academic_calendar_year:
             return academic_calendar_year.get('data_year__year')
+
+
+ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE = {
+    osis_type: context
+    for context, admission_types in ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT.items()
+    for admission_type in admission_types
+    for osis_type in AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING[admission_type]
+}

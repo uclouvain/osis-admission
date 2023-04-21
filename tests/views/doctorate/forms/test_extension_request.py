@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ from django.urls import reverse
 from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from admission.contrib.models import ConfirmationPaper
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE, ENTITY_CDSS
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeContratTravail,
@@ -40,34 +39,23 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.confirmation_paper import ConfirmationPaperFactory
-from admission.tests.factories.roles import CddManagerFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.entity import EntityFactory
-from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.program_manager import ProgramManagerFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
 class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
-
-        # First entity
-        first_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
-
-        second_doctoral_commission = EntityFactory()
-        EntityVersionFactory(entity=second_doctoral_commission, acronym=ENTITY_CDSS)
 
         promoter = PromoterFactory()
         cls.promoter = promoter.person
 
         # Create admissions
         cls.admission_without_confirmation_paper = DoctorateAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             cotutelle=False,
             supervision_group=promoter.process,
@@ -78,8 +66,7 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
             admitted=True,
         )
         cls.admission_with_confirmation_papers = DoctorateAdmissionFactory(
-            training__management_entity=first_doctoral_commission,
-            training__academic_year=academic_years[0],
+            training=cls.admission_without_confirmation_paper.training,
             cotutelle=False,
             supervision_group=promoter.process,
             financing_type=ChoixTypeFinancement.WORK_CONTRACT.name,
@@ -89,14 +76,15 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
             admitted=True,
         )
 
-        cls.candidate = cls.admission_without_confirmation_paper.candidate
-
         # User with one cdd
-        cls.cdd_person = CddManagerFactory(entity=first_doctoral_commission).person
+        cls.manager = ProgramManagerFactory(
+            education_group=cls.admission_without_confirmation_paper.training.education_group
+        ).person.user
         cls.update_path = 'admission:doctorate:update:extension-request'
         cls.read_path = 'admission:doctorate:extension-request'
 
     def setUp(self):
+        self.client.force_login(user=self.manager)
         self.confirmation_paper_with_extension_request = ConfirmationPaperFactory(
             admission=self.admission_with_confirmation_papers,
             confirmation_date=datetime.date(2022, 4, 1),
@@ -108,8 +96,6 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
         )
 
     def test_get_extension_request_detail_cdd_user_with_unknown_doctorate(self):
-        self.client.force_login(user=self.cdd_person.user)
-
         url = reverse(self.update_path, args=[uuid.uuid4()])
 
         response = self.client.get(url)
@@ -117,8 +103,6 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
     def test_get_extension_request_detail_cdd_user_without_confirmation_paper(self):
-        self.client.force_login(user=self.cdd_person.user)
-
         url = reverse(self.update_path, args=[self.admission_without_confirmation_paper.uuid])
 
         response = self.client.get(url)
@@ -126,8 +110,6 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
     def test_get_extension_request_detail_cdd_user_with_confirmation_paper_with_extension_request(self):
-        self.client.force_login(user=self.cdd_person.user)
-
         url = reverse(self.update_path, args=[self.admission_with_confirmation_papers.uuid])
 
         response = self.client.get(url)
@@ -144,7 +126,6 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
         )
 
     def test_get_extension_request_detail_cdd_user_with_confirmation_paper_without_extension_request(self):
-        self.client.force_login(user=self.cdd_person.user)
         self.confirmation_paper_without_extension_request = ConfirmationPaperFactory(
             admission=self.admission_with_confirmation_papers,
             confirmation_date=datetime.date(2022, 6, 1),
@@ -164,8 +145,6 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
         self.assertEqual(response.context['form'].initial, {})
 
     def test_post_extension_request_detail_cdd_user_with_confirmation_paper_with_extension_request(self):
-        self.client.force_login(user=self.cdd_person.user)
-
         url = reverse(self.update_path, args=[self.admission_with_confirmation_papers.uuid])
 
         response = self.client.post(url, data={'avis_cdd': 'My new opinion'})
@@ -178,8 +157,6 @@ class DoctorateAdmissionExtensionRequestFormViewTestCase(TestCase):
         self.assertEqual(updated_confirmation_paper.cdd_opinion, 'My new opinion')
 
     def test_post_extension_request_detail_cdd_user_with_confirmation_paper_without_extension_request(self):
-        self.client.force_login(user=self.cdd_person.user)
-
         self.confirmation_paper_without_extension_request = ConfirmationPaperFactory(
             admission=self.admission_with_confirmation_papers,
             confirmation_date=datetime.date(2022, 6, 1),

@@ -59,6 +59,11 @@ class RecupererPropositionQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RecupererResumePropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ModifierChoixFormationCommand(interface.CommandRequest):
     uuid_proposition: str
 
@@ -194,4 +199,9 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class RecupererElementsConfirmationQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPropositionGestionnaireQuery(interface.QueryRequest):
     uuid_proposition: str

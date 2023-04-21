@@ -28,15 +28,15 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models.enums.actor_type import ActorType
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
 )
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
-from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
@@ -63,8 +63,6 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory(person__first_name="Jim").person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
-        cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.other_cdd_manager_user = CddManagerFactory().person.user
         # Target url
         cls.url = resolve_url("admission_api_v1:supervision", uuid=cls.admission.uuid)
         cls.empty_external_data = {
@@ -87,7 +85,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.candidate.user)
-        methods_not_allowed = ['delete', 'patch']
+        methods_not_allowed = ['delete']
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.url)
@@ -111,16 +109,6 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_supervision_get_using_api_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_supervision_get_using_api_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
-    def test_supervision_get_using_api_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -295,26 +283,6 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_supervision_ajouter_membre_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        data = {
-            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
-            'type': ActorType.PROMOTER.name,
-            **self.empty_external_data,
-        }
-        response = self.client.put(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
-    def test_supervision_ajouter_membre_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
-        data = {
-            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
-            'type': ActorType.PROMOTER.name,
-            **self.empty_external_data,
-        }
-        response = self.client.put(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
     def test_supervision_ajouter_membre_promoter(self):
         # Other user
         other_promoter = PromoterFactory()
@@ -421,28 +389,6 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_supervision_supprimer_membre_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-
-        promoter = PromoterFactory(process=self.promoter.actor_ptr.process)
-
-        data = {
-            'type': ActorType.PROMOTER.name,
-            'uuid_membre': promoter.uuid,
-        }
-        response = self.client.post(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
-    def test_supervision_supprimer_membre_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
-
-        data = {
-            'type': ActorType.PROMOTER.name,
-            'uuid_membre': self.promoter.uuid,
-        }
-        response = self.client.post(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
     def test_supervision_supprimer_membre_promoter(self):
         # Other user
         other_promoter = PromoterFactory()
@@ -485,7 +431,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_modification_impossible_par_doctorant_apres_envoi(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        self.admission.status = ChoixStatutProposition.SIGNING_IN_PROGRESS.name
+        self.admission.status = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
         self.admission.save()
 
         data = {
@@ -502,7 +448,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        self.admission.status = ChoixStatutProposition.IN_PROGRESS.name
+        self.admission.status = ChoixStatutPropositionDoctorale.EN_BROUILLON.name
         self.admission.save()
 
     def test_supervision_modification_par_doctorant_apres_refus(self):
@@ -544,6 +490,40 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         membres_CA = response.json()['signatures_membres_CA']
         self.assertEqual(len(promoters), 1)
         self.assertEqual(membres_CA[0]['membre_CA']['prenom'], 'Joe')
+
+    def test_supervision_modification_externe_par_doctorant(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        external = ExternalPromoterFactory(process=self.admission.supervision_group, first_name="John")
+
+        # Check supervision before
+        response = self.client.get(self.url)
+        data = response.json()
+        self.assertEqual(len(data['signatures_promoteurs']), 2)
+        self.assertEqual(data['signatures_promoteurs'][1]['promoteur']['prenom'], 'John')
+
+        # Edit member
+        data = {
+            'uuid_proposition': self.admission.uuid,
+            'uuid_membre': external.uuid,
+            'prenom': 'Joe',
+            'nom': 'Dalton',
+            'email': 'joe@example.org',
+            'est_docteur': False,
+            'institution': 'Nope',
+            'ville': 'Nope',
+            'pays': 'FR',
+            'langue': 'fr-be',
+        }
+        response = self.client.patch(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        # Check supervision after
+        response = self.client.get(self.url)
+        data = response.json()
+        self.assertEqual(len(data['signatures_promoteurs']), 2)
+        self.assertEqual(len(data['signatures_membres_CA']), 0)
+        self.assertEqual(data['signatures_promoteurs'][1]['promoteur']['prenom'], 'Joe')
 
     def test_supervision_designer_promoteur_reference(self):
         self.client.force_authenticate(user=self.candidate.user)

@@ -39,7 +39,7 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutProposition,
+    ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
@@ -47,7 +47,6 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
@@ -168,7 +167,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return Proposition(
             entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
             matricule_candidat=admission.candidate.global_id,
-            statut=ChoixStatutProposition[admission.status],
+            statut=ChoixStatutPropositionContinue[admission.status],
             creee_le=admission.created_at,
             modifiee_le=admission.modified_at,
             soumise_le=admission.submitted_at,
@@ -210,6 +209,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def _load_dto(cls, admission: ContinuingEducationAdmission) -> 'PropositionDTO':
+        language_is_french = get_language() == settings.LANGUAGE_CODE_FR
         return PropositionDTO(
             uuid=admission.uuid,
             statut=admission.status,
@@ -220,23 +220,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             date_fin_pot=admission.pool_end_date,  # from annotation
             formation=FormationDTO(
                 sigle=admission.training.acronym,
+                code=admission.training.partial_acronym,
                 annee=admission.training.academic_year.year,
-                intitule=admission.training.title
-                if get_language() == settings.LANGUAGE_CODE
-                else admission.training.title_english,
+                intitule=admission.training.title if language_is_french else admission.training.title_english,
                 campus=admission.teaching_campus or '',  # from annotation
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
                 campus_inscription=admission.training.enrollment_campus.name,
                 sigle_entite_gestion=admission.sigle_entite_gestion,  # from annotation
             ),
-            reference=formater_reference(
-                reference=admission.reference,
-                nom_campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.training_management_faculty
-                or admission.sigle_entite_gestion,  # From annotation
-                annee=admission.training.academic_year.year,
-            ),
+            reference=admission.formatted_reference,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool or '',
             matricule_candidat=admission.candidate.global_id,
@@ -263,10 +256,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 code_postal=admission.billing_address_postal_code,
                 ville=admission.billing_address_city,
                 pays=admission.billing_address_country.iso_code if admission.billing_address_country else '',
+                nom_pays=getattr(admission.billing_address_country, 'name' if language_is_french else 'name_en')
+                if admission.billing_address_country
+                else '',
                 destinataire=admission.billing_address_recipient,
                 boite_postale=admission.billing_address_postal_box,
                 lieu_dit=admission.billing_address_place,
             )
             if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
             else None,
+            elements_confirmation=admission.confirmation_elements,
+            pdf_recapitulatif=admission.pdf_recap,
         )

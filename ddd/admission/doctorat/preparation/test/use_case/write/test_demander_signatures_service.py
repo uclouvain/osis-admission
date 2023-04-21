@@ -28,7 +28,10 @@ import attr
 from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import DemanderSignaturesCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature, ChoixStatutProposition
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixEtatSignature,
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     CotutelleNonCompleteException,
@@ -75,7 +78,7 @@ class TestDemanderSignaturesService(TestCase):
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
         signatures = groupe.signatures_promoteurs
         proposition = self.proposition_repository.get(proposition_id)
-        self.assertEqual(proposition.statut, ChoixStatutProposition.SIGNING_IN_PROGRESS)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE)
         self.assertTrue(proposition.est_verrouillee_pour_signature)
         self.assertEqual(len(signatures), 2)
         self.assertEqual(len(groupe.signatures_membres_CA), 1)
@@ -88,7 +91,7 @@ class TestDemanderSignaturesService(TestCase):
         self.assertEqual(proposition_id.uuid, "uuid-SC3DP-promoteur-refus-membre-deja-approuve")
         groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
         proposition = self.proposition_repository.get(proposition_id)
-        self.assertEqual(proposition.statut, ChoixStatutProposition.SIGNING_IN_PROGRESS)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE)
         self.assertTrue(proposition.est_verrouillee_pour_signature)
         self.assertEqual(len(groupe.signatures_promoteurs), 1)
         self.assertEqual(len(groupe.signatures_membres_CA), 1)

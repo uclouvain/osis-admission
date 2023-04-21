@@ -30,7 +30,7 @@ from django.test import SimpleTestCase
 
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.formation_generale.commands import ModifierChoixFormationCommand
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionNonTrouveeException,
     FormationNonTrouveeException,
@@ -61,7 +61,7 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(proposition.statut, ChoixStatutProposition.IN_PROGRESS)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.EN_BROUILLON)
         self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.formation_id.annee, self.cmd.annee_formation)
         self.assertEqual(proposition.bourse_erasmus_mundus_id.uuid, self.cmd.bourse_erasmus_mundus)

@@ -25,7 +25,7 @@
 # ##############################################################################
 import logging
 from pprint import pformat
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import attr
 
@@ -50,6 +50,7 @@ from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -209,18 +210,13 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         pool_ouverts: List[Tuple[str, int]],
     ):
         """Si le candidat pourrait tomber dans le pool de reorientation et n'a pas répondu à la question"""
-        if (
-            program == TrainingType.BACHELOR
-            and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
+        if cls.eligible_a_la_reorientation(program.name, formation_id.sigle, proposition, pool_ouverts) and (
+            proposition
             and (
-                proposition
-                and (
-                    proposition.est_reorientation_inscription_externe is None
-                    or proposition.est_reorientation_inscription_externe
-                    and not proposition.attestation_inscription_reguliere
-                )
+                proposition.est_reorientation_inscription_externe is None
+                or proposition.est_reorientation_inscription_externe
+                and not proposition.attestation_inscription_reguliere
             )
-            and AdmissionPoolExternalReorientationCalendar.event_reference in [pool for (pool, annee) in pool_ouverts]
         ):
             raise ReorientationInscriptionExterneNonConfirmeeException()
 
@@ -233,19 +229,13 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         pool_ouverts: List[Tuple[str, int]],
     ):
         """Si le candidat pourrait tomber dans le pool de modification et n'a pas répondu à la question"""
-        if (
-            program == TrainingType.BACHELOR
-            and not est_formation_contingentee_et_non_resident(formation_id.sigle, proposition)
+        if cls.eligible_a_la_modification(program.name, formation_id.sigle, proposition, pool_ouverts) and (
+            proposition
             and (
-                proposition
-                and (
-                    proposition.est_modification_inscription_externe is None
-                    or proposition.est_modification_inscription_externe
-                    and not proposition.formulaire_modification_inscription
-                )
+                proposition.est_modification_inscription_externe is None
+                or proposition.est_modification_inscription_externe
+                and not proposition.formulaire_modification_inscription
             )
-            and AdmissionPoolExternalEnrollmentChangeCalendar.event_reference
-            in [pool for (pool, annee) in pool_ouverts]
         ):
             raise ModificationInscriptionExterneNonConfirmeeException()
 
@@ -253,7 +243,11 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
     def verifier_residence_au_sens_du_decret(cls, sigle: str, proposition: Optional['Proposition']):
         """Si le candidat s'inscrit dans une formation contingentée et n'a pas répondu à la question
         sur la résidence au sens du décret."""
-        if sigle in SIGLES_WITH_QUOTA and proposition and proposition.est_non_resident_au_sens_decret is None:
+        if (
+            cls.inscrit_formation_contingentee(sigle)
+            and proposition
+            and proposition.est_non_resident_au_sens_decret is None
+        ):
             raise ResidenceAuSensDuDecretNonRenseigneeException()
 
     @classmethod
@@ -287,3 +281,39 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
         raise NotImplementedError
+
+    @classmethod
+    def eligible_a_la_reorientation(
+        cls,
+        program: str,
+        sigle: str,
+        proposition: Optional[Union['Proposition', 'PropositionDTO']],
+        pool_ouverts: List[Tuple[str, int]],
+    ):
+        """Retourne si le candidat est éligible à la réorientation"""
+        return (
+            program == TrainingType.BACHELOR.name
+            and not est_formation_contingentee_et_non_resident(sigle, proposition)
+            and AdmissionPoolExternalReorientationCalendar.event_reference in [pool for (pool, annee) in pool_ouverts]
+        )
+
+    @classmethod
+    def eligible_a_la_modification(
+        cls,
+        program: str,
+        sigle: str,
+        proposition: Optional[Union['Proposition', 'PropositionDTO']],
+        pool_ouverts: List[Tuple[str, int]],
+    ):
+        """Retourne si le candidat est éligible à la modification"""
+        return (
+            program == TrainingType.BACHELOR.name
+            and not est_formation_contingentee_et_non_resident(sigle, proposition)
+            and AdmissionPoolExternalEnrollmentChangeCalendar.event_reference
+            in [pool for (pool, annee) in pool_ouverts]
+        )
+
+    @classmethod
+    def inscrit_formation_contingentee(cls, sigle: str):
+        """Retourne si le candidat s'inscrit dans une formation contingentée"""
+        return sigle in SIGLES_WITH_QUOTA

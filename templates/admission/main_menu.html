@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -25,42 +25,42 @@
 {% endcomment %}
 
 <div class="row">
-  {% if perms.admission.view_cdddossiers %}
+  {% if perms.admission.view_enrolment_applications %}
+    <div class="col-md-6" style="margin-bottom: 2em">
+      <div class="col-md-2"><i class="fa fa-chalkboard-user" style="font-size: 400%; color: #6699FF;"></i></div>
+      <div class="col-md-10">
+        <h4 class="media-heading">
+          <a href="{% url 'admission:all-list' %}" id="lnk_admissions">
+            {% trans 'Enrolment applications' %}
+          </a>
+        </h4>
+        <p>{% trans 'Management of the enrolment applications' %}</p>
+      </div>
+    </div>
+  {% endif %}
+  {% if perms.admission.view_doctorate_enrolment_applications %}
     <div class="col-md-6" style="margin-bottom: 2em">
       <div class="col-md-2"><i class="fa fa-graduation-cap" style="font-size: 400%; color: #6699FF;"></i></div>
       <div class="col-md-10">
         <h4 class="media-heading">
           <a href="{% url 'admission:doctorate:cdd:list' %}" id="lnk_doctoral_admissions">
-            {% trans 'Doctorate enrolments' %}
+            {% trans 'Doctorate enrolment applications' %}
           </a>
         </h4>
         <p>{% trans 'Management of the doctorate enrolments' %}</p>
       </div>
     </div>
   {% endif %}
-  {% if perms.admission.view_general_dossiers %}
-    <div class="col-md-6" style="margin-bottom: 2em">
-      <div class="col-md-2"><i class="fa fa-chalkboard-user" style="font-size: 400%; color: #6699FF;"></i></div>
-      <div class="col-md-10">
-        <h4 class="media-heading">
-          <a href="{% url 'admission:general-education:list' %}" id="lnk_general_admissions">
-            {% trans 'General enrolments' %}
-          </a>
-        </h4>
-        <p>{% trans 'Management of the general enrolments' %}</p>
-      </div>
-    </div>
-  {% endif %}
-  {% if perms.admission.view_continuing_dossiers %}
+  {% if perms.admission.view_continuing_enrolment_applications %}
     <div class="col-md-6" style="margin-bottom: 2em">
       <div class="col-md-2"><i class="fa fa-chalkboard-user" style="font-size: 400%; color: #6699FF;"></i></div>
       <div class="col-md-10">
         <h4 class="media-heading">
           <a href="{% url 'admission:continuing-education:list' %}" id="lnk_continuing_admissions">
-            {% trans 'Continuing enrolments' %}
+            {% trans 'Continuing enrolment applications' %}
           </a>
         </h4>
-        <p>{% trans 'Management of the continuing enrolments' %}</p>
+        <p>{% trans 'Management of the continuing enrolment applications' %}</p>
       </div>
     </div>
   {% endif %}

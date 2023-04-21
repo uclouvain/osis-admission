@@ -1,0 +1,168 @@
+{% load i18n admission enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+  {% if formation.type == 'BACHELOR' and etudes_secondaires.diplome_belge %}
+
+    {% panel _('Belgian diploma') %}
+
+      {% field_data _('Academic graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
+
+      {% field_data _('Community of education') etudes_secondaires.diplome_belge.communaute|enum_display:'BelgianCommunitiesOfEducation' %}
+
+      {% if etudes_secondaires.diplome_belge.communaute == 'FRENCH_SPEAKING' %}
+        {% if etudes_secondaires.diplome_belge.type_enseignement %}
+          {% field_data _('Education type') etudes_secondaires.diplome_belge.type_enseignement|enum_display:'EducationalType' %}
+        {% else %}
+          {% field_data _('Education type') etudes_secondaires.diplome_belge.autre_type_enseignement %}
+        {% endif %}
+      {% endif %}
+
+      {% field_data _('What result did you get?') etudes_secondaires.diplome_belge.resultat|enum_display:'DiplomaResults' %}
+
+      {% display etudes_secondaires.diplome_belge.nom_institut ' ' '(' etudes_secondaires.diplome_belge.adresse_institut ')' as belgian_institute %}
+      {% translate 'Institute' context 'admission' as institute_label %}
+      {% field_data institute_label belgian_institute %}
+
+      {% if etudes_secondaires.diplome_belge.grille_horaire %}
+        <dl>
+          <dt>{% translate 'Timetable' %}</dt>
+          <dd>
+            <div class='row' style='margin-top: 0.5em; display: flex;'>
+              <div class='col-md-4'>
+                {% panel _('Ancient languages') %}
+                  {% field_data _('Latin')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.latin inline=True %}
+                  {% field_data _('Greek')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.grec inline=True %}
+                {% endpanel %}
+                {% panel _('Sciences') %}
+                  {% field_data _('Chemistry')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.chimie inline=True %}
+                  {% field_data _('Physic')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.physique inline=True %}
+                  {% field_data _('Biology')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.biologie inline=True %}
+                {% endpanel %}
+              </div>
+              <div class='col-md-4'>
+                {% panel _('Modern languages') %}
+                  {% field_data _('French')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.francais inline=True %}
+                  {% field_data _('English')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.anglais inline=True %}
+                  {% field_data _('Dutch')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.neerlandais inline=True %}
+                  {% field_data _('Spanish')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.espagnol inline=True %}
+                  {% field_data _('German')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.allemand inline=True %}
+                  {% field_data etudes_secondaires.diplome_belge.grille_horaire.autre_langue_moderne_label|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.autre_langue_moderne_duree hide_empty=True inline=True %}
+                {% endpanel %}
+              </div>
+              <div class='col-md-4'>
+                {% panel _('Others') %}
+                  {% field_data _('Mathematics')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.mathematique inline=True %}
+                  {% field_data _('IT')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.informatique inline=True %}
+                  {% field_data _('Social sciences')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.sciences_sociales inline=True %}
+                  {% field_data _('Economic sciences')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.sciences_economiques inline=True %}
+                  {% field_data etudes_secondaires.diplome_belge.grille_horaire.autre_label|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.autre_duree hide_empty=True inline=True %}
+                {% endpanel %}
+              </div>
+            </div>
+          </dd>
+        </dl>
+      {% endif %}
+    {% endpanel %}
+
+    {% panel _('Attachments') %}
+      {% field_data _('High school diploma') etudes_secondaires.diplome_belge.diplome %}
+      {% if etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
+        {% field_data _('Certificate of enrolment or school attendance') etudes_secondaires.diplome_belge.certificat_inscription %}
+      {% endif %}
+    {% endpanel %}
+
+  {% elif formation.type == 'BACHELOR' and etudes_secondaires.diplome_etranger %}
+
+    {% panel _('Foreign diploma') %}
+
+      {% field_data _('Academic graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
+
+      {% field_data _('What diploma did you get (or will you get)?') etudes_secondaires.diplome_etranger.type_diplome|enum_display:'ForeignDiplomaTypes' %}
+
+      {% field_data _('Organizing country') etudes_secondaires.diplome_etranger.pays_nom %}
+
+      {% field_data _('Linguistic regime') etudes_secondaires.diplome_etranger.pays_regime_linguistique %}
+      {% if etudes_secondaires.diplome_etranger.type_diplome == 'NATIONAL_BACHELOR' %}
+        {% if ue_or_assimilated %}
+          {% field_data _('Has this diploma been subject to a decision of equivalence provided by the French-speaking community of Belgium?') etudes_secondaires.diplome_etranger.equivalence|enum_display:'Equivalence' %}
+          {% if etudes_secondaires.diplome_etranger.equivalence == 'YES' %}
+            {% field_data _('A double-sided copy of the final equivalence decision') etudes_secondaires.diplome_etranger.decision_final_equivalence_ue %}
+          {% elif etudes_secondaires.diplome_etranger.equivalence == 'PENDING' %}
+            {% field_data _('Proof of the final equivalence decision') etudes_secondaires.diplome_etranger.preuve_decision_equivalence %}
+          {% endif %}
+        {% else %}
+          {% field_data _('A double-sided copy of the final equivalence decision') etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue %}
+        {% endif %}
+      {% endif %}
+
+      {% field_data _('What result did you get?') etudes_secondaires.diplome_etranger.resultat|enum_display:'DiplomaResults' %}
+
+    {% endpanel %}
+
+    {% panel _('Attachments') %}
+      {% field_data _('High school diploma') etudes_secondaires.diplome_etranger.diplome %}
+
+      {% if need_translations %}
+        {% field_data _('A certified translation of your high school diploma') etudes_secondaires.diplome_etranger.traduction_diplome %}
+      {% endif %}
+
+      {% if etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' and ue_or_assimilated %}
+        {% field_data _('Certificate of enrolment or school attendance') etudes_secondaires.diplome_etranger.certificat_inscription %}
+        {% if need_translations %}
+          {% field_data _('A certified translation of your certificate of enrolment or school attendance') etudes_secondaires.diplome_etranger.traduction_certificat_inscription %}
+        {% endif %}
+      {% endif %}
+
+      {% field_data _('A transcript or your last year at high school') etudes_secondaires.diplome_etranger.releve_notes %}
+      {% if need_translations %}
+        {% field_data _('A certified translation of your official transcript of marks for your final year of secondary education') etudes_secondaires.diplome_etranger.traduction_releve_notes %}
+      {% endif %}
+    {% endpanel %}
+
+  {% elif formation.type == 'BACHELOR' and etudes_secondaires.alternative_secondaires %}
+    {% panel _('Secondary studies') %}
+      {% field_data _('Do you have a high school diploma?') _('No') %}
+    {% endpanel %}
+    {% panel _('Attachments') %}
+      {% field_data _('Certificate of successful completion of the admission test for the first cycle of higher education') etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle %}
+    {% endpanel %}
+
+  {% else %}
+    {% panel _('Secondary studies') %}
+      {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' %}
+        {% blocktranslate trimmed with year=etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year asvar graduation_text %}
+          Yes, in {{ year }}.
+        {% endblocktranslate %}
+      {% elif etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
+        {% blocktranslate trimmed with year=etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year asvar graduation_text %}
+          You have indicated that you will receive one in {{ year }}.
+        {% endblocktranslate %}
+      {% elif etudes_secondaires.diplome_etudes_secondaires == 'NO' %}
+        {% blocktranslate asvar graduation_text %}No.{% endblocktranslate %}
+      {% endif %}
+      {% field_data _('Do you have a high school diploma?') graduation_text %}
+    {% endpanel %}
+  {% endif %}
+
+  {% multiple_field_data specific_questions proposition.reponses_questions_specifiques %}

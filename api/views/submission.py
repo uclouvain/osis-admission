@@ -68,10 +68,9 @@ from admission.utils import (
     get_cached_general_education_admission_perm_obj,
 )
 from base.models.academic_calendar import AcademicCalendar
-from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from infrastructure.formation_catalogue.repository.program_tree import ProgramTreeRepository
+from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -82,6 +81,7 @@ __all__ = [
     "SubmitDoctoralPropositionView",
     "SubmitGeneralEducationPropositionView",
     "SubmitContinuingEducationPropositionView",
+    "get_access_conditions_url",
 ]
 
 
@@ -147,7 +147,7 @@ class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModel
     name = "verify-project"
     schema = VerifyProjectSchema()
     permission_mapping = {
-        'GET': 'admission.change_doctorateadmission_project',
+        'GET': 'admission.change_admission_project',
     }
     pagination_class = None
     filter_backends = []
@@ -177,6 +177,39 @@ class SubmitDoctoralPropositionSchema(VerifySchema):
         return super().get_operation_id(path, method)
 
 
+def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
+    if training_type == TrainingType.PHD.name:
+        return (
+            "https://uclouvain.be/en/study/inscriptions/doctorate-and-doctoral-training.html"
+            if get_language() == settings.LANGUAGE_CODE_EN
+            else "https://uclouvain.be/fr/etudier/inscriptions/conditions-doctorats.html"
+        )
+    else:
+        # Get the last year being published
+        today = timezone.now().today()
+        year = (
+            AcademicCalendar.objects.filter(
+                reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
+                start_date__lte=today,
+            )
+            .order_by('-start_date')
+            .values_list('data_year__year', flat=True)
+            .first()
+        )
+
+        sigle = training_acronym
+        with suppress(ProgramTreeNotFoundException):  # pragma: no cover
+            # Try to get the acronym from the parent, if it exists
+            sigle = message_bus_instance.invoke(
+                GetSigleFormationParenteQuery(
+                    code_formation=partial_training_acronym,
+                    annee=year,
+                )
+            )
+
+        return f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
+
+
 class SubmitPropositionMixin:
     pagination_class = None
     filter_backends = []
@@ -185,36 +218,11 @@ class SubmitPropositionMixin:
         error_codes = [e['status_code'] for e in data['errors']]
         if ConditionsAccessNonRempliesException.status_code in error_codes:
             admission = self.get_permission_object()
-
-            if admission.training.education_group_type.name == TrainingType.PHD.name:
-                data['access_conditions_url'] = (
-                    "https://uclouvain.be/en/study/inscriptions/doctorate-and-doctoral-training.html"
-                    if get_language() == settings.LANGUAGE_CODE_EN
-                    else "https://uclouvain.be/fr/etudier/inscriptions/conditions-doctorats.html"
-                )
-            else:
-                # Get the last year being published
-                today = timezone.now().today()
-                year = (
-                    AcademicCalendar.objects.filter(
-                        reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
-                        start_date__lte=today,
-                    )
-                    .order_by('-start_date')
-                    .values_list('data_year__year', flat=True)
-                    .first()
-                )
-
-                sigle = admission.training.acronym
-                with suppress(ProgramTreeNotFoundException):  # pragma: no cover
-                    # Try to get the acronym from the parent, if it exists
-                    parent = ProgramTreeRepository.get_identite_parent_2M(admission.training.partial_acronym, year)
-                    sigle = EducationGroupYear.objects.get(
-                        partial_acronym=parent.code,
-                        academic_year__year=parent.year,
-                    ).acronym
-
-                data['access_conditions_url'] = f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
+            data['access_conditions_url'] = get_access_conditions_url(
+                training_type=admission.training.education_group_type.name,
+                training_acronym=admission.training.acronym,
+                partial_training_acronym=admission.training.partial_acronym,
+            )
 
 
 class SubmitDoctoralPropositionView(
@@ -236,7 +244,7 @@ class SubmitDoctoralPropositionView(
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         admission = self.get_permission_object()
-        admission.update_detailed_status()
+        admission.update_detailed_status(request.user.person)
 
         data = {'errors': admission.detailed_status}
         self.add_access_conditions_url(data)
@@ -289,7 +297,7 @@ class SubmitGeneralEducationPropositionView(
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         admission = self.get_permission_object()
-        admission.update_detailed_status()
+        admission.update_detailed_status(request.user.person)
 
         data = {'errors': admission.detailed_status}
         error_codes = [e['status_code'] for e in data['errors']]
@@ -358,7 +366,7 @@ class SubmitContinuingEducationPropositionView(
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         admission = self.get_permission_object()
-        admission.update_detailed_status()
+        admission.update_detailed_status(request.user.person)
 
         data = {'errors': admission.detailed_status}
         self.add_access_conditions_url(data)

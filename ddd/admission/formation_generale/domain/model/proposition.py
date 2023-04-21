@@ -44,7 +44,7 @@ from admission.ddd.admission.enums import (
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import comptabilite_non_remplie, Comptabilite
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -62,7 +62,7 @@ class Proposition(interface.RootEntity):
     reference: int
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
-    statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
+    statut: ChoixStatutPropositionGenerale = ChoixStatutPropositionGenerale.EN_BROUILLON
     type_demande: 'TypeDemande' = TypeDemande.ADMISSION
 
     creee_le: Optional[datetime.datetime] = None
@@ -90,6 +90,8 @@ class Proposition(interface.RootEntity):
     equivalence_diplome: List[str] = attr.Factory(list)
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
+    est_inscription_tardive: bool = False
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
@@ -106,7 +108,7 @@ class Proposition(interface.RootEntity):
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
 
     def supprimer(self):
-        self.statut = ChoixStatutProposition.CANCELLED
+        self.statut = ChoixStatutPropositionGenerale.ANNULEE
 
     def soumettre(
         self,
@@ -114,8 +116,9 @@ class Proposition(interface.RootEntity):
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
         type_demande: TypeDemande,
+        est_inscription_tardive: bool,
     ):
-        self.statut = ChoixStatutProposition.SUBMITTED
+        self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
         self.type_demande = type_demande
         self.annee_calculee = formation_id.annee
         self.formation_id = formation_id
@@ -126,6 +129,7 @@ class Proposition(interface.RootEntity):
             self.attestation_inscription_reguliere = []
         if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE:
             self.formulaire_modification_inscription = []
+        self.est_inscription_tardive = est_inscription_tardive
 
     def completer_curriculum(
         self,

@@ -35,6 +35,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     GetGroupeDeSupervisionCommand,
     IdentifierMembreCACommand,
     IdentifierPromoteurCommand,
+    ModifierMembreSupervisionExterneCommand,
     SupprimerMembreCACommand,
     SupprimerPromoteurCommand,
 )
@@ -53,12 +54,14 @@ class SupervisionSchema(ResponseSpecificSchema):
         'GET': serializers.SupervisionDTOSerializer,
         'PUT': (serializers.IdentifierSupervisionActorSerializer, serializers.PropositionIdentityDTOSerializer),
         'POST': (serializers.SupervisionActorReferenceSerializer, serializers.PropositionIdentityDTOSerializer),
+        'PATCH': (serializers.ModifierMembreSupervisionExterneSerializer, serializers.PropositionIdentityDTOSerializer),
     }
 
     method_mapping = {
         'get': 'retrieve',
         'put': 'add',
         'post': 'remove',
+        'patch': 'edit_external',
     }
 
     def get_operation_id_base(self, path, method, action):
@@ -79,9 +82,10 @@ class SupervisionAPIView(
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission_supervision',
+        'GET': 'admission.view_admission_supervision',
         'PUT': 'admission.add_supervision_member',
         'POST': 'admission.remove_supervision_member',
+        'PATCH': 'admission.edit_external_supervision_member',
     }
 
     def get_permission_object(self):
@@ -106,7 +110,7 @@ class SupervisionAPIView(
 
         serializer_cls(data=data).is_valid(raise_exception=True)
         result = message_bus_instance.invoke(cmd(**data))
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -127,7 +131,15 @@ class SupervisionAPIView(
 
         serializer_cls(data=data).is_valid(raise_exception=True)
         result = message_bus_instance.invoke(cmd(**data))
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, *args, **kwargs):
+        """Edit an external supervision group member for a proposition"""
+        serializers.ModifierMembreSupervisionExterneSerializer(data=request.data).is_valid(raise_exception=True)
+        result = message_bus_instance.invoke(ModifierMembreSupervisionExterneCommand(**request.data))
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -157,6 +169,6 @@ class SupervisionSetReferencePromoterAPIView(APIPermissionRequiredMixin, Generic
         """Set a supervision group member as reference promoter"""
         serializers.DesignerPromoteurReferenceCommandSerializer(data=request.data).is_valid(raise_exception=True)
         result = message_bus_instance.invoke(DesignerPromoteurReferenceCommand(**request.data))
-        self.get_permission_object().update_detailed_status()
+        self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

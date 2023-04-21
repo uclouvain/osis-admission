@@ -41,6 +41,7 @@ class PromoteurDTO(interface.DTO):
     est_docteur: bool = False
     institution: str = ""
     ville: str = ""
+    code_pays: str = ""
     pays: str = ""
     est_externe: bool = False
 
@@ -55,6 +56,7 @@ class MembreCADTO(interface.DTO):
     est_docteur: bool = False
     institution: str = ""
     ville: str = ""
+    code_pays: str = ""
     pays: str = ""
     est_externe: bool = False
 
@@ -91,13 +93,6 @@ class AvisDTO(interface.DTO):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class GroupeDeSupervisionDTO(interface.DTO):
-    signatures_promoteurs: List[DetailSignaturePromoteurDTO] = attr.Factory(list)
-    signatures_membres_CA: List[DetailSignatureMembreCADTO] = attr.Factory(list)
-    promoteur_reference: Optional[str] = None
-
-
-@attr.dataclass(frozen=True, slots=True)
 class CotutelleDTO(interface.DTO):
     cotutelle: Optional[bool]
     motivation: Optional[str]
@@ -106,3 +101,11 @@ class CotutelleDTO(interface.DTO):
     demande_ouverture: List[str]
     convention: List[str]
     autres_documents: List[str]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class GroupeDeSupervisionDTO(interface.DTO):
+    signatures_promoteurs: List[DetailSignaturePromoteurDTO] = attr.Factory(list)
+    signatures_membres_CA: List[DetailSignatureMembreCADTO] = attr.Factory(list)
+    promoteur_reference: Optional[str] = None
+    cotutelle: Optional[CotutelleDTO] = None

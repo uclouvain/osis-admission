@@ -32,7 +32,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.formation_generale.commands import InitierPropositionCommand
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
@@ -67,7 +67,7 @@ class TestInitierPropositionService(SimpleTestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(proposition.statut, ChoixStatutProposition.IN_PROGRESS)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.EN_BROUILLON)
         self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.formation_id.annee, self.cmd.annee_formation)
         self.assertEqual(proposition.matricule_candidat, self.cmd.matricule_candidat)

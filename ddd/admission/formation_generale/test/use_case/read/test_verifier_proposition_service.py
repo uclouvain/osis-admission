@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from typing import Optional
 from unittest import TestCase, mock
 
@@ -38,6 +39,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AffiliationsNonCompleteesException,
     ExperiencesAcademiquesNonCompleteesException,
     TypeCompteBancaireRemboursementNonCompleteException,
+    CoordonneesNonCompleteesException,
 )
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.domain.validator.exceptions import (
@@ -68,7 +70,7 @@ from admission.ddd.admission.enums import (
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EquivalenceNonRenseigneeException,
     FichierCurriculumNonRenseigneException,
@@ -92,7 +94,14 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
-from osis_profile.models.enums.curriculum import Result, TranscriptType, Grade, EvaluationSystem
+from osis_profile.models.enums.curriculum import (
+    Result,
+    TranscriptType,
+    Grade,
+    EvaluationSystem,
+    ActivityType,
+    ActivitySector,
+)
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 
@@ -167,7 +176,24 @@ class TestVerifierPropositionService(TestCase):
             nom_formation='Formation AA',
             grade_obtenu=Grade.GREAT_DISTINCTION.name,
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+            adresse_institut='',
+            code_institut='',
+            communaute_institut='',
+            nom_institut='',
+            nom_pays='',
+            nom_regime_linguistique='',
+            type_enseignement='',
         )
+
+        cls.params_defaut_experience_non_academique = {
+            'uuid': str(uuid.uuid4()),
+            'employeur': 'UCL',
+            'type': ActivityType.WORK.name,
+            'certificat': [],
+            'fonction': 'Bibliothécaire',
+            'secteur': ActivitySector.PUBLIC.name,
+            'autre_activite': '',
+        }
 
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
@@ -306,6 +332,13 @@ class TestVerifierPropositionService(TestCase):
                 nom_formation='Formation AA',
                 systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
                 grade_obtenu=Grade.GREAT_DISTINCTION.name,
+                adresse_institut='',
+                code_institut='',
+                communaute_institut='',
+                nom_institut='',
+                nom_pays='',
+                nom_regime_linguistique='',
+                type_enseignement='',
             ),
         )
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):
@@ -372,9 +405,9 @@ class TestVerifierPropositionService(TestCase):
                 QuestionsSpecifiquesChoixFormationNonCompleteesException,
             )
 
-    def test_should_retourner_erreur_si_comptabilite_incomplete_pour_document_enfant_personnel(self):
+    def test_should_retourner_erreur_si_comptabilite_incomplete_pour_enfant_personnel(self):
         self._test_should_retourner_erreur_si_comptabilite_incomplete(
-            comptabilite=_ComptabiliteFactory(enfant_personnel=True, attestation_enfant_personnel=[]),
+            comptabilite=_ComptabiliteFactory(enfant_personnel=None),
             exception=ReductionDesDroitsInscriptionNonCompleteeException,
         )
 
@@ -1033,6 +1066,7 @@ class TestVerifierPropositionService(TestCase):
                 personne=self.bachelier_proposition.matricule_candidat,
                 date_debut=datetime.date(2015, 1, 1),
                 date_fin=datetime.date(2018, 1, 1),
+                **self.params_defaut_experience_non_academique,
             )
         )
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1093,6 +1127,7 @@ class TestVerifierPropositionService(TestCase):
                 personne=self.bachelier_proposition.matricule_candidat,
                 date_debut=datetime.date(2015, 1, 1),
                 date_fin=datetime.date(2018, 1, 1),
+                **self.params_defaut_experience_non_academique,
             )
         )
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
@@ -1604,10 +1639,10 @@ class TestVerifierPropositionService(TestCase):
     def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
         propositions = self.proposition_in_memory.search(matricule_candidat='0000000001')
         for proposition in propositions:
-            proposition.statut = ChoixStatutProposition.IN_PROGRESS
+            proposition.statut = ChoixStatutPropositionGenerale.EN_BROUILLON
 
         for proposition_index in range(2):
-            propositions[proposition_index].statut = ChoixStatutProposition.SUBMITTED
+            propositions[proposition_index].statut = ChoixStatutPropositionGenerale.CONFIRMEE
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))

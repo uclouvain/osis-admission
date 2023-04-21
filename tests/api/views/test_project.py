@@ -41,7 +41,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDSS,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
@@ -59,6 +59,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesCurriculumNonCompleteesException,
 )
 from admission.ddd.admission.enums.question_specifique import Onglets
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests import CheckActionLinksMixin, QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
@@ -68,7 +69,7 @@ from admission.tests.factories.curriculum import EducationalExperienceFactory, E
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import CandidateFactory, CddManagerFactory
+from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.community import CommunityEnum
@@ -77,6 +78,7 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
+from osis_notification.models import WebNotification
 from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
@@ -102,12 +104,12 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             acronym='CDA',
         ).entity
         cls.admission = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.CANCELLED.name,  # set the status to cancelled so we have access to creation
+            status=ChoixStatutPropositionDoctorale.ANNULEE.name,  # set the status to cancelled so we have access to creation
             training__management_entity=cls.commission,
             supervision_group=cls.promoter.process,
         )
         cls.other_admission = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
         )
         cls.other_commission = EntityVersionFactory(
             entity_type=EntityType.FACULTY.name,
@@ -131,7 +133,6 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         cls.candidate = cls.admission.candidate
         cls.other_candidate = cls.other_admission.candidate
         cls.no_role_user = PersonFactory().user
-        cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
         cls.promoter_user = cls.promoter.person.user
         cls.committee_member_user = committee_member.person.user
 
@@ -171,11 +172,12 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         self.assertEqual(proposition['matricule_candidat'], self.general_education_admission.candidate.global_id)
         self.assertEqual(proposition['prenom_candidat'], self.general_education_admission.candidate.first_name)
         self.assertEqual(proposition['nom_candidat'], self.general_education_admission.candidate.last_name)
-        self.assertEqual(proposition['statut'], ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(proposition['statut'], ChoixStatutPropositionGenerale.EN_BROUILLON.name)
         self.assertEqual(
             proposition['formation'],
             {
                 'sigle': self.general_education_admission.training.acronym,
+                'code': self.general_education_admission.training.partial_acronym,
                 'annee': self.general_education_admission.training.academic_year.year,
                 'intitule': self.general_education_admission.training.title,
                 'campus': self.general_campus_name,
@@ -225,12 +227,13 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         self.assertEqual(proposition['matricule_candidat'], self.continuing_education_admission.candidate.global_id)
         self.assertEqual(proposition['prenom_candidat'], self.continuing_education_admission.candidate.first_name)
         self.assertEqual(proposition['nom_candidat'], self.continuing_education_admission.candidate.last_name)
-        self.assertEqual(proposition['statut'], ChoixStatutProposition.IN_PROGRESS.name)
+        self.assertEqual(proposition['statut'], ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
 
         self.assertEqual(
             proposition['formation'],
             {
                 'sigle': self.continuing_education_admission.training.acronym,
+                'code': self.continuing_education_admission.training.partial_acronym,
                 'annee': self.continuing_education_admission.training.academic_year.year,
                 'intitule': self.continuing_education_admission.training.title,
                 'campus': self.continuing_campus_name,
@@ -322,11 +325,6 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
-    def test_list_propositions_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-
     def test_list_propositions_promoter(self):
         self.client.force_authenticate(user=self.promoter_user)
         response = self.client.get(self.url, format="json")
@@ -362,7 +360,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
+class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Create supervision group members
@@ -387,12 +385,23 @@ class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
             with_answers_to_specific_questions=True,
         )
 
+        cls.update_data = {
+            "uuid": cls.admission.uuid,
+            "type_admission": ChoixTypeAdmission.ADMISSION.name,
+            "titre_projet": "A new title",
+            "commission_proximite": '',
+            "bourse_preuve": [],
+            "documents_projet": [],
+            "graphe_gantt": [],
+            "proposition_programme_doctoral": [],
+            "projet_formation_complementaire": [],
+            "lettres_recommandation": [],
+        }
+
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory().person.user
         cls.no_role_user = PersonFactory().user
-        cls.cdd_manager_user = CddManagerFactory(entity=cls.commission).person.user
-        cls.other_cdd_manager_user = CddManagerFactory().person.user
         cls.promoter_user = promoter.person.user
         cls.other_promoter_user = PromoterFactory().person.user
         cls.committee_member_user = committee_member.person.user
@@ -400,8 +409,6 @@ class DoctorateAdmissionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # Targeted url
         cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
 
-
-class DoctorateAdmissionCancelApiTestCase(DoctorateAdmissionApiTestCase):
     def test_admission_doctorate_cancel_using_api(self):
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.delete(self.url, format="json")
@@ -410,7 +417,7 @@ class DoctorateAdmissionCancelApiTestCase(DoctorateAdmissionApiTestCase):
         admissions = DoctorateAdmission.objects.all()
         self.assertEqual(admissions.count(), 1)
         admission = admissions.get()
-        self.assertEqual(admission.status, ChoixStatutProposition.CANCELLED.name)
+        self.assertEqual(admission.status, ChoixStatutPropositionDoctorale.ANNULEE.name)
 
     def test_user_not_logged_assert_cancel_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -425,16 +432,6 @@ class DoctorateAdmissionCancelApiTestCase(DoctorateAdmissionApiTestCase):
 
     def test_admission_doctorate_cancel_using_api_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
-        response = self.client.delete(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_cancel_using_api_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.delete(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_cancel_using_api_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
         response = self.client.delete(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -458,8 +455,6 @@ class DoctorateAdmissionCancelApiTestCase(DoctorateAdmissionApiTestCase):
         response = self.client.delete(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-
-class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmissionApiTestCase):
     def test_admission_doctorate_get_proximity_commission(self):
         self.client.force_authenticate(user=self.other_candidate_user)
         admission = DoctorateAdmissionFactory(
@@ -524,6 +519,7 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
             'retrieve_cotutelle',
             'update_cotutelle',
             'add_member',
+            'edit_external_member',
             'remove_member',
             'set_reference_promoter',
             'retrieve_supervision',
@@ -557,16 +553,6 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
         response = self.client.get(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_admission_doctorate_get_using_api_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_admission_doctorate_get_using_api_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
     def test_admission_doctorate_get_using_api_promoter(self):
         self.client.force_authenticate(user=self.promoter_user)
         response = self.client.get(self.url, format="json")
@@ -592,22 +578,6 @@ class DoctorateAdmissionGetApiTestCase(CheckActionLinksMixin, DoctorateAdmission
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-
-class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
-    def setUp(self):
-        self.update_data = {
-            "uuid": self.admission.uuid,
-            "type_admission": ChoixTypeAdmission.ADMISSION.name,
-            "titre_projet": "A new title",
-            "commission_proximite": '',
-            "bourse_preuve": [],
-            "documents_projet": [],
-            "graphe_gantt": [],
-            "proposition_programme_doctoral": [],
-            "projet_formation_complementaire": [],
-            "lettres_recommandation": [],
-        }
-
     def test_admission_doctorate_update_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.put(self.url, data=self.update_data, format="json")
@@ -630,16 +600,6 @@ class DoctorateAdmissionUpdatingApiTestCase(DoctorateAdmissionApiTestCase):
 
     def test_admission_doctorate_update_using_api_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
-        response = self.client.put(self.url, data=self.update_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_admission_doctorate_update_using_api_cdd_manager(self):
-        self.client.force_authenticate(user=self.cdd_manager_user)
-        response = self.client.put(self.url, data=self.update_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_admission_doctorate_update_using_api_other_cdd_manager(self):
-        self.client.force_authenticate(user=self.other_cdd_manager_user)
         response = self.client.put(self.url, data=self.update_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -905,7 +865,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         # Create admissions
         cls.first_admission_with_invitation = DoctorateAdmissionFactory(
             candidate=cls.first_candidate,
-            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=cls.first_invited_promoter.actor_ptr.process,
         )
         cls.first_admission_without_invitation = DoctorateAdmissionFactory(
@@ -914,7 +874,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         )
         cls.second_admission = DoctorateAdmissionFactory(
             candidate=cls.second_candidate,
-            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=cls.second_invited_promoter.actor_ptr.process,
         )
         # Create other users
@@ -1004,10 +964,10 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         admission = DoctorateAdmissionFactory(
             training__academic_year__current=True,
             candidate=self.first_candidate,
-            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
-        CddManagerFactory(entity=admission.doctorate.management_entity)
+        manager = ProgramManagerRoleFactory(education_group_id=admission.training.education_group_id)
 
         self.client.force_authenticate(user=self.first_candidate.user)
 
@@ -1021,11 +981,11 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
         # TODO Replace the following lines by the commented ones when the admission approval by CDD and SIC
         #  will be created
-        self.assertEqual(updated_admission.status, ChoixStatutProposition.ENROLLED.name)
+        self.assertEqual(updated_admission.status, ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name)
         self.assertEqual(updated_admission.status_cdd, ChoixStatutCDD.ACCEPTED.name)
         self.assertEqual(updated_admission.post_enrolment_status, ChoixStatutDoctorat.ADMITTED.name)
 
-        # self.assertEqual(updated_admission.status, ChoixStatutProposition.SUBMITTED.name)
+        # self.assertEqual(updated_admission.status, ChoixStatutPropositionDoctorale.CONFIRMEE.name)
         # self.assertEqual(updated_admission.status_sic, ChoixStatutCDD.TO_BE_VERIFIED.name)
         # self.assertEqual(updated_admission.status_cdd, ChoixStatutSIC.TO_BE_VERIFIED.name)
         # self.assertEqual(updated_admission.post_enrolment_status, ChoixStatutDoctorat.ADMISSION_IN_PROGRESS.name)
@@ -1052,22 +1012,23 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                 },
             },
         )
+        self.assertEqual(WebNotification.objects.count(), 1)
+        self.assertEqual(WebNotification.objects.first().person, manager.person)
 
     def test_submit_valid_proposition_using_api_but_too_much_submitted_propositions(self):
         DoctorateAdmissionFactory(
             training__academic_year__current=True,
             candidate=self.first_candidate,
-            status=ChoixStatutProposition.SUBMITTED.name,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
 
         admission = DoctorateAdmissionFactory(
             training__academic_year__current=True,
             candidate=self.first_candidate,
-            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
-        CddManagerFactory(entity=admission.doctorate.management_entity)
 
         self.client.force_authenticate(user=self.first_candidate.user)
 
@@ -1083,7 +1044,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     def test_submit_invalid_proposition_using_api(self):
         admission = DoctorateAdmissionFactory(
             candidate=self.second_candidate,
-            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
 
@@ -1097,11 +1058,10 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
     def test_submit_invalid_proposition_using_api_accounting(self):
         admission = DoctorateAdmissionFactory(
-            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
         url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
-        CddManagerFactory(entity=admission.doctorate.management_entity)
 
         self.client.force_authenticate(user=admission.candidate.user)
 
@@ -1161,12 +1121,10 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         admission = DoctorateAdmissionFactory(
             training__academic_year__current=True,
             candidate=self.first_candidate,
-            status=ChoixStatutProposition.SIGNING_IN_PROGRESS.name,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
         self.client.force_authenticate(user=admission.candidate.user)
-
-        CddManagerFactory(entity=admission.doctorate.management_entity)
 
         admission = DoctorateAdmission.objects.get(pk=admission.pk)
 

@@ -61,7 +61,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
     ChoixSousDomaineSciences,
-    ChoixStatutProposition,
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
@@ -92,7 +92,7 @@ class Proposition(interface.RootEntity):
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
     justification: Optional[str] = ''
-    statut: ChoixStatutProposition = ChoixStatutProposition.IN_PROGRESS
+    statut: ChoixStatutPropositionDoctorale = ChoixStatutPropositionDoctorale.EN_BROUILLON
     commission_proximite: Optional[
         Union[
             ChoixCommissionProximiteCDEouCLSM,
@@ -125,10 +125,10 @@ class Proposition(interface.RootEntity):
 
     @property
     def est_verrouillee_pour_signature(self) -> bool:
-        return self.statut == ChoixStatutProposition.SIGNING_IN_PROGRESS
+        return self.statut == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
 
     def est_en_cours(self):
-        return self.statut != ChoixStatutProposition.CANCELLED
+        return self.statut != ChoixStatutPropositionDoctorale.ANNULEE
 
     def completer(
         self,
@@ -211,6 +211,9 @@ class Proposition(interface.RootEntity):
     ):
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
+        self._definir_commission(commission_proximite)
+
+    def _definir_commission(self, commission_proximite):
         self.commission_proximite = None
         if commission_proximite and commission_proximite in ChoixCommissionProximiteCDEouCLSM.get_names():
             self.commission_proximite = ChoixCommissionProximiteCDEouCLSM[commission_proximite]
@@ -417,10 +420,10 @@ class Proposition(interface.RootEntity):
         self.fiche_archive_signatures_envoyees = []
 
     def verrouiller_proposition_pour_signature(self):
-        self.statut = ChoixStatutProposition.SIGNING_IN_PROGRESS
+        self.statut = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE
 
     def deverrouiller_projet_doctoral(self):
-        self.statut = ChoixStatutProposition.IN_PROGRESS
+        self.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON
 
     def verifier_projet_doctoral(self):
         """Vérification de la validité du projet doctoral avant demande des signatures"""
@@ -432,17 +435,17 @@ class Proposition(interface.RootEntity):
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
     ):
-        self.statut = ChoixStatutProposition.SUBMITTED
+        self.statut = ChoixStatutPropositionDoctorale.CONFIRMEE
         self.annee_calculee = formation_id.annee
         self.formation_id = formation_id
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
 
     def supprimer(self):
-        self.statut = ChoixStatutProposition.CANCELLED
+        self.statut = ChoixStatutPropositionDoctorale.ANNULEE
 
     def valider_inscription(self):
-        self.statut = ChoixStatutProposition.ENROLLED
+        self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE
 
     def definir_institut_these(self, institut_these: Optional[str]):
         if institut_these:
@@ -453,16 +456,19 @@ class Proposition(interface.RootEntity):
 
     def modifier_type_admission(
         self,
+        formation_id: FormationIdentity,
         type_admission: str,
         justification: Optional[str],
         bourse_erasmus_mundus: Optional[BourseIdentity],
         reponses_questions_specifiques: Dict,
+        commission_proximite: Optional[str],
     ):
         ModifierTypeAdmissionValidatorList(
             type_admission=type_admission,
             justification=justification,
         ).validate()
-
+        self._definir_commission(commission_proximite)
+        self.formation_id = formation_id
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
         self.bourse_erasmus_mundus_id = bourse_erasmus_mundus

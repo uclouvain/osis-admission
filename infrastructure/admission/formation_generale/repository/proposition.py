@@ -26,7 +26,9 @@
 from typing import List, Optional
 
 from django.conf import settings
+from django.db.models import Subquery, OuterRef
 from django.utils.translation import get_language
+from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import (
@@ -38,24 +40,27 @@ from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutProposition
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
-from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
-from base.models.academic_year import AcademicYear
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
+from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
+from admission.infrastructure.utils import dto_to_dict
+from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.person import Person
+from base.models.student import Student
 from osis_common.ddd.interface import ApplicationService
 
 
@@ -146,6 +151,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
                 'confirmation_elements': entity.elements_confirmation,
+                'late_enrollment': entity.est_inscription_tardive,
             },
         )
 
@@ -253,7 +259,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             soumise_le=admission.submitted_at,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
-            statut=ChoixStatutProposition[admission.status],
+            statut=ChoixStatutPropositionGenerale[admission.status],
             bourse_internationale_id=BourseIdentity(uuid=str(admission.international_scholarship.uuid))
             if admission.international_scholarship
             else None,
@@ -274,6 +280,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             equivalence_diplome=admission.diploma_equivalence,
             comptabilite=get_accounting_from_admission(admission=admission),
             elements_confirmation=admission.confirmation_elements,
+            est_inscription_tardive=admission.late_enrollment,
         )
 
     @classmethod
@@ -282,13 +289,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             uuid=admission.uuid,
             creee_le=admission.created_at,
             modifiee_le=admission.modified_at,
-            reference=formater_reference(
-                reference=admission.reference,
-                nom_campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.training_management_faculty
-                or admission.sigle_entite_gestion,  # From annotation
-                annee=admission.training.academic_year.year,
-            ),
+            reference=admission.formatted_reference,
             soumise_le=admission.submitted_at,
             erreurs=admission.detailed_status or [],
             statut=admission.status,
@@ -297,9 +298,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             date_fin_pot=admission.pool_end_date,  # from annotation
             formation=FormationDTO(
                 sigle=admission.training.acronym,
+                code=admission.training.partial_acronym,
                 annee=admission.training.academic_year.year,
                 intitule=admission.training.title
-                if get_language() == settings.LANGUAGE_CODE
+                if get_language() == settings.LANGUAGE_CODE_FR
                 else admission.training.title_english,
                 campus=admission.teaching_campus or '',  # from annotation
                 type=admission.training.education_group_type.name,
@@ -322,4 +324,67 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
+            est_bachelier_belge=admission.is_belgian_bachelor,
+            est_non_resident_au_sens_decret=admission.is_non_resident,
+            elements_confirmation=admission.confirmation_elements,
+            est_modification_inscription_externe=admission.is_external_modification,
+            formulaire_modification_inscription=admission.registration_change_form,
+            est_reorientation_inscription_externe=admission.is_external_reorientation,
+            attestation_inscription_reguliere=admission.regular_registration_proof,
+            pdf_recapitulatif=admission.pdf_recap,
         )
+
+    @classmethod
+    def _load_dto_for_gestionnaire(cls, admission: GeneralEducationAdmission) -> 'PropositionGestionnaireDTO':
+        is_french_language = get_language() == settings.LANGUAGE_CODE_FR
+        return PropositionGestionnaireDTO(
+            **dto_to_dict(cls._load_dto(admission)),
+            type=admission.type_demande,
+            date_changement_statut=admission.status_updated_at,  # from annotation
+            genre_candidat=admission.candidate.gender,
+            noma_candidat=admission.student_registration_id or '',  # from annotation
+            photo_identite_candidat=admission.candidate.id_photo,
+            adresse_email_candidat=admission.candidate.private_email,
+            langue_contact_candidat=admission.candidate.language,
+            nationalite_candidat=getattr(
+                admission.candidate.country_of_citizenship,
+                'name' if is_french_language else 'name_en',
+            )
+            if admission.candidate.country_of_citizenship
+            else '',
+            nationalite_ue_candidat=admission.candidate.country_of_citizenship
+            and admission.candidate.country_of_citizenship.european_union,
+            candidat_a_plusieurs_demandes=admission.has_other_admission_in_progress,  # from annotation
+            titre_access='',  # TODO
+            candidat_assimile=admission.accounting
+            and admission.accounting.assimilation_situation
+            and admission.accounting.assimilation_situation != TypeSituationAssimilation.AUCUNE_ASSIMILATION.name,
+            fraudeur_ares=False,  # TODO
+            non_financable=False,  # TODO,
+            est_inscription_tardive=admission.late_enrollment,
+        )
+
+    @classmethod
+    def get_dto_for_gestionnaire(cls, entity_id: 'PropositionIdentity') -> 'PropositionGestionnaireDTO':
+        try:
+            return cls._load_dto_for_gestionnaire(
+                GeneralEducationAdmissionProxy.objects.for_dto()
+                .annotate_other_admissions_in_progress()
+                .annotate(
+                    status_updated_at=Subquery(
+                        HistoryEntry.objects.filter(
+                            object_uuid=OuterRef('uuid'),
+                            tags__contains=['proposition', 'status-changed'],
+                        ).values('created')[:1]
+                    ),
+                    student_registration_id=Subquery(
+                        Student.objects.filter(person_id=OuterRef('candidate_id'),).values(
+                            'registration_id'
+                        )[:1],
+                    ),
+                )
+                .select_related('accounting')
+                .get(uuid=entity_id.uuid)
+            )
+        except GeneralEducationAdmission.DoesNotExist:
+            raise PropositionNonTrouveeException

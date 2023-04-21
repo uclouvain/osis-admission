@@ -1,0 +1,207 @@
+{% load i18n admission enums %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain
+  (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% panel %}
+  <div class="row">
+    <div class="col-md-6">
+      {% with experience.annees|last as first_year %}
+        {% field_data _("Start") first_year.annee|get_academic_year %}
+      {% endwith %}
+    </div>
+    <div class="col-md-6">
+      {% field_data _("End") experience.annees.0.annee|get_academic_year %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      {% field_data _("Institute name") experience.nom_institut %}
+    </div>
+    <div class="col-md-6">
+      {% field_data _("Institute address") experience.adresse_institut hide_empty=True %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      {% field_data _("Country") experience.nom_pays %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      {% translate 'Education name' context 'admission' as education_name_label %}
+      {% field_data education_name_label experience.nom_formation %}
+    </div>
+    <div class="col-md-6">
+      {% field_data _('Study system') experience.type_enseignement|enum_display:'TeachingTypeEnum' hide_empty=True %}
+    </div>
+  </div>
+  {% if is_continuing %}
+    <div class="row">
+      <div class="col-md-6">
+        {% field_data _('Did you graduate from this training?') experience.a_obtenu_diplome %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        {% field_data _('Graduate degree') experience.diplome %}
+      </div>
+    </div>
+  {% else %}
+
+    {% if is_foreign_experience %}
+      <div class="row">
+        <div class="col-md-6">
+          {% field_data _("Linguistic regime") experience.nom_regime_linguistique %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="row">
+      <div class="col-md-6">
+        {% field_data _("Transcript type") experience.type_releve_notes|enum_display:'TranscriptType' %}
+      </div>
+      <div class="col-md-6">
+        {% field_data _("Evaluation type") experience.systeme_evaluation|enum_display:'EvaluationSystem' %}
+      </div>
+    </div>
+
+    {% if experience.type_releve_notes == 'ONE_FOR_ALL_YEARS' %}
+      <div class="row">
+        <div class="col-md-6">
+          {% field_data _("Transcript") experience.releve_notes %}
+        </div>
+        {% if translation_required %}
+          <div class="col-md-6">
+            {% field_data _("Translation of the transcript") experience.traduction_releve_notes %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div id="table-container">
+      <table class="table table-bordered">
+        <caption>{% translate "Results by year" %}</caption>
+        <thead>
+          <tr>
+            <th style="width: 120px;">{% translate 'Academic year' %}</th>
+            {% if evaluation_system_with_credits %}
+              <th>{% translate 'Registered credits' %}</th>
+              <th>{% translate 'Acquired credits' %}</th>
+            {% endif %}
+            <th>{% translate 'Result' %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for experience_year in experience.annees %}
+            {% if experience_year.resultat %}
+              <tr>
+                <td class="academic-year-container" {% if experience.type_releve_notes == 'ONE_A_YEAR' %}rowspan="2"{% endif %}>
+                  {{ experience_year.annee|get_academic_year }}
+                </td>
+                {% if evaluation_system_with_credits %}
+                  <td>
+                    {{ experience_year.credits_inscrits }}
+                  </td>
+                  <td>
+                    {{ experience_year.credits_acquis }}
+                  </td>
+                {% endif %}
+                <td>
+                  {{ experience_year.resultat|enum_display:'Result'|default:_('Not specified') }}
+                </td>
+              </tr>
+              {% if experience.type_releve_notes == 'ONE_A_YEAR' %}
+                <tr>
+                  <td colspan="3">
+                    <div class="flex-container-no-wrap">
+                      {% field_data _('Transcript') experience_year.releve_notes %}
+                      {% if translation_required %}
+                        {% field_data _('Transcript translation') experience_year.traduction_releve_notes %}
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endif %}
+            {% else %}
+              <tr>
+                <td class="academic-year-container">{{ experience_year.annee }}</td>
+                <td {% if evaluation_system_with_credits %}colspan="3"{% endif %}>
+                  {% translate 'Year without registration for the training.' %}
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        {% field_data _('Did you graduate from this training?') experience.a_obtenu_diplome %}
+      </div>
+      {% if not experience.a_obtenu_diplome %}
+        </div>
+      {% else %}
+        <div class="col-md-6">
+          {% field_data _('Obtained grade') experience.grade_obtenu|enum_display:'Grade' %}
+        </div>
+        </div>
+        {% if is_doctorate %}
+          <div class="row">
+            <div class="col-md-6">
+              {% field_data _('Rank in diploma') experience.rang_diplome %}
+            </div>
+            <div class="col-md-6">
+              {% field_data _('Expected date of graduation (signed document)') experience.date_prevue_delivrance_diplome|date:"DATE_FORMAT" %}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              {% field_data _('Title of the dissertation') experience.titre_memoire|linebreaks %}
+            </div>
+            <div class="col-md-6">
+              {% field_data _('Dissertation score') experience.note_memoire %}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              {% field_data _('Dissertation summary') experience.resume_memoire %}
+            </div>
+          </div>
+        {% endif %}
+        <div class="row">
+          <div class="col-md-6">
+            {% field_data _('Graduate degree') experience.diplome %}
+          </div>
+          {% if translation_required %}
+            <div class="col-md-6">
+              {% field_data _('Graduate degree translation') experience.traduction_diplome %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endpanel %}

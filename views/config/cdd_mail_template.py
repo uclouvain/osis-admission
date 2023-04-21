@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import get_language, gettext_lazy as _
 from django.views import generic
 
-from admission.auth.roles.cdd_manager import CddManager
+from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.contrib.models import CddMailTemplate
 from admission.forms.cdd_mail_template import NameMailTemplateForm
 from osis_mail_template.forms import MailTemplateConfigureForm
@@ -57,7 +57,9 @@ class CddMailTemplateListView(PermissionRequiredMixin, generic.ListView):
     permission_required = 'admission.change_cddmailtemplate'
 
     def get_queryset(self):
-        managed_cdds = CddManager.objects.filter(person=self.request.user.person).values_list('entity_id', flat=True)
+        managed_cdds = CddConfigurator.objects.filter(person=self.request.user.person).values_list(
+            'entity_id', flat=True
+        )
         if not managed_cdds:
             raise PermissionDenied('Current user has no CDD')
         qs = CddMailTemplate.objects.filter(
@@ -111,7 +113,9 @@ class CddMailTemplateChangeView(PermissionRequiredMixin, generic.FormView):
                 # Adding
                 managed_cdds = [
                     managing.entity
-                    for managing in CddManager.objects.filter(person=self.request.user.person).select_related('entity')
+                    for managing in CddConfigurator.objects.filter(person=self.request.user.person).select_related(
+                        'entity'
+                    )
                 ]
                 if not managed_cdds:
                     raise PermissionDenied('Current user has no CDD')
