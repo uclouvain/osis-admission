@@ -1,0 +1,116 @@
+{% load i18n bootstrap3 admission %}
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<form
+    id="request-form"
+    hx-post="{% url request.resolver_match.namespace|add:':candidate-request' uuid=request.resolver_match.kwargs.uuid identifier=request.resolver_match.kwargs.identifier %}"
+    method="post"
+    hx-swap="outerHTML"
+>
+  {% if message %}
+    <p class="alert alert-success">{{ message }}</p>
+  {% endif %}
+  {% csrf_token %}
+  {% bootstrap_field request_form.is_requested %}
+  {% if request_form.is_requested.value %}
+    <div id="reason-container" class="flex-content-no-wrap">
+      <div id="reason-message-container">
+        {% field_data request_form.reason.label request_reason|linebreaks %}
+      </div>
+      <button
+          class="btn btn-primary"
+          type="button"
+          data-toggle="modal"
+          data-target="#request-form-modal"
+      >
+        <i class="fa-solid fa-pen-to-square"></i>
+      </button>
+    </div>
+  {% endif %}
+  <div id="request-form-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">{% translate 'Request a document' %}</h4>
+        </div>
+        <div class="modal-body">
+          {% bootstrap_field request_form.reason %}
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary" name="request-form">{% translate 'Save the request' %}</button>
+          <button type="button" class="cancel-button btn btn-default" data-dismiss="modal">{% translate 'Close' %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="cancel-request-form-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">{% translate 'Cancel the request of a document' %}</h4>
+        </div>
+        <div class="modal-body">
+          {% translate 'Please note that this document will be removed from the list of the missing documents.' %}
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary" name="request-form">{% translate 'Confirm' %}</button>
+          <button type="button" class="cancel-button btn btn-default" data-dismiss="modal">{% translate 'Close' %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+  $(function () {
+    const isRequested = $('#id_is_requested').prop('checked');
+
+    $('#id_is_requested').change(function() {
+      if (this.checked) {
+        $('#request-form-modal').modal('show');
+      } else {
+        {% if document_type == 'CANDIDAT_SIC' or document_type == 'CANDIDAT_FAC' %}
+          $('#cancel-request-form-modal').modal('show');
+        {% else %}
+          $('#cancel-request-form-modal button[type="submit"]').click();
+        {% endif %}
+      }
+    });
+
+    $('#request-form-modal').on('shown.bs.modal', function () {
+      $('#request-form-modal textarea').focus();
+    });
+
+    $('.cancel-button').on('click', function () {
+      console.log('on click', isRequested);
+      $('#id_is_requested').prop('checked', isRequested);
+    });
+
+    $('#request-form').on('htmx:beforeSend', function (evt) {
+      $('.modal').modal('hide');
+    });
+  });
+</script>

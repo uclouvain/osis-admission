@@ -27,28 +27,63 @@ from typing import List
 
 from django.utils.dateparse import parse_datetime
 
-from admission.ddd.admission.domain.service.i_recuperer_documents_demande import IRecupererDocumentsDemandeTranslator
-from admission.ddd.admission.dtos.document import DocumentDTO
+from admission.ddd.admission.domain.model.demande import DemandeIdentity
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+from admission.ddd.admission.domain.service.i_emplacements_documents_demande import (
+    IEmplacementsDocumentsDemandeTranslator,
+)
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums.document import TypeDocument, StatutDocument, OngletsDemande
+from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument, OngletsDemande
 from admission.exports.admission_recap.section import get_sections
 from osis_document.api.utils import get_remote_tokens, get_several_remote_metadata
 
 
-class RecupererDocumentsDemandeTranslator(IRecupererDocumentsDemandeTranslator):
+class EmplacementsDocumentsDemandeTranslator(IEmplacementsDocumentsDemandeTranslator):
     @classmethod
-    def recuperer(
+    def recuperer_emplacements_dto(
         cls,
         resume_dto: ResumePropositionDTO,
         questions_specifiques: List[QuestionSpecifiqueDTO],
-    ) -> List[DocumentDTO]:
-        # Get the requested attachments by tab
-        sections = get_sections(resume_dto, questions_specifiques)
+    ) -> List[EmplacementDocumentDTO]:
+        documents = cls.recuperer_emplacements(resume_dto, questions_specifiques)
+        return [
+            EmplacementDocumentDTO(
+                identifiant=document.entity_id.identifiant,
+                libelle=document.libelle,
+                uuids=document.uuids,
+                auteur=document.auteur,
+                type=document.type.name,
+                statut=document.statut.name,
+                justification_gestionnaire=document.justification_gestionnaire,
+                soumis_le=document.soumis_le,
+                reclame_le=document.reclame_le,
+                derniere_action_le=document.derniere_action_le,
+                a_echeance_le=document.a_echeance_le,
+                onglet=document.onglet.name,
+                nom_onglet=document.onglet.value,
+                uuid_demande=document.demande.uuid,
+            )
+            for document in documents
+        ]
 
-        # Get a read token and metadata of all attachments
+    @classmethod
+    def recuperer_emplacements(
+        cls,
+        resume_dto: ResumePropositionDTO,
+        questions_specifiques: List[QuestionSpecifiqueDTO],
+    ) -> List[EmplacementDocument]:
+        # Get the requested documents by tab
+        tabs = get_sections(
+            context=resume_dto,
+            specific_questions=questions_specifiques,
+            additional_documents=True,
+        )
+
+        # Get a read token and metadata of all documents
         all_file_uuids = [
-            file_uuid for section in sections for attachment in section.attachments for file_uuid in attachment.uuids
+            file_uuid for section in tabs for attachment in section.attachments for file_uuid in attachment.uuids
         ]
 
         for champ_documents_libres in [
@@ -66,12 +101,12 @@ class RecupererDocumentsDemandeTranslator(IRecupererDocumentsDemandeTranslator):
         documents = []
 
         # Add all documents that are or were requested to the candidate
-        for section in sections:
-            for attachment in section.attachments:
-                document = cls.get_candidate_document(
-                    uuid_proposition=resume_dto.proposition.uuid,
+        for tab in tabs:
+            for attachment in tab.attachments:
+                document = cls.get_emplacement_document_candidat(
+                    uuid_demande=resume_dto.proposition.uuid,
                     attachment=attachment,
-                    section=section,
+                    tab=tab,
                     file_metadata=file_metadata,
                     file_tokens=file_tokens,
                     requested_documents=resume_dto.proposition.documents_demandes,
@@ -87,7 +122,7 @@ class RecupererDocumentsDemandeTranslator(IRecupererDocumentsDemandeTranslator):
         ]:
             for document_uuid in document_uuids:
                 documents.append(
-                    cls.get_manager_document(
+                    cls.get_emplacement_document_gestionnaire(
                         uuid_proposition=resume_dto.proposition.uuid,
                         document_uuid=str(document_uuid),
                         document_type=document_type,
@@ -99,16 +134,16 @@ class RecupererDocumentsDemandeTranslator(IRecupererDocumentsDemandeTranslator):
         return documents
 
     @classmethod
-    def get_candidate_document(
+    def get_emplacement_document_candidat(
         cls,
-        uuid_proposition,
+        uuid_demande,
         attachment,
-        section,
+        tab,
         file_metadata,
         file_tokens,
         requested_documents,
-    ):
-        document_id = f'{section.identifier}.{attachment.identifier}'
+    ) -> EmplacementDocument:
+        document_id = f'{tab.identifier}.{attachment.identifier}'
         requested_document = requested_documents.get(document_id, {})
         metadata = (
             file_metadata[file_tokens[attachment.uuids[0]]]
@@ -117,21 +152,19 @@ class RecupererDocumentsDemandeTranslator(IRecupererDocumentsDemandeTranslator):
             and file_tokens[attachment.uuids[0]] in file_metadata
             else {}
         )
-        return DocumentDTO(
-            uuid_proposition=uuid_proposition,
-            identifiant=document_id,
-            onglet=section.identifier,
-            nom_onglet=section.label,
+        return EmplacementDocument(
+            demande=DemandeIdentity(uuid=uuid_demande),
+            entity_id=EmplacementDocumentIdentity(identifiant=document_id),
+            onglet=tab.base_identifier,
             libelle=attachment.label,
             uuids=attachment.uuids,
             auteur=requested_document.get('author', ''),
-            type=requested_document.get('type', TypeDocument.NON_LIBRE.name),
-            statut=requested_document['status']
+            type=TypeDocument[requested_document['type']] if 'type' in requested_document else TypeDocument.NON_LIBRE,
+            statut=StatutDocument[requested_document['status']]
             if 'status' in requested_document
-            else StatutDocument.A_RECLAMER.name
+            else StatutDocument.A_RECLAMER
             if (attachment.required and not attachment.uuids)
-            else StatutDocument.NON_ANALYSE.name,
-            requis=attachment.required,
+            else StatutDocument.NON_ANALYSE,
             justification_gestionnaire=requested_document.get('reason', ''),
             soumis_le=metadata.get('uploaded_at') and parse_datetime(metadata['uploaded_at']),
             reclame_le=requested_document.get('requested_at') and parse_datetime(requested_document['requested_at']),
@@ -141,24 +174,29 @@ class RecupererDocumentsDemandeTranslator(IRecupererDocumentsDemandeTranslator):
         )
 
     @classmethod
-    def get_manager_document(cls, uuid_proposition, document_uuid, document_type, file_metadata, file_tokens):
+    def get_emplacement_document_gestionnaire(
+        cls,
+        uuid_proposition,
+        document_uuid,
+        document_type,
+        file_metadata,
+        file_tokens,
+    ) -> EmplacementDocument:
         metadata = (
             file_metadata[file_tokens[document_uuid]]
             if document_uuid in file_tokens and file_tokens[document_uuid] in file_metadata
             else {}
         )
 
-        return DocumentDTO(
-            uuid_proposition=uuid_proposition,
-            identifiant=document_uuid,
-            onglet=OngletsDemande.DOCUMENTS_ADDITIONNELS.name,
-            nom_onglet=OngletsDemande.DOCUMENTS_ADDITIONNELS.value,
+        return EmplacementDocument(
+            demande=DemandeIdentity(uuid=uuid_proposition),
+            entity_id=EmplacementDocumentIdentity(f'{OngletsDemande.DOCUMENTS_ADDITIONNELS.name}.{document_uuid}'),
+            onglet=OngletsDemande.DOCUMENTS_ADDITIONNELS,
             libelle=metadata.get('explicit_name', ''),
             uuids=[document_uuid],
             auteur=metadata.get('author', ''),
             type=document_type,
-            statut=StatutDocument.VALIDE.name,
-            requis=False,
+            statut=StatutDocument.VALIDE,
             justification_gestionnaire='',
             soumis_le=metadata.get('uploaded_at') and parse_datetime(metadata['uploaded_at']),
             reclame_le=None,

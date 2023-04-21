@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,16 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import re
 
-from django.utils.translation import gettext_lazy as _
+from admission.ddd.admission.commands import ReclamerDocumentCommand
+from admission.ddd.admission.domain.builder.document_builder import DocumentBuilder
+from admission.ddd.admission.enums.emplacement_document import StatutDocument
+from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
-FIELD_REQUIRED_MESSAGE = _("This field is required.")
-DEFAULT_PAGINATOR_SIZE = 10
-PDF_MIME_TYPE = 'application/pdf'
-JPEG_MIME_TYPE = 'image/jpeg'
-PNG_MIME_TYPE = 'image/png'
-IMAGE_MIME_TYPES = {JPEG_MIME_TYPE, PNG_MIME_TYPE}
-DEFAULT_MIME_TYPES = {PDF_MIME_TYPE} | IMAGE_MIME_TYPES
-UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
-UUID_COMPILE_REGEX = re.compile(UUID_REGEX)
+
+def reclamer_document(
+    cmd: 'ReclamerDocumentCommand',
+    emplacement_document_repository: 'IEmplacementDocumentRepository',
+) -> str:
+    document = DocumentBuilder().initier_document(
+        statut_document=StatutDocument.A_RECLAMER.name,
+        uuid_demande=cmd.uuid_demande,
+        auteur=cmd.auteur,
+        nom_document='',
+        identifiant_document=cmd.identifiant_document,
+        type_document=cmd.type_document,
+    )
+
+    document.definir_a_reclamer(raison=cmd.raison)
+
+    emplacement_document_repository.save_emplacement_document_candidat(entity=document)
+
+    return document.entity_id.identifiant

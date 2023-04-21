@@ -36,11 +36,11 @@
         <th>{% translate 'Date' %}</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="selectable">
       {% for document in documents %}
         {% if not document.uuids and document.type not in DOCUMENTS_UCLOUVAIN %}
           {% ifchanged document.onglet %}
-            <tr class="active">
+            <tr class="tab-name">
               <td colspan="3">> {{ document.nom_onglet|default:_('Additional documents') }}</td>
             </tr>
           {% endifchanged %}

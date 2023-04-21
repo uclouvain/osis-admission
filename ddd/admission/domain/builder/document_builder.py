@@ -25,25 +25,25 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.domain.builder.document_identity_builder import DocumentIdentityBuilder
-from admission.ddd.admission.domain.model.document import Document, DocumentIdentity
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.dtos.document import DocumentDTO
-from admission.ddd.admission.enums.document import TypeDocument, StatutDocument, OngletsDemande
+from admission.ddd.admission.domain.builder.document_identity_builder import EmplacementDocumentIdentityBuilder
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.demande import DemandeIdentity
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument, OngletsDemande
 from osis_common.ddd import interface
 from osis_common.ddd.interface import CommandRequest
 
 
 class DocumentBuilder(interface.RootEntityBuilder):
     @classmethod
-    def build_from_command(cls, cmd: 'CommandRequest') -> 'Document':
+    def build_from_command(cls, cmd: 'CommandRequest') -> 'EmplacementDocument':
         pass
 
     @classmethod
-    def build_from_repository_dto(cls, dto_object: 'DocumentDTO') -> 'Document':
-        return Document(
-            entity_id=DocumentIdentity(identifiant=dto_object.identifiant),
-            proposition=PropositionIdentity(uuid=dto_object.uuid_proposition),
+    def build_from_repository_dto(cls, dto_object: 'EmplacementDocumentDTO') -> 'EmplacementDocument':
+        return EmplacementDocument(
+            entity_id=EmplacementDocumentIdentity(identifiant=dto_object.identifiant),
+            demande=DemandeIdentity(uuid=dto_object.uuid_demande),
             libelle=dto_object.libelle,
             onglet=OngletsDemande[dto_object.onglet],
             uuids=dto_object.uuids,
@@ -60,7 +60,7 @@ class DocumentBuilder(interface.RootEntityBuilder):
     @classmethod
     def initier_document(
         cls,
-        uuid_proposition: str,
+        uuid_demande: str,
         auteur: str,
         type_document: str,
         nom_document: str,
@@ -69,17 +69,16 @@ class DocumentBuilder(interface.RootEntityBuilder):
         identifiant_document: str = '',
         identifiant_question_specifique: str = '',
         onglet: OngletsDemande = OngletsDemande.DOCUMENTS_ADDITIONNELS,
-    ) -> 'Document':
+    ) -> 'EmplacementDocument':
         heure_initiation = datetime.datetime.now()
-        return Document(
-            entity_id=DocumentIdentityBuilder.build(
-                type_document=TypeDocument[type_document],
+        return EmplacementDocument(
+            entity_id=EmplacementDocumentIdentityBuilder.build(
                 identifiant_document=identifiant_document,
                 token_document=token_document,
                 identifiant_question_specifique=identifiant_question_specifique,
                 onglet_document=onglet,
             ),
-            proposition=PropositionIdentity(uuid=uuid_proposition),
+            demande=DemandeIdentity(uuid=uuid_demande),
             libelle=nom_document,
             uuids=[token_document] if token_document else [],
             auteur=auteur,

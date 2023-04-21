@@ -419,7 +419,7 @@ class AdmissionFormItemInstantiation(models.Model):
             'An integer greater than zero indicating the position of the item in relation to the others. Important '
             'point: the questions are displayed together according to the field "Display according to training" (the '
             'elements for all trainings, then the elements for a type of training, then the elements for a specific '
-            'training).'
+            'training and finally the elements associated with a single admission).'
         ),
     )
     required = models.BooleanField(

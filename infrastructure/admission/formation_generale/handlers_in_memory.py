@@ -44,7 +44,7 @@ from admission.infrastructure.admission.domain.service.in_memory.maximum_proposi
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_demande import (
-    RecupererDocumentsDemandeInMemoryTranslator,
+    RecupererDocumentsDemandeInMemoryTranslator, EmplacementsDocumentsDemandeInMemoryTranslator,
 )
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
@@ -65,6 +65,9 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+    EmplacementDocumentInMemoryRepository,
+)
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
@@ -78,7 +81,8 @@ _academic_year_repository = AcademicYearInMemoryRepository()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 _historique = HistoriqueInMemory()
-_recuperer_documents_demande_translator = RecupererDocumentsDemandeInMemoryTranslator()
+_emplacements_documents_demande_translator = EmplacementsDocumentsDemandeInMemoryTranslator()
+_emplacement_document_repository = EmplacementDocumentInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -191,11 +195,20 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=_profil_candidat_translator,
         comptabilite_translator=_comptabilite_translator,
         question_specifique_translator=_question_specific_translator,
-        recuperer_documents_demande_translator=_recuperer_documents_demande_translator,
+        emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
         academic_year_repository=_academic_year_repository,
     ),
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_demande(
         cmd,
         question_specifique_translator=_question_specific_translator,
+    ),
+    DeterminerEmplacementsDocumentsDemandeCommand: lambda msg_bus, cmd: determiner_emplacements_documents_demande(
+        cmd,
+        proposition_repository=_proposition_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        comptabilite_translator=_comptabilite_translator,
+        question_specifique_translator=_question_specific_translator,
+        academic_year_repository=_academic_year_repository,
+        emplacement_document_repository=_emplacement_document_repository,
     ),
 }

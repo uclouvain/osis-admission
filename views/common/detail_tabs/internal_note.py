@@ -28,12 +28,12 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView
 
 from admission.contrib.models.doctorate import InternalNote
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from admission.views.doctorate.mixins import AdmissionFormMixin
 
 __all__ = ["InternalNoteView"]
 
 
-class InternalNoteView(LoadDossierViewMixin, CreateView):
+class InternalNoteView(AdmissionFormMixin, CreateView):
     model = InternalNote
     fields = ['text']
     template_name = 'admission/doctorate/forms/internal_note.html'

@@ -520,13 +520,18 @@ msgid ""
 "to the others. Important point: the questions are displayed together "
 "according to the field \"Display according to training\" (the elements for "
 "all trainings, then the elements for a type of training, then the elements "
-"for a specific training)."
+"for a specific training and finally the elements associated with a single "
+"admission)."
 msgstr ""
 "Entier supérieur à zéro indiquant la position de l’élément par rapport aux "
 "autres. Point important : les questions sont affichées groupées suivant le "
 "champ \"Affichage selon la formation\" (les éléments pour toutes les "
 "formations, puis les éléments pour un type de formation, puis les éléments "
-"pour une formation spécifique)."
+"pour une formation spécifique et enfin les éléments associés à une admission "
+"unique)."
+
+msgid "Analysis folder"
+msgstr "Dossier d'analyse"
 
 msgid "Ancient languages"
 msgstr "Langues anciennes"
@@ -540,6 +545,12 @@ msgid ""
 msgstr ""
 "Annexe 26 ou 26 ou la carte A/B mentionnant le statut de réfugié ou la "
 "décision confirmant la protection du parent"
+
+msgid "Annual transcript"
+msgstr "Relevé de notes annuel"
+
+msgid "Annual transcript translation"
+msgstr "Traduction du relevé de notes annuel"
 
 msgid "Another address"
 msgstr "Une autre adresse"
@@ -1128,6 +1139,14 @@ msgstr "Commentaires"
 msgid "Communication attestation"
 msgstr "Attestation de communication"
 
+#, python-format
+msgid ""
+"Communication to the candidate, in <span class=\"label label-admission-"
+"primary\">%s</span>"
+msgstr ""
+"Communication au candidat, en langue <span class=\"label label-admission-"
+"primary\">%s</span>"
+
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
 
@@ -1286,6 +1305,20 @@ msgstr "Copie recto-verso du titre de séjour en Belgique"
 msgid "Copy of both sides of the residence permit valid for more than 3 months"
 msgstr ""
 "Copie recto-verso du titre de séjour d’une validité supérieure à 3 mois"
+
+msgid ""
+"Copy of both sides of the residence permit valid for more than 3 months "
+"(professional)"
+msgstr ""
+"Copie recto-verso du titre de séjour d’une validité supérieure à 3 mois "
+"(professionnel)"
+
+msgid ""
+"Copy of both sides of the residence permit valid for more than 3 months "
+"(replacement)"
+msgstr ""
+"Copie recto-verso du titre de séjour d’une validité supérieure à 3 mois "
+"(remplacement)"
 
 #, python-format
 msgid ""
@@ -1639,8 +1672,14 @@ msgstr "Demandes d'inscription en doctorat"
 msgid "Document"
 msgstr "Document"
 
+msgid "Document not found."
+msgstr "Document non trouvé."
+
 msgid "Document requested"
 msgstr "Document réclamé"
+
+msgid "Document to be requested"
+msgstr "Document à réclamer"
 
 msgid "Document uploaded"
 msgstr "Document téléversé"
@@ -1867,11 +1906,11 @@ msgstr "Modification d'inscription externe"
 msgid "External reorientation"
 msgstr "Réorientation externe"
 
-msgid "FAC/CDD processing"
-msgstr "Traitement FAC/CDD"
-
 msgid "FAC free documents"
 msgstr "Documents libres FAC"
+
+msgid "FAC/CDD processing"
+msgstr "Traitement FAC/CDD"
 
 msgid "FNRS"
 msgstr "FNRS"
@@ -3757,6 +3796,9 @@ msgstr "Procès-verbal du comité d'accompagnement"
 msgid "Reporting categories"
 msgstr "Catégories de reporting"
 
+msgid "Request a document"
+msgstr "Réclamer un document"
+
 msgid "Request of a new deadline for the confirmation paper"
 msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 
@@ -3963,6 +4005,9 @@ msgstr "Enregistrer"
 
 msgid "Save and view result"
 msgstr "Enregistrer et voir le résultat"
+
+msgid "Save the request"
+msgstr "Sauvegarder la requête"
 
 msgid "Scholarship"
 msgstr "Boursier"

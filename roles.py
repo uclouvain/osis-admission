@@ -24,18 +24,25 @@
 #
 # ##############################################################################
 
+from admission.auth.predicates import (
+    complementary_training_enabled,
+    is_enrolled,
+    is_part_of_education_group,
+    is_pre_admission,
+    submitted_confirmation_paper,
+)
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
+from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_configurator import CddConfigurator
+from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.jury_secretary import JurySecretary
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
-from admission.auth.roles.central_manager import CentralManager
 from osis_role import role
-from admission.auth.roles.candidate import Candidate
 
 role.role_manager.register(Candidate)
 role.role_manager.register(AdreSecretary)
@@ -48,3 +55,26 @@ role.role_manager.register(ProgramManager)
 role.role_manager.register(CentralManager)
 role.role_manager.register(SicManagement)
 role.role_manager.register(JurySecretary)
+
+def base_program_manager_rules():
+    return {
+        # Doctorats
+        # --- Confirmation
+        'admission.view_admission_confirmation': is_part_of_education_group & is_enrolled,
+        'admission.change_admission_confirmation': is_part_of_education_group & is_enrolled,
+        'admission.change_admission_confirmation_extension': is_part_of_education_group & is_enrolled,
+        'admission.make_confirmation_decision': is_part_of_education_group & submitted_confirmation_paper,
+        'admission.send_message': is_part_of_education_group & is_enrolled,
+        # -- Formation doctorale
+        'admission.view_training': is_part_of_education_group & is_enrolled,
+        'admission.view_doctoral_training': is_part_of_education_group & is_enrolled & ~is_pre_admission,
+        'admission.view_complementary_training': is_part_of_education_group & complementary_training_enabled,
+        'admission.view_course_enrollment': is_part_of_education_group & is_enrolled,
+        'admission.change_activity': is_part_of_education_group & is_enrolled,
+        'admission.delete_activity': is_part_of_education_group & is_enrolled,
+        'admission.refuse_activity': is_part_of_education_group & is_enrolled,
+        'admission.restore_activity': is_part_of_education_group & is_enrolled,
+        # -- Jury
+        # -- Défense
+        # -- Soutenance
+    }

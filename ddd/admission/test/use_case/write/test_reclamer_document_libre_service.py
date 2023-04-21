@@ -32,7 +32,7 @@ import freezegun
 from admission.constants import UUID_REGEX
 from admission.ddd.admission.commands import ReclamerDocumentLibreCommand
 from admission.ddd.admission.domain.model.document import DocumentIdentity
-from admission.ddd.admission.enums.document import TypeDocument, StatutDocument, OngletsDemande, DocumentsInterOnglets
+from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument, OngletsDemande, DocumentsInterOnglets
 from admission.infrastructure.admission.repository.in_memory.document import DocumentInMemoryRepository
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
@@ -57,7 +57,7 @@ class TestReclamerDocumentLibre(TestCase):
     def test_should_reclamer_document_libre_sic(self):
         identifiant_document_depose = self.message_bus.invoke(
             ReclamerDocumentLibreCommand(
-                uuid_proposition=self.uuid_proposition,
+                uuid_demande=self.uuid_proposition,
                 auteur='0123456789',
                 type_document=TypeDocument.CANDIDAT_SIC.name,
                 nom_document='Nom du document',
@@ -86,7 +86,7 @@ class TestReclamerDocumentLibre(TestCase):
     def test_should_reclamer_document_libre_fac(self):
         identifiant_document_depose = self.message_bus.invoke(
             ReclamerDocumentLibreCommand(
-                uuid_proposition=self.uuid_proposition,
+                uuid_demande=self.uuid_proposition,
                 auteur='0123456789',
                 type_document=TypeDocument.CANDIDAT_FAC.name,
                 nom_document='Nom du document',

@@ -26,9 +26,9 @@
 
 from admission.ddd.admission.commands import *
 from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.write import deposer_document_libre_par_gestionnaire, reclamer_document_libre
+from admission.ddd.admission.use_case.write import *
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
-from admission.infrastructure.admission.repository.document import DocumentRepository
+from admission.infrastructure.admission.repository.emplacement_document import EmplacementDocumentRepository
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
@@ -37,10 +37,18 @@ COMMAND_HANDLERS = {
     ),
     DeposerDocumentLibreParGestionnaireCommand: lambda msg_bus, cmd: deposer_document_libre_par_gestionnaire(
         cmd,
-        document_repository=DocumentRepository(),
+        emplacement_document_repository=EmplacementDocumentRepository(),
     ),
     ReclamerDocumentLibreCommand: lambda msg_bus, cmd: reclamer_document_libre(
         cmd,
-        document_repository=DocumentRepository(),
+        emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    ReclamerDocumentCommand: lambda msg_bus, cmd: reclamer_document(
+        cmd,
+        emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    AnnulerReclamationDocumentCommand: lambda msg_bus, cmd: annuler_reclamation_document(
+        cmd,
+        emplacement_document_repository=EmplacementDocumentRepository(),
     ),
 }

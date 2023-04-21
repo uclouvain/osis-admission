@@ -27,23 +27,29 @@ from typing import List
 
 from django.utils.dateparse import parse_datetime
 
-from admission.ddd.admission.domain.service.i_recuperer_documents_demande import IRecupererDocumentsDemandeTranslator
-from admission.ddd.admission.dtos.document import DocumentDTO
+from admission.ddd.admission.domain.service.i_emplacements_documents_demande import (
+    IEmplacementsDocumentsDemandeTranslator,
+)
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums.document import TypeDocument, StatutDocument
+from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument
 from admission.exports.admission_recap.section import get_sections
 
 
-class RecupererDocumentsDemandeInMemoryTranslator(IRecupererDocumentsDemandeTranslator):
+class EmplacementsDocumentsDemandeInMemoryTranslator(IEmplacementsDocumentsDemandeTranslator):
     @classmethod
     def recuperer(
         cls,
         resume_dto: ResumePropositionDTO,
         questions_specifiques: List[QuestionSpecifiqueDTO],
-    ) -> List[DocumentDTO]:
+    ) -> List[EmplacementDocumentDTO]:
         # Get the requested attachments by tab
-        sections = get_sections(resume_dto, questions_specifiques)
+        sections = get_sections(
+            context=resume_dto,
+            specific_questions=questions_specifiques,
+            additional_documents=True,
+        )
 
         requested_documents = resume_dto.proposition.documents_demandes
 
@@ -54,8 +60,8 @@ class RecupererDocumentsDemandeInMemoryTranslator(IRecupererDocumentsDemandeTran
             for attachment in section.attachments:
                 document_id = f'{section.identifier}.{attachment.identifier}'
                 requested_document = requested_documents.get(document_id, {})
-                document = DocumentDTO(
-                    uuid_proposition=resume_dto.proposition.uuid,
+                document = EmplacementDocumentDTO(
+                    uuid_demande=resume_dto.proposition.uuid,
                     identifiant=document_id,
                     onglet=section.identifier,
                     nom_onglet=section.label,
@@ -68,7 +74,6 @@ class RecupererDocumentsDemandeInMemoryTranslator(IRecupererDocumentsDemandeTran
                     else StatutDocument.A_RECLAMER.name
                     if (attachment.required and not attachment.uuids)
                     else StatutDocument.NON_ANALYSE.name,
-                    requis=attachment.required,
                     justification_gestionnaire=requested_document.get('reason', ''),
                     soumis_le=requested_document.get('uploaded_at')
                     and parse_datetime(requested_document['uploaded_at']),

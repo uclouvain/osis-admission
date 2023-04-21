@@ -26,23 +26,23 @@
 
 from admission.ddd.admission.commands import DeposerDocumentLibreParGestionnaireCommand
 from admission.ddd.admission.domain.builder.document_builder import DocumentBuilder
-from admission.ddd.admission.enums.document import StatutDocument
-from admission.ddd.admission.repository.i_document import IDocumentRepository
+from admission.ddd.admission.enums.emplacement_document import StatutDocument
+from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
 def deposer_document_libre_par_gestionnaire(
     cmd: 'DeposerDocumentLibreParGestionnaireCommand',
-    document_repository: 'IDocumentRepository',
+    emplacement_document_repository: 'IEmplacementDocumentRepository',
 ) -> str:
     document = DocumentBuilder().initier_document(
         statut_document=StatutDocument.VALIDE.name,
-        uuid_proposition=cmd.uuid_proposition,
+        uuid_demande=cmd.uuid_demande,
         auteur=cmd.auteur,
         token_document=cmd.token_document,
         type_document=cmd.type_document,
         nom_document=cmd.nom_document,
     )
 
-    document_repository.save_document_gestionnaire(document)
+    emplacement_document_repository.save_emplacement_document_gestionnaire(document)
 
     return document.entity_id.identifiant

@@ -216,3 +216,8 @@ class RecupererDocumentsDemandeQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererQuestionsSpecifiquesQuery(RecupererQuestionsSpecifiquesQuery):
     pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DeterminerEmplacementsDocumentsDemandeCommand(interface.CommandRequest):
+    uuid_demande: str

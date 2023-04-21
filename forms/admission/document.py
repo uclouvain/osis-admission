@@ -24,9 +24,12 @@
 #
 # ##############################################################################
 from django import forms
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.forms import AdmissionFileUploadField
+from admission.templatetags.admission import formatted_language
 
 
 class UploadFreeDocumentForm(forms.Form):
@@ -50,3 +53,37 @@ class RequestFreeDocumentForm(forms.Form):
         label=_('Reason'),
         widget=forms.Textarea,
     )
+
+
+class RequestDocumentForm(forms.Form):
+    is_requested = forms.BooleanField(
+        label=_('Document to be requested'),
+        required=False,
+    )
+
+    reason = forms.CharField(
+        widget=forms.Textarea,
+    )
+
+    def __init__(self, candidate_language, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['reason'].label = mark_safe(
+            _(
+                'Communication to the candidate, in <span class="label label-admission-primary">%s</span>'
+                % formatted_language(candidate_language)
+            )
+        )
+        self.fields['reason'].required = bool(
+            self.data.get(
+                self.add_prefix('is_requested'),
+                True,
+            ),
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if not cleaned_data.get('is_requested'):
+            cleaned_data['reason'] = ''
+
+        return cleaned_data

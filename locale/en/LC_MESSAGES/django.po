@@ -457,7 +457,11 @@ msgid ""
 "to the others. Important point: the questions are displayed together "
 "according to the field \"Display according to training\" (the elements for "
 "all trainings, then the elements for a type of training, then the elements "
-"for a specific training)."
+"for a specific training and finally the elements associated with a single "
+"admission)."
+msgstr ""
+
+msgid "Analysis folder"
 msgstr ""
 
 msgid "Ancient languages"
@@ -469,6 +473,12 @@ msgstr ""
 msgid ""
 "Annex 25 or 26 or the A/B card mentioning the refugee status or the decision "
 "confirming the protection of the parent"
+msgstr ""
+
+msgid "Annual transcript"
+msgstr ""
+
+msgid "Annual transcript translation"
 msgstr ""
 
 msgid "Another address"
@@ -1035,6 +1045,12 @@ msgstr ""
 msgid "Communication attestation"
 msgstr ""
 
+#, python-format
+msgid ""
+"Communication to the candidate, in <span class=\"label label-admission-"
+"primary\">%s</span>"
+msgstr ""
+
 msgid "Communication with Host Hospitals"
 msgstr ""
 
@@ -1177,6 +1193,16 @@ msgid "Copy of both sides of the residence permit in Belgium"
 msgstr ""
 
 msgid "Copy of both sides of the residence permit valid for more than 3 months"
+msgstr ""
+
+msgid ""
+"Copy of both sides of the residence permit valid for more than 3 months "
+"(professional)"
+msgstr ""
+
+msgid ""
+"Copy of both sides of the residence permit valid for more than 3 months "
+"(replacement)"
 msgstr ""
 
 #, python-format
@@ -1502,7 +1528,15 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
+#, fuzzy
+#| msgid "Membre CA not found."
+msgid "Document not found."
+msgstr "Supervisory panel member not found."
+
 msgid "Document requested"
+msgstr ""
+
+msgid "Document to be requested"
 msgstr ""
 
 msgid "Document uploaded"
@@ -1728,10 +1762,10 @@ msgstr ""
 msgid "External reorientation"
 msgstr ""
 
-msgid "FAC/CDD processing"
+msgid "FAC free documents"
 msgstr ""
 
-msgid "FAC free documents"
+msgid "FAC/CDD processing"
 msgstr ""
 
 msgid "FNRS"
@@ -3387,6 +3421,9 @@ msgstr ""
 msgid "Reporting categories"
 msgstr ""
 
+msgid "Request a document"
+msgstr ""
+
 msgid "Request of a new deadline for the confirmation paper"
 msgstr ""
 
@@ -3584,6 +3621,9 @@ msgid "Save"
 msgstr ""
 
 msgid "Save and view result"
+msgstr ""
+
+msgid "Save the request"
 msgstr ""
 
 msgid "Scholarship"

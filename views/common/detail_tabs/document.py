@@ -28,20 +28,33 @@ from django.utils.translation import gettext as _
 from django.views.generic import TemplateView, FormView
 
 from admission.auth.roles.program_manager import ProgramManager
-from admission.ddd.admission.commands import DeposerDocumentLibreParGestionnaireCommand, ReclamerDocumentLibreCommand
-from admission.ddd.admission.enums.document import DOCUMENTS_UCLOUVAIN, TypeDocument
+from admission.ddd.admission.commands import (
+    DeposerDocumentLibreParGestionnaireCommand,
+    ReclamerDocumentLibreCommand,
+    ReclamerDocumentCommand,
+    AnnulerReclamationDocumentCommand,
+)
+from admission.ddd.admission.enums.emplacement_document import (
+    DOCUMENTS_UCLOUVAIN,
+    TypeDocument,
+    StatutDocument,
+)
 from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.forms.admission.document import UploadFreeDocumentForm, RequestFreeDocumentForm
+from admission.forms.admission.document import UploadFreeDocumentForm, RequestFreeDocumentForm, RequestDocumentForm
+from admission.infrastructure.utils import get_document_from_identifier
 from admission.templatetags.admission import CONTEXT_GENERAL
-from admission.views.doctorate.mixins import LoadDossierViewMixin
-from base.utils.htmx import HtmxMixin, HtmxPermissionRequiredMixin
+from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
+from osis_common.utils.htmx import HtmxMixin
 
 __namespace__ = 'document'
 __all__ = [
     'DocumentView',
     'UploadFreeCandidateDocumentView',
     'RequestFreeCandidateDocumentView',
+    'DocumentDetailView',
+    'RequestCandidateDocumentView',
 ]
 
 
@@ -72,7 +85,7 @@ class DocumentView(LoadDossierViewMixin, TemplateView):
         return context
 
 
-class UploadFreeCandidateDocumentView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
+class UploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     form_class = UploadFreeDocumentForm
     template_name = 'admission/document/upload_free_document.html'
     htmx_template_name = 'admission/document/upload_free_document.html'
@@ -82,7 +95,7 @@ class UploadFreeCandidateDocumentView(LoadDossierViewMixin, HtmxPermissionRequir
     def form_valid(self, form) -> HttpResponse:
         message_bus_instance.invoke(
             DeposerDocumentLibreParGestionnaireCommand(
-                uuid_proposition=self.kwargs.get('uuid'),
+                uuid_demande=self.kwargs.get('uuid'),
                 auteur=self.request.user.username,
                 token_document=form.cleaned_data['file'][0],
                 type_document=(
@@ -101,7 +114,7 @@ class UploadFreeCandidateDocumentView(LoadDossierViewMixin, HtmxPermissionRequir
         )
 
 
-class RequestFreeCandidateDocumentView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
+class RequestFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     form_class = RequestFreeDocumentForm
     template_name = 'admission/document/request_free_document.html'
     htmx_template_name = 'admission/document/request_free_document.html'
@@ -111,7 +124,7 @@ class RequestFreeCandidateDocumentView(LoadDossierViewMixin, HtmxPermissionRequi
     def form_valid(self, form) -> HttpResponse:
         message_bus_instance.invoke(
             ReclamerDocumentLibreCommand(
-                uuid_proposition=self.kwargs.get('uuid'),
+                uuid_demande=self.kwargs.get('uuid'),
                 auteur=self.request.user.username,
                 type_document=(
                     TypeDocument.CANDIDAT_FAC.name
@@ -128,3 +141,94 @@ class RequestFreeCandidateDocumentView(LoadDossierViewMixin, HtmxPermissionRequi
                 message=_('Document requested'),
             )
         )
+
+
+class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, TemplateView):
+    template_name = 'admission/document/document-detail.html'
+    htmx_template_name = 'admission/document/document-detail.html'
+    permission_required = 'admission.view_documents_management'
+    urlpatterns = {'detail': 'detail/<str:identifier>'}
+
+    def get_context_data(self, **kwargs):
+        context = TemplateView().get_context_data(**kwargs)
+
+        document_identifier = self.kwargs.get('identifier')
+
+        document = get_document_from_identifier(self.admission, document_identifier)
+
+        if document:
+            context['document_identifier'] = document_identifier
+            context['document_uuid'] = document.get('uuids')
+            context['document_type'] = document.get('type')
+
+        # Request form
+        requested_document = self.admission.requested_documents.get(document_identifier)
+        request_initial = None
+
+        if requested_document:
+            request_initial = {
+                'is_requested': requested_document.get('status') == StatutDocument.A_RECLAMER.name,
+                'reason': requested_document.get('reason'),
+            }
+            context['request_reason'] = requested_document.get('reason')
+
+        context['request_form'] = RequestDocumentForm(
+            candidate_language=self.admission.candidate.language,
+            initial=request_initial,
+        )
+
+        return context
+
+
+class RequestCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
+    form_class = RequestDocumentForm
+    template_name = 'admission/document/request_document.html'
+    htmx_template_name = 'admission/document/request_document.html'
+    permission_required = 'admission.view_documents_management'
+    urlpatterns = {'candidate-request': 'candidate-request/<str:identifier>'}
+    # message_on_success = _('Document requested')
+
+    @property
+    def document_identifier(self):
+        return self.kwargs.get('identifier', '')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['request_form'] = context['form']
+
+        requested_document = self.admission.requested_documents.get(self.document_identifier)
+
+        if requested_document:
+            context['request_reason'] = requested_document.get('reason')
+
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['candidate_language'] = self.admission.candidate.language
+        return kwargs
+
+    def form_valid(self, form):
+        document = get_document_from_identifier(self.admission, self.document_identifier)
+
+        if not document:
+            return self.form_invalid(form)
+
+        message_bus_instance.invoke(
+            ReclamerDocumentCommand(
+                uuid_demande=self.kwargs.get('uuid'),
+                identifiant_document=self.document_identifier,
+                auteur=self.request.user.username,
+                type_document=document.get('type'),
+                raison=form.cleaned_data['reason'],
+            )
+            if form.cleaned_data['is_requested']
+            else AnnulerReclamationDocumentCommand(
+                uuid_demande=self.kwargs.get('uuid'),
+                identifiant_document=self.document_identifier,
+                type_document=document.get('type'),
+            )
+        )
+
+        return super().form_valid(form)

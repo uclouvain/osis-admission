@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,22 +22,36 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from abc import abstractmethod
-from typing import List
+##############################################################################
+import datetime
+from typing import Optional, List
 
-from admission.ddd.admission.dtos.document import DocumentDTO
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+import attr
+
 from osis_common.ddd import interface
 
 
-class IRecupererDocumentsDemandeTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def recuperer(
-        cls,
-        resume_dto: ResumePropositionDTO,
-        questions_specifiques: List[QuestionSpecifiqueDTO],
-    ) -> List[DocumentDTO]:
-        raise NotImplementedError
+@attr.dataclass(frozen=True, slots=True)
+class AuteurDTO(interface.DTO):
+    matricule: str
+    nom: str
+    prenom: str
+    est_candidat: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EmplacementDocumentDTO(interface.Entity):
+    identifiant: str
+    libelle: str
+    uuids: List[str]
+    auteur: str
+    type: str
+    statut: str
+    justification_gestionnaire: str
+    soumis_le: Optional[datetime.datetime]
+    reclame_le: Optional[datetime.datetime]
+    derniere_action_le: Optional[datetime.datetime]
+    a_echeance_le: Optional[datetime.datetime]
+    onglet: str
+    nom_onglet: str
+    uuid_demande: str
