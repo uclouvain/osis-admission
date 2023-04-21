@@ -43,7 +43,7 @@ from admission.ddd.admission.domain.validator._should_comptabilite_etre_complete
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.enums.document import (
+from admission.ddd.admission.enums.emplacement_document import (
     DocumentsIdentification,
     DocumentsEtudesSecondaires,
     DocumentsConnaissancesLangues,
@@ -73,8 +73,12 @@ class Attachment:
         sub_identifier='',
         sub_identifier_label='',
         required=False,
+        full_identifier='',
     ):
-        self.identifier = f'{identifier.name}.{sub_identifier}' if sub_identifier else identifier.name
+        if full_identifier:
+            self.identifier = full_identifier
+        else:
+            self.identifier = f'{sub_identifier}.{identifier.name}' if sub_identifier else identifier.name
         self.label = (
             label
             if label
@@ -609,8 +613,8 @@ def get_dynamic_questions_attachments(specific_questions: List[QuestionSpecifiqu
     """Returns the dynamic questions attachments."""
     return [
         Attachment(
+            full_identifier=f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{question.uuid}',
             identifier=DocumentsInterOnglets.QUESTION_SPECIFIQUE,
-            sub_identifier=question.uuid,
             label=question.label,
             uuids=question.valeur or [],
             required=question.requis,

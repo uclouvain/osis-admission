@@ -59,7 +59,7 @@ class RecupererQuestionsSpecifiquesQuery(interface.QueryRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class DeposerDocumentLibreParGestionnaireCommand(interface.QueryRequest):
-    uuid_proposition: str
+    uuid_demande: str
     auteur: str
     token_document: str
     type_document: str
@@ -68,8 +68,24 @@ class DeposerDocumentLibreParGestionnaireCommand(interface.QueryRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class ReclamerDocumentLibreCommand(interface.QueryRequest):
-    uuid_proposition: str
+    uuid_demande: str
     auteur: str
     type_document: str
     nom_document: str
     raison: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ReclamerDocumentCommand(interface.QueryRequest):
+    uuid_demande: str
+    identifiant_document: str
+    auteur: str
+    type_document: str
+    raison: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnnulerReclamationDocumentCommand(interface.QueryRequest):
+    uuid_demande: str
+    identifiant_document: str
+    type_document: str

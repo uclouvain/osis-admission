@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _, pgettext_lazy, ngettext_lazy
 
 from base.models.utils.utils import ChoiceEnum
 
@@ -76,6 +76,7 @@ class DocumentsIdentification(ChoiceEnum):
 
 class DocumentsInterOnglets(ChoiceEnum):
     QUESTION_SPECIFIQUE = _('Specific question')
+    DOSSIER_ANALYSE = _('Analysis folder')
 
 
 class DocumentsEtudesSecondaires(ChoiceEnum):
@@ -120,8 +121,8 @@ class DocumentsCurriculum(ChoiceEnum):
     CURRICULUM = _('Curriculum vitae detailed, dated and signed')
     RELEVE_NOTES = _('Transcript')
     TRADUCTION_RELEVE_NOTES = _('Transcript translation')
-    RELEVE_NOTES_ANNUEL = _('Transcript')
-    TRADUCTION_RELEVE_NOTES_ANNUEL = _('Transcript translation')
+    RELEVE_NOTES_ANNUEL = _('Annual transcript')
+    TRADUCTION_RELEVE_NOTES_ANNUEL = _('Annual transcript translation')
     RESUME_MEMOIRE = _('Dissertation summary')
     DIPLOME = _('Graduate degree')
     TRADUCTION_DIPLOME = _('Graduate degree translation')
@@ -138,9 +139,11 @@ class DocumentsQuestionsSpecifiques(ChoiceEnum):
 
 
 class DocumentsComptabilite(ChoiceEnum):
-    ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT = _(
-        'Certificate stating the absence of debts towards the last institution(s) of the French community '
-        'attended since %(year)s'
+    ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT = ngettext_lazy(
+            'Certificate stating the absence of debts towards the institution attended '
+            'during the academic year %(academic_year)s: %(names)s',
+            'Certificates stating the absence of debts towards the institutions attended '
+            'during the academic year %(academic_year)s: %(names)s',
     )
     ATTESTATION_ENFANT_PERSONNEL = _('Staff child certificate')
     CARTE_RESIDENT_LONGUE_DUREE = _('Copy of both sides of the EC long-term resident card (D or L card)')
@@ -167,9 +170,13 @@ class DocumentsComptabilite(ChoiceEnum):
     DECISION_PROTECTION_TEMPORAIRE = _(
         'Copy of the decision of the Foreigners\' Office confirming the granting of temporary protection'
     )
-    TITRE_SEJOUR_3_MOIS_PROFESSIONEL = _('Copy of both sides of the residence permit valid for more than 3 months')
+    TITRE_SEJOUR_3_MOIS_PROFESSIONEL = _(
+        'Copy of both sides of the residence permit valid for more than 3 months (professional)'
+    )
     FICHES_REMUNERATION = _('Copy of 6 salary slips issued in the 12 months preceding the application')
-    TITRE_SEJOUR_3_MOIS_REMPLACEMENT = _('Copy of both sides of the residence permit valid for more than 3 months')
+    TITRE_SEJOUR_3_MOIS_REMPLACEMENT = _(
+        'Copy of both sides of the residence permit valid for more than 3 months (replacement)'
+    )
     PREUVE_ALLOCATIONS_CHOMAGE_PENSION_INDEMNITE = _(
         'Proof of receipt of unemployment benefit, pension or compensation from the mutual insurance company'
     )

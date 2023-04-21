@@ -25,20 +25,24 @@
 # ##############################################################################
 from typing import Optional, List
 
-from admission.ddd.admission.domain.model.document import Document, DocumentIdentity
-from admission.ddd.admission.repository.i_document import IDocumentRepository
+from admission.ddd.admission.domain.model.demande import DemandeIdentity
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+from admission.ddd.admission.enums.emplacement_document import TypeDocument
+from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from osis_common.ddd.interface import EntityIdentity, ApplicationService
 
 
-class DocumentInMemoryRepository(IDocumentRepository):
-    entities: List[Document] = []
+class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
+    entities: List[EmplacementDocument] = []
 
     @classmethod
     def reset(cls):
         cls.entities = []
 
     @classmethod
-    def search(cls, entity_ids: Optional[List[DocumentIdentity]] = None, **kwargs) -> List[Document]:
+    def search(
+        cls, entity_ids: Optional[List[EmplacementDocumentIdentity]] = None, **kwargs
+    ) -> List[EmplacementDocument]:
         return [entity for entity in cls.entities if entity.entity_id in entity_ids]
 
     @classmethod
@@ -49,17 +53,36 @@ class DocumentInMemoryRepository(IDocumentRepository):
                 break
 
     @classmethod
-    def save_document_gestionnaire(cls, document: Document) -> None:
+    def save_emplacement_document_gestionnaire(cls, document: EmplacementDocument) -> None:
         cls.save(document)
 
     @classmethod
-    def save_document_candidat(cls, document: Document) -> None:
+    def save_emplacement_document_candidat(cls, document: EmplacementDocument) -> None:
         cls.save(document)
 
     @classmethod
-    def save(cls, document: Document) -> None:
+    def save(cls, document: EmplacementDocument) -> None:
         cls.entities.append(document)
 
     @classmethod
-    def get(cls, entity_id: DocumentIdentity) -> Document:
-        return next(entity for entity in cls.entities if entity.entity_id == entity_id)
+    def save_multiple_emplacements_documents_candidat(cls, entities: List[EmplacementDocument]) -> None:
+        for entity in entities:
+            cls.save(entity)
+
+    @classmethod
+    def reinitialiser_emplacements_documents_candidat(
+        cls,
+        demande_identity: DemandeIdentity,
+        entities: List[EmplacementDocument],
+    ) -> None:
+        cls.entities = [
+            entity
+            for entity in cls.entities
+            if entity.demande != demande_identity
+            or entity.type
+            in {
+                TypeDocument.CANDIDAT_SIC,
+                TypeDocument.CANDIDAT_FAC,
+            }
+        ]
+        cls.save_multiple_emplacements_documents_candidat(entities)

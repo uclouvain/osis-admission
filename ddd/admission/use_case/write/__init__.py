@@ -25,3 +25,5 @@
 # ##############################################################################
 from .deposer_document_libre_par_gestionnaire_service import deposer_document_libre_par_gestionnaire
 from .reclamer_document_libre_service import reclamer_document_libre
+from .reclamer_document_service import reclamer_document
+from .annuler_reclamation_document_service import annuler_reclamation_document

@@ -31,7 +31,7 @@ import freezegun
 
 from admission.ddd.admission.commands import DeposerDocumentLibreParGestionnaireCommand
 from admission.ddd.admission.domain.model.document import DocumentIdentity
-from admission.ddd.admission.enums.document import TypeDocument, StatutDocument, OngletsDemande
+from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument, OngletsDemande
 from admission.infrastructure.admission.repository.in_memory.document import DocumentInMemoryRepository
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
@@ -48,7 +48,7 @@ class TestDeposerDocumentLibreParGestionnaire(TestCase):
     def test_should_deposer_document_libre_sic(self):
         identifiant_document_depose = self.message_bus.invoke(
             DeposerDocumentLibreParGestionnaireCommand(
-                uuid_proposition=self.uuid_proposition,
+                uuid_demande=self.uuid_proposition,
                 auteur='0123456789',
                 token_document='token-file',
                 type_document=TypeDocument.CANDIDAT_SIC.name,
@@ -77,7 +77,7 @@ class TestDeposerDocumentLibreParGestionnaire(TestCase):
     def test_should_deposer_document_libre_fac(self):
         identifiant_document_depose = self.message_bus.invoke(
             DeposerDocumentLibreParGestionnaireCommand(
-                uuid_proposition=self.uuid_proposition,
+                uuid_demande=self.uuid_proposition,
                 auteur='0123456789',
                 token_document='token-file',
                 type_document=TypeDocument.CANDIDAT_FAC.name,

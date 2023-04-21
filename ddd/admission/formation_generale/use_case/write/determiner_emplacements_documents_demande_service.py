@@ -24,38 +24,38 @@
 #
 # ##############################################################################
 import datetime
-from typing import List
 
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_emplacements_documents_demande import IEmplacementsDocumentsDemandeTranslator
-from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.formation_generale.commands import RecupererDocumentsDemandeQuery
-from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
+from admission.ddd.admission.domain.model.demande import DemandeIdentity
+from admission.ddd.admission.domain.service.i_emplacements_documents_demande import (
+    IEmplacementsDocumentsDemandeTranslator,
 )
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.formation_generale.commands import DeterminerEmplacementsDocumentsDemandeCommand
+from admission.ddd.admission.formation_generale.commands import RecupererDocumentsDemandeQuery
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_comptabilite import IComptabiliteTranslator
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
 
-def recuperer_documents_demande(
-    cmd: 'RecupererDocumentsDemandeQuery',
+def determiner_emplacements_documents_demande(
+    cmd: 'DeterminerEmplacementsDocumentsDemandeCommand',
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     comptabilite_translator: 'IComptabiliteTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
-    emplacements_documents_demande_translator: 'IEmplacementsDocumentsDemandeTranslator',
     academic_year_repository: 'IAcademicYearRepository',
-) -> 'List[EmplacementDocumentDTO]':
+    emplacement_document_repository: 'IEmplacementDocumentRepository',
+) -> 'DemandeIdentity':
     # GIVEN
-    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_demande)
-    proposition_dto = proposition_repository.get_dto(entity_id=proposition_id)
+    proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_demande))
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_demande)
     annee_courante = (
         GetCurrentAcademicYear()
@@ -77,10 +77,11 @@ def recuperer_documents_demande(
     )
 
     # WHEN
-    documents_dto = emplacements_documents_demande_translator.recuperer_emplacements_dto(
+    IEmplacementsDocumentsDemandeTranslator.reinitialiser_emplacements(
         resume_dto=resume_dto,
         questions_specifiques=questions_specifiques_dtos,
+        emplacement_document_repository=emplacement_document_repository,
     )
 
     # THEN
-    return documents_dto
+    return DemandeIdentity(uuid=cmd.uuid_demande)

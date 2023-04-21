@@ -537,13 +537,18 @@ msgid ""
 "to the others. Important point: the questions are displayed together "
 "according to the field \"Display according to training\" (the elements for "
 "all trainings, then the elements for a type of training, then the elements "
-"for a specific training)."
+"for a specific training and finally the elements associated with a single "
+"admission)."
 msgstr ""
 "Entier supérieur à zéro indiquant la position de l’élément par rapport aux "
 "autres. Point important : les questions sont affichées groupées suivant le "
 "champ \"Affichage selon la formation\" (les éléments pour toutes les "
 "formations, puis les éléments pour un type de formation, puis les éléments "
-"pour une formation spécifique)."
+"pour une formation spécifique et enfin les éléments associés à une admission "
+"unique)."
+
+msgid "Analysis folder"
+msgstr "Dossier d'analyse"
 
 msgid "Ancient languages"
 msgstr "Langues anciennes"
@@ -557,6 +562,12 @@ msgid ""
 msgstr ""
 "Annexe 26 ou 26 ou la carte A/B mentionnant le statut de réfugié ou la "
 "décision confirmant la protection du parent"
+
+msgid "Annual transcript"
+msgstr "Relevé de notes annuel"
+
+msgid "Annual transcript translation"
+msgstr "Traduction du relevé de notes annuel"
 
 msgid "Another address"
 msgstr "Une autre adresse"
@@ -1148,6 +1159,14 @@ msgstr "Commentaires"
 msgid "Communication attestation"
 msgstr "Attestation de communication"
 
+#, python-format
+msgid ""
+"Communication to the candidate, in <span class=\"label label-admission-"
+"primary\">%s</span>"
+msgstr ""
+"Communication au candidat, en langue <span class=\"label label-admission-"
+"primary\">%s</span>"
+
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
 
@@ -1309,6 +1328,20 @@ msgstr "Copie recto-verso du titre de séjour en Belgique"
 msgid "Copy of both sides of the residence permit valid for more than 3 months"
 msgstr ""
 "Copie recto-verso du titre de séjour d’une validité supérieure à 3 mois"
+
+msgid ""
+"Copy of both sides of the residence permit valid for more than 3 months "
+"(professional)"
+msgstr ""
+"Copie recto-verso du titre de séjour d’une validité supérieure à 3 mois "
+"(professionnel)"
+
+msgid ""
+"Copy of both sides of the residence permit valid for more than 3 months "
+"(replacement)"
+msgstr ""
+"Copie recto-verso du titre de séjour d’une validité supérieure à 3 mois "
+"(remplacement)"
 
 #, python-format
 msgid ""
@@ -1598,6 +1631,9 @@ msgstr "Description de votre communication"
 msgid "Desired training"
 msgstr "Formation souhaitée"
 
+msgid "Designate the document as to be requested"
+msgstr "Désigner le document comme étant à réclamer"
+
 msgid "Detailed curriculum vitae"
 msgstr "Curriculum vitae détaillé"
 
@@ -1677,8 +1713,14 @@ msgstr "Demandes d'inscription en doctorat"
 msgid "Document"
 msgstr "Document"
 
+msgid "Document not found."
+msgstr "Document non trouvé."
+
 msgid "Document requested"
 msgstr "Document réclamé"
+
+msgid "Document to be requested"
+msgstr "Document à réclamer"
 
 msgid "Document uploaded"
 msgstr "Document téléversé"
@@ -1902,11 +1944,11 @@ msgstr "Modification d'inscription externe"
 msgid "External reorientation"
 msgstr "Réorientation externe"
 
-msgid "FAC/CDD processing"
-msgstr "Traitement FAC/CDD"
-
 msgid "FAC free documents"
 msgstr "Documents libres FAC"
+
+msgid "FAC/CDD processing"
+msgstr "Traitement FAC/CDD"
 
 msgid "FNRS"
 msgstr "FNRS"
@@ -3144,6 +3186,9 @@ msgstr "Aucune inscription en formation générale n'a été trouvée"
 msgid "No languages knowledge provided."
 msgstr "Aucune connaissance des langues renseignée."
 
+msgid "No longer designate the document as to be requested"
+msgstr "Ne plus désigner le document comme étant à réclamer"
+
 msgid "No one invited"
 msgstr "Aucun invité"
 
@@ -3460,6 +3505,11 @@ msgstr ""
 "Nous vous invitons à indiquer vos autres prénoms conformément à votre "
 "document d'identité. Si aucun autre prénom n'est mentionné sur votre "
 "document d'identité, vous ne devez rien indiquer."
+
+msgid ""
+"Please note that this document will be removed from the list of the missing "
+"documents."
+msgstr "Veuillez noter que ce document sera retiré de la liste des documents manquants."
 
 msgid "Please provide a copy of your curriculum."
 msgstr "Merci de fournir une copie de votre curriculum."
@@ -4479,6 +4529,12 @@ msgctxt "male gender"
 msgid "The doctoral student"
 msgstr "Le doctorant"
 
+msgid "The document has been designated as to be requested"
+msgstr "Le document a été désigné comme étant à réclamer"
+
+msgid "The document is no longer designated as to be requested"
+msgstr "Le document n'est plus désigné comme étant à réclamer"
+
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
 
@@ -4727,6 +4783,9 @@ msgid ""
 msgstr ""
 "Ce choix définira la langue de communication tout au long de votre parcours "
 "d'admission."
+
+msgid "This document cannot be requested"
+msgstr "Ce document ne peut être réclamer"
 
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""

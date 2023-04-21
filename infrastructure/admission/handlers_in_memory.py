@@ -25,13 +25,14 @@
 ##############################################################################
 from admission.ddd.admission.commands import *
 from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.write import deposer_document_libre_par_gestionnaire, reclamer_document_libre
+from admission.ddd.admission.use_case.write import *
 from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_demandes import (
     ListerToutesDemandesInMemory,
 )
-from admission.infrastructure.admission.repository.in_memory.document import DocumentInMemoryRepository
 
-_document_repository = DocumentInMemoryRepository()
+from admission.infrastructure.admission.repository.emplacement_document import EmplacementDocumentRepository
+
+_emplacement_document_repository = EmplacementDocumentRepository()
 
 
 COMMAND_HANDLERS = {
@@ -41,10 +42,18 @@ COMMAND_HANDLERS = {
     ),
     DeposerDocumentLibreParGestionnaireCommand: lambda msg_bus, cmd: deposer_document_libre_par_gestionnaire(
         cmd,
-        document_repository=_document_repository,
+        emplacement_document_repository=_emplacement_document_repository,
     ),
     ReclamerDocumentLibreCommand: lambda msg_bus, cmd: reclamer_document_libre(
         cmd,
-        document_repository=_document_repository,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    ReclamerDocumentCommand: lambda msg_bus, cmd: reclamer_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    AnnulerReclamationDocumentCommand: lambda msg_bus, cmd: annuler_reclamation_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
     ),
 }

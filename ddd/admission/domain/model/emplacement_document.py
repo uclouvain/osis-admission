@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,37 +22,39 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-import datetime
-from typing import Optional, List
+# ##############################################################################
+from datetime import datetime
+from typing import List, Optional
 
 import attr
 
+from admission.ddd.admission.domain.model.demande import DemandeIdentity
+from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument, OngletsDemande
 from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
-class AuteurDTO(interface.DTO):
-    matricule: str
-    nom: str
-    prenom: str
-    est_candidat: bool
-
-
-@attr.dataclass(frozen=True, slots=True)
-class DocumentDTO(interface.Entity):
+class EmplacementDocumentIdentity(interface.EntityIdentity):
     identifiant: str
+
+
+@attr.dataclass(slots=True)
+class EmplacementDocument(interface.Entity):
+    entity_id: EmplacementDocumentIdentity
+    demande: DemandeIdentity
     libelle: str
+    onglet: OngletsDemande
     uuids: List[str]
     auteur: str
-    type: str
-    statut: str
-    requis: bool
+    type: TypeDocument
+    statut: StatutDocument
     justification_gestionnaire: str
-    soumis_le: Optional[datetime.datetime]
-    reclame_le: Optional[datetime.datetime]
-    derniere_action_le: Optional[datetime.datetime]
-    a_echeance_le: Optional[datetime.datetime]
-    onglet: str
-    nom_onglet: str
-    uuid_proposition: str
+    soumis_le: Optional[datetime] = None
+    reclame_le: Optional[datetime] = None
+    a_echeance_le: Optional[datetime] = None
+    derniere_action_le: Optional[datetime] = None
+
+    def definir_a_reclamer(self, raison):
+        self.justification_gestionnaire = raison
+        self.derniere_action_le = datetime.now()
+        self.statut = StatutDocument.A_RECLAMER
