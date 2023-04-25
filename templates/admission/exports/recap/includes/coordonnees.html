@@ -25,9 +25,11 @@
 {% panel _("Residential address") %}
   <div class="row">
     <div class="col-md-4">{% field_data _("Street") coordonnees.domicile_legal.rue %}</div>
-    <div class="col-md-2">{% field_data _("Number") coordonnees.domicile_legal.numero_rue %}</div>
+    {% trans "Number" context "address" as address_number_label %}
+    <div class="col-md-2">{% field_data address_number_label coordonnees.domicile_legal.numero_rue %}</div>
     <div class="col-md-2">{% field_data _("Box") coordonnees.domicile_legal.boite_postale hide_empty=True %} </div>
-    <div class="col-md-4">{% field_data _("Place") coordonnees.domicile_legal.lieu_dit hide_empty=True %}</div>
+    {% trans "Place" context "address" as address_place_label %}
+    <div class="col-md-4">{% field_data address_place_label coordonnees.domicile_legal.lieu_dit hide_empty=True %}</div>
   </div>
   <div class="row">
     <div class="col-md-4">{% field_data _("Country") coordonnees.domicile_legal.nom_pays %}</div>
@@ -40,9 +42,11 @@
   {% panel contact_address_label %}
     <div class="row">
       <div class="col-md-4">{% field_data _("Street") coordonnees.adresse_correspondance.rue %}</div>
-      <div class="col-md-2">{% field_data _("Number") coordonnees.adresse_correspondance.numero_rue %}</div>
+      {% trans "Number" context "address" as address_number_label %}
+      <div class="col-md-2">{% field_data address_number_label coordonnees.adresse_correspondance.numero_rue %}</div>
       <div class="col-md-2">{% field_data _("Box") coordonnees.adresse_correspondance.boite_postale hide_empty=True %}</div>
-      <div class="col-md-4">{% field_data _("Place") coordonnees.adresse_correspondance.lieu_dit hide_empty=True %}</div>
+      {% trans "Place" context "address" as address_place_label %}
+      <div class="col-md-4">{% field_data address_place_label coordonnees.adresse_correspondance.lieu_dit hide_empty=True %}</div>
     </div>
     <div class="row">
       <div class="col-md-4">{% field_data _("Country") coordonnees.adresse_correspondance.nom_pays %}</div>

@@ -41,9 +41,11 @@
         {% panel _("Billing address") %}
           <div class="row">
             {% field_data _("Street") proposition.adresse_facturation.rue css_class="col-md-4" %}
-            {% field_data _("Number") proposition.adresse_facturation.numero_rue css_class="col-md-2" %}
+            {% trans "Number" context "address" as address_number_label %}
+            {% field_data address_number_label proposition.adresse_facturation.numero_rue css_class="col-md-2" %}
             {% field_data _("Box") proposition.adresse_facturation.boite_postale css_class="col-md-2" hide_empty=True %}
-            {% field_data _("Place") proposition.adresse_facturation.lieu_dit css_class="col-md-4" hide_empty=True %}
+            {% trans "Place" context "address" as address_place_label %}
+            {% field_data address_place_label proposition.adresse_facturation.lieu_dit css_class="col-md-4" hide_empty=True %}
           </div>
           <div class="row">
             {% field_data _("Country") proposition.adresse_facturation.nom_pays css_class="col-md-4" %}

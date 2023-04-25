@@ -327,7 +327,7 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
                 country=self.be_country,
                 institute=OrganizationFactory(
                     community=CommunityEnum.FRENCH_SPEAKING.name,
-                    code='INSTITUTE',
+                    acronym='INSTITUTE',
                     name='First institute',
                 ),
             ),
@@ -338,7 +338,7 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
                 country=self.be_country,
                 institute=OrganizationFactory(
                     community=CommunityEnum.FRENCH_SPEAKING.name,
-                    code=UCLouvain_acronym,
+                    acronym=UCLouvain_acronym,
                     name='Second institute',
                 ),
             ),
@@ -349,7 +349,7 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
                 country=self.be_country,
                 institute=OrganizationFactory(
                     community=CommunityEnum.FRENCH_SPEAKING.name,
-                    code='INSTITUTE',
+                    acronym='INSTITUTE',
                     name='Third institute',
                 ),
             ),
@@ -360,7 +360,7 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
                 country=self.be_country,
                 institute=OrganizationFactory(
                     community=CommunityEnum.GERMAN_SPEAKING.name,
-                    code='INSTITUTE',
+                    acronym='INSTITUTE',
                     name='Fourth institute',
                 ),
             ),
@@ -378,8 +378,8 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
             country=self.be_country,
             institute=OrganizationFactory(
                 community=CommunityEnum.FRENCH_SPEAKING.name,
-                code='INSTITUTE',
-                name='Fourth institute',
+                acronym='INSTITUTE',
+                name='Fifth institute',
             ),
         )
         EducationalExperienceYearFactory(
@@ -592,7 +592,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
                 country=self.be_country,
                 institute=OrganizationFactory(
                     community=CommunityEnum.FRENCH_SPEAKING.name,
-                    code='INSTITUTE',
+                    acronym='INSTITUTE',
                     name='First institute',
                 ),
             ),
@@ -603,7 +603,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
                 country=self.be_country,
                 institute=OrganizationFactory(
                     community=CommunityEnum.FRENCH_SPEAKING.name,
-                    code=UCLouvain_acronym,
+                    acronym=UCLouvain_acronym,
                     name='Second institute',
                 ),
             ),
@@ -614,7 +614,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
                 country=self.be_country,
                 institute=OrganizationFactory(
                     community=CommunityEnum.FRENCH_SPEAKING.name,
-                    code='INSTITUTE',
+                    acronym='INSTITUTE',
                     name='Third institute',
                 ),
             ),
@@ -625,7 +625,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
                 country=self.be_country,
                 institute=OrganizationFactory(
                     community=CommunityEnum.GERMAN_SPEAKING.name,
-                    code='INSTITUTE',
+                    acronym='INSTITUTE',
                     name='Fourth institute',
                 ),
             ),
@@ -643,8 +643,8 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
             country=self.be_country,
             institute=OrganizationFactory(
                 community=CommunityEnum.FRENCH_SPEAKING.name,
-                code='INSTITUTE',
-                name='Fourth institute',
+                acronym='INSTITUTE',
+                name='Fifth institute',
             ),
         )
         EducationalExperienceYearFactory(

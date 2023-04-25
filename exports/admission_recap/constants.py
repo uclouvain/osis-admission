@@ -76,13 +76,9 @@ ACCOUNTING_LABEL = {
     'decision_protection_temporaire': _(
         'Copy of the decision of the Foreigners\' Office confirming the granting of temporary protection'
     ),
-    'titre_sejour_3_mois_professionel': _(
-        'Copy of both sides of the residence permit valid for more than 3 months of %(person_concerned)s'
-    ),
+    'titre_sejour_3_mois_professionel': _('Copy of both sides of the residence permit valid for more than 3 months'),
     'fiches_remuneration': _('Copy of 6 salary slips issued in the 12 months preceding the application'),
-    'titre_sejour_3_mois_remplacement': _(
-        'Copy of both sides of the residence permit valid for more than 3 months of %(person_concerned)s'
-    ),
+    'titre_sejour_3_mois_remplacement': _('Copy of both sides of the residence permit valid for more than 3 months'),
     'preuve_allocations_chomage_pension_indemnite': _(
         'Proof of receipt of unemployment benefit, pension or compensation from the mutual insurance company'
     ),

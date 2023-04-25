@@ -35,7 +35,7 @@
 
   {% panel _("Approvals") additional_class="breakable-panel" %}
     {% for name, content in proposition.elements_confirmation.items %}
-      {% if name != 'hors_delai' and name != 'justificatifs' and name != 'declaration_sur_lhonneur' %}
+      {% if name != 'hors_delai' and name not in undertake_declaration_fields %}
         <dl>
           <dt>{{ element_confirmation_title|get_item:name }}</dt>
           <dd>{{ content|safe }}</dd>
@@ -44,20 +44,18 @@
     {% endfor %}
   {% endpanel %}
 
-  {% if proposition.elements_confirmation.justificatifs or proposition.elements_confirmation.declaration_sur_lhonneur %}
+  {% has_value proposition.elements_confirmation undertake_declaration_fields as has_undertake_declaration_fields %}
+  {% if has_undertake_declaration_fields %}
     {% panel _("Undertake and declaration") %}
-      {% if proposition.elements_confirmation.justificatifs %}
-        <dl>
-          <dt>{{ element_confirmation_title|get_item:'justificatifs' }}</dt>
-          <dd>{{ proposition.elements_confirmation.justificatifs|safe }}</dd>
-        </dl>
-      {% endif %}
-      {% if proposition.elements_confirmation.declaration_sur_lhonneur %}
-        <dl>
-          <dt>{{ element_confirmation_title|get_item:'declaration_sur_lhonneur' }}</dt>
-          <dd>{{ proposition.elements_confirmation.declaration_sur_lhonneur|safe }}</dd>
-        </dl>
-      {% endif %}
+      {% for field in undertake_declaration_fields %}
+        {% get_item_or_default proposition.elements_confirmation field as field_value %}
+        {% if field_value %}
+          <dl>
+            <dt>{{ element_confirmation_title|get_item:field }}</dt>
+            <dd>{{ field_value|safe }}</dd>
+          </dl>
+        {% endif %}
+      {% endfor %}
     {% endpanel %}
   {% endif %}
 

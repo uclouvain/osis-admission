@@ -67,7 +67,7 @@
   {% if identification.annee_derniere_inscription_ucl %}
     <p>{% trans "Yes" %}</p>
     <div class="row">
-      {% field_data _("Last registration year") identification.annee_derniere_inscription_ucl "col-md-6" %}
+      {% field_data _("Last registration year") identification.annee_derniere_inscription_ucl|get_academic_year "col-md-6" %}
       {% field_data _("Your previous NOMA (registration id)") identification.noma_derniere_inscription_ucl "col-md-6" %}
     </div>
   {% else %}

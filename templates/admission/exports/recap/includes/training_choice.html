@@ -23,14 +23,26 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 {% panel _('Education you are applying for') %}
+  {% if is_doctorate %}
+      {% field_data _("Admission type") proposition.type_admission|enum_display:'ChoixTypeAdmission' %}
+      {% if proposition.justification %}
+        {% field_data _("Brief justification") proposition.justification|linebreaks %}
+      {% endif %}
+      {% field_data _("Sector") proposition.intitule_secteur_formation %}
+  {% endif %}
   {% field_data _('Education name') formation.intitule %}
   {% field_data _('Campus') formation.campus %}
+  {% if is_doctorate %}
+    {% if proposition.commission_proximite %}
+      {% field_data _("Proximity commission / Subdomain") proposition.commission_proximite|enum_display:'ChoixProximityCommissionCDE'|enum_display:'ChoixProximityCommissionCDSS'|enum_display:'ChoixSousDomaineSciences' %}
+    {% endif %}
+  {% endif %}
 {% endpanel %}
 
-{% if formation.type|admission_training_type == 'DOCTORAT' %}
+{% if is_doctorate %}
   {% panel _('Student profile') %}
     {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
-      {% field_data _('Erasmus mundus scholarship') admission.bourse_erasmus_mundus.nom_long|default:short_name %}
+      {% field_data _('Erasmus mundus scholarship') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
     {% endwith %}
   {% endpanel %}
 {% elif formation.type|admission_training_type == 'MASTER' %}

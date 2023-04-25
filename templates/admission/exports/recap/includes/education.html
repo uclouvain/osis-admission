@@ -156,7 +156,7 @@
         {% endblocktranslate %}
       {% elif etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
         {% blocktranslate trimmed with year=etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year asvar graduation_text %}
-          You have indicated that you will receive one in {{ year }}.
+          You have indicated that you will get it in {{ year }}.
         {% endblocktranslate %}
       {% elif etudes_secondaires.diplome_etudes_secondaires == 'NO' %}
         {% blocktranslate asvar graduation_text %}No.{% endblocktranslate %}

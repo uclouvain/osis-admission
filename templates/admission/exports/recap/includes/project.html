@@ -23,17 +23,15 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 {% panel _("Course choice") %}
-  <div class="row">
-    {% field_data _("Admission type") proposition.type_admission|enum_display:'ChoixTypeAdmission' "col-md-4" %}
-    {% field_data _("Sector") proposition.intitule_secteur_formation "col-md-4" %}
-    {% display proposition.doctorat.intitule " (" proposition.doctorat.campus ")" as doctorate_title %}
-    {% field_data _("Doctorate") doctorate_title "col-md-4" %}
-  </div>
-  {% if proposition.commission_proximite %}
-    {% field_data _("Proximity commission / Subdomain") proposition.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
-  {% endif %}
+  {% field_data _("Admission type") proposition.type_admission|enum_display:'ChoixTypeAdmission' %}
   {% if proposition.justification %}
     {% field_data _("Brief justification") proposition.justification|linebreaks %}
+  {% endif %}
+  {% field_data _("Sector") proposition.intitule_secteur_formation %}
+  {% display proposition.doctorat.intitule " (" proposition.doctorat.campus ")" as doctorate_title %}
+  {% field_data _("Doctorate") doctorate_title %}
+  {% if proposition.commission_proximite %}
+    {% field_data _("Proximity commission / Subdomain") proposition.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
   {% endif %}
 {% endpanel %}
 
@@ -49,7 +47,7 @@
       {% else %}
         {% display proposition.autre_bourse_recherche as nom_bourse %}
       {% endif %}
-      {% field_data _("Scholarship") nom_bourse %}
+      {% field_data _("Scholarship grant") nom_bourse %}
       {% field_data _("Scholarship start date") proposition.bourse_date_debut %}
       {% field_data _("Scholarship end date") proposition.bourse_date_fin %}
       {% field_data _("Scholarship proof") proposition.bourse_preuve %}
@@ -63,7 +61,10 @@
   {% field_data _("Project title") proposition.titre_projet %}
   {% field_data _("Project resume") proposition.resume_projet|linebreaks %}
   {% field_data _("Thesis redacting language") proposition.langue_redaction_these|enum_display:'ChoixLangueRedactionThese' %}
-  {% field_data _("Research institute") proposition.institut_these|default_if_none:'' %}
+  {% if proposition.institut_these %}
+    {% display proposition.nom_institut_these ' ' '(' proposition.sigle_institut_these ')' as institut_these %}
+  {% endif %}
+  {% field_data _("Research institute") institut_these|default_if_none:'' %}
   {% field_data _("Thesis location") proposition.lieu_these %}
 
   {% field_data _("Research project") proposition.documents_projet %}

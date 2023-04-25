@@ -216,9 +216,6 @@ msgstr "Admission in progress"
 msgid "ADMITTED"
 msgstr "Admitted"
 
-msgid "APPROVED"
-msgstr "Approved"
-
 msgid "ARC - Action de Recherche Concertee"
 msgstr "ARC - Action de Recherche Concertée"
 
@@ -493,6 +490,10 @@ msgid "Approbation by pdf of %(member)s"
 msgstr ""
 
 msgid "Approvals"
+msgstr ""
+
+msgctxt "admission decision"
+msgid "Approved"
 msgstr ""
 
 msgid "Approximate date for completing the thesis:"
@@ -954,9 +955,13 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Certificate stating the absence of debts towards the last institution(s) of "
-"the French community attended since %(year)s"
-msgstr ""
+"Certificate stating the absence of debts towards the institution attended "
+"during the academic year %(academic_year)s: %(names)s"
+msgid_plural ""
+"Certificates stating the absence of debts towards the institutions attended "
+"during the academic year %(academic_year)s: %(names)s"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Certificate, with dates, justifying the specified period"
 msgstr ""
@@ -1050,9 +1055,6 @@ msgid "Confirm and send the message"
 msgstr ""
 
 msgid "Confirm restoring activity to submitted"
-msgstr ""
-
-msgid "Confirmation"
 msgstr ""
 
 msgctxt "tab"
@@ -2048,7 +2050,7 @@ msgid "INVALID"
 msgstr "Invalid"
 
 msgid "INVITED"
-msgstr "Invited"
+msgstr "Invited to sign"
 
 msgid "IN_PROGRESS"
 msgstr "In progress"
@@ -2641,7 +2643,7 @@ msgid "NOT_ALLOWED_TO_CONTINUE"
 msgstr "Not allowed to continue"
 
 msgid "NOT_INVITED"
-msgstr "Not invited"
+msgstr "Not invited to sign"
 
 msgid "Name"
 msgstr ""
@@ -2747,6 +2749,7 @@ msgctxt "admission-header"
 msgid "Not specified"
 msgstr ""
 
+msgctxt "address"
 msgid "Number"
 msgstr ""
 
@@ -2926,6 +2929,7 @@ msgstr ""
 msgid "Physic"
 msgstr ""
 
+msgctxt "address"
 msgid "Place"
 msgstr ""
 
@@ -3194,9 +3198,6 @@ msgid ""
 "Content of the message to be displayed for Message elements."
 msgstr ""
 
-msgid "REFUSED"
-msgstr "Declined"
-
 msgid "REFUSEE"
 msgstr "Declined"
 
@@ -3282,6 +3283,10 @@ msgstr ""
 
 msgid "Registration modification form"
 msgstr ""
+
+msgctxt "admission decision"
+msgid "Rejected"
+msgstr "Rejetée"
 
 msgid "Rejection reason"
 msgstr ""
@@ -4465,7 +4470,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #, python-format
-msgid "You have indicated that you will receive one in %(year)s."
+msgid "You have indicated that you will get it in %(year)s."
 msgstr ""
 
 msgid ""

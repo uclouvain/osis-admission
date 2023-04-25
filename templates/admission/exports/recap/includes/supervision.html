@@ -24,7 +24,7 @@
 {% endcomment %}
 {% panel _("Promoters") %}
   {% for signature in groupe_supervision.signatures_promoteurs %}
-    {% include "admission/exports/recap/includes/supervision_member_entry.html" with type='PROMOTER' member=signature.promoteur supervision=supervision %}
+    {% include "admission/exports/recap/includes/supervision_member_entry.html" with type='PROMOTER' member=signature.promoteur supervision=groupe_supervision %}
   {% empty %}
     {% trans "No one invited" %}
   {% endfor %}

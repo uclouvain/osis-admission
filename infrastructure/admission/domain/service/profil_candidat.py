@@ -28,11 +28,12 @@ from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Exists, OuterRef, Subquery, Prefetch
-from django.db.models.functions import ExtractYear, ExtractMonth
+from django.db.models import Exists, OuterRef, Subquery, Prefetch, F, Value, Case, When
+from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
@@ -226,7 +227,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 nom_institut=belgian_high_school_diploma.institute.name
                 if belgian_high_school_diploma.institute_id
                 else belgian_high_school_diploma.other_institute_name,
-                adresse_institut=belgian_high_school_diploma.other_institute_address,
+                adresse_institut=getattr(candidate, 'belgian_highschool_diploma_institute_address', '')
+                if belgian_high_school_diploma.institute_id
+                else belgian_high_school_diploma.other_institute_address,
                 communaute=belgian_high_school_diploma.community or '',
                 grille_horaire=GrilleHoraireDTO(
                     latin=belgian_high_school_diploma.schedule.latin,
@@ -343,7 +346,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 institute = (
                     {
                         'nom_institut': experience_year.educational_experience.institute.name,
-                        'code_institut': experience_year.educational_experience.institute.code,
+                        'code_institut': experience_year.educational_experience.institute.acronym,
                         'communaute_institut': experience_year.educational_experience.institute.community,
                         'adresse_institut': '',
                     }
@@ -583,7 +586,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 academic_year__year__gte=minimal_years.get('minimal_date').year,
             )
             .exclude(
-                educational_experience__institute__code=UCLouvain_acronym,
+                educational_experience__institute__acronym=UCLouvain_acronym,
             )
             .exists()
         )
@@ -663,17 +666,39 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             queryset = queryset.prefetch_related(
                 Prefetch(
                     'languages_knowledge',
-                    queryset=LanguageKnowledge.objects.select_related('language').all(),
+                    queryset=LanguageKnowledge.objects.select_related('language')
+                    .alias(
+                        order=Case(
+                            *[
+                                When(language__code=language, then=index)
+                                for index, language in enumerate(LANGUES_OBLIGATOIRES_DOCTORAT)
+                            ],
+                            default=len(LANGUES_OBLIGATOIRES_DOCTORAT),
+                        ),
+                    )
+                    .all()
+                    .order_by('order', 'language__code'),
                 ),
             )
 
         if formation == TrainingType.BACHELOR.name:
+            be_institute_address = 'belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress'
             queryset = queryset.select_related(
                 'highschooldiplomaalternative',
                 'belgianhighschooldiploma__schedule',
                 'belgianhighschooldiploma__institute',
                 'foreignhighschooldiploma__country',
                 'foreignhighschooldiploma__linguistic_regime',
+            ).annotate(
+                belgian_highschool_diploma_institute_address=Concat(
+                    F(f'{be_institute_address}__street'),
+                    Value(' '),
+                    F(f'{be_institute_address}__street_number'),
+                    Value(', '),
+                    F(f'{be_institute_address}__postal_code'),
+                    Value(' '),
+                    F(f'{be_institute_address}__city'),
+                ),
             )
 
         candidate: Person = queryset.get(global_id=matricule)
