@@ -30,7 +30,7 @@ from django.views.generic import ListView
 
 from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
-from base.utils.htmx import HtmxMixin
+from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
     "ContinuingAdmissionList",
