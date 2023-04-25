@@ -28,6 +28,7 @@ from django.contrib import messages
 from django.forms import BaseForm
 from django.utils.translation import gettext_lazy as _, override
 from django.views.generic import FormView
+from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models import CddMailTemplate
 from admission.ddd.parcours_doctoral.commands import EnvoyerMessageDoctorantCommand
@@ -40,9 +41,8 @@ from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.serv
 )
 from admission.mail_templates import CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS
 from admission.views.doctorate.mixins import LoadDossierViewMixin
-from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
-from osis_mail_template.models import MailTemplate
+from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
     "DoctorateSendMailView",
