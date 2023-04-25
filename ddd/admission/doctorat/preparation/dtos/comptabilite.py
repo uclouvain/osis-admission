@@ -104,3 +104,9 @@ class ComptabiliteDTO(interface.DTO):
 class ConditionsComptabiliteDTO(interface.DTO):
     pays_nationalite_ue: Optional[bool]
     a_frequente_recemment_etablissement_communaute_fr: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentes(interface.DTO):
+    annee: int
+    noms: List[str]

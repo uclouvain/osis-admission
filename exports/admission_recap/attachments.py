@@ -28,17 +28,24 @@ from typing import List, Optional, Dict
 
 import img2pdf
 from django.conf import settings
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, ngettext
 
 from admission.constants import IMAGE_MIME_TYPES, DEFAULT_MIME_TYPES
 from admission.contrib.models import AdmissionFormItemInstantiation
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeFinancement
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeFinancement,
+    ChoixEtatSignature,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
+from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
+    DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentes,
+)
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.validator._should_comptabilite_etre_completee import recuperer_champs_requis_dto
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL, ACCOUNTING_LABEL
+from admission.utils import format_academic_year
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from osis_document.api.utils import get_raw_content_remotely
@@ -67,6 +74,9 @@ class Attachment:
 
     def __eq__(self, other):
         return self.label == other.label and self.uuids == other.uuids if isinstance(other, Attachment) else False
+
+    def __str__(self):
+        return self.label
 
 
 def get_identification_attachments(context: ResumePropositionDTO) -> List[Attachment]:
@@ -307,21 +317,27 @@ def get_specific_questions_attachments(
 
 def get_accounting_attachments(
     context: ResumePropositionDTO,
-    in_french_institute_during_last_years: bool,
+    last_fr_institutes: DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentes,
     with_assimilation: bool,
     formatted_relationship: str,
 ) -> List[Attachment]:
     """Returns the accounting attachments."""
     attachments = []
 
-    if in_french_institute_during_last_years:
+    if last_fr_institutes:
         attachments.append(
             Attachment(
-                _(
-                    'Certificate stating the absence of debts towards the last institution(s) of the French community '
-                    'attended since %(year)s'
+                ngettext(
+                    'Certificate stating the absence of debts towards the institution attended '
+                    'during the academic year %(academic_year)s: %(names)s',
+                    'Certificates stating the absence of debts towards the institutions attended '
+                    'during the academic year %(academic_year)s: %(names)s',
+                    len(last_fr_institutes.noms),
                 )
-                % {'year': context.curriculum.annee_minimum_a_remplir},
+                % {
+                    'academic_year': format_academic_year(last_fr_institutes.annee),
+                    'names': ', '.join(last_fr_institutes.noms),
+                },
                 context.comptabilite.attestation_absence_dette_etablissement,
             )
         )
@@ -382,21 +398,23 @@ def get_supervision_group_attachments(context: ResumePropositionDTO) -> List[Att
     """Returns the supervision group attachments."""
     attachments = []
     for supervision_member in context.groupe_supervision.signatures_promoteurs:
-        attachments.append(
-            Attachment(
-                _('Approbation by pdf of %(member)s')
-                % {'member': f'{supervision_member.promoteur.prenom} {supervision_member.promoteur.nom}'},
-                supervision_member.pdf,
+        if supervision_member.pdf and supervision_member.statut == ChoixEtatSignature.APPROVED.name:
+            attachments.append(
+                Attachment(
+                    _('Approbation by pdf of %(member)s')
+                    % {'member': f'{supervision_member.promoteur.prenom} {supervision_member.promoteur.nom}'},
+                    supervision_member.pdf,
+                )
             )
-        )
     for supervision_member in context.groupe_supervision.signatures_membres_CA:
-        attachments.append(
-            Attachment(
-                _('Approbation by pdf of %(member)s')
-                % {'member': f'{supervision_member.membre_CA.prenom} {supervision_member.membre_CA.nom}'},
-                supervision_member.pdf,
+        if supervision_member.pdf and supervision_member.statut == ChoixEtatSignature.APPROVED.name:
+            attachments.append(
+                Attachment(
+                    _('Approbation by pdf of %(member)s')
+                    % {'member': f'{supervision_member.membre_CA.prenom} {supervision_member.membre_CA.nom}'},
+                    supervision_member.pdf,
+                )
             )
-        )
     return attachments
 
 

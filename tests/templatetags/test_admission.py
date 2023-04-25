@@ -67,6 +67,7 @@ from admission.templatetags.admission import (
     get_image_file_url,
     get_country_name,
     formatted_language,
+    get_item_or_default,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -487,6 +488,15 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
 
     def test_get_item_with_key_not_in_dict_returns_the_specified_key(self):
         self.assertEqual(get_item({'key1': 'value'}, 'key2'), 'key2')
+
+    def test_get_item_or_default_with_key_in_dict_returns_the_related_value(self):
+        self.assertEqual(get_item_or_default({'key': 'value'}, 'key'), 'value')
+
+    def test_get_item_or_default_with_key_not_in_dict_returns_the_default_value_if_specified(self):
+        self.assertEqual(get_item_or_default({'key1': 'value'}, 'key2', 'default'), 'default')
+
+    def test_get_item_or_default_with_key_not_in_dict_returns_none_if_the_default_value_is_not_specified(self):
+        self.assertEqual(get_item_or_default({'key1': 'value'}, 'key2'), None)
 
     def test_interpolate_a_string(self):
         self.assertEqual(

@@ -3,7 +3,7 @@
 <html lang="{{ LANGUAGE_CODE }}">
   <head>
     <meta charset="UTF-8">
-    <title>{% block title %}{{ admission.reference }}{% endblock %}</title>
+    <title>{% block title %}{{ proposition.reference }}{% endblock %}</title>
     {% block extra_head %}{% endblock %}
   </head>
   <body>
@@ -16,7 +16,7 @@
           </div>
           <div>
             <p>{% translate 'Candidate:' %} {{ proposition.prenom_candidat }} {{ proposition.nom_candidat }}</p>
-            <p>{% translate 'Academic year:' %} {{ formation.annee|get_academic_year }}</p>
+            <p>{% translate 'Academic year:' %} {{ proposition.annee_calculee|get_academic_year }}</p>
             <p>{% translate 'Offer:' %} {{ formation.sigle }}</p>
             <p>{% translate 'Reference:' %} {{ proposition.reference }}</p>
             {% if proposition.soumise_le %}<p>{% translate 'Confirmation date:' %} {{ proposition.soumise_le|date:"SHORT_DATE_FORMAT" }}</p>{% endif %}

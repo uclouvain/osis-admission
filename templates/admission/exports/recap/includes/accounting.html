@@ -22,12 +22,14 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% if in_french_institute_during_last_years %}
-  {% blocktranslate trimmed with year=curriculum.annee_minimum_a_remplir|get_academic_year asvar absence_of_debt_label %}
-    Certificate stating the absence of debts towards the last institution(s) of the French community attended since {{ year }}
-  {% endblocktranslate %}
+{% if last_fr_institutes %}
+    {% blocktranslate trimmed with academic_year=last_fr_institutes.annee|get_academic_year names=last_fr_institutes.noms|join:', ' count counter=last_fr_institutes.noms|length asvar absence_of_debt_label %}
+      Certificate stating the absence of debts towards the institution attended during the academic year {{ academic_year}}: {{ names }}
+      {% plural %}
+      Certificates stating the absence of debts towards the institutions attended during the academic year {{ academic_year}}: {{ names }}
+    {% endblocktranslate %}
   {% panel _('Absence of debt') %}
-    {% field_data absence_of_debt_label comptabilite.attestation_absence_dette_etablissement %}
+    {% field_data absence_of_debt_label comptabilite.attestation_absence_dette_etablissement inline=True %}
   {% endpanel %}
 {% endif %}
 

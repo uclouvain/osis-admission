@@ -35,10 +35,9 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
 from admission.api.views.mixins import PersonRelatedMixin, PersonRelatedSchema
+from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from osis_profile.models.education import LanguageKnowledge
 from osis_role.contrib.views import APIPermissionRequiredMixin
-
-MANDATORY_LANGUAGES = ["FR", "EN"]
 
 
 class LanguagesKnowledgeSchema(PersonRelatedSchema):
@@ -89,7 +88,7 @@ class LanguagesKnowledgeViewSet(
     def validate_languages(data):
         """Validate language uniqueness and mandatory languages presence."""
         languages = [language_knowledge.get("language").code for language_knowledge in data]
-        if not all(language in languages for language in MANDATORY_LANGUAGES):
+        if not all(language in languages for language in LANGUES_OBLIGATOIRES_DOCTORAT):
             raise ValidationError(_("Mandatory languages are missing."))
         duplicate_languages = set([language for language in languages if languages.count(language) > 1])
         if duplicate_languages:

@@ -741,6 +741,17 @@ def get_item(dictionary, value):
 
 
 @register.simple_tag
+def get_item_or_default(dictionary, value, default=None):
+    """Returns the value of a key in a dictionary if it exists else the default value itself"""
+    return dictionary.get(value, default)
+
+
+@register.simple_tag
+def has_value(iterable, values):
+    return any(value in iterable for value in values)
+
+
+@register.simple_tag
 def interpolate(string, **kwargs):
     """Interpolate variables inside a string"""
     return string % kwargs

@@ -25,7 +25,7 @@
 # ##############################################################################
 from dal import autocomplete, forward
 from django import forms
-from django.utils.translation import gettext_lazy as _, pgettext_lazy as __
+from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pgettext_lazy
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd import BE_ISO_CODE
@@ -89,7 +89,7 @@ class AdmissionAddressForm(forms.ModelForm):
 
     street_number = forms.CharField(
         required=False,
-        label=_('Number'),
+        label=pgettext_lazy('address', 'Number'),
     )
 
     place = forms.CharField(
