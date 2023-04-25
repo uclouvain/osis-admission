@@ -48,11 +48,11 @@ class ScheduleFactory(factory.DjangoModelFactory):
 
 class BelgianHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
     schedule = factory.SubFactory(ScheduleFactory)
-    result = (DiplomaResults.GT_75_RESULT.name,)
+    result = DiplomaResults.GT_75_RESULT.name
     high_school_diploma = factory.LazyAttribute(lambda _: [PdfUploadFactory().uuid])
     enrolment_certificate = factory.LazyAttribute(lambda _: [PdfUploadFactory().uuid])
-    community = (BelgianCommunitiesOfEducation.FRENCH_SPEAKING.name,)
-    educational_type = (EducationalType.PROFESSIONAL_EDUCATION.name,)
+    community = BelgianCommunitiesOfEducation.GERMAN_SPEAKING.name
+    educational_type = EducationalType.PROFESSIONAL_EDUCATION.name
     other_institute_name = ('HS UCL',)
     other_institute_address = ('Louvain-La-Neuve',)
 

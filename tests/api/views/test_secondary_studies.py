@@ -107,7 +107,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
             "belgian_diploma": {
                 "institute": cls.high_school.uuid,
                 "academic_graduation_year": cls.academic_year.year,
-                "educational_type": "PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM",
+                "educational_type": "PROFESSIONAL_EDUCATION",
                 "schedule": {
                     "latin": 3,
                 },

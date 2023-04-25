@@ -29,9 +29,11 @@
     {% panel _("Residential address") %}
         <div class="row">
             <div class="col-md-4">{% field_data _("Street") coordonnees.residential.street %}</div>
-            <div class="col-md-2">{% field_data _("Number") coordonnees.residential.street_number %}</div>
+            {% trans "Number" context "address" as address_number_label %}
+            <div class="col-md-2">{% field_data address_number_label coordonnees.residential.street_number %}</div>
             <div class="col-md-2">{% field_data _("Box") coordonnees.residential.postal_box hide_empty=True %} </div>
-            <div class="col-md-4">{% field_data _("Place") coordonnees.residential.place hide_empty=True %}</div>
+            {% trans "Place" context "address" as address_place_label %}
+            <div class="col-md-4">{% field_data address_place_label coordonnees.residential.place hide_empty=True %}</div>
         </div>
         <div class="row">
             {% get_country_name coordonnees.residential.country as residential_country %}
@@ -45,9 +47,11 @@
         {% panel contact_panel_title %}
             <div class="row">
                 <div class="col-md-4">{% field_data _("Street") coordonnees.contact.street %}</div>
-                <div class="col-md-2">{% field_data _("Number") coordonnees.contact.street_number %}</div>
+                {% trans "Number" context "address" as address_number_label %}
+                <div class="col-md-2">{% field_data address_number_label coordonnees.contact.street_number %}</div>
                 <div class="col-md-2">{% field_data _("Box") coordonnees.contact.postal_box hide_empty=True %}</div>
-                <div class="col-md-4">{% field_data _("Place") coordonnees.contact.place hide_empty=True %}</div>
+                {% trans "Place" context "address" as address_place_label %}
+                <div class="col-md-4">{% field_data address_place_label coordonnees.contact.place hide_empty=True %}</div>
             </div>
             <div class="row">
                 {% get_country_name coordonnees.contact.country as contact_country %}

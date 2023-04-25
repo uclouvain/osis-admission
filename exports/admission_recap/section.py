@@ -28,11 +28,12 @@ from typing import Optional, List
 
 import weasyprint
 from django.conf import settings
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, pgettext
 
 from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import Onglets
@@ -57,9 +58,7 @@ from admission.exports.admission_recap.constants import (
     CURRICULUM_ACTIVITY_LABEL,
 )
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
-from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
-from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from osis_profile.models.enums.curriculum import ActivityType
 
 
@@ -290,13 +289,13 @@ def get_specific_questions_section(context, language, specific_questions_by_tab)
     )
 
 
-def get_accounting_section(context) -> Section:
+def get_accounting_section(context: ResumePropositionDTO) -> Section:
     """Returns the accounting section."""
-    in_french_institute_during_last_years = any(
-        experience.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
-        and experience.code_institut != UCLouvain_acronym
-        and any(year for year in experience.annees if year.annee >= context.curriculum.annee_minimum_a_remplir)
-        for experience in context.curriculum.experiences_academiques
+    last_fr_institutes = (
+        IProfilCandidatTranslator.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
+            experiences_academiques=context.curriculum.experiences_academiques,
+            annee_minimale=context.curriculum.annee_minimum_a_remplir,
+        )
     )
     with_assimilation = context.identification.pays_nationalite_europeen is False
     formatted_relationship = FORMATTED_RELATIONSHIPS.get(context.comptabilite.relation_parente)
@@ -305,13 +304,13 @@ def get_accounting_section(context) -> Section:
         content_template='admission/exports/recap/includes/accounting.html',
         context=context,
         extra_context={
-            'in_french_institute_during_last_years': in_french_institute_during_last_years,
+            'last_fr_institutes': last_fr_institutes,
             'with_assimilation': with_assimilation,
             'formatted_relationship': formatted_relationship,
         },
         attachments=get_accounting_attachments(
             context,
-            in_french_institute_during_last_years,
+            last_fr_institutes,
             with_assimilation,
             formatted_relationship,
         ),
@@ -369,10 +368,15 @@ def get_supervision_section(context) -> Section:
 def get_confirmation_section(context) -> Section:
     """Returns the confirmation section."""
     return Section(
-        label=_('Confirmation'),
+        label=pgettext('tab', 'Confirmation'),
         content_template='admission/exports/recap/includes/confirmation.html',
         context=context,
         extra_context={
             'element_confirmation_title': IElementsConfirmation.TITRE_ELEMENT_CONFIRMATION,
+            'undertake_declaration_fields': [
+                'justificatifs',
+                'declaration_sur_lhonneur',
+                'droits_inscription_iufc',
+            ],
         },
     )

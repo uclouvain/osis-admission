@@ -27,11 +27,20 @@ import datetime
 from abc import abstractmethod
 from typing import Dict, List, Optional
 
-from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos import (
+    ConditionsComptabiliteDTO,
+    CurriculumDTO,
+    ExperienceAcademiqueDTO,
+)
+from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
+    DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
+)
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAExperiencesDTO
 from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
+from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
+from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from osis_common.ddd import interface
 
 
@@ -128,3 +137,28 @@ class IProfilCandidatTranslator(interface.DomainService):
     ) -> ResumeCandidatDTO:
         """Retourne toutes les données relatives à un candidat nécessaires à son admission."""
         raise NotImplementedError
+
+    @classmethod
+    def recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
+        cls,
+        experiences_academiques: List[ExperienceAcademiqueDTO],
+        annee_minimale: int,
+    ) -> Optional[DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO]:
+        derniere_annee = 0
+        noms = []
+
+        for experience in experiences_academiques:
+            derniere_annee_actuelle = max(experience_year.annee for experience_year in experience.annees)
+            if (
+                experience.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
+                and experience.code_institut != UCLouvain_acronym
+                and derniere_annee_actuelle >= annee_minimale
+            ):
+                if derniere_annee_actuelle > derniere_annee:
+                    derniere_annee = derniere_annee_actuelle
+                    noms = [experience.nom_institut]
+                else:
+                    noms.append(experience.nom_institut)
+
+        if noms:
+            return DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO(annee=derniere_annee, noms=noms)

@@ -29,7 +29,7 @@
         {% if member.est_docteur %}{% trans "Dr." %} {% endif %}
         {{ member.prenom }} {{ member.nom }}
       </strong>
-      (<a href="mailto:{{ member.email }}">{{ member.email }}</a>)
+      ({{ member.email }})
       {% if member.institution %} - {{ member.institution }} {% endif %}
       {% if member.ville %} - {{ member.ville }} {% endif %}
       {% if member.pays %}({{ member.pays }}){% endif %}
