@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.cache import cache
@@ -78,6 +79,7 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
         kwargs['filter_form'] = self.form
         kwargs['htmx_template_name'] = self.htmx_template_name
         kwargs['default_form_values'] = {field.id_for_label: field.initial for field in self.form if field.initial}
+        kwargs['now'] = datetime.datetime.now()
         return super().get_context_data(**kwargs)
 
     def get_paginate_by(self, queryset):

@@ -57,7 +57,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         numero: Optional[int] = None,
         noma: Optional[str] = '',
         matricule_candidat: Optional[str] = '',
-        etat: Optional[str] = '',
+        etats: Optional[List[str]] = None,
         type: Optional[str] = '',
         site_inscription: Optional[str] = '',
         entites: Optional[List[str]] = None,
@@ -75,7 +75,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
         prefetch_viewers_queryset = (
-            AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
+            AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(hours=1))
             .select_related('person')
             .order_by('-viewed_at')
         )
@@ -144,10 +144,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 # The term can be a part of the acronym or of the training title
                 training_filters &= Q(Q(training__acronym__icontains=term) | Q(training__title__icontains=term))
             qs = qs.filter(training_filters)
-        if etat:
-            qs = qs.filter(status=etat)
-        else:
-            qs = qs.exclude(Q(status__in=cls.STATUTS_A_FILTRER_PAR_DEFAUT))
+        if etats:
+            qs = qs.filter(status__in=etats)
         if bourse_internationale:
             qs = qs.filter(
                 Q(doctorateadmission__international_scholarship_id=bourse_internationale)

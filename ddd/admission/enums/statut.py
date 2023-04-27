@@ -35,3 +35,4 @@ CHOIX_STATUT_TOUTE_PROPOSITION.insert(
         ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.value,
     ),
 )
+CHOIX_STATUT_TOUTE_PROPOSITION_DICT = {statut[0]: statut[1] for statut in CHOIX_STATUT_TOUTE_PROPOSITION}
