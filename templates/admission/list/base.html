@@ -207,6 +207,8 @@
     htmx.config.historyCacheSize = 0;
 
     $(document).ready(function () {
+        const main_container = document.getElementById('main');
+
       {# Clear inputs when the form is reset #}
       const formFields = $('#admission-search :input');
       $('#search_form').on('reset', function (evt) {
@@ -221,6 +223,12 @@
       {# Display / hide the form errors #}
       $('#admission-search').on('htmx:beforeSend', function (evt) {
         $('#form_errors').html('');
+      });
+
+      $('#admission-search').on('htmx:afterSwap', function(evt) {
+        if(evt.target.classList.contains('scroll-to-top')) {
+          main_container.scrollIntoView(true);
+        };
       });
 
       {# Select the pagination #}
