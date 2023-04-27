@@ -4342,9 +4342,6 @@ msgstr ""
 msgid "The experiences that have been valuated from this admission."
 msgstr "Les expériences qui ont été valorisées via cette admission."
 
-msgid "The export has been planned"
-msgstr "L'export a été planifié"
-
 msgid "The export has failed"
 msgstr "L'export a échoué"
 
@@ -5045,6 +5042,13 @@ msgstr ""
 
 msgid "Your data has been saved"
 msgstr "Vos données ont été sauvegardées"
+
+msgid ""
+"Your export request has been planned, you will receive a notification as "
+"soon as it is available."
+msgstr ""
+"Votre demande d’export a été planifié, vous recevrez une notification dès "
+"qu’il sera disponible."
 
 msgid "Your note has been added."
 msgstr "Votre note a bien été ajoutée."
