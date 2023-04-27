@@ -46,6 +46,7 @@ from admission.mail_templates import (
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.academic_year import AcademicYear
 from base.models.person import Person
 from osis_common.ddd.interface import BusinessException, QueryRequest
 
@@ -128,6 +129,8 @@ def format_academic_year(year: Union[int, str, float], short: bool = False) -> s
         return ''
     if isinstance(year, (str, float)):
         year = int(year)
+    elif isinstance(year, AcademicYear):
+        year = year.year
     end_year = year + 1
     if short:
         end_year = end_year % 100

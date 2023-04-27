@@ -470,6 +470,9 @@ msgstr ""
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 
+msgid "Application no."
+msgstr ""
+
 msgid "Application numero"
 msgstr ""
 
@@ -2237,6 +2240,9 @@ msgid "Languages knowledge"
 msgstr ""
 
 msgid "Last 24 hours views:"
+msgstr ""
+
+msgid "Last modif."
 msgstr ""
 
 msgid "Last modification"

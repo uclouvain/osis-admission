@@ -26,8 +26,11 @@
 
 from django.test import TestCase
 
-from admission.contrib.models.base import admission_directory_path
+from admission.contrib.models.base import admission_directory_path, BaseAdmissionProxy
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from base.tests.factories.academic_year import AcademicYearFactory
 
 
 class BaseTestCase(TestCase):
@@ -39,3 +42,57 @@ class BaseTestCase(TestCase):
             admission_directory_path(self.base_admission, 'my_file.pdf'),
             'admission/{}/{}/my_file.pdf'.format(self.base_admission.candidate.uuid, self.base_admission.uuid),
         )
+
+
+class BaseAnnotateSeveralAdmissionInProgress(TestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.academic_year = AcademicYearFactory(year=2020)
+        cls.base_admission = GeneralEducationAdmissionFactory(
+            determined_academic_year=cls.academic_year,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+    def test_annotate_several_admissions_in_progress_with_no_other_admission(self):
+        with self.assertNumQueries(1):
+            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().first()
+            self.assertFalse(admission.has_several_admissions_in_progress)
+
+    def test_annotate_several_admissions_in_progress_with_other_admission_but_with_other_candidate(self):
+        GeneralEducationAdmissionFactory(
+            determined_academic_year=self.base_admission.determined_academic_year,
+            status=self.base_admission.status,
+        )
+        with self.assertNumQueries(1):
+            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            self.assertFalse(admission.has_several_admissions_in_progress)
+
+    def test_annotate_several_admissions_in_progress_with_other_admission_but_with_in_progress_status(self):
+        GeneralEducationAdmissionFactory(
+            determined_academic_year=self.base_admission.determined_academic_year,
+            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+            candidate=self.base_admission.candidate,
+        )
+        with self.assertNumQueries(1):
+            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            self.assertFalse(admission.has_several_admissions_in_progress)
+
+    def test_annotate_several_admissions_in_progress_with_other_admission_but_with_cancelled_status(self):
+        GeneralEducationAdmissionFactory(
+            determined_academic_year=self.base_admission.determined_academic_year,
+            status=ChoixStatutPropositionGenerale.ANNULEE.name,
+            candidate=self.base_admission.candidate,
+        )
+        with self.assertNumQueries(1):
+            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            self.assertFalse(admission.has_several_admissions_in_progress)
+
+    def test_annotate_several_admissions_in_progress_with_other_admission(self):
+        GeneralEducationAdmissionFactory(
+            determined_academic_year=self.base_admission.determined_academic_year,
+            status=self.base_admission.status,
+            candidate=self.base_admission.candidate,
+        )
+        with self.assertNumQueries(1):
+            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            self.assertTrue(admission.has_several_admissions_in_progress)

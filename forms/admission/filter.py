@@ -42,6 +42,7 @@ from base.forms.widgets import Select2MultipleCheckboxesWidget
 from base.models.academic_year import current_academic_year
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
+from base.models.person import Person
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from education_group.forms.fields import MainCampusChoiceField
 
@@ -49,6 +50,15 @@ REGEX_REFERENCE = r'\d{3}\.\d{3}$'
 
 
 class AllAdmissionsFilterForm(forms.Form):
+    scholarship_types_by_field = {
+        'bourse_internationale': {
+            TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name,
+            TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
+        },
+        'bourse_erasmus_mundus': {TypeBourse.ERASMUS_MUNDUS.name},
+        'bourse_double_diplomation': {TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name},
+    }
+
     annee_academique = forms.TypedChoiceField(
         label=_('Year'),
         coerce=int,
@@ -177,25 +187,26 @@ class AllAdmissionsFilterForm(forms.Form):
             | AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
         )
 
-        scholarships = Scholarship.objects.order_by('short_name').in_bulk(field_name='uuid')
-        self.fields['bourse_internationale'].coerce = scholarships.get
-        self.fields['bourse_internationale'].choices = ALL_EMPTY_CHOICE + tuple(
-            (s.uuid, str(s))
-            for s in scholarships.values()
-            if s.type
-            in [
-                TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name,
-                TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
-            ]
-        )
-        self.fields['bourse_erasmus_mundus'].coerce = scholarships.get
-        self.fields['bourse_erasmus_mundus'].choices = ALL_EMPTY_CHOICE + tuple(
-            (s.uuid, str(s)) for s in scholarships.values() if s.type == TypeBourse.ERASMUS_MUNDUS.name
-        )
-        self.fields['bourse_double_diplomation'].coerce = scholarships.get
-        self.fields['bourse_double_diplomation'].choices = ALL_EMPTY_CHOICE + tuple(
-            (s.uuid, str(s)) for s in scholarships.values() if s.type == TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name
-        )
+        scholarships_objects = Scholarship.objects.order_by('short_name')
+        scholarships = {str(scholarship.uuid): scholarship for scholarship in scholarships_objects}
+
+        for scholarship_field, scholarship_types in self.scholarship_types_by_field.items():
+            self.fields[scholarship_field].coerce = scholarships.get
+            self.fields[scholarship_field].choices = ALL_EMPTY_CHOICE + tuple(
+                (scholarship.uuid, str(scholarship))
+                for scholarship_uuid, scholarship in scholarships.items()
+                if scholarship.type in scholarship_types
+            )
+
+        # Initialize the labels of the autocomplete fields
+        if load_labels:
+            candidate = self.data.get(self.add_prefix('matricule_candidat'))
+            if candidate:
+                person = Person.objects.values('last_name', 'first_name').filter(global_id=candidate).first()
+                if person:
+                    self.fields['matricule_candidat'].widget.choices = (
+                        (candidate, '{}, {}'.format(person['last_name'], person['first_name'])),
+                    )
 
     def clean_numero(self):
         numero = self.cleaned_data.get('numero')

@@ -55,6 +55,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         EntityVersionFactory(entity=school, acronym='SCH')
 
         self.admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             training__management_entity=school,
             erasmus_mundus_scholarship=None,
             double_degree_scholarship=None,
@@ -175,7 +176,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
     def test_get_proposition_with_several_enrolments(self):
         second_admission = GeneralEducationAdmissionFactory(
             candidate=self.admission.candidate,
-            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         result = self._get_command_result()
@@ -187,7 +188,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         result = self._get_command_result()
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)
 
-        second_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        second_admission.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
         second_admission.save()
 
         result = self._get_command_result()
