@@ -192,7 +192,9 @@ def sortable_header_div(context, order_field_name, order_field_label):
     asc_ordering = True
     ordering_class = 'sort'
 
-    query_order_param = context.request.GET.get('o')
+    query_params = getattr(context.get('view'), 'query_params', None) or context.request.GET
+
+    query_order_param = query_params.get('o')
 
     # An order query parameter is already specified
     if query_order_param:
@@ -207,7 +209,7 @@ def sortable_header_div(context, order_field_name, order_field_label):
                 asc_ordering = False
                 ordering_class = 'sort-up'
 
-    new_params = context.request.GET.copy()
+    new_params = query_params.copy()
     new_params['o'] = '{}{}'.format('' if asc_ordering else '-', order_field_name)
     new_params.pop('page', None)
     return {

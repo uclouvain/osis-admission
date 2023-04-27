@@ -86,7 +86,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
         qs = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
-            .annotate_other_admissions_in_progress()
+            .annotate_several_admissions_in_progress()
             .annotate(
                 status=Coalesce(
                     NullIf(F('continuingeducationadmission__status'), Value('')),
@@ -213,7 +213,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
             noma_candidat=admission.candidate.last_registration_id,
-            plusieurs_demandes=admission.has_other_admission_in_progress,  # From annotation
+            plusieurs_demandes=admission.has_several_admissions_in_progress,  # From annotation
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, 'title' if language_is_french else 'title_english'),
