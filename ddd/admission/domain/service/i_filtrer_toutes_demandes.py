@@ -26,25 +26,12 @@
 from abc import abstractmethod
 from typing import Optional, List
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.views import PaginatedList
 from osis_common.ddd import interface
 
 
 class IListerToutesDemandes(interface.DomainService):
-    STATUTS_A_FILTRER_PAR_DEFAUT = {
-        ChoixStatutPropositionGenerale.ANNULEE.name,
-        ChoixStatutPropositionGenerale.EN_BROUILLON.name,
-        ChoixStatutPropositionDoctorale.ANNULEE.name,
-        ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
-        ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
-        ChoixStatutPropositionContinue.ANNULEE.name,
-        ChoixStatutPropositionContinue.EN_BROUILLON.name,
-    }
-
     @classmethod
     @abstractmethod
     def filtrer(
@@ -53,7 +40,7 @@ class IListerToutesDemandes(interface.DomainService):
         numero: Optional[int] = None,
         noma: Optional[str] = '',
         matricule_candidat: Optional[str] = '',
-        etat: Optional[str] = '',
+        etats: Optional[List[str]] = None,
         type: Optional[str] = '',
         site_inscription: Optional[str] = '',
         entites: Optional[List[str]] = None,
