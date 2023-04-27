@@ -30,38 +30,42 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, Exists
+from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count
 from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
-from admission.contrib.models.functions import ToChar
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_SOUMISSION
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from base.models.academic_calendar import AcademicCalendar
-from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
-from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from base.models.enums.entity_type import EntityType
-from base.utils.cte import CTESubquery
-from education_group.contrib.models import EducationGroupRoleModel
 from osis_comment.models import CommentDeleteMixin
-from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
+from admission.contrib.models.functions import ToChar
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
+)
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
+from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_categories import Categories
+from base.models.enums.entity_type import EntityType
 from base.models.person import Person
+from base.utils.cte import CTESubquery
+from education_group.contrib.models import EducationGroupRoleModel
+from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
-
 
 REFERENCE_SEQ_NAME = 'admission_baseadmission_reference_seq'
 
@@ -150,17 +154,30 @@ class BaseAdmissionQuerySet(models.QuerySet):
             )
         )
 
-    def annotate_other_admissions_in_progress(self):
-        return self.annotate(
-            has_other_admission_in_progress=Exists(
-                BaseAdmission.objects.filter(candidate_id=OuterRef('candidate_id'))
-                .filter(
-                    Q(generaleducationadmission__status=ChoixStatutPropositionGenerale.EN_BROUILLON.name)
-                    | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.EN_BROUILLON.name)
-                    | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_AVANT_SOUMISSION),
+    def annotate_several_admissions_in_progress(self):
+        return self.alias(
+            admissions_in_progress_nb=Subquery(
+                BaseAdmission.objects.filter(
+                    candidate_id=OuterRef("candidate_id"),
+                    determined_academic_year_id=OuterRef("determined_academic_year_id"),
                 )
-                .filter(determined_academic_year_id=OuterRef('determined_academic_year_id'))
-                .exclude(pk=OuterRef('pk')),
+                .exclude(
+                    Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE)
+                    | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
+                    | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE),
+                )
+                .values('candidate_id')
+                .annotate(count=Count('pk'))
+                .values('count')[:1],
+            ),
+        ).annotate(
+            has_several_admissions_in_progress=Case(
+                When(
+                    Q(admissions_in_progress_nb__gt=1),
+                    then=Value(True),
+                ),
+                default=Value(False),
+                output_field=BooleanField(),
             ),
         )
 

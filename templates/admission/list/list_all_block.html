@@ -29,8 +29,7 @@
   <li>
     <a
         href="#"
-        hx-get="{% url 'admission:admission-list-excel-export' %}"
-        hx-include="#search_form"
+        hx-get="{% url 'admission:admission-list-excel-export' %}?{{ view.query_params.urlencode }}"
         hx-indicator="#htmx-overlay"
         hx-swap="none"
     >
@@ -40,13 +39,13 @@
 {% endblock %}
 
 {% block list_block_header %}
-  {% sortable_header_div 'numero_demande' _('Application numero') %}
+  {% sortable_header_div 'numero_demande' _('Application no.') %}
   {% sortable_header_div 'nom_candidat' _('Name') %}
   {% sortable_header_div 'formation' _('Training') %}
   {% sortable_header_div 'nationalite_candidat' _('Nationality') %}
   {% sortable_header_div 'vip' _('VIP') %}
   {% sortable_header_div 'type_demande' _('Application status') %}
-  {% sortable_header_div 'derniere_modification_le' _('Last modification') %}
+  {% sortable_header_div 'derniere_modification_le' _('Last modif.') %}
   {% sortable_header_div 'derniere_modification_par' _('Modification author') %}
   {% sortable_header_div 'date_confirmation' _('Confirmation date') %}
 {% endblock %}

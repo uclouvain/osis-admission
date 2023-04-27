@@ -354,7 +354,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else '',
             nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
-            candidat_a_plusieurs_demandes=admission.has_other_admission_in_progress,  # from annotation
+            candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
             titre_access='',  # TODO
             candidat_assimile=admission.accounting
             and admission.accounting.assimilation_situation
@@ -369,7 +369,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         try:
             return cls._load_dto_for_gestionnaire(
                 GeneralEducationAdmissionProxy.objects.for_dto()
-                .annotate_other_admissions_in_progress()
+                .annotate_several_admissions_in_progress()
                 .annotate(
                     status_updated_at=Subquery(
                         HistoryEntry.objects.filter(
