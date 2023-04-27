@@ -33,7 +33,7 @@
         {{ start_index }} to {{ end_index }} of {{ total_counts }} enrolment applications
       {% endblocktrans %}
     </p>
-    <div id="list-actions" class="text-right" hx-preserve="true">
+    <div id="list-actions" class="text-right">
       {% bootstrap_field filter_form.taille_page show_label=False form_group_class="fit-content" show_help=False %}
       <span>{% trans "items per page" %}</span>
       <div class="btn-group">

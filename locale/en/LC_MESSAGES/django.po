@@ -3921,9 +3921,6 @@ msgstr ""
 msgid "The experiences that have been valuated from this admission."
 msgstr ""
 
-msgid "The export has been planned"
-msgstr ""
-
 msgid "The export has failed"
 msgstr ""
 
@@ -4542,6 +4539,11 @@ msgid "You specified that no assimilation proposals applies to you."
 msgstr ""
 
 msgid "Your data has been saved"
+msgstr ""
+
+msgid ""
+"Your export request has been planned, you will receive a notification as "
+"soon as it is available."
 msgstr ""
 
 msgid "Your note has been added."
