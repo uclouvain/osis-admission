@@ -38,6 +38,7 @@ from django.views import View
 
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from base.models.campus import Campus
@@ -181,13 +182,11 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
                 )
 
         # Format enums
-        status = formatted_filters.get('etat')
-        if status:
-            mapping_filter_key_value['etat'] = (
-                ChoixStatutPropositionGenerale.get_value(status)
-                if hasattr(ChoixStatutPropositionGenerale, status)
-                else ChoixStatutPropositionDoctorale.get_value(status)
-            )
+        statuses = formatted_filters.get('etats')
+        if statuses:
+            mapping_filter_key_value['etats'] = [
+                CHOIX_STATUT_TOUTE_PROPOSITION_DICT.get(status_key) for status_key in statuses
+            ]
 
         admission_type = formatted_filters.get('type')
         if admission_type:

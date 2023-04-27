@@ -294,7 +294,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
                 'numero': 1,
                 'noma': '00000001',
                 'matricule_candidat': candidate.global_id,
-                'etat': ChoixStatutPropositionGenerale.CONFIRMEE.name,
+                'etats': [ChoixStatutPropositionGenerale.CONFIRMEE.name],
                 'type': TypeDemande.ADMISSION.name,
                 'site_inscription': str(campus.uuid),
                 'entites': 'ENT',
@@ -346,7 +346,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(values[4], '1')
         self.assertEqual(values[5], '00000001')
         self.assertEqual(values[6], candidate.full_name)
-        self.assertEqual(values[7], ChoixStatutPropositionGenerale.CONFIRMEE.value)
+        self.assertEqual(values[7], f"['{ChoixStatutPropositionGenerale.CONFIRMEE.value}']")
         self.assertEqual(values[8], TypeDemande.ADMISSION.value)
         self.assertEqual(values[9], campus.name)
         self.assertEqual(values[10], 'ENT')

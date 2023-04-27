@@ -40,7 +40,7 @@ def lister_demandes(
         numero=cmd.numero,
         noma=cmd.noma,
         matricule_candidat=cmd.matricule_candidat,
-        etat=cmd.etat,
+        etats=cmd.etats,
         type=cmd.type,
         site_inscription=cmd.site_inscription,
         entites=cmd.entites,

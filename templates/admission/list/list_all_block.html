@@ -53,27 +53,33 @@
 {% block list_block_row_result %}
   {% admission_url admission.uuid admission.type_formation as admission_url %}
   {% url 'admission:access-conditions-url' admission.type_formation admission.sigle_formation|urlencode:'' admission.code_formation as access_conditions_url %}
-  <td class="flex-content-no-wrap">
-    <a href="{{ admission_url }}">
-      {{ admission.type_demande|enum_display:'TypeDemande' }}<br>
-      {{ admission.numero_demande }}
-    </a>
-    {% if admission.dernieres_vues_par %}
-      <span
-          class="fa fa-user-pen popover-buttons"
-          data-content="
-          <table class='table table-bordered'>
-          <caption>{% translate "Last 24 hours views:" %}</caption>
-            <tbody>
-              {% for vue in admission.dernieres_vues_par %}
-                <tr>
-                  <td>{{ vue.prenom }} {{ vue.nom }}</td>
-                  <td>{{ vue.date|date:'d/m H:i' }}</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>"
-      ></span>
+  <td>
+    <div class="flex-content-no-wrap">
+      <a href="{{ admission_url }}">
+        {{ admission.type_demande|enum_display:'TypeDemande' }}<br>
+        {{ admission.numero_demande }}
+      </a>
+      {% if admission.dernieres_vues_par %}
+        <span
+            class="fa fa-gears popover-buttons"
+            data-content="
+            <table class='table table-bordered'>
+            <caption>{% translate "Last hour views:" %}</caption>
+              <tbody>
+                {% for vue in admission.dernieres_vues_par %}
+                  <tr>
+                    <td>
+                      {{ vue.prenom }} {{ vue.nom }}
+                      {% blocktranslate trimmed with minutes=vue.date|timesince:now %}
+                        ({{ minutes }} ago)
+                      {% endblocktranslate %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>"
+        ></span>
+      </div>
     {% endif %}
   </td>
   <td>
