@@ -32,7 +32,7 @@ from django.utils.translation import gettext_lazy as _, ngettext
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.enums import TypeBourse
-from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION, CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -97,10 +97,16 @@ class AllAdmissionsFilterForm(forms.Form):
         ),
     )
 
-    etat = forms.ChoiceField(
-        choices=[ALL_EMPTY_CHOICE[0]] + CHOIX_STATUT_TOUTE_PROPOSITION,
+    etats = forms.MultipleChoiceField(
+        choices=CHOIX_STATUT_TOUTE_PROPOSITION,
         label=_('Application status'),
         required=False,
+        widget=Select2MultipleCheckboxesWidget(
+            attrs={
+                'data-dropdown-auto-width': True,
+                'data-selection-template': _("{items} types out of {total}"),
+            }
+        ),
     )
 
     type = forms.ChoiceField(
@@ -186,6 +192,7 @@ class AllAdmissionsFilterForm(forms.Form):
             AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
             | AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
         )
+        self.fields['etats'].initial = list(CHOIX_STATUT_TOUTE_PROPOSITION_DICT.keys())
 
         scholarships_objects = Scholarship.objects.order_by('short_name')
         scholarships = {str(scholarship.uuid): scholarship for scholarship in scholarships_objects}

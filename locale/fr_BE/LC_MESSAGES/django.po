@@ -72,6 +72,10 @@ msgstr ""
 msgid "%(state)s on %(date)s"
 msgstr "%(state)s le %(date)s"
 
+#, python-format
+msgid "(%(minutes)s ago)"
+msgstr "(il y a %(minutes)s)"
+
 msgid ", on"
 msgstr ", le"
 
@@ -2498,8 +2502,8 @@ msgstr "Langue"
 msgid "Languages knowledge"
 msgstr "Connaissance des langues"
 
-msgid "Last 24 hours views:"
-msgstr "Vues des 24 dernières heures :"
+msgid "Last hour views:"
+msgstr "Vues de la dernière heure :"
 
 msgid "Last modif."
 msgstr "Dernière modif."

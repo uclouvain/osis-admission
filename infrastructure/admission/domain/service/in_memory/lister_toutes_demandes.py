@@ -50,7 +50,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         numero: Optional[int] = None,
         noma: Optional[str] = '',
         matricule_candidat: Optional[str] = '',
-        etat: Optional[str] = '',
+        etats: Optional[List[str]] = None,
         type: Optional[str] = '',
         site_inscription: Optional[str] = '',
         entites: Optional[List[str]] = None,
