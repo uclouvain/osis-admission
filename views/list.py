@@ -27,6 +27,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.cache import cache
 from django.core.exceptions import NON_FIELD_ERRORS
+from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
 from django.views.generic import ListView
 from django.views.generic.edit import FormMixin
@@ -87,18 +88,18 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
     def additional_command_kwargs(self):
         return {}
 
+    @cached_property
+    def query_params(self):
+        return self.request.GET or cache.get(self.cache_key)
+
     def get_form_kwargs(self):
         return {
             'user': self.request.user,
-            'data': self.request.GET or cache.get(self.cache_key) or None,
+            'data': self.query_params,
             'load_labels': not self.request.htmx,
         }
 
     def get(self, request, *args, **kwargs):
-        query_params = self.request.GET.copy()
-
-        ordering_field = query_params.pop('o', None)
-
         self.form = self.get_form()
 
         if not self.form.is_valid():
@@ -107,17 +108,21 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
                 self.htmx_render_form_errors(self.request, self.form)
             return self.form_invalid(form=self.form)
 
-        if query_params:
-            query_params.pop('page', None)
-            query_params.pop('taille_page', None)
-            cache.set(self.cache_key, query_params)
+        if self.request.GET:
+            cache.set(self.cache_key, self.request.GET)
 
         self.filters = self.form.cleaned_data
 
-        # Order the queryset
-        if ordering_field:
-            self.filters['tri_inverse'] = ordering_field[0][0] == '-'
-            self.filters['champ_tri'] = ordering_field[0].lstrip('-')
+        if self.query_params:
+            # Add page number to kwargs to pass it to the paginator
+            self.kwargs['page'] = self.query_params.get('page')
+
+            # Order the queryset if specified
+            ordering_field = self.query_params.get('o')
+
+            if ordering_field:
+                self.filters['tri_inverse'] = ordering_field[0] == '-'
+                self.filters['champ_tri'] = ordering_field.lstrip('-')
 
         return super().get(request, *args, **kwargs)
 

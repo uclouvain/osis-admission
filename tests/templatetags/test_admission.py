@@ -113,7 +113,10 @@ class AdmissionSortableHeaderDivTestCase(TestCase):
         cls.field_label = 'My field label'
 
     def test_sortable_header_div_without_query_order_param(self):
-        context = mock.Mock(request=self.factory.get('', data={}))
+        context = mock.Mock(
+            request=self.factory.get('', data={}),
+            get=lambda elt: None,
+        )
         value = sortable_header_div(
             context=context,
             order_field_name=self.field_name,
@@ -130,12 +133,8 @@ class AdmissionSortableHeaderDivTestCase(TestCase):
 
     def test_sortable_header_div_with_asc_query_order_param(self):
         context = mock.Mock(
-            request=self.factory.get(
-                '',
-                data={
-                    'o': self.field_name,
-                },
-            )
+            request=self.factory.get('', data={'o': self.field_name}),
+            get=lambda elt: None,
         )
         value = sortable_header_div(
             context=context,
@@ -149,12 +148,8 @@ class AdmissionSortableHeaderDivTestCase(TestCase):
 
     def test_sortable_header_div_with_desc_query_order_param(self):
         context = mock.Mock(
-            request=self.factory.get(
-                '',
-                data={
-                    'o': '-' + self.field_name,
-                },
-            )
+            request=self.factory.get('', data={'o': '-' + self.field_name}),
+            get=lambda elt: None,
         )
         value = sortable_header_div(
             context=context,
@@ -178,7 +173,8 @@ class AdmissionSortableHeaderDivTestCase(TestCase):
                     'o': '-other_field_name',
                     'other_param': '10',
                 },
-            )
+            ),
+            get=lambda elt: None,
         )
         value = sortable_header_div(
             context=context,

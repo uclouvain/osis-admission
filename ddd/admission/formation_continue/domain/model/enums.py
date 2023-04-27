@@ -45,3 +45,9 @@ class ChoixTypeAdresseFacturation(ChoiceEnum):
     RESIDENTIEL = _("Residential address")
     CONTACT = pgettext_lazy("admission", "Contact address")
     AUTRE = _("Another address")
+
+
+STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE = {
+    ChoixStatutPropositionContinue.EN_BROUILLON.name,
+    ChoixStatutPropositionContinue.ANNULEE.name,
+}

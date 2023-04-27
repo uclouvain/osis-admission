@@ -47,3 +47,8 @@ class ChoixStatutPropositionGenerale(ChoiceEnum):
 
 
 CHOIX_DIPLOME_OBTENU = {GotDiploma.YES.name, GotDiploma.THIS_YEAR.name}
+
+STATUTS_PROPOSITION_GENERALE_NON_SOUMISE = {
+    ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+    ChoixStatutPropositionGenerale.ANNULEE.name,
+}
