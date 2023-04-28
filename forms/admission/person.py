@@ -40,6 +40,7 @@ from admission.forms import (
     AdmissionFileUploadField as FileUploadField,
     RadioBooleanField,
     AdmissionModelCountryChoiceField,
+    AdmissionModelForm,
 )
 from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.utils import force_title
@@ -54,7 +55,7 @@ class IdentificationType(ChoiceEnum):
     PASSPORT_NUMBER = _('Passport number')
 
 
-class AdmissionPersonForm(forms.ModelForm):
+class AdmissionPersonForm(AdmissionModelForm):
     # Identification
     first_name = forms.CharField(
         required=False,
@@ -247,6 +248,7 @@ class AdmissionPersonForm(forms.ModelForm):
         js = [
             'js/jquery.mask.min.js',
             'js/dependsOn.min.js',
+            'admission/formatter.js',
         ]
 
     def __init__(self, resides_in_belgium, *args, **kwargs):
@@ -386,4 +388,15 @@ class AdmissionPersonForm(forms.ModelForm):
             'has_national_number',
             'unknown_birth_date',
             'identification_type',
+        ]
+        fields_to_init = [
+            'birth_year',
+            'national_number',
+            'identification_type',
+            'id_card_number',
+            'id_card',
+            'passport',
+            'passport_number',
+            'last_registration_year',
+            'last_registration_id',
         ]

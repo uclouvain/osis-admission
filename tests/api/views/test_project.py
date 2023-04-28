@@ -1001,7 +1001,6 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                     'country_of_citizenship': self.first_candidate.country_of_citizenship.iso_code,
                 },
                 'coordinates': {
-                    'email': self.first_candidate.email,
                     'country': 'BE',
                     'postal_code': '1348',
                     'city': 'Louvain-La-Neuve',

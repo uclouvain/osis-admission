@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,30 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
-
-import attr
-
-from osis_common.ddd import interface
+import factory
+from osis_history.models import HistoryEntry
 
 
-@attr.dataclass(frozen=True, slots=True)
-class ProfilCandidatDTO(interface.DTO):
+class HistoryEntryFactory(factory.DjangoModelFactory):
+    message_fr = factory.Faker('text')
+    message_en = factory.Faker('text')
 
-    # Identification
-    nom: Optional[str] = ''
-    prenom: Optional[str] = ''
-    genre: Optional[str] = ''
-    nationalite: Optional[str] = ''
-    nom_pays_nationalite: Optional[str] = ''
-
-    # Coordonnees
-    email: Optional[str] = ''
-    pays: Optional[str] = ''
-    nom_pays: Optional[str] = ''
-    code_postal: Optional[str] = ''
-    ville: Optional[str] = ''
-    lieu_dit: Optional[str] = ''
-    rue: Optional[str] = ''
-    numero_rue: Optional[str] = ''
-    boite_postale: Optional[str] = ''
+    class Meta:
+        model = HistoryEntry

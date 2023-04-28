@@ -254,6 +254,44 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         filters = ast.literal_eval(export.filters)
         self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
 
+    def test_export_with_sic_management_user_with_filters_and_asc_ordering(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # With asc ordering
+        response = self.client.get(self.url, data={**self.default_params, 'o': 'numero_demande'})
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('tri_inverse'), False)
+        self.assertEqual(filters.get('champ_tri'), 'numero_demande')
+
+    def test_export_with_sic_management_user_with_filters_and_desc_ordering(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # With asc ordering
+        response = self.client.get(self.url, data={**self.default_params, 'o': '-numero_demande'})
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('tri_inverse'), True)
+        self.assertEqual(filters.get('champ_tri'), 'numero_demande')
+
     def test_export_content(self):
         view = AdmissionListExcelExportView()
         header = view.get_header()
