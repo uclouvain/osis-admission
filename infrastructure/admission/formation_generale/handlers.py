@@ -33,6 +33,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
+from admission.infrastructure.admission.domain.service.historique import Historique
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
@@ -58,6 +59,7 @@ COMMAND_HANDLERS = {
         formation_translator=FormationGeneraleTranslator(),
         bourse_translator=BourseTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        historique=Historique(),
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -76,6 +78,7 @@ COMMAND_HANDLERS = {
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
+        historique=Historique(),
     ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
@@ -101,6 +104,7 @@ COMMAND_HANDLERS = {
         notification=Notification(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         inscription_tardive_service=InscriptionTardive(),
+        historique=Historique(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

@@ -270,7 +270,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(row_data[7], self.result.nationalite_candidat)
         self.assertEqual(row_data[8], 'oui')
         self.assertEqual(row_data[9], ChoixStatutPropositionGenerale.CONFIRMEE.value)
-        self.assertEqual(row_data[10], self.result.derniere_modification_par)
+        self.assertEqual(row_data[10], _('candidate'))
         self.assertEqual(row_data[11], '2023/01/01, 00:00:00')
         self.assertEqual(row_data[12], '2023/01/02, 00:00:00')
 
