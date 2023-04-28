@@ -66,3 +66,15 @@ class AdmissionPersonFormView(LoadDossierViewMixin, UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['resides_in_belgium'] = self.resides_in_belgium
         return kwargs
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        # Update submitted profile with newer data
+        if admission.submitted_profile:
+            admission.submitted_profile['identification'] = {
+                'last_name': form.cleaned_data.get('last_name'),
+                'first_name': form.cleaned_data.get('first_name'),
+                'gender': form.cleaned_data.get('gender'),
+                'country_of_citizenship': form.cleaned_data.get('country_of_citizenship').iso_code
+                if form.cleaned_data.get('country_of_citizenship')
+                else '',
+            }

@@ -54,6 +54,7 @@ class HistoryAPIView(LoginRequiredMixin, APIPermissionRequiredMixin, HistoryEntr
 
     def get_permission_object(self):
         current_context = self.request.resolver_match.namespaces[1]
+
         return {
             CONTEXT_DOCTORATE: get_cached_admission_perm_obj,
             CONTEXT_GENERAL: get_cached_general_education_admission_perm_obj,

@@ -65,13 +65,13 @@ class AdmissionCoordonneesFormView(LoadDossierViewMixin, FormView):
         PersonAddress.objects.update_or_create(
             person=self.admission.candidate,
             label=PersonAddressType.RESIDENTIAL.name,
-            defaults=forms['residential'].get_prepare_data(),
+            defaults=forms['residential'].get_prepare_data,
         )
         if forms['main_form'].cleaned_data['show_contact']:
             PersonAddress.objects.update_or_create(
                 person=self.admission.candidate,
                 label=PersonAddressType.CONTACT.name,
-                defaults=forms['contact'].get_prepare_data(),
+                defaults=forms['contact'].get_prepare_data,
             )
         else:
             PersonAddress.objects.filter(
@@ -80,6 +80,24 @@ class AdmissionCoordonneesFormView(LoadDossierViewMixin, FormView):
             ).delete()
 
         return super().form_valid(forms)
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        # Update submitted profile with newer data
+        if admission.submitted_profile:
+            address = (
+                form['contact'].get_prepare_data
+                if form['main_form'].cleaned_data['show_contact']
+                else form['residential'].get_prepare_data
+            )
+            admission.submitted_profile['coordinates'] = {
+                'country': address.get('country').iso_code,
+                'postal_code': address.get('postal_code'),
+                'city': address.get('city'),
+                'place': address.get('place'),
+                'street': address.get('street'),
+                'street_number': address.get('street_number'),
+                'postal_box': address.get('postal_box'),
+            }
 
     def get_initial(self):
         addresses = PersonAddress.objects.filter(
@@ -111,6 +129,7 @@ class AdmissionCoordonneesFormView(LoadDossierViewMixin, FormView):
                     **kwargs,
                 ),
                 'contact': AdmissionAddressForm(
+                    check_coordinates_fields=bool(kwargs.get('data') and kwargs['data'].get('show_contact')),
                     prefix='contact',
                     instance=initial['contact'],
                     **kwargs,
