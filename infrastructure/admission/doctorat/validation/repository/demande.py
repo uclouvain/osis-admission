@@ -27,7 +27,7 @@ from typing import List, Optional
 
 from admission.contrib.models import DoctorateAdmission
 from admission.contrib.models.doctorate import DemandeProxy
-from admission.ddd.admission.doctorat.validation.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.doctorat.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.doctorat.validation.domain.service.proposition_identity import (
@@ -63,20 +63,7 @@ class DemandeRepository(IDemandeRepository):
         except DoctorateAdmission.DoesNotExist:
             raise DemandeNonTrouveeException
         return Demande(
-            profil_candidat=ProfilCandidat(
-                prenom=admission.submitted_profile.get('identification').get('first_name'),
-                nom=admission.submitted_profile.get('identification').get('last_name'),
-                genre=admission.submitted_profile.get('identification').get('gender'),
-                nationalite=admission.submitted_profile.get('identification').get('country_of_citizenship'),
-                email=admission.submitted_profile.get('coordinates').get('email'),
-                pays=admission.submitted_profile.get('coordinates').get('country'),
-                code_postal=admission.submitted_profile.get('coordinates').get('postal_code'),
-                ville=admission.submitted_profile.get('coordinates').get('city'),
-                lieu_dit=admission.submitted_profile.get('coordinates').get('place'),
-                rue=admission.submitted_profile.get('coordinates').get('street'),
-                numero_rue=admission.submitted_profile.get('coordinates').get('street_number'),
-                boite_postale=admission.submitted_profile.get('coordinates').get('postal_box'),
-            ),
+            profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile),
             entity_id=entity_id,
             proposition_id=PropositionIdentityTranslator.convertir_depuis_demande(entity_id),
             statut_cdd=ChoixStatutCDD[admission.status_cdd],
@@ -99,24 +86,7 @@ class DemandeRepository(IDemandeRepository):
         DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
-                'submitted_profile': {
-                    'identification': {
-                        'first_name': entity.profil_candidat.prenom,
-                        'last_name': entity.profil_candidat.nom,
-                        'gender': entity.profil_candidat.genre,
-                        'country_of_citizenship': entity.profil_candidat.nationalite,
-                    },
-                    'coordinates': {
-                        'email': entity.profil_candidat.email,
-                        'country': entity.profil_candidat.pays,
-                        'postal_code': entity.profil_candidat.code_postal,
-                        'city': entity.profil_candidat.ville,
-                        'place': entity.profil_candidat.lieu_dit,
-                        'street': entity.profil_candidat.rue,
-                        'street_number': entity.profil_candidat.numero_rue,
-                        'postal_box': entity.profil_candidat.boite_postale,
-                    },
-                },
+                'submitted_profile': entity.profil_soumis_candidat.to_dict(),
                 'pre_admission_submission_date': entity.pre_admission_confirmee_le,
                 'submitted_at': entity.admission_confirmee_le,
                 'status_cdd': entity.statut_cdd.name,
@@ -137,21 +107,10 @@ class DemandeRepository(IDemandeRepository):
             derniere_modification=demande.modified_at,
             pre_admission_confirmee_le=demande.pre_admission_submission_date,
             admission_confirmee_le=demande.submitted_at,
-            profil_candidat=ProfilCandidatDTO(
-                prenom=demande.submitted_profile.get('identification').get('first_name'),
-                nom=demande.submitted_profile.get('identification').get('last_name'),
-                genre=demande.submitted_profile.get('identification').get('gender'),
-                nationalite=demande.submitted_profile.get('identification').get('country_of_citizenship'),
-                nom_pays_nationalite=demande.nom_pays_nationalite or '',  # from DemandeManager annotation
-                email=demande.submitted_profile.get('coordinates').get('email'),
-                pays=demande.submitted_profile.get('coordinates').get('country'),
-                nom_pays=demande.nom_pays or '',  # from DemandeManager annotation
-                code_postal=demande.submitted_profile.get('coordinates').get('postal_code'),
-                ville=demande.submitted_profile.get('coordinates').get('city'),
-                lieu_dit=demande.submitted_profile.get('coordinates').get('place'),
-                rue=demande.submitted_profile.get('coordinates').get('street'),
-                numero_rue=demande.submitted_profile.get('coordinates').get('street_number'),
-                boite_postale=demande.submitted_profile.get('coordinates').get('postal_box'),
+            profil_soumis_candidat=ProfilCandidatDTO.from_dict(
+                dict_profile=demande.submitted_profile,
+                nom_pays_nationalite=demande.submitted_profile_country_of_citizenship_name or '',  # from annotation
+                nom_pays_adresse=demande.submitted_profile_country_name or '',  # from annotation
             ),
             # TODO use the related fields when they will be available
             pre_admission_acceptee_le=None,

@@ -33,15 +33,14 @@ __all__ = ['AdmissionPersonDetailView']
 
 class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
     permission_required = 'admission.view_admission_person'
-
-    def get_template_names(self):
-        return [
-            f'admission/{self.formatted_current_context}/details/person.html',
-            'admission/details/person.html',
-        ]
+    template_name = 'admission/details/person_backoffice.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['person'] = self.admission.candidate
         context['contact_language'] = get_languages().get(self.admission.candidate.language)
+        if self.is_doctorate and 'dossier' in context:
+            context['profil_candidat'] = context['dossier'].profil_soumis_candidat
+        elif self.is_general:
+            context['profil_candidat'] = context['admission'].profil_soumis_candidat
         return context

@@ -29,7 +29,7 @@ from typing import Optional
 import attr
 
 from osis_common.ddd import interface
-from .profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -57,7 +57,7 @@ class DemandeDTO(interface.DTO):
     derniere_modification: datetime.datetime
     pre_admission_confirmee_le: Optional[datetime.datetime]
     admission_confirmee_le: Optional[datetime.datetime]
-    profil_candidat: ProfilCandidatDTO
+    profil_soumis_candidat: ProfilCandidatDTO
     # TODO only include info about demande
 
 

@@ -48,6 +48,9 @@ from admission.ddd.admission.domain.service.i_maximum_propositions import IMaxim
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.enums.question_specifique import Onglets
+from admission.ddd.admission.domain.service.profil_soumis_candidat import (
+    ProfilSoumisCandidatTranslator,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
@@ -111,11 +114,16 @@ def soumettre_proposition(
         formation_translator=doctorat_translator,
         profil_candidat_translator=profil_candidat_translator,
     )
-    demande = DemandeService().initier(
+
+    profil_candidat_soumis = ProfilSoumisCandidatTranslator().recuperer(
         profil_candidat_translator=profil_candidat_translator,
-        proposition_id=proposition_id,
         matricule_candidat=proposition.matricule_candidat,
+    )
+
+    demande = DemandeService().initier(
+        proposition_id=proposition_id,
         type_admission=proposition.type_admission,
+        profil_soumis_candidat=profil_candidat_soumis,
     )
 
     # THEN

@@ -55,18 +55,6 @@ class CoordonneesFormTestCase(TestCase):
         cls.belgium_country = CountryFactory(iso_code=BE_ISO_CODE)
         cls.france_country = CountryFactory(iso_code=FR_ISO_CODE)
         cls.academic_year = AcademicYearFactory(year=2021)
-        cls.form_data = {
-            'first_name': 'John',
-            'last_name': 'Doe',
-            'birth_date': datetime.date(1990, 1, 1),
-            'birth_country': cls.belgium_country.pk,
-            'birth_place': 'Louvain-La-Neuve',
-            'sex': ChoixSexe.M.name,
-            'gender': ChoixGenre.H.name,
-            'civil_state': CivilState.MARRIED.name,
-            'has_national_number': True,
-            'national_number': '01234567899',
-        }
 
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
@@ -198,7 +186,7 @@ class CoordonneesFormTestCase(TestCase):
             },
         )
         self.assertEqual(
-            form.get_prepare_data(),
+            form.get_prepare_data,
             {
                 'city': '',
                 'country': None,
@@ -234,7 +222,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('city', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('postal_code', []))
-        self.assertEqual(form.get_prepare_data(), None)
+        self.assertEqual(form.get_prepare_data, None)
 
         # All required fields are filled
         form = AdmissionAddressForm(
@@ -266,7 +254,7 @@ class CoordonneesFormTestCase(TestCase):
             },
         )
         self.assertEqual(
-            form.get_prepare_data(),
+            form.get_prepare_data,
             {
                 'country': self.france_country,
                 'city': 'Paris',
@@ -290,7 +278,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('be_city', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('be_postal_code', []))
-        self.assertEqual(form.get_prepare_data(), None)
+        self.assertEqual(form.get_prepare_data, None)
 
         # All required fields are filled
         form = AdmissionAddressForm(
@@ -322,7 +310,7 @@ class CoordonneesFormTestCase(TestCase):
             },
         )
         self.assertEqual(
-            form.get_prepare_data(),
+            form.get_prepare_data,
             {
                 'country': self.belgium_country,
                 'city': 'Louvain-La-Neuve',
@@ -334,14 +322,14 @@ class CoordonneesFormTestCase(TestCase):
             },
         )
 
-    def test_general_person_form_on_get_sic_manager(self):
+    def test_general_coordinates_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(self.general_url)
 
         self.assertEqual(response.status_code, 200)
 
-    def test_general_person_form_on_get(self):
+    def test_general_coordinates_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(self.general_url)
@@ -353,7 +341,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
         self.assertTrue(response.context['force_form'])
 
-    def test_general_person_form_post_main_form(self):
+    def test_general_coordinates_form_post_main_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(
@@ -361,6 +349,11 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'phone_mobile': '0123456789',
                 'private_email': 'john.doe@example.com',
+                'residential-country': self.france_country.pk,
+                'residential-postal_code': '92000',
+                'residential-city': 'Paris',
+                'residential-street': 'Peace street',
+                'residential-street_number': '10',
             },
         )
 
@@ -370,7 +363,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertEqual(candidate.phone_mobile, '0123456789')
         self.assertEqual(candidate.private_email, 'joe.foe@example.com')  # Not updated (disabled field)
 
-    def test_general_person_form_post_residential_address(self):
+    def test_general_coordinates_form_post_residential_address(self):
         self.client.force_login(user=self.sic_manager_user)
 
         PersonAddress.objects.filter(person=self.general_admission.candidate).delete()
@@ -427,27 +420,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertEqual(residential_addresses[0].street, 'Peace street')
         self.assertEqual(residential_addresses[0].street_number, '10')
 
-        # The candidate has an existing address and no specifies a new one -> reset address
-        response = self.client.post(
-            self.general_url,
-            {},
-        )
-
-        self.assertRedirects(response, self.general_redirect_url)
-
-        residential_addresses = PersonAddress.objects.filter(
-            person=self.general_admission.candidate,
-            label=PersonAddressType.RESIDENTIAL.name,
-        )
-
-        self.assertEqual(len(residential_addresses), 1)
-        self.assertEqual(residential_addresses[0].country, None)
-        self.assertEqual(residential_addresses[0].postal_code, '')
-        self.assertEqual(residential_addresses[0].city, '')
-        self.assertEqual(residential_addresses[0].street, '')
-        self.assertEqual(residential_addresses[0].street_number, '')
-
-    def test_general_person_form_post_contact_address(self):
+    def test_general_coordinates_form_post_contact_address(self):
         self.client.force_login(user=self.sic_manager_user)
 
         PersonAddress.objects.filter(person=self.general_admission.candidate).delete()
@@ -462,6 +435,11 @@ class CoordonneesFormTestCase(TestCase):
                 'contact-be_city': 'Louvain-La-Neuve',
                 'contact-street': 'Art street',
                 'contact-street_number': '1',
+                'residential-country': self.france_country.pk,
+                'residential-postal_code': '92000',
+                'residential-city': 'Paris',
+                'residential-street': 'Peace street',
+                'residential-street_number': '10',
             },
         )
 
@@ -488,6 +466,11 @@ class CoordonneesFormTestCase(TestCase):
                 'contact-city': 'Paris',
                 'contact-street': 'Peace street',
                 'contact-street_number': '10',
+                'residential-country': self.france_country.pk,
+                'residential-postal_code': '92000',
+                'residential-city': 'Paris',
+                'residential-street': 'Peace street',
+                'residential-street_number': '10',
             },
         )
 
@@ -505,11 +488,15 @@ class CoordonneesFormTestCase(TestCase):
         self.assertEqual(contact_addresses[0].street, 'Peace street')
         self.assertEqual(contact_addresses[0].street_number, '10')
 
-        # The candidate has an existing address and no specifies a new one -> delete the existing one
+        # The candidate has an existing contact address and no specifies a new one -> delete the existing one
         response = self.client.post(
             self.general_url,
             data={
-                'show_contact': False,
+                'residential-country': self.france_country.pk,
+                'residential-postal_code': '92000',
+                'residential-city': 'Paris',
+                'residential-street': 'Peace street',
+                'residential-street_number': '10',
             },
         )
 
@@ -521,7 +508,137 @@ class CoordonneesFormTestCase(TestCase):
             ).exists()
         )
 
-    def test_general_person_form_post_with_invalid_data(self):
+    def test_general_coordinates_form_post_updates_submitted_profile_if_necessary(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        general_admission = GeneralEducationAdmissionFactory(
+            training__management_entity=self.general_admission.training.management_entity,
+            training__academic_year=self.general_admission.training.academic_year,
+            candidate__phone_mobile='987654321',
+            candidate__private_email='joe.foe@example.com',
+            submitted_profile={},
+        )
+
+        url = resolve_url('admission:general-education:update:coordonnees', uuid=general_admission.uuid)
+
+        default_submitted_profile = {
+            'identification': {
+                'first_name': general_admission.candidate.first_name,
+                'last_name': general_admission.candidate.last_name,
+                'gender': general_admission.candidate.gender,
+                'country_of_citizenship': 'BE',
+            },
+            'coordinates': {
+                'country': 'BE',
+                'postal_code': '1348',
+                'city': 'Louvain-La-Neuve',
+                'place': 'P1',
+                'street': 'University street',
+                'street_number': '1',
+                'postal_box': 'PB1',
+            },
+        }
+
+        # No submitted profile so it should not be updated
+        response = self.client.post(
+            url,
+            data={
+                'residential-country': self.france_country.pk,
+                'residential-postal_code': '92000',
+                'residential-city': 'Paris',
+                'residential-street': 'Peace street',
+                'residential-street_number': '10',
+                'residential-postal_box': 'PB2',
+                'residential-place': 'P2',
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        general_admission.refresh_from_db()
+        self.assertEqual(general_admission.submitted_profile, {})
+
+        # The submitted profile exists so it should be updated with the residential address
+        general_admission.submitted_profile = default_submitted_profile
+        general_admission.save()
+
+        response = self.client.post(
+            url,
+            data={
+                'residential-country': self.france_country.pk,
+                'residential-postal_code': '92000',
+                'residential-city': 'Paris',
+                'residential-street': 'Peace street',
+                'residential-street_number': '10',
+                'residential-postal_box': 'PB2',
+                'residential-place': 'P2',
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        general_admission.refresh_from_db()
+        self.assertEqual(
+            general_admission.submitted_profile,
+            {
+                'identification': default_submitted_profile.get('identification'),
+                'coordinates': {
+                    'country': 'FR',
+                    'postal_code': '92000',
+                    'city': 'Paris',
+                    'place': 'P2',
+                    'street': 'Peace street',
+                    'street_number': '10',
+                    'postal_box': 'PB2',
+                },
+            },
+        )
+
+        # The submitted profile exists so it should be updated with the contact address
+        general_admission.submitted_profile = default_submitted_profile
+        general_admission.save()
+
+        response = self.client.post(
+            url,
+            {
+                'show_contact': True,
+                'residential-country': self.france_country.pk,
+                'residential-postal_code': '92000',
+                'residential-city': 'Paris',
+                'residential-street': 'Peace street',
+                'residential-street_number': '10',
+                'residential-postal_box': 'PB2',
+                'residential-place': 'P2',
+                'contact-country': self.belgium_country.pk,
+                'contact-be_postal_code': '1000',
+                'contact-be_city': 'Bruxelles',
+                'contact-street': 'Main street',
+                'contact-street_number': '15',
+                'contact-postal_box': 'PB3',
+                'contact-place': 'P3',
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+        general_admission.refresh_from_db()
+        self.assertEqual(
+            general_admission.submitted_profile,
+            {
+                'identification': default_submitted_profile.get('identification'),
+                'coordinates': {
+                    'country': 'BE',
+                    'postal_code': '1000',
+                    'city': 'Bruxelles',
+                    'street': 'Main street',
+                    'street_number': '15',
+                    'postal_box': 'PB3',
+                    'place': 'P3',
+                },
+            },
+        )
+
+    def test_general_coordinates_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
         max_pk = Country.objects.latest('pk').pk
         response = self.client.post(
@@ -532,13 +649,13 @@ class CoordonneesFormTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    def test_continuing_person_form_on_get_sic_manager(self):
+    def test_continuing_coordinates_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(self.continuing_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_continuing_person_form_on_get(self):
+    def test_continuing_coordinates_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(self.continuing_url)
@@ -550,7 +667,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
         self.assertTrue(response.context['force_form'])
 
-    def test_continuing_person_form_post_main_form(self):
+    def test_continuing_coordinates_form_post_main_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(
@@ -558,6 +675,11 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'phone_mobile': '0123456789',
                 'private_email': 'john.doe@example.com',
+                'residential-country': self.france_country.pk,
+                'residential-postal_code': '92000',
+                'residential-city': 'Paris',
+                'residential-street': 'Peace street',
+                'residential-street_number': '10',
             },
         )
         redirect_url = resolve_url('admission:continuing-education:coordonnees', uuid=self.continuing_admission.uuid)
@@ -566,7 +688,7 @@ class CoordonneesFormTestCase(TestCase):
         candidate = Person.objects.get(pk=self.continuing_admission.candidate.pk)
         self.assertEqual(candidate.phone_mobile, '0123456789')
 
-    def test_continuing_person_form_post_with_invalid_data(self):
+    def test_continuing_coordinates_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
         max_pk = Country.objects.latest('pk').pk
         response = self.client.post(
@@ -577,19 +699,19 @@ class CoordonneesFormTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    def test_doctoral_person_form_on_get_sic_manager(self):
+    def test_doctoral_coordinates_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_doctoral_person_form_on_get_cdd_manager(self):
+    def test_doctoral_coordinates_form_on_get_cdd_manager(self):
         self.client.force_login(user=self.cdd_manager.person.user)
 
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_doctoral_person_form_on_get(self):
+    def test_doctoral_coordinates_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(self.doctorate_url)
@@ -601,7 +723,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
         self.assertTrue(response.context['force_form'])
 
-    def test_doctoral_person_form_post_main_form(self):
+    def test_doctoral_coordinates_form_post_main_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(
@@ -609,6 +731,11 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'phone_mobile': '0123456789',
                 'private_email': 'john.doe@example.com',
+                'residential-country': self.france_country.pk,
+                'residential-postal_code': '92000',
+                'residential-city': 'Paris',
+                'residential-street': 'Peace street',
+                'residential-street_number': '10',
             },
         )
 
@@ -618,7 +745,7 @@ class CoordonneesFormTestCase(TestCase):
         candidate = Person.objects.get(pk=self.doctorate_admission.candidate.pk)
         self.assertEqual(candidate.phone_mobile, '0123456789')
 
-    def test_doctoral_person_form_post_with_invalid_data(self):
+    def test_doctoral_coordinates_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
         max_pk = Country.objects.latest('pk').pk
         response = self.client.post(

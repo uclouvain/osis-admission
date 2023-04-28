@@ -30,6 +30,7 @@ import attr
 
 from admission.ddd.admission.dtos.bourse import BourseDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from osis_common.ddd import interface
 
 
@@ -93,6 +94,8 @@ class PropositionGestionnaireDTO(PropositionDTO):
     fraudeur_ares: bool
     non_financable: bool
     est_inscription_tardive: bool
+
+    profil_soumis_candidat: Optional[ProfilCandidatDTO]
 
     @property
     def candidat_vip(self) -> bool:

@@ -3913,7 +3913,7 @@ msgstr ""
 msgid "The dossier has been confirmed as:"
 msgstr ""
 
-msgid "The dossier has been confirmed with the following contact address:"
+msgid "The dossier has been confirmed with the following address:"
 msgstr ""
 
 #, python-format
@@ -4281,6 +4281,9 @@ msgstr ""
 msgid "Unknown birth date"
 msgstr ""
 
+msgid "Unknown citizenship"
+msgstr ""
+
 msgid "Unknown noma"
 msgstr ""
 
@@ -4544,7 +4547,7 @@ msgstr ""
 msgid "You specified that no assimilation proposals applies to you."
 msgstr ""
 
-msgid "Your data has been saved"
+msgid "Your data has been saved."
 msgstr ""
 
 msgid ""
