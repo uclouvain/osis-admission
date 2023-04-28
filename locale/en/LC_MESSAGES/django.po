@@ -1696,6 +1696,12 @@ msgstr ""
 msgid "Extension request not defined."
 msgstr ""
 
+msgid "External enrollment change"
+msgstr ""
+
+msgid "External reorientation"
+msgstr ""
+
 msgid "FAC/CDD processing"
 msgstr ""
 
