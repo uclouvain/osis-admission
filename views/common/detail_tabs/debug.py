@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 import logging
 from io import StringIO
 
@@ -31,20 +30,19 @@ import freezegun
 from django.utils.timezone import now
 from django.views.generic import TemplateView
 
+from admission.ddd.admission.doctorat.preparation.commands import DeterminerAnneeAcademiqueEtPotQuery as DoctorateCmd
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
-from admission.ddd.admission.formation_generale.commands import DeterminerAnneeAcademiqueEtPotQuery
+from admission.ddd.admission.formation_continue.commands import DeterminerAnneeAcademiqueEtPotQuery as ContinuingCmd
+from admission.ddd.admission.formation_generale.commands import DeterminerAnneeAcademiqueEtPotQuery as GeneralCmd
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from osis_common.ddd.interface import BusinessException
 
-__all__ = ["GeneralDebugView"]
+__all__ = ['DebugView']
 
 
-# TODO Move to 'common' once we have the same logic as frontoffice
-class GeneralDebugView(LoadDossierViewMixin, TemplateView):
-    urlpatterns = 'debug'
+class DebugView(LoadDossierViewMixin, TemplateView):
     template_name = 'admission/debug.html'
     permission_required = "admission.view_debug_info"
-    cmd = DeterminerAnneeAcademiqueEtPotQuery
 
     def get_context_data(self, **kwargs):
         from infrastructure.messages_bus import message_bus_instance
@@ -60,7 +58,12 @@ class GeneralDebugView(LoadDossierViewMixin, TemplateView):
             logger.addHandler(handler)
 
             try:
-                cmd = self.cmd(self.admission_uuid)
+                mapping = {
+                    'doctorate': DoctorateCmd,
+                    'general-education': GeneralCmd,
+                    'continuing-education': ContinuingCmd,
+                }
+                cmd = mapping[self.current_context](self.admission_uuid)
                 dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(cmd)
                 data['determined_academic_year'] = dto.annee
                 data['determined_pool'] = dto.pool.name
