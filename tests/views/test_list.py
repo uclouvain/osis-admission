@@ -346,10 +346,10 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             ],
         )
 
-    def test_list_with_filter_by_admission_status(self):
+    def test_list_with_filter_by_admission_statuses(self):
         self.client.force_login(user=self.sic_management_user)
 
-        response = self._do_request(etat=self.admissions[0].status)
+        response = self._do_request(etats=[self.admissions[0].status])
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
 

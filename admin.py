@@ -106,6 +106,7 @@ class AdmissionAdminMixin(admin.ModelAdmin):
         'detailed_status',
         "submitted_at",
         "last_update_author",
+        "submitted_profile",
     ]
     filter_horizontal = [
         "professional_valuated_experiences",
@@ -148,7 +149,6 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
     list_filter = ['status', 'type']
     readonly_fields = [
         "detailed_status",
-        "submitted_profile",
         "pre_admission_submission_date",
         "submitted_at",
         "last_update_author",
