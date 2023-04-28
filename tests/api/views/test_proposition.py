@@ -27,6 +27,7 @@ import uuid
 
 import freezegun
 from django.shortcuts import resolve_url
+from osis_history.models import HistoryEntry
 from rest_framework import status
 
 from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission
@@ -164,6 +165,13 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
 
         admission = GeneralEducationAdmission.objects.get(pk=admission.pk)
         self.assertEqual(admission.status, ChoixStatutPropositionGenerale.ANNULEE.name)
+
+        history_entry: HistoryEntry = HistoryEntry.objects.filter(
+            object_uuid=admission.uuid,
+            tags__contains=['proposition', 'status-changed'],
+        ).last()
+        self.assertIsNotNone(history_entry)
+        self.assertEqual(history_entry.message_fr, 'La proposition a été annulée.')
 
     def test_delete_proposition_other_candidate_is_forbidden(self):
         self.client.force_authenticate(user=self.other_candidate.user)
