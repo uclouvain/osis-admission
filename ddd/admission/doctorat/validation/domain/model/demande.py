@@ -47,7 +47,7 @@ class DemandeIdentity(interface.EntityIdentity):
 class Demande(interface.RootEntity):
     entity_id: DemandeIdentity
     proposition_id: PropositionIdentity
-    profil_candidat: ProfilCandidat
+    profil_soumis_candidat: ProfilCandidat
     statut_cdd: ChoixStatutCDD = ChoixStatutCDD.TO_BE_VERIFIED
     statut_sic: ChoixStatutSIC = ChoixStatutSIC.TO_BE_VERIFIED
     matricule_gestionnaire: Optional[str] = ''

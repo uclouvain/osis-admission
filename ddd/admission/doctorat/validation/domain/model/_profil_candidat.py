@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,13 +40,47 @@ class ProfilCandidat(interface.ValueObject):
     nationalite: Optional[str] = ''
 
     # Coordonnees
-    email: Optional[str] = ''
     pays: Optional[str] = ''
-    nom_pays: Optional[str] = ''
     code_postal: Optional[str] = ''
     ville: Optional[str] = ''
     lieu_dit: Optional[str] = ''
     rue: Optional[str] = ''
     numero_rue: Optional[str] = ''
     boite_postale: Optional[str] = ''
-    destinataire: Optional[str] = ''
+
+    def to_dict(self):
+        return {
+            'identification': {
+                'first_name': self.prenom,
+                'last_name': self.nom,
+                'gender': self.genre,
+                'country_of_citizenship': self.nationalite,
+            },
+            'coordinates': {
+                'country': self.pays,
+                'postal_code': self.code_postal,
+                'city': self.ville,
+                'place': self.lieu_dit,
+                'street': self.rue,
+                'street_number': self.numero_rue,
+                'postal_box': self.boite_postale,
+            },
+        }
+
+    @classmethod
+    def from_dict(cls, dict_profile):
+        identification = dict_profile.get('identification', {})
+        coordinates = dict_profile.get('coordinates', {})
+        return ProfilCandidat(
+            nom=identification.get('last_name'),
+            prenom=identification.get('first_name'),
+            genre=identification.get('gender'),
+            nationalite=identification.get('country_of_citizenship'),
+            pays=coordinates.get('country'),
+            code_postal=coordinates.get('postal_code'),
+            ville=coordinates.get('city'),
+            lieu_dit=coordinates.get('place'),
+            rue=coordinates.get('street'),
+            numero_rue=coordinates.get('street_number'),
+            boite_postale=coordinates.get('postal_box'),
+        )

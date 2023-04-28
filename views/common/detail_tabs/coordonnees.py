@@ -34,12 +34,7 @@ __all__ = ['AdmissionCoordonneesDetailView']
 
 class AdmissionCoordonneesDetailView(LoadDossierViewMixin, TemplateView):
     permission_required = 'admission.view_admission_coordinates'
-
-    def get_template_names(self):
-        return [
-            f'admission/{self.formatted_current_context}/details/coordonnees.html',
-            'admission/details/coordonnees.html',
-        ]
+    template_name = 'admission/details/coordonnees_backoffice.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -58,5 +53,10 @@ class AdmissionCoordonneesDetailView(LoadDossierViewMixin, TemplateView):
             'private_email': self.admission.candidate.private_email,
             'phone_mobile': self.admission.candidate.phone_mobile,
         }
+
+        if self.is_doctorate and 'dossier' in context:
+            context['profil_candidat'] = context['dossier'].profil_soumis_candidat
+        elif self.is_general:
+            context['profil_candidat'] = context['admission'].profil_soumis_candidat
 
         return context

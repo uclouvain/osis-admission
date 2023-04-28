@@ -55,7 +55,7 @@ class _DemandeFactory(factory.Factory):
     entity_id = factory.SubFactory(_DemandeIdentityFactory)
     statut_sic = ChoixStatutSIC.TO_BE_VERIFIED
     statut_cdd = ChoixStatutCDD.TO_BE_VERIFIED
-    profil_candidat = factory.SubFactory(ProfilCandidatFactory)
+    profil_soumis_candidat = factory.SubFactory(ProfilCandidatFactory)
     admission_confirmee_le = factory.Faker('past_datetime')
 
 

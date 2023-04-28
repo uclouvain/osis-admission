@@ -29,6 +29,7 @@ from typing import Dict, Optional, List
 import attr
 from django.utils.timezone import now
 
+from admission.ddd.admission.doctorat.validation.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.enums import (
@@ -92,6 +93,8 @@ class Proposition(interface.RootEntity):
 
     est_inscription_tardive: bool = False
 
+    profil_soumis_candidat: ProfilCandidat = None
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
@@ -117,6 +120,7 @@ class Proposition(interface.RootEntity):
         elements_confirmation: Dict[str, str],
         type_demande: TypeDemande,
         est_inscription_tardive: bool,
+        profil_candidat_soumis: ProfilCandidat,
     ):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
         self.type_demande = type_demande
@@ -130,6 +134,7 @@ class Proposition(interface.RootEntity):
         if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE:
             self.formulaire_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
+        self.profil_soumis_candidat = profil_candidat_soumis
 
     def completer_curriculum(
         self,

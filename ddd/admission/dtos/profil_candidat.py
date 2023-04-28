@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,7 +41,6 @@ class ProfilCandidatDTO(interface.DTO):
     nom_pays_nationalite: Optional[str] = ''
 
     # Coordonnees
-    email: Optional[str] = ''
     pays: Optional[str] = ''
     nom_pays: Optional[str] = ''
     code_postal: Optional[str] = ''
@@ -50,3 +49,23 @@ class ProfilCandidatDTO(interface.DTO):
     rue: Optional[str] = ''
     numero_rue: Optional[str] = ''
     boite_postale: Optional[str] = ''
+
+    @classmethod
+    def from_dict(cls, dict_profile, nom_pays_nationalite, nom_pays_adresse):
+        identification = dict_profile.get('identification', {})
+        coordinates = dict_profile.get('coordinates', {})
+        return ProfilCandidatDTO(
+            nom=identification.get('last_name'),
+            prenom=identification.get('first_name'),
+            genre=identification.get('gender'),
+            nationalite=identification.get('country_of_citizenship'),
+            nom_pays_nationalite=nom_pays_nationalite,
+            pays=coordinates.get('country'),
+            nom_pays=nom_pays_adresse,
+            code_postal=coordinates.get('postal_code'),
+            ville=coordinates.get('city'),
+            lieu_dit=coordinates.get('place'),
+            rue=coordinates.get('street'),
+            numero_rue=coordinates.get('street_number'),
+            boite_postale=coordinates.get('postal_box'),
+        )
