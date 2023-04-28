@@ -4333,8 +4333,8 @@ msgstr "Le doctorant"
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
 
-msgid "The dossier has been confirmed with the following contact address:"
-msgstr "La demande a été confirmée avec pour adresse de correspondance :"
+msgid "The dossier has been confirmed with the following address:"
+msgstr "La demande a été confirmée avec pour adresse :"
 
 #, python-format
 msgid "The educational experience '%(education_name)s' is not completed."
@@ -4738,6 +4738,9 @@ msgstr "Numéro unique d'entreprise"
 msgid "Unknown birth date"
 msgstr "Date de naissance exacte inconnue"
 
+msgid "Unknown citizenship"
+msgstr "Nationalité inconnue"
+
 msgid "Unknown noma"
 msgstr "Noma inconnu"
 
@@ -5046,8 +5049,8 @@ msgid "You specified that no assimilation proposals applies to you."
 msgstr ""
 "Vous avez spécifié qu'aucune situation d'assimilation ne s'appliquait à vous."
 
-msgid "Your data has been saved"
-msgstr "Vos données ont été sauvegardées"
+msgid "Your data has been saved."
+msgstr "Vos données ont été sauvegardées."
 
 msgid ""
 "Your export request has been planned, you will receive a notification as "

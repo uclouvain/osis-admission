@@ -77,8 +77,8 @@ class CitiesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': '1000', 'text': 'Bruxelles - 1000'},
-                    {'id': '1348', 'text': 'Louvain-La-Neuve - 1348'},
+                    {'id': 'Bruxelles', 'text': 'Bruxelles'},
+                    {'id': 'Louvain-La-Neuve', 'text': 'Louvain-La-Neuve'},
                 ],
             },
         )
@@ -100,7 +100,7 @@ class CitiesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': '1348', 'text': 'Louvain-La-Neuve - 1348'},
+                    {'id': 'Louvain-La-Neuve', 'text': 'Louvain-La-Neuve'},
                 ],
             },
         )
@@ -122,7 +122,7 @@ class CitiesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': '1348', 'text': 'Louvain-La-Neuve - 1348'},
+                    {'id': 'Louvain-La-Neuve', 'text': 'Louvain-La-Neuve'},
                 ],
             },
         )
@@ -145,7 +145,7 @@ class CitiesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': '1348', 'text': 'Louvain-La-Neuve - 1348'},
+                    {'id': 'Louvain-La-Neuve', 'text': 'Louvain-La-Neuve'},
                 ],
             },
         )

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 from functools import partial
 from typing import List, Optional
 
@@ -162,3 +161,19 @@ class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
         kwargs.setdefault('widget', autocomplete.ListSelect2(url="country-autocomplete"))
         kwargs.setdefault('queryset', Country.objects.none())
         super().__init__(*args, **kwargs)
+
+
+class AdmissionModelForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        """
+        When using a model form, the fields that are not specified in the 'data' attribute of the form are not updated,
+        even if some data is provided through the 'cleaned_data' so we need to initialize them to
+        simulate their submission.
+        Define the 'fields_to_init' attribute in the Meta class of the form to specify which fields should be
+        initialized.
+        """
+        super().__init__(*args, **kwargs)
+        if self.data:
+            self.data = self.data.copy()
+            for field in getattr(self.Meta, 'fields_to_init', []):
+                self.data.setdefault(self.add_prefix(field), None)

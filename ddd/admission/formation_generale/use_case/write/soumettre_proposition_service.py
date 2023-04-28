@@ -41,6 +41,9 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import IInscriptionTardive
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
+from admission.ddd.admission.domain.service.profil_soumis_candidat import (
+    ProfilSoumisCandidatTranslator,
+)
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -119,10 +122,22 @@ def soumettre_proposition(
         profil_candidat_translator=profil_candidat_translator,
     )
 
+    profil_candidat_soumis = ProfilSoumisCandidatTranslator().recuperer(
+        profil_candidat_translator=profil_candidat_translator, matricule_candidat=proposition.matricule_candidat
+    )
+
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
     # THEN
-    proposition.soumettre(formation_id, pool, cmd.elements_confirmation, type_demande, est_inscription_tardive)
+    proposition.soumettre(
+        formation_id,
+        pool,
+        cmd.elements_confirmation,
+        type_demande,
+        est_inscription_tardive,
+        profil_candidat_soumis,
+    )
+
     proposition_repository.save(proposition)
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)

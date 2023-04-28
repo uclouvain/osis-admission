@@ -24,7 +24,7 @@
 #
 ##############################################################################
 from .demande import DemandeDTO, DemandeRechercheDTO, RecupererDemandeDTO
-from .profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 
 
 __all__ = [
