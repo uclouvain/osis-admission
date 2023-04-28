@@ -1,4 +1,4 @@
-{% extends "admission/doctorate/details/tab_layout.html" %}
+{% extends base_template %}
 {% load static %}
 
 {% comment "License" %}
@@ -57,7 +57,7 @@
 
 {% block tab_content %}
   <div class="history-viewer"
-       data-url="{% url 'admission:doctorate:history-api' uuid=view.kwargs.uuid %}"
+       data-url="{% url request.resolver_match.namespace|add:':history-api' uuid=view.kwargs.uuid %}"
        data-tags="{{ tag }}"
        data-on-item-render-vertical-timeline="renderList"
        data-on-item-render-horizontal-timeline="renderList"
@@ -109,5 +109,6 @@
 
 
 {% block script %}
+  {{ block.super }}
   <script type="text/javascript" src="{% static 'osis_history/osis-history.umd.min.js' %}"></script>
 {% endblock %}

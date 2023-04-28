@@ -1835,6 +1835,12 @@ msgstr "Demande de prolongation non complète."
 msgid "Extension request not defined."
 msgstr "Demande de prolongation non définie."
 
+msgid "External enrollment change"
+msgstr "Modification d'inscription externe"
+
+msgid "External reorientation"
+msgstr "Réorientation externe"
+
 msgid "FAC/CDD processing"
 msgstr "Traitement FAC/CDD"
 

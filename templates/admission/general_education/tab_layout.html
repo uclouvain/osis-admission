@@ -58,7 +58,7 @@
 
 {% block panel-heading %}
   {% display admission.nom_candidat ',' admission.prenom_candidat as full_candidate_name %}
-  <div>
+  <div class="min-width">
     {% get_image_file_url admission.photo_identite_candidat as id_photo_url %}
     <img
         {% if id_photo_url %}
@@ -99,7 +99,7 @@
     {% url 'admission:access-conditions-url' admission.formation.type admission.formation.sigle|urlencode:'' admission.formation.code as access_conditions_url %}
     <span>
       <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}</a> -
-      {{ admission.formation.intitule }}
+      {{ admission.formation.intitule }} ({{ admission.formation.campus }})
       <span class="label label-default">{{ admission.formation.annee|display_as_academic_year }}</span>
     </span>
     <br>
@@ -111,10 +111,10 @@
       </button>
     </span>
   </div>
-  <div>
+  <div class="min-width">
     <span>
       {% translate 'Status:' %} <span class="label label-admission-primary">{{ admission.statut|enum_display:'ChoixStatutPropositionGenerale' }}</span>
-      {{ date_changement_statut|date:'d/m/Y' }}
+      {{ admission.date_changement_statut|date:'d/m/Y' }}
     </span>
     {% if admission.soumise_le %}
       <br>
@@ -128,15 +128,21 @@
       {% translate 'Access condition:' %} <span class="label label-success">{{ admission.titre_access|default:not_specified }}</span>
     </span>
   </div>
-  <div id="admission-badges">
+  <div id="admission-badges" class="min-width">
     {% if admission.fraudeur_ares %}
       <span class="label label-danger">{% translate 'Fraudster (ARES)' %}</span>
     {% endif %}
     {% if admission.candidat_vip %}
       <span class="label label-success">{% translate 'VIP' %}</span>
     {% endif %}
-    {% if admission.inscription_tardive %}
+    {% if admission.est_inscription_tardive %}
       <span class="label label-danger">{% translate 'Late enrollment' %}</span>
+    {% endif %}
+    {% if admission.est_modification_inscription_externe %}
+      <span class="label label-info">{% translate 'External enrollment change' %}</span>
+    {% endif %}
+    {% if admission.est_reorientation_inscription_externe %}
+      <span class="label label-info">{% translate 'External reorientation' %}</span>
     {% endif %}
     {% if admission.non_financable %}
       <span class="label label-danger">{% translate 'Not fundable' %}</span>
@@ -163,7 +169,7 @@
   <style>
     #admission-panel-header {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 1em;
       flex: 1;
     }
@@ -186,6 +192,10 @@
 
     #admission-badges > span {
       width: min-content;
+    }
+
+    #admission-panel-header > div.min-width {
+      min-width: max-content;
     }
 
     #admission-panel-header > div:not(:first-child) {
