@@ -68,6 +68,7 @@ from admission.templatetags.admission import (
     get_country_name,
     formatted_language,
     get_item_or_default,
+    has_value,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -536,6 +537,17 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             formatted_language(''),
             '',
         )
+
+    def test_has_value_with_list(self):
+        self.assertFalse(has_value([], ['value1']))
+        self.assertFalse(has_value([], []))
+        self.assertFalse(has_value(['value2'], ['value1']))
+        self.assertTrue(has_value(['value1'], ['value1']))
+
+    def test_has_value_with_dict(self):
+        self.assertFalse(has_value({}, ['value1']))
+        self.assertFalse(has_value({'value2': 10}, ['value1']))
+        self.assertTrue(has_value({'value1': False}, ['value1']))
 
 
 class AdmissionTagsTestCase(TestCase):

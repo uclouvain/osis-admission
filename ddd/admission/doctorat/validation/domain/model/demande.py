@@ -29,7 +29,7 @@ from typing import List, Optional
 import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.validation.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.doctorat.validation.domain.validator.validator_by_business_action import (
     ApprouverDemandeCDDValidatorList,
@@ -47,7 +47,7 @@ class DemandeIdentity(interface.EntityIdentity):
 class Demande(interface.RootEntity):
     entity_id: DemandeIdentity
     proposition_id: PropositionIdentity
-    profil_candidat: ProfilCandidat
+    profil_soumis_candidat: ProfilCandidat
     statut_cdd: ChoixStatutCDD = ChoixStatutCDD.TO_BE_VERIFIED
     statut_sic: ChoixStatutSIC = ChoixStatutSIC.TO_BE_VERIFIED
     matricule_gestionnaire: Optional[str] = ''

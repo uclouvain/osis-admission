@@ -63,6 +63,7 @@ class PersonFormTestCase(TestCase):
             'last_name': 'Doe',
             'birth_date': datetime.date(1990, 1, 1),
             'birth_country': cls.belgium_country.pk,
+            'country_of_citizenship': cls.belgium_country.pk,
             'birth_place': 'Louvain-La-Neuve',
             'sex': ChoixSexe.M.name,
             'gender': ChoixGenre.H.name,
@@ -610,12 +611,74 @@ class PersonFormTestCase(TestCase):
         response = self.client.post(self.general_url, self.form_data)
 
         self.assertRedirects(
-            response, reverse('admission:general-education:person', args=[self.general_admission.uuid])
+            response,
+            reverse('admission:general-education:person', args=[self.general_admission.uuid]),
         )
 
         candidate = Person.objects.get(pk=self.general_admission.candidate.pk)
         self.assertEqual(candidate.first_name, self.form_data['first_name'])
         self.assertEqual(candidate.last_name, self.form_data['last_name'])
+
+    def test_general_person_form_post_updates_submitted_profile_if_necessary(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        general_admission = GeneralEducationAdmissionFactory(
+            training__management_entity=self.general_admission.training.management_entity,
+            training__academic_year=self.general_admission.training.academic_year,
+            candidate__phone_mobile='987654321',
+            candidate__private_email='joe.foe@example.com',
+            submitted_profile={},
+        )
+
+        url = resolve_url('admission:general-education:update:person', uuid=general_admission.uuid)
+
+        default_submitted_profile = {
+            'identification': {
+                'first_name': 'Joe',
+                'last_name': 'Poe',
+                'gender': ChoixGenre.X.name,
+                'country_of_citizenship': 'FR',
+            },
+            'coordinates': {
+                'country': 'BE',
+                'postal_code': '1348',
+                'city': 'Louvain-La-Neuve',
+                'place': 'P1',
+                'street': 'University street',
+                'street_number': '1',
+                'postal_box': 'PB1',
+            },
+        }
+
+        # No submitted profile so it should not be updated
+        response = self.client.post(url, data=self.form_data)
+
+        self.assertEqual(response.status_code, 302)
+
+        general_admission.refresh_from_db()
+        self.assertEqual(general_admission.submitted_profile, {})
+
+        # The submitted profile exists so it should be updated with the newer data
+        general_admission.submitted_profile = default_submitted_profile
+        general_admission.save()
+
+        response = self.client.post(url, data=self.form_data)
+
+        self.assertEqual(response.status_code, 302)
+
+        general_admission.refresh_from_db()
+        self.assertEqual(
+            general_admission.submitted_profile,
+            {
+                'coordinates': default_submitted_profile.get('coordinates'),
+                'identification': {
+                    'first_name': 'John',
+                    'last_name': 'Doe',
+                    'gender': ChoixGenre.H.name,
+                    'country_of_citizenship': 'BE',
+                },
+            },
+        )
 
     def test_general_person_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)

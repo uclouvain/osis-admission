@@ -25,6 +25,7 @@
 # ##############################################################################
 from dal import autocomplete, forward
 from django import forms
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pgettext_lazy
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
@@ -60,7 +61,10 @@ class AdmissionCoordonneesForm(forms.ModelForm):
     )
 
     class Media:
-        js = ('js/dependsOn.min.js',)
+        js = (
+            'js/dependsOn.min.js',
+            'admission/formatter.js',
+        )
 
     class Meta:
         model = Person
@@ -152,9 +156,9 @@ class AdmissionAddressForm(forms.ModelForm):
             'country',
         ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, check_coordinates_fields=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.address_can_be_empty = True
+        self.check_coordinates_fields = check_coordinates_fields
 
         country = self.data.get(self.add_prefix('country'), self.initial.get('country'))
         if country:
@@ -185,9 +189,7 @@ class AdmissionAddressForm(forms.ModelForm):
         else:
             mandatory_address_fields.extend(['postal_code', 'city'])
 
-        all_fields = mandatory_address_fields + ['street', 'postal_box', 'place']
-
-        if not self.address_can_be_empty or any(cleaned_data.get(f) for f in all_fields):
+        if self.check_coordinates_fields:
             for field in mandatory_address_fields:
                 if not cleaned_data.get(field):
                     self.add_error(field, FIELD_REQUIRED_MESSAGE)
@@ -199,6 +201,7 @@ class AdmissionAddressForm(forms.ModelForm):
 
         return cleaned_data
 
+    @cached_property
     def get_prepare_data(self):
         if not self.is_valid():
             return

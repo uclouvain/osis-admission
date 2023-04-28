@@ -54,8 +54,8 @@ class CitiesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
         """Return data for the 'results' key of the response."""
         return [
             {
-                'id': city.get('zip_code'),
-                'text': f"{city.get('municipality')} - {city.get('zip_code')}",
+                'id': city.get('municipality'),
+                'text': city.get('municipality'),
             }
             for city in context['object_list']
         ]

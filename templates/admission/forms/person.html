@@ -122,10 +122,7 @@
 
 {% block script %}
   {{ block.super }}
-  {{ form.media.js }}
-  <script src="{% static "js/jquery.mask.min.js" %}"></script>
-  <script src="{% static "js/dependsOn.min.js" %}"></script>
-    <script type="application/javascript">
+  <script type="application/javascript">
       $(function () {
           const is_falsy = val => !val;
           const resides_in_belgium = "{{ resides_in_belgium }}" === "True";

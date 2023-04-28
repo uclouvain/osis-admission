@@ -30,10 +30,9 @@ from admission.ddd.admission.formation_continue.domain.model.enums import ChoixI
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.tests.factories.utils import generate_proposition_reference
-from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.person import CompletePersonForIUFCFactory
 from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.utils import generate_proposition_reference
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
