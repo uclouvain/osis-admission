@@ -26,6 +26,7 @@
 import factory
 
 from admission.contrib.models import GeneralEducationAdmission
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -89,6 +90,26 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
             candidate=factory.SubFactory(CompletePersonForBachelorFactory),
             is_external_reorientation=False,
             is_external_modification=False,
+        )
+        admitted = factory.Trait(
+            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            submitted_profile={
+                "coordinates": {
+                    "city": "Louvain-La-Neuve",
+                    "place": "",
+                    "street": "Place de l'Université",
+                    "country": "BE",
+                    "postal_box": "",
+                    "postal_code": "1348",
+                    "street_number": "2",
+                },
+                "identification": {
+                    "gender": "H",
+                    "last_name": "Doe",
+                    "first_name": "John",
+                    "country_of_citizenship": "BE",
+                },
+            },
         )
 
     @factory.post_generation

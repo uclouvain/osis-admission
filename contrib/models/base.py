@@ -26,16 +26,18 @@
 import uuid
 
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count
+from django.db.models.fields.json import KeyTextTransform, KeyTransform
 from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, get_language
 from osis_comment.models import CommentDeleteMixin
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -66,6 +68,7 @@ from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
+from reference.models.country import Country
 
 REFERENCE_SEQ_NAME = 'admission_baseadmission_reference_seq'
 
@@ -205,6 +208,33 @@ class BaseAdmissionQuerySet(models.QuerySet):
 
         return self.filter(entities_conditions, education_group_conditions)
 
+    def annotate_submitted_profile_countries_names(self):
+        """
+        Annotate the admission with the names of the countries specified in the submitted profile of the candidate.
+        """
+        country_title_field = 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
+
+        return self.alias(
+            # TODO to be simplified with the KT operator (>= Django 4.2)
+            submitted_profile_country_of_citizenship=KeyTextTransform(
+                'country_of_citizenship',
+                KeyTransform('identification', 'submitted_profile'),
+            ),
+            submitted_profile_country=KeyTextTransform(
+                'country',
+                KeyTransform('coordinates', 'submitted_profile'),
+            ),
+        ).annotate(
+            submitted_profile_country_of_citizenship_name=models.Subquery(
+                Country.objects.filter(iso_code=OuterRef('submitted_profile_country_of_citizenship')).values(
+                    country_title_field
+                )[:1]
+            ),
+            submitted_profile_country_name=models.Subquery(
+                Country.objects.filter(iso_code=OuterRef('submitted_profile_country')).values(country_title_field)[:1]
+            ),
+        )
+
 
 class BaseAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def with_training_management_and_reference(self):
@@ -313,6 +343,11 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     submitted_at = models.DateTimeField(
         verbose_name=_("Submission date"),
         null=True,
+    )
+
+    submitted_profile = models.JSONField(
+        verbose_name=_("Submitted profile"),
+        default=dict,
     )
 
     reference = models.BigIntegerField(

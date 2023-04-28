@@ -29,6 +29,7 @@ from typing import List, Optional
 import factory
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
@@ -72,6 +73,10 @@ class PropositionInMemoryRepository(
     IPropositionRepository,
 ):
     entities: List['Proposition'] = []
+    countries = {
+        'BE': 'Belgium',
+        'FR': 'France',
+    }
 
     @classmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
@@ -237,4 +242,21 @@ class PropositionInMemoryRepository(
             fraudeur_ares=False,
             non_financable=False,
             est_inscription_tardive=proposition.est_inscription_tardive,
+            profil_soumis_candidat=ProfilCandidatDTO(
+                prenom=proposition.profil_soumis_candidat.prenom,
+                nom=proposition.profil_soumis_candidat.nom,
+                genre=proposition.profil_soumis_candidat.genre,
+                nationalite=proposition.profil_soumis_candidat.nationalite,
+                nom_pays_nationalite=cls.countries.get(proposition.profil_soumis_candidat.nationalite, ''),
+                pays=proposition.profil_soumis_candidat.pays,
+                nom_pays=cls.countries.get(proposition.profil_soumis_candidat.pays, ''),
+                code_postal=proposition.profil_soumis_candidat.code_postal,
+                ville=proposition.profil_soumis_candidat.ville,
+                lieu_dit=proposition.profil_soumis_candidat.lieu_dit,
+                rue=proposition.profil_soumis_candidat.rue,
+                numero_rue=proposition.profil_soumis_candidat.numero_rue,
+                boite_postale=proposition.profil_soumis_candidat.boite_postale,
+            )
+            if proposition.profil_soumis_candidat
+            else None,
         )

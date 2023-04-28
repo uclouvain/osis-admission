@@ -27,24 +27,27 @@
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.entity import EntityFactory, EntityWithVersionFactory
+from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from reference.tests.factories.country import CountryFactory
 
 
 class PersonDetailViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+
+        CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
 
         first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
         EntityVersionFactory(
@@ -65,14 +68,36 @@ class PersonDetailViewTestCase(TestCase):
             candidate__language=settings.LANGUAGE_CODE_EN,
         )
 
+        cls.confirmed_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=cls.general_admission.training,
+            candidate=cls.general_admission.candidate,
+            admitted=True,
+        )
+
+        cls.confirmed_general_url = resolve_url(
+            'admission:general-education:person',
+            uuid=cls.confirmed_general_admission.uuid,
+        )
+
         cls.central_manager = CentralManagerRoleFactory(entity=first_doctoral_commission)
-        cls.doctoral_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+        cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_FR,
         )
 
-        cls.doctoral_url = resolve_url('admission:doctorate:person', uuid=cls.doctoral_admission.uuid)
+        cls.doctorate_url = resolve_url('admission:doctorate:person', uuid=cls.doctorate_admission.uuid)
+
+        cls.confirmed_doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training=cls.doctorate_admission.training,
+            candidate=cls.doctorate_admission.candidate,
+            admitted=True,
+        )
+
+        cls.confirmed_doctorate_url = resolve_url(
+            'admission:doctorate:person',
+            uuid=cls.confirmed_doctorate_admission.uuid,
+        )
 
     def test_continuing_person_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -95,20 +120,66 @@ class PersonDetailViewTestCase(TestCase):
         self.assertEqual(response.context['admission'].uuid, self.general_admission.uuid)
         self.assertEqual(response.context['person'], self.general_admission.candidate)
         self.assertEqual(response.context['contact_language'], _('English'))
+        self.assertIsNone(response.context['profil_candidat'])
+
+        response = self.client.get(self.confirmed_general_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context.get('profil_candidat'),
+            ProfilCandidatDTO(
+                nom='Doe',
+                prenom='John',
+                genre='H',
+                nationalite='BE',
+                nom_pays_nationalite='Belgique',
+                pays='BE',
+                nom_pays='Belgique',
+                code_postal='1348',
+                ville='Louvain-La-Neuve',
+                lieu_dit='',
+                rue="Place de l'Université",
+                numero_rue='2',
+                boite_postale='',
+            ),
+        )
 
     def test_doctoral_person_detail_cdd_manager_user(self):
         self.client.force_login(user=self.central_manager.person.user)
 
-        response = self.client.get(self.doctoral_url)
+        response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.doctoral_admission.uuid)
-        self.assertEqual(response.context['person'], self.doctoral_admission.candidate)
+        self.assertEqual(response.context['admission'].uuid, self.doctorate_admission.uuid)
+        self.assertEqual(response.context['person'], self.doctorate_admission.candidate)
 
     def test_doctoral_person_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        response = self.client.get(self.doctoral_url)
+        response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['admission'].uuid, self.doctoral_admission.uuid)
-        self.assertEqual(response.context['person'], self.doctoral_admission.candidate)
+        self.assertEqual(response.context['admission'].uuid, self.doctorate_admission.uuid)
+        self.assertEqual(response.context['person'], self.doctorate_admission.candidate)
         self.assertEqual(response.context['contact_language'], _('French'))
+        self.assertIsNone(response.context.get('profil_candidat'))
+
+        response = self.client.get(self.confirmed_doctorate_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context.get('profil_candidat'),
+            ProfilCandidatDTO(
+                nom='Doe',
+                prenom='John',
+                genre='H',
+                nationalite='BE',
+                nom_pays_nationalite='Belgique',
+                pays='BE',
+                nom_pays='Belgique',
+                code_postal='1348',
+                ville='Louvain-La-Neuve',
+                lieu_dit='',
+                rue="Place de l'Université",
+                numero_rue='2',
+                boite_postale='',
+            ),
+        )

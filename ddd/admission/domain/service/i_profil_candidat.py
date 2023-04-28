@@ -153,6 +153,7 @@ class IProfilCandidatTranslator(interface.DomainService):
                 experience.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
                 and experience.code_institut != UCLouvain_acronym
                 and derniere_annee_actuelle >= annee_minimale
+                and derniere_annee_actuelle >= derniere_annee
             ):
                 if derniere_annee_actuelle > derniere_annee:
                     derniere_annee = derniere_annee_actuelle

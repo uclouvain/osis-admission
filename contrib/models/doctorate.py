@@ -287,11 +287,6 @@ class DoctorateAdmission(BaseAdmission):
         verbose_name=_("Pre-admission submission date"),
         null=True,
     )
-    # TODO: make this common to the 3 contexts?
-    submitted_profile = models.JSONField(
-        verbose_name=_("Submitted profile"),
-        default=dict,
-    )
 
     supervision_group = SignatureProcessField()
 
@@ -479,9 +474,8 @@ class PropositionProxy(DoctorateAdmission):
         proxy = True
 
 
-class DemandeManager(models.Manager):
+class DemandeManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def get_queryset(self):
-        country_title_field = 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
         return (
             super()
             .get_queryset()
@@ -494,24 +488,7 @@ class DemandeManager(models.Manager):
                 'status_cdd',
                 'status_sic',
             )
-            .annotate(
-                # TODO to be simplified with the KT operator (>= Django 4.2)
-                nationalite_iso_code=KeyTextTransform(
-                    'country_of_citizenship',
-                    KeyTransform('identification', 'submitted_profile'),
-                ),
-                nom_pays_nationalite=models.Subquery(
-                    Country.objects.filter(iso_code=OuterRef('nationalite_iso_code')).values(country_title_field)[:1]
-                ),
-                # TODO to be simplified with the KT operator (>= Django 4.2)
-                pays_iso_code=KeyTextTransform(
-                    'country',
-                    KeyTransform('coordinates', 'submitted_profile'),
-                ),
-                nom_pays=models.Subquery(
-                    Country.objects.filter(iso_code=OuterRef('pays_iso_code')).values(country_title_field)[:1]
-                ),
-            )
+            .annotate_submitted_profile_countries_names()
             .filter(
                 status__in=[
                     ChoixStatutPropositionDoctorale.CONFIRMEE.name,
