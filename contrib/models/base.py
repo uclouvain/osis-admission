@@ -25,6 +25,7 @@
 ##############################################################################
 import uuid
 
+from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
@@ -46,6 +47,7 @@ from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_E
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
 from base.utils.cte import CTESubquery
+from education_group.contrib.models import EducationGroupRoleModel
 from osis_comment.models import CommentDeleteMixin
 from osis_document.contrib import FileField
 
@@ -56,6 +58,8 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
+from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
 
 
@@ -159,6 +163,30 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 .exclude(pk=OuterRef('pk')),
             ),
         )
+
+    def filter_according_to_roles(self, demandeur_uuid):
+        demandeur_user = User.objects.filter(person__uuid=demandeur_uuid).first()
+        roles = _get_relevant_roles(demandeur_user, 'admission.view_enrolment_application')
+
+        # Filter managed entities
+        entities_conditions = Q()
+        for entity_aware_role in [r for r in roles if issubclass(r, EntityRoleModel)]:
+            entities_conditions |= Q(
+                training__management_entity_id__in=entity_aware_role.objects.filter(
+                    person__uuid=demandeur_uuid
+                ).get_entities_ids()
+            )
+
+        # Filter managed education groups
+        education_group_conditions = Q()
+        for education_aware_role in [r for r in roles if issubclass(r, EducationGroupRoleModel)]:
+            education_group_conditions |= Q(
+                training__education_group_id__in=education_aware_role.objects.filter(
+                    person__uuid=demandeur_uuid
+                ).values_list('education_group_id')
+            )
+
+        return self.filter(entities_conditions, education_group_conditions)
 
 
 class BaseAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):

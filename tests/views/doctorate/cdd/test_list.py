@@ -51,8 +51,10 @@ from admission.tests.factories.roles import (
     SicManagementRoleFactory,
 )
 from admission.tests.factories.supervision import PromoterFactory
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.user import UserFactory
@@ -61,7 +63,7 @@ from reference.tests.factories.country import CountryFactory
 
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 20
+    NB_MAX_QUERIES = 21
 
     @classmethod
     def setUpTestData(cls):
@@ -255,7 +257,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertIn(self.results[1], response.context['object_list'])
 
     def test_list_other_manager(self):
-        other_manager = ProgramManagerRoleFactory()
+        education_group = EducationGroupYearFactory(education_group_type__name=TrainingType.PHD.name).education_group
+        other_manager = ProgramManagerRoleFactory(education_group=education_group)
         self.client.force_login(user=other_manager.person.user)
 
         data = {

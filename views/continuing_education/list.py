@@ -59,4 +59,6 @@ class ContinuingAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxM
     def get_queryset(self):
         # TODO Wait for GetAdmissionsQuery
 
-        return ContinuingEducationAdmissionProxy.objects.for_dto().all()
+        return ContinuingEducationAdmissionProxy.objects.for_dto().filter_according_to_roles(
+            self.request.user.person.uuid
+        )
