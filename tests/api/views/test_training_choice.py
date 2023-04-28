@@ -31,6 +31,7 @@ from django.db import connection
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import override_settings
+from osis_history.models import HistoryEntry
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -212,6 +213,13 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
         self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         self.assertEqual(admission.double_degree_scholarship_id, self.double_degree_scholarship.pk)
         self.assertEqual(admission.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
+
+        history_entry: HistoryEntry = HistoryEntry.objects.filter(
+            object_uuid=admission.uuid,
+            tags__contains=['proposition', 'status-changed'],
+        ).last()
+        self.assertIsNotNone(history_entry)
+        self.assertEqual(history_entry.message_fr, 'La proposition a été initiée.')
 
     def test_training_choice_initialization_using_api_candidate_with_wrong_training(self):
         self.client.force_authenticate(user=self.candidate.user)
