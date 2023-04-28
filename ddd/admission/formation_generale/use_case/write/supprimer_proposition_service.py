@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_generale.repository.i_proposition import 
 def supprimer_proposition(
     cmd: 'SupprimerPropositionCommand',
     proposition_repository: 'IPropositionRepository',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -45,5 +46,6 @@ def supprimer_proposition(
 
     # THEN
     proposition_repository.save(proposition)
+    historique.historiser_suppression(proposition)
 
     return proposition_id

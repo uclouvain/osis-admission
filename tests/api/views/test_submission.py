@@ -29,6 +29,7 @@ from unittest.mock import patch
 import freezegun
 from django.shortcuts import resolve_url
 from django.utils.translation import gettext_lazy as _
+from osis_history.models import HistoryEntry
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -231,6 +232,13 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
         self.assertEqual(self.admission_ok.late_enrollment, False)
+
+        history_entry: HistoryEntry = HistoryEntry.objects.filter(
+            object_uuid=self.admission_ok.uuid,
+            tags__contains=['proposition', 'status-changed'],
+        ).last()
+        self.assertIsNotNone(history_entry)
+        self.assertEqual(history_entry.message_fr, 'La proposition a été soumise.')
 
     @freezegun.freeze_time("1980-10-22")
     def test_general_proposition_submission_with_late_enrollment(self):

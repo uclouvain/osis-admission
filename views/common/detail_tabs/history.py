@@ -27,38 +27,48 @@
 from django.views.generic import TemplateView
 from rules.contrib.views import LoginRequiredMixin
 
-from admission.utils import get_cached_admission_perm_obj
+from admission.templatetags.admission import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.utils import (
+    get_cached_admission_perm_obj,
+    get_cached_continuing_education_admission_perm_obj,
+    get_cached_general_education_admission_perm_obj,
+)
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from osis_history.contrib.mixins import HistoryEntryListAPIMixin
 
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 __all__ = [
-    "DoctorateHistoryAPIView",
-    "DoctorateHistoryView",
-    "DoctorateHistoryAllView",
+    "HistoryAPIView",
+    "HistoryView",
+    "HistoryAllView",
 ]
 __namespace__ = False
 
 
-class DoctorateHistoryAPIView(LoginRequiredMixin, APIPermissionRequiredMixin, HistoryEntryListAPIMixin):
+class HistoryAPIView(LoginRequiredMixin, APIPermissionRequiredMixin, HistoryEntryListAPIMixin):
     urlpatterns = 'history-api'
     permission_mapping = {
         'GET': 'admission.view_historyentry',
     }
 
     def get_permission_object(self):
-        return get_cached_admission_perm_obj(self.kwargs['uuid'])
+        current_context = self.request.resolver_match.namespaces[1]
+        return {
+            CONTEXT_DOCTORATE: get_cached_admission_perm_obj,
+            CONTEXT_GENERAL: get_cached_general_education_admission_perm_obj,
+            CONTEXT_CONTINUING: get_cached_continuing_education_admission_perm_obj,
+        }[current_context](self.kwargs['uuid'])
 
 
-class DoctorateHistoryView(LoadDossierViewMixin, TemplateView):
+class HistoryView(LoadDossierViewMixin, TemplateView):
     urlpatterns = 'history'
-    template_name = 'admission/doctorate/details/history.html'
+    template_name = 'admission/details/history.html'
     permission_required = 'admission.view_historyentry'
     extra_context = {'tag': 'status-changed'}
 
 
-class DoctorateHistoryAllView(LoadDossierViewMixin, TemplateView):
+class HistoryAllView(LoadDossierViewMixin, TemplateView):
     urlpatterns = 'history-all'
-    template_name = 'admission/doctorate/details/history.html'
+    template_name = 'admission/details/history.html'
     permission_required = 'admission.view_historyentry'
