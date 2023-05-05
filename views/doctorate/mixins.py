@@ -207,7 +207,7 @@ class AdmissionFormMixin(LoadDossierViewMixin):
         if self.request.htmx:
             return self.render_to_response(
                 self.get_context_data(
-                    form=self.get_form(self.form_class),
+                    form=form,
                 )
             )
 

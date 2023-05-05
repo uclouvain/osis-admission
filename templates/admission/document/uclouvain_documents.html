@@ -39,7 +39,11 @@
     <tbody class="selectable">
       {% for document in documents %}
         {% if document.type in DOCUMENTS_UCLOUVAIN %}
-          <tr>
+          <tr
+            hx-get="{% url request.resolver_match.namespace|add:':detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
+            hx-target="#document-details"
+            hx-swap="outerHTML"
+          >
             <td class="auto-width">
               <i class="fa-solid fa-school"></i>
               {% if document.type == 'INTERNE_FAC' %}
@@ -68,4 +72,19 @@
       {% endfor %}
     </tbody>
   </table>
+  <button
+      class="btn btn-primary"
+      data-toggle="collapse"
+      data-target="#upload-internal-document-form"
+      hx-get="{% url request.resolver_match.namespace|add:':free-internal-upload' uuid=view.kwargs.uuid %}"
+      hx-target="#upload-internal-document-form"
+      hx-trigger="click once"
+  >
+    <i class="fa-solid fa-upload"></i>
+    {% translate 'Upload a document' %}
+    <i class="fa-solid fa-paperclip"></i>
+  </button>
+
+  <div id="upload-internal-document-form" class="collapse mt-1 media">
+  </div>
 </div>

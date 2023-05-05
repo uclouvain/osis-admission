@@ -1,3 +1,4 @@
+{% load osis_document %}
 {% load i18n admission bootstrap3 %}
 
 {% comment "License" %}
@@ -26,7 +27,7 @@
 
 <div id="document-details">
   {# Viewer #}
-  {% field_data '' document_uuid %}
+  {% document_component document_uuid.0 %}
   {# Actions #}
 
   {% if requestable_document %}

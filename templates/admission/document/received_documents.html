@@ -100,9 +100,9 @@
   <button
       class="btn btn-primary"
       data-toggle="collapse"
-      data-target="#upload-document-form"
+      data-target="#upload-candidate-document-form"
       hx-get="{% url request.resolver_match.namespace|add:':free-candidate-upload' uuid=view.kwargs.uuid %}"
-      hx-target="#upload-document-form"
+      hx-target="#upload-candidate-document-form"
       hx-trigger="click once"
   >
     <i class="fa-solid fa-upload"></i>
@@ -110,6 +110,6 @@
     <i class="fa-solid fa-paperclip"></i>
   </button>
 
-  <div id="upload-document-form" class="collapse mt-1 media">
+  <div id="upload-candidate-document-form" class="collapse mt-1 media">
   </div>
 </div>

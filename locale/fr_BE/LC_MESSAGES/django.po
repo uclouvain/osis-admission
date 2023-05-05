@@ -1716,14 +1716,8 @@ msgstr "Document"
 msgid "Document not found."
 msgstr "Document non trouvé."
 
-msgid "Document requested"
-msgstr "Document réclamé"
-
 msgid "Document to be requested"
 msgstr "Document à réclamer"
-
-msgid "Document uploaded"
-msgstr "Document téléversé"
 
 msgid "Documents"
 msgstr "Documents"
@@ -3509,7 +3503,9 @@ msgstr ""
 msgid ""
 "Please note that this document will be removed from the list of the missing "
 "documents."
-msgstr "Veuillez noter que ce document sera retiré de la liste des documents manquants."
+msgstr ""
+"Veuillez noter que ce document sera retiré de la liste des documents "
+"manquants."
 
 msgid "Please provide a copy of your curriculum."
 msgstr "Merci de fournir une copie de votre curriculum."

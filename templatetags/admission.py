@@ -43,7 +43,7 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES
+from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -63,7 +63,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import format_academic_year, get_uuid_value
+from admission.utils import format_academic_year
 from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
@@ -524,6 +524,28 @@ def get_image_file_url(file_uuids):
             if metadata and metadata.get('mimetype') in IMAGE_MIME_TYPES:
                 return metadata.get('url')
     return ''
+
+
+@register.inclusion_tag('admission/dummy.html')
+def document_component(value):
+    """Display the right editor component depending on the file type."""
+    from osis_document.api.utils import get_remote_token
+
+    token = get_remote_token(value)
+    metadata = get_remote_metadata(token)
+
+    if metadata and metadata.get('mimetype') == PDF_MIME_TYPE:
+        return {
+            'template': 'osis_document/editor.html',
+            'value': token,
+            'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+        }
+    else:
+        return {
+            'template': 'osis_document/visualizer.html',
+            'values': [token],
+            'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+        }
 
 
 @register.filter
