@@ -89,7 +89,7 @@ class EmplacementsDocumentsDemandeTranslator(IEmplacementsDocumentsDemandeTransl
         for champ_documents_libres in [
             'documents_libres_sic_candidats',
             'documents_libres_fac_candidats',
-            'documents_libres_fac_uclouvain',
+            'documents_libres_sic_uclouvain',
             'documents_libres_fac_uclouvain',
         ]:
             for document_uuid in getattr(resume_dto.proposition, champ_documents_libres):
@@ -117,7 +117,7 @@ class EmplacementsDocumentsDemandeTranslator(IEmplacementsDocumentsDemandeTransl
         for document_type, document_uuids in [
             (TypeDocument.CANDIDAT_FAC, resume_dto.proposition.documents_libres_fac_candidats),
             (TypeDocument.CANDIDAT_SIC, resume_dto.proposition.documents_libres_sic_candidats),
-            (TypeDocument.INTERNE_FAC, resume_dto.proposition.documents_libres_sic_uclouvain),
+            (TypeDocument.INTERNE_FAC, resume_dto.proposition.documents_libres_fac_uclouvain),
             (TypeDocument.INTERNE_SIC, resume_dto.proposition.documents_libres_sic_uclouvain),
         ]:
             for document_uuid in document_uuids:

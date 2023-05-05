@@ -1563,13 +1563,7 @@ msgstr ""
 msgid "Document not found."
 msgstr "Supervisory panel member not found."
 
-msgid "Document requested"
-msgstr ""
-
 msgid "Document to be requested"
-msgstr ""
-
-msgid "Document uploaded"
 msgstr ""
 
 msgid "Documents"

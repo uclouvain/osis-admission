@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.http import HttpResponse
+from django.shortcuts import resolve_url
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView, FormView
 
@@ -52,6 +53,7 @@ __namespace__ = 'document'
 __all__ = [
     'DocumentView',
     'UploadFreeCandidateDocumentView',
+    'UploadFreeInternalDocumentView',
     'RequestFreeCandidateDocumentView',
     'DocumentDetailView',
     'RequestCandidateDocumentView',
@@ -85,12 +87,15 @@ class DocumentView(LoadDossierViewMixin, TemplateView):
         return context
 
 
-class UploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
+class BaseUploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     form_class = UploadFreeDocumentForm
+    permission_required = 'admission.view_documents_management'
     template_name = 'admission/document/upload_free_document.html'
     htmx_template_name = 'admission/document/upload_free_document.html'
-    urlpatterns = 'free-candidate-upload'
-    permission_required = 'admission.view_documents_management'
+
+    @property
+    def document_type(self) -> str:
+        raise NotImplementedError
 
     def form_valid(self, form) -> HttpResponse:
         message_bus_instance.invoke(
@@ -98,19 +103,34 @@ class UploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequired
                 uuid_demande=self.kwargs.get('uuid'),
                 auteur=self.request.user.username,
                 token_document=form.cleaned_data['file'][0],
-                type_document=(
-                    TypeDocument.CANDIDAT_FAC.name
-                    if ProgramManager.belong_to(self.request.user.person)
-                    else TypeDocument.CANDIDAT_SIC.name
-                ),
+                type_document=self.document_type,
                 nom_document=form.cleaned_data['file_name'],
             ),
         )
-        return self.render_to_response(
-            self.get_context_data(
-                form=self.form_class(),
-                message=_('Document uploaded'),
-            )
+        return super().form_valid(self.form_class())
+
+
+class UploadFreeCandidateDocumentView(BaseUploadFreeCandidateDocumentView):
+    urlpatterns = 'free-candidate-upload'
+
+    @property
+    def document_type(self):
+        return (
+            TypeDocument.CANDIDAT_FAC.name
+            if ProgramManager.belong_to(self.request.user.person)
+            else TypeDocument.CANDIDAT_SIC.name
+        )
+
+
+class UploadFreeInternalDocumentView(BaseUploadFreeCandidateDocumentView):
+    urlpatterns = 'free-internal-upload'
+
+    @property
+    def document_type(self):
+        return (
+            TypeDocument.INTERNE_FAC.name
+            if ProgramManager.belong_to(self.request.user.person)
+            else TypeDocument.INTERNE_SIC.name
         )
 
 
@@ -135,12 +155,7 @@ class RequestFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequire
                 raison=form.cleaned_data['reason'],
             ),
         )
-        return self.render_to_response(
-            self.get_context_data(
-                form=self.form_class(),
-                message=_('Document requested'),
-            )
-        )
+        return super().form_valid(self.form_class())
 
 
 class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, TemplateView):

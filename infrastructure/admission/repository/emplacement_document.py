@@ -71,6 +71,8 @@ class EmplacementDocumentRepository(IEmplacementDocumentRepository):
             field_name = {
                 TypeDocument.CANDIDAT_SIC: 'sic_documents',
                 TypeDocument.CANDIDAT_FAC: 'fac_documents',
+                TypeDocument.INTERNE_SIC: 'uclouvain_sic_documents',
+                TypeDocument.INTERNE_FAC: 'uclouvain_fac_documents',
             }[document.type]
 
             getattr(admission, field_name).append(document.uuids[0])

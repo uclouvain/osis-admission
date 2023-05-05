@@ -86,6 +86,8 @@
 
 {% block style %}
   {{ block.super }}
+
+  <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
   <style>
     #document-container {
       display: flex;
@@ -140,6 +142,7 @@
   {{ block.super }}
 
   <script src="{% static 'js/dependsOn.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
 
   <script>
     $(document).ready(function () {

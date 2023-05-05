@@ -22,11 +22,8 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% if message %}
-  <p class="alert alert-success">{{ message }}</p>
-{% endif %}
 <form
-    hx-post="{% url request.resolver_match.namespace|add:':free-candidate-upload' uuid=view.kwargs.uuid %}"
+    hx-post="{% url request.resolver_match.namespace|add:':'|add:view.urlpatterns uuid=view.kwargs.uuid %}"
     method="post"
 >
   {% csrf_token %}
