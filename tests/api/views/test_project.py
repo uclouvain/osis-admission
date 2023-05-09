@@ -1001,7 +1001,6 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                     'country_of_citizenship': self.first_candidate.country_of_citizenship.iso_code,
                 },
                 'coordinates': {
-                    'email': self.first_candidate.email,
                     'country': 'BE',
                     'postal_code': '1348',
                     'city': 'Louvain-La-Neuve',
@@ -1076,7 +1075,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             country=CountryFactory(iso_code="BE"),
             institute=OrganizationFactory(
                 community=CommunityEnum.FRENCH_SPEAKING.name,
-                code='INSTITUTE',
+                acronym='INSTITUTE',
                 name='First institute',
             ),
         )
@@ -1089,14 +1088,14 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertInErrors(response, AbsenceDeDetteNonCompleteeException)
 
         # Experience in UCL -> the absence of debt certificate is not required
-        experience.institute.code = "UCL"
+        experience.institute.acronym = "UCL"
         experience.institute.save()
 
         response = self.client.post(url, self.submitted_data)
         self.assertNotInErrors(response, AbsenceDeDetteNonCompleteeException)
 
         # Experience in a german speaking community institute -> the absence of debt certificate is not required
-        experience.institute.code = "INSTITUTE"
+        experience.institute.acronym = "INSTITUTE"
         experience.institute.community = CommunityEnum.GERMAN_SPEAKING.name
         experience.institute.save()
 

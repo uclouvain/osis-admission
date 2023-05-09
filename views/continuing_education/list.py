@@ -30,7 +30,7 @@ from django.views.generic import ListView
 
 from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
-from base.utils.htmx import HtmxMixin
+from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
     "ContinuingAdmissionList",
@@ -59,4 +59,6 @@ class ContinuingAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxM
     def get_queryset(self):
         # TODO Wait for GetAdmissionsQuery
 
-        return ContinuingEducationAdmissionProxy.objects.for_dto().all()
+        return ContinuingEducationAdmissionProxy.objects.for_dto().filter_according_to_roles(
+            self.request.user.person.uuid
+        )

@@ -25,6 +25,7 @@
 ##############################################################################
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
+from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.formation_generale.commands import InitierPropositionCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_builder import PropositionBuilder
@@ -39,6 +40,7 @@ def initier_proposition(
     formation_translator: 'IFormationGeneraleTranslator',
     bourse_translator: 'IBourseTranslator',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
@@ -62,5 +64,6 @@ def initier_proposition(
 
     # THEN
     proposition_repository.save(proposition)
+    historique.historiser_initiation(proposition)
 
     return proposition.entity_id

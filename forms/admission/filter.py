@@ -32,7 +32,7 @@ from django.utils.translation import gettext_lazy as _, ngettext
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.enums import TypeBourse
-from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION, CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -42,6 +42,7 @@ from base.forms.widgets import Select2MultipleCheckboxesWidget
 from base.models.academic_year import current_academic_year
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
+from base.models.person import Person
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from education_group.forms.fields import MainCampusChoiceField
 
@@ -49,6 +50,15 @@ REGEX_REFERENCE = r'\d{3}\.\d{3}$'
 
 
 class AllAdmissionsFilterForm(forms.Form):
+    scholarship_types_by_field = {
+        'bourse_internationale': {
+            TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name,
+            TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
+        },
+        'bourse_erasmus_mundus': {TypeBourse.ERASMUS_MUNDUS.name},
+        'bourse_double_diplomation': {TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name},
+    }
+
     annee_academique = forms.TypedChoiceField(
         label=_('Year'),
         coerce=int,
@@ -87,10 +97,16 @@ class AllAdmissionsFilterForm(forms.Form):
         ),
     )
 
-    etat = forms.ChoiceField(
-        choices=[ALL_EMPTY_CHOICE[0]] + CHOIX_STATUT_TOUTE_PROPOSITION,
+    etats = forms.MultipleChoiceField(
+        choices=CHOIX_STATUT_TOUTE_PROPOSITION,
         label=_('Application status'),
         required=False,
+        widget=Select2MultipleCheckboxesWidget(
+            attrs={
+                'data-dropdown-auto-width': True,
+                'data-selection-template': _("{items} types out of {total}"),
+            }
+        ),
     )
 
     type = forms.ChoiceField(
@@ -176,26 +192,28 @@ class AllAdmissionsFilterForm(forms.Form):
             AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
             | AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
         )
+        self.fields['etats'].initial = list(CHOIX_STATUT_TOUTE_PROPOSITION_DICT.keys())
 
-        scholarships = Scholarship.objects.order_by('short_name').in_bulk(field_name='uuid')
-        self.fields['bourse_internationale'].coerce = scholarships.get
-        self.fields['bourse_internationale'].choices = ALL_EMPTY_CHOICE + tuple(
-            (s.uuid, str(s))
-            for s in scholarships.values()
-            if s.type
-            in [
-                TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name,
-                TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
-            ]
-        )
-        self.fields['bourse_erasmus_mundus'].coerce = scholarships.get
-        self.fields['bourse_erasmus_mundus'].choices = ALL_EMPTY_CHOICE + tuple(
-            (s.uuid, str(s)) for s in scholarships.values() if s.type == TypeBourse.ERASMUS_MUNDUS.name
-        )
-        self.fields['bourse_double_diplomation'].coerce = scholarships.get
-        self.fields['bourse_double_diplomation'].choices = ALL_EMPTY_CHOICE + tuple(
-            (s.uuid, str(s)) for s in scholarships.values() if s.type == TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name
-        )
+        scholarships_objects = Scholarship.objects.order_by('short_name')
+        scholarships = {str(scholarship.uuid): scholarship for scholarship in scholarships_objects}
+
+        for scholarship_field, scholarship_types in self.scholarship_types_by_field.items():
+            self.fields[scholarship_field].coerce = scholarships.get
+            self.fields[scholarship_field].choices = ALL_EMPTY_CHOICE + tuple(
+                (scholarship.uuid, str(scholarship))
+                for scholarship_uuid, scholarship in scholarships.items()
+                if scholarship.type in scholarship_types
+            )
+
+        # Initialize the labels of the autocomplete fields
+        if load_labels:
+            candidate = self.data.get(self.add_prefix('matricule_candidat'))
+            if candidate:
+                person = Person.objects.values('last_name', 'first_name').filter(global_id=candidate).first()
+                if person:
+                    self.fields['matricule_candidat'].widget.choices = (
+                        (candidate, '{}, {}'.format(person['last_name'], person['first_name'])),
+                    )
 
     def clean_numero(self):
         numero = self.cleaned_data.get('numero')

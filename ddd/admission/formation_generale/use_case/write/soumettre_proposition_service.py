@@ -28,6 +28,7 @@ import datetime
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
@@ -40,6 +41,9 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import IInscriptionTardive
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
+from admission.ddd.admission.domain.service.profil_soumis_candidat import (
+    ProfilSoumisCandidatTranslator,
+)
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -63,6 +67,7 @@ def soumettre_proposition(
     notification: 'INotification',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     inscription_tardive_service: 'IInscriptionTardive',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -117,11 +122,24 @@ def soumettre_proposition(
         profil_candidat_translator=profil_candidat_translator,
     )
 
+    profil_candidat_soumis = ProfilSoumisCandidatTranslator().recuperer(
+        profil_candidat_translator=profil_candidat_translator, matricule_candidat=proposition.matricule_candidat
+    )
+
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
     # THEN
-    proposition.soumettre(formation_id, pool, cmd.elements_confirmation, type_demande, est_inscription_tardive)
+    proposition.soumettre(
+        formation_id,
+        pool,
+        cmd.elements_confirmation,
+        type_demande,
+        est_inscription_tardive,
+        profil_candidat_soumis,
+    )
+
     proposition_repository.save(proposition)
     notification.confirmer_soumission(proposition)
+    historique.historiser_soumission(proposition)
 
     return proposition_id

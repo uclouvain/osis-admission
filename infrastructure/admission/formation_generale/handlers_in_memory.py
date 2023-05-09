@@ -37,6 +37,7 @@ from admission.infrastructure.admission.domain.service.in_memory.calendrier_insc
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.historique import HistoriqueInMemory
 from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
@@ -72,6 +73,7 @@ _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _academic_year_repository = AcademicYearInMemoryRepository()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
+_historique = HistoriqueInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -86,6 +88,7 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_generale_translator,
         bourse_translator=_bourse_translator,
         maximum_propositions_service=_maximum_propositions_autorisees,
+        historique=_historique,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -104,6 +107,7 @@ COMMAND_HANDLERS = {
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
         proposition_repository=_proposition_repository,
+        historique=_historique,
     ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
@@ -129,6 +133,7 @@ COMMAND_HANDLERS = {
         notification=NotificationInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
         inscription_tardive_service=InscriptionTardiveInMemory(),
+        historique=_historique,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

@@ -37,9 +37,11 @@ from admission.contrib.models import (
     Accounting,
 )
 from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -152,6 +154,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'diploma_equivalence': entity.equivalence_diplome,
                 'confirmation_elements': entity.elements_confirmation,
                 'late_enrollment': entity.est_inscription_tardive,
+                'submitted_profile': entity.profil_soumis_candidat.to_dict() if entity.profil_soumis_candidat else {},
             },
         )
 
@@ -281,6 +284,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             comptabilite=get_accounting_from_admission(admission=admission),
             elements_confirmation=admission.confirmation_elements,
             est_inscription_tardive=admission.late_enrollment,
+            profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile)
+            if admission.submitted_profile
+            else None,
         )
 
     @classmethod
@@ -354,7 +360,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else '',
             nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
-            candidat_a_plusieurs_demandes=admission.has_other_admission_in_progress,  # from annotation
+            candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
             titre_access='',  # TODO
             candidat_assimile=admission.accounting
             and admission.accounting.assimilation_situation
@@ -362,6 +368,13 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             fraudeur_ares=False,  # TODO
             non_financable=False,  # TODO,
             est_inscription_tardive=admission.late_enrollment,
+            profil_soumis_candidat=ProfilCandidatDTO.from_dict(
+                dict_profile=admission.submitted_profile,
+                nom_pays_nationalite=admission.submitted_profile_country_of_citizenship_name,  # from annotation
+                nom_pays_adresse=admission.submitted_profile_country_name,  # from annotation
+            )
+            if admission.submitted_profile
+            else None,
         )
 
     @classmethod
@@ -369,7 +382,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         try:
             return cls._load_dto_for_gestionnaire(
                 GeneralEducationAdmissionProxy.objects.for_dto()
-                .annotate_other_admissions_in_progress()
+                .annotate_several_admissions_in_progress()
+                .annotate_submitted_profile_countries_names()
                 .annotate(
                     status_updated_at=Subquery(
                         HistoryEntry.objects.filter(

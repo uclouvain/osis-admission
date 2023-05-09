@@ -106,6 +106,7 @@ class AdmissionAdminMixin(admin.ModelAdmin):
         'detailed_status',
         "submitted_at",
         "last_update_author",
+        "submitted_profile",
     ]
     filter_horizontal = [
         "professional_valuated_experiences",
@@ -148,7 +149,6 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
     list_filter = ['status', 'type']
     readonly_fields = [
         "detailed_status",
-        "submitted_profile",
         "pre_admission_submission_date",
         "submitted_at",
         "last_update_author",
@@ -512,6 +512,13 @@ class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
         return obj.person.user
 
 
+class HijackEntityRoleModelAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
+    list_select_related = ['person__user']
+
+    def get_hijack_user(self, obj):
+        return obj.person.user
+
+
 class CddConfiguratorAdmin(HijackRoleModelAdmin):
     list_display = ('person', 'most_recent_acronym')
     search_fields = [
@@ -590,7 +597,7 @@ admin.site.register(CddConfigurator, CddConfiguratorAdmin)
 
 admin.site.register(CentralManager, CentralManagerAdmin)
 admin.site.register(ProgramManager, ProgramManagerAdmin)
-admin.site.register(SicManagement, HijackRoleModelAdmin)
+admin.site.register(SicManagement, HijackEntityRoleModelAdmin)
 admin.site.register(AdreSecretary, HijackRoleModelAdmin)
 admin.site.register(JurySecretary, HijackRoleModelAdmin)
 admin.site.register(Sceb, HijackRoleModelAdmin)

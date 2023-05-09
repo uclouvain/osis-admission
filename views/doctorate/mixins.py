@@ -36,7 +36,7 @@ from django.views.generic.base import ContextMixin
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.base import AdmissionViewer
+from admission.contrib.models.base import AdmissionViewer, BaseAdmission
 from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
@@ -68,7 +68,8 @@ from osis_role.contrib.views import PermissionRequiredMixin
 
 
 class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
-    message_on_success = _('Your data has been saved')
+    message_on_success = _('Your data has been saved.')
+    message_on_failure = _('Some errors have been encountered.')
 
     @property
     def admission_uuid(self) -> str:
@@ -140,7 +141,23 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
 
     def form_valid(self, form):
         messages.success(self.request, self.message_on_success)
+
+        # Update the last update author of the admission
+        author = getattr(self.request.user, 'person')
+        if author:
+            admission = BaseAdmission.objects.get(uuid=self.admission_uuid)
+            admission.last_update_author = author
+            self.update_current_admission_on_form_valid(form, admission)
+            admission.save()
+
         return super().form_valid(form)
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        pass
+
+    def form_invalid(self, form):
+        messages.error(self.request, self.message_on_failure)
+        return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

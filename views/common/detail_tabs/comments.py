@@ -26,6 +26,7 @@
 
 from django.views.generic import TemplateView
 
+from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.views.doctorate.mixins import LoadDossierViewMixin
@@ -73,8 +74,8 @@ class AdmissionCommentApiView(CommentEntryAPIMixin):
         'other-comments': [f"other-comments", f"other-comments/<uuid:comment_uuid>"],
     }
     roles = {
-        'sic-comments': SicManagement,
-        'fac-comments': ProgramManager,
+        'sic-comments': {SicManagement, CentralManager},
+        'fac-comments': {ProgramManager},
     }
 
     def dispatch(self, request, *args, **kwargs):
@@ -83,12 +84,12 @@ class AdmissionCommentApiView(CommentEntryAPIMixin):
         return super().dispatch(request, *args, **kwargs)
 
     def has_add_permission(self):
-        return self.roles.get(self.url_name) and self.roles[self.url_name] in self.relevant_roles
+        return self.roles.get(self.url_name) and self.roles[self.url_name] & self.relevant_roles
 
     def has_change_permission(self, comment: 'CommentEntry'):
         return (
             self.roles.get(self.url_name)
-            and self.roles[self.url_name] in self.relevant_roles
+            and self.roles[self.url_name] & self.relevant_roles
             and comment.author == self.request.user.person
         )
 

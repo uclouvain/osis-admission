@@ -34,7 +34,7 @@ import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, ngettext
 from rest_framework import status
 
 from admission.calendar.admission_calendar import (
@@ -46,6 +46,7 @@ from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutSignatureGroupeDeSupervision,
     ChoixTypeFinancement,
+    ChoixEtatSignature,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
     AnneeExperienceAcademiqueDTO,
@@ -437,7 +438,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
             'Copie du titre de séjour qui couvre la totalité de la formation, épreuve d’évaluation comprise (sauf '
             'pour les formations organisées en ligne)',
         )
-        self.assertEqual(call_args_by_tab['confirmation'].title, 'Confirmation')
+        self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
 
         self.assertEqual(pdf_token, 'pdf-token')
 
@@ -474,7 +475,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Questions spécifiques')
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
-        self.assertEqual(call_args_by_tab['confirmation'].title, 'Confirmation')
+        self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
 
     def test_generation_with_doctorate_education(self):
         admission = DoctorateAdmissionFactory()
@@ -513,7 +514,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['project'].title, 'Projet de recherche doctoral')
         self.assertEqual(call_args_by_tab['cotutelle'].title, 'Cotutelle')
         self.assertEqual(call_args_by_tab['supervision'].title, 'Groupe de supervision')
-        self.assertEqual(call_args_by_tab['confirmation'].title, 'Confirmation')
+        self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
 
     def test_async_generation_with_continuing_education(self):
         admission = ContinuingEducationAdmissionFactory()
@@ -972,6 +973,8 @@ class SectionsAttachmentsTestCase(TestCase):
             fiche_archive_signatures_envoyees=['uuid-fiche-archive-signatures-envoyees'],
             graphe_gantt=['uuid-graphe-gantt'],
             institut_these=None,
+            nom_institut_these='',
+            sigle_institut_these='',
             institution='',
             intitule_secteur_formation='',
             justification='',
@@ -1037,7 +1040,7 @@ class SectionsAttachmentsTestCase(TestCase):
             groupe_supervision=_GroupeDeSupervisionDTO(
                 signatures_promoteurs=[
                     DetailSignaturePromoteurDTO(
-                        statut=ChoixStatutSignatureGroupeDeSupervision.IN_PROGRESS.name,
+                        statut=ChoixEtatSignature.APPROVED.name,
                         pdf=['uuid-signature-1'],
                         promoteur=PromoteurDTO(
                             uuid='uuid-1',
@@ -1046,11 +1049,22 @@ class SectionsAttachmentsTestCase(TestCase):
                             prenom='John',
                             email='john.doe@example.com',
                         ),
-                    )
+                    ),
+                    DetailSignaturePromoteurDTO(
+                        statut=ChoixEtatSignature.INVITED.name,
+                        pdf=['uuid-signature-3'],
+                        promoteur=PromoteurDTO(
+                            uuid='uuid-3',
+                            matricule='789',
+                            nom='Poe',
+                            prenom='Joe',
+                            email='joe.poe@example.com',
+                        ),
+                    ),
                 ],
                 signatures_membres_CA=[
                     DetailSignatureMembreCADTO(
-                        statut=ChoixStatutSignatureGroupeDeSupervision.IN_PROGRESS.name,
+                        statut=ChoixEtatSignature.APPROVED.name,
                         pdf=['uuid-signature-2'],
                         membre_CA=MembreCADTO(
                             uuid='uuid-2',
@@ -1936,11 +1950,14 @@ class SectionsAttachmentsTestCase(TestCase):
             section.attachments,
             [
                 Attachment(
-                    _(
-                        'Certificate stating the absence of debts towards the last institution(s) of the French community '
-                        'attended since %(year)s'
+                    ngettext(
+                        'Certificate stating the absence of debts towards the institution attended during '
+                        'the academic year %(academic_year)s: %(names)s',
+                        'Certificates stating the absence of debts towards the institutions attended during '
+                        'the academic year %(academic_year)s: %(names)s',
+                        1,
                     )
-                    % {'year': self.general_bachelor_context.curriculum.annee_minimum_a_remplir},
+                    % {'academic_year': '2023-2024', 'names': 'Institut 1'},
                     self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
                 ),
             ],
@@ -1953,11 +1970,14 @@ class SectionsAttachmentsTestCase(TestCase):
                 section.attachments,
                 [
                     Attachment(
-                        _(
-                            'Certificate stating the absence of debts towards the last institution(s) of the French community '
-                            'attended since %(year)s'
+                        ngettext(
+                            'Certificate stating the absence of debts towards the institution attended during '
+                            'the academic year %(academic_year)s: %(names)s',
+                            'Certificates stating the absence of debts towards the institutions attended during '
+                            'the academic year %(academic_year)s: %(names)s',
+                            1,
                         )
-                        % {'year': self.general_bachelor_context.curriculum.annee_minimum_a_remplir},
+                        % {'academic_year': '2023-2024', 'names': 'Institut 1'},
                         self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
                     ),
                     Attachment(
@@ -1982,11 +2002,14 @@ class SectionsAttachmentsTestCase(TestCase):
                 section.attachments,
                 [
                     Attachment(
-                        _(
-                            'Certificate stating the absence of debts towards the last institution(s) of the French community '
-                            'attended since %(year)s'
+                        ngettext(
+                            'Certificate stating the absence of debts towards the institution attended during '
+                            'the academic year %(academic_year)s: %(names)s',
+                            'Certificates stating the absence of debts towards the institutions attended during '
+                            'the academic year %(academic_year)s: %(names)s',
+                            1,
                         )
-                        % {'year': self.general_bachelor_context.curriculum.annee_minimum_a_remplir},
+                        % {'academic_year': '2023-2024', 'names': 'Institut 1'},
                         self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
                     ),
                     Attachment(

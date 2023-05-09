@@ -30,6 +30,7 @@ from django.utils.translation import gettext_lazy as _, override
 from django.views import View
 from django.views.generic import FormView
 from django.views.generic.edit import FormMixin
+from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models import CddMailTemplate
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
@@ -51,9 +52,8 @@ from admission.mail_templates import (
 from admission.views.doctorate.mixins import DoctorateAdmissionLastConfirmationMixin
 from admission.views.mixins.business_exceptions_form_view_mixin import BusinessExceptionFormViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from base.utils.htmx import HtmxMixin
 from infrastructure.messages_bus import message_bus_instance
-from osis_mail_template.models import MailTemplate
+from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
     "DoctorateAdmissionConfirmationFailureDecisionView",

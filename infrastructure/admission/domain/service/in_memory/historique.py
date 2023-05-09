@@ -24,14 +24,19 @@
 #
 # ##############################################################################
 
-from admission.contrib.models import ContinuingEducationAdmission
-from admission.ddd.admission.formation_continue.commands import DeterminerAnneeAcademiqueEtPotQuery
-from admission.views.general_education.details.debug import GeneralDebugView
-
-__all__ = ["ContinuingDebugView"]
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.domain.service.i_historique import IHistorique, PropositionAdmission
 
 
-# TODO Move to 'common' once we have the same logic as frontoffice
-class ContinuingDebugView(GeneralDebugView):
-    model = ContinuingEducationAdmission
-    cmd = DeterminerAnneeAcademiqueEtPotQuery
+class HistoriqueInMemory(IHistorique):
+    @classmethod
+    def historiser_initiation(cls, proposition: PropositionAdmission):
+        pass
+
+    @classmethod
+    def historiser_soumission(cls, proposition: Proposition):
+        pass
+
+    @classmethod
+    def historiser_suppression(cls, proposition: Proposition):
+        pass

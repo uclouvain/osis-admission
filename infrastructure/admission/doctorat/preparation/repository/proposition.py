@@ -443,6 +443,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             lettres_recommandation=admission.recommendation_letters,
             langue_redaction_these=admission.thesis_language,
             institut_these=admission.thesis_institute and admission.thesis_institute.uuid,
+            nom_institut_these=admission.thesis_institute and admission.thesis_institute.title,
+            sigle_institut_these=admission.thesis_institute and admission.thesis_institute.acronym,
             lieu_these=admission.thesis_location,
             doctorat_deja_realise=admission.phd_already_done,
             institution=admission.phd_already_done_institution,
@@ -463,6 +465,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             elements_confirmation=admission.confirmation_elements,
-            soumise_le=admission.submitted_at,
+            soumise_le=admission.submitted_at or admission.pre_admission_submission_date,
             pdf_recapitulatif=admission.pdf_recap,
         )

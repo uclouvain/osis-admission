@@ -26,8 +26,10 @@
 import rules
 from django.db import models
 
-from admission.auth.predicates import is_part_of_education_group, is_debug
+from admission.auth.predicates import has_education_group_of_types, is_part_of_education_group, is_debug
 from base.models.education_group import EducationGroup
+from base.models.enums.education_group_types import TrainingType
+from continuing_education.models.continuing_education_training import CONTINUING_EDUCATION_TRAINING_TYPES
 from education_group.contrib.models import EducationGroupRoleModel
 from django.utils.translation import gettext_lazy as _
 
@@ -61,9 +63,10 @@ class ProgramManager(EducationGroupRoleModel):
         ruleset = {
             # Listings
             'admission.view_enrolment_applications': rules.always_allow,
-            # TODO check which education group is linked?
-            'admission.view_doctorate_enrolment_applications': rules.always_allow,
-            'admission.view_continuing_enrolment_applications': rules.always_allow,
+            'admission.view_doctorate_enrolment_applications': has_education_group_of_types(TrainingType.PHD.name),
+            'admission.view_continuing_enrolment_applications': has_education_group_of_types(
+                *CONTINUING_EDUCATION_TRAINING_TYPES
+            ),
             # Access a single application
             'admission.view_enrolment_application': is_part_of_education_group,
             # Profile

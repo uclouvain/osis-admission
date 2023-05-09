@@ -25,39 +25,50 @@
 ##############################################################################
 import uuid
 
+from django.contrib.auth.models import User
+from django.conf import settings
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, Exists
+from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count
+from django.db.models.fields.json import KeyTextTransform, KeyTransform
 from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
-
-from admission.contrib.models.functions import ToChar
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_SOUMISSION
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from base.models.academic_calendar import AcademicCalendar
-from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
-from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from base.models.enums.entity_type import EntityType
-from base.utils.cte import CTESubquery
+from django.utils.translation import gettext_lazy as _, get_language
 from osis_comment.models import CommentDeleteMixin
-from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
+from admission.contrib.models.functions import ToChar
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
+)
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
+from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_categories import Categories
+from base.models.enums.entity_type import EntityType
 from base.models.person import Person
+from base.utils.cte import CTESubquery
+from education_group.contrib.models import EducationGroupRoleModel
+from osis_document.contrib import FileField
+from osis_role.contrib.models import EntityRoleModel
+from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
-
+from reference.models.country import Country
 
 REFERENCE_SEQ_NAME = 'admission_baseadmission_reference_seq'
 
@@ -146,17 +157,81 @@ class BaseAdmissionQuerySet(models.QuerySet):
             )
         )
 
-    def annotate_other_admissions_in_progress(self):
-        return self.annotate(
-            has_other_admission_in_progress=Exists(
-                BaseAdmission.objects.filter(candidate_id=OuterRef('candidate_id'))
-                .filter(
-                    Q(generaleducationadmission__status=ChoixStatutPropositionGenerale.EN_BROUILLON.name)
-                    | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.EN_BROUILLON.name)
-                    | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_AVANT_SOUMISSION),
+    def annotate_several_admissions_in_progress(self):
+        return self.alias(
+            admissions_in_progress_nb=Subquery(
+                BaseAdmission.objects.filter(
+                    candidate_id=OuterRef("candidate_id"),
+                    determined_academic_year_id=OuterRef("determined_academic_year_id"),
                 )
-                .filter(determined_academic_year_id=OuterRef('determined_academic_year_id'))
-                .exclude(pk=OuterRef('pk')),
+                .exclude(
+                    Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE)
+                    | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
+                    | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE),
+                )
+                .values('candidate_id')
+                .annotate(count=Count('pk'))
+                .values('count')[:1],
+            ),
+        ).annotate(
+            has_several_admissions_in_progress=Case(
+                When(
+                    Q(admissions_in_progress_nb__gt=1),
+                    then=Value(True),
+                ),
+                default=Value(False),
+                output_field=BooleanField(),
+            ),
+        )
+
+    def filter_according_to_roles(self, demandeur_uuid):
+        demandeur_user = User.objects.filter(person__uuid=demandeur_uuid).first()
+        roles = _get_relevant_roles(demandeur_user, 'admission.view_enrolment_application')
+
+        # Filter managed entities
+        entities_conditions = Q()
+        for entity_aware_role in [r for r in roles if issubclass(r, EntityRoleModel)]:
+            entities_conditions |= Q(
+                training__management_entity_id__in=entity_aware_role.objects.filter(
+                    person__uuid=demandeur_uuid
+                ).get_entities_ids()
+            )
+
+        # Filter managed education groups
+        education_group_conditions = Q()
+        for education_aware_role in [r for r in roles if issubclass(r, EducationGroupRoleModel)]:
+            education_group_conditions |= Q(
+                training__education_group_id__in=education_aware_role.objects.filter(
+                    person__uuid=demandeur_uuid
+                ).values_list('education_group_id')
+            )
+
+        return self.filter(entities_conditions, education_group_conditions)
+
+    def annotate_submitted_profile_countries_names(self):
+        """
+        Annotate the admission with the names of the countries specified in the submitted profile of the candidate.
+        """
+        country_title_field = 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
+
+        return self.alias(
+            # TODO to be simplified with the KT operator (>= Django 4.2)
+            submitted_profile_country_of_citizenship=KeyTextTransform(
+                'country_of_citizenship',
+                KeyTransform('identification', 'submitted_profile'),
+            ),
+            submitted_profile_country=KeyTextTransform(
+                'country',
+                KeyTransform('coordinates', 'submitted_profile'),
+            ),
+        ).annotate(
+            submitted_profile_country_of_citizenship_name=models.Subquery(
+                Country.objects.filter(iso_code=OuterRef('submitted_profile_country_of_citizenship')).values(
+                    country_title_field
+                )[:1]
+            ),
+            submitted_profile_country_name=models.Subquery(
+                Country.objects.filter(iso_code=OuterRef('submitted_profile_country')).values(country_title_field)[:1]
             ),
         )
 
@@ -268,6 +343,11 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     submitted_at = models.DateTimeField(
         verbose_name=_("Submission date"),
         null=True,
+    )
+
+    submitted_profile = models.JSONField(
+        verbose_name=_("Submitted profile"),
+        default=dict,
     )
 
     reference = models.BigIntegerField(

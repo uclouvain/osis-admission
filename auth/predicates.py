@@ -187,3 +187,19 @@ def is_part_of_education_group(self, user: User, obj: BaseAdmission):
 @predicate_cache(cache_key_fn=lambda obj: getattr(obj, 'pk', None))
 def is_entity_manager(self, user: User, obj: BaseAdmission):
     return obj.training.management_entity_id in self.context['role_qs'].get_entities_ids()
+
+
+def has_education_group_of_types(*education_group_types):
+    name = 'has_education_group_of_types:%s' % ','.join(education_group_types)
+
+    @predicate(name, bind=True)
+    def fn(self, user: User):
+        if not hasattr(user, '_education_group_types'):
+            user._education_group_types = set(
+                self.context['role_qs'].values_list(
+                    'education_group__educationgroupyear__education_group_type__name', flat=True
+                )
+            )
+        return set(education_group_types) & user._education_group_types
+
+    return fn

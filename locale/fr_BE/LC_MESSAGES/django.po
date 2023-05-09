@@ -72,6 +72,10 @@ msgstr ""
 msgid "%(state)s on %(date)s"
 msgstr "%(state)s le %(date)s"
 
+#, python-format
+msgid "(%(minutes)s ago)"
+msgstr "(il y a %(minutes)s)"
+
 msgid ", on"
 msgstr ", le"
 
@@ -270,9 +274,6 @@ msgstr "Admission en cours"
 
 msgid "ADMITTED"
 msgstr "Admis"
-
-msgid "APPROVED"
-msgstr "Approuvé"
 
 msgid "ARC - Action de Recherche Concertee"
 msgstr "ARC - Action de Recherche Concertée"
@@ -544,6 +545,9 @@ msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 "Demande d'allocation d'études auprès de la Communauté française de Belgique"
 
+msgid "Application no."
+msgstr "N° de demande"
+
 msgid "Application numero"
 msgstr "Numéro de demande"
 
@@ -565,6 +569,10 @@ msgstr "Approbation par pdf de %(member)s"
 
 msgid "Approvals"
 msgstr "Approbations"
+
+msgctxt "admission decision"
+msgid "Approved"
+msgstr "Approuvée"
 
 msgid "Approximate date for completing the thesis:"
 msgstr "Date approximative d'achèvement de la thèse :"
@@ -735,7 +743,7 @@ msgid "Box"
 msgstr "Boîte"
 
 msgid "Brief justification"
-msgstr "Justification succincte"
+msgstr "Motivation succincte"
 
 msgid ""
 "By finalising my application, I undertake to pay the registration fees upon "
@@ -1043,11 +1051,17 @@ msgstr "Attestation stipulant l'absence de dettes vis-à-vis de l'établissement
 
 #, python-format
 msgid ""
-"Certificate stating the absence of debts towards the last institution(s) of "
-"the French community attended since %(year)s"
-msgstr ""
-"Attestation stipulant l'absence de dettes vis-à-vis du (des) dernier(s) "
-"établissement(s) de la communauté française fréquenté(s) depuis %(year)s"
+"Certificate stating the absence of debts towards the institution attended "
+"during the academic year %(academic_year)s: %(names)s"
+msgid_plural ""
+"Certificates stating the absence of debts towards the institutions attended "
+"during the academic year %(academic_year)s: %(names)s"
+msgstr[0] ""
+"Attestation stipulant l'absence de dettes vis-à-vis de l'établissement "
+"fréquenté durant l'année académique %(academic_year)s : %(names)s"
+msgstr[1] ""
+"Attestations stipulant l'absence de dettes vis-à-vis des établissements "
+"fréquentés durant l'année académique %(academic_year)s : %(names)s"
 
 msgid "Certificate, with dates, justifying the specified period"
 msgstr "Attestation, avec mention des dates, justifiant la période concernée"
@@ -1143,12 +1157,9 @@ msgstr "Confirmer et envoyer le message"
 msgid "Confirm restoring activity to submitted"
 msgstr "Confirmer la remise au statut soumise de cette activité"
 
-msgid "Confirmation"
-msgstr "Confirmation"
-
 msgctxt "tab"
 msgid "Confirmation"
-msgstr "Confirmation"
+msgstr "Finalisation"
 
 msgid "Confirmation date"
 msgstr "Date confirmation"
@@ -1824,6 +1835,12 @@ msgstr "Demande de prolongation non complète."
 msgid "Extension request not defined."
 msgstr "Demande de prolongation non définie."
 
+msgid "External enrollment change"
+msgstr "Modification d'inscription externe"
+
+msgid "External reorientation"
+msgstr "Réorientation externe"
+
 msgid "FAC/CDD processing"
 msgstr "Traitement FAC/CDD"
 
@@ -2491,8 +2508,11 @@ msgstr "Langue"
 msgid "Languages knowledge"
 msgstr "Connaissance des langues"
 
-msgid "Last 24 hours views:"
-msgstr "Vues des 24 dernières heures :"
+msgid "Last hour views:"
+msgstr "Vues de la dernière heure :"
+
+msgid "Last modif."
+msgstr "Dernière modif."
 
 msgid "Last modification"
 msgstr "Dernière modification"
@@ -2971,7 +2991,7 @@ msgid "NOT_ALLOWED_TO_CONTINUE"
 msgstr "Non autorisé à poursuivre"
 
 msgid "NOT_INVITED"
-msgstr "Non invité"
+msgstr "Pas encore invité à signer"
 
 msgid "Name"
 msgstr "Nom"
@@ -3079,6 +3099,7 @@ msgctxt "admission-header"
 msgid "Not specified"
 msgstr "Non précisée"
 
+msgctxt "address"
 msgid "Number"
 msgstr "Numéro"
 
@@ -3188,7 +3209,7 @@ msgid "PHYSICS"
 msgstr "Physique"
 
 msgid "PRE_ADMISSION"
-msgstr "Pre-admission"
+msgstr "Pré-admission"
 
 msgid "PRIVATE_DEFENSE"
 msgstr "Défense privée"
@@ -3261,6 +3282,7 @@ msgstr "Doctorat déjà réalisé"
 msgid "Physic"
 msgstr "Physique"
 
+msgctxt "address"
 msgid "Place"
 msgstr "Lieu-dit"
 
@@ -3434,7 +3456,7 @@ msgid "Project resume"
 msgstr "Résumé"
 
 msgid "Project title"
-msgstr "Titre du projet"
+msgstr "Sujet"
 
 msgid "Promoter"
 msgstr "Promoteur"
@@ -3560,9 +3582,6 @@ msgstr ""
 "Document, Sélection et Texte. Contenu du message à afficher pour les "
 "éléments de type Message."
 
-msgid "REFUSED"
-msgstr "Refusé"
-
 msgid "REFUSEE"
 msgstr "Refusée"
 
@@ -3650,6 +3669,10 @@ msgstr "Droits d'inscription"
 
 msgid "Registration modification form"
 msgstr "Formulaire de modification d'inscription"
+
+msgctxt "admission decision"
+msgid "Rejected"
+msgstr "Rejetée"
 
 msgid "Rejection reason"
 msgstr "Motif de refus"
@@ -4310,8 +4333,8 @@ msgstr "Le doctorant"
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
 
-msgid "The dossier has been confirmed with the following contact address:"
-msgstr "La demande a été confirmée avec pour adresse de correspondance :"
+msgid "The dossier has been confirmed with the following address:"
+msgstr "La demande a été confirmée avec pour adresse :"
 
 #, python-format
 msgid "The educational experience '%(education_name)s' is not completed."
@@ -4324,9 +4347,6 @@ msgstr ""
 
 msgid "The experiences that have been valuated from this admission."
 msgstr "Les expériences qui ont été valorisées via cette admission."
-
-msgid "The export has been planned"
-msgstr "L'export a été planifié"
 
 msgid "The export has failed"
 msgstr "L'export a échoué"
@@ -4718,6 +4738,9 @@ msgstr "Numéro unique d'entreprise"
 msgid "Unknown birth date"
 msgstr "Date de naissance exacte inconnue"
 
+msgid "Unknown citizenship"
+msgstr "Nationalité inconnue"
+
 msgid "Unknown noma"
 msgstr "Noma inconnu"
 
@@ -4950,8 +4973,8 @@ msgstr[1] ""
 "vous en avez déjà soumises %(maximum_number)s."
 
 #, python-format
-msgid "You have indicated that you will receive one in %(year)s."
-msgstr "Vous avez indiqué que vous alliez en recevoir un en %(year)s."
+msgid "You have indicated that you will get it in %(year)s."
+msgstr "Vous avez indiqué que vous alliez l'obtenir en %(year)s."
 
 msgid ""
 "You haven't answered to the question about your bank account in the "
@@ -5026,8 +5049,15 @@ msgid "You specified that no assimilation proposals applies to you."
 msgstr ""
 "Vous avez spécifié qu'aucune situation d'assimilation ne s'appliquait à vous."
 
-msgid "Your data has been saved"
-msgstr "Vos données ont été sauvegardées"
+msgid "Your data has been saved."
+msgstr "Vos données ont été sauvegardées."
+
+msgid ""
+"Your export request has been planned, you will receive a notification as "
+"soon as it is available."
+msgstr ""
+"Votre demande d’export a été planifié, vous recevrez une notification dès "
+"qu’il sera disponible."
 
 msgid "Your note has been added."
 msgstr "Votre note a bien été ajoutée."

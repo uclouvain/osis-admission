@@ -23,26 +23,32 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import Union
 
-import attr
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition as PropositionFormationDoctorale,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as PropositionFormationGenerale,
+)
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    Proposition as PropositionFormationContinue,
+)
+from osis_common.ddd import interface
 
-from admission.ddd.interface import SortedQueryRequest
+
+PropositionAdmission = Union[PropositionFormationDoctorale, PropositionFormationGenerale, PropositionFormationContinue]
 
 
-@attr.dataclass(frozen=True, slots=True)
-class ListerToutesDemandesQuery(SortedQueryRequest):
-    annee_academique: Optional[int] = None
-    numero: Optional[int] = None
-    noma: Optional[str] = ''
-    matricule_candidat: Optional[str] = ''
-    etats: Optional[List[str]] = None
-    type: Optional[str] = ''
-    site_inscription: Optional[str] = ''
-    entites: Optional[List[str]] = None
-    types_formation: Optional[List[str]] = None
-    formation: Optional[str] = ''
-    bourse_internationale: Optional[str] = ''
-    bourse_erasmus_mundus: Optional[str] = ''
-    bourse_double_diplomation: Optional[str] = ''
-    demandeur: Optional[str] = ''
+class IHistorique(interface.DomainService):
+    @classmethod
+    def historiser_initiation(cls, proposition: PropositionAdmission):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_soumission(cls, proposition: PropositionAdmission):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_suppression(cls, proposition: PropositionAdmission):
+        raise NotImplementedError

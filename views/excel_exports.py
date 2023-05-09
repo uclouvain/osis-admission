@@ -29,22 +29,21 @@ from typing import Dict
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.template.defaultfilters import yesno
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext as _, gettext_lazy
 from django.views import View
+from osis_async.models import AsyncTask
+from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
 
 from admission.contrib.models import Scholarship
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from base.models.campus import Campus
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
-from osis_async.models import AsyncTask
-from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
 
 __all__ = [
     'AdmissionListExcelExportView',
@@ -72,7 +71,9 @@ class BaseAdmissionExcelExportView(
 ):
     export_name = gettext_lazy('Admission export')
     export_description = gettext_lazy('Excel export of admission')
-    success_message = gettext_lazy('The export has been planned')
+    success_message = gettext_lazy(
+        'Your export request has been planned, you will receive a notification as soon as it is available.'
+    )
     failure_message = gettext_lazy('The export has failed')
     redirect_url_name = 'admission'
     command = None
@@ -134,6 +135,9 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
     def get_formatted_filters_parameters_worksheet(self, filters: str) -> Dict:
         formatted_filters = super().get_formatted_filters_parameters_worksheet(filters)
 
+        formatted_filters.pop('tri_inverse', None)
+        formatted_filters.pop('champ_tri', None)
+
         # Formatting of the names of the filters
         base_fields = AllAdmissionsFilterForm.base_fields
         mapping_filter_key_name = {
@@ -181,13 +185,11 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
                 )
 
         # Format enums
-        status = formatted_filters.get('etat')
-        if status:
-            mapping_filter_key_value['etat'] = (
-                ChoixStatutPropositionGenerale.get_value(status)
-                if hasattr(ChoixStatutPropositionGenerale, status)
-                else ChoixStatutPropositionDoctorale.get_value(status)
-            )
+        statuses = formatted_filters.get('etats')
+        if statuses:
+            mapping_filter_key_value['etats'] = [
+                CHOIX_STATUT_TOUTE_PROPOSITION_DICT.get(status_key) for status_key in statuses
+            ]
 
         admission_type = formatted_filters.get('type')
         if admission_type:
@@ -231,7 +233,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             row.nationalite_candidat,
             yesno(row.vip),
             str(admission_status(row.etat_demande, row.type_formation)),
-            row.derniere_modification_par,
+            _('candidate') if row.derniere_modification_par_candidat else row.derniere_modification_par,
             row.derniere_modification_le.strftime(FULL_DATE_FORMAT),
             row.date_confirmation.strftime(FULL_DATE_FORMAT) if row.date_confirmation else '',
         ]
@@ -242,5 +244,10 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             filters = form.cleaned_data
             filters.pop('taille_page', None)
             filters.pop('page', None)
+
+            ordering_field = self.request.GET.get('o')
+            if ordering_field:
+                filters['tri_inverse'] = ordering_field[0] == '-'
+                filters['champ_tri'] = ordering_field.lstrip('-')
             return form.cleaned_data
         return {}

@@ -109,8 +109,7 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             submitted_profile={
                 "coordinates": {
-                    "city": "Louvain-La-Neuves",
-                    "email": "user@uclouvain.be",
+                    "city": "Louvain-La-Neuve",
                     "place": "",
                     "street": "Place de l'Université",
                     "country": "BE",
@@ -119,7 +118,7 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
                     "street_number": "2",
                 },
                 "identification": {
-                    "gender": "M",
+                    "gender": "H",
                     "last_name": "Doe",
                     "first_name": "John",
                     "country_of_citizenship": "BE",

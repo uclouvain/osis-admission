@@ -254,6 +254,44 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         filters = ast.literal_eval(export.filters)
         self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
 
+    def test_export_with_sic_management_user_with_filters_and_asc_ordering(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # With asc ordering
+        response = self.client.get(self.url, data={**self.default_params, 'o': 'numero_demande'})
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('tri_inverse'), False)
+        self.assertEqual(filters.get('champ_tri'), 'numero_demande')
+
+    def test_export_with_sic_management_user_with_filters_and_desc_ordering(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # With asc ordering
+        response = self.client.get(self.url, data={**self.default_params, 'o': '-numero_demande'})
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('tri_inverse'), True)
+        self.assertEqual(filters.get('champ_tri'), 'numero_demande')
+
     def test_export_content(self):
         view = AdmissionListExcelExportView()
         header = view.get_header()
@@ -270,7 +308,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(row_data[7], self.result.nationalite_candidat)
         self.assertEqual(row_data[8], 'oui')
         self.assertEqual(row_data[9], ChoixStatutPropositionGenerale.CONFIRMEE.value)
-        self.assertEqual(row_data[10], self.result.derniere_modification_par)
+        self.assertEqual(row_data[10], _('candidate'))
         self.assertEqual(row_data[11], '2023/01/01, 00:00:00')
         self.assertEqual(row_data[12], '2023/01/02, 00:00:00')
 
@@ -294,7 +332,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
                 'numero': 1,
                 'noma': '00000001',
                 'matricule_candidat': candidate.global_id,
-                'etat': ChoixStatutPropositionGenerale.CONFIRMEE.name,
+                'etats': [ChoixStatutPropositionGenerale.CONFIRMEE.name],
                 'type': TypeDemande.ADMISSION.name,
                 'site_inscription': str(campus.uuid),
                 'entites': 'ENT',
@@ -346,7 +384,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(values[4], '1')
         self.assertEqual(values[5], '00000001')
         self.assertEqual(values[6], candidate.full_name)
-        self.assertEqual(values[7], ChoixStatutPropositionGenerale.CONFIRMEE.value)
+        self.assertEqual(values[7], f"['{ChoixStatutPropositionGenerale.CONFIRMEE.value}']")
         self.assertEqual(values[8], TypeDemande.ADMISSION.value)
         self.assertEqual(values[9], campus.name)
         self.assertEqual(values[10], 'ENT')

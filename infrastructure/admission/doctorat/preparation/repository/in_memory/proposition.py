@@ -66,6 +66,12 @@ class _Candidat:
 
 
 @dataclass
+class _Institut:
+    nom: str
+    acronyme: str
+
+
+@dataclass
 class _Doctorat:
     intitule: str
     code_secteur: str
@@ -110,6 +116,10 @@ class PropositionInMemoryRepository(
         "0123456789": _Candidat("Jean", "Dupont", "France"),
         "0000000001": _Candidat("Michel", "Durand", "Belgique"),
         "candidat": _Candidat("Pierre", "Dupond", "Belgique"),
+    }
+    instituts = {
+        '06de0c3d-3c06-4c93-8eb4-c8648f04f140': _Institut("Institut de l'enseignement supérieur", "IES"),
+        '06de0c3d-3c06-4c93-8eb4-c8648f04f141': _Institut("Institut du sport", "IS"),
     }
     entities: List['Proposition'] = []
 
@@ -200,6 +210,11 @@ class PropositionInMemoryRepository(
     def _load_dto(cls, proposition: 'Proposition'):
         candidat = cls.candidats[proposition.matricule_candidat]
         doctorat = cls.doctorats[(proposition.formation_id.sigle, proposition.formation_id.annee)]
+        institut = (
+            cls.instituts.get(str(proposition.projet.institut_these.uuid))
+            if proposition.projet.institut_these
+            else None
+        )
         bourse_erasmus_dto = (
             BourseInMemoryTranslator.get_dto(uuid=str(proposition.bourse_erasmus_mundus_id.uuid))
             if proposition.bourse_erasmus_mundus_id
@@ -254,6 +269,8 @@ class PropositionInMemoryRepository(
             lettres_recommandation=proposition.projet.lettres_recommandation,
             langue_redaction_these=proposition.projet.langue_redaction_these.name,
             institut_these=proposition.projet.institut_these.uuid if proposition.projet.institut_these else None,
+            nom_institut_these=institut.nom if institut else '',
+            sigle_institut_these=institut.acronyme if institut else '',
             lieu_these=proposition.projet.lieu_these,
             doctorat_deja_realise=proposition.experience_precedente_recherche.doctorat_deja_realise.name,
             institution=proposition.experience_precedente_recherche.institution,

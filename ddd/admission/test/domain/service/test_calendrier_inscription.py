@@ -64,13 +64,13 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 
 
+@freezegun.freeze_time('2022-03-15')
 class CalendrierInscriptionTestCase(TestCase):
     def setUp(self):
         self.profil_candidat_translator = ProfilCandidatInMemoryTranslator()
         self.formation_translator = FormationGeneraleInMemoryTranslator()
         self.profil_candidat_translator.reset()
 
-    @freezegun.freeze_time('2023-03-15')
     def test_verification_calendrier_inscription_doctorat(self):
         proposition = PropositionAdmissionECGE3DPMinimaleFactory()
         dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
@@ -83,7 +83,6 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT)
 
-    @freezegun.freeze_time('2023-03-15')
     def test_verification_calendrier_inscription_formation_continue(self):
         proposition = PropositionContinueFactory()
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)

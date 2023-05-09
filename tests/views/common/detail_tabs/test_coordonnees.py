@@ -28,6 +28,7 @@ from django.test import TestCase
 
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -37,6 +38,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person_address import PersonAddressFactory
+from reference.tests.factories.country import CountryFactory
 
 
 class CoordonneesDetailViewTestCase(TestCase):
@@ -46,6 +48,8 @@ class CoordonneesDetailViewTestCase(TestCase):
 
         first_doctoral_commission = EntityFactory()
         EntityVersionFactory(entity=first_doctoral_commission, acronym=ENTITY_CDE)
+
+        CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         cls.central_manager = CentralManagerRoleFactory(entity=first_doctoral_commission)
@@ -66,6 +70,17 @@ class CoordonneesDetailViewTestCase(TestCase):
 
         cls.general_url = resolve_url('admission:general-education:coordonnees', uuid=cls.general_admission.uuid)
 
+        cls.confirmed_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=cls.general_admission.training,
+            candidate=cls.general_admission.candidate,
+            admitted=True,
+        )
+
+        cls.confirmed_general_url = resolve_url(
+            'admission:general-education:coordonnees',
+            uuid=cls.confirmed_general_admission.uuid,
+        )
+
         cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
@@ -74,6 +89,17 @@ class CoordonneesDetailViewTestCase(TestCase):
         )
 
         cls.doctorate_url = resolve_url('admission:doctorate:coordonnees', uuid=cls.doctorate_admission.uuid)
+
+        cls.confirmed_doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training=cls.doctorate_admission.training,
+            candidate=cls.doctorate_admission.candidate,
+            admitted=True,
+        )
+
+        cls.confirmed_doctorate_url = resolve_url(
+            'admission:doctorate:coordonnees',
+            uuid=cls.confirmed_doctorate_admission.uuid,
+        )
 
     def test_continuing_coordonnees_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -105,6 +131,30 @@ class CoordonneesDetailViewTestCase(TestCase):
         self.assertEqual(response.context['coordonnees']['residential'], None)
         self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
         self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
+
+        self.assertIsNone(response.context['profil_candidat'])
+
+        response = self.client.get(self.confirmed_general_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context.get('profil_candidat'),
+            ProfilCandidatDTO(
+                nom='Doe',
+                prenom='John',
+                genre='H',
+                nationalite='BE',
+                nom_pays_nationalite='Belgique',
+                pays='BE',
+                nom_pays='Belgique',
+                code_postal='1348',
+                ville='Louvain-La-Neuve',
+                lieu_dit='',
+                rue="Place de l'Université",
+                numero_rue='2',
+                boite_postale='',
+            ),
+        )
 
     def test_general_coordonnees_detail_sic_manager_with_contact_address(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -168,3 +218,27 @@ class CoordonneesDetailViewTestCase(TestCase):
         self.assertEqual(response.context['coordonnees']['residential'], residential_address)
         self.assertEqual(response.context['coordonnees']['private_email'], 'john.doe@example.com')
         self.assertEqual(response.context['coordonnees']['phone_mobile'], '0123456789')
+        self.assertIsNone(response.context.get('profil_candidat'))
+
+        response = self.client.get(self.confirmed_doctorate_url)
+        self.assertEqual(response.context['dossier'].uuid, self.confirmed_doctorate_admission.uuid)
+        self.assertEqual(
+            response.context.get('profil_candidat'),
+            ProfilCandidatDTO(
+                nom='Doe',
+                prenom='John',
+                genre='H',
+                nationalite='BE',
+                nom_pays_nationalite='Belgique',
+                pays='BE',
+                nom_pays='Belgique',
+                code_postal='1348',
+                ville='Louvain-La-Neuve',
+                lieu_dit='',
+                rue="Place de l'Université",
+                numero_rue='2',
+                boite_postale='',
+            ),
+        )
+
+        self.assertEqual(response.status_code, 200)

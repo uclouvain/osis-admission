@@ -27,7 +27,6 @@ import datetime
 from typing import List, Optional
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db.models import (
     BooleanField,
     Case,
@@ -48,9 +47,6 @@ from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import ILi
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.views import PaginatedList
-from education_group.contrib.models import EducationGroupRoleModel
-from osis_role.contrib.models import EntityRoleModel
-from osis_role.contrib.permissions import _get_relevant_roles
 
 
 class ListerToutesDemandes(IListerToutesDemandes):
@@ -61,7 +57,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         numero: Optional[int] = None,
         noma: Optional[str] = '',
         matricule_candidat: Optional[str] = '',
-        etat: Optional[str] = '',
+        etats: Optional[List[str]] = None,
         type: Optional[str] = '',
         site_inscription: Optional[str] = '',
         entites: Optional[List[str]] = None,
@@ -79,7 +75,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
         prefetch_viewers_queryset = (
-            AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(days=1))
+            AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(hours=1))
             .select_related('person')
             .order_by('-viewed_at')
         )
@@ -87,12 +83,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
         roles = []
         if demandeur:
             prefetch_viewers_queryset = prefetch_viewers_queryset.exclude(person__uuid=demandeur)
-            demandeur_user: User = User.objects.filter(person__uuid=demandeur).first()
-            roles = _get_relevant_roles(demandeur_user, 'admission.view_enrolment_application')
 
         qs = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
-            .annotate_other_admissions_in_progress()
+            .annotate_several_admissions_in_progress()
             .annotate(
                 status=Coalesce(
                     NullIf(F('continuingeducationadmission__status'), Value('')),
@@ -139,27 +133,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
             qs = qs.filter(training__enrollment_campus__uuid=site_inscription)
         if entites:
             qs = qs.filter(Q(sigle_entite_gestion__in=entites) | Q(training_management_faculty__in=entites))
-
-        # Filter managed entities
-        entities_conditions = Q()
-        for entity_aware_role in [r for r in roles if issubclass(r, EntityRoleModel)]:
-            entities_conditions |= Q(
-                training__management_entity_id__in=entity_aware_role.objects.filter(
-                    person__uuid=demandeur
-                ).get_entities_ids()
-            )
-        qs = qs.filter(entities_conditions)
-
-        # Filter managed education groups
-        education_group_conditions = Q()
-        for education_aware_role in [r for r in roles if issubclass(r, EducationGroupRoleModel)]:
-            education_group_conditions |= Q(
-                training__education_group_id__in=education_aware_role.objects.filter(
-                    person__uuid=demandeur
-                ).values_list('education_group_id')
-            )
-        qs = qs.filter(education_group_conditions)
-
+        if demandeur:
+            qs = qs.filter_according_to_roles(demandeur)
         if types_formation:
             qs = qs.filter(training__education_group_type__name__in=types_formation)
         if formation:
@@ -169,10 +144,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 # The term can be a part of the acronym or of the training title
                 training_filters &= Q(Q(training__acronym__icontains=term) | Q(training__title__icontains=term))
             qs = qs.filter(training_filters)
-        if etat:
-            qs = qs.filter(status=etat)
-        else:
-            qs = qs.exclude(Q(status__in=cls.STATUTS_A_FILTRER_PAR_DEFAUT))
+        if etats:
+            qs = qs.filter(status__in=etats)
         if bourse_internationale:
             qs = qs.filter(
                 Q(doctorateadmission__international_scholarship_id=bourse_internationale)
@@ -238,7 +211,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
             noma_candidat=admission.candidate.last_registration_id,
-            plusieurs_demandes=admission.has_other_admission_in_progress,  # From annotation
+            plusieurs_demandes=admission.has_several_admissions_in_progress,  # From annotation
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, 'title' if language_is_french else 'title_english'),

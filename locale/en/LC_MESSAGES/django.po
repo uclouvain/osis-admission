@@ -62,6 +62,10 @@ msgstr ""
 msgid "%(state)s on %(date)s"
 msgstr ""
 
+#, python-format
+msgid "(%(minutes)s ago)"
+msgstr ""
+
 msgid ", on"
 msgstr ""
 
@@ -215,9 +219,6 @@ msgstr "Admission in progress"
 
 msgid "ADMITTED"
 msgstr "Admitted"
-
-msgid "APPROVED"
-msgstr "Approved"
 
 msgid "ARC - Action de Recherche Concertee"
 msgstr "ARC - Action de Recherche Concertée"
@@ -473,6 +474,9 @@ msgstr ""
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 
+msgid "Application no."
+msgstr ""
+
 msgid "Application numero"
 msgstr ""
 
@@ -493,6 +497,10 @@ msgid "Approbation by pdf of %(member)s"
 msgstr ""
 
 msgid "Approvals"
+msgstr ""
+
+msgctxt "admission decision"
+msgid "Approved"
 msgstr ""
 
 msgid "Approximate date for completing the thesis:"
@@ -954,9 +962,13 @@ msgstr ""
 
 #, python-format
 msgid ""
-"Certificate stating the absence of debts towards the last institution(s) of "
-"the French community attended since %(year)s"
-msgstr ""
+"Certificate stating the absence of debts towards the institution attended "
+"during the academic year %(academic_year)s: %(names)s"
+msgid_plural ""
+"Certificates stating the absence of debts towards the institutions attended "
+"during the academic year %(academic_year)s: %(names)s"
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Certificate, with dates, justifying the specified period"
 msgstr ""
@@ -1050,9 +1062,6 @@ msgid "Confirm and send the message"
 msgstr ""
 
 msgid "Confirm restoring activity to submitted"
-msgstr ""
-
-msgid "Confirmation"
 msgstr ""
 
 msgctxt "tab"
@@ -1687,6 +1696,12 @@ msgstr ""
 msgid "Extension request not defined."
 msgstr ""
 
+msgid "External enrollment change"
+msgstr ""
+
+msgid "External reorientation"
+msgstr ""
+
 msgid "FAC/CDD processing"
 msgstr ""
 
@@ -2048,7 +2063,7 @@ msgid "INVALID"
 msgstr "Invalid"
 
 msgid "INVITED"
-msgstr "Invited"
+msgstr "Invited to sign"
 
 msgid "IN_PROGRESS"
 msgstr "In progress"
@@ -2234,7 +2249,10 @@ msgstr ""
 msgid "Languages knowledge"
 msgstr ""
 
-msgid "Last 24 hours views:"
+msgid "Last hour views:"
+msgstr ""
+
+msgid "Last modif."
 msgstr ""
 
 msgid "Last modification"
@@ -2641,7 +2659,7 @@ msgid "NOT_ALLOWED_TO_CONTINUE"
 msgstr "Not allowed to continue"
 
 msgid "NOT_INVITED"
-msgstr "Not invited"
+msgstr "Not invited to sign"
 
 msgid "Name"
 msgstr ""
@@ -2747,6 +2765,7 @@ msgctxt "admission-header"
 msgid "Not specified"
 msgstr ""
 
+msgctxt "address"
 msgid "Number"
 msgstr ""
 
@@ -2926,6 +2945,7 @@ msgstr ""
 msgid "Physic"
 msgstr ""
 
+msgctxt "address"
 msgid "Place"
 msgstr ""
 
@@ -3194,9 +3214,6 @@ msgid ""
 "Content of the message to be displayed for Message elements."
 msgstr ""
 
-msgid "REFUSED"
-msgstr "Declined"
-
 msgid "REFUSEE"
 msgstr "Declined"
 
@@ -3282,6 +3299,10 @@ msgstr ""
 
 msgid "Registration modification form"
 msgstr ""
+
+msgctxt "admission decision"
+msgid "Rejected"
+msgstr "Rejetée"
 
 msgid "Rejection reason"
 msgstr ""
@@ -3892,7 +3913,7 @@ msgstr ""
 msgid "The dossier has been confirmed as:"
 msgstr ""
 
-msgid "The dossier has been confirmed with the following contact address:"
+msgid "The dossier has been confirmed with the following address:"
 msgstr ""
 
 #, python-format
@@ -3904,9 +3925,6 @@ msgid ""
 msgstr ""
 
 msgid "The experiences that have been valuated from this admission."
-msgstr ""
-
-msgid "The export has been planned"
 msgstr ""
 
 msgid "The export has failed"
@@ -4263,6 +4281,9 @@ msgstr ""
 msgid "Unknown birth date"
 msgstr ""
 
+msgid "Unknown citizenship"
+msgstr ""
+
 msgid "Unknown noma"
 msgstr ""
 
@@ -4465,7 +4486,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #, python-format
-msgid "You have indicated that you will receive one in %(year)s."
+msgid "You have indicated that you will get it in %(year)s."
 msgstr ""
 
 msgid ""
@@ -4526,7 +4547,12 @@ msgstr ""
 msgid "You specified that no assimilation proposals applies to you."
 msgstr ""
 
-msgid "Your data has been saved"
+msgid "Your data has been saved."
+msgstr ""
+
+msgid ""
+"Your export request has been planned, you will receive a notification as "
+"soon as it is available."
 msgstr ""
 
 msgid "Your note has been added."

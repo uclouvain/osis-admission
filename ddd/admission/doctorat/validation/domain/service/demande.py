@@ -23,13 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
 from django.utils.timezone import now
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.doctorat.validation.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.doctorat.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.admission.doctorat.validation.domain.service.proposition_identity import (
     PropositionIdentityTranslator,
@@ -51,24 +49,14 @@ class DemandeService(interface.DomainService):
     @classmethod
     def initier(
         cls,
-        profil_candidat_translator: IProfilCandidatTranslator,
         proposition_id: PropositionIdentity,
-        matricule_candidat: str,
         type_admission: ChoixTypeAdmission,
+        profil_soumis_candidat: ProfilCandidat,
     ) -> Demande:
-        identification = profil_candidat_translator.get_identification(matricule_candidat)
-        coordonnees = profil_candidat_translator.get_coordonnees(matricule_candidat)
         return Demande(
             entity_id=PropositionIdentityTranslator.convertir_en_demande(proposition_id),
             proposition_id=proposition_id,
             pre_admission_confirmee_le=now() if type_admission == ChoixTypeAdmission.PRE_ADMISSION else None,
             admission_confirmee_le=now() if type_admission == ChoixTypeAdmission.ADMISSION else None,
-            profil_candidat=ProfilCandidat(
-                nom=identification.nom,
-                prenom=identification.prenom,
-                genre=identification.genre,
-                nationalite=identification.pays_nationalite,
-                email=identification.email,
-                **attr.asdict(coordonnees.adresse_correspondance or coordonnees.domicile_legal),  # type: ignore
-            ),
+            profil_soumis_candidat=profil_soumis_candidat,
         )

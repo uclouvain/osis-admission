@@ -28,22 +28,26 @@ import re
 from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
-from typing import Union, Optional
+from typing import Optional, Union
 
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
-from django.utils.translation import gettext_lazy as _, pgettext, get_language
+from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
-from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.auth.roles.central_manager import CentralManager
+from admission.auth.roles.program_manager import ProgramManager
+from admission.auth.roles.sic_management import SicManagement
+from admission.constants import IMAGE_MIME_TYPES
+from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    STATUTS_PROPOSITION_AVANT_INSCRIPTION,
     ChoixStatutPropositionDoctorale,
+    STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
 from admission.ddd.admission.enums import TYPES_ITEMS_LECTURE_SEULE, TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
@@ -54,13 +58,14 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     ChoixTypeEpreuve,
     StatutActivite,
 )
-from admission.constants import IMAGE_MIME_TYPES
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
-    AnneeInscriptionFormationTranslator,
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
+    AnneeInscriptionFormationTranslator,
 )
-from admission.utils import get_uuid_value, format_academic_year
-from osis_document.api.utils import get_remote_token, get_remote_metadata
+from admission.utils import format_academic_year, get_uuid_value
+from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
+from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
 
@@ -187,7 +192,9 @@ def sortable_header_div(context, order_field_name, order_field_label):
     asc_ordering = True
     ordering_class = 'sort'
 
-    query_order_param = context.request.GET.get('o')
+    query_params = getattr(context.get('view'), 'query_params', None) or context.request.GET
+
+    query_order_param = query_params.get('o')
 
     # An order query parameter is already specified
     if query_order_param:
@@ -202,7 +209,7 @@ def sortable_header_div(context, order_field_name, order_field_label):
                 asc_ordering = False
                 ordering_class = 'sort-up'
 
-    new_params = context.request.GET.copy()
+    new_params = query_params.copy()
     new_params['o'] = '{}{}'.format('' if asc_ordering else '-', order_field_name)
     new_params.pop('page', None)
     return {
@@ -345,13 +352,24 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
     valid_tab_tree = {}
 
     # Loop over the tabs of the original tab tree
-    for (parent_tab, sub_tabs) in tab_tree.items():
+    for parent_tab, sub_tabs in tab_tree.items():
         # Get the accessible sub tabs depending on the user permissions
         valid_sub_tabs = [tab for tab in sub_tabs if can_read_tab(context, tab.name, permission_obj)]
 
         # Add dynamic badge on parent for internal notes
         if Tab('internal-note') in valid_sub_tabs:
             parent_tab.badge = permission_obj.internalnote_set.count()
+
+        # Add dynamic badge for comments
+        if parent_tab == Tab('comments'):
+            from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC
+
+            roles = _get_roles_assigned_to_user(context['request'].user)
+            qs = CommentEntry.objects.filter(object_uuid=context['view'].kwargs['uuid'])
+            if {SicManagement, CentralManager} & set(roles):
+                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC]).count()
+            elif {ProgramManager} & set(roles):
+                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC]).count()
 
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
@@ -722,6 +740,17 @@ def get_first_truthy_value(*args):
 def get_item(dictionary, value):
     """Returns the value of a key in a dictionary if it exists else the value itself"""
     return dictionary.get(value, value)
+
+
+@register.simple_tag
+def get_item_or_default(dictionary, value, default=None):
+    """Returns the value of a key in a dictionary if it exists else the default value itself"""
+    return dictionary.get(value, default)
+
+
+@register.simple_tag
+def has_value(iterable, values):
+    return any(value in iterable for value in values)
 
 
 @register.simple_tag

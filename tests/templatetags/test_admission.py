@@ -67,6 +67,8 @@ from admission.templatetags.admission import (
     get_image_file_url,
     get_country_name,
     formatted_language,
+    get_item_or_default,
+    has_value,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -112,7 +114,10 @@ class AdmissionSortableHeaderDivTestCase(TestCase):
         cls.field_label = 'My field label'
 
     def test_sortable_header_div_without_query_order_param(self):
-        context = mock.Mock(request=self.factory.get('', data={}))
+        context = mock.Mock(
+            request=self.factory.get('', data={}),
+            get=lambda elt: None,
+        )
         value = sortable_header_div(
             context=context,
             order_field_name=self.field_name,
@@ -129,12 +134,8 @@ class AdmissionSortableHeaderDivTestCase(TestCase):
 
     def test_sortable_header_div_with_asc_query_order_param(self):
         context = mock.Mock(
-            request=self.factory.get(
-                '',
-                data={
-                    'o': self.field_name,
-                },
-            )
+            request=self.factory.get('', data={'o': self.field_name}),
+            get=lambda elt: None,
         )
         value = sortable_header_div(
             context=context,
@@ -148,12 +149,8 @@ class AdmissionSortableHeaderDivTestCase(TestCase):
 
     def test_sortable_header_div_with_desc_query_order_param(self):
         context = mock.Mock(
-            request=self.factory.get(
-                '',
-                data={
-                    'o': '-' + self.field_name,
-                },
-            )
+            request=self.factory.get('', data={'o': '-' + self.field_name}),
+            get=lambda elt: None,
         )
         value = sortable_header_div(
             context=context,
@@ -177,7 +174,8 @@ class AdmissionSortableHeaderDivTestCase(TestCase):
                     'o': '-other_field_name',
                     'other_param': '10',
                 },
-            )
+            ),
+            get=lambda elt: None,
         )
         value = sortable_header_div(
             context=context,
@@ -488,6 +486,15 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
     def test_get_item_with_key_not_in_dict_returns_the_specified_key(self):
         self.assertEqual(get_item({'key1': 'value'}, 'key2'), 'key2')
 
+    def test_get_item_or_default_with_key_in_dict_returns_the_related_value(self):
+        self.assertEqual(get_item_or_default({'key': 'value'}, 'key'), 'value')
+
+    def test_get_item_or_default_with_key_not_in_dict_returns_the_default_value_if_specified(self):
+        self.assertEqual(get_item_or_default({'key1': 'value'}, 'key2', 'default'), 'default')
+
+    def test_get_item_or_default_with_key_not_in_dict_returns_none_if_the_default_value_is_not_specified(self):
+        self.assertEqual(get_item_or_default({'key1': 'value'}, 'key2'), None)
+
     def test_interpolate_a_string(self):
         self.assertEqual(
             interpolate('my-str-with-value: %(value)s', value=1),
@@ -530,6 +537,17 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             formatted_language(''),
             '',
         )
+
+    def test_has_value_with_list(self):
+        self.assertFalse(has_value([], ['value1']))
+        self.assertFalse(has_value([], []))
+        self.assertFalse(has_value(['value2'], ['value1']))
+        self.assertTrue(has_value(['value1'], ['value1']))
+
+    def test_has_value_with_dict(self):
+        self.assertFalse(has_value({}, ['value1']))
+        self.assertFalse(has_value({'value2': 10}, ['value1']))
+        self.assertTrue(has_value({'value1': False}, ['value1']))
 
 
 class AdmissionTagsTestCase(TestCase):

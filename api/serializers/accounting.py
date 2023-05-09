@@ -76,7 +76,7 @@ class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
                 academic_year__year__gte=cv_minimal_years.get('minimal_date').year,
             )
             .exclude(
-                educational_experience__institute__code=UCLouvain_acronym,
+                educational_experience__institute__acronym=UCLouvain_acronym,
             )
             .values('academic_year__year', 'educational_experience__institute__name')
         )

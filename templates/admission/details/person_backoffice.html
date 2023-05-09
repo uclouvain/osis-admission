@@ -25,13 +25,13 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 {% block tab_content %}
-  {% if dossier %}
+  {% if profil_candidat %}
     <p class="alert alert-info" role="alert">
       <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
       {% trans "The dossier has been confirmed as:" %}
-      {{ dossier.profil_candidat.nom }}, {{ dossier.profil_candidat.prenom }}
-      ({{ dossier.profil_candidat.genre|enum_display:'ChoixGenre' }}) -
-      {{ dossier.profil_candidat.nom_pays_nationalite }}
+      {{ profil_candidat.nom }}, {{ profil_candidat.prenom }}
+      ({{ profil_candidat.genre|enum_display:'ChoixGenre' }}) -
+      {{ profil_candidat.nom_pays_nationalite|default:_('Unknown citizenship') }}
     </p>
   {% endif %}
   {{ block.super }}
