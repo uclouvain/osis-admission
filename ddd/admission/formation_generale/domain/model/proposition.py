@@ -30,6 +30,7 @@ import attr
 from django.utils.timezone import now
 
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.enums import (
@@ -95,6 +96,8 @@ class Proposition(interface.RootEntity):
 
     profil_soumis_candidat: ProfilCandidat = None
 
+    documents_demandes: Dict = attr.Factory(dict)
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
@@ -135,6 +138,16 @@ class Proposition(interface.RootEntity):
             self.formulaire_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
+
+    def reclamer_documents_par_sic(self, documents_demandes: List[EmplacementDocument]):
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC
+        for document in documents_demandes:
+            self.documents_demandes[document.entity_id.identifiant] = document.get_infos_a_sauvegarder()
+
+    def reclamer_documents_par_fac(self, documents_demandes: List[EmplacementDocument]):
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD
+        for document in documents_demandes:
+            self.documents_demandes[document.entity_id.identifiant] = document.get_infos_a_sauvegarder()
 
     def completer_curriculum(
         self,

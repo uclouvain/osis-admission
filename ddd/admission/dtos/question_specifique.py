@@ -40,3 +40,4 @@ class QuestionSpecifiqueDTO(interface.DTO):
     label: str
     valeur: Union[str, List[str]]
     valeur_formatee: Union[str, List[str]]
+    label_langue_candidat: str

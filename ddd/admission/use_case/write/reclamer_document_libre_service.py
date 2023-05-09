@@ -44,7 +44,7 @@ def reclamer_document_libre(
         identifiant_question_specifique=str(uuid.uuid4()),
     )
 
-    document.definir_a_reclamer(raison=cmd.raison)
+    document.definir_a_reclamer(raison=cmd.raison, auteur=cmd.auteur)
 
     emplacement_document_repository.save_emplacement_document_candidat(entity=document)
 

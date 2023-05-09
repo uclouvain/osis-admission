@@ -80,7 +80,13 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
         ]
 
     @classmethod
-    def build_dto(cls, question: AdmissionFormItemInstantiation, answers, language: str) -> QuestionSpecifiqueDTO:
+    def build_dto(
+        cls,
+        question: AdmissionFormItemInstantiation,
+        answers,
+        language: str,
+        candidate_language: str = '',
+    ) -> QuestionSpecifiqueDTO:
         question_uuid = str(question.form_item.uuid)
         question_type = question.form_item.type
 
@@ -106,6 +112,7 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
             label=question.form_item.title.get(language, ''),
             valeur=answers.get(question_uuid),
             valeur_formatee=formatted_value,
+            label_langue_candidat=question.form_item.title.get(candidate_language, ''),
         )
 
     @classmethod
@@ -119,7 +126,7 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
         current_language = get_language()
         admission = cls.get_admission(proposition_uuid)
         return [
-            cls.build_dto(question, admission.specific_question_answers, current_language)
+            cls.build_dto(question, admission.specific_question_answers, current_language, admission.candidate.language)
             for question in AdmissionFormItemInstantiation.objects.form_items_by_admission(
                 admission=admission,
                 tabs=onglets,

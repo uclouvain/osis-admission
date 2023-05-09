@@ -41,21 +41,7 @@ class DocumentBuilder(interface.RootEntityBuilder):
 
     @classmethod
     def build_from_repository_dto(cls, dto_object: 'EmplacementDocumentDTO') -> 'EmplacementDocument':
-        return EmplacementDocument(
-            entity_id=EmplacementDocumentIdentity(identifiant=dto_object.identifiant),
-            demande=DemandeIdentity(uuid=dto_object.uuid_demande),
-            libelle=dto_object.libelle,
-            onglet=OngletsDemande[dto_object.onglet],
-            uuids=dto_object.uuids,
-            auteur=dto_object.auteur,
-            type=TypeDocument[dto_object.type],
-            statut=StatutDocument[dto_object.statut],
-            justification_gestionnaire=dto_object.justification_gestionnaire,
-            soumis_le=dto_object.soumis_le,
-            reclame_le=dto_object.reclame_le,
-            a_echeance_le=dto_object.a_echeance_le,
-            derniere_action_le=dto_object.derniere_action_le,
-        )
+        pass
 
     @classmethod
     def initier_document(
@@ -80,6 +66,7 @@ class DocumentBuilder(interface.RootEntityBuilder):
             ),
             demande=DemandeIdentity(uuid=uuid_demande),
             libelle=nom_document,
+            libelle_langue_candidat=nom_document,
             uuids=[token_document] if token_document else [],
             auteur=auteur,
             type=TypeDocument[type_document],

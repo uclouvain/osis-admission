@@ -125,7 +125,7 @@ class CustomDateInput(forms.DateInput):
         super().__init__(attrs, format)
 
     class Media:
-        js = ('jquery.mask.min.js',)
+        js = ('js/jquery.mask.min.js',)
 
 
 def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM_SELECTABLE_YEAR):

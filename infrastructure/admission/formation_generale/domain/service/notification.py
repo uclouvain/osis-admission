@@ -29,7 +29,9 @@ from django.utils import translation
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
 from osis_mail_template import generate_email
+from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
+from osis_notification.contrib.notification import EmailNotification
 
 from admission.contrib.models import AdmissionTask
 from admission.contrib.models.base import BaseAdmission
@@ -37,6 +39,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
+from base.models.person import Person
 
 
 class Notification(INotification):
@@ -76,7 +79,7 @@ class Notification(INotification):
             type=AdmissionTask.TaskType.GENERAL_RECAP.name,
         )
 
-        # Notifier le doctorant via mail
+        # Notifier le candidat via mail
         with translation.override(admission.candidate.language):
             common_tokens = cls.get_common_tokens(proposition, admission.candidate)
         email_message = generate_email(
@@ -86,3 +89,18 @@ class Notification(INotification):
             recipients=[admission.candidate],
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+    @classmethod
+    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> None:
+        # Notifier le candidat via mail
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)

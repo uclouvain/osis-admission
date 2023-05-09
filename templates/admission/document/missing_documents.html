@@ -64,8 +64,8 @@
             <td class="min-width">
               <span class="flex-content-no-wrap align-items-baseline">
                 {% if document.auteur %}
+                  {{ document.auteur }}
                   {% if document.statut == 'A_RECLAMER' %}
-                    {{ document.auteur }}
                     <i class="fa-solid fa-file-circle-exclamation" title="{% translate 'To be requested' %}"></i>
                   {% elif document.statut == 'RECLAME' %}
                     <i class="fa-solid fa-envelope" title="{% translate 'Requested' %}"></i>

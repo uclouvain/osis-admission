@@ -87,6 +87,7 @@ class IEmplacementsDocumentsDemandeTranslator(interface.DomainService):
                             reclame_le=None,
                             a_echeance_le=None,
                             derniere_action_le=heure_actuelle,
+                            libelle_langue_candidat=document.candidate_language_label,
                         )
                     )
 

@@ -40,3 +40,11 @@ class HistoriqueInMemory(IHistorique):
     @classmethod
     def historiser_suppression(cls, proposition: Proposition):
         pass
+
+    @classmethod
+    def historiser_demande_complements_sic(cls, proposition: PropositionAdmission, acteur: str):
+        pass
+
+    @classmethod
+    def historiser_demande_complements_fac(cls, proposition: PropositionAdmission, acteur: str):
+        pass

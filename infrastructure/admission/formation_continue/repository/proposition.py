@@ -227,7 +227,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
                 campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.sigle_entite_gestion,  # from annotation
+                sigle_entite_gestion=admission.training_management_faculty or admission.sigle_entite_gestion,  # from annotation
             ),
             reference=admission.formatted_reference,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,

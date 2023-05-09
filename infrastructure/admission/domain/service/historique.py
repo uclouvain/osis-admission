@@ -64,3 +64,23 @@ class Historique(IHistorique):
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
             tags=["proposition", "status-changed"],
         )
+
+    @classmethod
+    def historiser_demande_complements_sic(cls, proposition: Proposition, acteur: str):
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "Une demande de compléments a été envoyée par SIC.",
+            "A request for additional information has been submitted by SIC.",
+            acteur,
+            tags=["proposition", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_demande_complements_fac(cls, proposition: Proposition, acteur: str):
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "Une demande de compléments a été envoyée par FAC.",
+            "A request for additional information has been submitted by FAC.",
+            acteur,
+            tags=["proposition", "status-changed"],
+        )

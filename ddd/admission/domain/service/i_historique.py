@@ -50,5 +50,13 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    def historiser_demande_complements_sic(cls, proposition: PropositionAdmission, acteur: str):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_demande_complements_fac(cls, proposition: PropositionAdmission, acteur: str):
+        raise NotImplementedError
+
+    @classmethod
     def historiser_suppression(cls, proposition: PropositionAdmission):
         raise NotImplementedError

@@ -178,4 +178,18 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         emplacement_document_repository=EmplacementDocumentRepository(),
     ),
+    ReclamerDocumentsAuCandidatParSICCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_sic(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        emplacement_document_repository=EmplacementDocumentRepository(),
+        notification=Notification(),
+        historique=Historique(),
+    ),
+    ReclamerDocumentsAuCandidatParFACCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_fac(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        emplacement_document_repository=EmplacementDocumentRepository(),
+        notification=Notification(),
+        historique=Historique(),
+    ),
 }

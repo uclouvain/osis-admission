@@ -26,6 +26,7 @@
 from typing import Optional, List
 
 from django.db import transaction
+from django.utils.dateparse import parse_datetime
 from django.utils.text import slugify
 
 from admission.contrib.models import AdmissionFormItem, AdmissionFormItemInstantiation
@@ -37,7 +38,8 @@ from admission.ddd.admission.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
 from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
-from admission.ddd.admission.enums.emplacement_document import TypeDocument
+from admission.ddd.admission.enums.emplacement_document import TypeDocument, OngletsDemande, StatutDocument
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from osis_common.ddd.interface import EntityIdentity, ApplicationService, RootEntity
 
@@ -94,6 +96,33 @@ class EmplacementDocumentRepository(IEmplacementDocumentRepository):
         pass
 
     @classmethod
+    def get_documents_reclamables_proposition(
+        cls,
+        proposition: Proposition,
+    ) -> List[EmplacementDocument]:
+        return [
+            EmplacementDocument(
+                entity_id=EmplacementDocumentIdentity(identifiant=document_id),
+                demande=DemandeIdentity(uuid=proposition.entity_id.uuid),
+                libelle='',
+                libelle_langue_candidat='',
+                onglet=OngletsDemande.DOCUMENTS_ADDITIONNELS,
+                uuids=[],
+                auteur=document_content.get('author', ''),
+                type=TypeDocument[document_content.get('type', '')],
+                statut=StatutDocument[document_content.get('status', '')],
+                justification_gestionnaire=document_content.get('reason', ''),
+                soumis_le=None,
+                reclame_le=None,
+                a_echeance_le=None,
+                derniere_action_le=document_content.get('last_action_at')
+                and parse_datetime(document_content['last_action_at']),
+            )
+            for document_id, document_content in proposition.documents_demandes.items()
+            if document_content.get('status') == StatutDocument.A_RECLAMER.name
+        ]
+
+    @classmethod
     def reinitialiser_emplacements_documents_candidat(
         cls,
         demande_identity: DemandeIdentity,
@@ -111,22 +140,12 @@ class EmplacementDocumentRepository(IEmplacementDocumentRepository):
 
             # Add the documents requested by the system
             for entity in entities:
-                admission.requested_documents[entity.entity_id.identifiant] = cls.get_requested_document_to_save(entity)
+                admission.requested_documents[entity.entity_id.identifiant] = entity.get_infos_a_sauvegarder()
 
             admission.save(update_fields=['requested_documents'])
 
         except BaseAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
-
-    @classmethod
-    def get_requested_document_to_save(cls, entity: EmplacementDocument):
-        return {
-            'author': entity.auteur,
-            'reason': entity.justification_gestionnaire,
-            'type': entity.type.name,
-            'last_action_at': entity.derniere_action_le,
-            'status': entity.statut.name,
-        }
 
     @classmethod
     def save_multiple_emplacements_documents_candidat(cls, entities: List[EmplacementDocument]) -> None:
@@ -149,20 +168,18 @@ class EmplacementDocumentRepository(IEmplacementDocumentRepository):
                             uuid=entity.entity_id.identifiant.split('.')[-1],
                         )
                         form_item.save()
-                        form_item_instantiation = (
-                            AdmissionFormItemInstantiation(
-                                form_item=form_item,
-                                academic_year_id=admission.determined_academic_year_id,
-                                weight=1,
-                                required=True,
-                                display_according_education=CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
-                                admission=admission,
-                                tab=Onglets.DOCUMENTS.name,
-                            )
+                        form_item_instantiation = AdmissionFormItemInstantiation(
+                            form_item=form_item,
+                            academic_year_id=admission.determined_academic_year_id,
+                            weight=1,
+                            required=True,
+                            display_according_education=CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+                            admission=admission,
+                            tab=Onglets.DOCUMENTS.name,
                         )
                         form_item_instantiation.save()
 
-                    admission.requested_documents[entity.entity_id.identifiant] = cls.get_requested_document_to_save(entity)
+                    admission.requested_documents[entity.entity_id.identifiant] = entity.get_infos_a_sauvegarder()
 
                 admission.save(update_fields=['requested_documents'])
 
@@ -183,7 +200,9 @@ class EmplacementDocumentRepository(IEmplacementDocumentRepository):
                 if type_document in {TypeDocument.CANDIDAT_SIC, TypeDocument.CANDIDAT_FAC}:
                     # For free documents, also delete the specific question
                     specific_question_uuid = entity_id.identifiant.split('.')[-1]
-                    form_item_instantiation_to_delete = AdmissionFormItemInstantiation.objects.filter(form_item__uuid=specific_question_uuid).first()
+                    form_item_instantiation_to_delete = AdmissionFormItemInstantiation.objects.filter(
+                        form_item__uuid=specific_question_uuid
+                    ).first()
                     related_form_item = form_item_instantiation_to_delete.form_item
                     form_item_instantiation_to_delete.delete()
                     related_form_item.delete()

@@ -43,6 +43,7 @@ class AuteurDTO(interface.DTO):
 class EmplacementDocumentDTO(interface.Entity):
     identifiant: str
     libelle: str
+    libelle_langue_candidat: str
     uuids: List[str]
     auteur: str
     type: str

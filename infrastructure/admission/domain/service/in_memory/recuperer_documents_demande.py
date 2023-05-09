@@ -83,6 +83,7 @@ class EmplacementsDocumentsDemandeInMemoryTranslator(IEmplacementsDocumentsDeman
                     and parse_datetime(requested_document['deadline_at']),
                     derniere_action_le=requested_document.get('last_action_at')
                     and parse_datetime(requested_document['last_action_at']),
+                    libelle_langue_candidat=attachment.candidate_language_label,
                 )
                 documents.append(document)
         return documents

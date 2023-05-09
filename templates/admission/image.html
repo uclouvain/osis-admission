@@ -1,6 +1,3 @@
-{% load osis_document %}
-{% load i18n admission bootstrap3 %}
-
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -25,16 +22,4 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<div id="document-details">
-  {# Viewer #}
-  <div id="document-details-viewer">
-    {% document_component document_uuid.0 %}
-  </div>
-
-  {# Actions #}
-  {% if requestable_document %}
-    {# Request #}
-    {% include 'admission/document/request_document.html' %}
-  {% endif %}
-
-</div>
+<img src="{{ url }}" alt="{{ alt }}"/>
