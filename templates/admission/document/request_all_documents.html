@@ -1,0 +1,126 @@
+{% load i18n bootstrap3 static %}
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<form
+    id="request-all-documents-form"
+    method="post"
+    hx-post="{% url 'admission:general-education:document:document' uuid=view.kwargs.uuid %}"
+    class="no-prevent-quitting"
+>
+  <div id="request-all-documents-form-fields" class="modal-body">
+    {% bootstrap_form_errors form %}
+    {% csrf_token %}
+    {% bootstrap_field form.deadline %}
+    {% bootstrap_field form.documents %}
+    <button
+        id="object-reset-button"
+        class="btn btn-primary btn-sm reset-button"
+    >
+      <i class="fa-solid fa-arrow-rotate-right"></i>
+      {% translate 'Reset' %}
+    </button>
+    {% bootstrap_field form.message_object %}
+    <button
+        id="content-reset-button"
+        class="btn btn-primary btn-sm reset-button"
+    >
+      <i class="fa-solid fa-arrow-rotate-right"></i>
+      {% translate 'Reset' %}
+    </button>
+    {% bootstrap_field form.message_content %}
+  </div>
+  <div class="modal-footer">
+    <button
+        type="submit"
+        class="btn btn-success"
+        name="request-all-form"
+    >
+      <i class="fa-solid fa-envelope"></i>
+      {% translate 'Send' %}
+    </button>
+    <button type="button" class="cancel-button btn btn-default" data-dismiss="modal">
+      {% translate 'Close' %}
+    </button>
+  </div>
+  <div id="hidden-message-content" class="hidden"></div>
+  <script>
+      $(document).ready(function () {
+          const requestedDocuments = {{ requested_documents|safe }};
+          const defaultMessage = `{{ form.initial.message_content|safe }}`;
+          const defaultObject = `{{ form.initial.message_object|safe }}`;
+          let instance;
+
+          const defaultMessageElement = $('#hidden-message-content');
+          defaultMessageElement.html(defaultMessage);
+          const contentToUpdate = defaultMessageElement.find('#requested-documents-email-list');
+          const dateToUpdate = defaultMessageElement.find('#request_deadline');
+
+          {# Manage the request all documents form #}
+          {% if form.is_valid %}$('#request-all-form-modal').modal('hide');{% endif %}
+
+          {# Manage the CKEDITOR instance #}
+          initializeCKEditor('id_message_content');
+
+          $('#request-all-documents-form').on('submit', function () {
+              removeEditor('#id_message_content');
+          })
+
+          CKEDITOR.on('instanceReady', function(){
+              instance = CKEDITOR.instances['id_message_content'];
+              $('#content-reset-button').click();
+          });
+
+          {# Reset the content of the message #}
+          $('#content-reset-button').click(function(event) {
+
+              event.preventDefault();
+
+              if (!instance) return;
+
+              {# Update the list of documents #}
+              let html_documents_list = '';
+              $('input:checkbox[name=documents]:checked').each(function(){
+                  const selected_document = requestedDocuments[$(this).val()];
+                  html_documents_list += `<li>${selected_document['label']}. ${selected_document['reason']}</li>`;
+              })
+              contentToUpdate.html(html_documents_list);
+
+              {# Update the deadline #}
+              const currentDate = moment($('#id_deadline').val(), "DD-MM-YYYY");
+              dateToUpdate.html(currentDate.isValid()
+                  ? moment(currentDate).format('D MMMM YYYY')
+                  : '<span style="background-color: #f2dede">[{% translate 'Invalid date' %}]</span>'
+              );
+
+              instance.setData(defaultMessageElement.html());
+          });
+
+          {# Reset the content of the object #}
+          $('#object-reset-button').click(function(event) {
+              event.preventDefault();
+              $('#id_message_object').val(defaultObject);
+          });
+      });
+  </script>
+</form>

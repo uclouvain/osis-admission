@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Optional
 
 import attr
@@ -43,6 +43,7 @@ class EmplacementDocument(interface.Entity):
     entity_id: EmplacementDocumentIdentity
     demande: DemandeIdentity
     libelle: str
+    libelle_langue_candidat: str
     onglet: OngletsDemande
     uuids: List[str]
     auteur: str
@@ -51,10 +52,34 @@ class EmplacementDocument(interface.Entity):
     justification_gestionnaire: str
     soumis_le: Optional[datetime] = None
     reclame_le: Optional[datetime] = None
-    a_echeance_le: Optional[datetime] = None
+    a_echeance_le: Optional[date] = None
     derniere_action_le: Optional[datetime] = None
 
-    def definir_a_reclamer(self, raison):
+    def definir_a_reclamer(self, raison: str, auteur: str):
         self.justification_gestionnaire = raison
         self.derniere_action_le = datetime.now()
         self.statut = StatutDocument.A_RECLAMER
+        self.auteur = auteur
+
+    def reclamer_au_candidat(
+        self,
+        auteur: str,
+        a_echeance_le: date,
+        reclame_le: datetime,
+    ):
+        self.auteur = auteur
+        self.a_echeance_le = a_echeance_le
+        self.derniere_action_le = reclame_le
+        self.reclame_le = reclame_le
+        self.statut = StatutDocument.RECLAME
+
+    def get_infos_a_sauvegarder(self):
+        return {
+            'author': self.auteur,
+            'reason': self.justification_gestionnaire,
+            'type': self.type.name,
+            'last_action_at': self.derniere_action_le,
+            'status': self.statut.name,
+            'requested_at': self.reclame_le,
+            'deadline_at': self.a_echeance_le,
+        }

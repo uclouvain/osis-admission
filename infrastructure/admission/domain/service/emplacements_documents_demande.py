@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List
 
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_datetime, parse_date
 
 from admission.ddd.admission.domain.model.demande import DemandeIdentity
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
@@ -64,6 +64,7 @@ class EmplacementsDocumentsDemandeTranslator(IEmplacementsDocumentsDemandeTransl
                 onglet=document.onglet.name,
                 nom_onglet=document.onglet.value,
                 uuid_demande=document.demande.uuid,
+                libelle_langue_candidat=document.libelle_langue_candidat,
             )
             for document in documents
         ]
@@ -168,9 +169,10 @@ class EmplacementsDocumentsDemandeTranslator(IEmplacementsDocumentsDemandeTransl
             justification_gestionnaire=requested_document.get('reason', ''),
             soumis_le=metadata.get('uploaded_at') and parse_datetime(metadata['uploaded_at']),
             reclame_le=requested_document.get('requested_at') and parse_datetime(requested_document['requested_at']),
-            a_echeance_le=requested_document.get('deadline_at') and parse_datetime(requested_document['deadline_at']),
+            a_echeance_le=requested_document.get('deadline_at') and parse_date(requested_document['deadline_at']),
             derniere_action_le=requested_document.get('last_action_at')
             and parse_datetime(requested_document['last_action_at']),
+            libelle_langue_candidat=attachment.candidate_language_label,
         )
 
     @classmethod
@@ -202,4 +204,5 @@ class EmplacementsDocumentsDemandeTranslator(IEmplacementsDocumentsDemandeTransl
             reclame_le=None,
             a_echeance_le=None,
             derniere_action_le=None,
+            libelle_langue_candidat=metadata.get('explicit_name', ''),
         )

@@ -44,7 +44,7 @@ from admission.infrastructure.admission.domain.service.in_memory.maximum_proposi
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_demande import (
-    RecupererDocumentsDemandeInMemoryTranslator, EmplacementsDocumentsDemandeInMemoryTranslator,
+    EmplacementsDocumentsDemandeInMemoryTranslator,
 )
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
@@ -210,5 +210,19 @@ COMMAND_HANDLERS = {
         question_specifique_translator=_question_specific_translator,
         academic_year_repository=_academic_year_repository,
         emplacement_document_repository=_emplacement_document_repository,
+    ),
+    ReclamerDocumentsAuCandidatParSICCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_sic(
+        cmd,
+        proposition_repository=_proposition_repository,
+        emplacement_document_repository=_emplacement_document_repository,
+        notification=NotificationInMemory(),
+        historique=_historique,
+    ),
+    ReclamerDocumentsAuCandidatParFACCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_fac(
+        cmd,
+        proposition_repository=_proposition_repository,
+        emplacement_document_repository=_emplacement_document_repository,
+        notification=NotificationInMemory(),
+        historique=_historique,
     ),
 }

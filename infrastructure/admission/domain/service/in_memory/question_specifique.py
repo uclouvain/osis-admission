@@ -243,6 +243,7 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
                 label='',
                 valeur='',
                 valeur_formatee='',
+                label_langue_candidat='',
             )
             for question in cls._extended_search_by_proposition(
                 proposition_uuid=proposition_uuid,

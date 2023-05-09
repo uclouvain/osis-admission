@@ -27,7 +27,7 @@ from io import BytesIO
 from typing import List, Optional, Dict
 
 import img2pdf
-from django.utils.translation import ngettext
+from django.utils.translation import ngettext, override
 
 from admission.constants import IMAGE_MIME_TYPES, DEFAULT_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -74,6 +74,8 @@ class Attachment:
         sub_identifier_label='',
         required=False,
         full_identifier='',
+        candidate_language_label='',
+        candidate_language='',
     ):
         if full_identifier:
             self.identifier = full_identifier
@@ -86,6 +88,12 @@ class Attachment:
         )
         self.uuids = [str(uuid) for uuid in uuids]
         self.required = required
+
+        if candidate_language_label:
+            self.candidate_language_label = candidate_language_label
+        else:
+            with override(language=candidate_language):
+                self.candidate_language_label = str(self.label)
 
     def get_raw(self, token: Optional[str], metadata: Optional[Dict], default_content: BytesIO) -> BytesIO:
         """
@@ -115,6 +123,7 @@ def get_identification_attachments(context: ResumePropositionDTO) -> List[Attach
             identifier=DocumentsIdentification.PHOTO_IDENTITE,
             uuids=context.identification.photo_identite,
             required=True,
+            candidate_language=context.identification.langue_contact,
         )
     ]
     if context.identification.numero_carte_identite or context.identification.numero_registre_national_belge:
@@ -123,6 +132,7 @@ def get_identification_attachments(context: ResumePropositionDTO) -> List[Attach
                 identifier=DocumentsIdentification.CARTE_IDENTITE,
                 uuids=context.identification.carte_identite,
                 required=True,
+                candidate_language=context.identification.langue_contact,
             )
         )
     if context.identification.numero_passeport:
@@ -131,6 +141,7 @@ def get_identification_attachments(context: ResumePropositionDTO) -> List[Attach
                 identifier=DocumentsIdentification.PASSEPORT,
                 uuids=context.identification.passeport,
                 required=True,
+                candidate_language=context.identification.langue_contact,
             )
         )
     return attachments
@@ -158,6 +169,7 @@ def get_secondary_studies_attachments(
                         and context.etudes_secondaires.diplome_belge.diplome
                         and not context.etudes_secondaires.diplome_belge.certificat_inscription
                     ),
+                    candidate_language=context.identification.langue_contact,
                 )
             )
             if context.etudes_secondaires.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name:
@@ -170,6 +182,7 @@ def get_secondary_studies_attachments(
                             context.etudes_secondaires.diplome_belge.certificat_inscription
                             and not context.etudes_secondaires.diplome_belge.diplome
                         ),
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
         elif context.etudes_secondaires.diplome_etranger:
@@ -181,6 +194,7 @@ def get_secondary_studies_attachments(
                                 identifier=DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE,
                                 uuids=context.etudes_secondaires.diplome_etranger.decision_final_equivalence_ue,
                                 required=True,
+                                candidate_language=context.identification.langue_contact,
                             )
                         )
                     elif context.etudes_secondaires.diplome_etranger.equivalence == Equivalence.PENDING.name:
@@ -189,6 +203,7 @@ def get_secondary_studies_attachments(
                                 identifier=DocumentsEtudesSecondaires.DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE,
                                 uuids=context.etudes_secondaires.diplome_etranger.preuve_decision_equivalence,
                                 required=True,
+                                candidate_language=context.identification.langue_contact,
                             )
                         )
                 else:
@@ -197,6 +212,7 @@ def get_secondary_studies_attachments(
                             identifier=DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE,
                             uuids=context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
                             required=True,
+                            candidate_language=context.identification.langue_contact,
                         )
                     )
 
@@ -211,6 +227,7 @@ def get_secondary_studies_attachments(
                         and context.etudes_secondaires.diplome_etranger.diplome
                         and not context.etudes_secondaires.diplome_etranger.certificat_inscription
                     ),
+                    candidate_language=context.identification.langue_contact,
                 ),
             )
 
@@ -225,6 +242,7 @@ def get_secondary_studies_attachments(
                             got_diploma == GotDiploma.THIS_YEAR.name
                             and context.etudes_secondaires.diplome_etranger.diplome
                         ),
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
 
@@ -237,6 +255,7 @@ def get_secondary_studies_attachments(
                             context.etudes_secondaires.diplome_etranger.certificat_inscription
                             and not context.etudes_secondaires.diplome_etranger.diplome
                         ),
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
                 if need_translations:
@@ -245,6 +264,7 @@ def get_secondary_studies_attachments(
                             identifier=DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION,
                             uuids=context.etudes_secondaires.diplome_etranger.traduction_certificat_inscription,
                             required=bool(context.etudes_secondaires.diplome_etranger.certificat_inscription),
+                            candidate_language=context.identification.langue_contact,
                         )
                     )
 
@@ -253,6 +273,7 @@ def get_secondary_studies_attachments(
                     identifier=DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES,
                     uuids=context.etudes_secondaires.diplome_etranger.releve_notes,
                     required=True,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
             if need_translations:
@@ -261,6 +282,7 @@ def get_secondary_studies_attachments(
                         identifier=DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES,
                         uuids=context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
                         required=True,
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
 
@@ -270,6 +292,7 @@ def get_secondary_studies_attachments(
                     identifier=DocumentsEtudesSecondaires.ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE,
                     uuids=context.etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle,
                     required=not context.curriculum.candidat_est_potentiel_vae,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
 
@@ -287,6 +310,7 @@ def get_languages_attachments(context: ResumePropositionDTO) -> List[Attachment]
             sub_identifier_label=language.nom_langue,
             uuids=language.certificat,
             required=False,
+            candidate_language=context.identification.langue_contact,
         )
         for language in context.connaissances_langues
     ]
@@ -310,6 +334,7 @@ def get_curriculum_attachments(
                 identifier=DocumentsCurriculum.DIPLOME_EQUIVALENCE,
                 uuids=context.proposition.equivalence_diplome,
                 required=require_equivalence,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
@@ -319,6 +344,7 @@ def get_curriculum_attachments(
                 identifier=DocumentsCurriculum.CURRICULUM,
                 uuids=context.proposition.curriculum,
                 required=require_curriculum,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
@@ -341,6 +367,7 @@ def get_curriculum_academic_experience_attachments(
                     identifier=DocumentsCurriculum.RELEVE_NOTES,
                     uuids=experience.releve_notes,
                     required=True,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
             if translation_required:
@@ -349,6 +376,7 @@ def get_curriculum_academic_experience_attachments(
                         identifier=DocumentsCurriculum.TRADUCTION_RELEVE_NOTES,
                         uuids=experience.traduction_releve_notes,
                         required=True,
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
         elif experience.type_releve_notes == TranscriptType.ONE_A_YEAR.name:
@@ -361,6 +389,7 @@ def get_curriculum_academic_experience_attachments(
                         sub_identifier_label=sub_identifier,
                         uuids=annee.releve_notes,
                         required=True,
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
                 if translation_required:
@@ -371,6 +400,7 @@ def get_curriculum_academic_experience_attachments(
                             sub_identifier_label=sub_identifier,
                             uuids=annee.traduction_releve_notes,
                             required=True,
+                            candidate_language=context.identification.langue_contact,
                         )
                     )
 
@@ -381,6 +411,7 @@ def get_curriculum_academic_experience_attachments(
                     identifier=DocumentsCurriculum.RESUME_MEMOIRE,
                     uuids=experience.resume_memoire,
                     required=True,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
 
@@ -389,6 +420,7 @@ def get_curriculum_academic_experience_attachments(
                 identifier=DocumentsCurriculum.DIPLOME,
                 uuids=experience.diplome,
                 required=True,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
@@ -398,6 +430,7 @@ def get_curriculum_academic_experience_attachments(
                     identifier=DocumentsCurriculum.TRADUCTION_DIPLOME,
                     uuids=experience.traduction_diplome,
                     required=True,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
 
@@ -417,6 +450,7 @@ def get_curriculum_non_academic_experience_attachments(
                     identifier=DocumentsCurriculum.CERTIFICAT_EXPERIENCE,
                     label=CURRICULUM_ACTIVITY_LABEL[experience.type],
                     uuids=experience.certificat,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
         return attachments
@@ -435,6 +469,7 @@ def get_specific_questions_attachments(
             Attachment(
                 identifier=DocumentsQuestionsSpecifiques.COPIE_TITRE_SEJOUR,
                 uuids=context.proposition.copie_titre_sejour,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
@@ -444,6 +479,7 @@ def get_specific_questions_attachments(
                 identifier=DocumentsQuestionsSpecifiques.ATTESTATION_INSCRIPTION_REGULIERE,
                 uuids=context.proposition.attestation_inscription_reguliere,
                 required=True,
+                candidate_language=context.identification.langue_contact,
             )
         )
     if eligible_for_modification and context.proposition.est_modification_inscription_externe:
@@ -452,6 +488,7 @@ def get_specific_questions_attachments(
                 identifier=DocumentsQuestionsSpecifiques.FORMULAIRE_MODIFICATION_INSCRIPTION,
                 uuids=context.proposition.formulaire_modification_inscription,
                 required=True,
+                candidate_language=context.identification.langue_contact,
             )
         )
     attachments.extend(get_dynamic_questions_attachments(specific_questions))
@@ -485,6 +522,7 @@ def get_accounting_attachments(
                 },
                 uuids=context.comptabilite.attestation_absence_dette_etablissement,
                 required=True,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
@@ -493,6 +531,7 @@ def get_accounting_attachments(
             Attachment(
                 identifier=DocumentsComptabilite.ATTESTATION_ENFANT_PERSONNEL,
                 uuids=context.comptabilite.attestation_enfant_personnel,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
@@ -511,6 +550,7 @@ def get_accounting_attachments(
                         label=identifier.value % {'person_concerned': formatted_relationship},
                         uuids=getattr(context.comptabilite, field),
                         required=True,
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
 
@@ -525,6 +565,7 @@ def get_research_project_attachments(context: ResumePropositionDTO) -> List[Atta
             Attachment(
                 identifier=DocumentsProjetRecherche.PREUVE_BOURSE,
                 uuids=context.proposition.bourse_preuve,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
@@ -533,23 +574,28 @@ def get_research_project_attachments(context: ResumePropositionDTO) -> List[Atta
             identifier=DocumentsProjetRecherche.DOCUMENTS_PROJET,
             uuids=context.proposition.documents_projet,
             required=True,
+            candidate_language=context.identification.langue_contact,
         ),
         Attachment(
             identifier=DocumentsProjetRecherche.PROPOSITION_PROGRAMME_DOCTORAL,
             uuids=context.proposition.proposition_programme_doctoral,
             required=True,
+            candidate_language=context.identification.langue_contact,
         ),
         Attachment(
             identifier=DocumentsProjetRecherche.PROJET_FORMATION_COMPLEMENTAIRE,
             uuids=context.proposition.projet_formation_complementaire,
+            candidate_language=context.identification.langue_contact,
         ),
         Attachment(
             identifier=DocumentsProjetRecherche.GRAPHE_GANTT,
             uuids=context.proposition.graphe_gantt,
+            candidate_language=context.identification.langue_contact,
         ),
         Attachment(
             identifier=DocumentsProjetRecherche.LETTRES_RECOMMANDATION,
             uuids=context.proposition.lettres_recommandation,
+            candidate_language=context.identification.langue_contact,
         ),
     ]
 
@@ -569,14 +615,17 @@ def get_cotutelle_attachments(context: ResumePropositionDTO) -> List[Attachment]
                 identifier=DocumentsCotutelle.DEMANDE_OUVERTURE,
                 uuids=context.groupe_supervision.cotutelle.demande_ouverture,
                 required=True,
+                candidate_language=context.identification.langue_contact,
             ),
             Attachment(
                 identifier=DocumentsCotutelle.CONVENTION,
                 uuids=context.groupe_supervision.cotutelle.convention,
+                candidate_language=context.identification.langue_contact,
             ),
             Attachment(
                 identifier=DocumentsCotutelle.AUTRES_DOCUMENTS,
                 uuids=context.groupe_supervision.cotutelle.autres_documents,
+                candidate_language=context.identification.langue_contact,
             ),
         ]
     return attachments
@@ -594,6 +643,7 @@ def get_supervision_group_attachments(context: ResumePropositionDTO) -> List[Att
                     sub_identifier=supervision_member.promoteur.uuid,
                     sub_identifier_label=f'{supervision_member.promoteur.prenom} {supervision_member.promoteur.nom}',
                     uuids=supervision_member.pdf,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
     for supervision_member in context.groupe_supervision.signatures_membres_CA:
@@ -604,6 +654,7 @@ def get_supervision_group_attachments(context: ResumePropositionDTO) -> List[Att
                     sub_identifier=supervision_member.membre_CA.uuid,
                     sub_identifier_label=f'{supervision_member.membre_CA.prenom} {supervision_member.membre_CA.nom}',
                     uuids=supervision_member.pdf,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
     return attachments
@@ -618,6 +669,7 @@ def get_dynamic_questions_attachments(specific_questions: List[QuestionSpecifiqu
             label=question.label,
             uuids=question.valeur or [],
             required=question.requis,
+            candidate_language_label=question.label_langue_candidat,
         )
         for question in specific_questions
         if question.type == TypeItemFormulaire.DOCUMENT.name

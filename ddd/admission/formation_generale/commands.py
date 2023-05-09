@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import Dict, List, Optional
 
 import attr
@@ -221,3 +222,22 @@ class RecupererQuestionsSpecifiquesQuery(RecupererQuestionsSpecifiquesQuery):
 @attr.dataclass(frozen=True, slots=True)
 class DeterminerEmplacementsDocumentsDemandeCommand(interface.CommandRequest):
     uuid_demande: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ReclamerDocumentsAuCandidatParSICCommand(interface.QueryRequest):
+    uuid_demande: str
+    identifiants_documents: List[str]
+    auteur: str
+    a_echeance_le: datetime.date
+    objet_message: str
+    corps_message: str
+
+@attr.dataclass(frozen=True, slots=True)
+class ReclamerDocumentsAuCandidatParFACCommand(interface.QueryRequest):
+    uuid_demande: str
+    identifiants_documents: List[str]
+    auteur: str
+    a_echeance_le: datetime.date
+    objet_message: str
+    corps_message: str

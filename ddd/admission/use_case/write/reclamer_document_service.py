@@ -43,7 +43,7 @@ def reclamer_document(
         type_document=cmd.type_document,
     )
 
-    document.definir_a_reclamer(raison=cmd.raison)
+    document.definir_a_reclamer(raison=cmd.raison, auteur=cmd.auteur)
 
     emplacement_document_repository.save_emplacement_document_candidat(entity=document)
 

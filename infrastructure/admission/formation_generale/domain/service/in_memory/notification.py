@@ -31,3 +31,7 @@ class NotificationInMemory(INotification):
     @classmethod
     def confirmer_soumission(cls, proposition: Proposition) -> None:
         pass
+
+    @classmethod
+    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> None:
+        pass

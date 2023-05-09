@@ -1,4 +1,5 @@
 {% extends base_template %}
+{% load bootstrap3 %}
 {% load static %}
 {% load enums i18n admission %}
 
@@ -75,6 +76,29 @@
         <div role="tabpanel" class="tab-pane" id="uclouvain">
           {% include 'admission/document/uclouvain_documents.html' %}
         </div>
+
+        <div class="text-right mt-1">
+          <button
+              class="btn btn-primary"
+              data-toggle="modal"
+              data-target="#request-all-form-modal"
+          >
+            <i class="fa-solid fa-envelope"></i>
+            {% translate 'Request the documents from the candidate' %}
+            <i class="fa-solid fa-paperclip"></i>
+          </button>
+        </div>
+        <div id="request-all-form-modal" class="modal fade" tabindex="-1" role="dialog">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">{% translate 'Request the documents from the candidate' %}</h4>
+              </div>
+              {% include 'admission/document/request_all_documents.html' %}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -93,11 +117,23 @@
       display: flex;
     }
 
+    .reset-button {
+      float: right;
+      margin-top: -7px;
+    }
+
+    .modal-footer {
+      position: sticky;
+      bottom: 0;
+      background: white;
+    }
+
     {# Document lists #}
     #document-lists {
       padding-right: 1em;
       width: 70%;
       max-width: calc(100% - 5px);
+      min-width: min-content;
     }
 
     #document-tabs {
@@ -133,6 +169,24 @@
       padding-right: 1em;
       width: 30%;
       flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #document-details #document-details-viewer {
+      flex: 1;
+    }
+
+    #document-details .osis-document-editor {
+      height: 100%;
+    }
+
+    #document-details #document-details-viewer img {
+      max-width: 100%;
+    }
+
+    #document-details .osis-document-editor .editor-container {
+      height: 100%;
     }
 
   </style>
@@ -140,27 +194,28 @@
 
 {% block script %}
   {{ block.super }}
-
   <script src="{% static 'js/dependsOn.min.js' %}"></script>
+  <script src="{% static 'admission/ckeditor.js' %}"></script>
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
-
   <script>
-    $(document).ready(function () {
-      {# Make the div resizable #}
-      $("#document-lists").resizable({
-        containment: "#document-container",
-        handles: "e",
-      })
+      $(document).ready(function () {
+          moment.locale("{% if candidate_language == 'fr-be' %}fr{% else %}en{% endif %}");
 
-      {# Select a document #}
-      $("#document-lists tbody.selectable tr:not(.tab-name)").on('click', function(){
-        if(!$(this).hasClass('selected')) {
-          {# Select a row #}
-          $(this).siblings('.selected').removeClass('selected');
-          $(this).addClass('selected');
-        }
-      })
-    });
+          {# Make the div resizable #}
+          $("#document-lists").resizable({
+              containment: "#document-container",
+              handles: "e",
+          })
+
+          {# Select a document #}
+          $("#document-lists tbody.selectable tr:not(.tab-name)").on('click', function(){
+              if(!$(this).hasClass('selected')) {
+                  {# Select a row #}
+                  $(this).siblings('.selected').removeClass('selected');
+                  $(this).addClass('selected');
+              }
+          })
+      });
   </script>
 
 {% endblock %}

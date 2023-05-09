@@ -34,3 +34,8 @@ class INotification(interface.DomainService):
     @abstractmethod
     def confirmer_soumission(cls, proposition: Proposition) -> None:
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> None:
+        raise NotImplementedError

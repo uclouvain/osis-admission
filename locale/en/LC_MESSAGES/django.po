@@ -287,6 +287,12 @@ msgstr ""
 msgid "Acronym / Title"
 msgstr ""
 
+msgid "Acronym of the management entity"
+msgstr ""
+
+msgid "Acronym of the training"
+msgstr ""
+
 msgid "Actions"
 msgstr ""
 
@@ -1417,6 +1423,9 @@ msgstr ""
 msgid "Date the application is sent to the supervision group"
 msgstr ""
 
+msgid "Deadline"
+msgstr ""
+
 msgid "Deadline extended"
 msgstr ""
 
@@ -1424,6 +1433,9 @@ msgid "Deadline for confirmation"
 msgstr ""
 
 msgid "Deadline for confirmation:"
+msgstr ""
+
+msgid "Deadline for the candidate to upload documents"
 msgstr ""
 
 msgid "Deadline of the confirmation paper (DD/MM/YYYY)"
@@ -1567,6 +1579,9 @@ msgid "Document to be requested"
 msgstr ""
 
 msgid "Documents"
+msgstr ""
+
+msgid "Documents to be requested now"
 msgstr ""
 
 msgid "Done in"
@@ -2307,6 +2322,9 @@ msgstr ""
 msgid "Internship framework agreement"
 msgstr ""
 
+msgid "Invalid date"
+msgstr ""
+
 #, python-format
 msgid "Invalid property: %(config_params)s"
 msgid_plural "Invalid properties: %(config_params)s"
@@ -2436,6 +2454,9 @@ msgstr ""
 msgid "List a missing document"
 msgstr ""
 
+msgid "List of the requested documents with the reason"
+msgstr ""
+
 msgid "List of the values that the Selection elements can take (one per row)."
 msgstr ""
 
@@ -2543,6 +2564,31 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to confirm that his application has been taken "
 "into account by UCLouvain"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some FAC documents are missing "
+"or invalid in his application for doctorate education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some FAC documents are missing "
+"or invalid in his application for general education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some SIC documents are missing "
+"or invalid in his application for continuing education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some SIC documents are missing "
+"or invalid in his application for doctorate education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some SIC documents are missing "
+"or invalid in his application for general education"
 msgstr ""
 
 msgid ""
@@ -2683,6 +2729,9 @@ msgstr ""
 msgid "Message for the candidate"
 msgstr ""
 
+msgid "Message object"
+msgstr ""
+
 msgid "Message sent successfully"
 msgstr ""
 
@@ -2780,6 +2829,9 @@ msgid "Name of the activity"
 msgstr ""
 
 msgid "Name of the event"
+msgstr ""
+
+msgid "Name of the management entity"
 msgstr ""
 
 msgid "Name of the manifestation"
@@ -3409,6 +3461,9 @@ msgstr ""
 msgid "Reference DIAL.Pr"
 msgstr "Référence DIAL.Pr"
 
+msgid "Reference of the admission"
+msgstr ""
+
 msgid "Reference promoter"
 msgstr ""
 
@@ -3468,6 +3523,9 @@ msgid "Reporting categories"
 msgstr ""
 
 msgid "Request of a new deadline for the confirmation paper"
+msgstr ""
+
+msgid "Request the documents from the candidate"
 msgstr ""
 
 msgid "Requested"
@@ -3733,6 +3791,9 @@ msgstr ""
 msgid "Selection type"
 msgstr ""
 
+msgid "Send"
+msgstr ""
+
 msgid "Send a mail"
 msgstr ""
 
@@ -3963,6 +4024,9 @@ msgid ""
 "in Belgium are considered as both French and English studies."
 msgstr ""
 
+msgid "Teaching campus of the training"
+msgstr ""
+
 msgid "Text"
 msgstr ""
 
@@ -4083,6 +4147,9 @@ msgid "The document has been designated as to be requested"
 msgstr ""
 
 msgid "The document is no longer designated as to be requested"
+msgstr ""
+
+msgid "The documents have been requested to the candidate"
 msgstr ""
 
 msgid "The dossier has been confirmed as:"
@@ -4618,6 +4685,9 @@ msgid "Year"
 msgstr ""
 
 msgid "Year of graduation from secondary school"
+msgstr ""
+
+msgid "Year of the training"
 msgstr ""
 
 msgid "Year without registration for the training."

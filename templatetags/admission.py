@@ -33,6 +33,7 @@ from typing import Union, Optional, List
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
+from django.template.defaultfilters import date
 from django.urls import NoReverseMatch, reverse
 from django.utils.dateparse import parse_datetime
 from django.utils.safestring import SafeString
@@ -534,18 +535,19 @@ def document_component(value):
     token = get_remote_token(value)
     metadata = get_remote_metadata(token)
 
-    if metadata and metadata.get('mimetype') == PDF_MIME_TYPE:
-        return {
-            'template': 'osis_document/editor.html',
-            'value': token,
-            'base_url': settings.OSIS_DOCUMENT_BASE_URL,
-        }
-    else:
-        return {
-            'template': 'osis_document/visualizer.html',
-            'values': [token],
-            'base_url': settings.OSIS_DOCUMENT_BASE_URL,
-        }
+    if metadata:
+        if metadata.get('mimetype') == PDF_MIME_TYPE:
+            return {
+                'template': 'osis_document/editor.html',
+                'value': token,
+                'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+            }
+        elif metadata.get('mimetype') in IMAGE_MIME_TYPES:
+            return {
+                'template': 'admission/image.html',
+                'url': metadata.get('url'),
+                'alt': metadata.get('name'),
+            }
 
 
 @register.filter

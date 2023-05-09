@@ -1,0 +1,148 @@
+# ##############################################################################
+#
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
+#
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
+#
+# ##############################################################################
+from django.utils.translation import gettext_lazy as _
+
+from osis_mail_template import Token, templates
+from .tokens import CONTINUING_ADMISSION_TAG, DOCTORATE_ADMISSION_TAG, GENERAL_ADMISSION_TAG, admission_common_tokens
+
+__all__ = [
+    'ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL',
+    'ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_GENERAL',
+    'ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE',
+    'ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE',
+    'ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING',
+    'ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING',
+]
+
+
+DOCUMENT_TOKENS = admission_common_tokens + [
+    Token(
+        name='training_acronym',
+        description=_('Acronym of the training'),
+        example='ESP3DP',
+    ),
+    Token(
+        name='training_campus',
+        description=_('Teaching campus of the training'),
+        example='Louvain-La-Neuve',
+    ),
+    Token(
+        name='training_year',
+        description=_('Year of the training'),
+        example='2023-2024',
+    ),
+    Token(
+        name='request_deadline',
+        description=_('Deadline for the candidate to upload documents'),
+        example='10th February 2023',
+    ),
+    Token(
+        name='requested_documents',
+        description=_('List of the requested documents with the reason'),
+        example='Identity card. The format is unknown.',
+    ),
+    Token(
+        name='admission_reference',
+        description=_('Reference of the admission'),
+        example='L-ESPO24-100.102',
+    ),
+    Token(
+        name='management_entity_name',
+        description=_('Name of the management entity'),
+        example='Faculté des sciences économiques, sociales, politiques et de communication',
+    ),
+    Token(
+        name='management_entity_acronym',
+        description=_('Acronym of the management entity'),
+        example='ESPO',
+    ),
+]
+
+ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL = 'osis-admission-request-sic-documents-general'
+templates.register(
+    ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL,
+    description=_(
+        'Mail sent to the candidate to inform him that some SIC documents are missing or invalid '
+        'in his application for general education'
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=DOCUMENT_TOKENS,
+)
+
+ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_GENERAL = 'osis-admission-request-fac-documents-general'
+templates.register(
+    ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_GENERAL,
+    description=_(
+        'Mail sent to the candidate to inform him that some FAC documents are missing or invalid '
+        'in his application for general education'
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=DOCUMENT_TOKENS,
+)
+
+ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE = 'osis-admission-request-sic-documents-doctorate'
+templates.register(
+    ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE,
+    description=_(
+        'Mail sent to the candidate to inform him that some SIC documents are missing or invalid '
+        'in his application for doctorate education'
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=DOCUMENT_TOKENS,
+)
+
+ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE = 'osis-admission-request-fac-documents-doctorate'
+templates.register(
+    ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE,
+    description=_(
+        'Mail sent to the candidate to inform him that some FAC documents are missing or invalid '
+        'in his application for doctorate education'
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
+    tokens=DOCUMENT_TOKENS,
+)
+
+ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING = 'osis-admission-request-sic-documents-continuing'
+templates.register(
+    ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING,
+    description=_(
+        'Mail sent to the candidate to inform him that some SIC documents are missing or invalid '
+        'in his application for continuing education'
+    ),
+    tag=CONTINUING_ADMISSION_TAG,
+    tokens=DOCUMENT_TOKENS,
+)
+
+ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING = 'osis-admission-request-fac-documents-continuing'
+templates.register(
+    ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING,
+    description=_(
+        'Mail sent to the candidate to inform him that some FAC documents are missing or invalid '
+        'in his application for general education'
+    ),
+    tag=CONTINUING_ADMISSION_TAG,
+    tokens=DOCUMENT_TOKENS,
+)

@@ -23,23 +23,41 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from abc import ABCMeta
 from typing import List
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.demande import DemandeIdentity
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.enums.emplacement_document import TypeDocument
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from osis_common.ddd import interface
 
 
 class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABCMeta):
     @classmethod
-    def get_document_admission(
+    def get_documents_reclamables_proposition(
         cls,
-        proposition_identity: DemandeIdentity,
-        entity_id: EmplacementDocumentIdentity,
-    ) -> EmplacementDocument:
+        proposition: Proposition,
+    ) -> List[EmplacementDocument]:
         raise NotImplementedError
+
+    @classmethod
+    def reclamer_documents_au_candidat(
+        cls,
+        identifiants_documents_reclames: List[str],
+        documents_reclamables: List[EmplacementDocument],
+        auteur: str,
+        a_echeance_le: datetime.date,
+    ):
+        heure = datetime.datetime.now()
+        for document in documents_reclamables:
+            if document.entity_id.identifiant in identifiants_documents_reclames:
+                document.reclamer_au_candidat(
+                    auteur=auteur,
+                    a_echeance_le=a_echeance_le,
+                    reclame_le=heure,
+                )
 
     @classmethod
     def save_emplacement_document_gestionnaire(cls, entity: EmplacementDocument) -> None:
