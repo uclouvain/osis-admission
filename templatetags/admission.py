@@ -173,7 +173,7 @@ def reduce_list_separated(arg1, arg2, separator=", "):
 
 
 @register_panel('panel.html', takes_context=True)
-def panel(context, title='', title_level=4, additional_class='', **kwargs):
+def panel(context, title='', title_level=4, additional_class='', edit_button='', **kwargs):
     """
     Template tag for panel
     :param title: the panel title
@@ -184,6 +184,8 @@ def panel(context, title='', title_level=4, additional_class='', **kwargs):
     context['title'] = title
     context['title_level'] = title_level
     context['additional_class'] = additional_class
+    if edit_button:
+        context['edit_button'] = edit_button
     context['attributes'] = {k.replace('_', '-'): v for k, v in kwargs.items()}
     return context
 
@@ -309,6 +311,9 @@ TAB_TREES = {
     CONTEXT_GENERAL: {
         Tab('documents', _('Documents'), 'folder-open'): [
             Tab('documents', _('Documents'), 'folder-open'),
+        ],
+        Tab('checklist', _('Checklist'), 'list-check'): [
+            Tab('checklist', _('Checklist'), 'list-check'),
         ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
@@ -484,10 +489,14 @@ def field_data(
     inline=False,
     html_tag='',
 ):
-    for_pdf = context.get('for_pdf')
+    if context.get('all_inline') is True:
+        inline = True
 
     if isinstance(data, list):
-        if for_pdf:
+        if context.get('hide_files') is True:
+            data = None
+            hide_empty = True
+        elif context.get('load_files') is False:
             data = _('Specified') if data else _('Not specified')
         elif data:
             template_string = "{% load osis_document %}{% document_visualizer files %}"
@@ -500,7 +509,7 @@ def field_data(
     elif translate_data is True:
         data = _(data)
 
-    if inline is True or for_pdf:
+    if inline is True:
         if name and name[-1] not in ':?!.':
             name = _("%(label)s:") % {'label': name}
         css_class = (css_class + ' inline-field-data') if css_class else 'inline-field-data'
@@ -725,7 +734,8 @@ def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], ti
     return {
         'fields': configurations,
         'title': title,
-        'for_pdf': context.get('for_pdf'),
+        'all_inline': context.get('all_inline'),
+        'load_files': context.get('load_files'),
     }
 
 
@@ -757,6 +767,12 @@ def get_item_or_none(dictionary, value):
 def get_item_or_default(dictionary, value, default=None):
     """Returns the value of a key in a dictionary if it exists else the default value itself"""
     return dictionary.get(value, default)
+
+
+@register.filter
+def part_of_dict(member, container):
+    """Check if a dict is containing into another one"""
+    return member.items() <= container.items()
 
 
 @register.simple_tag
@@ -798,3 +814,14 @@ def get_country_name(country: Optional[Country]):
     if not country:
         return ''
     return getattr(country, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
+
+
+@register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
+def checklist_state_button(context, **kwargs):
+    expected_attrs = {arg_name: kwargs.pop(arg_name, None) for arg_name in ['label', 'icon', 'state', 'class']}
+    return {'current': context['current'] or context['initial'], **expected_attrs, 'extra': kwargs}
+
+
+@register.filter
+def edit_button(string, url):
+    return str(string) + f'<a class="btn btn-default" href="{url}"><i class="fas fa-edit"></i></a>'

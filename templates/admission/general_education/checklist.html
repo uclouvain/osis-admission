@@ -1,0 +1,590 @@
+{% extends base_template %}
+{% load i18n static admission bootstrap3 enums osis_document %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block actions %}{% endblock %}
+
+{% block tab_content %}
+  <div id="three-pane-checklist">
+    <div id="shortcuts" class="btn-group" data-toggle="buttons">
+      <label class="btn btn-default active">
+        <input id="documents-shortcut" type="radio" name="shortcut" autocomplete="off" checked>
+        <i class="fa fa-folder-open"></i>
+      </label>
+      <label class="btn btn-default">
+        <input id="infos-shortcut" type="radio" name="shortcut" autocomplete="off">
+        <i class="fa fa-circle-info"></i>
+      </label>
+    </div>
+
+    {% include "admission/general_education/checklist_menu.html" %}
+    {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
+    {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
+    {% url base_namespace|add:":update:accounting" view.kwargs.uuid as accounting_url %}
+
+    <div id="tabs-content" class="tab-content">
+      {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation %}
+        <div role="tabpanel" class="tab-pane in active" id="assimilation">
+          <div class="form-group btn-group status-group" role="group">
+            {% translate initial.libelle as initial_state_label %}
+            {% checklist_state_button label=initial_state_label icon='user' state=initial.statut class='muted' %}
+            {% checklist_state_button label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}
+            {% checklist_state_button label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
+            {% checklist_state_button label=_("To be completed for application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}
+            {% checklist_state_button label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
+          </div>
+
+          {% bootstrap_form comment_forms.assimilation %}
+          <form>
+            {% bootstrap_form assimilation_form %}
+          </form>
+
+          <div class="info-part">
+            {% firstof person_url|add:'?next=assimilation' as contextual_person_url %}
+            {% display _("Citizenship") ''|edit_button:contextual_person_url as button %}
+            {% field_data button resume_proposition.identification.nom_pays_nationalite %}
+
+            {% panel _("Assimilation") edit_button=person_url|add:'?next=assimilation' %}
+              {% field_data "" resume_proposition.comptabilite.type_situation_assimilation|enum_display:'TypeSituationAssimilation' %}
+            {% endpanel %}
+          </div>
+        </div>
+      {% endwith %}
+
+      {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles %}
+        <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
+          <div class="form-group btn-group status-group" role="group">
+            {% translate initial.libelle as initial_state_label %}
+            {% checklist_state_button label=initial_state_label icon='user' state=initial.statut class='muted' %}
+            {% checklist_state_button label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud=0 %}
+            {% checklist_state_button label=_("Fraudster") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud=1 %}
+            {% checklist_state_button label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
+          </div>
+
+          {% bootstrap_form comment_forms.donnees_personnelles %}
+
+          <div class="info-part">
+            {% include 'admission/exports/recap/includes/person.html' with identification=resume_proposition.identification edit_button=person_url|add:'?next=donnees_personnelles' %}
+            {% include 'admission/exports/recap/includes/coordonnees.html' with coordonnees=resume_proposition.coordonnees edit_button=coordonnees_url|add:'?next=donnees_personnelles' %}
+          </div>
+        </div>
+      {% endwith %}
+
+      {% with initial=original_admission.checklist.initial.financabilite current=original_admission.checklist.current.financabilite %}
+        <div role="tabpanel" class="tab-pane" id="financabilite">
+          <p>{% trans "This page is currently under construction." %}</p>
+          <div class="info-part">
+          </div>
+        </div>
+      {% endwith %}
+      {% with initial=original_admission.checklist.initial.frais_dossier current=original_admission.checklist.current.frais_dossier %}
+        <div role="tabpanel" class="tab-pane" id="frais_dossier">
+          <p>{% trans "This page is currently under construction." %}</p>
+          <div class="info-part">
+          </div>
+        </div>
+      {% endwith %}
+      {% with initial=original_admission.checklist.initial.choix_formation current=original_admission.checklist.current.choix_formation %}
+        <div role="tabpanel" class="tab-pane" id="choix_formation">
+          <p>{% trans "This page is currently under construction." %}</p>
+          <div class="info-part">
+          </div>
+        </div>
+      {% endwith %}
+      {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur %}
+        <div role="tabpanel" class="tab-pane" id="parcours_anterieur">
+          <p>{% trans "This page is currently under construction." %}</p>
+          <div class="info-part">
+          </div>
+        </div>
+      {% endwith %}
+      {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation %}
+        <div role="tabpanel" class="tab-pane" id="specificites_formation">
+          <p>{% trans "This page is currently under construction." %}</p>
+          <div class="info-part">
+          </div>
+        </div>
+      {% endwith %}
+    </div>
+
+
+    <div id="info-viewer-tab" class="viewer-tab">
+      <div class="split-tab-slider"></div>
+      <div class="info-content"></div>
+    </div>
+
+
+    <div id="document-viewer-tab" class="viewer-tab">
+      <div class="split-tab-slider"></div>
+      <div id="document-content">
+        {% for tab, documents in documents.items %}
+          <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
+            <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
+            <select
+                id="{{ tab }}-documents-select"
+                class="form-control"
+                hx-target="#document-details"
+                hx-swap="outerHTML"
+            >
+              <option disabled selected value>{% translate 'Select a document' %}</option>
+              {% for document in documents %}
+                <option
+                    hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
+                    value="{{ document.identifier }}"
+                >
+                  {{ document.libelle }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endfor %}
+        {% include 'admission/document/document_detail.html' %}
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  {{ assimilation_form.media.js }}
+  <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
+  <script>
+      (function ($) {
+          function refreshDocuments() {
+              const documentsSelectorToDisplay = `${window.location.hash || '#assimilation'}-documents`;
+              $('.documents-tab').addClass('hidden').filter(documentsSelectorToDisplay).removeClass('hidden');
+          }
+
+          // Activate tab from hash on first load
+          if (window.location.hash) {
+              $('#checklist-menu li[data-toggle="tab"][href="' + window.location.hash + '"]').click();
+          }
+
+          refreshDocuments();
+
+          // Save state button status
+          $('.status-group .btn-group button').on('click', function () {
+              if (!$(this).is('.active')) {
+                  const $btn = $(this);
+                  const iconClasses = $btn.find('i')[0].className;
+                  $btn.find('i')[0].className = 'fas fa-spinner fa-spin-pulse';
+                  $btn.parents('.btn-group').find('button').removeClass([
+                      'active',
+                      'btn-muted',
+                      'btn-info',
+                      'btn-warning',
+                      'btn-danger',
+                      'btn-success',
+                  ].join(' ')).addClass('btn-default');
+                  $.post('./change-checklist-status', {
+                      tab_name: $btn.parents('.tab-pane').attr('id'),
+                      status: $btn.data('status'),
+                      extra: JSON.stringify($btn.data('extra')),
+                  }, function () {
+                      $btn.find('i')[0].className = iconClasses;
+                      $btn.addClass(['active', $btn.data('class')].join(' ')).removeClass('btn-default');
+                      const currentTabHref = $('#checklist-menu').find('.active').attr('href');
+                      htmx.ajax('GET', './checklist', '#checklist-menu').then(() => {
+                          $('#checklist-menu').find('li').removeClass('active').filter('[href="' + currentTabHref + '"]').addClass('active');
+                      });
+                  }, 'json');
+              }
+          });
+
+          /**
+           * Save comment value
+           */
+          const intervals = {};
+
+          function saveComment (elem) {
+              const $formGroup = $(elem);
+              const $textarea = $(elem).find('textarea');
+              $formGroup.addClass('saving fa-spinner');
+              $textarea.attr('readonly', 'readonly');
+              $.post('./save-comment', {
+                  tab_name: $formGroup.parents('.tab-pane').attr('id'),
+                  comment: $textarea.val(),
+              }, function () {
+                  $formGroup.removeClass('saving fa-spinner');
+                  $textarea.attr('readonly', null);
+                  delete intervals[$textarea[0].name];
+              }, 'json');
+          }
+
+          function autogrow () {
+              if (this.scrollHeight > this.clientHeight) {
+                  this.style.height = `${this.scrollHeight}px`;
+              }
+          }
+
+          $('textarea[name$="-comment"]').on('input', function () {
+              autogrow.call(this);
+              if (intervals[this.name]) {
+                  clearTimeout(intervals[this.name]);
+              }
+              intervals[this.name] = setTimeout(saveComment, 1000, this.parentNode);
+          });
+
+          $('#checklist-menu li[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+              const tabPaneId = $(this).attr('href');
+              window.location.hash = tabPaneId;
+
+              // refresh comment height
+              autogrow.call($(tabPaneId).find('textarea[name$="-comment"]')[0]);
+
+              refreshDocuments();
+
+              // refresh info viewer (e.target = active && e.relatedTarget = previous)
+              if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+                  // move old info to old tab
+                  const oldTabPaneId = $(e.relatedTarget).parent().attr('href');
+                  const $info = $('#info-viewer-tab .info-content');
+                  $(oldTabPaneId).find(' .info-part').html($info.html());
+                  $info.html($(tabPaneId).find('.info-part').html());
+                  $(tabPaneId).find('.info-part').html('');
+              }
+          });
+
+          // TODO find a way to genericly save extra and status
+          /**
+           * Save date value
+           */
+          let interval = null;
+
+          function saveDate (elem) {
+              const $formGroup = $(elem);
+              const $input = $(elem).find('textarea, input');
+              const data = {};
+              $($input.parents('form').serializeArray()).each(function (index, obj) {
+                  data[obj.name] = obj.value;
+              });
+
+              $formGroup.addClass('saving fa-spinner');
+              $input.attr('readonly', 'readonly');
+              $.post('./change-checklist-extra', {
+                  tab_name: $formGroup.parents('.tab-pane').attr('id'),
+                  extra: JSON.stringify(data),
+              }, function () {
+                  $formGroup.removeClass('saving fa-spinner');
+                  $input.attr('readonly', null);
+                  delete intervals[$input[0].name];
+              }, 'json');
+          }
+
+          $('#id_date_debut').on('change', function () {
+              if (interval) {
+                  clearTimeout(interval);
+              }
+              interval = setTimeout(saveDate, 1000, this.parentNode);
+          });
+
+          let configurationCache = null;
+
+          const sidebars = $('#document-viewer-tab, #info-viewer-tab');
+
+          $(document).ready(function () {
+              configurationCache = new BaseCache('admission_checklist_configuration');
+              sidebars.css('min-width', configurationCache.getItem('split_size', '20%'));
+
+              if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+                  $('#infos-shortcut').click();
+              } else {
+                  $('#info-viewer-tab').hide();
+              }
+
+              $('textarea[name$="-comment"]:visible').each(autogrow);
+          });
+
+          let bound = false;
+          $('.split-tab-slider').mousedown(function (e) {
+              bound = true;
+              e.preventDefault();
+              const initialWidth = sidebars.outerWidth();
+              const initialX = e.pageX;
+              $(document).mousemove(function (e) {
+                  e.preventDefault();
+                  sidebars.css('min-width', initialWidth + (initialX - e.pageX));
+              });
+          });
+          $(document).mouseup(function () {
+              if (bound) {
+                  $(document).off('mousemove');
+                  $('.osis-document-editor .editor-container').each(function () {
+                      configurationCache.setItem('split_size', sidebars.css('min-width'));
+                      this.dispatchEvent(new CustomEvent('setScale', { detail: 'auto' }));
+                  });
+              }
+          });
+
+          // Shortcuts
+
+          const $info = $('#info-viewer-tab .info-content');
+          $('#infos-shortcut').change(function () {
+              // move the current tab's info-part to the side
+              configurationCache.setItem('side-tab', 'info');
+              const $tabInfo = $('#tabs-content .tab-pane.active .info-part');
+              $info.html($tabInfo.html());
+              $('#info-viewer-tab').show();
+              $tabInfo.empty();
+              $('#document-viewer-tab').hide();
+          });
+          $('#documents-shortcut').change(function () {
+              // move back the current tab's info-part
+              configurationCache.setItem('side-tab', 'documents');
+              $('#tabs-content .tab-pane.active .info-part').html($info.html());
+              $('#info-viewer-tab').hide();
+              $info.empty();
+              $('#document-viewer-tab').show();
+              $('.osis-document-editor .editor-container').each(function () {
+                  this.dispatchEvent(new CustomEvent('setScale', { detail: 'auto' }));
+              });
+          });
+
+          {# Manage HTMX requests #}
+
+          {# When a form is submitted #}
+          const base_details_url = "{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='custom_identifier' %}";
+          $('#document-content').on('formValidation', function(event) {
+
+              if (event.originalEvent.detail.is_valid) {
+                  $('#document-content .modal').modal('hide');
+                  $('#document-content .collapse').collapse('hide');
+
+                  {# Load the details of a documents if the form has an impact on it #}
+                  if (event.originalEvent.detail.refresh_details) {
+                      htmx.ajax(
+                          'GET',
+                          base_details_url.replace('custom_identifier', event.originalEvent.detail.refresh_details),
+                          {
+                              target: '#document-details',
+                              swap: 'outerHTML',
+                          }
+                      )
+                  }
+              }
+          })
+
+          const htmxErrorsMessages = $('#pnl_error_messages');
+          const errorsByStatus = {
+              404: "{% translate 'The element has not been found.' %}",
+          };
+
+          {# When an error is encountered #}
+          $('#document-content').on('htmx:responseError', function(event) {
+              $('#document-content .modal').modal('hide');
+              $('#document-content .collapse').collapse('hide');
+              htmxErrorsMessages.text(
+                  errorsByStatus[event.originalEvent.detail.xhr.status] ||
+                  "{% translate 'Some errors have been encountered.' %}"
+              );
+              htmxErrorsMessages.removeClass('hidden');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+
+          $('#document-content').on('htmx:beforeSend', function(event) {
+              htmxErrorsMessages.addClass('hidden');
+              htmxErrorsMessages.text('');
+          });
+
+      })(jQuery);
+  </script>
+{% endblock script %}
+
+
+{% block style %}
+  {{ block.super }}
+  <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
+  <style>
+    #three-pane-checklist {
+      display: flex;
+      position: relative;
+    }
+
+    #tabs-content, #info-viewer-tab, #document-viewer-tab {
+      height: max(60vh, 100px);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+
+    #shortcuts {
+      position: absolute;
+      top: -60px;
+      right: 0;
+    }
+
+    #checklist-menu {
+      min-width: 200px;
+    }
+
+    #checklist-menu li {
+      cursor: pointer;
+    }
+    #checklist-menu li a {
+      color: inherit;
+    }
+    #checklist-menu li a:hover {
+      text-decoration: none;
+    }
+
+    #checklist-menu li.active {
+      cursor: pointer;
+      background: inherit;
+      color: inherit;
+      font-weight: bold;
+    }
+
+    .viewer-tab {
+      position: relative;
+      padding: 0 15px;
+      flex: 0;
+      min-width: 50%;
+    }
+
+    .split-tab-slider {
+      border: solid 1px #ddd;
+      border-top: none;
+      border-bottom: none;
+      width: 3px;
+      left: -1px;
+      height: 100%;
+      cursor: col-resize;
+      position: absolute;
+    }
+
+    dl dt a.btn, .panel-heading .btn {
+      padding: 2px 5px 2px 7px;
+      vertical-align: bottom;
+    }
+
+    dl dt a.btn {
+      margin-left: 0.5em;
+    }
+
+    .panel-heading .btn {
+      margin-right: -0.5em;
+      margin-top: -0.5em;
+    }
+
+    #tabs-content {
+      padding: 0 15px;
+      flex: 1;
+      overflow: auto;
+    }
+
+    #tabs-content textarea {
+      overflow: hidden;
+    }
+
+    #tabs-content .saving {
+      position: relative;
+    }
+
+    #tabs-content .saving::after {
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(238, 238, 238, .5);
+      content: "";
+      top: 0;
+    }
+
+    #tabs-content .saving::before {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      font-size: 2em;
+      margin-top: -1em;
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      -webkit-animation-name: fa-spin;
+      animation-name: fa-spin;
+      -webkit-animation-direction: normal;
+      animation-direction: normal;
+      -webkit-animation-duration: 1s;
+      animation-duration: 1s;
+      -webkit-animation-iteration-count: infinite;
+      animation-iteration-count: infinite;
+      -webkit-animation-timing-function: steps(8);
+      animation-timing-function: steps(8);
+    }
+
+    {# Document details #}
+    #document-viewer-tab {
+      display: flex;
+    }
+
+    #document-content {
+      display: flex;
+      flex-direction: column;
+      min-height: max(60vh, 250px);
+      width: 100%;
+    }
+
+    #document-details {
+      margin-top: 1em;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    #document-details #empty-document-details {
+      text-align: center;
+      margin: auto;
+    }
+
+    #empty-document-details #empty-document-icon {
+      display: block;
+      margin-top: 1em;
+      font-size: 3em;
+    }
+
+    #document-details .osis-document-editor {
+      height: 100%;
+      flex: 1;
+    }
+
+    #document-details img {
+      max-width: min(100%, min-content);
+      height: auto;
+    }
+
+    #document-details .osis-document-editor .editor-container {
+      height: 100%;
+      width: 100%;
+    }
+
+    #no-document-container {
+      border: 1px solid #ddd;
+      padding: 1em;
+      text-align: center;
+      color: #888;
+    }
+  </style>
+{% endblock style %}

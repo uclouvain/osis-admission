@@ -46,6 +46,7 @@ from admission.ddd.admission.enums import (
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import comptabilite_non_remplie, Comptabilite
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -92,6 +93,8 @@ class Proposition(interface.RootEntity):
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
     est_inscription_tardive: bool = False
+    checklist_initiale: Optional[StatutsChecklistGenerale] = None
+    checklist_actuelle: Optional[StatutsChecklistGenerale] = None
 
     profil_soumis_candidat: ProfilCandidat = None
 

@@ -405,6 +405,12 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         verbose_name=_('UCLouvain FAC free documents'),
     )
 
+    checklist = models.JSONField(
+        blank=True,
+        default=dict,
+        encoder=DjangoJSONEncoder,
+    )
+
     class Meta:
         constraints = [
             models.CheckConstraint(

@@ -325,3 +325,50 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
                     documents.append(document)
 
         return documents
+
+    @classmethod
+    def recuperer_emplacements_documents_non_libres_dto(
+        cls,
+        personne_connue_translator: IPersonneConnueUclTranslator,
+        resume_dto: ResumePropositionDTO,
+        questions_specifiques: List[QuestionSpecifiqueDTO],
+    ) -> List[EmplacementDocumentDTO]:
+        # Get the requested documents by tab
+        sections = get_sections(
+            context=resume_dto,
+            specific_questions=questions_specifiques,
+            with_free_requestable_documents=False,
+        )
+
+        # Get a read token and metadata of all documents
+        # Add all documents that are or were requested to the candidate
+        uuids_documents = [
+            file_uuid for section in sections for attachment in section.attachments for file_uuid in attachment.uuids
+        ]
+
+        metadonnees = cls.recuperer_metadonnees_par_uuid_document(uuids_documents)
+
+        # Get all information about the actors
+        acteurs = cls.recuperer_acteurs_dto_par_matricule(
+            personne_connue_translator=personne_connue_translator,
+            metadonnees=metadonnees,
+            documents_reclames=resume_dto.proposition.documents_demandes,
+        )
+
+        documents = []
+
+        # Add all documents that are or were requested to the candidate
+        for section in sections:
+            for fichier in section.attachments:
+                documents.append(
+                    cls.get_emplacement_document_reclamables(
+                        uuid_proposition=resume_dto.proposition.uuid,
+                        document=fichier,
+                        section=section,
+                        metadonnees=metadonnees,
+                        documents_demandes=resume_dto.proposition.documents_demandes,
+                        acteurs=acteurs,
+                    )
+                )
+
+        return documents

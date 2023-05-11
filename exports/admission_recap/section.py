@@ -116,7 +116,8 @@ class Section:
                     'is_general': context.est_proposition_generale,
                     'is_continuing': context.est_proposition_continue,
                     'is_doctorate': context.est_proposition_doctorale,
-                    'for_pdf': True,
+                    'all_inline': True,
+                    'load_files': False,
                     **(extra_context or {}),
                 },
             )

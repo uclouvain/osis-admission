@@ -295,3 +295,8 @@ class RemplacerEmplacementDocumentCommand(commands.RemplacerEmplacementDocumentC
 @attr.dataclass(frozen=True, slots=True)
 class RemplirEmplacementDocumentParGestionnaireCommand(commands.RemplirEmplacementDocumentParGestionnaireCommand):
     pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str

@@ -23,21 +23,27 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from django.views.generic import RedirectView
-
-__all__ = ['AdmissionRedirectView']
-__namespace__ = False
+from django import forms
+from django.utils.translation import gettext_lazy as _
 
 
-class AdmissionRedirectView(RedirectView):
-    urlpatterns = {
-        'doctorate': 'doctorate/<uuid:uuid>/',
-        'general-education': 'general-education/<uuid:uuid>/',
-        'continuing-education': 'continuing-education/<uuid:uuid>/',
-    }
+class CommentForm(forms.Form):
+    comment = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), label=_("Comment"))
 
-    @property
-    def pattern_name(self):
-        namespace = self.request.resolver_match.url_name
-        return f'admission:{namespace}:checklist'
+    def __init__(self, comment, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if comment:
+            self.fields['comment'].initial = comment.content
+            self.fields['comment'].label += _(" (last update by {author} on {date} at {time}):").format(
+                author=comment.author,
+                date=comment.modified_at.strftime("%d/%m/%Y"),
+                time=comment.modified_at.strftime("%H:%M"),
+            )
+
+
+class DateInput(forms.DateInput):
+    input_type = 'date'
+
+
+class AssimilationForm(forms.Form):
+    date_debut = forms.DateField(widget=DateInput(), label=_("Assimilation start date"))

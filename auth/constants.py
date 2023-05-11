@@ -54,6 +54,7 @@ READ_ACTIONS_BY_TAB = {
     'internal-note': 'admission.view_internalnote',
     'debug': 'admission.view_debug_info',
     'comments': 'admission.view_enrolment_application',
+    'checklist': 'admission.view_checklist',
     # Documents
     'documents': 'admission.view_documents_management',
 }

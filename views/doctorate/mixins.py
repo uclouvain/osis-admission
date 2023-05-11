@@ -28,7 +28,8 @@ from typing import Union
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
@@ -138,11 +139,34 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
             raise Http404(e.message)
 
+    def get_permission_object(self):
+        return self.admission
+
+    @property
+    def is_doctorate(self):
+        return self.current_context == CONTEXT_DOCTORATE
+
+    @property
+    def is_continuing(self):
+        return self.current_context == CONTEXT_CONTINUING
+
+    @property
+    def is_general(self):
+        return self.current_context == CONTEXT_GENERAL
+
+    @cached_property
+    def base_namespace(self):
+        return ':'.join(self.request.resolver_match.namespaces[:2])
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        pass
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
         context['base_namespace'] = self.base_namespace
         context['base_template'] = f'admission/{self.formatted_current_context}/tab_layout.html'
+        context['original_admission'] = self.admission
 
         if self.is_doctorate:
             try:
@@ -197,13 +221,15 @@ class AdmissionFormMixin(AdmissionViewMixin):
     def htmx_trigger_form(self, is_valid: bool):
         """Add a JS event to listen for when the form is submitted through HTMX."""
         self.custom_headers = {
-            'HX-Trigger': json.dumps({
-                "formValidation": {
-                    "is_valid": is_valid,
-                    "message": str(self.message_on_success if is_valid else self.message_on_failure),
-                    **self.htmx_trigger_form_extra,
+            'HX-Trigger': json.dumps(
+                {
+                    "formValidation": {
+                        "is_valid": is_valid,
+                        "message": str(self.message_on_success if is_valid else self.message_on_failure),
+                        **self.htmx_trigger_form_extra,
+                    }
                 }
-            })
+            )
         }
 
     def update_current_admission_on_form_valid(self, form, admission):
@@ -229,6 +255,11 @@ class AdmissionFormMixin(AdmissionViewMixin):
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=True)
             return self.render_to_response(self.get_context_data(form=form))
+
+        # If specified, return to the correct checklist tab
+        if 'next' in self.request.GET:
+            url = resolve_url(f'admission:{self.current_context}:checklist', uuid=self.admission_uuid)
+            return HttpResponseRedirect(f"{url}{'#' + self.request.GET['next']}")
 
         return super().form_valid(form)
 

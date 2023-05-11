@@ -23,19 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from enum import Enum
 from typing import List, Optional
 
+import attrs
 from django.conf import settings
-from django.db.models import Subquery, OuterRef
+from django.db.models import OuterRef, Subquery
 from django.utils.translation import get_language
-from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import (
-    GeneralEducationAdmissionProxy,
-    Scholarship,
-    Accounting,
-)
+from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
@@ -48,8 +45,14 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutChecklist,
+    StatutsChecklistGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -64,6 +67,7 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.person import Person
 from base.models.student import Student
 from osis_common.ddd.interface import ApplicationService
+from osis_history.models import HistoryEntry
 
 
 class PropositionRepository(GlobalPropositionRepository, IPropositionRepository):
@@ -98,6 +102,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             return cls._load(GeneralEducationAdmissionProxy.objects.get(uuid=entity_id.uuid))
         except GeneralEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
+
+    @classmethod
+    def _serialize(cls, inst, field, value):
+        if isinstance(value, StatutChecklist):
+            return attrs.asdict(value, value_serializer=cls._serialize)
+
+        if isinstance(value, Enum):
+            return value.name
+
+        return value
 
     @classmethod
     def save(cls, entity: 'Proposition') -> None:
@@ -155,6 +169,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'confirmation_elements': entity.elements_confirmation,
                 'late_enrollment': entity.est_inscription_tardive,
                 'submitted_profile': entity.profil_soumis_candidat.to_dict() if entity.profil_soumis_candidat else {},
+                'checklist': {
+                    'initial': entity.checklist_initiale
+                    and attrs.asdict(entity.checklist_initiale, value_serializer=cls._serialize)
+                    or {},
+                    'current': entity.checklist_actuelle
+                    and attrs.asdict(entity.checklist_actuelle, value_serializer=cls._serialize)
+                    or {},
+                },
             },
         )
 
@@ -248,6 +270,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def _load(cls, admission: 'GeneralEducationAdmission') -> 'Proposition':
+        checklist_initiale = admission.checklist.get('initial')
+        checklist_actuelle = admission.checklist.get('current')
         return Proposition(
             entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
             matricule_candidat=admission.candidate.global_id,
@@ -288,6 +312,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.submitted_profile
             else None,
             documents_demandes=admission.requested_documents,
+            checklist_initiale=checklist_initiale and StatutsChecklistGenerale(**checklist_initiale),
+            checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale(**checklist_actuelle),
         )
 
     @classmethod
