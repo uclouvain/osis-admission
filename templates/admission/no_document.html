@@ -1,6 +1,4 @@
-{% load osis_document %}
-{% load i18n admission bootstrap3 %}
-
+{% load i18n %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -24,40 +22,4 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-
-<div id="document-details">
-  {% if document_uuid %}
-    {# Viewer for received or internal documents #}
-    <div id="document-details-viewer">
-      {% document_component document_write_token document_metadata %}
-    </div>
-  {% else %}
-  {% endif %}
-
-  {# Actions #}
-  <div class="btn-group">
-    {% if document_uuid %}
-      {# Received or internal documents #}
-      <a
-          class="btn btn-default"
-          href="{{ document_metadata.url }}?dl=1"
-          target="_blank"
-          title="{% translate 'Download the file' %}"
-      >
-        <i class="fas fa-download"></i>
-      </a>
-
-    {% else %}
-      {# Missing documents #}
-
-    {% endif %}
-  </div>
-
-  {% if requestable_document %}
-    <div>
-      {% if document_uuid %}<hr>{% endif %}
-      {# Request #}
-      {% include 'admission/document/request_document.html' %}
-    </div>
-  {% endif %}
-</div>
+{% translate 'Non-retrievable document' %}

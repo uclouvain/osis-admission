@@ -222,7 +222,9 @@ class DocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, F
                 a_echeance_le=form.cleaned_data['deadline'],
                 objet_message=form.cleaned_data['message_object'],
                 corps_message=form.cleaned_data['message_content'],
-            ) if self.is_fac else ReclamerDocumentsAuCandidatParSICCommand(
+            )
+            if self.is_fac
+            else ReclamerDocumentsAuCandidatParSICCommand(
                 uuid_demande=self.admission_uuid,
                 identifiants_documents=form.cleaned_data['documents'],
                 auteur=self.request.user.username,
@@ -313,6 +315,9 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
     urlpatterns = {'detail': 'detail/<str:identifier>'}
 
     def get_context_data(self, **kwargs):
+        from osis_document.api.utils import get_remote_token
+        from osis_document.api.utils import get_remote_metadata
+
         context = TemplateView().get_context_data(**kwargs)
 
         document_identifier = self.kwargs.get('identifier')
@@ -324,6 +329,10 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
             context['document_uuid'] = document.get('uuids')
             context['document_type'] = document.get('type')
             context['requestable_document'] = document.get('requestable')
+            if document.get('uuids'):
+                context['document_uuid'] = document['uuids'][0]
+                context['document_write_token'] = get_remote_token(uuid=context['document_uuid'], write_token=True)
+                context['document_metadata'] = get_remote_metadata(context['document_write_token'])
 
         # Request form
         requested_document = self.admission.requested_documents.get(document_identifier)

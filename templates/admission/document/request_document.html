@@ -28,7 +28,6 @@
     method="post"
     hx-swap="outerHTML"
 >
-  <hr>
   {% csrf_token %}
   {% bootstrap_field request_form.is_requested %}
   {% if request_form.is_requested.value %}

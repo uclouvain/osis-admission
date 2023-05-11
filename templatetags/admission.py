@@ -528,26 +528,24 @@ def get_image_file_url(file_uuids):
 
 
 @register.inclusion_tag('admission/dummy.html')
-def document_component(value):
+def document_component(document_write_token, document_metadata):
     """Display the right editor component depending on the file type."""
-    from osis_document.api.utils import get_remote_token
-
-    token = get_remote_token(value)
-    metadata = get_remote_metadata(token)
-
-    if metadata:
-        if metadata.get('mimetype') == PDF_MIME_TYPE:
+    if document_metadata:
+        if document_metadata.get('mimetype') == PDF_MIME_TYPE:
             return {
                 'template': 'osis_document/editor.html',
-                'value': token,
+                'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
             }
-        elif metadata.get('mimetype') in IMAGE_MIME_TYPES:
+        elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
             return {
                 'template': 'admission/image.html',
-                'url': metadata.get('url'),
-                'alt': metadata.get('name'),
+                'url': document_metadata.get('url'),
+                'alt': document_metadata.get('name'),
             }
+    return {
+        'template': 'admission/no_document.html',
+    }
 
 
 @register.filter
