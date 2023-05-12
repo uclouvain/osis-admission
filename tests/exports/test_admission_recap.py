@@ -88,7 +88,6 @@ from admission.ddd.admission.enums import (
 )
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsIdentification,
-    DocumentsInterOnglets,
     DocumentsEtudesSecondaires,
     DocumentsCurriculum,
     DocumentsQuestionsSpecifiques,
@@ -97,6 +96,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsProjetRecherche,
     DocumentsCotutelle,
     DocumentsSupervision,
+    IdentifiantBaseEmplacementDocument,
 )
 from admission.ddd.admission.formation_continue.commands import RecupererQuestionsSpecifiquesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -350,7 +350,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.addCleanup(patcher.stop)
 
     def test_get_raw_with_pdf_attachment(self):
-        pdf_attachment = Attachment(label='PDF', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
+        pdf_attachment = Attachment(label='PDF', uuids=[''], identifier='CARTE_IDENTITE')
         pdf_attachment.get_raw(
             token='token',
             metadata={
@@ -362,7 +362,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.get_raw_content_mock.assert_called_once_with('token')
 
     def test_convert_and_get_raw_with_jpeg_attachment(self):
-        image_attachment = Attachment(label='JPEG', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
+        image_attachment = Attachment(label='JPEG', uuids=[''], identifier='CARTE_IDENTITE')
         image_attachment.get_raw(
             token='token',
             metadata={
@@ -375,7 +375,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.convert_img_mock.assert_called_once_with(self.get_raw_content_mock.return_value)
 
     def test_convert_and_get_raw_with_png_attachment(self):
-        image_attachment = Attachment(label='PNG', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
+        image_attachment = Attachment(label='PNG', uuids=[''], identifier='CARTE_IDENTITE')
         image_attachment.get_raw(
             token='token',
             metadata={
@@ -388,7 +388,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.convert_img_mock.assert_called_once_with(self.get_raw_content_mock.return_value)
 
     def test_get_default_content_if_mimetype_is_not_supported(self):
-        unknown_attachment = Attachment(label='Unknown', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
+        unknown_attachment = Attachment(label='Unknown', uuids=[''], identifier='CARTE_IDENTITE')
         raw = unknown_attachment.get_raw(
             token='token',
             metadata={
@@ -402,7 +402,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
     def test_get_default_content_if_no_retrieved_content(self):
         self.get_raw_content_mock.return_value = None
-        pdf_attachment = Attachment(label='PDF', uuids=[''], identifier=DocumentsIdentification.CARTE_IDENTITE)
+        pdf_attachment = Attachment(label='PDF', uuids=[''], identifier='CARTE_IDENTITE')
         raw = pdf_attachment.get_raw(
             token='token',
             metadata={
@@ -534,7 +534,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
         self.assertEqual(call_args_by_tab['project'].title, 'Projet de recherche doctoral')
         self.assertEqual(call_args_by_tab['cotutelle'].title, 'Cotutelle')
-        self.assertEqual(call_args_by_tab['supervision'].title, 'Groupe de supervision')
+        self.assertEqual(call_args_by_tab['supervision'].title, 'Supervision')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
 
     def test_async_generation_with_continuing_education(self):
@@ -1204,8 +1204,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 1)
 
-            self.assertEqual(attachments[0].identifier, DocumentsIdentification.PHOTO_IDENTITE.name)
-            self.assertEqual(attachments[0].label, DocumentsIdentification.PHOTO_IDENTITE.value)
+            self.assertEqual(attachments[0].identifier, 'PHOTO_IDENTITE')
+            self.assertEqual(attachments[0].label, DocumentsIdentification['PHOTO_IDENTITE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
             self.assertTrue(attachments[0].required)
 
@@ -1221,13 +1221,13 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsIdentification.PHOTO_IDENTITE.name)
-            self.assertEqual(attachments[0].label, DocumentsIdentification.PHOTO_IDENTITE.value)
+            self.assertEqual(attachments[0].identifier, 'PHOTO_IDENTITE')
+            self.assertEqual(attachments[0].label, DocumentsIdentification['PHOTO_IDENTITE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsIdentification.CARTE_IDENTITE.name)
-            self.assertEqual(attachments[1].label, DocumentsIdentification.CARTE_IDENTITE.value)
+            self.assertEqual(attachments[1].identifier, 'CARTE_IDENTITE')
+            self.assertEqual(attachments[1].label, DocumentsIdentification['CARTE_IDENTITE'])
             self.assertEqual(attachments[1].uuids, self.continuing_context.identification.carte_identite)
             self.assertTrue(attachments[1].required)
 
@@ -1243,13 +1243,13 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsIdentification.PHOTO_IDENTITE.name)
-            self.assertEqual(attachments[0].label, DocumentsIdentification.PHOTO_IDENTITE.value)
+            self.assertEqual(attachments[0].identifier, 'PHOTO_IDENTITE')
+            self.assertEqual(attachments[0].label, DocumentsIdentification['PHOTO_IDENTITE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsIdentification.CARTE_IDENTITE.name)
-            self.assertEqual(attachments[1].label, DocumentsIdentification.CARTE_IDENTITE.value)
+            self.assertEqual(attachments[1].identifier, 'CARTE_IDENTITE')
+            self.assertEqual(attachments[1].label, DocumentsIdentification['CARTE_IDENTITE'])
             self.assertEqual(attachments[1].uuids, self.continuing_context.identification.carte_identite)
             self.assertTrue(attachments[1].required)
 
@@ -1265,13 +1265,13 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsIdentification.PHOTO_IDENTITE.name)
-            self.assertEqual(attachments[0].label, DocumentsIdentification.PHOTO_IDENTITE.value)
+            self.assertEqual(attachments[0].identifier, 'PHOTO_IDENTITE')
+            self.assertEqual(attachments[0].label, DocumentsIdentification['PHOTO_IDENTITE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.identification.photo_identite)
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsIdentification.PASSEPORT.name)
-            self.assertEqual(attachments[1].label, DocumentsIdentification.PASSEPORT.value)
+            self.assertEqual(attachments[1].identifier, 'PASSEPORT')
+            self.assertEqual(attachments[1].label, DocumentsIdentification['PASSEPORT'])
             self.assertEqual(attachments[1].uuids, self.continuing_context.identification.passeport)
             self.assertTrue(attachments[1].required)
 
@@ -1288,7 +1288,8 @@ class SectionsAttachmentsTestCase(TestCase):
         self.assertEqual(len(attachments), 1)
 
         self.assertEqual(
-            attachments[0].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
+            attachments[0].identifier,
+            f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{document_question.uuid}',
         )
         self.assertEqual(attachments[0].label, document_question.label)
         self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
@@ -1310,8 +1311,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 1)
 
-            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_BELGE_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
@@ -1335,22 +1336,16 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_BELGE_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
             )
             self.assertFalse(attachments[0].required)
 
-            self.assertEqual(
-                attachments[1].identifier,
-                DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.name,
-            )
-            self.assertEqual(
-                attachments[1].label,
-                DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.value,
-            )
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_BELGE_CERTIFICAT_INSCRIPTION'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_belge.certificat_inscription,
@@ -1372,11 +1367,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 2)
 
-                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
-                self.assertEqual(
-                    attachments[1].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.name,
-                )
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
+                self.assertEqual(attachments[1].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
                 self.assertFalse(attachments[0].required)
                 self.assertFalse(attachments[1].required)
 
@@ -1394,11 +1386,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 2)
 
-                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
-                self.assertEqual(
-                    attachments[1].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.name,
-                )
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
+                self.assertEqual(attachments[1].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
                 self.assertTrue(attachments[0].required)
                 self.assertFalse(attachments[1].required)
 
@@ -1416,11 +1405,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 2)
 
-                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_BELGE_DIPLOME.name)
-                self.assertEqual(
-                    attachments[1].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION.name,
-                )
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
+                self.assertEqual(attachments[1].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
                 self.assertFalse(attachments[0].required)
                 self.assertTrue(attachments[1].required)
 
@@ -1440,13 +1426,10 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 1)
 
-            self.assertEqual(
-                attachments[0].identifier,
-                DocumentsEtudesSecondaires.ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE.name,
-            )
+            self.assertEqual(attachments[0].identifier, 'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE')
             self.assertEqual(
                 attachments[0].label,
-                DocumentsEtudesSecondaires.ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE.value,
+                DocumentsEtudesSecondaires['ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE'],
             )
             self.assertEqual(
                 attachments[0].uuids,
@@ -1468,7 +1451,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 self.assertEqual(len(attachments), 1)
                 self.assertEqual(
                     attachments[0].identifier,
-                    DocumentsEtudesSecondaires.ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE.name,
+                    'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE',
                 )
                 self.assertFalse(attachments[0].required)
 
@@ -1484,7 +1467,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 self.assertEqual(len(attachments), 1)
                 self.assertEqual(
                     attachments[0].identifier,
-                    DocumentsEtudesSecondaires.ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE.name,
+                    'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE',
                 )
                 self.assertTrue(attachments[0].required)
 
@@ -1504,16 +1487,16 @@ class SectionsAttachmentsTestCase(TestCase):
             attachments = section.attachments
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
@@ -1540,37 +1523,34 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 4)
 
-            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(
-                attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name
-            )
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
             )
             self.assertTrue(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[2].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[2].required)
 
+            self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES')
             self.assertEqual(
-                attachments[3].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.name
-            )
-            self.assertEqual(
-                attachments[3].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.value
+                attachments[3].label,
+                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES'],
             )
             self.assertEqual(
                 attachments[3].uuids,
@@ -1592,10 +1572,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 4)
 
-                self.assertEqual(
-                    attachments[1].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name,
-                )
+                self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
                 self.assertTrue(attachments[1].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_diploma_this_year(self):
@@ -1618,16 +1595,16 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
@@ -1654,37 +1631,34 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 4)
 
-            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(
-                attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name
-            )
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
             )
             self.assertTrue(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[2].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[2].required)
 
+            self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES')
             self.assertEqual(
-                attachments[3].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.name
-            )
-            self.assertEqual(
-                attachments[3].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.value
+                attachments[3].label,
+                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES'],
             )
             self.assertEqual(
                 attachments[3].uuids,
@@ -1706,10 +1680,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 4)
 
-                self.assertEqual(
-                    attachments[1].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name,
-                )
+                self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
                 self.assertTrue(attachments[1].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_diploma_this_year(self):
@@ -1732,18 +1703,16 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 6)
 
-            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertFalse(attachments[0].required)
 
-            self.assertEqual(
-                attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name
-            )
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
@@ -1751,11 +1720,9 @@ class SectionsAttachmentsTestCase(TestCase):
             # The diploma is specified -> the related translation is required
             self.assertTrue(attachments[1].required)
 
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION')
             self.assertEqual(
-                attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name
-            )
-            self.assertEqual(
-                attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.value
+                attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION']
             )
             self.assertEqual(
                 attachments[2].uuids,
@@ -1765,11 +1732,11 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(
                 attachments[3].identifier,
-                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION.name,
+                'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
             )
             self.assertEqual(
                 attachments[3].label,
-                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION.value,
+                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION'],
             )
             self.assertEqual(
                 attachments[3].uuids,
@@ -1778,19 +1745,18 @@ class SectionsAttachmentsTestCase(TestCase):
             # The enrolment certificate is specified -> the related translation is required
             self.assertTrue(attachments[3].required)
 
-            self.assertEqual(attachments[4].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[4].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[4].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[4].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[4].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[4].required)
 
+            self.assertEqual(attachments[5].identifier, 'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES')
             self.assertEqual(
-                attachments[5].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.name
-            )
-            self.assertEqual(
-                attachments[5].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES.value
+                attachments[5].label,
+                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES'],
             )
             self.assertEqual(
                 attachments[5].uuids,
@@ -1813,13 +1779,10 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 6)
 
-                self.assertEqual(
-                    attachments[1].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_DIPLOME.name,
-                )
+                self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
                 self.assertEqual(
                     attachments[3].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION.name,
+                    'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
                 )
                 self.assertFalse(attachments[1].required)
                 self.assertFalse(attachments[3].required)
@@ -1845,19 +1808,18 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 3)
 
-            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertFalse(attachments[0].required)
 
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION')
             self.assertEqual(
-                attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name
-            )
-            self.assertEqual(
-                attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.value
+                attachments[1].label,
+                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION'],
             )
             self.assertEqual(
                 attachments[1].uuids,
@@ -1865,8 +1827,8 @@ class SectionsAttachmentsTestCase(TestCase):
             )
             self.assertFalse(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[2].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
@@ -1888,10 +1850,10 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 3)
 
-                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
                 self.assertEqual(
                     attachments[1].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name,
+                    'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
                 )
                 self.assertFalse(attachments[0].required)
                 self.assertFalse(attachments[1].required)
@@ -1910,11 +1872,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 3)
 
-                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-                self.assertEqual(
-                    attachments[1].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name,
-                )
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+                self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION')
                 self.assertTrue(attachments[0].required)
                 self.assertFalse(attachments[1].required)
 
@@ -1932,11 +1891,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 3)
 
-                self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-                self.assertEqual(
-                    attachments[1].identifier,
-                    DocumentsEtudesSecondaires.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION.name,
-                )
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+                self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION')
                 self.assertFalse(attachments[0].required)
                 self.assertTrue(attachments[1].required)
 
@@ -1961,13 +1917,10 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 3)
 
-            self.assertEqual(
-                attachments[0].identifier,
-                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE.name,
-            )
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE')
             self.assertEqual(
                 attachments[0].label,
-                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE.value,
+                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE'],
             )
             self.assertEqual(
                 attachments[0].uuids,
@@ -1975,16 +1928,16 @@ class SectionsAttachmentsTestCase(TestCase):
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[2].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
@@ -2009,12 +1962,10 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 3)
 
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE')
             self.assertEqual(
-                attachments[0].identifier,
-                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE.name,
-            )
-            self.assertEqual(
-                attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE.value
+                attachments[0].label,
+                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE'],
             )
             self.assertEqual(
                 attachments[0].uuids,
@@ -2022,16 +1973,16 @@ class SectionsAttachmentsTestCase(TestCase):
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[2].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
@@ -2059,13 +2010,10 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 3)
 
-            self.assertEqual(
-                attachments[0].identifier,
-                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE.name,
-            )
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE')
             self.assertEqual(
                 attachments[0].label,
-                DocumentsEtudesSecondaires.DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE.value,
+                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE'],
             )
             self.assertEqual(
                 attachments[0].uuids,
@@ -2073,16 +2021,16 @@ class SectionsAttachmentsTestCase(TestCase):
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[2].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
@@ -2106,16 +2054,16 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.name)
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_DIPLOME.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.name)
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires.DIPLOME_ETRANGER_RELEVE_NOTES.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
@@ -2135,13 +2083,14 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(len(attachments), 2)
 
-        self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
-        self.assertEqual(attachments[0].label, DocumentsCurriculum.CURRICULUM.value)
+        self.assertEqual(attachments[0].identifier, 'CURRICULUM')
+        self.assertEqual(attachments[0].label, DocumentsCurriculum['CURRICULUM'])
         self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.curriculum)
         self.assertFalse(attachments[0].required)
 
         self.assertEqual(
-            attachments[1].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
+            attachments[1].identifier,
+            f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{document_question.uuid}',
         )
         self.assertEqual(attachments[1].label, document_question.label)
         self.assertEqual(attachments[1].uuids, self.admission.specific_question_answers[document_question.uuid])
@@ -2157,13 +2106,13 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME_EQUIVALENCE.name)
-            self.assertEqual(attachments[0].label, DocumentsCurriculum.DIPLOME_EQUIVALENCE.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_EQUIVALENCE')
+            self.assertEqual(attachments[0].label, DocumentsCurriculum['DIPLOME_EQUIVALENCE'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.equivalence_diplome)
             self.assertFalse(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.CURRICULUM.name)
-            self.assertEqual(attachments[1].label, DocumentsCurriculum.CURRICULUM.value)
+            self.assertEqual(attachments[1].identifier, 'CURRICULUM')
+            self.assertEqual(attachments[1].label, DocumentsCurriculum['CURRICULUM'])
             self.assertEqual(attachments[1].uuids, self.continuing_context.proposition.curriculum)
             self.assertFalse(attachments[1].required)
 
@@ -2177,8 +2126,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 1)
 
-            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
-            self.assertEqual(attachments[0].label, DocumentsCurriculum.CURRICULUM.value)
+            self.assertEqual(attachments[0].identifier, 'CURRICULUM')
+            self.assertEqual(attachments[0].label, DocumentsCurriculum['CURRICULUM'])
             self.assertEqual(attachments[0].uuids, self.general_bachelor_context.proposition.curriculum)
             self.assertTrue(attachments[0].required)
 
@@ -2193,13 +2142,13 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME_EQUIVALENCE.name)
-            self.assertEqual(attachments[0].label, DocumentsCurriculum.DIPLOME_EQUIVALENCE.value)
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_EQUIVALENCE')
+            self.assertEqual(attachments[0].label, DocumentsCurriculum['DIPLOME_EQUIVALENCE'])
             self.assertEqual(attachments[0].uuids, self.general_bachelor_context.proposition.equivalence_diplome)
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.CURRICULUM.name)
-            self.assertEqual(attachments[1].label, DocumentsCurriculum.CURRICULUM.value)
+            self.assertEqual(attachments[1].identifier, 'CURRICULUM')
+            self.assertEqual(attachments[1].label, DocumentsCurriculum['CURRICULUM'])
             self.assertEqual(attachments[1].uuids, self.general_bachelor_context.proposition.curriculum)
             self.assertTrue(attachments[1].required)
 
@@ -2212,7 +2161,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 attachments = section.attachments
 
                 self.assertEqual(len(attachments), 1)
-                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
+                self.assertEqual(attachments[0].identifier, 'CURRICULUM')
 
             # Without diploma, don't display the equivalence
             with mock.patch.multiple(
@@ -2223,7 +2172,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 attachments = section.attachments
 
                 self.assertEqual(len(attachments), 1)
-                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
+                self.assertEqual(attachments[0].identifier, 'CURRICULUM')
 
             # Without obtained diploma, don't display the equivalence
             with mock.patch.multiple(
@@ -2234,7 +2183,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 attachments = section.attachments
 
                 self.assertEqual(len(attachments), 1)
-                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CURRICULUM.name)
+                self.assertEqual(attachments[0].identifier, 'CURRICULUM')
 
             # With both obtained foreign and belgian diplomas, display a facultative equivalence
             with mock.patch.multiple(
@@ -2249,7 +2198,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 2)
 
-                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME_EQUIVALENCE.name)
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_EQUIVALENCE')
                 self.assertFalse(attachments[0].required)
 
             # With several obtained foreign diplomas, display a required equivalence
@@ -2265,7 +2214,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 2)
 
-                self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME_EQUIVALENCE.name)
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_EQUIVALENCE')
                 self.assertTrue(attachments[0].required)
 
     def test_curriculum_attachments_for_bachelor_proposition(self):
@@ -2283,8 +2232,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(len(attachments), 1)
 
-        self.assertEqual(attachments[0].identifier, DocumentsCurriculum.DIPLOME.name)
-        self.assertEqual(attachments[0].label, DocumentsCurriculum.DIPLOME.value)
+        self.assertEqual(attachments[0].identifier, 'DIPLOME')
+        self.assertEqual(attachments[0].label, DocumentsCurriculum['DIPLOME'])
         self.assertEqual(attachments[0].uuids, experience.diplome)
         self.assertTrue(attachments[0].required)
 
@@ -2300,13 +2249,13 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.RELEVE_NOTES.name)
-            self.assertEqual(attachments[0].label, DocumentsCurriculum.RELEVE_NOTES.value)
+            self.assertEqual(attachments[0].identifier, 'RELEVE_NOTES')
+            self.assertEqual(attachments[0].label, DocumentsCurriculum['RELEVE_NOTES'])
             self.assertEqual(attachments[0].uuids, experience.releve_notes)
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.DIPLOME.name)
-            self.assertEqual(attachments[1].label, DocumentsCurriculum.DIPLOME.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME')
+            self.assertEqual(attachments[1].label, DocumentsCurriculum['DIPLOME'])
             self.assertEqual(attachments[1].uuids, experience.diplome)
             self.assertTrue(attachments[1].required)
 
@@ -2329,23 +2278,23 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 4)
 
-            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.RELEVE_NOTES.name)
-            self.assertEqual(attachments[0].label, DocumentsCurriculum.RELEVE_NOTES.value)
+            self.assertEqual(attachments[0].identifier, 'RELEVE_NOTES')
+            self.assertEqual(attachments[0].label, DocumentsCurriculum['RELEVE_NOTES'])
             self.assertEqual(attachments[0].uuids, experience.releve_notes)
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.TRADUCTION_RELEVE_NOTES.name)
-            self.assertEqual(attachments[1].label, DocumentsCurriculum.TRADUCTION_RELEVE_NOTES.value)
+            self.assertEqual(attachments[1].identifier, 'TRADUCTION_RELEVE_NOTES')
+            self.assertEqual(attachments[1].label, DocumentsCurriculum['TRADUCTION_RELEVE_NOTES'])
             self.assertEqual(attachments[1].uuids, experience.traduction_releve_notes)
             self.assertTrue(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, DocumentsCurriculum.DIPLOME.name)
-            self.assertEqual(attachments[2].label, DocumentsCurriculum.DIPLOME.value)
+            self.assertEqual(attachments[2].identifier, 'DIPLOME')
+            self.assertEqual(attachments[2].label, DocumentsCurriculum['DIPLOME'])
             self.assertEqual(attachments[2].uuids, experience.diplome)
             self.assertTrue(attachments[2].required)
 
-            self.assertEqual(attachments[3].identifier, DocumentsCurriculum.TRADUCTION_DIPLOME.name)
-            self.assertEqual(attachments[3].label, DocumentsCurriculum.TRADUCTION_DIPLOME.value)
+            self.assertEqual(attachments[3].identifier, 'TRADUCTION_DIPLOME')
+            self.assertEqual(attachments[3].label, DocumentsCurriculum['TRADUCTION_DIPLOME'])
             self.assertEqual(attachments[3].uuids, experience.traduction_diplome)
             self.assertTrue(attachments[3].required)
 
@@ -2362,17 +2311,15 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
+            self.assertEqual(attachments[0].identifier, f'{experience_year.annee}.RELEVE_NOTES_ANNUEL')
             self.assertEqual(
-                attachments[0].identifier, f'{DocumentsCurriculum.RELEVE_NOTES_ANNUEL.name}.{experience_year.annee}'
-            )
-            self.assertEqual(
-                attachments[0].label, f'{DocumentsCurriculum.RELEVE_NOTES_ANNUEL.value} - {experience_year.annee}'
+                attachments[0].label, f'{DocumentsCurriculum["RELEVE_NOTES_ANNUEL"]} - {experience_year.annee}'
             )
             self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsCurriculum.DIPLOME.name)
-            self.assertEqual(attachments[1].label, DocumentsCurriculum.DIPLOME.value)
+            self.assertEqual(attachments[1].identifier, 'DIPLOME')
+            self.assertEqual(attachments[1].label, DocumentsCurriculum['DIPLOME'])
             self.assertEqual(attachments[1].uuids, experience.diplome)
             self.assertTrue(attachments[1].required)
 
@@ -2395,33 +2342,29 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 4)
 
+            self.assertEqual(attachments[0].identifier, f'{experience_year.annee}.RELEVE_NOTES_ANNUEL')
             self.assertEqual(
-                attachments[0].identifier, f'{DocumentsCurriculum.RELEVE_NOTES_ANNUEL.name}.{experience_year.annee}'
-            )
-            self.assertEqual(
-                attachments[0].label, f'{DocumentsCurriculum.RELEVE_NOTES_ANNUEL.value} - {experience_year.annee}'
+                attachments[0].label,
+                f'{DocumentsCurriculum["RELEVE_NOTES_ANNUEL"]} - {experience_year.annee}',
             )
             self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(
-                attachments[1].identifier,
-                f'{DocumentsCurriculum.TRADUCTION_RELEVE_NOTES_ANNUEL.name}.{experience_year.annee}',
-            )
+            self.assertEqual(attachments[1].identifier, f'{experience_year.annee}.TRADUCTION_RELEVE_NOTES_ANNUEL')
             self.assertEqual(
                 attachments[1].label,
-                f'{DocumentsCurriculum.TRADUCTION_RELEVE_NOTES_ANNUEL.value} - {experience_year.annee}',
+                f'{DocumentsCurriculum["TRADUCTION_RELEVE_NOTES_ANNUEL"]} - {experience_year.annee}',
             )
             self.assertEqual(attachments[1].uuids, experience_year.traduction_releve_notes)
             self.assertTrue(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, DocumentsCurriculum.DIPLOME.name)
-            self.assertEqual(attachments[2].label, DocumentsCurriculum.DIPLOME.value)
+            self.assertEqual(attachments[2].identifier, 'DIPLOME')
+            self.assertEqual(attachments[2].label, DocumentsCurriculum['DIPLOME'])
             self.assertEqual(attachments[2].uuids, experience.diplome)
             self.assertTrue(attachments[2].required)
 
-            self.assertEqual(attachments[3].identifier, DocumentsCurriculum.TRADUCTION_DIPLOME.name)
-            self.assertEqual(attachments[3].label, DocumentsCurriculum.TRADUCTION_DIPLOME.value)
+            self.assertEqual(attachments[3].identifier, 'TRADUCTION_DIPLOME')
+            self.assertEqual(attachments[3].label, DocumentsCurriculum['TRADUCTION_DIPLOME'])
             self.assertEqual(attachments[3].uuids, experience.traduction_diplome)
             self.assertTrue(attachments[3].required)
 
@@ -2436,18 +2379,18 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(len(attachments), 3)
 
-        self.assertEqual(attachments[0].identifier, DocumentsCurriculum.RELEVE_NOTES.name)
-        self.assertEqual(attachments[0].label, DocumentsCurriculum.RELEVE_NOTES.value)
+        self.assertEqual(attachments[0].identifier, 'RELEVE_NOTES')
+        self.assertEqual(attachments[0].label, DocumentsCurriculum['RELEVE_NOTES'])
         self.assertEqual(attachments[0].uuids, experience.releve_notes)
         self.assertTrue(attachments[0].required)
 
-        self.assertEqual(attachments[1].identifier, DocumentsCurriculum.RESUME_MEMOIRE.name)
-        self.assertEqual(attachments[1].label, DocumentsCurriculum.RESUME_MEMOIRE.value)
+        self.assertEqual(attachments[1].identifier, 'RESUME_MEMOIRE')
+        self.assertEqual(attachments[1].label, DocumentsCurriculum['RESUME_MEMOIRE'])
         self.assertEqual(attachments[1].uuids, experience.resume_memoire)
         self.assertTrue(attachments[1].required)
 
-        self.assertEqual(attachments[2].identifier, DocumentsCurriculum.DIPLOME.name)
-        self.assertEqual(attachments[2].label, DocumentsCurriculum.DIPLOME.value)
+        self.assertEqual(attachments[2].identifier, 'DIPLOME')
+        self.assertEqual(attachments[2].label, DocumentsCurriculum['DIPLOME'])
         self.assertEqual(attachments[2].uuids, experience.diplome)
         self.assertTrue(attachments[2].required)
 
@@ -2470,7 +2413,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(len(attachments), 1)
 
-        self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CERTIFICAT_EXPERIENCE.name)
+        self.assertEqual(attachments[0].identifier, 'CERTIFICAT_EXPERIENCE')
         self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.WORK.name))
         self.assertEqual(attachments[0].uuids, experience.certificat)
         self.assertFalse(attachments[0].required)
@@ -2493,7 +2436,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 1)
 
-            self.assertEqual(attachments[0].identifier, DocumentsCurriculum.CERTIFICAT_EXPERIENCE.name)
+            self.assertEqual(attachments[0].identifier, 'CERTIFICAT_EXPERIENCE')
             self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.LANGUAGE_TRAVEL.name))
             self.assertEqual(attachments[0].uuids, experience.certificat)
             self.assertFalse(attachments[0].required)
@@ -2514,7 +2457,8 @@ class SectionsAttachmentsTestCase(TestCase):
             self.assertEqual(len(attachments), 1)
 
             self.assertEqual(
-                attachments[0].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
+                attachments[0].identifier,
+                f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{document_question.uuid}',
             )
             self.assertEqual(attachments[0].label, document_question.label)
             self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
@@ -2535,8 +2479,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 1)
 
-            self.assertEqual(attachments[0].identifier, DocumentsQuestionsSpecifiques.COPIE_TITRE_SEJOUR.name)
-            self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques.COPIE_TITRE_SEJOUR.value)
+            self.assertEqual(attachments[0].identifier, 'COPIE_TITRE_SEJOUR')
+            self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques['COPIE_TITRE_SEJOUR'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.copie_titre_sejour)
             self.assertFalse(attachments[0].required)
 
@@ -2555,14 +2499,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 1)
 
-            self.assertEqual(
-                attachments[0].identifier,
-                DocumentsQuestionsSpecifiques.ATTESTATION_INSCRIPTION_REGULIERE.name,
-            )
-            self.assertEqual(
-                attachments[0].label,
-                DocumentsQuestionsSpecifiques.ATTESTATION_INSCRIPTION_REGULIERE.value,
-            )
+            self.assertEqual(attachments[0].identifier, 'ATTESTATION_INSCRIPTION_REGULIERE')
+            self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.proposition.attestation_inscription_reguliere,
@@ -2600,12 +2538,9 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(
                 attachments[0].identifier,
-                DocumentsQuestionsSpecifiques.FORMULAIRE_MODIFICATION_INSCRIPTION.name,
+                'FORMULAIRE_MODIFICATION_INSCRIPTION',
             )
-            self.assertEqual(
-                attachments[0].label,
-                DocumentsQuestionsSpecifiques.FORMULAIRE_MODIFICATION_INSCRIPTION.value,
-            )
+            self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques['FORMULAIRE_MODIFICATION_INSCRIPTION'])
             self.assertEqual(
                 attachments[0].uuids,
                 self.general_bachelor_context.proposition.formulaire_modification_inscription,
@@ -2631,21 +2566,11 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(len(attachments), 1)
 
-        self.assertEqual(
-            attachments[0].identifier,
-            DocumentsComptabilite.ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT.name,
-        )
+        self.assertEqual(attachments[0].identifier, 'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT')
         self.assertEqual(
             attachments[0].label,
-            ngettext(
-                'Certificate stating the absence of debts towards the institution attended during '
-                'the academic year %(academic_year)s: %(names)s',
-                'Certificates stating the absence of debts towards the institutions attended during '
-                'the academic year %(academic_year)s: %(names)s',
-                1,
-            )
-            % {'academic_year': '2023-2024', 'names': 'Institut 1'},
-            self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
+            DocumentsComptabilite['ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT']
+            % {'academic_year': '2023-2024', 'names': 'Institut 1', 'count': 1},
         )
         self.assertEqual(
             attachments[0].uuids, self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement
@@ -2660,35 +2585,20 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 2)
 
-            self.assertEqual(
-                attachments[0].identifier,
-                DocumentsComptabilite.ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT.name,
-            )
+            self.assertEqual(attachments[0].identifier, 'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT')
             self.assertEqual(
                 attachments[0].label,
-                ngettext(
-                    'Certificate stating the absence of debts towards the institution attended during '
-                    'the academic year %(academic_year)s: %(names)s',
-                    'Certificates stating the absence of debts towards the institutions attended during '
-                    'the academic year %(academic_year)s: %(names)s',
-                    1,
-                )
-                % {'academic_year': '2023-2024', 'names': 'Institut 1'},
-                self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
+                DocumentsComptabilite['ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT']
+                % {'academic_year': '2023-2024', 'names': 'Institut 1', 'count': 1},
             )
             self.assertEqual(
-                attachments[0].uuids, self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
+                attachments[0].uuids,
+                self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(
-                attachments[1].identifier,
-                DocumentsComptabilite.ATTESTATION_ENFANT_PERSONNEL.name,
-            )
-            self.assertEqual(
-                attachments[1].label,
-                DocumentsComptabilite.ATTESTATION_ENFANT_PERSONNEL.value,
-            )
+            self.assertEqual(attachments[1].identifier, 'ATTESTATION_ENFANT_PERSONNEL')
+            self.assertEqual(attachments[1].label, DocumentsComptabilite['ATTESTATION_ENFANT_PERSONNEL'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.comptabilite.attestation_enfant_personnel,
@@ -2712,35 +2622,20 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 3)
 
-            self.assertEqual(
-                attachments[0].identifier,
-                DocumentsComptabilite.ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT.name,
-            )
+            self.assertEqual(attachments[0].identifier, 'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT')
             self.assertEqual(
                 attachments[0].label,
-                ngettext(
-                    'Certificate stating the absence of debts towards the institution attended during '
-                    'the academic year %(academic_year)s: %(names)s',
-                    'Certificates stating the absence of debts towards the institutions attended during '
-                    'the academic year %(academic_year)s: %(names)s',
-                    1,
-                )
-                % {'academic_year': '2023-2024', 'names': 'Institut 1'},
-                self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
+                DocumentsComptabilite['ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT']
+                % {'academic_year': '2023-2024', 'names': 'Institut 1', 'count': 1},
             )
             self.assertEqual(
-                attachments[0].uuids, self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement
+                attachments[0].uuids,
+                self.general_bachelor_context.comptabilite.attestation_absence_dette_etablissement,
             )
             self.assertTrue(attachments[0].required)
 
-            self.assertEqual(
-                attachments[1].identifier,
-                DocumentsComptabilite.COMPOSITION_MENAGE_ACTE_NAISSANCE.name,
-            )
-            self.assertEqual(
-                attachments[1].label,
-                DocumentsComptabilite.COMPOSITION_MENAGE_ACTE_NAISSANCE.value,
-            )
+            self.assertEqual(attachments[1].identifier, 'COMPOSITION_MENAGE_ACTE_NAISSANCE')
+            self.assertEqual(attachments[1].label, DocumentsComptabilite['COMPOSITION_MENAGE_ACTE_NAISSANCE'])
             self.assertEqual(
                 attachments[1].uuids,
                 self.general_bachelor_context.comptabilite.composition_menage_acte_naissance,
@@ -2749,11 +2644,11 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(
                 attachments[2].identifier,
-                DocumentsComptabilite.ATTESTATION_CPAS_PARENT.name,
+                'ATTESTATION_CPAS_PARENT',
             )
             self.assertEqual(
                 attachments[2].label,
-                DocumentsComptabilite.ATTESTATION_CPAS_PARENT.value % {'person_concerned': 'votre père'},
+                DocumentsComptabilite['ATTESTATION_CPAS_PARENT'] % {'person_concerned': 'votre père'},
             )
             self.assertEqual(
                 attachments[2].uuids,
@@ -2769,12 +2664,11 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(
             attachments[0].identifier,
-            f'{DocumentsConnaissancesLangues.CERTIFICAT_CONNAISSANCE_LANGUE.name}.'
-            f'{self.doctorate_context.connaissances_langues[0].langue}',
+            f'{self.doctorate_context.connaissances_langues[0].langue}.CERTIFICAT_CONNAISSANCE_LANGUE',
         )
         self.assertEqual(
             attachments[0].label,
-            f'{DocumentsConnaissancesLangues.CERTIFICAT_CONNAISSANCE_LANGUE.value} - '
+            f'{DocumentsConnaissancesLangues["CERTIFICAT_CONNAISSANCE_LANGUE"]} - '
             f'{self.doctorate_context.connaissances_langues[0].nom_langue}',
         )
         self.assertEqual(
@@ -2785,12 +2679,11 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(
             attachments[1].identifier,
-            f'{DocumentsConnaissancesLangues.CERTIFICAT_CONNAISSANCE_LANGUE.name}.'
-            f'{self.doctorate_context.connaissances_langues[1].langue}',
+            f'{self.doctorate_context.connaissances_langues[1].langue}.CERTIFICAT_CONNAISSANCE_LANGUE',
         )
         self.assertEqual(
             attachments[1].label,
-            f'{DocumentsConnaissancesLangues.CERTIFICAT_CONNAISSANCE_LANGUE.value} - '
+            f'{DocumentsConnaissancesLangues["CERTIFICAT_CONNAISSANCE_LANGUE"]} - '
             f'{self.doctorate_context.connaissances_langues[1].nom_langue}',
         )
         self.assertEqual(
@@ -2805,28 +2698,28 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(len(attachments), 5)
 
-        self.assertEqual(attachments[0].identifier, DocumentsProjetRecherche.DOCUMENTS_PROJET.name)
-        self.assertEqual(attachments[0].label, DocumentsProjetRecherche.DOCUMENTS_PROJET.value)
+        self.assertEqual(attachments[0].identifier, 'DOCUMENTS_PROJET')
+        self.assertEqual(attachments[0].label, DocumentsProjetRecherche['DOCUMENTS_PROJET'])
         self.assertEqual(attachments[0].uuids, self.doctorate_context.proposition.documents_projet)
         self.assertTrue(attachments[0].required)
 
-        self.assertEqual(attachments[1].identifier, DocumentsProjetRecherche.PROPOSITION_PROGRAMME_DOCTORAL.name)
-        self.assertEqual(attachments[1].label, DocumentsProjetRecherche.PROPOSITION_PROGRAMME_DOCTORAL.value)
+        self.assertEqual(attachments[1].identifier, 'PROPOSITION_PROGRAMME_DOCTORAL')
+        self.assertEqual(attachments[1].label, DocumentsProjetRecherche['PROPOSITION_PROGRAMME_DOCTORAL'])
         self.assertEqual(attachments[1].uuids, self.doctorate_context.proposition.proposition_programme_doctoral)
         self.assertTrue(attachments[1].required)
 
-        self.assertEqual(attachments[2].identifier, DocumentsProjetRecherche.PROJET_FORMATION_COMPLEMENTAIRE.name)
-        self.assertEqual(attachments[2].label, DocumentsProjetRecherche.PROJET_FORMATION_COMPLEMENTAIRE.value)
+        self.assertEqual(attachments[2].identifier, 'PROJET_FORMATION_COMPLEMENTAIRE')
+        self.assertEqual(attachments[2].label, DocumentsProjetRecherche['PROJET_FORMATION_COMPLEMENTAIRE'])
         self.assertEqual(attachments[2].uuids, self.doctorate_context.proposition.projet_formation_complementaire)
         self.assertFalse(attachments[2].required)
 
-        self.assertEqual(attachments[3].identifier, DocumentsProjetRecherche.GRAPHE_GANTT.name)
-        self.assertEqual(attachments[3].label, DocumentsProjetRecherche.GRAPHE_GANTT.value)
+        self.assertEqual(attachments[3].identifier, 'GRAPHE_GANTT')
+        self.assertEqual(attachments[3].label, DocumentsProjetRecherche['GRAPHE_GANTT'])
         self.assertEqual(attachments[3].uuids, self.doctorate_context.proposition.graphe_gantt)
         self.assertFalse(attachments[3].required)
 
-        self.assertEqual(attachments[4].identifier, DocumentsProjetRecherche.LETTRES_RECOMMANDATION.name)
-        self.assertEqual(attachments[4].label, DocumentsProjetRecherche.LETTRES_RECOMMANDATION.value)
+        self.assertEqual(attachments[4].identifier, 'LETTRES_RECOMMANDATION')
+        self.assertEqual(attachments[4].label, DocumentsProjetRecherche['LETTRES_RECOMMANDATION'])
         self.assertEqual(attachments[4].uuids, self.doctorate_context.proposition.lettres_recommandation)
         self.assertFalse(attachments[4].required)
 
@@ -2840,33 +2733,33 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 6)
 
-            self.assertEqual(attachments[0].identifier, DocumentsProjetRecherche.PREUVE_BOURSE.name)
-            self.assertEqual(attachments[0].label, DocumentsProjetRecherche.PREUVE_BOURSE.value)
+            self.assertEqual(attachments[0].identifier, 'PREUVE_BOURSE')
+            self.assertEqual(attachments[0].label, DocumentsProjetRecherche['PREUVE_BOURSE'])
             self.assertEqual(attachments[0].uuids, self.doctorate_context.proposition.bourse_preuve)
             self.assertFalse(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, DocumentsProjetRecherche.DOCUMENTS_PROJET.name)
-            self.assertEqual(attachments[1].label, DocumentsProjetRecherche.DOCUMENTS_PROJET.value)
+            self.assertEqual(attachments[1].identifier, 'DOCUMENTS_PROJET')
+            self.assertEqual(attachments[1].label, DocumentsProjetRecherche['DOCUMENTS_PROJET'])
             self.assertEqual(attachments[1].uuids, self.doctorate_context.proposition.documents_projet)
             self.assertTrue(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, DocumentsProjetRecherche.PROPOSITION_PROGRAMME_DOCTORAL.name)
-            self.assertEqual(attachments[2].label, DocumentsProjetRecherche.PROPOSITION_PROGRAMME_DOCTORAL.value)
+            self.assertEqual(attachments[2].identifier, 'PROPOSITION_PROGRAMME_DOCTORAL')
+            self.assertEqual(attachments[2].label, DocumentsProjetRecherche['PROPOSITION_PROGRAMME_DOCTORAL'])
             self.assertEqual(attachments[2].uuids, self.doctorate_context.proposition.proposition_programme_doctoral)
             self.assertTrue(attachments[2].required)
 
-            self.assertEqual(attachments[3].identifier, DocumentsProjetRecherche.PROJET_FORMATION_COMPLEMENTAIRE.name)
-            self.assertEqual(attachments[3].label, DocumentsProjetRecherche.PROJET_FORMATION_COMPLEMENTAIRE.value)
+            self.assertEqual(attachments[3].identifier, 'PROJET_FORMATION_COMPLEMENTAIRE')
+            self.assertEqual(attachments[3].label, DocumentsProjetRecherche['PROJET_FORMATION_COMPLEMENTAIRE'])
             self.assertEqual(attachments[3].uuids, self.doctorate_context.proposition.projet_formation_complementaire)
             self.assertFalse(attachments[3].required)
 
-            self.assertEqual(attachments[4].identifier, DocumentsProjetRecherche.GRAPHE_GANTT.name)
-            self.assertEqual(attachments[4].label, DocumentsProjetRecherche.GRAPHE_GANTT.value)
+            self.assertEqual(attachments[4].identifier, 'GRAPHE_GANTT')
+            self.assertEqual(attachments[4].label, DocumentsProjetRecherche['GRAPHE_GANTT'])
             self.assertEqual(attachments[4].uuids, self.doctorate_context.proposition.graphe_gantt)
             self.assertFalse(attachments[4].required)
 
-            self.assertEqual(attachments[5].identifier, DocumentsProjetRecherche.LETTRES_RECOMMANDATION.name)
-            self.assertEqual(attachments[5].label, DocumentsProjetRecherche.LETTRES_RECOMMANDATION.value)
+            self.assertEqual(attachments[5].identifier, 'LETTRES_RECOMMANDATION')
+            self.assertEqual(attachments[5].label, DocumentsProjetRecherche['LETTRES_RECOMMANDATION'])
             self.assertEqual(attachments[5].uuids, self.doctorate_context.proposition.lettres_recommandation)
             self.assertFalse(attachments[5].required)
 
@@ -2892,18 +2785,18 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(len(attachments), 3)
 
-        self.assertEqual(attachments[0].identifier, DocumentsCotutelle.DEMANDE_OUVERTURE.name)
-        self.assertEqual(attachments[0].label, DocumentsCotutelle.DEMANDE_OUVERTURE.value)
+        self.assertEqual(attachments[0].identifier, 'DEMANDE_OUVERTURE')
+        self.assertEqual(attachments[0].label, DocumentsCotutelle['DEMANDE_OUVERTURE'])
         self.assertEqual(attachments[0].uuids, self.doctorate_context.groupe_supervision.cotutelle.demande_ouverture)
         self.assertTrue(attachments[0].required)
 
-        self.assertEqual(attachments[1].identifier, DocumentsCotutelle.CONVENTION.name)
-        self.assertEqual(attachments[1].label, DocumentsCotutelle.CONVENTION.value)
+        self.assertEqual(attachments[1].identifier, 'CONVENTION')
+        self.assertEqual(attachments[1].label, DocumentsCotutelle['CONVENTION'])
         self.assertEqual(attachments[1].uuids, self.doctorate_context.groupe_supervision.cotutelle.convention)
         self.assertFalse(attachments[1].required)
 
-        self.assertEqual(attachments[2].identifier, DocumentsCotutelle.AUTRES_DOCUMENTS.name)
-        self.assertEqual(attachments[2].label, DocumentsCotutelle.AUTRES_DOCUMENTS.value)
+        self.assertEqual(attachments[2].identifier, 'AUTRES_DOCUMENTS')
+        self.assertEqual(attachments[2].label, DocumentsCotutelle['AUTRES_DOCUMENTS'])
         self.assertEqual(attachments[2].uuids, self.doctorate_context.groupe_supervision.cotutelle.autres_documents)
         self.assertFalse(attachments[2].required)
 
@@ -2915,25 +2808,19 @@ class SectionsAttachmentsTestCase(TestCase):
 
         self.assertEqual(len(attachments), 2)
 
-        self.assertEqual(
-            attachments[0].identifier,
-            f'{DocumentsSupervision.APPROBATION_PDF.name}.{signature_promoteur.promoteur.uuid}',
-        )
+        self.assertEqual(attachments[0].identifier, f'{signature_promoteur.promoteur.uuid}.APPROBATION_PDF')
         self.assertEqual(
             attachments[0].label,
-            f'{DocumentsSupervision.APPROBATION_PDF.value} - '
+            f'{DocumentsSupervision["APPROBATION_PDF"]} - '
             f'{signature_promoteur.promoteur.prenom} {signature_promoteur.promoteur.nom}',
         )
         self.assertEqual(attachments[0].uuids, signature_promoteur.pdf)
         self.assertFalse(attachments[0].required)
 
-        self.assertEqual(
-            attachments[1].identifier,
-            f'{DocumentsSupervision.APPROBATION_PDF.name}.{signature_membre_ca.membre_CA.uuid}',
-        )
+        self.assertEqual(attachments[1].identifier, f'{signature_membre_ca.membre_CA.uuid}.APPROBATION_PDF')
         self.assertEqual(
             attachments[1].label,
-            f'{DocumentsSupervision.APPROBATION_PDF.value} - '
+            f'{DocumentsSupervision["APPROBATION_PDF"]} - '
             f'{signature_membre_ca.membre_CA.prenom} {signature_membre_ca.membre_CA.nom}',
         )
         self.assertEqual(attachments[1].uuids, signature_membre_ca.pdf)
@@ -2951,7 +2838,8 @@ class SectionsAttachmentsTestCase(TestCase):
         self.assertEqual(len(attachments), 1)
 
         self.assertEqual(
-            attachments[0].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
+            attachments[0].identifier,
+            f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{document_question.uuid}',
         )
         self.assertEqual(attachments[0].label, document_question.label)
         self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
@@ -2967,7 +2855,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 1)
             self.assertEqual(
-                attachments[0].identifier, f'{DocumentsInterOnglets.QUESTION_SPECIFIQUE.name}.{document_question.uuid}'
+                attachments[0].identifier,
+                f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{document_question.uuid}',
             )
 
             self.assertTrue(attachments[0].required)

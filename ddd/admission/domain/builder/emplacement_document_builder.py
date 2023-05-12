@@ -25,16 +25,17 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.domain.builder.document_identity_builder import EmplacementDocumentIdentityBuilder
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
-from admission.ddd.admission.domain.model.demande import DemandeIdentity
+from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
+    EmplacementDocumentIdentityBuilder,
+)
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument, OngletsDemande
+from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
 from osis_common.ddd import interface
 from osis_common.ddd.interface import CommandRequest
 
 
-class DocumentBuilder(interface.RootEntityBuilder):
+class EmplacementDocumentBuilder(interface.RootEntityBuilder):
     @classmethod
     def build_from_command(cls, cmd: 'CommandRequest') -> 'EmplacementDocument':
         pass
@@ -44,37 +45,47 @@ class DocumentBuilder(interface.RootEntityBuilder):
         pass
 
     @classmethod
-    def initier_document(
+    def initier_emplacement_document_libre(
         cls,
-        uuid_demande: str,
+        uuid_proposition: str,
         auteur: str,
-        type_document: str,
-        nom_document: str,
-        statut_document: str,
-        token_document: str = '',
-        identifiant_document: str = '',
-        identifiant_question_specifique: str = '',
-        onglet: OngletsDemande = OngletsDemande.DOCUMENTS_ADDITIONNELS,
+        type_emplacement: str,
+        libelle: str,
+        raison: str = '',
     ) -> 'EmplacementDocument':
         heure_initiation = datetime.datetime.now()
         return EmplacementDocument(
-            entity_id=EmplacementDocumentIdentityBuilder.build(
-                identifiant_document=identifiant_document,
-                token_document=token_document,
-                identifiant_question_specifique=identifiant_question_specifique,
-                onglet_document=onglet,
+            entity_id=EmplacementDocumentIdentityBuilder.build_libre(
+                type_emplacement=type_emplacement,
+                uuid_proposition=uuid_proposition,
             ),
-            demande=DemandeIdentity(uuid=uuid_demande),
-            libelle=nom_document,
-            libelle_langue_candidat=nom_document,
-            uuids=[token_document] if token_document else [],
-            auteur=auteur,
-            type=TypeDocument[type_document],
-            statut=StatutDocument[statut_document],
-            justification_gestionnaire='',
-            soumis_le=heure_initiation if token_document else None,
-            reclame_le=None,
-            a_echeance_le=None,
-            onglet=OngletsDemande.DOCUMENTS_ADDITIONNELS,
+            libelle=libelle,
+            uuids_documents=[],
+            dernier_acteur=auteur,
+            type=TypeEmplacementDocument[type_emplacement],
+            statut=StatutEmplacementDocument.A_RECLAMER,
+            justification_gestionnaire=raison,
+            derniere_action_le=heure_initiation,
+        )
+
+    @classmethod
+    def initier_emplacement_document_a_reclamer(
+        cls,
+        identifiant_emplacement: str,
+        uuid_proposition: str,
+        auteur: str,
+        raison: str,
+    ) -> 'EmplacementDocument':
+        heure_initiation = datetime.datetime.now()
+        return EmplacementDocument(
+            entity_id=EmplacementDocumentIdentityBuilder.build_non_libre(
+                identifiant_emplacement=identifiant_emplacement,
+                uuid_proposition=uuid_proposition,
+            ),
+            uuids_documents=[],
+            dernier_acteur=auteur,
+            type=TypeEmplacementDocument.NON_LIBRE,
+            statut=StatutEmplacementDocument.A_RECLAMER,
+            justification_gestionnaire=raison,
             derniere_action_le=heure_initiation,
         )

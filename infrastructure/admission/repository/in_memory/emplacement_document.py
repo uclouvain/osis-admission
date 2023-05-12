@@ -25,9 +25,9 @@
 # ##############################################################################
 from typing import Optional, List
 
-from admission.ddd.admission.domain.model.demande import DemandeIdentity
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
-from admission.ddd.admission.enums.emplacement_document import TypeDocument
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from osis_common.ddd.interface import EntityIdentity, ApplicationService
 
@@ -53,36 +53,27 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                 break
 
     @classmethod
-    def save_emplacement_document_gestionnaire(cls, document: EmplacementDocument) -> None:
-        cls.save(document)
+    def save(cls, entity: EmplacementDocument) -> None:
+        cls.entities.append(entity)
 
     @classmethod
-    def save_emplacement_document_candidat(cls, document: EmplacementDocument) -> None:
-        cls.save(document)
+    def get(cls, entity_id: EmplacementDocumentIdentity) -> EmplacementDocument:
+        return next((entity for entity in cls.entities if entity.entity_id == entity_id), None)
 
     @classmethod
-    def save(cls, document: EmplacementDocument) -> None:
-        cls.entities.append(document)
-
-    @classmethod
-    def save_multiple_emplacements_documents_candidat(cls, entities: List[EmplacementDocument]) -> None:
+    def save_multiple(cls, entities: List[EmplacementDocument]) -> None:
         for entity in entities:
             cls.save(entity)
 
     @classmethod
-    def reinitialiser_emplacements_documents_candidat(
+    def reinitialiser_emplacements_documents_non_libres(
         cls,
-        demande_identity: DemandeIdentity,
+        proposition_identity: PropositionIdentity,
         entities: List[EmplacementDocument],
     ) -> None:
         cls.entities = [
             entity
             for entity in cls.entities
-            if entity.demande != demande_identity
-            or entity.type
-            in {
-                TypeDocument.CANDIDAT_SIC,
-                TypeDocument.CANDIDAT_FAC,
-            }
+            if entity.entity_id.proposition != proposition_identity or entity.type != TypeEmplacementDocument.NON_LIBRE
         ]
-        cls.save_multiple_emplacements_documents_candidat(entities)
+        cls.save_multiple(entities)

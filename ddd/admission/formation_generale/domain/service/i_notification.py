@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from abc import abstractmethod
+from email.message import EmailMessage
 
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from osis_common.ddd import interface
@@ -37,5 +38,5 @@ class INotification(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> None:
+    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> EmailMessage:
         raise NotImplementedError

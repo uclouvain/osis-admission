@@ -23,11 +23,26 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
 
-from osis_common.ddd import interface
+from admission.ddd.admission.commands import InitierEmplacementDocumentLibreInterneCommand
+from admission.ddd.admission.domain.builder.emplacement_document_builder import EmplacementDocumentBuilder
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
+from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
-@attr.dataclass(frozen=True, slots=True)
-class DemandeIdentity(interface.EntityIdentity):
-    uuid: str
+def initier_emplacement_document_libre_interne(
+    cmd: 'InitierEmplacementDocumentLibreInterneCommand',
+    emplacement_document_repository: 'IEmplacementDocumentRepository',
+) -> EmplacementDocumentIdentity:
+    emplacement_document = EmplacementDocumentBuilder().initier_emplacement_document_libre(
+        uuid_proposition=cmd.uuid_proposition,
+        auteur=cmd.auteur,
+        libelle=cmd.libelle,
+        type_emplacement=cmd.type_emplacement,
+    )
+
+    emplacement_document.remplir_par_gestionnaire(uuid_document=cmd.uuid_document)
+
+    emplacement_document_repository.save(emplacement_document)
+
+    return emplacement_document.entity_id

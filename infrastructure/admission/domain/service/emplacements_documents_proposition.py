@@ -23,29 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
+from typing import List
 
-from admission.ddd.admission.commands import ReclamerDocumentLibreCommand
-from admission.ddd.admission.domain.builder.document_builder import DocumentBuilder
-from admission.ddd.admission.enums.emplacement_document import StatutDocument
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
+from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
+    IEmplacementsDocumentsPropositionTranslator,
+)
 
 
-def reclamer_document_libre(
-    cmd: 'ReclamerDocumentLibreCommand',
-    emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> str:
-    document = DocumentBuilder().initier_document(
-        statut_document=StatutDocument.A_RECLAMER.name,
-        uuid_demande=cmd.uuid_demande,
-        auteur=cmd.auteur,
-        type_document=cmd.type_document,
-        nom_document=cmd.nom_document,
-        identifiant_question_specifique=str(uuid.uuid4()),
-    )
+class EmplacementsDocumentsPropositionTranslator(IEmplacementsDocumentsPropositionTranslator):
+    @classmethod
+    def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> dict:
+        from osis_document.api.utils import get_remote_tokens, get_several_remote_metadata
 
-    document.definir_a_reclamer(raison=cmd.raison, auteur=cmd.auteur)
+        tokens = get_remote_tokens(uuids_documents)
+        metadata = get_several_remote_metadata(list(tokens.values()))
 
-    emplacement_document_repository.save_emplacement_document_candidat(entity=document)
-
-    return document.entity_id.identifiant
+        return {
+            uuid: metadata[tokens[uuid]] if uuid in tokens and tokens[uuid] in metadata else {}
+            for uuid in uuids_documents
+        }

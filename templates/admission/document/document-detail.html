@@ -35,17 +35,31 @@
   {% endif %}
 
   {# Actions #}
-  <div class="btn-group">
+  <div
+      class="btn-group"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+  >
     {% if document_uuid %}
       {# Received or internal documents #}
       <a
           class="btn btn-default"
           href="{{ document_metadata.url }}?dl=1"
           target="_blank"
-          title="{% translate 'Download the file' %}"
+          title="{% translate 'Download the document' %}"
       >
         <i class="fas fa-download"></i>
       </a>
+      {% if document_type != 'SYSTEME' %}
+        <button
+            class="btn btn-danger"
+            data-toggle="modal"
+            data-target="#delete-confirm-modal"
+            title="{% translate 'Delete the document' %}"
+        >
+          <i class="fas fa-trash"></i>
+        </button>
+        {% include 'admission/document/delete_confirm_modal.html' %}
+      {% endif %}
 
     {% else %}
       {# Missing documents #}

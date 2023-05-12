@@ -149,10 +149,10 @@ class GeneralEducationAdmission(BaseAdmission):
     def update_requested_documents(self):
         """Update the requested documents depending on the admission data."""
         from admission.ddd.admission.formation_generale.commands import (
-            DeterminerEmplacementsDocumentsDemandeCommand
+            RecalculerEmplacementsDocumentsNonLibresPropositionCommand
         )
         from infrastructure.messages_bus import message_bus_instance
-        message_bus_instance.invoke(DeterminerEmplacementsDocumentsDemandeCommand(self.uuid))
+        message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
 
 
 class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):

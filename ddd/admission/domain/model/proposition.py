@@ -23,32 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import attr
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande, DocumentsInterOnglets
 from osis_common.ddd import interface
 
 
-class EmplacementDocumentIdentityBuilder(interface.EntityIdentityBuilder):
-    @classmethod
-    def build(
-        cls,
-        onglet_document: OngletsDemande,
-        identifiant_document: str = '',
-        token_document: str = '',
-        identifiant_question_specifique: str = '',
-    ) -> EmplacementDocumentIdentity:
-        if identifiant_document:
-            return EmplacementDocumentIdentity(identifiant=identifiant_document)
-
-        if identifiant_question_specifique:
-            return EmplacementDocumentIdentity(
-                identifiant='{}.{}.{}'.format(
-                    onglet_document.name,
-                    DocumentsInterOnglets.QUESTION_SPECIFIQUE.name,
-                    identifiant_question_specifique,
-                ),
-            )
-
-        if token_document:
-            return EmplacementDocumentIdentity(identifiant=f'{onglet_document.name}.{token_document}')
+@attr.dataclass(frozen=True, slots=True)
+class PropositionIdentity(interface.EntityIdentity):
+    uuid: str

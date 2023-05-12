@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
+
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils import translation
@@ -91,7 +93,7 @@ class Notification(INotification):
         EmailNotificationHandler.create(email_message, person=admission.candidate)
 
     @classmethod
-    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> None:
+    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> EmailMessage:
         # Notifier le candidat via mail
         candidate = Person.objects.get(global_id=proposition.matricule_candidat)
 
@@ -104,3 +106,5 @@ class Notification(INotification):
 
         candidate_email_message = EmailNotificationHandler.build(email_notification)
         EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message

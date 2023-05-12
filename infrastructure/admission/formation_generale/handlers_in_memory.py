@@ -43,8 +43,8 @@ from admission.infrastructure.admission.domain.service.in_memory.maximum_proposi
     MaximumPropositionsAutoriseesInMemory,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_demande import (
-    EmplacementsDocumentsDemandeInMemoryTranslator,
+from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
+    EmplacementsDocumentsPropositionInMemoryTranslator,
 )
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
@@ -81,7 +81,7 @@ _academic_year_repository = AcademicYearInMemoryRepository()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 _historique = HistoriqueInMemory()
-_emplacements_documents_demande_translator = EmplacementsDocumentsDemandeInMemoryTranslator()
+_emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
 _emplacement_document_repository = EmplacementDocumentInMemoryRepository()
 
 
@@ -189,7 +189,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
-    RecupererDocumentsDemandeQuery: lambda msg_bus, cmd: recuperer_documents_demande(
+    RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
         cmd,
         proposition_repository=_proposition_repository,
         profil_candidat_translator=_profil_candidat_translator,
@@ -202,14 +202,16 @@ COMMAND_HANDLERS = {
         cmd,
         question_specifique_translator=_question_specific_translator,
     ),
-    DeterminerEmplacementsDocumentsDemandeCommand: lambda msg_bus, cmd: determiner_emplacements_documents_demande(
-        cmd,
-        proposition_repository=_proposition_repository,
-        profil_candidat_translator=_profil_candidat_translator,
-        comptabilite_translator=_comptabilite_translator,
-        question_specifique_translator=_question_specific_translator,
-        academic_year_repository=_academic_year_repository,
-        emplacement_document_repository=_emplacement_document_repository,
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand: (
+        lambda msg_bus, cmd: recalculer_emplacements_documents_non_libres_proposition(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            question_specifique_translator=_question_specific_translator,
+            academic_year_repository=_academic_year_repository,
+            emplacement_document_repository=_emplacement_document_repository,
+        )
     ),
     ReclamerDocumentsAuCandidatParSICCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_sic(
         cmd,

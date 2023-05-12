@@ -31,7 +31,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
 
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import StatutDocument, TypeDocument
+from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument, TypeEmplacementDocument
 from admission.forms import AdmissionFileUploadField, CustomDateInput
 from admission.templatetags.admission import formatted_language
 
@@ -121,12 +121,12 @@ class RequestAllDocumentsForm(forms.Form):
         self.fields['message_content'].widget.config['language'] = get_language()
 
         for document in documents:
-            if document.statut == StatutDocument.A_RECLAMER.name:
-                if document.uuids:
+            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
+                if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:
                     label = '<span class="fa-solid fa-link-slash"></span> '
-                if document.type == TypeDocument.CANDIDAT_FAC.name:
+                if document.type == TypeEmplacementDocument.LIBRE_CANDIDAT_FAC.name:
                     label += '<i class="fa-solid fa-building-columns"/> '
                 label += document.libelle
 

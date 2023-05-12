@@ -32,133 +32,66 @@ from django.utils.text import slugify
 from admission.contrib.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.form_item import TRANSLATION_LANGUAGES
-from admission.ddd.admission.domain.model.demande import DemandeIdentity
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.validator.exceptions import (
     PropositionNonTrouveeException,
+    EmplacementDocumentNonTrouveException,
 )
 from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
-from admission.ddd.admission.enums.emplacement_document import TypeDocument, OngletsDemande, StatutDocument
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
+    EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
+    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+)
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
-from osis_common.ddd.interface import EntityIdentity, ApplicationService, RootEntity
+from admission.infrastructure.utils import get_document_from_identifier
 
 
 class EmplacementDocumentRepository(IEmplacementDocumentRepository):
     @classmethod
-    def search(cls, entity_ids: Optional[List[EntityIdentity]] = None, **kwargs) -> List[RootEntity]:
-        pass
-
-    @classmethod
-    def delete(cls, entity_id: EntityIdentity, **kwargs: ApplicationService) -> None:
-        pass
-
-    @classmethod
-    def save_emplacement_document_gestionnaire(cls, document: EmplacementDocument):
-        try:
-            admission: BaseAdmission = BaseAdmission.objects.get(uuid=document.demande.uuid)
-
-            # Save the metadata of the file
-            from osis_document.api.utils import change_remote_metadata
-
-            change_remote_metadata(
-                token=document.uuids[0],
-                metadata={
-                    'explicit_name': document.libelle,
-                    'author': document.auteur,
-                },
-            )
-
-            # Save the file into the admission
-            field_name = {
-                TypeDocument.CANDIDAT_SIC: 'sic_documents',
-                TypeDocument.CANDIDAT_FAC: 'fac_documents',
-                TypeDocument.INTERNE_SIC: 'uclouvain_sic_documents',
-                TypeDocument.INTERNE_FAC: 'uclouvain_fac_documents',
-            }[document.type]
-
-            getattr(admission, field_name).append(document.uuids[0])
-            admission.save(update_fields=[field_name])
-
-        except BaseAdmission.DoesNotExist:
-            raise PropositionNonTrouveeException
-
-    @classmethod
-    def save_emplacement_document_candidat(cls, entity: EmplacementDocument):
-        cls.save_multiple_emplacements_documents_candidat(entities=[entity])
-
-    @classmethod
-    def save(cls, entity: EmplacementDocument) -> None:
-        pass
-
-    @classmethod
-    def get(cls, entity_id: EntityIdentity) -> RootEntity:
-        pass
-
-    @classmethod
-    def get_documents_reclamables_proposition(
+    def search(
         cls,
-        proposition: Proposition,
+        entity_ids: Optional[List[EmplacementDocumentIdentity]] = None,
+        **kwargs,
     ) -> List[EmplacementDocument]:
-        return [
-            EmplacementDocument(
-                entity_id=EmplacementDocumentIdentity(identifiant=document_id),
-                demande=DemandeIdentity(uuid=proposition.entity_id.uuid),
-                libelle='',
-                libelle_langue_candidat='',
-                onglet=OngletsDemande.DOCUMENTS_ADDITIONNELS,
-                uuids=[],
-                auteur=document_content.get('author', ''),
-                type=TypeDocument[document_content.get('type', '')],
-                statut=StatutDocument[document_content.get('status', '')],
-                justification_gestionnaire=document_content.get('reason', ''),
-                soumis_le=None,
-                reclame_le=None,
-                a_echeance_le=None,
-                derniere_action_le=document_content.get('last_action_at')
-                and parse_datetime(document_content['last_action_at']),
-            )
-            for document_id, document_content in proposition.documents_demandes.items()
-            if document_content.get('status') == StatutDocument.A_RECLAMER.name
-        ]
-
-    @classmethod
-    def reinitialiser_emplacements_documents_candidat(
-        cls,
-        demande_identity: DemandeIdentity,
-        entities: List[EmplacementDocument],
-    ) -> None:
+        if not entity_ids:
+            return []
         try:
-            admission: BaseAdmission = BaseAdmission.objects.get(uuid=demande_identity.uuid)
+            admission = BaseAdmission.objects.get(uuid=entity_ids[0].proposition.uuid)
+            entities = []
 
-            # In the previous requested documents, only keep the free ones
-            admission.requested_documents = {
-                identifier: content
-                for identifier, content in admission.requested_documents.items()
-                if content.get('type') != TypeDocument.NON_LIBRE.name
-            }
+            for entity_id in entity_ids:
+                pass
+                emplacement_document = get_document_from_identifier(admission, entity_id.identifiant)
 
-            # Add the documents requested by the system
-            for entity in entities:
-                admission.requested_documents[entity.entity_id.identifiant] = entity.get_infos_a_sauvegarder()
+                if not emplacement_document:
+                    raise EmplacementDocumentNonTrouveException
 
-            admission.save(update_fields=['requested_documents'])
+                entities.append(cls.entity_from_dict(entity_id=entity_id, emplacement_document=emplacement_document))
+
+            return entities
 
         except BaseAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
 
     @classmethod
-    def save_multiple_emplacements_documents_candidat(cls, entities: List[EmplacementDocument]) -> None:
+    def save_multiple_emplacements_documents_reclamables(cls, entities: List[EmplacementDocument]) -> None:
         if not entities:
             return
         try:
-            admission: BaseAdmission = BaseAdmission.objects.get(uuid=entities[0].demande.uuid)
-            with transaction.atomic():
+            admission: BaseAdmission = BaseAdmission.objects.get(uuid=entities[0].entity_id.proposition.uuid)
 
+            with transaction.atomic():
                 for entity in entities:
-                    # Create a specific question for each free document
-                    if (
-                        entity.type in {TypeDocument.CANDIDAT_SIC, TypeDocument.CANDIDAT_FAC}
+                    if entity.type.name not in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
+                        raise NotImplementedError
+
+                    # Create a specific question for each new free document
+                    elif (
+                        entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES
                         and entity.entity_id.identifiant not in admission.requested_documents
                     ):
                         form_item = AdmissionFormItem(
@@ -179,7 +112,7 @@ class EmplacementDocumentRepository(IEmplacementDocumentRepository):
                         )
                         form_item_instantiation.save()
 
-                    admission.requested_documents[entity.entity_id.identifiant] = entity.get_infos_a_sauvegarder()
+                    admission.requested_documents[entity.entity_id.identifiant] = cls.entity_to_dict(entity)
 
                 admission.save(update_fields=['requested_documents'])
 
@@ -187,27 +120,187 @@ class EmplacementDocumentRepository(IEmplacementDocumentRepository):
             raise PropositionNonTrouveeException
 
     @classmethod
-    def delete_emplacement_candidat(
+    def entity_to_dict(cls, entity: EmplacementDocument) -> dict:
+        return {
+            'last_actor': entity.dernier_acteur,
+            'reason': entity.justification_gestionnaire,
+            'type': entity.type.name,
+            'last_action_at': entity.derniere_action_le,
+            'status': entity.statut.name,
+            'requested_at': entity.reclame_le,
+            'deadline_at': entity.a_echeance_le,
+        }
+
+    @classmethod
+    def save_emplacement_document_libre_non_reclamable(cls, emplacement_document: EmplacementDocument):
+        try:
+            admission: BaseAdmission = BaseAdmission.objects.get(uuid=emplacement_document.entity_id.proposition.uuid)
+
+            # Save the metadata of the file
+            from osis_document.api.utils import change_remote_metadata
+
+            change_remote_metadata(
+                token=emplacement_document.uuids_documents[0],
+                metadata={
+                    'explicit_name': emplacement_document.libelle,
+                    'author': emplacement_document.dernier_acteur,
+                },
+            )
+
+            # Save the file into the admission
+            field_name = {
+                TypeEmplacementDocument.LIBRE_CANDIDAT_SIC: 'sic_documents',
+                TypeEmplacementDocument.LIBRE_CANDIDAT_FAC: 'fac_documents',
+                TypeEmplacementDocument.LIBRE_INTERNE_SIC: 'uclouvain_sic_documents',
+                TypeEmplacementDocument.LIBRE_INTERNE_FAC: 'uclouvain_fac_documents',
+            }[emplacement_document.type]
+
+            getattr(admission, field_name).append(emplacement_document.uuids_documents[0])
+            admission.save(update_fields=[field_name])
+
+        except BaseAdmission.DoesNotExist:
+            raise PropositionNonTrouveeException
+
+    @classmethod
+    def save_emplacement_document_reclamable(cls, entity: EmplacementDocument):
+        cls.save_multiple_emplacements_documents_reclamables(entities=[entity])
+
+    @classmethod
+    def save_multiple(cls, entities: List[EmplacementDocument]) -> None:
+        return cls.save_multiple_emplacements_documents_reclamables(entities=entities)
+
+    @classmethod
+    def save(cls, entity: EmplacementDocument) -> None:
+        if entity.type.name in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
+            return cls.save_emplacement_document_reclamable(entity)
+        elif entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES:
+            return cls.save_emplacement_document_libre_non_reclamable(entity)
+        raise NotImplementedError
+
+    @classmethod
+    def get(cls, entity_id: EmplacementDocumentIdentity) -> EmplacementDocument:
+        try:
+            admission = BaseAdmission.objects.get(uuid=entity_id.proposition.uuid)
+            emplacement_document = get_document_from_identifier(admission, entity_id.identifiant)
+
+            if not emplacement_document:
+                raise EmplacementDocumentNonTrouveException
+
+            return cls.entity_from_dict(entity_id, emplacement_document)
+
+        except BaseAdmission.DoesNotExist:
+            raise PropositionNonTrouveeException
+
+    @classmethod
+    def entity_from_dict(
         cls,
         entity_id: EmplacementDocumentIdentity,
-        demande_entity_id: DemandeIdentity,
-        type_document: TypeDocument,
+        emplacement_document: dict,
+    ) -> EmplacementDocument:
+        return EmplacementDocument(
+            entity_id=entity_id,
+            uuids_documents=emplacement_document['uuids'],
+            type=TypeEmplacementDocument[emplacement_document['type']],
+            statut=StatutEmplacementDocument[emplacement_document['status']],
+            justification_gestionnaire=emplacement_document['reason'] or '',
+            libelle='',  # TODO ?
+            reclame_le=emplacement_document['requested_at'] and parse_datetime(emplacement_document['requested_at']),
+            a_echeance_le=emplacement_document['deadline_at'] and parse_datetime(emplacement_document['deadline_at']),
+            derniere_action_le=emplacement_document['last_action_at']
+            and parse_datetime(emplacement_document['last_action_at']),
+            dernier_acteur=emplacement_document['last_actor'],
+        )
+
+    @classmethod
+    def reinitialiser_emplacements_documents_non_libres(
+        cls,
+        proposition_identity: PropositionIdentity,
+        entities: List[EmplacementDocument],
     ) -> None:
         try:
-            admission = BaseAdmission.objects.get(uuid=demande_entity_id.uuid)
-            admission.requested_documents.pop(entity_id.identifiant)
-            with transaction.atomic():
-                if type_document in {TypeDocument.CANDIDAT_SIC, TypeDocument.CANDIDAT_FAC}:
-                    # For free documents, also delete the specific question
-                    specific_question_uuid = entity_id.identifiant.split('.')[-1]
-                    form_item_instantiation_to_delete = AdmissionFormItemInstantiation.objects.filter(
-                        form_item__uuid=specific_question_uuid
-                    ).first()
-                    related_form_item = form_item_instantiation_to_delete.form_item
-                    form_item_instantiation_to_delete.delete()
-                    related_form_item.delete()
+            admission: BaseAdmission = BaseAdmission.objects.get(uuid=proposition_identity.uuid)
+            entities_to_keep = set(entity.entity_id.identifiant for entity in entities)
 
-                admission.save(update_fields=['requested_documents'])
+            # Remove the previous non free documents that are not requested anymore
+            for requested_document_identifier in list(admission.requested_documents.keys()):
+                if (
+                    admission.requested_documents[requested_document_identifier].get('type')
+                    == TypeEmplacementDocument.NON_LIBRE.name
+                    and requested_document_identifier not in entities_to_keep
+                ):
+                    del admission.requested_documents[requested_document_identifier]
+
+            # Add the new documents requested by the system
+            for entity in entities:
+                if entity.entity_id.identifiant not in admission.requested_documents:
+                    admission.requested_documents[entity.entity_id.identifiant] = cls.entity_to_dict(entity)
+
+            admission.save(update_fields=['requested_documents'])
+
+        except BaseAdmission.DoesNotExist:
+            raise PropositionNonTrouveeException
+
+    @classmethod
+    def delete(cls, entity_id: EmplacementDocumentIdentity, supprimer_donnees=False, **kwargs) -> None:
+        try:
+            admission = BaseAdmission.objects.get(uuid=entity_id.proposition.uuid)
+            emplacement_document = get_document_from_identifier(admission, entity_id.identifiant)
+
+            if not emplacement_document:
+                raise EmplacementDocumentNonTrouveException
+
+            model_object = emplacement_document.get('obj')
+            model_field = emplacement_document.get('field')
+            specific_question_uuid = emplacement_document.get('specific_question_uuid')
+
+            entity = cls.entity_from_dict(entity_id, emplacement_document)
+
+            if supprimer_donnees and entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES:
+                # Remove the document from the admission field
+                getattr(model_object, model_field).remove(entity.uuids_documents[0])
+                model_object.save(update_fields=[model_field])
+
+            elif entity.type.name in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
+                admission_update_fields = []
+
+                # Remove the document from the field of the related object
+                if supprimer_donnees:
+
+                    if specific_question_uuid:
+                        # For a specific question, remove the answer from the specific question field of the admission
+                        admission_update_fields = [model_field]
+                        admission.specific_question_answers.pop(specific_question_uuid, None)
+
+                    else:
+                        # Otherwise, reset the related field in the specific object
+                        setattr(model_object, model_field, [])
+
+                        if model_object == admission:
+                            admission_update_fields = [model_field]
+
+                # Don't keep the data related to the document request
+                else:
+                    admission.requested_documents.pop(entity.entity_id.identifiant, None)
+                    admission_update_fields.append('requested_documents')
+
+                with transaction.atomic():
+                    if admission_update_fields:
+                        admission.save(update_fields=admission_update_fields)
+
+                    if model_object != admission:
+                        model_object.save(update_fields=[model_field])
+
+                    # Remove the specific question for a free question
+                    if entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
+                        form_item_instantiation_to_delete = AdmissionFormItemInstantiation.objects.filter(
+                            form_item__uuid=specific_question_uuid
+                        ).first()
+                        related_form_item = form_item_instantiation_to_delete.form_item
+                        form_item_instantiation_to_delete.delete()
+                        related_form_item.delete()
+
+            else:
+                raise NotImplementedError
 
         except BaseAdmission.DoesNotExist:
             raise PropositionNonTrouveeException

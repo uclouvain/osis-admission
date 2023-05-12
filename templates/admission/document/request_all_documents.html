@@ -22,47 +22,27 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-<form
-    id="request-all-documents-form"
-    method="post"
-    hx-post="{% url 'admission:general-education:document:document' uuid=view.kwargs.uuid %}"
-    class="no-prevent-quitting"
->
-  <div id="request-all-documents-form-fields" class="modal-body">
-    {% bootstrap_form_errors form %}
-    {% csrf_token %}
-    {% bootstrap_field form.deadline %}
-    {% bootstrap_field form.documents %}
-    <button
-        id="object-reset-button"
-        class="btn btn-primary btn-sm reset-button"
-    >
-      <i class="fa-solid fa-arrow-rotate-right"></i>
-      {% translate 'Reset' %}
-    </button>
-    {% bootstrap_field form.message_object %}
-    <button
-        id="content-reset-button"
-        class="btn btn-primary btn-sm reset-button"
-    >
-      <i class="fa-solid fa-arrow-rotate-right"></i>
-      {% translate 'Reset' %}
-    </button>
-    {% bootstrap_field form.message_content %}
-  </div>
-  <div class="modal-footer">
-    <button
-        type="submit"
-        class="btn btn-success"
-        name="request-all-form"
-    >
-      <i class="fa-solid fa-envelope"></i>
-      {% translate 'Send' %}
-    </button>
-    <button type="button" class="cancel-button btn btn-default" data-dismiss="modal">
-      {% translate 'Close' %}
-    </button>
-  </div>
+<div>
+  {% bootstrap_form_errors form %}
+  {% csrf_token %}
+  {% bootstrap_field form.deadline %}
+  {% bootstrap_field form.documents %}
+  <button
+      id="object-reset-button"
+      class="btn btn-primary btn-sm reset-button"
+  >
+    <i class="fa-solid fa-arrow-rotate-right"></i>
+    {% translate 'Reset' %}
+  </button>
+  {% bootstrap_field form.message_object %}
+  <button
+      id="content-reset-button"
+      class="btn btn-primary btn-sm reset-button"
+  >
+    <i class="fa-solid fa-arrow-rotate-right"></i>
+    {% translate 'Reset' %}
+  </button>
+  {% bootstrap_field form.message_content %}
   <div id="hidden-message-content" class="hidden"></div>
   <script>
       $(document).ready(function () {
@@ -123,4 +103,4 @@
           });
       });
   </script>
-</form>
+</div>

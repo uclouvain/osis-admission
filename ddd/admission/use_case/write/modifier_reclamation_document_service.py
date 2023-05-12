@@ -23,21 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import AnnulerReclamationEmplacementDocumentCommand
+
+from admission.ddd.admission.commands import ModifierReclamationEmplacementDocumentCommand
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
-def annuler_reclamation_emplacement_document(
-    cmd: 'AnnulerReclamationEmplacementDocumentCommand',
+def modifier_reclamation_emplacement_document(
+    cmd: 'ModifierReclamationEmplacementDocumentCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
 ) -> EmplacementDocumentIdentity:
-    entity_id = EmplacementDocumentIdentity(
-        identifiant=cmd.identifiant_emplacement,
-        proposition=PropositionIdentity(cmd.uuid_proposition),
+    emplacement_document = emplacement_document_repository.get(
+        entity_id=EmplacementDocumentIdentity(
+            identifiant=cmd.identifiant_emplacement,
+            proposition=PropositionIdentity(uuid=cmd.uuid_proposition),
+        )
     )
 
-    emplacement_document_repository.delete(entity_id=entity_id, supprimer_donnees=False)
+    emplacement_document.specifier_reclamation(raison=cmd.raison, acteur=cmd.auteur)
 
-    return entity_id
+    emplacement_document_repository.save(entity=emplacement_document)
+
+    return emplacement_document.entity_id

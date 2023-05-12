@@ -210,8 +210,8 @@ class RecupererPropositionGestionnaireQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererDocumentsDemandeQuery(interface.QueryRequest):
-    uuid_demande: str
+class RecupererDocumentsPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -220,24 +220,25 @@ class RecupererQuestionsSpecifiquesQuery(RecupererQuestionsSpecifiquesQuery):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class DeterminerEmplacementsDocumentsDemandeCommand(interface.CommandRequest):
-    uuid_demande: str
+class RecalculerEmplacementsDocumentsNonLibresPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ReclamerDocumentsAuCandidatParSICCommand(interface.QueryRequest):
-    uuid_demande: str
-    identifiants_documents: List[str]
-    auteur: str
+class ReclamerDocumentsAuCandidatParSICCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiants_emplacements: List[str]
     a_echeance_le: datetime.date
     objet_message: str
     corps_message: str
+    auteur: str
+
 
 @attr.dataclass(frozen=True, slots=True)
-class ReclamerDocumentsAuCandidatParFACCommand(interface.QueryRequest):
-    uuid_demande: str
-    identifiants_documents: List[str]
-    auteur: str
+class ReclamerDocumentsAuCandidatParFACCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiants_emplacements: List[str]
     a_echeance_le: datetime.date
     objet_message: str
     corps_message: str
+    auteur: str

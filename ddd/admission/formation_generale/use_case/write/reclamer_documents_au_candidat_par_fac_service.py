@@ -23,6 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
+    EmplacementDocumentIdentityBuilder,
+)
 from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.commands import ReclamerDocumentsAuCandidatParFACCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
@@ -38,27 +41,30 @@ def reclamer_documents_au_candidat_par_fac(
     notification: 'INotification',
     historique: 'IHistorique',
 ) -> PropositionIdentity:
-    proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_demande))
+    proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    documents_reclamables = emplacement_document_repository.get_documents_reclamables_proposition(
-        proposition=proposition,
+    identifiants_documents_reclames = EmplacementDocumentIdentityBuilder.build_list(
+        cmd.identifiants_emplacements,
+        cmd.uuid_proposition,
     )
 
+    documents_reclames = emplacement_document_repository.search(entity_ids=identifiants_documents_reclames)
+
     emplacement_document_repository.reclamer_documents_au_candidat(
-        identifiants_documents_reclames=cmd.identifiants_documents,
-        documents_reclamables=documents_reclamables,
+        documents_reclames=documents_reclames,
         auteur=cmd.auteur,
         a_echeance_le=cmd.a_echeance_le,
     )
 
-    proposition.reclamer_documents_par_sic(documents_demandes=documents_reclamables)
+    emplacement_document_repository.save_multiple(entities=documents_reclames)
+    proposition.reclamer_documents_par_fac()
 
     proposition_repository.save(proposition)
-    notification.demande_complements(
+    message = notification.demande_complements(
         proposition=proposition,
         objet_message=cmd.objet_message,
         corps_message=cmd.corps_message,
     )
-    historique.historiser_demande_complements_fac(proposition=proposition, acteur=cmd.auteur)
+    historique.historiser_demande_complements_fac(proposition=proposition, acteur=cmd.auteur, message=message)
 
     return proposition.entity_id

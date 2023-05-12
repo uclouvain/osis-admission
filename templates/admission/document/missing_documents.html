@@ -38,10 +38,10 @@
     </thead>
     <tbody class="selectable">
       {% for document in documents %}
-        {% if not document.uuids and document.type not in DOCUMENTS_UCLOUVAIN %}
+        {% if not document.document_uuids and document.type not in EMPLACEMENTS_DOCUMENTS_INTERNES %}
           {% ifchanged document.onglet %}
             <tr class="tab-name">
-              <td colspan="3">> {{ document.nom_onglet|default:_('Additional documents') }}</td>
+              <td colspan="3">> {{ document.nom_onglet }}</td>
             </tr>
           {% endifchanged %}
           <tr
@@ -56,23 +56,20 @@
           >
             <td class="auto-width">
               <i class="fa-solid fa-link-slash"></i>
-              {% if document.type == 'DEMANDE_FAC' %}
+              {% if document.type in EMPLACEMENTS_FAC %}
                 <i class="fa-solid fa-building-columns"></i>
               {% endif %}
               {{ document.libelle }}
             </td>
             <td class="min-width">
               <span class="flex-content-no-wrap align-items-baseline">
-                {% if document.auteur %}
-                  {{ document.auteur }}
-                  {% if document.statut == 'A_RECLAMER' %}
-                    <i class="fa-solid fa-file-circle-exclamation" title="{% translate 'To be requested' %}"></i>
-                  {% elif document.statut == 'RECLAME' %}
+                {% if document.dernier_acteur %}
+                  {{ document.dernier_acteur }}
+                  {% if document.statut == 'RECLAME' %}
                     <i class="fa-solid fa-envelope" title="{% translate 'Requested' %}"></i>
                   {% endif %}
                 {% else %}
                   {% translate 'System' %}
-                  <i class="fa-solid fa-gear"></i>
                 {% endif %}
               </span>
             </td>

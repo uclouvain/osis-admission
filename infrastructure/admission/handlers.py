@@ -35,19 +35,27 @@ COMMAND_HANDLERS = {
         cmd,
         lister_toutes_demandes_service=ListerToutesDemandes(),
     ),
-    DeposerDocumentLibreParGestionnaireCommand: lambda msg_bus, cmd: deposer_document_libre_par_gestionnaire(
+    InitierEmplacementDocumentLibreInterneCommand: lambda msg_bus, cmd: initier_emplacement_document_libre_interne(
         cmd,
         emplacement_document_repository=EmplacementDocumentRepository(),
     ),
-    ReclamerDocumentLibreCommand: lambda msg_bus, cmd: reclamer_document_libre(
+    InitierEmplacementDocumentLibreAReclamerCommand: lambda msg_bus, cmd: initier_emplacement_document_libre_a_reclamer(
         cmd,
         emplacement_document_repository=EmplacementDocumentRepository(),
     ),
-    ReclamerDocumentCommand: lambda msg_bus, cmd: reclamer_document(
+    InitierEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initier_emplacement_document_a_reclamer(
         cmd,
         emplacement_document_repository=EmplacementDocumentRepository(),
     ),
-    AnnulerReclamationDocumentCommand: lambda msg_bus, cmd: annuler_reclamation_document(
+    AnnulerReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: annuler_reclamation_emplacement_document(
+        cmd,
+        emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    ModifierReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: modifier_reclamation_emplacement_document(
+        cmd,
+        emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    SupprimerEmplacementDocumentCommand: lambda msg_bus, cmd: supprimer_emplacement_document(
         cmd,
         emplacement_document_repository=EmplacementDocumentRepository(),
     ),

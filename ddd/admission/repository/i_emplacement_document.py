@@ -25,46 +25,43 @@
 # ##############################################################################
 import datetime
 from abc import ABCMeta
-from typing import List
+from typing import List, Optional
 
-from admission.ddd.admission.domain.model.demande import DemandeIdentity
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
-from admission.ddd.admission.enums.emplacement_document import TypeDocument
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from osis_common.ddd import interface
 
 
 class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABCMeta):
     @classmethod
-    def get_documents_reclamables_proposition(
-        cls,
-        proposition: Proposition,
-    ) -> List[EmplacementDocument]:
-        raise NotImplementedError
-
-    @classmethod
     def reclamer_documents_au_candidat(
         cls,
-        identifiants_documents_reclames: List[str],
-        documents_reclamables: List[EmplacementDocument],
+        documents_reclames: List[EmplacementDocument],
         auteur: str,
         a_echeance_le: datetime.date,
     ):
         heure = datetime.datetime.now()
-        for document in documents_reclamables:
-            if document.entity_id.identifiant in identifiants_documents_reclames:
-                document.reclamer_au_candidat(
-                    auteur=auteur,
-                    a_echeance_le=a_echeance_le,
-                    reclame_le=heure,
-                )
+        for document in documents_reclames:
+            document.reclamer_au_candidat(
+                auteur=auteur,
+                a_echeance_le=a_echeance_le,
+                reclame_le=heure,
+            )
 
     @classmethod
-    def save_emplacement_document_gestionnaire(cls, entity: EmplacementDocument) -> None:
+    def get(cls, entity_id: EmplacementDocumentIdentity) -> EmplacementDocument:
         raise NotImplementedError
 
     @classmethod
-    def save_emplacement_document_candidat(cls, entity: EmplacementDocument) -> None:
+    def search(
+        cls,
+        entity_ids: Optional[List[EmplacementDocumentIdentity]] = None,
+        **kwargs,
+    ) -> List[EmplacementDocument]:
+        raise NotImplementedError
+
+    @classmethod
+    def delete(cls, entity_id: EmplacementDocumentIdentity, supprimer_donnees=False, **kwargs) -> None:
         raise NotImplementedError
 
     @classmethod
@@ -72,22 +69,13 @@ class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABC
         raise NotImplementedError
 
     @classmethod
-    def delete_emplacement_candidat(
-        cls,
-        entity_id: EmplacementDocumentIdentity,
-        demande_entity_id: DemandeIdentity,
-        type_document: TypeDocument,
-    ) -> None:
+    def save_multiple(cls, entities: List[EmplacementDocument]) -> None:
         raise NotImplementedError
 
     @classmethod
-    def save_multiple_emplacements_documents_candidat(cls, entities: List[EmplacementDocument]) -> None:
-        raise NotImplementedError
-
-    @classmethod
-    def reinitialiser_emplacements_documents_candidat(
+    def reinitialiser_emplacements_documents_non_libres(
         cls,
-        demande_identity: DemandeIdentity,
+        proposition_identity: PropositionIdentity,
         entities: List[EmplacementDocument],
     ) -> None:
         raise NotImplementedError

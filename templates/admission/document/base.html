@@ -85,20 +85,17 @@
           >
             <i class="fa-solid fa-envelope"></i>
             {% translate 'Request the documents from the candidate' %}
-            <i class="fa-solid fa-paperclip"></i>
           </button>
         </div>
-        <div id="request-all-form-modal" class="modal fade" tabindex="-1" role="dialog">
-          <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">{% translate 'Request the documents from the candidate' %}</h4>
-              </div>
-              {% include 'admission/document/request_all_documents.html' %}
-            </div>
-          </div>
-        </div>
+
+        <form
+            id="request-all-documents-form"
+            method="post"
+            hx-post="{% url request.resolver_match.namespace|add:':document' uuid=view.kwargs.uuid %}"
+            class="no-prevent-quitting"
+        >
+          {% include 'admission/document/request_all_documents_modal.html' %}
+        </form>
       </div>
     </div>
 
@@ -112,9 +109,12 @@
   {{ block.super }}
 
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
+  <link href="{% static "osis_document/osis-document.css" %}" rel="stylesheet" />
+
   <style>
     #document-container {
       display: flex;
+      max-height: 80vh;
     }
 
     .reset-button {
@@ -198,6 +198,8 @@
   <script src="{% static 'js/dependsOn.min.js' %}"></script>
   <script src="{% static 'admission/ckeditor.js' %}"></script>
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
+  <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
+
   <script>
       $(document).ready(function () {
           moment.locale("{% if candidate_language == 'fr-be' %}fr{% else %}en{% endif %}");

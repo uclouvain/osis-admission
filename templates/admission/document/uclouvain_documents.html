@@ -38,7 +38,7 @@
     </thead>
     <tbody class="selectable">
       {% for document in documents %}
-        {% if document.type in DOCUMENTS_UCLOUVAIN %}
+        {% if document.type in EMPLACEMENTS_DOCUMENTS_INTERNES %}
           <tr
             hx-get="{% url request.resolver_match.namespace|add:':detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
             hx-target="#document-details"
@@ -46,26 +46,16 @@
           >
             <td class="auto-width">
               <i class="fa-solid fa-school"></i>
-              {% if document.type == 'INTERNE_FAC' %}
+              {% if document.type in EMPLACEMENTS_FAC %}
                 <i class="fa-solid fa-building-columns"></i>
               {% endif %}
               {{ document.libelle }}
             </td>
             <td class="min-width">
-              {% if document.auteur %}
-                {{ document.auteur }}
-                {% if document.type == 'SYSTEME' %}
-                  <i class="fa-solid fa-play"></i>
-                {% else %}
-                  <i class="fa-solid fa-arrow-up"></i>
-                {% endif %}
-              {% else %}
-                {% translate 'System' %}
-                <i class="fa-solid fa-gear"></i>
-              {% endif %}
+              {{ document.document_soumis_par|default:_('System') }}
             </td>
             <td class="min-width">
-              {{ document.soumis_le|date:'DATETIME_FORMAT' }}
+              {{ document.document_soumis_le|date:'DATETIME_FORMAT' }}
             </td>
           </tr>
         {% endif %}

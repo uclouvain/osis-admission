@@ -23,14 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import AnnulerReclamationEmplacementDocumentCommand
+from admission.ddd.admission.commands import SupprimerEmplacementDocumentCommand
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
-def annuler_reclamation_emplacement_document(
-    cmd: 'AnnulerReclamationEmplacementDocumentCommand',
+def supprimer_emplacement_document(
+    cmd: 'SupprimerEmplacementDocumentCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
 ) -> EmplacementDocumentIdentity:
     entity_id = EmplacementDocumentIdentity(
@@ -38,6 +38,6 @@ def annuler_reclamation_emplacement_document(
         proposition=PropositionIdentity(cmd.uuid_proposition),
     )
 
-    emplacement_document_repository.delete(entity_id=entity_id, supprimer_donnees=False)
+    emplacement_document_repository.delete(entity_id=entity_id, supprimer_donnees=True)
 
     return entity_id

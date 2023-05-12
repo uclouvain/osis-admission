@@ -24,27 +24,24 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.commands import ReclamerDocumentCommand
-from admission.ddd.admission.domain.builder.document_builder import DocumentBuilder
-from admission.ddd.admission.enums.emplacement_document import StatutDocument
+from admission.ddd.admission.commands import InitierEmplacementDocumentLibreAReclamerCommand
+from admission.ddd.admission.domain.builder.emplacement_document_builder import EmplacementDocumentBuilder
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
-def reclamer_document(
-    cmd: 'ReclamerDocumentCommand',
+def initier_emplacement_document_libre_a_reclamer(
+    cmd: 'InitierEmplacementDocumentLibreAReclamerCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> str:
-    document = DocumentBuilder().initier_document(
-        statut_document=StatutDocument.A_RECLAMER.name,
-        uuid_demande=cmd.uuid_demande,
+) -> EmplacementDocumentIdentity:
+    emplacement_document = EmplacementDocumentBuilder().initier_emplacement_document_libre(
+        uuid_proposition=cmd.uuid_proposition,
         auteur=cmd.auteur,
-        nom_document='',
-        identifiant_document=cmd.identifiant_document,
-        type_document=cmd.type_document,
+        type_emplacement=cmd.type_emplacement,
+        libelle=cmd.libelle,
+        raison=cmd.raison,
     )
 
-    document.definir_a_reclamer(raison=cmd.raison, auteur=cmd.auteur)
+    emplacement_document_repository.save(entity=emplacement_document)
 
-    emplacement_document_repository.save_emplacement_document_candidat(entity=document)
-
-    return document.entity_id.identifiant
+    return emplacement_document.entity_id
