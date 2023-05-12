@@ -28,58 +28,43 @@ from typing import List, Optional
 
 import attr
 
-from admission.ddd.admission.domain.model.demande import DemandeIdentity
-from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument, OngletsDemande
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
 from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
 class EmplacementDocumentIdentity(interface.EntityIdentity):
     identifiant: str
+    proposition: PropositionIdentity
 
 
 @attr.dataclass(slots=True)
 class EmplacementDocument(interface.Entity):
     entity_id: EmplacementDocumentIdentity
-    demande: DemandeIdentity
-    libelle: str
-    libelle_langue_candidat: str
-    onglet: OngletsDemande
-    uuids: List[str]
-    auteur: str
-    type: TypeDocument
-    statut: StatutDocument
+    uuids_documents: List[str]
+    type: TypeEmplacementDocument
+    statut: StatutEmplacementDocument
     justification_gestionnaire: str
-    soumis_le: Optional[datetime] = None
+    libelle: str = ''
     reclame_le: Optional[datetime] = None
     a_echeance_le: Optional[date] = None
     derniere_action_le: Optional[datetime] = None
+    dernier_acteur: str = ''
 
-    def definir_a_reclamer(self, raison: str, auteur: str):
+    def specifier_reclamation(self, raison: str, acteur: str):
         self.justification_gestionnaire = raison
         self.derniere_action_le = datetime.now()
-        self.statut = StatutDocument.A_RECLAMER
-        self.auteur = auteur
+        self.statut = StatutEmplacementDocument.A_RECLAMER
+        self.dernier_acteur = acteur
 
-    def reclamer_au_candidat(
-        self,
-        auteur: str,
-        a_echeance_le: date,
-        reclame_le: datetime,
-    ):
-        self.auteur = auteur
+    def reclamer_au_candidat(self, auteur: str, reclame_le: datetime, a_echeance_le: date):
+        self.dernier_acteur = auteur
         self.a_echeance_le = a_echeance_le
         self.derniere_action_le = reclame_le
         self.reclame_le = reclame_le
-        self.statut = StatutDocument.RECLAME
+        self.statut = StatutEmplacementDocument.RECLAME
 
-    def get_infos_a_sauvegarder(self):
-        return {
-            'author': self.auteur,
-            'reason': self.justification_gestionnaire,
-            'type': self.type.name,
-            'last_action_at': self.derniere_action_le,
-            'status': self.statut.name,
-            'requested_at': self.reclame_le,
-            'deadline_at': self.a_echeance_le,
-        }
+    def remplir_par_gestionnaire(self, uuid_document):
+        self.uuids_documents = [uuid_document]
+        self.statut = StatutEmplacementDocument.VALIDE

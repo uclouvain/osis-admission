@@ -180,7 +180,7 @@ class PropositionNonTrouveeException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class DocumentNonTrouveException(BusinessException):
+class EmplacementDocumentNonTrouveException(BusinessException):
     status_code = "ADMISSION-17"
 
     def __init__(self, **kwargs):

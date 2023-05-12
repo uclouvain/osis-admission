@@ -23,21 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import AnnulerReclamationEmplacementDocumentCommand
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
+from typing import List
+
+from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
+    IEmplacementsDocumentsPropositionTranslator,
+)
 
 
-def annuler_reclamation_emplacement_document(
-    cmd: 'AnnulerReclamationEmplacementDocumentCommand',
-    emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> EmplacementDocumentIdentity:
-    entity_id = EmplacementDocumentIdentity(
-        identifiant=cmd.identifiant_emplacement,
-        proposition=PropositionIdentity(cmd.uuid_proposition),
-    )
+class EmplacementsDocumentsPropositionInMemoryTranslator(IEmplacementsDocumentsPropositionTranslator):
+    metadata = {}
 
-    emplacement_document_repository.delete(entity_id=entity_id, supprimer_donnees=False)
-
-    return entity_id
+    @classmethod
+    def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> dict:
+        return {uuid: cls.metadata.get(uuid, {}) for uuid in uuids_documents}

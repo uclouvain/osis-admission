@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
+
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 
@@ -33,5 +35,5 @@ class NotificationInMemory(INotification):
         pass
 
     @classmethod
-    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> None:
+    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> EmailMessage:
         pass

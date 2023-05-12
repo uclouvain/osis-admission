@@ -40,7 +40,7 @@ from admission.ddd.admission.domain.service.verifier_curriculum import VerifierC
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import Onglets
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande, IdentifiantBaseEmplacementDocument
 from admission.exports.admission_recap.attachments import (
     Attachment,
     get_identification_attachments,
@@ -457,9 +457,9 @@ def get_document_section(
     specific_questions_by_tab: Dict[str, List[QuestionSpecifiqueDTO]],
     load_content: bool,
 ) -> Section:
-    """Returns the additional document section."""
+    """Returns the requestable free documents."""
     return Section(
-        identifier=OngletsDemande.DOCUMENTS_ADDITIONNELS,
+        identifier=IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT,
         content_template='admission/exports/recap/includes/documents.html',
         context=context,
         extra_context={
@@ -476,7 +476,7 @@ def get_sections(
     context: ResumePropositionDTO,
     specific_questions: List[QuestionSpecifiqueDTO],
     load_content=False,
-    additional_documents=False,
+    with_free_requestable_documents=False,
 ):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
@@ -516,7 +516,7 @@ def get_sections(
 
     pdf_sections.append(get_confirmation_section(context, load_content))
 
-    if additional_documents:
+    if with_free_requestable_documents:
         # Section containing the additional requested documents
         pdf_sections.append(get_document_section(context, specific_questions_by_tab, load_content))
 

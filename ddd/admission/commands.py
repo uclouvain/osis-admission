@@ -58,34 +58,47 @@ class RecupererQuestionsSpecifiquesQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class DeposerDocumentLibreParGestionnaireCommand(interface.QueryRequest):
-    uuid_demande: str
+class InitierEmplacementDocumentLibreInterneCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_document: str
+    type_emplacement: str
+    libelle: str
     auteur: str
-    token_document: str
-    type_document: str
-    nom_document: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ReclamerDocumentLibreCommand(interface.QueryRequest):
-    uuid_demande: str
-    auteur: str
-    type_document: str
-    nom_document: str
+class InitierEmplacementDocumentLibreAReclamerCommand(interface.CommandRequest):
+    uuid_proposition: str
+    type_emplacement: str
+    libelle: str
     raison: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ReclamerDocumentCommand(interface.QueryRequest):
-    uuid_demande: str
-    identifiant_document: str
     auteur: str
-    type_document: str
-    raison: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class AnnulerReclamationDocumentCommand(interface.QueryRequest):
-    uuid_demande: str
-    identifiant_document: str
-    type_document: str
+class InitierEmplacementDocumentAReclamerCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    type_emplacement: str
+    raison: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierReclamationEmplacementDocumentCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    raison: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnnulerReclamationEmplacementDocumentCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerEmplacementDocumentCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str

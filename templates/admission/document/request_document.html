@@ -45,40 +45,8 @@
       </button>
     </div>
   {% endif %}
-  <div id="request-form-modal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">{% translate 'Designate the document as to be requested' %}</h4>
-        </div>
-        <div class="modal-body">
-          {% bootstrap_field request_form.reason %}
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary" name="request-form">{% translate 'Confirm' %}</button>
-          <button type="button" class="cancel-button btn btn-default" data-dismiss="modal">{% translate 'Close' %}</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div id="cancel-request-form-modal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">{% translate 'No longer designate the document as to be requested' %}</h4>
-        </div>
-        <div class="modal-body">
-          {% translate 'Please note that this document will be removed from the list of the missing documents.' %}
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary" name="request-form">{% translate 'Confirm' %}</button>
-          <button type="button" class="cancel-button btn btn-default" data-dismiss="modal">{% translate 'Close' %}</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  {% include 'admission/document/single_document_request_modal.html' %}
+  {% include 'admission/document/request_cancel_confirm_modal.html' %}
 </form>
 
 <script>
@@ -89,7 +57,7 @@
       if (this.checked) {
         $('#request-form-modal').modal('show');
       } else {
-        {% if document_type == 'CANDIDAT_SIC' or document_type == 'CANDIDAT_FAC' %}
+        {% if document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES %}
           $('#cancel-request-form-modal').modal('show');
         {% else %}
           $('#cancel-request-form-modal button[type="submit"]').click();

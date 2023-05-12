@@ -23,31 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from abc import abstractmethod
 from typing import List
 
-from admission.ddd.admission.domain.model.demande import DemandeIdentity
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.domain.builder.emplacement_document_builder import EmplacementDocumentBuilder
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument
+from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from admission.exports.admission_recap.section import get_sections
 from osis_common.ddd import interface
 
 
-class IEmplacementsDocumentsDemandeTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def recuperer_emplacements_dto(
-        cls,
-        resume_dto: ResumePropositionDTO,
-        questions_specifiques: List[QuestionSpecifiqueDTO],
-    ) -> List[EmplacementDocumentDTO]:
-        raise NotImplementedError
-
+class CalculerEmplacementsDocumentsNonLibresPropositionService(interface.DomainService):
     @classmethod
     def reinitialiser_emplacements(
         cls,
@@ -55,43 +42,31 @@ class IEmplacementsDocumentsDemandeTranslator(interface.DomainService):
         questions_specifiques: List[QuestionSpecifiqueDTO],
         emplacement_document_repository: IEmplacementDocumentRepository,
     ):
-        # Récupérer la liste de documents par onglet
+        # Récupérer la liste des emplacements de documents par onglet
         onglets = get_sections(
             context=resume_dto,
             specific_questions=questions_specifiques,
-            additional_documents=False,
+            with_free_requestable_documents=False,
         )
 
         documents = []
-        demande_identity = DemandeIdentity(uuid=resume_dto.proposition.uuid)
+
+        proposition_identity = PropositionIdentity(uuid=resume_dto.proposition.uuid)
 
         # Création d'un nouvel emplacement de document pour les documents catégorisés obligatoires à remplir
-        heure_actuelle = datetime.datetime.now()
         for onglet in onglets:
             for document in onglet.attachments:
                 if document.required and not document.uuids:
                     documents.append(
-                        EmplacementDocument(
-                            demande=demande_identity,
-                            entity_id=EmplacementDocumentIdentity(
-                                identifiant=f'{onglet.identifier}.{document.identifier}'
-                            ),
-                            onglet=onglet.identifier,
-                            libelle=document.label,
-                            uuids=document.uuids,
+                        EmplacementDocumentBuilder.initier_emplacement_document_a_reclamer(
+                            identifiant_emplacement=f'{onglet.identifier}.{document.identifier}',
+                            uuid_proposition=proposition_identity.uuid,
                             auteur='',
-                            type=TypeDocument.NON_LIBRE,
-                            statut=StatutDocument.A_RECLAMER,
-                            justification_gestionnaire='',
-                            soumis_le=None,
-                            reclame_le=None,
-                            a_echeance_le=None,
-                            derniere_action_le=heure_actuelle,
-                            libelle_langue_candidat=document.candidate_language_label,
+                            raison='',
                         )
                     )
 
-        emplacement_document_repository.reinitialiser_emplacements_documents_candidat(
-            demande_identity=demande_identity,
+        emplacement_document_repository.reinitialiser_emplacements_documents_non_libres(
+            proposition_identity=proposition_identity,
             entities=documents,
         )

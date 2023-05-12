@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.domain.service.i_historique import IHistorique, PropositionAdmission
@@ -42,9 +43,9 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
-    def historiser_demande_complements_sic(cls, proposition: PropositionAdmission, acteur: str):
+    def historiser_demande_complements_sic(cls, proposition: PropositionAdmission, acteur: str, message: EmailMessage):
         pass
 
     @classmethod
-    def historiser_demande_complements_fac(cls, proposition: PropositionAdmission, acteur: str):
+    def historiser_demande_complements_fac(cls, proposition: PropositionAdmission, acteur: str, message: EmailMessage):
         pass

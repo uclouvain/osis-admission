@@ -24,25 +24,34 @@
 #
 # ##############################################################################
 import datetime
+from typing import List
 
 from django.conf import settings
 from django.http import HttpResponse
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
+from django.views import View
 from django.views.generic import TemplateView, FormView
 from osis_mail_template.models import MailTemplate
+from rest_framework.status import HTTP_204_NO_CONTENT
 
 from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd.admission.commands import (
-    DeposerDocumentLibreParGestionnaireCommand,
-    ReclamerDocumentLibreCommand,
-    ReclamerDocumentCommand,
-    AnnulerReclamationDocumentCommand,
+    InitierEmplacementDocumentLibreInterneCommand,
+    InitierEmplacementDocumentLibreAReclamerCommand,
+    AnnulerReclamationEmplacementDocumentCommand,
+    InitierEmplacementDocumentAReclamerCommand,
+    ModifierReclamationEmplacementDocumentCommand,
+    SupprimerEmplacementDocumentCommand,
 )
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    DOCUMENTS_UCLOUVAIN,
-    TypeDocument,
-    StatutDocument,
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    EMPLACEMENTS_DOCUMENTS_INTERNES,
+    EMPLACEMENTS_FAC,
+    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
+    OngletsDemande,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.formation_generale.commands import (
@@ -73,6 +82,7 @@ from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
 __namespace__ = 'document'
+
 __all__ = [
     'DocumentView',
     'UploadFreeCandidateDocumentView',
@@ -80,6 +90,7 @@ __all__ = [
     'RequestFreeCandidateDocumentView',
     'DocumentDetailView',
     'RequestCandidateDocumentView',
+    'DeleteDocumentView',
 ]
 
 
@@ -91,25 +102,23 @@ class DocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, F
     form_class = RequestAllDocumentsForm
 
     retrieve_documents_command = {
-        CONTEXT_GENERAL: general_education_commands.RecupererDocumentsDemandeQuery,
+        CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,
     }
 
     @cached_property
     def is_fac(self):
-        return getattr(self.request.user, 'person', None) is not None and ProgramManager.belong_to(
-            self.request.user.person
-        )
+        return ProgramManager.belong_to(self.request.user.person)
 
     @cached_property
     def deadline(self):
         return datetime.date.today() + datetime.timedelta(days=15)
 
     @cached_property
-    def documents(self):
+    def documents(self) -> List[EmplacementDocumentDTO]:
         return (
             message_bus_instance.invoke(
                 self.retrieve_documents_command[self.current_context](
-                    uuid_demande=self.admission_uuid,
+                    uuid_proposition=self.admission_uuid,
                 )
             )
             if self.current_context in self.retrieve_documents_command
@@ -118,11 +127,15 @@ class DocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, F
 
     @cached_property
     def requestable_documents(self):
-        documents_to_exclude = TypeDocument.CANDIDAT_SIC.name if self.is_fac else TypeDocument.CANDIDAT_FAC.name
+        documents_to_exclude = (
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name
+            if self.is_fac
+            else TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name
+        )
         return [
             document
             for document in self.documents
-            if document.statut == StatutDocument.A_RECLAMER.name and document.type != documents_to_exclude
+            if document.statut == StatutEmplacementDocument.A_RECLAMER.name and document.type != documents_to_exclude
         ]
 
     def get_initial(self):
@@ -143,7 +156,8 @@ class DocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, F
         context = super().get_context_data(**kwargs)
 
         context['documents'] = self.documents
-        context['DOCUMENTS_UCLOUVAIN'] = DOCUMENTS_UCLOUVAIN
+        context['EMPLACEMENTS_DOCUMENTS_INTERNES'] = EMPLACEMENTS_DOCUMENTS_INTERNES
+        context['EMPLACEMENTS_FAC'] = EMPLACEMENTS_FAC
 
         context['requested_documents'] = {
             document.identifiant: {
@@ -216,8 +230,8 @@ class DocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, F
     def form_valid(self, form):
         message_bus_instance.invoke(
             ReclamerDocumentsAuCandidatParFACCommand(
-                uuid_demande=self.admission_uuid,
-                identifiants_documents=form.cleaned_data['documents'],
+                uuid_proposition=self.admission_uuid,
+                identifiants_emplacements=form.cleaned_data['documents'],
                 auteur=self.request.user.username,
                 a_echeance_le=form.cleaned_data['deadline'],
                 objet_message=form.cleaned_data['message_object'],
@@ -225,8 +239,8 @@ class DocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, F
             )
             if self.is_fac
             else ReclamerDocumentsAuCandidatParSICCommand(
-                uuid_demande=self.admission_uuid,
-                identifiants_documents=form.cleaned_data['documents'],
+                uuid_proposition=self.admission_uuid,
+                identifiants_emplacements=form.cleaned_data['documents'],
                 auteur=self.request.user.username,
                 a_echeance_le=form.cleaned_data['deadline'],
                 objet_message=form.cleaned_data['message_object'],
@@ -249,12 +263,12 @@ class BaseUploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequ
 
     def form_valid(self, form) -> HttpResponse:
         message_bus_instance.invoke(
-            DeposerDocumentLibreParGestionnaireCommand(
-                uuid_demande=self.kwargs.get('uuid'),
+            InitierEmplacementDocumentLibreInterneCommand(
+                uuid_proposition=self.kwargs.get('uuid'),
                 auteur=self.request.user.username,
-                token_document=form.cleaned_data['file'][0],
-                type_document=self.document_type,
-                nom_document=form.cleaned_data['file_name'],
+                uuid_document=form.cleaned_data['file'][0],
+                type_emplacement=self.document_type,
+                libelle=form.cleaned_data['file_name'],
             ),
         )
         return super().form_valid(self.form_class())
@@ -262,25 +276,27 @@ class BaseUploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequ
 
 class UploadFreeCandidateDocumentView(BaseUploadFreeCandidateDocumentView):
     urlpatterns = 'free-candidate-upload'
+    message_on_success = _('The document has been uploaded')
 
     @property
     def document_type(self):
         return (
-            TypeDocument.CANDIDAT_FAC.name
+            TypeEmplacementDocument.LIBRE_CANDIDAT_FAC.name
             if ProgramManager.belong_to(self.request.user.person)
-            else TypeDocument.CANDIDAT_SIC.name
+            else TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name
         )
 
 
 class UploadFreeInternalDocumentView(BaseUploadFreeCandidateDocumentView):
     urlpatterns = 'free-internal-upload'
+    message_on_success = _('The document has been uploaded')
 
     @property
     def document_type(self):
         return (
-            TypeDocument.INTERNE_FAC.name
+            TypeEmplacementDocument.LIBRE_INTERNE_FAC.name
             if ProgramManager.belong_to(self.request.user.person)
-            else TypeDocument.INTERNE_SIC.name
+            else TypeEmplacementDocument.LIBRE_INTERNE_SIC.name
         )
 
 
@@ -293,15 +309,15 @@ class RequestFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequire
 
     def form_valid(self, form) -> HttpResponse:
         message_bus_instance.invoke(
-            ReclamerDocumentLibreCommand(
-                uuid_demande=self.kwargs.get('uuid'),
+            InitierEmplacementDocumentLibreAReclamerCommand(
+                uuid_proposition=self.kwargs.get('uuid'),
                 auteur=self.request.user.username,
-                type_document=(
-                    TypeDocument.CANDIDAT_FAC.name
-                    if getattr(self.request.user, 'person', None) and ProgramManager.belong_to(self.request.user.person)
-                    else TypeDocument.CANDIDAT_SIC.name
+                type_emplacement=(
+                    TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name
+                    if ProgramManager.belong_to(self.request.user.person)
+                    else TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name
                 ),
-                nom_document=form.cleaned_data['file_name'],
+                libelle=form.cleaned_data['file_name'],
                 raison=form.cleaned_data['reason'],
             ),
         )
@@ -323,10 +339,10 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         document_identifier = self.kwargs.get('identifier')
 
         document = get_document_from_identifier(self.admission, document_identifier)
+        context['EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES'] = EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES
 
         if document:
             context['document_identifier'] = document_identifier
-            context['document_uuid'] = document.get('uuids')
             context['document_type'] = document.get('type')
             context['requestable_document'] = document.get('requestable')
             if document.get('uuids'):
@@ -340,7 +356,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
 
         if requested_document:
             request_initial = {
-                'is_requested': requested_document.get('status') == StatutDocument.A_RECLAMER.name,
+                'is_requested': requested_document.get('status') == StatutEmplacementDocument.A_RECLAMER.name,
                 'reason': requested_document.get('reason'),
             }
             context['request_reason'] = requested_document.get('reason')
@@ -389,24 +405,55 @@ class RequestCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMix
             return self.form_invalid(form)
 
         if form.cleaned_data['is_requested']:
-            message_bus_instance.invoke(
-                ReclamerDocumentCommand(
-                    uuid_demande=self.kwargs.get('uuid'),
-                    identifiant_document=self.document_identifier,
-                    auteur=self.request.user.username,
-                    type_document=document.get('type'),
-                    raison=form.cleaned_data['reason'],
+            if document.get('status') == StatutEmplacementDocument.A_RECLAMER.name:
+                message_bus_instance.invoke(
+                    ModifierReclamationEmplacementDocumentCommand(
+                        uuid_proposition=self.admission_uuid,
+                        identifiant_emplacement=self.document_identifier,
+                        raison=form.cleaned_data['reason'],
+                        auteur=self.request.user.username,
+                    )
                 )
-            )
-            self.message_on_success = _('The document has been designated as to be requested')
+            else:
+                message_bus_instance.invoke(
+                    InitierEmplacementDocumentAReclamerCommand(
+                        uuid_proposition=self.admission_uuid,
+                        identifiant_emplacement=self.document_identifier,
+                        type_emplacement=document.get('type'),
+                        raison=form.cleaned_data['reason'],
+                        auteur=self.request.user.username,
+                    )
+                )
+                self.message_on_success = _('The document has been designated as to be requested')
         else:
             message_bus_instance.invoke(
-                AnnulerReclamationDocumentCommand(
-                    uuid_demande=self.kwargs.get('uuid'),
-                    identifiant_document=self.document_identifier,
-                    type_document=document.get('type'),
+                AnnulerReclamationEmplacementDocumentCommand(
+                    uuid_proposition=self.admission_uuid,
+                    identifiant_emplacement=self.document_identifier,
                 )
             )
             self.message_on_success = _('The document is no longer designated as to be requested')
 
         return super().form_valid(form)
+
+
+class DeleteDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, View):
+    form_class = RequestDocumentForm
+    permission_required = 'admission.view_documents_management'
+    urlpatterns = {'delete': 'delete/<str:identifier>'}
+
+    def delete(self, request, *args, **kwargs):
+        identifier = self.kwargs.get('identifier')
+        identifier_parts = identifier.split('.')
+
+        message_bus_instance.invoke(
+            SupprimerEmplacementDocumentCommand(
+                uuid_proposition=self.admission_uuid,
+                identifiant_emplacement=identifier,
+            ),
+        )
+
+        if identifier_parts and identifier_parts[0] in OngletsDemande.get_names():
+            self.admission.update_requested_documents()
+
+        return HttpResponse(status=HTTP_204_NO_CONTENT)

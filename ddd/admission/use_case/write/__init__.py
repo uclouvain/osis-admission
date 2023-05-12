@@ -23,7 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .deposer_document_libre_par_gestionnaire_service import deposer_document_libre_par_gestionnaire
-from .reclamer_document_libre_service import reclamer_document_libre
-from .reclamer_document_service import reclamer_document
-from .annuler_reclamation_document_service import annuler_reclamation_document
+from .annuler_reclamation_document_service import annuler_reclamation_emplacement_document
+from .initier_emplacement_document_libre_interne import initier_emplacement_document_libre_interne
+from .initier_emplacement_document_a_reclamer_service import initier_emplacement_document_a_reclamer
+from .initier_emplacement_document_libre_a_reclamer_service import initier_emplacement_document_libre_a_reclamer
+from .modifier_reclamation_document_service import modifier_reclamation_emplacement_document
+from .supprimer_emplacement_document_service import supprimer_emplacement_document

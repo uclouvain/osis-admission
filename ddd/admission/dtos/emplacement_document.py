@@ -44,15 +44,16 @@ class EmplacementDocumentDTO(interface.Entity):
     identifiant: str
     libelle: str
     libelle_langue_candidat: str
-    uuids: List[str]
-    auteur: str
+    document_uuids: List[str]
     type: str
     statut: str
     justification_gestionnaire: str
-    soumis_le: Optional[datetime.datetime]
+    document_soumis_par: str
+    document_soumis_le: Optional[datetime.datetime]
     reclame_le: Optional[datetime.datetime]
+    dernier_acteur: str
     derniere_action_le: Optional[datetime.datetime]
     a_echeance_le: Optional[datetime.datetime]
     onglet: str
     nom_onglet: str
-    uuid_demande: str
+    uuid_proposition: str

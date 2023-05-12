@@ -155,7 +155,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'confirmation_elements': entity.elements_confirmation,
                 'late_enrollment': entity.est_inscription_tardive,
                 'submitted_profile': entity.profil_soumis_candidat.to_dict() if entity.profil_soumis_candidat else {},
-                'requested_documents': entity.documents_demandes,
             },
         )
 
@@ -243,7 +242,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
         try:
-            return cls._load_dto(GeneralEducationAdmissionProxy.objects.    for_dto().get(uuid=entity_id.uuid))
+            return cls._load_dto(GeneralEducationAdmissionProxy.objects.for_dto().get(uuid=entity_id.uuid))
         except GeneralEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
 
@@ -288,7 +287,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile)
             if admission.submitted_profile
             else None,
-            documents_demandes=admission.requested_documents,
         )
 
     @classmethod
@@ -315,7 +313,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
                 campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.training_management_faculty or admission.sigle_entite_gestion,  # from annotation
+                sigle_entite_gestion=admission.training_management_faculty
+                or admission.sigle_entite_gestion,  # from annotation
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,

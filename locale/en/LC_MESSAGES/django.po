@@ -384,7 +384,10 @@ msgstr ""
 msgid "Add an internal note"
 msgstr ""
 
-msgid "Additional documents"
+msgid "Additional documents to complete by the candidate"
+msgstr ""
+
+msgid "Additional documents uploaded by a manager"
 msgstr ""
 
 msgid "Additional information"
@@ -491,12 +494,6 @@ msgid ""
 "confirming the protection of the parent"
 msgstr ""
 
-msgid "Annual transcript"
-msgstr ""
-
-msgid "Annual transcript translation"
-msgstr ""
-
 msgid "Another address"
 msgstr ""
 
@@ -558,6 +555,9 @@ msgstr ""
 
 #, python-format
 msgid "Are you sure you want to restore \"%(object)s\"?"
+msgstr ""
+
+msgid "Are you sure your want to delete this document?"
 msgstr ""
 
 msgid ""
@@ -921,12 +921,6 @@ msgstr ""
 msgid "Candidate"
 msgstr ""
 
-msgid "Candidate FAC"
-msgstr ""
-
-msgid "Candidate SIC"
-msgstr ""
-
 msgid "Candidate nationality"
 msgstr ""
 
@@ -1215,16 +1209,6 @@ msgstr ""
 msgid "Copy of both sides of the residence permit valid for more than 3 months"
 msgstr ""
 
-msgid ""
-"Copy of both sides of the residence permit valid for more than 3 months "
-"(professional)"
-msgstr ""
-
-msgid ""
-"Copy of both sides of the residence permit valid for more than 3 months "
-"(replacement)"
-msgstr ""
-
 #, python-format
 msgid ""
 "Copy of both sides of the residence permit valid for more than 3 months of "
@@ -1393,13 +1377,7 @@ msgstr "Doctoral training"
 msgid "Data protection"
 msgstr ""
 
-msgid "Data related to the thesis"
-msgstr ""
-
 msgid "Date"
-msgstr ""
-
-msgid "Date of birth"
 msgstr ""
 
 msgid "Date of confirmation"
@@ -1475,6 +1453,9 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
+msgid "Delete the document"
+msgstr ""
+
 msgid "Delete?"
 msgstr ""
 
@@ -1487,10 +1468,10 @@ msgstr ""
 msgid "Description of your communication"
 msgstr ""
 
-msgid "Desired training"
+msgid "Designate the document as to be requested"
 msgstr ""
 
-msgid "Designate the document as to be requested"
+msgid "Desired training"
 msgstr ""
 
 msgid "Detailed curriculum vitae"
@@ -1603,6 +1584,9 @@ msgid "Double degree scholarship"
 msgstr ""
 
 msgid "Double or triple diplomation"
+msgstr ""
+
+msgid "Download the document"
 msgstr ""
 
 msgid "Dr."
@@ -1842,14 +1826,14 @@ msgstr ""
 msgid "File MIME types"
 msgstr ""
 
-msgctxt "tab"
-msgid "Finalization"
-msgstr ""
-
 msgid "File name"
 msgstr ""
 
 msgid "Filter by documents"
+msgstr ""
+
+msgctxt "tab"
+msgid "Finalization"
 msgstr ""
 
 msgid "Financing"
@@ -1926,6 +1910,24 @@ msgid "Former UCLouvain student"
 msgstr ""
 
 msgid "Fraudster (ARES)"
+msgstr ""
+
+msgid "Free and requestable by FAC"
+msgstr ""
+
+msgid "Free and requestable by SIC"
+msgstr ""
+
+msgid "Free and uploaded by FAC for the candidate"
+msgstr ""
+
+msgid "Free and uploaded by FAC for the managers"
+msgstr ""
+
+msgid "Free and uploaded by SIC for the candidate"
+msgstr ""
+
+msgid "Free and uploaded by SIC for the managers"
 msgstr ""
 
 msgid "French"
@@ -2290,12 +2292,6 @@ msgid "Institution Federation Wallonie-Bruxelles"
 msgstr ""
 
 msgid "Institution should be set when PhD has been set to yes or partial"
-msgstr ""
-
-msgid "Internal FAC"
-msgstr ""
-
-msgid "Internal SIC"
 msgstr ""
 
 msgid "Internal comment"
@@ -2741,13 +2737,6 @@ msgstr ""
 msgid "Missing"
 msgstr ""
 
-msgid "Mobile phone"
-msgstr ""
-
-msgctxt "admission"
-msgid "Mobile phone"
-msgstr ""
-
 msgid "Modern languages"
 msgstr ""
 
@@ -2905,6 +2894,9 @@ msgid "Noma"
 msgstr ""
 
 msgid "Non-retrievable attachment"
+msgstr ""
+
+msgid "Non-retrievable document"
 msgstr ""
 
 msgid "None of these proposals are relevant to me"
@@ -3907,9 +3899,6 @@ msgstr ""
 msgid "Specific question"
 msgstr ""
 
-msgid "Specific questions"
-msgstr ""
-
 msgid "Specificities"
 msgstr ""
 
@@ -4144,6 +4133,9 @@ msgid "The doctoral student"
 msgstr ""
 
 msgid "The document has been designated as to be requested"
+msgstr ""
+
+msgid "The document has been uploaded"
 msgstr ""
 
 msgid "The document is no longer designated as to be requested"
@@ -4571,9 +4563,6 @@ msgid "Upload a document"
 msgstr ""
 
 msgid "Upload the opinion on the renewal of the research mandate"
-msgstr ""
-
-msgid "Uploaded"
 msgstr ""
 
 msgid "VAE"

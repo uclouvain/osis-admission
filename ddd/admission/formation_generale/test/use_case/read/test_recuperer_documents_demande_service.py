@@ -29,7 +29,7 @@ import freezegun
 from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererDocumentsDemandeQuery,
+    RecupererDocumentsPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
@@ -40,7 +40,7 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 @freezegun.freeze_time('2023-10-01')
 class RecupererDocumentsDemandeServiceServiceTestCase(TestCase):
     def setUp(self):
-        self.cmd = RecupererDocumentsDemandeQuery(uuid_demande='uuid-MASTER-SCI')
+        self.cmd = RecupererDocumentsPropositionQuery(uuid_proposition='uuid-MASTER-SCI')
         self.message_bus = message_bus_in_memory_instance
 
         self.academic_year_repository = AcademicYearInMemoryRepository()
@@ -59,4 +59,4 @@ class RecupererDocumentsDemandeServiceServiceTestCase(TestCase):
 
     def test_get_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
-            self.message_bus.invoke(RecupererDocumentsDemandeQuery(uuid_demande='inexistant'))
+            self.message_bus.invoke(RecupererDocumentsPropositionQuery(uuid_proposition='inexistant'))

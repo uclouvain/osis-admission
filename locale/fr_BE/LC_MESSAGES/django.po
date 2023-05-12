@@ -450,8 +450,11 @@ msgstr "Ajouter une activité"
 msgid "Add an internal note"
 msgstr "Ajouter une note interne"
 
-msgid "Additional documents"
-msgstr "Documents additionnels"
+msgid "Additional documents to complete by the candidate"
+msgstr "Documents additionnels à compléter par le candidat"
+
+msgid "Additional documents uploaded by a manager"
+msgstr "Documents additionnels téléversés par un gestionnaire"
 
 msgid "Additional information"
 msgstr "Informations complémentaires"
@@ -569,12 +572,6 @@ msgstr ""
 "Annexe 26 ou 26 ou la carte A/B mentionnant le statut de réfugié ou la "
 "décision confirmant la protection du parent"
 
-msgid "Annual transcript"
-msgstr "Relevé de notes annuel"
-
-msgid "Annual transcript translation"
-msgstr "Traduction du relevé de notes annuel"
-
 msgid "Another address"
 msgstr "Une autre adresse"
 
@@ -640,6 +637,9 @@ msgstr "Êtes-vous sûr de vouloir refuser \"%(object)s\" ?"
 #, python-format
 msgid "Are you sure you want to restore \"%(object)s\"?"
 msgstr "Êtes-vous sûr de vouloir remettre \"%(object)s\" au statut soumis ?"
+
+msgid "Are you sure your want to delete this document?"
+msgstr "Êtes-vous sûr de vouloir supprimer ce document ?"
 
 msgid ""
 "Are you the child of a member of the staff of the UCLouvain or the Martin V "
@@ -1014,12 +1014,6 @@ msgstr "Demande annulée"
 msgid "Candidate"
 msgstr "Candidat"
 
-msgid "Candidate FAC"
-msgstr "Candidat FAC"
-
-msgid "Candidate SIC"
-msgstr "Candidat SIC"
-
 msgid "Candidate nationality"
 msgstr "Nationalité du candidat"
 
@@ -1335,20 +1329,6 @@ msgid "Copy of both sides of the residence permit valid for more than 3 months"
 msgstr ""
 "Copie recto-verso du titre de séjour d’une validité supérieure à 3 mois"
 
-msgid ""
-"Copy of both sides of the residence permit valid for more than 3 months "
-"(professional)"
-msgstr ""
-"Copie recto-verso du titre de séjour d’une validité supérieure à 3 mois "
-"(professionnel)"
-
-msgid ""
-"Copy of both sides of the residence permit valid for more than 3 months "
-"(replacement)"
-msgstr ""
-"Copie recto-verso du titre de séjour d’une validité supérieure à 3 mois "
-"(remplacement)"
-
 #, python-format
 msgid ""
 "Copy of both sides of the residence permit valid for more than 3 months of "
@@ -1546,14 +1526,8 @@ msgstr "Formation doctorale"
 msgid "Data protection"
 msgstr "Protection des données"
 
-msgid "Data related to the thesis"
-msgstr "Données relatives à la thèse"
-
 msgid "Date"
 msgstr "Date"
-
-msgid "Date of birth"
-msgstr "Date de naissance"
 
 msgid "Date of confirmation"
 msgstr "Date de l'épreuve de confirmation"
@@ -1628,6 +1602,9 @@ msgstr "Date de l'admission définitive :"
 msgid "Delete"
 msgstr "Supprimer"
 
+msgid "Delete the document"
+msgstr "Supprimer le document"
+
 msgid "Delete?"
 msgstr "Supprimer ?"
 
@@ -1640,11 +1617,11 @@ msgstr "Description de l'activité"
 msgid "Description of your communication"
 msgstr "Description de votre communication"
 
-msgid "Desired training"
-msgstr "Formation souhaitée"
-
 msgid "Designate the document as to be requested"
 msgstr "Désigner le document comme étant à réclamer"
+
+msgid "Desired training"
+msgstr "Formation souhaitée"
 
 msgid "Detailed curriculum vitae"
 msgstr "Curriculum vitae détaillé"
@@ -1757,6 +1734,9 @@ msgstr "Bourse double diplomation"
 
 msgid "Double or triple diplomation"
 msgstr "Double ou triple diplomation"
+
+msgid "Download the document"
+msgstr "Télécharger un document"
 
 msgid "Dr."
 msgstr "Dr."
@@ -1997,15 +1977,15 @@ msgstr "Fichier"
 msgid "File MIME types"
 msgstr "Types de fichier MIME"
 
-msgctxt "tab"
-msgid "Finalization"
-msgstr "Finalisation"
-
 msgid "File name"
 msgstr "Nom du fichier"
 
 msgid "Filter by documents"
 msgstr "Filtrer par documents"
+
+msgctxt "tab"
+msgid "Finalization"
+msgstr "Finalisation"
 
 msgid "Financing"
 msgstr "Financement"
@@ -2108,6 +2088,24 @@ msgstr "Ancien étudiant UCLouvain"
 
 msgid "Fraudster (ARES)"
 msgstr "Fraudeur (ARES)"
+
+msgid "Free and requestable by FAC"
+msgstr "Libre et réclamable par FAC"
+
+msgid "Free and requestable by SIC"
+msgstr "Libre et réclamable par SIC"
+
+msgid "Free and uploaded by FAC for the candidate"
+msgstr "Libre et téléversé par FAC pour le candidat"
+
+msgid "Free and uploaded by FAC for the managers"
+msgstr "Libre et téléversé par FAC pour les gestionnaires"
+
+msgid "Free and uploaded by SIC for the candidate"
+msgstr "Libre et téléversé par SIC pour le candidat"
+
+msgid "Free and uploaded by SIC for the managers"
+msgstr "Libre et téléversé par SIC pour les gestionnaires"
 
 msgid "French"
 msgstr "Français"
@@ -2565,12 +2563,6 @@ msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 "L'institution doit être renseignée quand le doctorat a déjà été réalisé "
 "partiellement ou complètement"
-
-msgid "Internal FAC"
-msgstr "Interne FAC"
-
-msgid "Internal SIC"
-msgstr "Interne SIC"
 
 msgid "Internal comment"
 msgstr "Commentaire interne"
@@ -3095,13 +3087,6 @@ msgstr "Sujet du message"
 msgid "Missing"
 msgstr "Manquants"
 
-msgid "Mobile phone"
-msgstr "Téléphone mobile (GSM)"
-
-msgctxt "admission"
-msgid "Mobile phone"
-msgstr "Téléphone mobile"
-
 msgid "Modern languages"
 msgstr "Langues modernes"
 
@@ -3265,6 +3250,9 @@ msgstr "Noma"
 
 msgid "Non-retrievable attachment"
 msgstr "Pièce jointe non récupérable"
+
+msgid "Non-retrievable document"
+msgstr "Document non récupérable"
 
 msgid "None of these proposals are relevant to me"
 msgstr "Aucune de ces propositions ne me correspond"
@@ -4333,9 +4321,6 @@ msgstr "Profil particulier"
 msgid "Specific question"
 msgstr "Question spécifique"
 
-msgid "Specific questions"
-msgstr "Questions spécifiques"
-
 msgid "Specificities"
 msgstr "Spécificités"
 
@@ -4601,6 +4586,9 @@ msgstr "Le doctorant"
 
 msgid "The document has been designated as to be requested"
 msgstr "Le document a été désigné comme étant à réclamer"
+
+msgid "The document has been uploaded"
+msgstr "Le document a été téléversé"
 
 msgid "The document is no longer designated as to be requested"
 msgstr "Le document n'est plus désigné comme étant à réclamer"
@@ -5067,9 +5055,6 @@ msgstr "Téléverser un document"
 
 msgid "Upload the opinion on the renewal of the research mandate"
 msgstr "Téléverser l'avis sur le renouvellement du mandat de recherche"
-
-msgid "Uploaded"
-msgstr "Téléversé"
 
 msgid "VAE"
 msgstr "Valorisation des acquis de l'expérience"

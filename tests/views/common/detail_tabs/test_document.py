@@ -26,6 +26,7 @@
 import uuid
 from unittest.mock import patch, ANY
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
@@ -34,7 +35,11 @@ from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission, AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
-from admission.ddd.admission.enums.emplacement_document import TypeDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    IdentifiantBaseEmplacementDocument,
+    StatutEmplacementDocument,
+)
 from admission.forms import AdmissionFileUploadField
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
@@ -63,6 +68,7 @@ class DocumentViewTestCase(TestCase):
         )
 
         cls.file_uuid = uuid.uuid4()
+        cls.default_headers = {'HTTP_HX-Request': 'true'}
 
     def setUp(self):
         # Mock documents
@@ -98,16 +104,12 @@ class DocumentViewTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch(
-            'admission.infrastructure.admission.domain.service.recuperer_documents_demande.get_remote_tokens'
-        )
+        patcher = patch('osis_document.api.utils.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
-        patcher = patch(
-            'admission.infrastructure.admission.domain.service.recuperer_documents_demande.get_several_remote_metadata'
-        )
+        patcher = patch('osis_document.api.utils.get_several_remote_metadata')
         patched = patcher.start()
         patched.side_effect = lambda tokens: {token: file_metadata for token in tokens}
         self.addCleanup(patcher.stop)
@@ -129,7 +131,7 @@ class DocumentViewTestCase(TestCase):
             'admission:general-education:document:free-candidate-upload',
             uuid=self.general_admission.uuid,
         )
-        response = self.client.get(url)
+        response = self.client.get(url, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['admission'].uuid, self.general_admission.uuid)
@@ -146,6 +148,7 @@ class DocumentViewTestCase(TestCase):
         response = self.client.post(
             url,
             data={},
+            **self.default_headers,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -162,6 +165,7 @@ class DocumentViewTestCase(TestCase):
                 'file_0': ['file_0-token'],
                 'file_1': ['file_1-token'],
             },
+            **self.default_headers,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -183,6 +187,7 @@ class DocumentViewTestCase(TestCase):
                 'file_name': 'My file name',
                 'file_0': ['file_0-token'],
             },
+            **self.default_headers,
         )
 
         # Check response
@@ -210,7 +215,7 @@ class DocumentViewTestCase(TestCase):
             'admission:general-education:document:free-candidate-request',
             uuid=self.general_admission.uuid,
         )
-        response = self.client.get(url)
+        response = self.client.get(url, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['admission'].uuid, self.general_admission.uuid)
@@ -222,12 +227,13 @@ class DocumentViewTestCase(TestCase):
             'admission:general-education:document:free-candidate-request',
             uuid=self.general_admission.uuid,
         )
-        response = self.client.post(url, data={})
+        response = self.client.post(url, data={}, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
 
+    @freezegun.freeze_time('2020-01-01')
     def test_general_document_request_free_candidate_document_on_post_valid_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -241,6 +247,7 @@ class DocumentViewTestCase(TestCase):
                 'file_name': 'My file name',
                 'reason': 'My reason',
             },
+            **self.default_headers,
         )
 
         self.assertEqual(response.status_code, 200)
@@ -274,14 +281,16 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form_item_instantiation.tab, Onglets.DOCUMENTS.name)
 
         # Save information about the request into the admission
-        self.assertEqual(
-            form_item_instantiation.admission.requested_documents,
-            {
-                f'DOCUMENTS_ADDITIONNELS.QUESTION_SPECIFIQUE.{form_item_instantiation.form_item.uuid}': {
-                    'author': self.sic_manager_user.username,
-                    'reason': 'My reason',
-                    'type': TypeDocument.CANDIDAT_SIC.name,
-                    'last_action_at': ANY,
-                }
-            },
-        )
+        desired_result = {
+            f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
+                'last_actor': self.sic_manager_user.username,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                'last_action_at': '2020-01-01T00:00:00',
+                'deadline_at': None,
+                'requested_at': None,
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+            }
+        }
+        self.maxDiff = None
+        self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)

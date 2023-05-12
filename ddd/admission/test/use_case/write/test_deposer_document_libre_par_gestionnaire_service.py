@@ -28,11 +28,20 @@ import uuid
 from unittest import TestCase
 
 import freezegun
+from cffi.model import BaseTypeByIdentity
 
-from admission.ddd.admission.commands import DeposerDocumentLibreParGestionnaireCommand
-from admission.ddd.admission.domain.model.document import DocumentIdentity
-from admission.ddd.admission.enums.emplacement_document import TypeDocument, StatutDocument, OngletsDemande
-from admission.infrastructure.admission.repository.in_memory.document import DocumentInMemoryRepository
+from admission.ddd.admission.commands import InitierEmplacementDocumentLibreInterneCommand
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    OngletsDemande,
+    IdentifiantBaseEmplacementDocument,
+)
+from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+    EmplacementDocumentInMemoryRepository,
+)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
@@ -40,65 +49,69 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 class TestDeposerDocumentLibreParGestionnaire(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
-        self.repository = DocumentInMemoryRepository()
+        self.repository = EmplacementDocumentInMemoryRepository()
         self.repository.reset()
         self.uuid_proposition = str(uuid.uuid4())
         self.current_datetime = datetime.datetime.now()
 
     def test_should_deposer_document_libre_sic(self):
         identifiant_document_depose = self.message_bus.invoke(
-            DeposerDocumentLibreParGestionnaireCommand(
-                uuid_demande=self.uuid_proposition,
+            InitierEmplacementDocumentLibreInterneCommand(
+                uuid_proposition=self.uuid_proposition,
                 auteur='0123456789',
-                token_document='token-file',
-                type_document=TypeDocument.CANDIDAT_SIC.name,
-                nom_document='Nom du document',
+                uuid_document='token-file',
+                type_emplacement=TypeEmplacementDocument.LIBRE_INTERNE_SIC.name,
+                libelle='Nom du document',
             )
         )
 
-        document = self.repository.get(entity_id=DocumentIdentity(identifiant=identifiant_document_depose))
+        document = self.repository.get(entity_id=identifiant_document_depose)
 
         self.assertIsNotNone(document)
 
-        self.assertEqual(document.entity_id.identifiant, f'{OngletsDemande.DOCUMENTS_ADDITIONNELS.name}.token-file')
-        self.assertEqual(document.proposition.uuid, self.uuid_proposition)
+        base_identifier = document.entity_id.identifiant.split('.')[0]
+        self.assertEqual(
+            base_identifier,
+            IdentifiantBaseEmplacementDocument.LIBRE_GESTIONNAIRE.name,
+        )
+        self.assertEqual(document.entity_id.proposition.uuid, self.uuid_proposition)
         self.assertEqual(document.libelle, 'Nom du document')
-        self.assertEqual(document.onglet, OngletsDemande.DOCUMENTS_ADDITIONNELS)
-        self.assertEqual(document.uuids, ['token-file'])
-        self.assertEqual(document.auteur, '0123456789')
-        self.assertEqual(document.type, TypeDocument.CANDIDAT_SIC)
-        self.assertEqual(document.statut, StatutDocument.VALIDE)
+        self.assertEqual(document.uuids_documents, ['token-file'])
+        self.assertEqual(document.dernier_acteur, '0123456789')
+        self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_INTERNE_SIC)
+        self.assertEqual(document.statut, StatutEmplacementDocument.VALIDE)
         self.assertEqual(document.justification_gestionnaire, '')
-        self.assertEqual(document.soumis_le, self.current_datetime)
         self.assertEqual(document.reclame_le, None)
         self.assertEqual(document.a_echeance_le, None)
         self.assertEqual(document.derniere_action_le, self.current_datetime)
 
     def test_should_deposer_document_libre_fac(self):
         identifiant_document_depose = self.message_bus.invoke(
-            DeposerDocumentLibreParGestionnaireCommand(
-                uuid_demande=self.uuid_proposition,
+            InitierEmplacementDocumentLibreInterneCommand(
+                uuid_proposition=self.uuid_proposition,
                 auteur='0123456789',
-                token_document='token-file',
-                type_document=TypeDocument.CANDIDAT_FAC.name,
-                nom_document='Nom du document',
+                uuid_document='token-file',
+                type_emplacement=TypeEmplacementDocument.LIBRE_INTERNE_FAC.name,
+                libelle='Nom du document',
             )
         )
 
-        document = self.repository.get(entity_id=DocumentIdentity(identifiant=identifiant_document_depose))
+        document = self.repository.get(entity_id=identifiant_document_depose)
 
         self.assertIsNotNone(document)
 
-        self.assertEqual(document.entity_id.identifiant, f'{OngletsDemande.DOCUMENTS_ADDITIONNELS.name}.token-file')
-        self.assertEqual(document.proposition.uuid, self.uuid_proposition)
+        base_identifier = document.entity_id.identifiant.split('.')[0]
+        self.assertEqual(
+            base_identifier,
+            IdentifiantBaseEmplacementDocument.LIBRE_GESTIONNAIRE.name,
+        )
+        self.assertEqual(document.entity_id.proposition.uuid, self.uuid_proposition)
         self.assertEqual(document.libelle, 'Nom du document')
-        self.assertEqual(document.onglet, OngletsDemande.DOCUMENTS_ADDITIONNELS)
-        self.assertEqual(document.uuids, ['token-file'])
-        self.assertEqual(document.auteur, '0123456789')
-        self.assertEqual(document.type, TypeDocument.CANDIDAT_FAC)
-        self.assertEqual(document.statut, StatutDocument.VALIDE)
+        self.assertEqual(document.uuids_documents, ['token-file'])
+        self.assertEqual(document.dernier_acteur, '0123456789')
+        self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_INTERNE_FAC)
+        self.assertEqual(document.statut, StatutEmplacementDocument.VALIDE)
         self.assertEqual(document.justification_gestionnaire, '')
-        self.assertEqual(document.soumis_le, self.current_datetime)
         self.assertEqual(document.reclame_le, None)
         self.assertEqual(document.a_echeance_le, None)
         self.assertEqual(document.derniere_action_le, self.current_datetime)
