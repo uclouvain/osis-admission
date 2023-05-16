@@ -30,10 +30,10 @@
   {% panel _("Identification") %}
     <div class="row">
       <div class="col-md-4">
-        {% bootstrap_field_with_tooltip form.last_name classes='required_field formatted-field' %}
+        {% bootstrap_field form.last_name form_group_class='form-group required_field formatted-field container_last_name' %}
       </div>
       <div class="col-md-4">
-        {% bootstrap_field_with_tooltip form.first_name classes='formatted-field' %}
+        {% bootstrap_field form.first_name form_group_class='form-group formatted-field container_first_name' %}
       </div>
       <div class="col-md-4">
         {% bootstrap_field_with_tooltip form.middle_name classes='formatted-field' %}
@@ -70,7 +70,7 @@
         {% bootstrap_field form.birth_country form_group_class="form-group required_field" %}
       </div>
       <div class="col-md-4">
-        {% bootstrap_field_with_tooltip form.birth_place classes="required_field formatted-field" %}
+        {% bootstrap_field form.birth_place form_group_class="form-group required_field formatted-field" %}
       </div>
       <div class="col-md-4">
         {% bootstrap_field form.country_of_citizenship form_group_class="form-group required_field" %}
@@ -81,7 +81,7 @@
 
     <div class="row">
       <div class="col-md-4">
-        {% bootstrap_field form.language form_group_class="form-group required_field" %}
+        {% bootstrap_field_with_tooltip form.language classes="required_field" %}
       </div>
     </div>
   {% endpanel %}
@@ -92,7 +92,7 @@
     </div>
 
     <div id="national_number_container" class="required_field">
-      {% bootstrap_field form.national_number %}
+      {% bootstrap_field_with_tooltip form.national_number %}
     </div>
 
     <div id="identification_type_container">
@@ -111,7 +111,7 @@
 
   {% endpanel %}
 
-  {% panel _("Have you previously been registered at UCLouvain?") %}
+  {% panel _("Former UCLouvain student") %}
     {% bootstrap_field form.already_registered form_group_class="form-group required_field" %}
     <div id="already_registered">
       {% bootstrap_field form.last_registration_year form_group_class="form-group required_field" %}
@@ -182,11 +182,11 @@
           });
 
           // Some fields are required depending on other fields
-          $('#container_last_name').dependsOn({
+          $('.container_last_name').dependsOn({
               '#id_first_name': { is_falsy },
           }, requiredField);
 
-          $('#container_first_name').dependsOn({
+          $('.container_first_name').dependsOn({
               '#id_last_name': { is_falsy },
           }, requiredField);
 

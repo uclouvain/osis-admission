@@ -368,7 +368,7 @@ def get_supervision_section(context) -> Section:
 def get_confirmation_section(context) -> Section:
     """Returns the confirmation section."""
     return Section(
-        label=pgettext('tab', 'Confirmation'),
+        label=pgettext('tab', 'Finalization'),
         content_template='admission/exports/recap/includes/confirmation.html',
         context=context,
         extra_context={

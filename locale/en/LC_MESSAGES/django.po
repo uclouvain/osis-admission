@@ -30,8 +30,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"%(person_concerned)s has a long-term residence permit (B, C, D, F, F+ or M "
-"cards) in Belgium"
+"%(person_concerned)s has a long-term residence permit (B, C, D, F, F+, K, L "
+"or M cards) in Belgium"
 msgstr ""
 
 #, python-format
@@ -177,7 +177,17 @@ msgstr ""
 msgid "A comment is required."
 msgstr ""
 
-msgid "A double-sided copy of the final equivalence decision"
+msgid ""
+"A double-sided copy of the final equivalence decision (possibly with the "
+"DAES or the admission test for the first cycle of higher education in case "
+"of restrictive equivalence)"
+msgstr ""
+
+msgid ""
+"A double-sided copy of the final equivalence decision issued by the Ministry "
+"of the French Community of Belgium (possibly with the DAES or the admission "
+"test for the first cycle of higher education if your equivalence doesn't "
+"give access to the desired programme)"
 msgstr ""
 
 msgid "A justification is needed when creating a pre-admission."
@@ -230,9 +240,6 @@ msgid "Absence of debt"
 msgstr ""
 
 msgid "Abstract"
-msgstr ""
-
-msgid "Academic graduation year"
 msgstr ""
 
 msgid "Academic year"
@@ -1136,11 +1143,12 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Copy of both sides of the CIRE - unlimited stay (B card) or copy of the "
-"foreigner's card - unlimited stay (C card)"
+"Copy of both sides of the Certificate of Registration in the Register of "
+"Foreigners CIRE - unlimited stay (B card) or copy of the foreigner's card - "
+"unlimited stay (C or K card)"
 msgstr ""
 
-msgid "Copy of both sides of the EC long-term resident card (D card)"
+msgid "Copy of both sides of the EC long-term resident card (D or L card)"
 msgstr ""
 
 #, python-format
@@ -1155,7 +1163,7 @@ msgstr ""
 #, python-format
 msgid ""
 "Copy of both sides of the long-term residence permit in Belgium of "
-"%(person_concerned)s (B, C, D, F, F+ or M cards)"
+"%(person_concerned)s (B, C, D, F, F+, K, L or M cards)"
 msgstr ""
 
 msgid ""
@@ -1196,7 +1204,9 @@ msgstr ""
 msgid ""
 "Copy of the Annex 25 or 26 or the A/B card mentioning the refugee status or "
 "copy of the decision of the Foreigners' Office confirming the temporary/"
-"subsidiary protection of %(person_concerned)s"
+"subsidiary protection of %(person_concerned)s or copy of the official "
+"document from the municipality or the Foreigners' Office proving the "
+"stateless status of %(person_concerned)s"
 msgstr ""
 
 msgid ""
@@ -1215,6 +1225,12 @@ msgid ""
 msgstr ""
 
 msgid "Copy of the decision to grant the scholarship from the CFWB"
+msgstr ""
+
+msgid ""
+"Copy of the equivalence decision delivered by the French Community of "
+"Belgium making your 2nd cycle diploma (bac+5) equivalent to the academic "
+"grade of a corresponding master."
 msgstr ""
 
 msgid "Copy of the registration certificate \"orange card\""
@@ -1376,11 +1392,6 @@ msgstr ""
 msgid "Decision confirming the granting of temporary protection"
 msgstr ""
 
-msgid ""
-"Decision of equivalence for your diploma(s) giving access to the training, "
-"if this(these) has(have) been obtained outside Belgium"
-msgstr ""
-
 msgid "Dedicated time (in EFT)"
 msgstr ""
 
@@ -1413,6 +1424,9 @@ msgid "Description of the activity"
 msgstr ""
 
 msgid "Description of your communication"
+msgstr ""
+
+msgid "Desired training"
 msgstr ""
 
 msgid "Detailed curriculum vitae"
@@ -1583,9 +1597,6 @@ msgstr ""
 msgid "Education type"
 msgstr ""
 
-msgid "Education you are applying for"
-msgstr ""
-
 msgid "Employer"
 msgstr ""
 
@@ -1747,6 +1758,10 @@ msgstr ""
 msgid "File MIME types"
 msgstr ""
 
+msgctxt "tab"
+msgid "Finalization"
+msgstr ""
+
 msgid "Financing"
 msgstr ""
 
@@ -1815,6 +1830,9 @@ msgid "Formation is not available for this year (%(sigle)s in %(annee)s)."
 msgstr ""
 
 msgid "Formation is not available for this year."
+msgstr ""
+
+msgid "Former UCLouvain student"
 msgstr ""
 
 msgid "Fraudster (ARES)"
@@ -2063,6 +2081,9 @@ msgid ""
 "and accept that my application will be closed."
 msgstr ""
 
+msgid "I wish to receive my mail at an address other than my legal address"
+msgstr ""
+
 msgid "IBAN account number"
 msgstr ""
 
@@ -2230,9 +2251,6 @@ msgid "Is it an institution of the Wallonia-Brussels Federation?"
 msgstr ""
 
 msgid "Is non-resident (as defined in decree)"
-msgstr ""
-
-msgid "Is your contact address different from your residential address?"
 msgstr ""
 
 msgid "Journal"
@@ -2584,10 +2602,6 @@ msgstr ""
 msgid "Message subject"
 msgstr ""
 
-msgctxt "admission"
-msgid "Mobile phone"
-msgstr ""
-
 msgid "Modern languages"
 msgstr ""
 
@@ -2779,6 +2793,9 @@ msgstr "Other"
 msgid "Obtained grade"
 msgstr ""
 
+msgid "Obtained mention"
+msgstr ""
+
 msgid "Offer:"
 msgstr ""
 
@@ -2827,6 +2844,9 @@ msgid "Other cotutelle-related documents"
 msgstr ""
 
 msgid "Other documents concerning cotutelle"
+msgstr ""
+
+msgid "Other first names"
 msgstr ""
 
 msgid "Other international scholarship"
@@ -2940,6 +2960,10 @@ msgstr ""
 msgid "PhD already done"
 msgstr ""
 
+msgctxt "admission"
+msgid "Phone (GSM/mobile)"
+msgstr ""
+
 msgid "Physic"
 msgstr ""
 
@@ -2990,6 +3014,12 @@ msgid ""
 msgstr ""
 
 msgid "Please fill in at least your last or first name."
+msgstr ""
+
+msgid ""
+"Please indicate your other first names in accordance with your identity "
+"document. If no other first name is mentioned on your identity document, you "
+"don't need to indicate anything."
 msgstr ""
 
 msgid "Please provide a copy of your curriculum."
@@ -3678,6 +3708,9 @@ msgstr ""
 msgid "Specific documents for quota studies"
 msgstr ""
 
+msgid "Specific profile"
+msgstr ""
+
 msgid "Specific questions"
 msgstr ""
 
@@ -3712,9 +3745,6 @@ msgid "Status:"
 msgstr ""
 
 msgid "Street"
-msgstr ""
-
-msgid "Student profile"
 msgstr ""
 
 msgid "Study language"
@@ -3805,6 +3835,15 @@ msgid "Text size"
 msgstr ""
 
 msgid "The <strong>additional training</strong> has been completed: yes / no."
+msgstr ""
+
+msgid ""
+"The Belgian national register number (or NISS, Social Security "
+"Identification Number) is a number composed of 11 digits, the first 6 of "
+"which refer to the date of birth of the concerned person. This number is "
+"assigned to every person living in Belgium when they register with the "
+"municipality (or other official body). It can be found on the Belgian "
+"identity card or on the residence permit."
 msgstr ""
 
 msgid "The Belgian national register number must consist of 11 digits."
@@ -4122,6 +4161,11 @@ msgstr ""
 msgid "This candidate has not created any course yet."
 msgstr ""
 
+msgid ""
+"This choice will define the language of communication throughout your "
+"admission process."
+msgstr ""
+
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
@@ -4353,13 +4397,13 @@ msgstr ""
 msgid "What diploma did you get (or will you get)?"
 msgstr ""
 
+msgid "What is your last year of UCLouvain enrollment?"
+msgstr ""
+
 msgid "What result did you get?"
 msgstr ""
 
 msgid "What was your NOMA (registration id)?"
-msgstr ""
-
-msgid "What was your last year of UCLouvain enrollment?"
 msgstr ""
 
 msgid ""
@@ -4408,6 +4452,9 @@ msgstr "Yes"
 msgid "Year"
 msgstr ""
 
+msgid "Year of graduation from secondary school"
+msgstr ""
+
 msgid "Year without registration for the training."
 msgstr ""
 
@@ -4424,16 +4471,16 @@ msgstr ""
 msgid "Yes, in %(year)s."
 msgstr ""
 
-msgid "Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (50 EUR)"
-msgstr "Yes, in Louvain-la-Neuve and/or Woluwé-Saint-Lambert (50 EUR)"
-
-msgid "Yes, in Mons and other UCLouvain sites (50 EUR)"
+msgid "Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (60 EUR)"
 msgstr ""
 
-msgid "Yes, in Saint-Gilles and other UCLouvain sites (50 EUR)"
+msgid "Yes, in Mons and other UCLouvain sites (60 EUR)"
 msgstr ""
 
-msgid "Yes, in Tournai and other UCLouvain sites (50 EUR)"
+msgid "Yes, in Saint-Gilles and other UCLouvain sites (60 EUR)"
+msgstr ""
+
+msgid "Yes, in Tournai and other UCLouvain sites (60 EUR)"
 msgstr ""
 
 msgid "Yes, only in Mons (10 EUR)"
