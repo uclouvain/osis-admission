@@ -693,7 +693,7 @@ def concat(*args):
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
-def multiple_field_data(context, configurations, data, title=_('Specific questions')):
+def multiple_field_data(context, configurations, data, title=_('Specificities')):
     """Display the answers of the specific questions based on a list of configurations and a data dictionary"""
     current_language = get_language()
 

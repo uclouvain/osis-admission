@@ -32,7 +32,7 @@
 
     {% panel _("Residential address") %}
         <div class="row">
-            <div class="col-md-4 required_field formatted-field">{% bootstrap_field_with_tooltip residential.street %}</div>
+            <div class="col-md-4 required_field formatted-field">{% bootstrap_field residential.street %}</div>
             <div class="col-md-2 required_field">{% bootstrap_field residential.street_number placeholder="" %}</div>
             <div class="col-md-2">{% bootstrap_field residential.postal_box placeholder="" %}</div>
             <div class="col-md-4 formatted-field">{% bootstrap_field residential.place placeholder="" %}</div>
@@ -54,7 +54,7 @@
     {% translate "Contact address" context "admission" as contact_address_label %}
     {% panel contact_address_label id="contact_address" %}
         <div class="row">
-            <div class="col-md-4 required_field formatted-field">{% bootstrap_field_with_tooltip contact.street %}</div>
+            <div class="col-md-4 required_field formatted-field">{% bootstrap_field contact.street %}</div>
             <div class="col-md-2 required_field">{% bootstrap_field contact.street_number placeholder="" %}</div>
             <div class="col-md-2">{% bootstrap_field contact.postal_box placeholder="" %}</div>
             <div class="col-md-4 formatted-field">{% bootstrap_field contact.place placeholder="" %}</div>
@@ -74,7 +74,7 @@
 
     {% panel _("Contact") %}
         <div class="row">
-            <div class="col-md-6">{% bootstrap_field_with_tooltip main_form.phone_mobile %}</div>
+            <div class="col-md-6">{% bootstrap_field main_form.phone_mobile %}</div>
             <div class="col-md-6">{% bootstrap_field main_form.private_email placeholder="" %}</div>
         </div>
     {% endpanel %}

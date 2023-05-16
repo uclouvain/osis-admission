@@ -52,10 +52,10 @@ CURRICULUM_ACTIVITY_LABEL = {
     ActivityType.WORK.name: _('Employment certificate from the employer, with dates, justifying the specified period'),
 }
 ACCOUNTING_LABEL = {
-    'carte_resident_longue_duree': _('Copy of both sides of the EC long-term resident card (D card)'),
+    'carte_resident_longue_duree': _('Copy of both sides of the EC long-term resident card (D or L card)'),
     'carte_cire_sejour_illimite_etranger': _(
-        'Copy of both sides of the CIRE - unlimited stay (B card) or copy of the foreigner\'s card - unlimited stay '
-        '(C card)'
+        "Copy of both sides of the Certificate of Registration in the Register of Foreigners CIRE - "
+        "unlimited stay (B card) or copy of the foreigner's card - unlimited stay (C or K card)"
     ),
     'carte_sejour_membre_ue': _(
         'Copy of both sides of the residence card of a family member of a European Union citizen (F card)'
@@ -92,11 +92,13 @@ ACCOUNTING_LABEL = {
     'carte_identite_parent': _('Copy of both sides of the identity card of %(person_concerned)s'),
     'titre_sejour_longue_duree_parent': _(
         'Copy of both sides of the long-term residence permit in Belgium of %(person_concerned)s '
-        '(B, C, D, F, F+ or M cards)'
+        '(B, C, D, F, F+, K, L or M cards)'
     ),
     'annexe_25_26_refugies_apatrides_decision_protection_parent': _(
         'Copy of the Annex 25 or 26 or the A/B card mentioning the refugee status or copy of the decision of the '
-        'Foreigners\' Office confirming the temporary/subsidiary protection of %(person_concerned)s'
+        'Foreigners\' Office confirming the temporary/subsidiary protection of %(person_concerned)s '
+        'or copy of the official document from the municipality or the Foreigners\' Office proving the '
+        'stateless status of %(person_concerned)s'
     ),
     'titre_sejour_3_mois_parent': _(
         'Copy of both sides of the residence permit valid for more than 3 months of %(person_concerned)s'

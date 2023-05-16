@@ -40,7 +40,7 @@ from reference.models.zipcode import ZipCode
 class AdmissionCoordonneesForm(forms.ModelForm):
     show_contact = forms.BooleanField(
         required=False,
-        label=_('Is your contact address different from your residential address?'),
+        label=_('I wish to receive my mail at an address other than my legal address'),
     )
 
     private_email = forms.EmailField(
@@ -51,8 +51,7 @@ class AdmissionCoordonneesForm(forms.ModelForm):
 
     phone_mobile = forms.CharField(
         required=False,
-        label=__('admission', 'Mobile phone'),
-        help_text=get_example_text('+32 490 00 00 00'),
+        label=__('admission', 'Phone (GSM/mobile)'),
         widget=forms.TextInput(
             attrs={
                 'placeholder': get_example_text('+32 490 00 00 00'),
@@ -83,7 +82,6 @@ class AdmissionAddressForm(forms.ModelForm):
     street = forms.CharField(
         required=False,
         label=_('Street'),
-        help_text=get_example_text('Rue des ponts <del>rue des ponts</del> <del>RUE DES PONTS</del>'),
         widget=forms.TextInput(
             attrs={
                 'placeholder': get_example_text('Rue des ponts'),

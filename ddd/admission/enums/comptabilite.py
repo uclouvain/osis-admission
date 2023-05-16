@@ -93,7 +93,7 @@ class ChoixAssimilation5(ChoiceEnum):
         '%(person_concerned)s has the nationality of a country of a Member State of the European Union'
     )
     TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE = _(
-        '%(person_concerned)s has a long-term residence permit (B, C, D, F, F+ or M cards) in Belgium'
+        '%(person_concerned)s has a long-term residence permit (B, C, D, F, F+, K, L or M cards) in Belgium'
     )
     CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE = _(
         '%(person_concerned)s is a refugee applicant, refugee, stateless person, or has '
@@ -116,12 +116,12 @@ class ChoixAssimilation6(ChoiceEnum):
 
 
 class ChoixAffiliationSport(ChoiceEnum):
-    LOUVAIN_WOLUWE = _('Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (50 EUR)')
-    MONS_UCL = _('Yes, in Mons and other UCLouvain sites (50 EUR)')
+    LOUVAIN_WOLUWE = _('Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (60 EUR)')
+    MONS_UCL = _('Yes, in Mons and other UCLouvain sites (60 EUR)')
     MONS = _('Yes, only in Mons (10 EUR)')
-    SAINT_GILLES_UCL = _('Yes, in Saint-Gilles and other UCLouvain sites (50 EUR)')
+    SAINT_GILLES_UCL = _('Yes, in Saint-Gilles and other UCLouvain sites (60 EUR)')
     SAINT_GILLES = _('Yes, only in Saint-Gilles (10 EUR)')
-    TOURNAI_UCL = _('Yes, in Tournai and other UCLouvain sites (50 EUR)')
+    TOURNAI_UCL = _('Yes, in Tournai and other UCLouvain sites (60 EUR)')
     TOURNAI = _('Yes, only in Tournai (10 EUR)')
     NON = _('No')
 

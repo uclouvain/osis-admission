@@ -114,7 +114,11 @@ def get_secondary_studies_attachments(
                     if context.etudes_secondaires.diplome_etranger.equivalence == Equivalence.YES.name:
                         attachments.append(
                             Attachment(
-                                _('A double-sided copy of the final equivalence decision'),
+                                _(
+                                    "A double-sided copy of the final equivalence decision (possibly with the DAES or "
+                                    "the admission test for the first cycle of higher education in case of "
+                                    "restrictive equivalence)"
+                                ),
                                 context.etudes_secondaires.diplome_etranger.decision_final_equivalence_ue,
                             )
                         )
@@ -128,7 +132,12 @@ def get_secondary_studies_attachments(
                 else:
                     attachments.append(
                         Attachment(
-                            _('A double-sided copy of the final equivalence decision'),
+                            _(
+                                "A double-sided copy of the final equivalence decision issued by the Ministry of the "
+                                "French Community of Belgium (possibly with the DAES or the admission test for the "
+                                "first cycle of higher education if your equivalence doesn't give access to the "
+                                "desired programme)"
+                            ),
                             context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
                         )
                     )
@@ -215,8 +224,8 @@ def get_curriculum_attachments(
         attachments.append(
             Attachment(
                 _(
-                    'Decision of equivalence for your diploma(s) giving access to the training, '
-                    'if this(these) has(have) been obtained outside Belgium'
+                    'Copy of the equivalence decision delivered by the French Community of Belgium making your '
+                    '2nd cycle diploma (bac+5) equivalent to the academic grade of a corresponding master.',
                 ),
                 context.proposition.equivalence_diplome,
             )

@@ -63,7 +63,7 @@
     {% endif %}
     {% panel _("Contact") %}
         <div class="row">
-            {% trans "Mobile phone" context "admission" as mobile_phone_label %}
+            {% trans "Phone (GSM/mobile)" context "admission" as mobile_phone_label %}
             {% field_data mobile_phone_label coordonnees.phone_mobile "col-md-6" %}
             {% trans "Private email" context "admission" as email_label %}
             {% field_data email_label coordonnees.private_email "col-md-6" %}
