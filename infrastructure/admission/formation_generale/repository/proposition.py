@@ -287,6 +287,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile)
             if admission.submitted_profile
             else None,
+            documents_demandes=admission.requested_documents,
         )
 
     @classmethod
@@ -319,7 +320,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
-            login_candidat=admission.candidate.user.username if admission.candidate.user else '',
             bourse_double_diplome=BourseTranslator.build_dto(admission.double_degree_scholarship)
             if admission.double_degree_scholarship
             else None,

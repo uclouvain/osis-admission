@@ -58,8 +58,13 @@ class QuestionSpecifiqueInMemoryTranslator(IQuestionSpecifiqueTranslator, SuperQ
         return [
             entity
             for entity in cls.entities
-            if entity.formation.annee == proposition.formation_id.annee
-            and entity.formation.sigle == proposition.formation_id.sigle
+            if (
+                entity.formation
+                and entity.formation.annee == proposition.formation_id.annee
+                and entity.formation.sigle == proposition.formation_id.sigle
+                or entity.proposition
+                and entity.proposition.uuid == proposition_uuid
+            )
             and (not onglets or entity.onglet.name in onglets)
             and (not type or entity.type.name == type)
             and (not requis or entity.requis == requis)

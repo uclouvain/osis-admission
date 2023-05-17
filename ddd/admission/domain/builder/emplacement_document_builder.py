@@ -38,14 +38,14 @@ from osis_common.ddd.interface import CommandRequest
 class EmplacementDocumentBuilder(interface.RootEntityBuilder):
     @classmethod
     def build_from_command(cls, cmd: 'CommandRequest') -> 'EmplacementDocument':
-        pass
+        raise NotImplementedError
 
     @classmethod
     def build_from_repository_dto(cls, dto_object: 'EmplacementDocumentDTO') -> 'EmplacementDocument':
-        pass
+        raise NotImplementedError
 
     @classmethod
-    def initier_emplacement_document_libre(
+    def initialiser_emplacement_document_libre(
         cls,
         uuid_proposition: str,
         auteur: str,
@@ -53,7 +53,7 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
         libelle: str,
         raison: str = '',
     ) -> 'EmplacementDocument':
-        heure_initiation = datetime.datetime.now()
+        heure_initialisation = datetime.datetime.now()
         return EmplacementDocument(
             entity_id=EmplacementDocumentIdentityBuilder.build_libre(
                 type_emplacement=type_emplacement,
@@ -65,18 +65,18 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
             type=TypeEmplacementDocument[type_emplacement],
             statut=StatutEmplacementDocument.A_RECLAMER,
             justification_gestionnaire=raison,
-            derniere_action_le=heure_initiation,
+            derniere_action_le=heure_initialisation,
         )
 
     @classmethod
-    def initier_emplacement_document_a_reclamer(
+    def initialiser_emplacement_document_a_reclamer(
         cls,
         identifiant_emplacement: str,
         uuid_proposition: str,
         auteur: str,
         raison: str,
     ) -> 'EmplacementDocument':
-        heure_initiation = datetime.datetime.now()
+        heure_initialisation = datetime.datetime.now()
         return EmplacementDocument(
             entity_id=EmplacementDocumentIdentityBuilder.build_non_libre(
                 identifiant_emplacement=identifiant_emplacement,
@@ -87,5 +87,6 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
             type=TypeEmplacementDocument.NON_LIBRE,
             statut=StatutEmplacementDocument.A_RECLAMER,
             justification_gestionnaire=raison,
-            derniere_action_le=heure_initiation,
+            derniere_action_le=heure_initialisation,
+            requis_automatiquement=True,
         )

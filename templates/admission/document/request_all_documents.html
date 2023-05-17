@@ -1,4 +1,4 @@
-{% load i18n bootstrap3 static %}
+{% load i18n bootstrap3 static admission %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -26,7 +26,46 @@
   {% bootstrap_form_errors form %}
   {% csrf_token %}
   {% bootstrap_field form.deadline %}
-  {% bootstrap_field form.documents %}
+  {% with field=form.documents %}
+    <div class="form-group {% if field.errors %}has-error{% elif form.is_bound %}has-success{% endif %} required_field">
+      <table class="table table-condensed">
+        <thead>
+          <tr>
+            <th class="control-label">
+              {% translate 'Documents' %}
+            </th>
+            <th class="min-width control-label">
+              {% translate 'Request now' %}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for radio in form.documents %}
+            {% with current_document=requested_documents|get_item:radio.data.value %}
+              {% ifchanged current_document|get_item:'tab' %}
+                <tr class="tab-name">
+                  <td colspan="2">> {{ current_document|get_item:'tab_label' }}</td>
+                </tr>
+              {% endifchanged %}
+            {% endwith %}
+            <tr>
+              <td>{{ radio.choice_label }}</td>
+              <td>{{ radio.tag }}</td>
+            </tr>
+          {% empty %}
+            <tr class="tab-name">
+              <td colspan="2">
+                {% translate 'No document is defined as requestable. At least one is required.' %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="help-block">
+        {% for error in field.errors %}{{ error }}{% endfor %}
+      </div>
+    </div>
+  {% endwith %}
   <button
       id="object-reset-button"
       class="btn btn-primary btn-sm reset-button"
@@ -49,6 +88,7 @@
           const requestedDocuments = {{ requested_documents|safe }};
           const defaultMessage = `{{ form.initial.message_content|safe }}`;
           const defaultObject = `{{ form.initial.message_object|safe }}`;
+          const deadlineInput = $('#id_deadline');
           let instance;
 
           const defaultMessageElement = $('#hidden-message-content');
@@ -57,7 +97,7 @@
           const dateToUpdate = defaultMessageElement.find('#request_deadline');
 
           {# Manage the request all documents form #}
-          {% if form.is_valid %}$('#request-all-form-modal').modal('hide');{% endif %}
+          deadlineInput.mask(deadlineInput.attr('data-mask'));
 
           {# Manage the CKEDITOR instance #}
           initializeCKEditor('id_message_content');
@@ -80,10 +120,17 @@
 
               {# Update the list of documents #}
               let html_documents_list = '';
+              let previousTab = '';
               $('input:checkbox[name=documents]:checked').each(function(){
                   const selected_document = requestedDocuments[$(this).val()];
+                  if(previousTab !== selected_document['tab']) {
+                      if (previousTab !== '') html_documents_list += '</ul></li>'
+                      html_documents_list += `<li>${selected_document['candidate_language_tab_label']}<ul>`;
+                      previousTab = selected_document['tab'];
+                  }
                   html_documents_list += `<li>${selected_document['label']}. ${selected_document['reason']}</li>`;
               })
+              html_documents_list += '</ul>'
               contentToUpdate.html(html_documents_list);
 
               {# Update the deadline #}

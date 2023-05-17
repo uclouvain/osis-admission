@@ -31,7 +31,6 @@ from osis_history.utilities import add_history_entry
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.domain.service.i_historique import IHistorique, PropositionAdmission
 from admission.infrastructure.utils import get_message_to_historize
-from base.models.person import Person
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
 
@@ -71,7 +70,7 @@ class Historique(IHistorique):
 
     @classmethod
     def historiser_demande_complements_sic(cls, proposition: Proposition, acteur: str, message: EmailMessage):
-        gestionnaire = Person.objects.get(user__username=acteur).values('first_name', 'last_name')
+        gestionnaire = PersonneConnueUclTranslator().get(acteur)
 
         message_a_historiser = get_message_to_historize(message)
 
@@ -79,7 +78,7 @@ class Historique(IHistorique):
             proposition.entity_id.uuid,
             message_a_historiser[settings.LANGUAGE_CODE_FR],
             message_a_historiser[settings.LANGUAGE_CODE_EN],
-            "{first_name} {last_name}" % gestionnaire,
+            "{first_name} {last_name}".format(first_name=gestionnaire.prenom, last_name=gestionnaire.nom),
             tags=["proposition", "message"],
         )
 
@@ -87,13 +86,13 @@ class Historique(IHistorique):
             proposition.entity_id.uuid,
             "Une demande de compléments a été envoyée par SIC.",
             "A request for additional information has been submitted by SIC.",
-            acteur,
+            "{first_name} {last_name}".format(first_name=gestionnaire.prenom, last_name=gestionnaire.nom),
             tags=["proposition", "status-changed"],
         )
 
     @classmethod
     def historiser_demande_complements_fac(cls, proposition: Proposition, acteur: str, message: EmailMessage):
-        gestionnaire = Person.objects.get(user__username=acteur).values('first_name', 'last_name')
+        gestionnaire = PersonneConnueUclTranslator().get(acteur)
 
         message_a_historiser = get_message_to_historize(message)
 
@@ -101,7 +100,7 @@ class Historique(IHistorique):
             proposition.entity_id.uuid,
             message_a_historiser[settings.LANGUAGE_CODE_FR],
             message_a_historiser[settings.LANGUAGE_CODE_EN],
-            "{first_name} {last_name}" % gestionnaire,
+            "{first_name} {last_name}".format(first_name=gestionnaire.prenom, last_name=gestionnaire.nom),
             tags=["proposition", "message"],
         )
 
@@ -109,6 +108,18 @@ class Historique(IHistorique):
             proposition.entity_id.uuid,
             "Une demande de compléments a été envoyée par FAC.",
             "A request for additional information has been submitted by FAC.",
-            acteur,
+            "{first_name} {last_name}".format(first_name=gestionnaire.prenom, last_name=gestionnaire.nom),
+            tags=["proposition", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_completion_documents_par_candidat(cls, proposition: PropositionAdmission):
+        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "Les documents ont été complétés par le candidat.",
+            "The documents have been completed by the candidate.",
+            f"{candidat.prenom} {candidat.nom}",
             tags=["proposition", "status-changed"],
         )

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import get_language
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 
@@ -34,7 +33,6 @@ from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
 )
-from base.models.person import Person
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 

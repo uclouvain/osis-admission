@@ -23,232 +23,53 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import List
 
-from django.conf import settings
-from django.http import HttpResponse
+from django.contrib import messages
+from django.http import HttpResponse, Http404
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
-from django.views import View
 from django.views.generic import TemplateView, FormView
-from osis_mail_template.models import MailTemplate
 from rest_framework.status import HTTP_204_NO_CONTENT
 
+from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
-from admission.ddd.admission.commands import (
-    InitierEmplacementDocumentLibreInterneCommand,
-    InitierEmplacementDocumentLibreAReclamerCommand,
-    AnnulerReclamationEmplacementDocumentCommand,
-    InitierEmplacementDocumentAReclamerCommand,
-    ModifierReclamationEmplacementDocumentCommand,
-    SupprimerEmplacementDocumentCommand,
-)
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.auth.roles.sic_management import SicManagement
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutEmplacementDocument,
-    EMPLACEMENTS_DOCUMENTS_INTERNES,
     EMPLACEMENTS_FAC,
     EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
-    OngletsDemande,
+    EMPLACEMENTS_SIC,
+    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.ddd.admission.formation_generale.commands import (
-    ReclamerDocumentsAuCandidatParFACCommand,
-    ReclamerDocumentsAuCandidatParSICCommand,
-)
 from admission.forms.admission.document import (
     UploadFreeDocumentForm,
     RequestFreeDocumentForm,
     RequestDocumentForm,
-    RequestAllDocumentsForm,
+    ReplaceDocumentForm,
+    UploadDocumentForm,
 )
-from admission.infrastructure.utils import get_document_from_identifier
-from admission.mail_templates import (
-    ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_GENERAL,
-    ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING,
-    ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL,
-    ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE,
-    ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE,
-    ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING,
-)
-from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
-from admission.utils import format_academic_year
+from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
-from base.models.entity_version import EntityVersion
+from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
+
 __namespace__ = 'document'
 
 __all__ = [
-    'DocumentView',
-    'UploadFreeCandidateDocumentView',
-    'UploadFreeInternalDocumentView',
-    'RequestFreeCandidateDocumentView',
+    'DeleteDocumentView',
     'DocumentDetailView',
     'RequestCandidateDocumentView',
-    'DeleteDocumentView',
+    'ReplaceDocumentView',
+    'RequestFreeCandidateDocumentView',
+    'UploadDocumentByManagerView',
+    'UploadFreeCandidateDocumentView',
+    'UploadFreeInternalDocumentView',
 ]
-
-
-class DocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    template_name = 'admission/document/base.html'
-    htmx_template_name = 'admission/document/request_all_documents.html'
-    permission_required = 'admission.view_documents_management'
-    urlpatterns = {'document': ''}
-    form_class = RequestAllDocumentsForm
-
-    retrieve_documents_command = {
-        CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,
-    }
-
-    @cached_property
-    def is_fac(self):
-        return ProgramManager.belong_to(self.request.user.person)
-
-    @cached_property
-    def deadline(self):
-        return datetime.date.today() + datetime.timedelta(days=15)
-
-    @cached_property
-    def documents(self) -> List[EmplacementDocumentDTO]:
-        return (
-            message_bus_instance.invoke(
-                self.retrieve_documents_command[self.current_context](
-                    uuid_proposition=self.admission_uuid,
-                )
-            )
-            if self.current_context in self.retrieve_documents_command
-            else []
-        )
-
-    @cached_property
-    def requestable_documents(self):
-        documents_to_exclude = (
-            TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name
-            if self.is_fac
-            else TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name
-        )
-        return [
-            document
-            for document in self.documents
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name and document.type != documents_to_exclude
-        ]
-
-    def get_initial(self):
-        email_object, email_content = self.get_email_template()
-
-        return {
-            'deadline': self.deadline,
-            'message_object': email_object,
-            'message_content': email_content,
-        }
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['documents'] = self.requestable_documents
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['documents'] = self.documents
-        context['EMPLACEMENTS_DOCUMENTS_INTERNES'] = EMPLACEMENTS_DOCUMENTS_INTERNES
-        context['EMPLACEMENTS_FAC'] = EMPLACEMENTS_FAC
-
-        context['requested_documents'] = {
-            document.identifiant: {
-                'reason': self.proposition.documents_demandes.get(document.identifiant, {}).get('reason', ''),
-                'label': document.libelle_langue_candidat,
-            }
-            for document in self.requestable_documents
-        }
-
-        context['candidate_language'] = self.admission.candidate.language
-
-        return context
-
-    def get_email_template(self):
-        current_language = self.admission.candidate.language
-        current_date = datetime.date.today()
-
-        email_template_identifier = (
-            {
-                CONTEXT_GENERAL: ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_GENERAL,
-                CONTEXT_DOCTORATE: ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE,
-                CONTEXT_CONTINUING: ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING,
-            }
-            if ProgramManager.belong_to(self.request.user.person)
-            else {
-                CONTEXT_GENERAL: ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL,
-                CONTEXT_DOCTORATE: ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE,
-                CONTEXT_CONTINUING: ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING,
-            }
-        )[self.current_context]
-
-        mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
-            email_template_identifier,
-            current_language,
-        )
-
-        formation = self.proposition.doctorat if self.is_doctorate else self.proposition.formation
-
-        management_entity = (
-            EntityVersion.objects.filter(
-                acronym=formation.sigle_entite_gestion,
-                start_date__lte=current_date,
-            )
-            .exclude(end_date__lte=current_date)
-            .values('title')
-            .first()
-        )
-
-        tokens = {
-            'admission_reference': self.proposition.reference,
-            'training_campus': formation.campus,
-            'training_title': getattr(
-                self.admission.training,
-                'title' if current_language == settings.LANGUAGE_CODE_FR else 'title_english',
-            ),
-            'training_acronym': formation.sigle,
-            'training_year': format_academic_year(self.proposition.annee_calculee),
-            'admission_link_front': settings.ADMISSION_FRONTEND_LINK.format(
-                context=self.current_context,
-                uuid=self.proposition.uuid,
-            ),
-            'request_deadline': f'<span id="request_deadline">_</span>',  # Will be updated through JS
-            'management_entity_name': management_entity.get('title') if management_entity else '',
-            'management_entity_acronym': formation.sigle_entite_gestion,
-            'requested_documents': '<ul id="requested-documents-email-list"></ul>',  # Will be updated through JS
-        }
-
-        return mail_template.render_subject(tokens=tokens), mail_template.body_as_html(tokens=tokens)
-
-    def form_valid(self, form):
-        message_bus_instance.invoke(
-            ReclamerDocumentsAuCandidatParFACCommand(
-                uuid_proposition=self.admission_uuid,
-                identifiants_emplacements=form.cleaned_data['documents'],
-                auteur=self.request.user.username,
-                a_echeance_le=form.cleaned_data['deadline'],
-                objet_message=form.cleaned_data['message_object'],
-                corps_message=form.cleaned_data['message_content'],
-            )
-            if self.is_fac
-            else ReclamerDocumentsAuCandidatParSICCommand(
-                uuid_proposition=self.admission_uuid,
-                identifiants_emplacements=form.cleaned_data['documents'],
-                auteur=self.request.user.username,
-                a_echeance_le=form.cleaned_data['deadline'],
-                objet_message=form.cleaned_data['message_object'],
-                corps_message=form.cleaned_data['message_content'],
-            )
-        )
-        self.message_on_success = _('The documents have been requested to the candidate')
-        return super().form_valid(self.get_form())
 
 
 class BaseUploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
@@ -256,21 +77,25 @@ class BaseUploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequ
     permission_required = 'admission.view_documents_management'
     template_name = 'admission/document/upload_free_document.html'
     htmx_template_name = 'admission/document/upload_free_document.html'
+    default_htmx_trigger_form_extra = {
+        'refresh_list': True,
+    }
 
     @property
     def document_type(self) -> str:
         raise NotImplementedError
 
     def form_valid(self, form) -> HttpResponse:
-        message_bus_instance.invoke(
-            InitierEmplacementDocumentLibreInterneCommand(
+        document_id = message_bus_instance.invoke(
+            general_education_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand(
                 uuid_proposition=self.kwargs.get('uuid'),
-                auteur=self.request.user.username,
+                auteur=self.request.user.person.global_id,
                 uuid_document=form.cleaned_data['file'][0],
                 type_emplacement=self.document_type,
                 libelle=form.cleaned_data['file_name'],
             ),
         )
+        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
         return super().form_valid(self.form_class())
 
 
@@ -300,18 +125,42 @@ class UploadFreeInternalDocumentView(BaseUploadFreeCandidateDocumentView):
         )
 
 
+def can_edit_document(person: Person, document: AdmissionDocument) -> bool:
+    """
+    Check if the document can be edited by the person.
+    - FAC user can only update their own documents
+    - SIC user can update all documents except the FAC and SYSTEM ones
+    """
+
+    document_type = document.type
+
+    if document_type == TypeEmplacementDocument.SYSTEME.name:
+        return False
+
+    if document_type in EMPLACEMENTS_FAC:
+        return ProgramManager.belong_to(person=person)
+
+    if document_type in EMPLACEMENTS_SIC:
+        return SicManagement.belong_to(person) or CentralManager.belong_to(person)
+
+    return False
+
+
 class RequestFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     form_class = RequestFreeDocumentForm
     template_name = 'admission/document/request_free_document.html'
     htmx_template_name = 'admission/document/request_free_document.html'
     urlpatterns = 'free-candidate-request'
     permission_required = 'admission.view_documents_management'
+    default_htmx_trigger_form_extra = {
+        'refresh_list': True,
+    }
 
     def form_valid(self, form) -> HttpResponse:
-        message_bus_instance.invoke(
-            InitierEmplacementDocumentLibreAReclamerCommand(
+        document_id = message_bus_instance.invoke(
+            general_education_commands.InitialiserEmplacementDocumentLibreAReclamerCommand(
                 uuid_proposition=self.kwargs.get('uuid'),
-                auteur=self.request.user.username,
+                auteur=self.request.user.person.global_id,
                 type_emplacement=(
                     TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name
                     if ProgramManager.belong_to(self.request.user.person)
@@ -321,12 +170,13 @@ class RequestFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequire
                 raison=form.cleaned_data['reason'],
             ),
         )
+        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
         return super().form_valid(self.form_class())
 
 
 class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, TemplateView):
-    template_name = 'admission/document/document-detail.html'
-    htmx_template_name = 'admission/document/document-detail.html'
+    template_name = 'admission/document/document_detail.html'
+    htmx_template_name = 'admission/document/document_detail.html'
     permission_required = 'admission.view_documents_management'
     urlpatterns = {'detail': 'detail/<str:identifier>'}
 
@@ -341,119 +191,213 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         document = get_document_from_identifier(self.admission, document_identifier)
         context['EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES'] = EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES
 
-        if document:
-            context['document_identifier'] = document_identifier
-            context['document_type'] = document.get('type')
-            context['requestable_document'] = document.get('requestable')
-            if document.get('uuids'):
-                context['document_uuid'] = document['uuids'][0]
-                context['document_write_token'] = get_remote_token(uuid=context['document_uuid'], write_token=True)
-                context['document_metadata'] = get_remote_metadata(context['document_write_token'])
+        if not document:
+            return context
+
+        context['document_identifier'] = document_identifier
+        context['document_type'] = document.type
+        context['requestable_document'] = document.requestable
+        context['editable_document'] = can_edit_document(self.request.user.person, document)
+
+        if document.uuids:
+            context['document_uuid'] = document.uuids[0]
+            context['document_write_token'] = get_remote_token(uuid=context['document_uuid'], write_token=True)
+            context['document_metadata'] = get_remote_metadata(context['document_write_token'])
 
         # Request form
-        requested_document = self.admission.requested_documents.get(document_identifier)
-        request_initial = None
-
-        if requested_document:
-            request_initial = {
-                'is_requested': requested_document.get('status') == StatutEmplacementDocument.A_RECLAMER.name,
-                'reason': requested_document.get('reason'),
-            }
-            context['request_reason'] = requested_document.get('reason')
+        request_initial = {
+            'is_requested': document.status == StatutEmplacementDocument.A_RECLAMER.name,
+            'reason': document.reason,
+        }
+        context['request_reason'] = document.reason
 
         context['request_form'] = RequestDocumentForm(
             candidate_language=self.admission.candidate.language,
             initial=request_initial,
+            auto_requested=document.automatically_required,
         )
+
+        context['replace_form'] = ReplaceDocumentForm(mimetypes=document.mimetypes)
+        context['upload_form'] = UploadDocumentForm(mimetypes=document.mimetypes)
 
         return context
 
 
-class RequestCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    form_class = RequestDocumentForm
-    template_name = 'admission/document/request_document.html'
-    htmx_template_name = 'admission/document/request_document.html'
+class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
+    default_htmx_trigger_form_extra = {
+        'refresh_list': True,
+    }
     permission_required = 'admission.view_documents_management'
-    urlpatterns = {'candidate-request': 'candidate-request/<str:identifier>'}
 
     @property
     def document_identifier(self):
         return self.kwargs.get('identifier', '')
+
+    @cached_property
+    def document(self):
+        return get_document_from_identifier(self.admission, self.document_identifier)
+
+    def has_permission(self):
+        # Check permission against the admission (only FAC and SIC users can access to it)
+        has_permission = super().has_permission()
+
+        if not self.document:
+            raise Http404
+
+        return has_permission and can_edit_document(self.request.user.person, self.document)
+
+
+class RequestCandidateDocumentView(DocumentFormView):
+    form_class = RequestDocumentForm
+    template_name = 'admission/document/request_document.html'
+    htmx_template_name = 'admission/document/request_document.html'
+    urlpatterns = {'candidate-request': 'candidate-request/<str:identifier>'}
+
+    def has_permission(self):
+        return super().has_permission() and self.document.requestable is True
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context['request_form'] = context['form']
 
-        requested_document = self.admission.requested_documents.get(self.document_identifier)
-
-        if requested_document:
-            context['request_reason'] = requested_document.get('reason')
+        context['request_reason'] = (
+            self.admission.requested_documents[self.document_identifier]['reason']
+            if self.document_identifier in self.admission.requested_documents
+            else ''
+        )
 
         return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['candidate_language'] = self.admission.candidate.language
+        kwargs['auto_requested'] = self.document.automatically_required
         return kwargs
 
     def form_valid(self, form):
-        document = get_document_from_identifier(self.admission, self.document_identifier)
-
-        if not document or not document.get('requestable'):
-            self.message_on_failure = _('This document cannot be requested')
-            return self.form_invalid(form)
-
         if form.cleaned_data['is_requested']:
-            if document.get('status') == StatutEmplacementDocument.A_RECLAMER.name:
-                message_bus_instance.invoke(
-                    ModifierReclamationEmplacementDocumentCommand(
-                        uuid_proposition=self.admission_uuid,
-                        identifiant_emplacement=self.document_identifier,
-                        raison=form.cleaned_data['reason'],
-                        auteur=self.request.user.username,
-                    )
-                )
-            else:
-                message_bus_instance.invoke(
-                    InitierEmplacementDocumentAReclamerCommand(
-                        uuid_proposition=self.admission_uuid,
-                        identifiant_emplacement=self.document_identifier,
-                        type_emplacement=document.get('type'),
-                        raison=form.cleaned_data['reason'],
-                        auteur=self.request.user.username,
-                    )
-                )
-                self.message_on_success = _('The document has been designated as to be requested')
-        else:
             message_bus_instance.invoke(
-                AnnulerReclamationEmplacementDocumentCommand(
+                general_education_commands.ModifierReclamationEmplacementDocumentCommand(
                     uuid_proposition=self.admission_uuid,
                     identifiant_emplacement=self.document_identifier,
+                    raison=form.cleaned_data['reason'],
+                    auteur=self.request.user.person.global_id,
+                )
+            )
+            self.message_on_success = _('The document has been designated as to be requested')
+        else:
+            document_id = message_bus_instance.invoke(
+                general_education_commands.AnnulerReclamationEmplacementDocumentCommand(
+                    uuid_proposition=self.admission_uuid,
+                    identifiant_emplacement=self.document_identifier,
+                    auteur=self.request.user.person.global_id,
                 )
             )
             self.message_on_success = _('The document is no longer designated as to be requested')
 
+            if self.document.type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
+                self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
+
         return super().form_valid(form)
 
 
-class DeleteDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, View):
-    form_class = RequestDocumentForm
-    permission_required = 'admission.view_documents_management'
+class DeleteDocumentView(DocumentFormView):
     urlpatterns = {'delete': 'delete/<str:identifier>'}
 
     def delete(self, request, *args, **kwargs):
-        identifier = self.kwargs.get('identifier')
-        identifier_parts = identifier.split('.')
-
-        message_bus_instance.invoke(
-            SupprimerEmplacementDocumentCommand(
+        document_id = message_bus_instance.invoke(
+            general_education_commands.SupprimerEmplacementDocumentCommand(
                 uuid_proposition=self.admission_uuid,
-                identifiant_emplacement=identifier,
+                identifiant_emplacement=self.document_identifier,
+                auteur=self.request.user.person.global_id,
             ),
         )
 
-        if identifier_parts and identifier_parts[0] in OngletsDemande.get_names():
-            self.admission.update_requested_documents()
+        if self.document:
+            if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
+                self.admission.update_requested_documents()
+                self.htmx_trigger_form_extra['next'] = 'missing'
+
+        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
+        self.htmx_trigger_form_extra['refresh_list'] = True
+
+        messages.success(self.request, _('The document has been deleted'))
+        self.htmx_trigger_form(is_valid=True)
 
         return HttpResponse(status=HTTP_204_NO_CONTENT)
+
+
+class ReplaceDocumentView(DocumentFormView):
+    form_class = ReplaceDocumentForm
+    urlpatterns = {'replace': 'replace/<str:identifier>'}
+    template_name = 'admission/document/replace_document.html'
+    htmx_template_name = 'admission/document/replace_document.html'
+
+    def post(self, request, *args, **kwargs) -> HttpResponse:
+        return super().post(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['mimetypes'] = self.document.mimetypes
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['replace_form'] = context['form']
+        return context
+
+    def form_valid(self, form):
+        document_id = message_bus_instance.invoke(
+            general_education_commands.RemplacerEmplacementDocumentCommand(
+                uuid_proposition=self.admission_uuid,
+                identifiant_emplacement=self.document_identifier,
+                uuid_document=form.cleaned_data['file'][0],
+                auteur=self.request.user.person.global_id,
+            )
+        )
+
+        self.message_on_success = _('The document has been replaced')
+        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
+
+        return super().form_valid(self.form_class(mimetypes=self.document.mimetypes))
+
+
+class UploadDocumentByManagerView(DocumentFormView):
+    form_class = UploadDocumentForm
+    urlpatterns = {'upload': 'upload/<str:identifier>'}
+    template_name = 'admission/document/upload_document.html'
+    htmx_template_name = 'admission/document/upload_document.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['mimetypes'] = self.document.mimetypes
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['upload_form'] = context['form']
+        return context
+
+    def form_valid(self, form):
+        document_id = message_bus_instance.invoke(
+            general_education_commands.RemplirEmplacementDocumentParGestionnaireCommand(
+                uuid_proposition=self.admission_uuid,
+                identifiant_emplacement=self.document_identifier,
+                uuid_document=form.cleaned_data['file'][0],
+                auteur=self.request.user.person.global_id,
+            )
+        )
+
+        if self.document:
+            if self.document.type == TypeEmplacementDocument.NON_LIBRE.name:
+                self.admission.update_requested_documents()
+
+            self.htmx_trigger_form_extra['next'] = (
+                'received' if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES else 'uclouvain'
+            )
+
+        self.message_on_success = _('The document has been uploaded')
+        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
+
+        return super().form_valid(self.form_class(mimetypes=self.document.mimetypes))

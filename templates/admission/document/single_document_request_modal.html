@@ -31,7 +31,7 @@
 {% block modal_title %}{% translate "Designate the document as to be requested" %}{% endblock %}
 
 {% block modal_body %}
-  {% bootstrap_field request_form.reason %}
+  {% bootstrap_field request_form.reason form_group_class='form-group required_field' %}
 {% endblock %}
 
 {% block modal_footer %}

@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+from typing import List, Dict
 
 from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
@@ -32,7 +32,7 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
 
 class EmplacementsDocumentsPropositionTranslator(IEmplacementsDocumentsPropositionTranslator):
     @classmethod
-    def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> dict:
+    def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> Dict[str, Dict]:
         from osis_document.api.utils import get_remote_tokens, get_several_remote_metadata
 
         tokens = get_remote_tokens(uuids_documents)

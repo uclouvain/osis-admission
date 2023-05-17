@@ -28,15 +28,8 @@ from typing import Optional, List
 
 import attr
 
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
-
-
-@attr.dataclass(frozen=True, slots=True)
-class AuteurDTO(interface.DTO):
-    matricule: str
-    nom: str
-    prenom: str
-    est_candidat: bool
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -48,12 +41,14 @@ class EmplacementDocumentDTO(interface.Entity):
     type: str
     statut: str
     justification_gestionnaire: str
-    document_soumis_par: str
+    document_soumis_par: Optional[PersonneConnueUclDTO]
     document_soumis_le: Optional[datetime.datetime]
     reclame_le: Optional[datetime.datetime]
-    dernier_acteur: str
+    dernier_acteur: Optional[PersonneConnueUclDTO]
     derniere_action_le: Optional[datetime.datetime]
     a_echeance_le: Optional[datetime.datetime]
     onglet: str
     nom_onglet: str
+    nom_onglet_langue_candidat: str
     uuid_proposition: str
+    requis_automatiquement: bool

@@ -30,31 +30,31 @@ from unittest import TestCase
 import freezegun
 
 from admission.constants import UUID_REGEX
-from admission.ddd.admission.commands import InitierEmplacementDocumentLibreAReclamerCommand
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutEmplacementDocument,
     IdentifiantBaseEmplacementDocument,
 )
+from admission.ddd.admission.formation_generale.commands import InitialiserEmplacementDocumentLibreAReclamerCommand
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
-    EmplacementDocumentInMemoryRepository,
+    emplacement_document_in_memory_repository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
 @freezegun.freeze_time('2023-01-01')
-class TestReclamerDocumentLibre(TestCase):
+class TestInitialiserEmplacementDocumentLibreAReclamer(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
-        self.repository = EmplacementDocumentInMemoryRepository()
-        self.repository.reset()
+        self.emplacement_document_repository = emplacement_document_in_memory_repository
+        self.addCleanup(self.emplacement_document_repository.reset)
         self.uuid_proposition = str(uuid.uuid4())
         self.current_datetime = datetime.datetime.now()
         self.regex_identifiant = r'' + IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name + '.' + UUID_REGEX
 
-    def test_should_reclamer_document_libre_sic(self):
+    def test_should_initialiser_emplacement_document_libre_reclamable_sic(self):
         identifiant_document_depose = self.message_bus.invoke(
-            InitierEmplacementDocumentLibreAReclamerCommand(
+            InitialiserEmplacementDocumentLibreAReclamerCommand(
                 uuid_proposition=self.uuid_proposition,
                 auteur='0123456789',
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
@@ -63,12 +63,12 @@ class TestReclamerDocumentLibre(TestCase):
             )
         )
 
-        document = self.repository.get(entity_id=identifiant_document_depose)
+        document = self.emplacement_document_repository.get(entity_id=identifiant_document_depose)
 
         self.assertIsNotNone(document)
 
         self.assertRegex(document.entity_id.identifiant, self.regex_identifiant)
-        self.assertEqual(document.entity_id.proposition.uuid, self.uuid_proposition)
+        self.assertEqual(document.entity_id.proposition_id.uuid, self.uuid_proposition)
         self.assertEqual(document.libelle, 'Nom du document')
         self.assertEqual(document.uuids_documents, [])
         self.assertEqual(document.dernier_acteur, '0123456789')
@@ -78,10 +78,12 @@ class TestReclamerDocumentLibre(TestCase):
         self.assertEqual(document.reclame_le, None)
         self.assertEqual(document.a_echeance_le, None)
         self.assertEqual(document.derniere_action_le, self.current_datetime)
+        self.assertEqual(document.document_soumis_par, '')
+        self.assertEqual(document.requis_automatiquement, False)
 
-    def test_should_reclamer_document_libre_fac(self):
+    def test_should_initialiser_emplacement_document_libre_reclamable_fac(self):
         identifiant_document_depose = self.message_bus.invoke(
-            InitierEmplacementDocumentLibreAReclamerCommand(
+            InitialiserEmplacementDocumentLibreAReclamerCommand(
                 uuid_proposition=self.uuid_proposition,
                 auteur='0123456789',
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
@@ -90,12 +92,12 @@ class TestReclamerDocumentLibre(TestCase):
             )
         )
 
-        document = self.repository.get(entity_id=identifiant_document_depose)
+        document = self.emplacement_document_repository.get(entity_id=identifiant_document_depose)
 
         self.assertIsNotNone(document)
 
         self.assertRegex(document.entity_id.identifiant, self.regex_identifiant)
-        self.assertEqual(document.entity_id.proposition.uuid, self.uuid_proposition)
+        self.assertEqual(document.entity_id.proposition_id.uuid, self.uuid_proposition)
         self.assertEqual(document.libelle, 'Nom du document')
         self.assertEqual(document.uuids_documents, [])
         self.assertEqual(document.dernier_acteur, '0123456789')
@@ -105,3 +107,5 @@ class TestReclamerDocumentLibre(TestCase):
         self.assertEqual(document.reclame_le, None)
         self.assertEqual(document.a_echeance_le, None)
         self.assertEqual(document.derniere_action_le, self.current_datetime)
+        self.assertEqual(document.document_soumis_par, '')
+        self.assertEqual(document.requis_automatiquement, False)

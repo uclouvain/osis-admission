@@ -23,9 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .annuler_reclamation_document_service import annuler_reclamation_emplacement_document
-from .initier_emplacement_document_libre_interne import initier_emplacement_document_libre_interne
-from .initier_emplacement_document_a_reclamer_service import initier_emplacement_document_a_reclamer
-from .initier_emplacement_document_libre_a_reclamer_service import initier_emplacement_document_libre_a_reclamer
-from .modifier_reclamation_document_service import modifier_reclamation_emplacement_document
+from .annuler_reclamation_emplacement_document_service import annuler_reclamation_emplacement_document
+from .initialiser_emplacement_document_libre_non_reclamable import initialiser_emplacement_document_libre_non_reclamable
+from .initialiser_emplacement_document_a_reclamer_service import initialiser_emplacement_document_a_reclamer
+from .initialiser_emplacement_document_libre_a_reclamer_service import initialiser_emplacement_document_libre_a_reclamer
+from .modifier_reclamation_emplacement_document_service import modifier_reclamation_emplacement_document
+from .remplacer_emplacement_document_service import remplacer_emplacement_document
+from .remplir_emplacement_document_par_gestionnaire_service import remplir_emplacement_document_par_gestionnaire
 from .supprimer_emplacement_document_service import supprimer_emplacement_document

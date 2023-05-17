@@ -28,7 +28,8 @@ from typing import Optional, List, Dict
 
 import weasyprint
 from django.conf import settings
-from django.utils.translation import gettext as _, pgettext
+from django.utils import formats
+from django.utils.translation import gettext as _, pgettext, override
 
 from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
@@ -73,21 +74,26 @@ class Section:
         identifier,
         content_template,
         context: ResumePropositionDTO,
-        label: str = '',
         sub_identifier='',
         sub_identifier_label='',
+        sub_identifier_dates='',
         extra_context: dict = None,
         attachments: Optional[List[Attachment]] = None,
         load_content=False,
     ):
         self.base_identifier = identifier
         self.identifier = f'{identifier.name}.{sub_identifier}' if sub_identifier else identifier.name
-        self.label = (
-            label
-            if label
-            else (f'{identifier.value} > {sub_identifier_label}' if sub_identifier_label else identifier.value)
-        )
+        self.label = self._get_label(identifier.value, sub_identifier_label, sub_identifier_dates)
         self.attachments = attachments if attachments is not None else []
+
+        with override(language=context.identification.langue_contact):
+            self.candidate_language_label = str(
+                self._get_label(
+                    identifier.value,
+                    sub_identifier_label,
+                    sub_identifier_dates,
+                )
+            )
 
         if load_content:
             from admission.exports.utils import get_pdf_from_template
@@ -97,7 +103,7 @@ class Section:
                 self.get_stylesheets(),
                 {
                     'content_template_name': content_template,
-                    'content_title': label,
+                    'content_title': self.label,
                     'identification': context.identification,
                     'coordonnees': context.coordonnees,
                     'curriculum': context.curriculum,
@@ -116,6 +122,15 @@ class Section:
             )
         else:
             self.content = None
+
+    @staticmethod
+    def _get_label(base_label: str, sub_label: str, sub_dates: str):
+        label = base_label
+        if sub_label:
+            label += f' > {sub_label}'
+        if sub_dates:
+            label += f' ({sub_dates})'
+        return label
 
     @classmethod
     def get_stylesheets(cls):
@@ -266,10 +281,15 @@ def get_educational_experience_section(
         and educational_experience.regime_linguistique
         and educational_experience.regime_linguistique not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
     )
+    min_year = min(educational_experience_year.annee for educational_experience_year in educational_experience.annees)
+    max_year = 1 + max(
+        educational_experience_year.annee for educational_experience_year in educational_experience.annees
+    )
     return Section(
         identifier=OngletsDemande.CURRICULUM,
         sub_identifier=educational_experience.uuid,
         sub_identifier_label=educational_experience.nom_formation,
+        sub_identifier_dates=f'{min_year}-{max_year}',
         content_template='admission/exports/recap/includes/curriculum_educational_experience.html',
         context=context,
         extra_context={
@@ -295,10 +315,13 @@ def get_non_educational_experience_section(
     load_content: bool,
 ) -> Section:
     """Returns the non educational experience section."""
+    start_date = formats.date_format(non_educational_experience.date_debut, "m/Y")
+    end_date = formats.date_format(non_educational_experience.date_fin, "m/Y")
     return Section(
         identifier=OngletsDemande.CURRICULUM,
         sub_identifier=non_educational_experience.uuid,
         sub_identifier_label=ActivityType.get_value(non_educational_experience.type),
+        sub_identifier_dates=f'{start_date} - {end_date}' if start_date != end_date else start_date,
         content_template='admission/exports/recap/includes/curriculum_professional_experience.html',
         context=context,
         extra_context={

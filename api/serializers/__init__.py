@@ -69,3 +69,4 @@ from .specific_question import (
 )
 from .submission import PropositionErrorsSerializer, SubmitPropositionSerializer
 from .pdf_recap import PDFRecapSerializer
+from .documents import *

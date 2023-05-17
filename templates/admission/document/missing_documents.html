@@ -25,46 +25,48 @@
 {% endcomment %}
 
 <div>
-  <table
-      id="document-list-table"
-      class="table table-bordered table-responsive"
-  >
-    <thead>
-      <tr>
-        <th>{% translate 'Document' %}</th>
-        <th>{% translate 'Actor' %}</th>
-        <th>{% translate 'Date' %}</th>
-      </tr>
-    </thead>
-    <tbody class="selectable">
-      {% for document in documents %}
-        {% if not document.document_uuids and document.type not in EMPLACEMENTS_DOCUMENTS_INTERNES %}
-          {% ifchanged document.onglet %}
-            <tr class="tab-name">
-              <td colspan="3">> {{ document.nom_onglet }}</td>
-            </tr>
-          {% endifchanged %}
-          <tr
-              {% if document.statut == 'A_RECLAMER' %}
-                class="bg-danger"
-              {% else %}
-                class="bg-warning"
-              {% endif %}
-              hx-get="{% url request.resolver_match.namespace|add:':detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
-              hx-target="#document-details"
-              hx-swap="outerHTML"
-          >
-            <td class="auto-width">
-              <i class="fa-solid fa-link-slash"></i>
-              {% if document.type in EMPLACEMENTS_FAC %}
-                <i class="fa-solid fa-building-columns"></i>
-              {% endif %}
-              {{ document.libelle }}
-            </td>
-            <td class="min-width">
+  <div class="scrollable-document">
+    <table
+        id="document-list-table"
+        class="table table-bordered table-responsive"
+    >
+      <thead>
+        <tr>
+          <th>{% translate 'Document' %}</th>
+          <th>{% translate 'Actor' %}</th>
+          <th>{% translate 'Date' %}</th>
+        </tr>
+      </thead>
+      <tbody class="selectable">
+        {% for document in documents %}
+          {% if not document.document_uuids and document.type not in EMPLACEMENTS_DOCUMENTS_INTERNES %}
+            {% ifchanged document.onglet %}
+              <tr class="tab-name">
+                <td colspan="3">> {{ document.nom_onglet }}</td>
+              </tr>
+            {% endifchanged %}
+            <tr
+                {% if document.statut == 'A_RECLAMER' %}
+                  class="bg-danger"
+                {% else %}
+                  class="bg-warning"
+                {% endif %}
+                  hx-get="{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
+                  hx-target="#document-details"
+                  hx-swap="outerHTML"
+                  data-document-id="{{ document.identifiant }}"
+            >
+              <td class="auto-width">
+                <i class="fa-solid fa-link-slash"></i>
+                {% if document.type in EMPLACEMENTS_FAC %}
+                  <i class="fa-solid fa-building-columns"></i>
+                {% endif %}
+                {{ document.libelle }}
+              </td>
+              <td class="min-width">
               <span class="flex-content-no-wrap align-items-baseline">
                 {% if document.dernier_acteur %}
-                  {{ document.dernier_acteur }}
+                  {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
                   {% if document.statut == 'RECLAME' %}
                     <i class="fa-solid fa-envelope" title="{% translate 'Requested' %}"></i>
                   {% endif %}
@@ -72,26 +74,27 @@
                   {% translate 'System' %}
                 {% endif %}
               </span>
-            </td>
-            <td class="min-width">
-              {% if document.statut == 'RECLAME' %}
-                {% translate 'Requested on' %} {{ document.reclame_le|date:'DATE_FORMAT' }}<br>
-                {% translate 'Deadline on' %} {{ document.a_echeance_le|date:'DATE_FORMAT' }}
-              {% elif document.derniere_action_le %}
-                {{ document.derniere_action_le|date:'DATETIME_FORMAT' }}
-              {% endif %}
-            </td>
-          </tr>
-        {% endif %}
-      {% endfor %}
-    </tbody>
-  </table>
+              </td>
+              <td class="min-width">
+                {% if document.statut == 'RECLAME' %}
+                  {% translate 'Requested on' %} {{ document.reclame_le|date:'DATE_FORMAT' }}<br>
+                  {% translate 'Deadline on' %} {{ document.a_echeance_le|date:'DATE_FORMAT' }}
+                {% elif document.derniere_action_le %}
+                  {{ document.derniere_action_le|date:'DATETIME_FORMAT' }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
   <button
       class="btn btn-primary"
       data-toggle="collapse"
       data-target="#request-document-form"
-      hx-get="{% url request.resolver_match.namespace|add:':free-candidate-request' uuid=view.kwargs.uuid %}"
+      hx-get="{% url request.resolver_match.namespace|add:':document:free-candidate-request' uuid=view.kwargs.uuid %}"
       hx-target="#request-document-form"
       hx-trigger="click once"
   >

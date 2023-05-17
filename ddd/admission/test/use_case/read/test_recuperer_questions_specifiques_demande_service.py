@@ -45,7 +45,7 @@ class TestRecupererQuestionsSpecifiquesFormationGenerale(TestCase):
 
     def test_should_recuperer_questions_specifiques_demande(self):
         questions = self.message_bus.invoke(self.cmd)
-        self.assertEqual(len(questions), 6)
+        self.assertEqual(len(questions), 8)
 
 
 class TestRecupererQuestionsSpecifiquesFormationContinue(TestCase):

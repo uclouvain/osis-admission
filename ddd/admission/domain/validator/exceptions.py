@@ -186,3 +186,11 @@ class EmplacementDocumentNonTrouveException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Document not found.")
         super().__init__(message, **kwargs)
+
+
+class DocumentsCompletesDifferentsDesReclamesException(BusinessException):
+    status_code = "ADMISSION-18"
+
+    def __init__(self, **kwargs):
+        message = _("The completed documents are different from the ones that are requested.")
+        super().__init__(message, **kwargs)

@@ -58,7 +58,7 @@ class RecupererQuestionsSpecifiquesQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class InitierEmplacementDocumentLibreInterneCommand(interface.CommandRequest):
+class InitialiserEmplacementDocumentLibreNonReclamableCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_document: str
     type_emplacement: str
@@ -67,7 +67,7 @@ class InitierEmplacementDocumentLibreInterneCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class InitierEmplacementDocumentLibreAReclamerCommand(interface.CommandRequest):
+class InitialiserEmplacementDocumentLibreAReclamerCommand(interface.CommandRequest):
     uuid_proposition: str
     type_emplacement: str
     libelle: str
@@ -76,7 +76,7 @@ class InitierEmplacementDocumentLibreAReclamerCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class InitierEmplacementDocumentAReclamerCommand(interface.CommandRequest):
+class InitialiserEmplacementDocumentAReclamerCommand(interface.CommandRequest):
     uuid_proposition: str
     identifiant_emplacement: str
     type_emplacement: str
@@ -96,9 +96,27 @@ class ModifierReclamationEmplacementDocumentCommand(interface.CommandRequest):
 class AnnulerReclamationEmplacementDocumentCommand(interface.CommandRequest):
     uuid_proposition: str
     identifiant_emplacement: str
+    auteur: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class SupprimerEmplacementDocumentCommand(interface.CommandRequest):
     uuid_proposition: str
     identifiant_emplacement: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplacerEmplacementDocumentCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    uuid_document: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplirEmplacementDocumentParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    uuid_document: str
+    auteur: str

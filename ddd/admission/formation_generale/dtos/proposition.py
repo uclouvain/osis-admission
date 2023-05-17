@@ -51,7 +51,6 @@ class PropositionDTO(interface.DTO):
     matricule_candidat: str
     prenom_candidat: str
     nom_candidat: str
-    login_candidat: str
 
     bourse_double_diplome: Optional[BourseDTO]
     bourse_internationale: Optional[BourseDTO]

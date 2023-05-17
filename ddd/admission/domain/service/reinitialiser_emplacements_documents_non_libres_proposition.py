@@ -34,7 +34,7 @@ from admission.exports.admission_recap.section import get_sections
 from osis_common.ddd import interface
 
 
-class CalculerEmplacementsDocumentsNonLibresPropositionService(interface.DomainService):
+class ReinitialiserEmplacementsDocumentsNonLibresPropositionService(interface.DomainService):
     @classmethod
     def reinitialiser_emplacements(
         cls,
@@ -58,7 +58,7 @@ class CalculerEmplacementsDocumentsNonLibresPropositionService(interface.DomainS
             for document in onglet.attachments:
                 if document.required and not document.uuids:
                     documents.append(
-                        EmplacementDocumentBuilder.initier_emplacement_document_a_reclamer(
+                        EmplacementDocumentBuilder.initialiser_emplacement_document_a_reclamer(
                             identifiant_emplacement=f'{onglet.identifier}.{document.identifier}',
                             uuid_proposition=proposition_identity.uuid,
                             auteur='',

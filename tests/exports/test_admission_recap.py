@@ -34,7 +34,6 @@ import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
-from django.utils.translation import ngettext
 from osis_async.models import AsyncTask
 from rest_framework import status
 
@@ -309,12 +308,12 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('admission.exports.admission_recap.admission_recap.get_remote_tokens')
+        patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('admission.exports.admission_recap.admission_recap.get_several_remote_metadata')
+        patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
         patched = patcher.start()
         patched.side_effect = lambda tokens: {
             token: {
@@ -348,6 +347,13 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.outline_root = patched.new.return_value.open_outline.return_value.__enter__.return_value.root = MagicMock()
         patched.open.return_value.__enter__.return_value = mock.Mock(pdf_version=1, pages=[None])
         self.addCleanup(patcher.stop)
+
+    def test_attachment_equality(self):
+        id_card_1 = Attachment(label='PDF', uuids=[''], identifier='CARTE_IDENTITE')
+        id_card_2 = Attachment(label='PDF', uuids=[''], identifier='CARTE_IDENTITE')
+        id_photo = Attachment(label='JPEG', uuids=[''], identifier='PHOTO_IDENTITE')
+        self.assertEqual(id_card_1, id_card_2)
+        self.assertNotEqual(id_card_1, id_photo)
 
     def test_get_raw_with_pdf_attachment(self):
         pdf_attachment = Attachment(label='PDF', uuids=[''], identifier='CARTE_IDENTITE')
@@ -450,8 +456,14 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['training_choice'].title, 'Choix de formation')
         self.assertEqual(call_args_by_tab['education'].title, 'Études secondaires')
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
-        self.assertEqual(call_args_by_tab['curriculum_academic_experience'].title, 'Curriculum > Computer science')
-        self.assertEqual(call_args_by_tab['curriculum_non_academic_experience'].title, 'Curriculum > Travail')
+        self.assertEqual(
+            call_args_by_tab['curriculum_academic_experience'].title,
+            'Curriculum > Computer science (2021-2022)',
+        )
+        self.assertEqual(
+            call_args_by_tab['curriculum_non_academic_experience'].title,
+            'Curriculum > Travail (01/2021 - 03/2021)',
+        )
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
         self.assertEqual(len(call_args_by_tab['specific_question'].children), 1)
         self.assertEqual(
@@ -1014,7 +1026,6 @@ class SectionsAttachmentsTestCase(TestCase):
             est_reorientation_inscription_externe=None,
             formulaire_modification_inscription=['uuid-formulaire-modification-inscription'],
             documents_demandes={},
-            login_candidat='candidate',
             documents_libres_sic_candidats=[],
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_candidats=[],
@@ -1111,7 +1122,8 @@ class SectionsAttachmentsTestCase(TestCase):
             connaissances_langues=[
                 ConnaissanceLangueDTO(
                     langue=FR_ISO_CODE,
-                    nom_langue='French',
+                    nom_langue_en='French',
+                    nom_langue_fr='Français',
                     comprehension_orale='C2',
                     capacite_orale='C2',
                     capacite_ecriture='C2',
@@ -1119,7 +1131,8 @@ class SectionsAttachmentsTestCase(TestCase):
                 ),
                 ConnaissanceLangueDTO(
                     langue='EN',
-                    nom_langue='English',
+                    nom_langue_en='English',
+                    nom_langue_fr='Anglais',
                     comprehension_orale='C1',
                     capacite_orale='C1',
                     capacite_ecriture='C1',

@@ -25,13 +25,49 @@
 # ##############################################################################
 from typing import List
 
+from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
 
 
 class EmplacementsDocumentsPropositionInMemoryTranslator(IEmplacementsDocumentsPropositionTranslator):
-    metadata = {}
+    metadata = {
+        'file1.pdf': {
+            'mimetype': PDF_MIME_TYPE,
+            'author': '',
+            'uploaded_at': '2023-01-01T00:00:00',
+        },
+        '24de0c3d-3c06-4c93-8eb4-c8648f04f144': {
+            'mimetype': PDF_MIME_TYPE,
+            'author': '00321234',
+            'uploaded_at': '2023-01-04T00:00:00',
+        },
+        '24de0c3d-3c06-4c93-8eb4-c8648f04f140': {
+            'mimetype': PDF_MIME_TYPE,
+            'explicit_name': 'My candidate sic file',
+            'author': '00987890',
+            'uploaded_at': '2023-01-05T00:00:00',
+        },
+        '24de0c3d-3c06-4c93-8eb4-c8648f04f141': {
+            'mimetype': PDF_MIME_TYPE,
+            'explicit_name': 'My candidate fac file',
+            'author': '00321234',
+            'uploaded_at': '2023-01-01T00:00:00',
+        },
+        '24de0c3d-3c06-4c93-8eb4-c8648f04f142': {
+            'mimetype': PDF_MIME_TYPE,
+            'explicit_name': 'My uclouvain sic file',
+            'author': '00987890',
+            'uploaded_at': '2023-01-02T00:00:00',
+        },
+        '24de0c3d-3c06-4c93-8eb4-c8648f04f143': {
+            'mimetype': PDF_MIME_TYPE,
+            'explicit_name': 'My uclouvain fac file',
+            'author': '00321234',
+            'uploaded_at': '2023-01-03T00:00:00',
+        },
+    }
 
     @classmethod
     def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> dict:

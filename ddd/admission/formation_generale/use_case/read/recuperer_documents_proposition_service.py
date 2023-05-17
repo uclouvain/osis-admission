@@ -26,8 +26,9 @@
 import datetime
 from typing import List
 
-from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import \
-    IEmplacementsDocumentsPropositionTranslator
+from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
+    IEmplacementsDocumentsPropositionTranslator,
+)
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
@@ -43,6 +44,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
 def recuperer_documents_proposition(
@@ -53,6 +55,7 @@ def recuperer_documents_proposition(
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    personne_connue_translator: 'IPersonneConnueUclTranslator',
 ) -> 'List[EmplacementDocumentDTO]':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -79,6 +82,7 @@ def recuperer_documents_proposition(
 
     # WHEN
     documents_dto = emplacements_documents_demande_translator.recuperer_emplacements_dto(
+        personne_connue_translator=personne_connue_translator,
         resume_dto=resume_dto,
         questions_specifiques=questions_specifiques_dtos,
     )

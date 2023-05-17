@@ -621,6 +621,9 @@ msgstr ""
 msgid "Authors"
 msgstr ""
 
+msgid "Automatically required"
+msgstr ""
+
 msgid "BIC/SWIFT code identifying the bank from which the account was opened"
 msgstr ""
 
@@ -1058,10 +1061,10 @@ msgstr ""
 msgid "Communication attestation"
 msgstr ""
 
-#, python-format
+#, python-brace-format
 msgid ""
 "Communication to the candidate, in <span class=\"label label-admission-"
-"primary\">%s</span>"
+"primary\">{language_code}]</span>"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -1080,6 +1083,9 @@ msgid "Complementary training not enabled"
 msgstr ""
 
 msgid "Complementary training proposition"
+msgstr ""
+
+msgid "Completed after the request"
 msgstr ""
 
 msgid "Completed application"
@@ -2863,6 +2869,12 @@ msgstr ""
 msgid "No doctorate found."
 msgstr ""
 
+msgid "No document"
+msgstr ""
+
+msgid "No document is defined as requestable. At least one is required."
+msgstr ""
+
 msgid "No enrolment application"
 msgstr ""
 
@@ -3508,10 +3520,19 @@ msgstr ""
 msgid "Reorientation"
 msgstr ""
 
+msgid "Replace a document"
+msgstr ""
+
+msgid "Replace the document"
+msgstr ""
+
 msgid "Report of the supervisory panel"
 msgstr ""
 
 msgid "Reporting categories"
+msgstr ""
+
+msgid "Request now"
 msgstr ""
 
 msgid "Request of a new deadline for the confirmation paper"
@@ -4092,6 +4113,9 @@ msgid ""
 "<u>before</u>:"
 msgstr ""
 
+msgid "The completed documents are different from the ones that are requested."
+msgstr ""
+
 msgid "The configuration is not valid for a document field: "
 msgstr ""
 
@@ -4132,7 +4156,13 @@ msgctxt "male gender"
 msgid "The doctoral student"
 msgstr ""
 
+msgid "The document has been deleted"
+msgstr ""
+
 msgid "The document has been designated as to be requested"
+msgstr ""
+
+msgid "The document has been replaced"
 msgstr ""
 
 msgid "The document has been uploaded"
@@ -4157,6 +4187,11 @@ msgstr ""
 msgid ""
 "The educational experiences that have been valuated from this admission."
 msgstr ""
+
+#, fuzzy
+#| msgid "Membre CA not found."
+msgid "The element has not been found."
+msgstr "Supervisory panel member not found."
 
 msgid "The experiences that have been valuated from this admission."
 msgstr ""
@@ -4366,9 +4401,6 @@ msgid ""
 "admission process."
 msgstr ""
 
-msgid "This document cannot be requested"
-msgstr ""
-
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
@@ -4423,6 +4455,10 @@ msgstr ""
 msgid ""
 "To be uploaded in your dossier on the doctoral platform as soon as possible "
 "after the confirmation test"
+msgstr ""
+
+msgid ""
+"To visualize and edit a document, please select it in the list opposite."
 msgstr ""
 
 msgid "Token"
@@ -4557,6 +4593,9 @@ msgid "Update"
 msgstr ""
 
 msgid "Update doctorate admission"
+msgstr ""
+
+msgid "Upload"
 msgstr ""
 
 msgid "Upload a document"
@@ -4799,6 +4838,9 @@ msgstr ""
 
 msgid ""
 "You must be a member of the doctoral commission to access this admission"
+msgstr ""
+
+msgid "You must be invited to complete this admission."
 msgstr ""
 
 msgid "You must be the reference promoter to access this admission"

@@ -24,25 +24,25 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.commands import ModifierReclamationEmplacementDocumentCommand
+from admission.ddd.admission.commands import RemplirEmplacementDocumentParGestionnaireCommand
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
-def modifier_reclamation_emplacement_document(
-    cmd: 'ModifierReclamationEmplacementDocumentCommand',
+def remplir_emplacement_document_par_gestionnaire(
+    cmd: 'RemplirEmplacementDocumentParGestionnaireCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
 ) -> EmplacementDocumentIdentity:
     emplacement_document = emplacement_document_repository.get(
         entity_id=EmplacementDocumentIdentity(
             identifiant=cmd.identifiant_emplacement,
-            proposition=PropositionIdentity(uuid=cmd.uuid_proposition),
+            proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
         )
     )
 
-    emplacement_document.specifier_reclamation(raison=cmd.raison, acteur=cmd.auteur)
+    emplacement_document.remplir_par_gestionnaire(uuid_document=cmd.uuid_document, auteur=cmd.auteur)
 
-    emplacement_document_repository.save(entity=emplacement_document)
+    emplacement_document_repository.save(entity=emplacement_document, auteur=cmd.auteur)
 
     return emplacement_document.entity_id

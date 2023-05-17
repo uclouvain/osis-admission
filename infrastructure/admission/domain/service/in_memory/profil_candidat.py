@@ -1032,7 +1032,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     def get_connaissances_langues(cls, matricule: str) -> List[ConnaissanceLangueDTO]:
         return [
             ConnaissanceLangueDTO(
-                nom_langue=connaissance.langue.nom_langue,
+                nom_langue_fr=connaissance.langue.nom_langue,
+                nom_langue_en=connaissance.langue.nom_langue,
                 langue=connaissance.langue.code_langue,
                 comprehension_orale=connaissance.comprehension_orale,
                 capacite_orale=connaissance.capacite_orale,

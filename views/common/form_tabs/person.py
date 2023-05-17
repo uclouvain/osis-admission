@@ -29,7 +29,7 @@ from django.views.generic import UpdateView
 
 from admission.ddd import BE_ISO_CODE
 from admission.forms.admission.person import AdmissionPersonForm
-from admission.views.doctorate.mixins import AdmissionFormMixin
+from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
 from reference.models.country import Country
@@ -37,11 +37,12 @@ from reference.models.country import Country
 __all__ = ['AdmissionPersonFormView']
 
 
-class AdmissionPersonFormView(AdmissionFormMixin, UpdateView):
+class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, UpdateView):
     template_name = 'admission/forms/person.html'
     permission_required = 'admission.change_admission_person'
     form_class = AdmissionPersonForm
     update_requested_documents = True
+    update_admission_author = True
 
     def get_object(self):
         return self.admission.candidate

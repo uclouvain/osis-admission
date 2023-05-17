@@ -27,7 +27,17 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
-from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_demande
+from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
+from admission.ddd.admission.use_case.write import (
+    initialiser_emplacement_document_libre_non_reclamable,
+    initialiser_emplacement_document_libre_a_reclamer,
+    initialiser_emplacement_document_a_reclamer,
+    annuler_reclamation_emplacement_document,
+    modifier_reclamation_emplacement_document,
+    supprimer_emplacement_document,
+    remplacer_emplacement_document,
+    remplir_emplacement_document_par_gestionnaire,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -48,9 +58,12 @@ from admission.infrastructure.admission.formation_generale.domain.service.notifi
 from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
+from admission.infrastructure.admission.formation_generale.repository.emplacement_document import (
+    EmplacementDocumentRepository,
+)
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
-from admission.infrastructure.admission.repository.emplacement_document import EmplacementDocumentRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -164,8 +177,9 @@ COMMAND_HANDLERS = {
         question_specifique_translator=QuestionSpecifiqueTranslator(),
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
         academic_year_repository=AcademicYearRepository(),
+        personne_connue_translator=PersonneConnueUclTranslator(),
     ),
-    RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_demande(
+    RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
         question_specifique_translator=QuestionSpecifiqueTranslator(),
     ),
@@ -193,5 +207,61 @@ COMMAND_HANDLERS = {
         emplacement_document_repository=EmplacementDocumentRepository(),
         notification=Notification(),
         historique=Historique(),
+    ),
+    RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        comptabilite_translator=ComptabiliteTranslator(),
+        question_specifique_translator=QuestionSpecifiqueTranslator(),
+        emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+        personne_connue_translator=PersonneConnueUclTranslator(),
+    ),
+    CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
+        completer_emplacements_documents_par_candidat(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            emplacement_document_repository=EmplacementDocumentRepository(),
+            historique=Historique(),
+        )
+    ),
+    InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
+        initialiser_emplacement_document_libre_non_reclamable(
+            cmd,
+            emplacement_document_repository=EmplacementDocumentRepository(),
+        )
+    ),
+    InitialiserEmplacementDocumentLibreAReclamerCommand: (
+        lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
+            cmd,
+            emplacement_document_repository=EmplacementDocumentRepository(),
+        )
+    ),
+    InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(
+        cmd,
+        emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    AnnulerReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: annuler_reclamation_emplacement_document(
+        cmd,
+        emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    ModifierReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: modifier_reclamation_emplacement_document(
+        cmd,
+        emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    SupprimerEmplacementDocumentCommand: lambda msg_bus, cmd: supprimer_emplacement_document(
+        cmd,
+        emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    RemplacerEmplacementDocumentCommand: lambda msg_bus, cmd: remplacer_emplacement_document(
+        cmd,
+        emplacement_document_repository=EmplacementDocumentRepository(),
+    ),
+    RemplirEmplacementDocumentParGestionnaireCommand: (
+        lambda msg_bus, cmd: remplir_emplacement_document_par_gestionnaire(
+            cmd,
+            emplacement_document_repository=EmplacementDocumentRepository(),
+        )
     ),
 }

@@ -706,6 +706,9 @@ msgstr "Auteur"
 msgid "Authors"
 msgstr "Auteurs et autrices"
 
+msgid "Automatically required"
+msgstr "Requis automatiquement"
+
 msgid "BIC/SWIFT code identifying the bank from which the account was opened"
 msgstr "Code BIC/SWIFT identifiant la banque dont provient le compte"
 
@@ -1159,13 +1162,13 @@ msgstr "Commentaires"
 msgid "Communication attestation"
 msgstr "Attestation de communication"
 
-#, python-format
+#, python-brace-format
 msgid ""
 "Communication to the candidate, in <span class=\"label label-admission-"
-"primary\">%s</span>"
+"primary\">{language_code}]</span>"
 msgstr ""
 "Communication au candidat, en langue <span class=\"label label-admission-"
-"primary\">%s</span>"
+"primary\">{language_code}</span>"
 
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
@@ -1184,6 +1187,9 @@ msgstr "Formation complémentaire non activée"
 
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
+
+msgid "Completed after the request"
+msgstr "Complété après la réclamation"
 
 msgid "Completed application"
 msgstr "Demande complétée"
@@ -3218,6 +3224,13 @@ msgstr "Raison de non-soutenance"
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
 
+msgid "No document"
+msgstr "Pas de document"
+
+msgid "No document is defined as requestable. At least one is required."
+msgstr ""
+"Aucun document n'est spécifié comme réclamable. Au-moins un est requis."
+
 msgid "No enrolment application"
 msgstr "Aucune demande d'inscription n'a été trouvée"
 
@@ -3904,11 +3917,20 @@ msgstr "Lien de parenté"
 msgid "Reorientation"
 msgstr "Réorientation"
 
+msgid "Replace a document"
+msgstr "Remplacer un document"
+
+msgid "Replace the document"
+msgstr "Remplacer le document"
+
 msgid "Report of the supervisory panel"
 msgstr "Procès-verbal du comité d'accompagnement"
 
 msgid "Reporting categories"
 msgstr "Catégories de reporting"
+
+msgid "Request now"
+msgstr "Réclamer maintenant"
 
 msgid "Request of a new deadline for the confirmation paper"
 msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
@@ -4539,6 +4561,9 @@ msgstr ""
 "Le comité demande au candidat de présenter une <strong>nouvelle épreuve</"
 "strong> <u>avant</u> le :"
 
+msgid "The completed documents are different from the ones that are requested."
+msgstr "Les documents complétés sont différents de ceux qui sont réclamés."
+
 msgid "The configuration is not valid for a document field: "
 msgstr "La configuration n'est pas valide pour un champ document : "
 
@@ -4584,8 +4609,14 @@ msgctxt "male gender"
 msgid "The doctoral student"
 msgstr "Le doctorant"
 
+msgid "The document has been deleted"
+msgstr "Le document a été supprimé"
+
 msgid "The document has been designated as to be requested"
 msgstr "Le document a été désigné comme étant à réclamer"
+
+msgid "The document has been replaced"
+msgstr "Le document a été remplacé"
 
 msgid "The document has been uploaded"
 msgstr "Le document a été téléversé"
@@ -4610,6 +4641,9 @@ msgid ""
 "The educational experiences that have been valuated from this admission."
 msgstr ""
 "Les expériences académiques qui ont été valorisées via cette admission."
+
+msgid "The element has not been found."
+msgstr "L'élément n'a pas été trouvé"
 
 msgid "The experiences that have been valuated from this admission."
 msgstr "Les expériences qui ont été valorisées via cette admission."
@@ -4845,9 +4879,6 @@ msgstr ""
 "Ce choix définira la langue de communication tout au long de votre parcours "
 "d'admission."
 
-msgid "This document cannot be requested"
-msgstr "Ce document ne peut être réclamer"
-
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 "Cette expérience ne peut être mise à jour car elle a déjà été valorisée."
@@ -4908,6 +4939,12 @@ msgid ""
 msgstr ""
 "À téléverser dans votre dossier sur la plateforme doctorale dans les plus "
 "brefs délais après l’épreuve de confirmation"
+
+msgid ""
+"To visualize and edit a document, please select it in the list opposite."
+msgstr ""
+"Pour visualiser et éditer un document, merci d'en sélectionner un dans la "
+"liste ci-contre."
 
 msgid "Token"
 msgstr "Token"
@@ -5049,6 +5086,9 @@ msgstr "Mettre à jour"
 
 msgid "Update doctorate admission"
 msgstr "Mettre à jour admission en doctorat"
+
+msgid "Upload"
+msgstr "Téléverser"
 
 msgid "Upload a document"
 msgstr "Téléverser un document"
@@ -5331,6 +5371,9 @@ msgid ""
 msgstr ""
 "Vous devez être membre de la commission doctorale pour accéder à cette "
 "admission"
+
+msgid "You must be invited to complete this admission."
+msgstr "Vous devez être invité à compléter cette admission."
 
 msgid "You must be the reference promoter to access this admission"
 msgstr ""

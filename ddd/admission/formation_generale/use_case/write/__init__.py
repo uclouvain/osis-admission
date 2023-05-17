@@ -29,6 +29,7 @@ from .supprimer_proposition_service import supprimer_proposition
 from .soumettre_proposition_service import soumettre_proposition
 from .completer_curriculum_service import completer_curriculum
 from .completer_comptabilite_proposition_service import completer_comptabilite_proposition
+from .completer_emplacements_documents_par_candidat_service import completer_emplacements_documents_par_candidat
 from .recalculer_emplacements_documents_non_libres_proposition_service import (
     recalculer_emplacements_documents_non_libres_proposition,
 )

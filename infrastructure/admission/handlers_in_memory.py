@@ -25,45 +25,20 @@
 ##############################################################################
 from admission.ddd.admission.commands import *
 from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.write import *
 from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_demandes import (
     ListerToutesDemandesInMemory,
 )
 
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
-    EmplacementDocumentInMemoryRepository,
+    emplacement_document_in_memory_repository,
 )
 
-_emplacement_document_repository = EmplacementDocumentInMemoryRepository()
+_emplacement_document_repository = emplacement_document_in_memory_repository
 
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
         cmd,
         lister_toutes_demandes_service=ListerToutesDemandesInMemory(),
-    ),
-    InitierEmplacementDocumentLibreInterneCommand: lambda msg_bus, cmd: initier_emplacement_document_libre_interne(
-        cmd,
-        emplacement_document_repository=_emplacement_document_repository,
-    ),
-    InitierEmplacementDocumentLibreAReclamerCommand: lambda msg_bus, cmd: initier_emplacement_document_libre_a_reclamer(
-        cmd,
-        emplacement_document_repository=_emplacement_document_repository,
-    ),
-    InitierEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initier_emplacement_document_a_reclamer(
-        cmd,
-        emplacement_document_repository=_emplacement_document_repository,
-    ),
-    AnnulerReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: annuler_reclamation_emplacement_document(
-        cmd,
-        emplacement_document_repository=_emplacement_document_repository,
-    ),
-    ModifierReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: modifier_reclamation_emplacement_document(
-        cmd,
-        emplacement_document_repository=_emplacement_document_repository,
-    ),
-    SupprimerEmplacementDocumentCommand: lambda msg_bus, cmd: supprimer_emplacement_document(
-        cmd,
-        emplacement_document_repository=_emplacement_document_repository,
     ),
 }

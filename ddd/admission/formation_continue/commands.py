@@ -27,7 +27,7 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.commands import RecupererQuestionsSpecifiquesQuery
+from admission.ddd.admission import commands
 from osis_common.ddd import interface
 
 
@@ -149,5 +149,5 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererQuestionsSpecifiquesQuery(RecupererQuestionsSpecifiquesQuery):
+class RecupererQuestionsSpecifiquesQuery(commands.RecupererQuestionsSpecifiquesQuery):
     pass

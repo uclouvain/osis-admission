@@ -29,7 +29,7 @@ from typing import List, Optional, Dict
 import img2pdf
 from django.utils.translation import override
 
-from admission.constants import IMAGE_MIME_TYPES, DEFAULT_MIME_TYPES
+from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
@@ -75,9 +75,10 @@ class Attachment:
         required=False,
         candidate_language_label='',
         candidate_language='',
+        label_interpolation: Optional[dict] = None,
     ):
         self.identifier = f'{sub_identifier}.{identifier}' if sub_identifier else identifier
-        self.label = f'{label} - {sub_identifier_label}' if sub_identifier_label else label
+        self.label = self._get_label(label, sub_identifier_label, label_interpolation)
 
         self.uuids = [str(uuid) for uuid in uuids]
         self.required = required
@@ -86,14 +87,21 @@ class Attachment:
             self.candidate_language_label = candidate_language_label
         else:
             with override(language=candidate_language):
-                self.candidate_language_label = str(self.label)
+                self.candidate_language_label = str(self._get_label(label, sub_identifier_label, label_interpolation))
+
+    @staticmethod
+    def _get_label(base_label: str, sub_label: str, label_interpolation: Optional[dict]):
+        label = (f'{base_label} - {sub_label}' if sub_label else base_label)
+        if label_interpolation:
+            return label % label_interpolation
+        return label
 
     def get_raw(self, token: Optional[str], metadata: Optional[Dict], default_content: BytesIO) -> BytesIO:
         """
         Returns the raw content of an attachment if a token is specified and the mimetype is supported else a default
         content.
         """
-        if token and metadata and metadata.get('mimetype') in DEFAULT_MIME_TYPES:
+        if token and metadata and metadata.get('mimetype') in SUPPORTED_MIME_TYPES:
             raw_content = get_raw_content_remotely(token)
             if not raw_content:
                 return default_content
@@ -529,8 +537,8 @@ def get_accounting_attachments(
         attachments.append(
             Attachment(
                 identifier='ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
-                label=DocumentsComptabilite['ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT']
-                % {
+                label=DocumentsComptabilite['ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT'],
+                label_interpolation={
                     'academic_year': format_academic_year(last_fr_institutes.annee),
                     'names': ', '.join(last_fr_institutes.noms),
                     'count': len(last_fr_institutes.noms),
@@ -562,7 +570,8 @@ def get_accounting_attachments(
                 attachments.append(
                     Attachment(
                         identifier=field_id,
-                        label=DocumentsComptabilite[field_id] % {'person_concerned': formatted_relationship},
+                        label=DocumentsComptabilite[field_id],
+                        label_interpolation={'person_concerned': formatted_relationship},
                         uuids=getattr(context.comptabilite, field),
                         required=True,
                         candidate_language=context.identification.langue_contact,
@@ -687,12 +696,13 @@ def get_supervision_group_attachments(context: ResumePropositionDTO) -> List[Att
 
 def get_dynamic_questions_attachments(
     specific_questions: List[QuestionSpecifiqueDTO],
-    base_identifier=IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name,
+    with_base_identifier=True,
 ):
     """Returns the dynamic questions attachments."""
+    prefix = f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.' if with_base_identifier else ''
     return [
         Attachment(
-            identifier=f'{base_identifier}.{question.uuid}',
+            identifier=f'{prefix}{question.uuid}',
             label=question.label,
             uuids=question.valeur or [],
             required=question.requis,
@@ -712,5 +722,5 @@ def get_documents_attachments(specific_questions: List[QuestionSpecifiqueDTO]) -
     """Returns the additional attachments."""
     return get_dynamic_questions_attachments(
         specific_questions,
-        base_identifier=IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name,
+        with_base_identifier=False,
     )

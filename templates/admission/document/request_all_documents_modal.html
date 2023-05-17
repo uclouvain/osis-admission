@@ -33,14 +33,21 @@
 {% block modal_class %}modal-lg{% endblock %}
 
 {% block modal_body %}
-  {% include 'admission/document/request_all_documents.html' %}
+  <form
+      id="request-all-documents-form"
+      method="post"
+      hx-post="{% url request.resolver_match.namespace|add:':documents' uuid=view.kwargs.uuid %}"
+      class="no-prevent-quitting"
+  >
+    {% include 'admission/document/request_all_documents.html' %}
+  </form>
 {% endblock %}
 
 {% block modal_footer %}
   <button type="button" class="cancel-button btn btn-default" data-dismiss="modal">
     {% translate 'Close' %}
   </button>
-  <button type="submit" class="btn btn-success" name="request-all-form">
+  <button type="submit" class="btn btn-success" name="request-all-form" form="request-all-documents-form">
     <i class="fa-solid fa-envelope"></i>
     {% translate 'Send' %}
   </button>

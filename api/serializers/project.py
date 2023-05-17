@@ -191,6 +191,8 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
                 'submit_proposition',
                 # Proposition
                 'destroy_proposition',
+                'retrieve_documents',
+                'update_documents',
             ]
         }
     )
@@ -199,7 +201,7 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
     erreurs = None
     reponses_questions_specifiques = None
     elements_confirmation = None
-    documents_demandes = serializers.JSONField()
+    documents_demandes = None
 
     class Meta:
         source = FormationGeneralePropositionDTO
@@ -412,13 +414,15 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
                 # Proposition
                 'destroy_proposition',
                 'submit_proposition',
+                'retrieve_documents',
+                'update_documents',
             ]
         }
     )
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
     elements_confirmation = None
-    documents_demandes = serializers.JSONField()
+    documents_demandes = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -35,9 +35,9 @@ def supprimer_emplacement_document(
 ) -> EmplacementDocumentIdentity:
     entity_id = EmplacementDocumentIdentity(
         identifiant=cmd.identifiant_emplacement,
-        proposition=PropositionIdentity(cmd.uuid_proposition),
+        proposition_id=PropositionIdentity(cmd.uuid_proposition),
     )
 
-    emplacement_document_repository.delete(entity_id=entity_id, supprimer_donnees=True)
+    emplacement_document_repository.delete(entity_id=entity_id, auteur=cmd.auteur, supprimer_donnees=True)
 
     return entity_id

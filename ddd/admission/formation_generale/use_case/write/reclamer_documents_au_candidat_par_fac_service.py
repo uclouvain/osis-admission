@@ -56,10 +56,10 @@ def reclamer_documents_au_candidat_par_fac(
         a_echeance_le=cmd.a_echeance_le,
     )
 
-    emplacement_document_repository.save_multiple(entities=documents_reclames)
     proposition.reclamer_documents_par_fac()
 
     proposition_repository.save(proposition)
+    emplacement_document_repository.save_multiple(entities=documents_reclames, auteur=cmd.auteur)
     message = notification.demande_complements(
         proposition=proposition,
         objet_message=cmd.objet_message,

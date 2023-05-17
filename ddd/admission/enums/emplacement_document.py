@@ -70,6 +70,7 @@ EMPLACEMENTS_FAC = {
 }
 
 EMPLACEMENTS_SIC = {
+    TypeEmplacementDocument.NON_LIBRE.name,
     TypeEmplacementDocument.LIBRE_INTERNE_SIC.name,
     TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name,
     TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
@@ -81,6 +82,7 @@ class StatutEmplacementDocument(ChoiceEnum):
     RECLAME = _('Requested')
     NON_ANALYSE = _('Not analyzed')
     VALIDE = _('Validated')
+    COMPLETE_APRES_RECLAMATION = _('Completed after the request')
 
 
 class OngletsDemande(ChoiceEnum):

@@ -23,25 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from admission.ddd.admission.commands import InitierEmplacementDocumentLibreAReclamerCommand
+from admission.ddd.admission.commands import InitialiserEmplacementDocumentAReclamerCommand
 from admission.ddd.admission.domain.builder.emplacement_document_builder import EmplacementDocumentBuilder
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
-def initier_emplacement_document_libre_a_reclamer(
-    cmd: 'InitierEmplacementDocumentLibreAReclamerCommand',
+def initialiser_emplacement_document_a_reclamer(
+    cmd: 'InitialiserEmplacementDocumentAReclamerCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
 ) -> EmplacementDocumentIdentity:
-    emplacement_document = EmplacementDocumentBuilder().initier_emplacement_document_libre(
+    emplacement_document = EmplacementDocumentBuilder().initialiser_emplacement_document_a_reclamer(
         uuid_proposition=cmd.uuid_proposition,
         auteur=cmd.auteur,
-        type_emplacement=cmd.type_emplacement,
-        libelle=cmd.libelle,
+        identifiant_emplacement=cmd.identifiant_emplacement,
         raison=cmd.raison,
     )
 
-    emplacement_document_repository.save(entity=emplacement_document)
+    emplacement_document_repository.save(entity=emplacement_document, auteur=cmd.auteur)
 
     return emplacement_document.entity_id

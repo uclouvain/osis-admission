@@ -23,22 +23,3 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
-
-from admission.ddd.admission.commands import RecupererQuestionsSpecifiquesQuery
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.domain.service.i_question_specifique import (
-    ISuperQuestionSpecifiqueTranslator,
-)
-
-
-def recuperer_questions_specifiques_demande(
-    cmd: 'RecupererQuestionsSpecifiquesQuery',
-    question_specifique_translator: 'ISuperQuestionSpecifiqueTranslator',
-) -> 'List[QuestionSpecifiqueDTO]':
-    return question_specifique_translator.search_dto_by_proposition(
-        proposition_uuid=cmd.uuid_proposition,
-        onglets=cmd.onglets,
-        type=cmd.type,
-        requis=cmd.requis,
-    )

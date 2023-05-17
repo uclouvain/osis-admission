@@ -53,7 +53,7 @@ class EmplacementDocumentIdentityBuilder(interface.EntityIdentityBuilder):
         """
         return EmplacementDocumentIdentity(
             identifiant=f'{IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE[type_emplacement]}.{uuid.uuid4()}',
-            proposition=PropositionIdentity(uuid=uuid_proposition),
+            proposition_id=PropositionIdentity(uuid=uuid_proposition),
         )
 
     @classmethod
@@ -70,7 +70,7 @@ class EmplacementDocumentIdentityBuilder(interface.EntityIdentityBuilder):
         """
         return EmplacementDocumentIdentity(
             identifiant=identifiant_emplacement,
-            proposition=PropositionIdentity(uuid=uuid_proposition),
+            proposition_id=PropositionIdentity(uuid=uuid_proposition),
         )
 
     @classmethod
@@ -82,7 +82,7 @@ class EmplacementDocumentIdentityBuilder(interface.EntityIdentityBuilder):
         return [
             EmplacementDocumentIdentity(
                 identifiant=identifiant_emplacement,
-                proposition=PropositionIdentity(uuid=uuid_proposition),
+                proposition_id=PropositionIdentity(uuid=uuid_proposition),
             )
             for identifiant_emplacement in identifiants_emplacements
         ]

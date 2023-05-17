@@ -25,10 +25,11 @@
 # ##############################################################################
 import datetime
 from abc import ABCMeta
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from osis_common.ddd import interface
 
 
@@ -49,6 +50,19 @@ class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABC
             )
 
     @classmethod
+    def completer_documents_par_candidat(
+        cls,
+        documents_completes: List[EmplacementDocument],
+        reponses_documents_a_completer: Dict[str, List[str]],
+        auteur: str,
+    ):
+        for document in documents_completes:
+            document.remplir_par_candidat(
+                uuid_documents=reponses_documents_a_completer.get(document.entity_id.identifiant),
+                auteur=auteur,
+            )
+
+    @classmethod
     def get(cls, entity_id: EmplacementDocumentIdentity) -> EmplacementDocument:
         raise NotImplementedError
 
@@ -56,20 +70,21 @@ class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABC
     def search(
         cls,
         entity_ids: Optional[List[EmplacementDocumentIdentity]] = None,
+        statut: Optional[StatutEmplacementDocument] = None,
         **kwargs,
     ) -> List[EmplacementDocument]:
         raise NotImplementedError
 
     @classmethod
-    def delete(cls, entity_id: EmplacementDocumentIdentity, supprimer_donnees=False, **kwargs) -> None:
+    def delete(cls, entity_id: EmplacementDocumentIdentity, auteur='', supprimer_donnees=False, **kwargs) -> None:
         raise NotImplementedError
 
     @classmethod
-    def save(cls, entity: EmplacementDocument) -> None:
+    def save(cls, entity: EmplacementDocument, auteur='') -> None:
         raise NotImplementedError
 
     @classmethod
-    def save_multiple(cls, entities: List[EmplacementDocument]) -> None:
+    def save_multiple(cls, entities: List[EmplacementDocument], auteur='') -> None:
         raise NotImplementedError
 
     @classmethod

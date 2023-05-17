@@ -68,6 +68,8 @@ from admission.templatetags.admission import (
     formatted_language,
     get_item_or_default,
     has_value,
+    document_component,
+    get_item_or_none,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -403,6 +405,51 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(admission.sigle_entite_gestion, 'SFC')
         self.assertEqual(admission.training_management_faculty, 'FFC')
         self.assertEqual(formatted_reference(admission), f'M-FFC22-{str(admission)}')
+
+    def test_document_component(self):
+        # No metadata and no token
+        component = document_component('', {})
+        self.assertEqual(component, {'template': 'admission/no_document.html', 'message': _('No document')})
+
+        # No metadata with a token
+        component = document_component('token', {})
+        self.assertEqual(
+            component, {'template': 'admission/no_document.html', 'message': _('Non-retrievable document')}
+        )
+
+        # With metadata for a PDF file
+        component = document_component(
+            'token',
+            {
+                'mimetype': PDF_MIME_TYPE,
+            },
+        )
+        self.assertEqual(
+            component,
+            {
+                'template': 'osis_document/editor.html',
+                'value': 'token',
+                'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+            },
+        )
+
+        # With metadata for a PNG file
+        component = document_component(
+            'token',
+            {
+                'mimetype': PNG_MIME_TYPE,
+                'url': 'url',
+                'name': 'name',
+            },
+        )
+        self.assertEqual(component, {'template': 'admission/image.html', 'url': 'url', 'alt': 'name'})
+
+    def test_get_item_or_none(self):
+        dictionary = {
+            'a': 1,
+        }
+        self.assertEqual(get_item_or_none(dictionary, 'a'), 1)
+        self.assertEqual(get_item_or_none(dictionary, 'b'), None)
 
 
 class SimpleAdmissionTemplateTagsTestCase(TestCase):

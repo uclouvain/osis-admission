@@ -25,8 +25,8 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.domain.service.calculer_emplacements_documents_non_libres_proposition import (
-    CalculerEmplacementsDocumentsNonLibresPropositionService,
+from admission.ddd.admission.domain.service.reinitialiser_emplacements_documents_non_libres_proposition import (
+    ReinitialiserEmplacementsDocumentsNonLibresPropositionService,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
@@ -77,7 +77,7 @@ def recalculer_emplacements_documents_non_libres_proposition(
     )
 
     # WHEN
-    CalculerEmplacementsDocumentsNonLibresPropositionService.reinitialiser_emplacements(
+    ReinitialiserEmplacementsDocumentsNonLibresPropositionService.reinitialiser_emplacements(
         resume_dto=resume_dto,
         questions_specifiques=questions_specifiques_dtos,
         emplacement_document_repository=emplacement_document_repository,

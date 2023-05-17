@@ -92,6 +92,10 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
     project_abstract = 'Test'
     project_document = factory.LazyFunction(lambda: [uuid.uuid4()])
     program_proposition = factory.LazyFunction(lambda: [uuid.uuid4()])
+    scholarship_proof = factory.LazyFunction(lambda: [uuid.uuid4()])
+    additional_training_project = factory.LazyFunction(lambda: [uuid.uuid4()])
+    gantt_graph = factory.LazyFunction(lambda: [uuid.uuid4()])
+    recommendation_letters = factory.LazyFunction(lambda: [uuid.uuid4()])
 
     curriculum = factory.LazyFunction(lambda: [uuid.uuid4()])
 
@@ -103,6 +107,7 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
             cotutelle_institution="Somewhere",
             cotutelle_opening_request=factory.LazyFunction(generate_token),  # This is to overcome circular import
             cotutelle_convention=factory.LazyFunction(generate_token),
+            cotutelle_other_documents=factory.LazyFunction(generate_token),
         )
         admitted = factory.Trait(
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,

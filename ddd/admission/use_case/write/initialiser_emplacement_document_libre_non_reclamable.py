@@ -24,25 +24,25 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.commands import InitierEmplacementDocumentLibreInterneCommand
+from admission.ddd.admission.commands import InitialiserEmplacementDocumentLibreNonReclamableCommand
 from admission.ddd.admission.domain.builder.emplacement_document_builder import EmplacementDocumentBuilder
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
-def initier_emplacement_document_libre_interne(
-    cmd: 'InitierEmplacementDocumentLibreInterneCommand',
+def initialiser_emplacement_document_libre_non_reclamable(
+    cmd: 'InitialiserEmplacementDocumentLibreNonReclamableCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
 ) -> EmplacementDocumentIdentity:
-    emplacement_document = EmplacementDocumentBuilder().initier_emplacement_document_libre(
+    emplacement_document = EmplacementDocumentBuilder().initialiser_emplacement_document_libre(
         uuid_proposition=cmd.uuid_proposition,
         auteur=cmd.auteur,
         libelle=cmd.libelle,
         type_emplacement=cmd.type_emplacement,
     )
 
-    emplacement_document.remplir_par_gestionnaire(uuid_document=cmd.uuid_document)
+    emplacement_document.remplir_par_gestionnaire(uuid_document=cmd.uuid_document, auteur=cmd.auteur)
 
-    emplacement_document_repository.save(emplacement_document)
+    emplacement_document_repository.save(emplacement_document, auteur=cmd.auteur)
 
     return emplacement_document.entity_id

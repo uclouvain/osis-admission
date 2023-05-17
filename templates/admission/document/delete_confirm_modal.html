@@ -44,6 +44,7 @@
       class="btn btn-danger"
       name="delete-a-document"
       hx-delete="{% url request.resolver_match.namespace|add:':delete' uuid=request.resolver_match.kwargs.uuid identifier=document_identifier %}"
+      data-dismiss="modal"
   >
     {% translate 'Confirm' %}
   </button>

@@ -307,15 +307,15 @@ TAB_TREES = {
         # TODO Documents
     },
     CONTEXT_GENERAL: {
+        Tab('documents', _('Documents'), 'folder-open'): [
+            Tab('documents', _('Documents'), 'folder-open'),
+        ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
         ],
         Tab('education', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Previous experience'), 'list-alt'),
-        ],
-        Tab('document', _('Documents'), 'folder-open'): [
-            Tab('document', _('Documents'), 'folder-open'),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('debug', _('Debug'), 'bug'),
@@ -545,6 +545,7 @@ def document_component(document_write_token, document_metadata):
             }
     return {
         'template': 'admission/no_document.html',
+        'message': _('Non-retrievable document') if document_write_token else _('No document'),
     }
 
 
@@ -750,24 +751,6 @@ def get_item(dictionary, value):
 def get_item_or_none(dictionary, value):
     """Returns the value of a key in a dictionary if it exists else None"""
     return dictionary.get(value)
-
-
-@register.simple_tag(takes_context=True)
-def get_attachment_date(context, uuid: str):
-    """Get the date of an attachment (admission submission date or submission file if later"""
-    admission = context['view'].get_permission_object()
-    if context['files'].get(uuid):
-        uploaded_at = parse_datetime(context['files'][uuid].get('uploaded_at'))
-        if uploaded_at >= admission.submitted_at:
-            return uploaded_at
-    return admission.submitted_at
-
-
-@register.simple_tag(takes_context=True)
-def get_attachment_author(context, uuid: str):
-    if context['files'].get(uuid) and context['files'][uuid].get('author'):
-        return context['files'][uuid]['author']
-    return _('Candidate')
 
 
 @register.simple_tag

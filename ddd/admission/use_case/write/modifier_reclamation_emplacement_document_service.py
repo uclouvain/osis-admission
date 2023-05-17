@@ -23,23 +23,26 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import InitierEmplacementDocumentAReclamerCommand
-from admission.ddd.admission.domain.builder.emplacement_document_builder import EmplacementDocumentBuilder
+
+from admission.ddd.admission.commands import ModifierReclamationEmplacementDocumentCommand
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
-def initier_emplacement_document_a_reclamer(
-    cmd: 'InitierEmplacementDocumentAReclamerCommand',
+def modifier_reclamation_emplacement_document(
+    cmd: 'ModifierReclamationEmplacementDocumentCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
 ) -> EmplacementDocumentIdentity:
-    document = EmplacementDocumentBuilder().initier_emplacement_document_a_reclamer(
-        uuid_proposition=cmd.uuid_proposition,
-        auteur=cmd.auteur,
-        identifiant_emplacement=cmd.identifiant_emplacement,
-        raison=cmd.raison
+    emplacement_document = emplacement_document_repository.get(
+        entity_id=EmplacementDocumentIdentity(
+            identifiant=cmd.identifiant_emplacement,
+            proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
+        )
     )
 
-    emplacement_document_repository.save(entity=document)
+    emplacement_document.specifier_reclamation(raison=cmd.raison, acteur=cmd.auteur)
 
-    return document.entity_id
+    emplacement_document_repository.save(entity=emplacement_document, auteur=cmd.auteur)
+
+    return emplacement_document.entity_id

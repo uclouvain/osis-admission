@@ -28,6 +28,9 @@ import attr
 from osis_common.ddd import interface
 
 
-@attr.dataclass(frozen=True, slots=True)
+@attr.dataclass(frozen=True, slots=True, eq=False)
 class PropositionIdentity(interface.EntityIdentity):
     uuid: str
+
+    def __eq__(self, other):
+        return self.uuid == other.uuid

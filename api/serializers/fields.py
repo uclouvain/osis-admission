@@ -472,6 +472,17 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
+    # Documents
+    'retrieve_documents': {
+        'path_name': 'admission_api_v1:general_documents',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_documents': {
+        'path_name': 'admission_api_v1:general_documents',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
 }
 
 CONTINUING_EDUCATION_ACTION_LINKS = {

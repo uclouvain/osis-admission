@@ -27,7 +27,7 @@
 from admission.ddd.admission.doctorat.preparation.commands import *
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
-from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_demande
+from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
@@ -270,7 +270,7 @@ COMMAND_HANDLERS = {
         membre_ca_translator=_membre_ca_translator,
         academic_year_repository=_academic_year_repository,
     ),
-    RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_demande(
+    RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
         question_specifique_translator=_question_specific_translator,
     ),

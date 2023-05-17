@@ -180,13 +180,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def _get_language_knowledge_dto(cls, candidate: Person, has_default_language: bool) -> List[ConnaissanceLangueDTO]:
+    def _get_language_knowledge_dto(cls, candidate: Person) -> List[ConnaissanceLangueDTO]:
         """Returns the DTO of the language knowledge data of the given candidate."""
         return [
             ConnaissanceLangueDTO(
-                nom_langue=getattr(langue.language, 'name' if has_default_language else 'name_en')
-                if langue.language
-                else '',
+                nom_langue_fr=langue.language.name if langue.language else '',
+                nom_langue_en=langue.language.name_en if langue.language else '',
                 langue=langue.language.code if langue.language else '',
                 comprehension_orale=langue.listening_comprehension or '',
                 capacite_orale=langue.speaking_ability or '',
@@ -737,7 +736,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 valuated_secondary_studies=curriculum_dto.candidat_est_potentiel_vae,
                 formation=formation,
             ),
-            connaissances_langues=cls._get_language_knowledge_dto(candidate, has_default_language)
+            connaissances_langues=cls._get_language_knowledge_dto(candidate)
             if is_doctorate
             else None,
         )

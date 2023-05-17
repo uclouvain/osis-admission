@@ -25,83 +25,88 @@
 {% endcomment %}
 
 <div>
-  <table
-      id="document-list-table"
-      class="table table-bordered table-responsive"
-  >
-    <thead>
-      <tr>
-        <th>{% translate 'Document' %}</th>
-        <th>{% translate 'Actor' %}</th>
-        <th>{% translate 'Date' %}</th>
-      </tr>
-    </thead>
-    <tbody class="selectable">
-      {% for document in documents %}
-        {% if document.document_uuids and document.type not in EMPLACEMENTS_DOCUMENTS_INTERNES %}
-          {% ifchanged document.onglet %}
-            <tr class="tab-name">
-              <td colspan="3">> {{ document.nom_onglet }}</td>
-            </tr>
-          {% endifchanged %}
-          <tr
-              {% if document.statut == 'A_RECLAMER' %}
-                class="bg-danger"
-              {% elif document.statut == 'RECLAME' %}
-                class="bg-info"
-              {% endif %}
-                hx-get="{% url request.resolver_match.namespace|add:':detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
-                hx-target="#document-details"
-                hx-swap="outerHTML"
-          >
-            <td class="auto-width">
-              <i class="fa-solid fa-paperclip"></i>
-              {% if document.type in EMPLACEMENTS_FAC %}
-                <i class="fa-solid fa-building-columns"></i>
-              {% endif %}
-              {{ document.libelle }}
-            </td>
-            <td class="min-width">
+  <div class="scrollable-document">
+    <table
+        id="document-list-table"
+        class="table table-bordered table-responsive"
+    >
+      <thead>
+        <tr>
+          <th>{% translate 'Document' %}</th>
+          <th>{% translate 'Actor' %}</th>
+          <th>{% translate 'Date' %}</th>
+        </tr>
+      </thead>
+      <tbody class="selectable">
+        {% for document in documents %}
+          {% if document.document_uuids and document.type not in EMPLACEMENTS_DOCUMENTS_INTERNES %}
+            {% ifchanged document.onglet %}
+              <tr class="tab-name">
+                <td colspan="3">> {{ document.nom_onglet }}</td>
+              </tr>
+            {% endifchanged %}
+            <tr
+                {% if document.statut == 'A_RECLAMER' %}
+                  class="bg-danger"
+                {% elif document.statut == 'RECLAME' %}
+                  class="bg-info"
+                {% endif %}
+                  hx-get="{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
+                  hx-target="#document-details"
+                  hx-swap="outerHTML"
+                  data-document-id="{{ document.identifiant }}"
+            >
+              <td class="auto-width">
+                <i class="fa-solid fa-paperclip"></i>
+                {% if document.type in EMPLACEMENTS_FAC %}
+                  <i class="fa-solid fa-building-columns"></i>
+                {% endif %}
+                {{ document.libelle }}
+              </td>
+              <td class="min-width">
               <span class="flex-content-no-wrap align-items-baseline">
                 {% if document.statut == 'A_RECLAMER' %}
-                  {{ document.dernier_acteur }}
+                  {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
                 {% elif document.statut == 'RECLAME' %}
-                  {{ document.dernier_acteur }}
+                  {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
                   <i class="fa-solid fa-envelope" title="{% translate 'Requested' %}"></i>
                 {% else %}
-                  {% if not document.document_soumis_par or document.document_soumis_par == admission.login_candidat %}
+                  {% if not document.document_soumis_par or document.document_soumis_par.matricule == admission.matricule_candidat %}
                     {% translate 'Candidate' %}
                   {% else %}
-                    {{ document.document_soumis_par }}
+                    {{ document.document_soumis_par.prenom }} {{ document.document_soumis_par.nom }}
+                  {% endif %}
+                  {% if document.statut == 'COMPLETE_APRES_RECLAMATION' %}
+                    <i class="fa-solid fa-envelope" title="{% translate 'Requested on' %} {{ document.reclame_le|date:'DATE_FORMAT' }}"></i>
                   {% endif %}
                 {% endif %}
               </span>
-            </td>
-            <td class="min-width">
-              {% if document.statut == 'A_RECLAMER' %}
-                {{ document.derniere_action_le|date:'DATETIME_FORMAT' }}
-              {% elif document.statut == 'RECLAME' %}
-                {% translate 'Requested on' %} {{ document.reclame_le|date:'DATE_FORMAT' }}<br>
-                {% translate 'Deadline on' %} {{ document.a_echeance_le|date:'DATE_FORMAT' }}
-              {% elif not document.document_soumis_le %}
+              </td>
+              <td class="min-width">
+                {% if document.statut == 'A_RECLAMER' %}
+                  {{ document.derniere_action_le|date:'DATETIME_FORMAT' }}
+                {% elif document.statut == 'RECLAME' %}
+                  {% translate 'Requested on' %} {{ document.reclame_le|date:'DATE_FORMAT' }}<br>
+                  {% translate 'Deadline on' %} {{ document.a_echeance_le|date:'DATE_FORMAT' }}
+                {% elif not document.document_soumis_le %}
                   {% translate 'Unknown' %}
-              {% elif document.document_soumis_le < proposition.soumise_le %}
-                {{ proposition.soumise_le|date:'DATETIME_FORMAT' }}
-              {% else %}
-                {{ document.document_soumis_le|date:'DATETIME_FORMAT' }}
-              {% endif %}
-            </td>
-          </tr>
-        {% endif %}
-      {% endfor %}
-    </tbody>
-  </table>
-
+                {% elif document.document_soumis_le < proposition.soumise_le %}
+                  {{ proposition.soumise_le|date:'DATETIME_FORMAT' }}
+                {% else %}
+                  {{ document.document_soumis_le|date:'DATETIME_FORMAT' }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   <button
       class="btn btn-primary"
       data-toggle="collapse"
       data-target="#upload-candidate-document-form"
-      hx-get="{% url request.resolver_match.namespace|add:':free-candidate-upload' uuid=view.kwargs.uuid %}"
+      hx-get="{% url request.resolver_match.namespace|add:':document:free-candidate-upload' uuid=view.kwargs.uuid %}"
       hx-target="#upload-candidate-document-form"
       hx-trigger="click once"
   >

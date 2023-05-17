@@ -262,6 +262,25 @@ class DoctorateSpecificQuestionListApiTestCase(BaseDoctorateSpecificQuestionList
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 1)
 
+    def test_retrieve_items_related_to_the_admission(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        # The question is related to another admission -> no result
+        self.message_instantiation.display_according_education = CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name
+        self.message_instantiation.admission_id = DoctorateAdmissionFactory().pk
+        self.message_instantiation.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The question is related to the admission -> return it
+        self.message_instantiation.admission_id = self.admission.pk
+        self.message_instantiation.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0].get('uuid'), 'fe254203-17c7-47d6-95e4-3c5c532da551')
+
     def test_retrieve_items_related_to_be_nationality(self):
         self.client.force_authenticate(user=self.candidate.user)
 

@@ -23,21 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.commands import AnnulerReclamationEmplacementDocumentCommand
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
+from typing import List, Dict
+
+import attr
+
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.domain.validator.exceptions import DocumentsCompletesDifferentsDesReclamesException
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-def annuler_reclamation_emplacement_document(
-    cmd: 'AnnulerReclamationEmplacementDocumentCommand',
-    emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> EmplacementDocumentIdentity:
-    entity_id = EmplacementDocumentIdentity(
-        identifiant=cmd.identifiant_emplacement,
-        proposition=PropositionIdentity(cmd.uuid_proposition),
-    )
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCompleterTousLesDocumentsReclames(BusinessValidator):
+    documents_reclames: List[EmplacementDocument]
+    reponses_documents_a_completer: Dict[str, List[str]]
 
-    emplacement_document_repository.delete(entity_id=entity_id, supprimer_donnees=False)
-
-    return entity_id
+    def validate(self, *args, **kwargs):
+        if len(self.documents_reclames) != len(self.reponses_documents_a_completer) or any(
+            document
+            for document in self.documents_reclames
+            if not self.reponses_documents_a_completer.get(document.entity_id.identifiant)
+        ):
+            raise DocumentsCompletesDifferentsDesReclamesException

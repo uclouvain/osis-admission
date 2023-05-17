@@ -26,37 +26,11 @@
 
 from admission.ddd.admission.commands import *
 from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.write import *
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
-from admission.infrastructure.admission.repository.emplacement_document import EmplacementDocumentRepository
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
         cmd,
         lister_toutes_demandes_service=ListerToutesDemandes(),
-    ),
-    InitierEmplacementDocumentLibreInterneCommand: lambda msg_bus, cmd: initier_emplacement_document_libre_interne(
-        cmd,
-        emplacement_document_repository=EmplacementDocumentRepository(),
-    ),
-    InitierEmplacementDocumentLibreAReclamerCommand: lambda msg_bus, cmd: initier_emplacement_document_libre_a_reclamer(
-        cmd,
-        emplacement_document_repository=EmplacementDocumentRepository(),
-    ),
-    InitierEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initier_emplacement_document_a_reclamer(
-        cmd,
-        emplacement_document_repository=EmplacementDocumentRepository(),
-    ),
-    AnnulerReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: annuler_reclamation_emplacement_document(
-        cmd,
-        emplacement_document_repository=EmplacementDocumentRepository(),
-    ),
-    ModifierReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: modifier_reclamation_emplacement_document(
-        cmd,
-        emplacement_document_repository=EmplacementDocumentRepository(),
-    ),
-    SupprimerEmplacementDocumentCommand: lambda msg_bus, cmd: supprimer_emplacement_document(
-        cmd,
-        emplacement_document_repository=EmplacementDocumentRepository(),
     ),
 }

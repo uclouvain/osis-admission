@@ -35,6 +35,13 @@ from ._should_coordonnees_candidat_etre_completees import (
     ShouldAdresseDomicileLegalCandidatEtreCompletee,
     ShouldAdresseEmailPriveeEtreCompletee,
 )
+from ._should_curriculum_etre_complete import (
+    ShouldAnneesCVRequisesCompletees,
+    ShouldExperiencesAcademiquesEtreCompletees,
+)
+from ._should_documents_etre_completes import (
+    ShouldCompleterTousLesDocumentsReclames,
+)
 from ._should_identification_candidat_etre_completee import (
     ShouldCandidatAuthentiquerIdentite,
     ShouldCandidatAuthentiquerPasseport,
@@ -44,10 +51,6 @@ from ._should_identification_candidat_etre_completee import (
     ShouldCandidatSpecifierNomOuPrenom,
     ShouldCandidatSpecifierNumeroIdentite,
     ShouldSignaletiqueCandidatEtreCompletee,
-)
-from ._should_curriculum_etre_complete import (
-    ShouldAnneesCVRequisesCompletees,
-    ShouldExperiencesAcademiquesEtreCompletees,
 )
 
 __all__ = [
@@ -59,6 +62,7 @@ __all__ = [
     "ShouldCandidatSpecifierNomOuPrenom",
     "ShouldCandidatAuthentiquerIdentite",
     "ShouldCandidatAuthentiquerPasseport",
+    "ShouldCompleterTousLesDocumentsReclames",
     "ShouldAdresseDomicileLegalCandidatEtreCompletee",
     "ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee",
     "ShouldAnneesCVRequisesCompletees",

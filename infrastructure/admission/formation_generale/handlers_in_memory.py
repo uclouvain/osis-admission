@@ -27,7 +27,17 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
-from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_demande
+from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
+from admission.ddd.admission.use_case.write import (
+    initialiser_emplacement_document_libre_non_reclamable,
+    initialiser_emplacement_document_a_reclamer,
+    annuler_reclamation_emplacement_document,
+    modifier_reclamation_emplacement_document,
+    supprimer_emplacement_document,
+    remplacer_emplacement_document,
+    remplir_emplacement_document_par_gestionnaire,
+    initialiser_emplacement_document_libre_a_reclamer,
+)
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
@@ -66,9 +76,12 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
-    EmplacementDocumentInMemoryRepository,
+    emplacement_document_in_memory_repository,
 )
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -82,7 +95,8 @@ _comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 _historique = HistoriqueInMemory()
 _emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
-_emplacement_document_repository = EmplacementDocumentInMemoryRepository()
+_emplacement_document_repository = emplacement_document_in_memory_repository
+_personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -197,8 +211,9 @@ COMMAND_HANDLERS = {
         question_specifique_translator=_question_specific_translator,
         emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
         academic_year_repository=_academic_year_repository,
+        personne_connue_translator=_personne_connue_ucl_translator,
     ),
-    RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_demande(
+    RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
         question_specifique_translator=_question_specific_translator,
     ),
@@ -226,5 +241,61 @@ COMMAND_HANDLERS = {
         emplacement_document_repository=_emplacement_document_repository,
         notification=NotificationInMemory(),
         historique=_historique,
+    ),
+    RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        comptabilite_translator=_comptabilite_translator,
+        question_specifique_translator=_question_specific_translator,
+        emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        academic_year_repository=_academic_year_repository,
+        personne_connue_translator=_personne_connue_ucl_translator,
+    ),
+    CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
+        completer_emplacements_documents_par_candidat(
+            cmd,
+            proposition_repository=_proposition_repository,
+            emplacement_document_repository=_emplacement_document_repository,
+            historique=_historique,
+        )
+    ),
+    InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
+        initialiser_emplacement_document_libre_non_reclamable(
+            cmd,
+            emplacement_document_repository=_emplacement_document_repository,
+        )
+    ),
+    InitialiserEmplacementDocumentLibreAReclamerCommand: (
+        lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
+            cmd,
+            emplacement_document_repository=_emplacement_document_repository,
+        )
+    ),
+    InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    AnnulerReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: annuler_reclamation_emplacement_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    ModifierReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: modifier_reclamation_emplacement_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    SupprimerEmplacementDocumentCommand: lambda msg_bus, cmd: supprimer_emplacement_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    RemplacerEmplacementDocumentCommand: lambda msg_bus, cmd: remplacer_emplacement_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    RemplirEmplacementDocumentParGestionnaireCommand: lambda msg_bus, cmd: (
+        remplir_emplacement_document_par_gestionnaire(
+            cmd,
+            emplacement_document_repository=_emplacement_document_repository,
+        )
     ),
 }

@@ -143,6 +143,7 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/accounting', views.GeneralAccountingView),
     _path('propositions/general-education/<uuid:uuid>/', include(general_education_view_set_router.urls)),
     path('propositions/general-education/<uuid:uuid>/submit', views.SubmitGeneralEducationPropositionView),
+    path('propositions/general-education/<uuid:uuid>/documents', views.GeneralRequestedDocumentListView),
     # > Continuing education
     path('propositions/continuing-education', views.ContinuingTrainingChoiceAPIView),
     path('propositions/continuing-education/<uuid:uuid>', views.ContinuingPropositionView),

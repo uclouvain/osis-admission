@@ -30,10 +30,30 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
 
+from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument, TypeEmplacementDocument
 from admission.forms import AdmissionFileUploadField, CustomDateInput
 from admission.templatetags.admission import formatted_language
+
+
+class UploadDocumentFormMixin(forms.Form):
+    def __init__(self, mimetypes, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['file'] = AdmissionFileUploadField(
+            label=_('File'),
+            max_files=1,
+            min_files=1,
+            mimetypes=mimetypes,
+        )
+
+
+class ReplaceDocumentForm(UploadDocumentFormMixin):
+    pass
+
+
+class UploadDocumentForm(UploadDocumentFormMixin):
+    pass
 
 
 class UploadFreeDocumentForm(forms.Form):
@@ -67,26 +87,34 @@ class RequestDocumentForm(forms.Form):
 
     reason = forms.CharField(
         widget=forms.Textarea,
+        required=False,
     )
 
-    def __init__(self, candidate_language, *args, **kwargs):
+    def __init__(self, candidate_language, auto_requested=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.fields['reason'].label = mark_safe(
-            _('Communication to the candidate, in <span class="label label-admission-primary">%s</span>')
-            % formatted_language(candidate_language)
+            _(
+                'Communication to the candidate, in <span class="label label-admission-primary">{language_code}]</span>'
+            ).format(language_code=formatted_language(candidate_language))
         )
-        self.fields['reason'].required = bool(
-            self.data.get(
-                self.add_prefix('is_requested'),
-                True,
-            ),
-        )
+
+        self.auto_requested = auto_requested
+        if auto_requested:
+            # If the document is automatically requested, it must be requested to specify a reason
+            self.fields['is_requested'].required = True
+            self.fields['is_requested'].widget.attrs['title'] = _('Automatically required')
+            if self.data.get('is_requested', self.initial.get('is_requested')):
+                self.fields['is_requested'].widget.attrs['onclick'] = 'return false'
 
     def clean(self):
         cleaned_data = super().clean()
 
         if not cleaned_data.get('is_requested'):
             cleaned_data['reason'] = ''
+
+        elif not cleaned_data.get('reason'):
+            self.add_error('reason', FIELD_REQUIRED_MESSAGE)
 
         return cleaned_data
 
@@ -126,8 +154,8 @@ class RequestAllDocumentsForm(forms.Form):
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:
                     label = '<span class="fa-solid fa-link-slash"></span> '
-                if document.type == TypeEmplacementDocument.LIBRE_CANDIDAT_FAC.name:
-                    label += '<i class="fa-solid fa-building-columns"/> '
+                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
+                    label += '<span class="fa-solid fa-building-columns"></span> '
                 label += document.libelle
 
                 initial_document_choices.append(document.identifiant)

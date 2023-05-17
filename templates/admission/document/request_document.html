@@ -28,6 +28,7 @@
     method="post"
     hx-swap="outerHTML"
 >
+  {% bootstrap_form_errors request_form %}
   {% csrf_token %}
   {% bootstrap_field request_form.is_requested %}
   {% if request_form.is_requested.value %}
@@ -76,5 +77,9 @@
     $('#request-form').on('htmx:beforeSend', function (evt) {
       $('.modal').modal('hide');
     });
+
+    {% if request_form.is_bound and not request_form.is_valid %}
+      $('#request-form-modal').modal('show');
+    {% endif %}
   });
 </script>

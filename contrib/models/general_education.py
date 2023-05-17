@@ -162,7 +162,6 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
             .get_queryset()
             .select_related(
                 "candidate__country_of_citizenship",
-                "candidate__user",
                 "training__academic_year",
                 "training__education_group_type",
                 "determined_academic_year",

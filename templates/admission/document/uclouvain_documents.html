@@ -25,48 +25,55 @@
 {% endcomment %}
 
 <div>
-  <table
-      id="document-list-table"
-      class="table table-bordered table-responsive"
-  >
-    <thead>
-      <tr>
-        <th>{% translate 'Document' %}</th>
-        <th>{% translate 'Actor' %}</th>
-        <th>{% translate 'Date' %}</th>
-      </tr>
-    </thead>
-    <tbody class="selectable">
-      {% for document in documents %}
-        {% if document.type in EMPLACEMENTS_DOCUMENTS_INTERNES %}
-          <tr
-            hx-get="{% url request.resolver_match.namespace|add:':detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
-            hx-target="#document-details"
-            hx-swap="outerHTML"
-          >
-            <td class="auto-width">
-              <i class="fa-solid fa-school"></i>
-              {% if document.type in EMPLACEMENTS_FAC %}
-                <i class="fa-solid fa-building-columns"></i>
-              {% endif %}
-              {{ document.libelle }}
-            </td>
-            <td class="min-width">
-              {{ document.document_soumis_par|default:_('System') }}
-            </td>
-            <td class="min-width">
-              {{ document.document_soumis_le|date:'DATETIME_FORMAT' }}
-            </td>
-          </tr>
-        {% endif %}
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="scrollable-document">
+    <table
+        id="document-list-table"
+        class="table table-bordered table-responsive"
+    >
+      <thead>
+        <tr>
+          <th>{% translate 'Document' %}</th>
+          <th>{% translate 'Actor' %}</th>
+          <th>{% translate 'Date' %}</th>
+        </tr>
+      </thead>
+      <tbody class="selectable">
+        {% for document in documents %}
+          {% if document.type in EMPLACEMENTS_DOCUMENTS_INTERNES %}
+            <tr
+                hx-get="{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
+                hx-target="#document-details"
+                hx-swap="outerHTML"
+                data-document-id="{{ document.identifiant }}"
+            >
+              <td class="auto-width">
+                <i class="fa-solid fa-school"></i>
+                {% if document.type in EMPLACEMENTS_FAC %}
+                  <i class="fa-solid fa-building-columns"></i>
+                {% endif %}
+                {{ document.libelle }}
+              </td>
+              <td class="min-width">
+                {% if document.document_soumis_par %}
+                  {{ document.document_soumis_par.prenom }} {{ document.document_soumis_par.nom }}
+                {% else %}
+                  {{ document.document_soumis_par|default:_('System') }}
+                {% endif %}
+              </td>
+              <td class="min-width">
+                {{ document.document_soumis_le|date:'DATETIME_FORMAT' }}
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   <button
       class="btn btn-primary"
       data-toggle="collapse"
       data-target="#upload-internal-document-form"
-      hx-get="{% url request.resolver_match.namespace|add:':free-internal-upload' uuid=view.kwargs.uuid %}"
+      hx-get="{% url request.resolver_match.namespace|add:':document:free-internal-upload' uuid=view.kwargs.uuid %}"
       hx-target="#upload-internal-document-form"
       hx-trigger="click once"
   >

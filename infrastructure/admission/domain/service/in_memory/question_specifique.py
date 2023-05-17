@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import abc
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import attr
 
@@ -32,15 +32,18 @@ from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique, QuestionSpecifiqueIdentity
 from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.enums import CleConfigurationItemFormulaire
 from admission.ddd.admission.enums.question_specifique import (
     Onglets,
     TypeItemFormulaire,
 )
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 
 
 @attr.dataclass(slots=True)
 class QuestionSpecifiqueEtendue(QuestionSpecifique):
-    formation: FormationIdentity
+    formation: Optional[FormationIdentity] = None
+    proposition: Optional[Union[PropositionIdentity]] = None
 
 
 class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslator):
@@ -137,6 +140,26 @@ class SuperQuestionSpecifiqueInMemoryTranslator(ISuperQuestionSpecifiqueTranslat
             configuration={},
             onglet=Onglets.INFORMATIONS_ADDITIONNELLES,
             formation=FormationIdentity(sigle='MASTER-SCI', annee=2021),
+        ),
+        QuestionSpecifiqueEtendue(
+            entity_id=QuestionSpecifiqueIdentity(uuid='16de0c3d-3c06-4c93-8eb4-c8648f04f145'),
+            type=TypeItemFormulaire.DOCUMENT,
+            requis=False,
+            configuration={
+                CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name: ['application/pdf'],
+            },
+            onglet=Onglets.INFORMATIONS_ADDITIONNELLES,
+            formation=FormationIdentity(sigle='MASTER-SCI', annee=2021),
+        ),
+        QuestionSpecifiqueEtendue(
+            entity_id=QuestionSpecifiqueIdentity(uuid='16de0c3d-3c06-4c93-8eb4-c8648f04f146'),
+            type=TypeItemFormulaire.DOCUMENT,
+            requis=False,
+            configuration={
+                CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name: ['application/pdf'],
+            },
+            onglet=Onglets.DOCUMENTS,
+            proposition=PropositionIdentity(uuid='uuid-MASTER-SCI'),
         ),
     ]
 

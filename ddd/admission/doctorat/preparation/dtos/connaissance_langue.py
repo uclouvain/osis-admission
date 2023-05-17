@@ -26,6 +26,8 @@
 from typing import List
 
 import attr
+from django.conf import settings
+from django.utils.translation import get_language
 
 from osis_common.ddd import interface
 
@@ -33,8 +35,16 @@ from osis_common.ddd import interface
 @attr.dataclass(frozen=True, slots=True)
 class ConnaissanceLangueDTO(interface.DTO):
     langue: str
-    nom_langue: str
+    nom_langue_fr: str
+    nom_langue_en: str
     comprehension_orale: str
     capacite_orale: str
     capacite_ecriture: str
     certificat: List[str]
+
+    @property
+    def nom_langue(self):
+        return {
+            settings.LANGUAGE_CODE_FR: self.nom_langue_fr,
+            settings.LANGUAGE_CODE_EN: self.nom_langue_en,
+        }.get(get_language(), '')

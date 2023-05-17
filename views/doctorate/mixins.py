@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import json
 from typing import Union
 
 from django.contrib import messages
@@ -35,8 +35,8 @@ from django.views.generic.base import ContextMixin
 
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.contrib.models.base import AdmissionViewer, BaseAdmission
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.contrib.models.base import AdmissionViewer, BaseAdmission
 from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
@@ -67,7 +67,7 @@ from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
 
-class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
+class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
     @property
     def admission_uuid(self) -> str:
         return self.kwargs.get('uuid', '')
@@ -80,6 +80,10 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
     def formatted_current_context(self):
         return self.current_context.replace('-', '_')
 
+    @cached_property
+    def base_namespace(self):
+        return ':'.join(self.request.resolver_match.namespaces[:2])
+
     @property
     def admission(self) -> Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]:
         return {
@@ -88,6 +92,23 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
             CONTEXT_CONTINUING: get_cached_continuing_education_admission_perm_obj,
         }[self.current_context](self.admission_uuid)
 
+    def get_permission_object(self):
+        return self.admission
+
+    @property
+    def is_doctorate(self):
+        return self.current_context == CONTEXT_DOCTORATE
+
+    @property
+    def is_continuing(self):
+        return self.current_context == CONTEXT_CONTINUING
+
+    @property
+    def is_general(self):
+        return self.current_context == CONTEXT_GENERAL
+
+
+class LoadDossierViewMixin(AdmissionViewMixin):
     @cached_property
     def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO]:
         cmd = {
@@ -116,28 +137,6 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
             return last_confirmation_paper
         except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
             raise Http404(e.message)
-
-    def get_permission_object(self):
-        return self.admission
-
-    @property
-    def is_doctorate(self):
-        return self.current_context == CONTEXT_DOCTORATE
-
-    @property
-    def is_continuing(self):
-        return self.current_context == CONTEXT_CONTINUING
-
-    @property
-    def is_general(self):
-        return self.current_context == CONTEXT_GENERAL
-
-    @cached_property
-    def base_namespace(self):
-        return ':'.join(self.request.resolver_match.namespaces[:2])
-
-    def update_current_admission_on_form_valid(self, form, admission):
-        pass
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -183,17 +182,40 @@ class DoctorateAdmissionLastConfirmationMixin(LoadDossierViewMixin):
         return context
 
 
-class AdmissionFormMixin(LoadDossierViewMixin):
+class AdmissionFormMixin(AdmissionViewMixin):
     message_on_success = _('Your data has been saved.')
     message_on_failure = _('Some errors have been encountered.')
     update_requested_documents = False
+    update_admission_author = False
+    default_htmx_trigger_form_extra = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.custom_headers = {}
+        self.htmx_trigger_form_extra = {**self.default_htmx_trigger_form_extra}
+
+    def htmx_trigger_form(self, is_valid: bool):
+        """Add a JS event to listen for when the form is submitted through HTMX."""
+        self.custom_headers = {
+            'HX-Trigger': json.dumps({
+                "formValidation": {
+                    "is_valid": is_valid,
+                    "message": str(self.message_on_success if is_valid else self.message_on_failure),
+                    **self.htmx_trigger_form_extra,
+                }
+            })
+        }
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        """Override this method to update the current admission on form valid."""
+        pass
 
     def form_valid(self, form):
         messages.success(self.request, self.message_on_success)
 
         # Update the last update author of the admission
         author = getattr(self.request.user, 'person')
-        if author:
+        if self.update_admission_author and author:
             admission = BaseAdmission.objects.get(uuid=self.admission_uuid)
             admission.last_update_author = author
             # Additional updates if needed
@@ -205,14 +227,20 @@ class AdmissionFormMixin(LoadDossierViewMixin):
             self.admission.update_requested_documents()
 
         if self.request.htmx:
-            return self.render_to_response(
-                self.get_context_data(
-                    form=form,
-                )
-            )
+            self.htmx_trigger_form(is_valid=True)
+            return self.render_to_response(self.get_context_data(form=form))
 
         return super().form_valid(form)
 
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        # Add custom headers
+        for k, v in self.custom_headers.items():
+            response.headers[k] = v
+        return response
+
     def form_invalid(self, form):
         messages.error(self.request, self.message_on_failure)
+        if self.request.htmx:
+            self.htmx_trigger_form(is_valid=False)
         return super().form_invalid(form)

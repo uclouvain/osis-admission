@@ -27,6 +27,9 @@ from admission.api.views.dashboard import DashboardViewSet
 from admission.api.views.autocomplete import *
 from admission.api.views.coordonnees import CoordonneesViewSet, GeneralCoordonneesView, ContinuingCoordonneesView
 from admission.api.views.curriculum import *
+from admission.api.views.documents import (
+    GeneralRequestedDocumentListView,
+)
 from admission.api.views.secondary_studies import (
     SecondaryStudiesViewSet,
     GeneralSecondaryStudiesView,
