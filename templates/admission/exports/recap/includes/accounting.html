@@ -62,9 +62,9 @@
       {% field_data _('Chosen assimilation') comptabilite.sous_type_situation_assimilation_1|enum_display:'ChoixAssimilation1' %}
 
       {% if comptabilite.sous_type_situation_assimilation_1 == 'TITULAIRE_CARTE_RESIDENT_LONGUE_DUREE' %}
-        {% field_data _('Copy of both sides of the EC long-term resident card (D card)') comptabilite.carte_resident_longue_duree %}
+        {% field_data _('Copy of both sides of the EC long-term resident card (D or L card)') comptabilite.carte_resident_longue_duree %}
       {% elif comptabilite.sous_type_situation_assimilation_1 == 'TITULAIRE_CARTE_ETRANGER' %}
-        {% field_data _("Copy of both sides of the CIRE - unlimited stay (B card) or copy of the foreigner's card - unlimited stay (C card)") comptabilite.carte_cire_sejour_illimite_etranger %}
+        {% field_data _("Copy of both sides of the Certificate of Registration in the Register of Foreigners CIRE - unlimited stay (B card) or copy of the foreigner's card - unlimited stay (C or K card)") comptabilite.carte_cire_sejour_illimite_etranger %}
       {% elif comptabilite.sous_type_situation_assimilation_1 == 'TITULAIRE_CARTE_SEJOUR_MEMBRE_UE' %}
         {% field_data _('Copy of both sides of the residence card of a family member of a European Union citizen (F card)') comptabilite.carte_sejour_membre_ue %}
       {% elif comptabilite.sous_type_situation_assimilation_1 == 'TITULAIRE_CARTE_SEJOUR_PERMANENT_MEMBRE_UE' %}
@@ -122,13 +122,15 @@
         {% field_data carte_identite_parent_label comptabilite.carte_identite_parent %}
       {% elif comptabilite.sous_type_situation_assimilation_5 == 'TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE' %}
         {% blocktranslate with person_concerned=formatted_relationship trimmed asvar titre_sejour_longue_duree_parent_label %}
-          Copy of both sides of the long-term residence permit in Belgium of {{ person_concerned }} (B, C, D, F, F+ or M cards)
+          Copy of both sides of the long-term residence permit in Belgium of {{ person_concerned }} (B, C, D, F, F+, K, L or M cards)
         {% endblocktranslate %}
         {% field_data titre_sejour_longue_duree_parent_label comptabilite.titre_sejour_longue_duree_parent %}
       {% elif comptabilite.sous_type_situation_assimilation_5 == 'CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE' %}
         {% blocktranslate with person_concerned=formatted_relationship trimmed asvar annexe_25_26_refugies_apatrides_decision_protection_parent_label %}
           Copy of the Annex 25 or 26 or the A/B card mentioning the refugee status or copy of the decision of the
           Foreigners' Office confirming the temporary/subsidiary protection of {{ person_concerned }}
+          or copy of the official document from the municipality or the Foreigners' Office proving the stateless
+          status of {{ person_concerned }}
         {% endblocktranslate %}
         {% field_data annexe_25_26_refugies_apatrides_decision_protection_parent_label comptabilite.annexe_25_26_refugies_apatrides_decision_protection_parent %}
       {% elif comptabilite.sous_type_situation_assimilation_5 == 'AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT' %}

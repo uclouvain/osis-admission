@@ -41,13 +41,10 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
+from admission.constants import JPEG_MIME_TYPE, PDF_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutSignatureGroupeDeSupervision,
-    ChoixTypeFinancement,
-    ChoixEtatSignature,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature, ChoixTypeFinancement
 from admission.ddd.admission.doctorat.preparation.dtos import (
     AnneeExperienceAcademiqueDTO,
     ConnaissanceLangueDTO,
@@ -96,7 +93,6 @@ from admission.ddd.admission.formation_generale.dtos import (
 from admission.exports.admission_recap.attachments import (
     Attachment,
 )
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.exports.admission_recap.constants import ACCOUNTING_LABEL, CURRICULUM_ACTIVITY_LABEL
 from admission.exports.admission_recap.section import (
     get_accounting_section,
@@ -1473,7 +1469,12 @@ class SectionsAttachmentsTestCase(TestCase):
                         self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
                     ),
                     Attachment(
-                        _('A double-sided copy of the final equivalence decision'),
+                        _(
+                            "A double-sided copy of the final equivalence decision issued by the Ministry of the "
+                            "French Community of Belgium (possibly with the DAES or the admission test for the first "
+                            "cycle of higher education if your equivalence doesn't give access to the desired "
+                            "programme)"
+                        ),
                         self.general_bachelor_context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
                     ),
                 ],
@@ -1508,7 +1509,11 @@ class SectionsAttachmentsTestCase(TestCase):
                         self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
                     ),
                     Attachment(
-                        _('A double-sided copy of the final equivalence decision'),
+                        _(
+                            'A double-sided copy of the final equivalence decision (possibly with the '
+                            'DAES or the admission test for the first cycle of higher education in case of restrictive '
+                            'equivalence)'
+                        ),
                         self.general_bachelor_context.etudes_secondaires.diplome_etranger.decision_final_equivalence_ue,
                     ),
                 ],
@@ -1618,8 +1623,8 @@ class SectionsAttachmentsTestCase(TestCase):
                     ),
                     Attachment(
                         _(
-                            'Decision of equivalence for your diploma(s) giving access to the training, if this(these) '
-                            'has(have) been obtained outside Belgium'
+                            'Copy of the equivalence decision delivered by the French Community of Belgium making your '
+                            '2nd cycle diploma (bac+5) equivalent to the academic grade of a corresponding master.',
                         ),
                         self.continuing_context.proposition.equivalence_diplome,
                     ),
@@ -1663,8 +1668,8 @@ class SectionsAttachmentsTestCase(TestCase):
                     ),
                     Attachment(
                         _(
-                            'Decision of equivalence for your diploma(s) giving access to the training, if this(these) '
-                            'has(have) been obtained outside Belgium'
+                            'Copy of the equivalence decision delivered by the French Community of Belgium making your '
+                            '2nd cycle diploma (bac+5) equivalent to the academic grade of a corresponding master.',
                         ),
                         self.continuing_context.proposition.equivalence_diplome,
                     ),

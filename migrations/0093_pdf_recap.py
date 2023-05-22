@@ -14,16 +14,62 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='baseadmission',
             name='pdf_recap',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='PDF recap of the proposition'),
+            field=osis_document.contrib.fields.FileField(
+                base_field=models.UUIDField(),
+                blank=True,
+                default=list,
+                size=None,
+                verbose_name='PDF recap of the proposition',
+            ),
         ),
         migrations.AlterField(
             model_name='accounting',
             name='assimilation_5_situation_type',
-            field=models.CharField(choices=[('A_NATIONALITE_UE', '%(person_concerned)s has the nationality of a country of a Member State of the European Union'), ('TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE', '%(person_concerned)s has a long-term residence permit (B, C, D, F, F+ or M cards) in Belgium'), ('CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE', '%(person_concerned)s is a refugee applicant, refugee, stateless person, or has temporary/subsidiary protection'), ('AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT', '%(person_concerned)s has a residence permit for more than 3 months and receives professional or replacement income'), ('PRIS_EN_CHARGE_OU_DESIGNE_CPAS', '%(person_concerned)s is supported by the CPAS, or by a CPAS rest home or designated by the CPAS')], default='', max_length=100, verbose_name='Assimilation 5 situation types'),
+            field=models.CharField(
+                choices=[
+                    (
+                        'A_NATIONALITE_UE',
+                        '%(person_concerned)s has the nationality of a country of a Member State of the European Union',
+                    ),
+                    (
+                        'TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE',
+                        '%(person_concerned)s has a long-term residence permit (B, C, D, F, F+, K, L or M cards) '
+                        'in Belgium',
+                    ),
+                    (
+                        'CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE',
+                        '%(person_concerned)s is a refugee applicant, refugee, stateless person, or has '
+                        'temporary/subsidiary protection',
+                    ),
+                    (
+                        'AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT',
+                        '%(person_concerned)s has a residence permit for more than 3 months and receives professional '
+                        'or replacement income',
+                    ),
+                    (
+                        'PRIS_EN_CHARGE_OU_DESIGNE_CPAS',
+                        '%(person_concerned)s is supported by the CPAS, or by a CPAS rest home or designated by the '
+                        'CPAS',
+                    ),
+                ],
+                default='',
+                max_length=100,
+                verbose_name='Assimilation 5 situation types',
+            ),
         ),
         migrations.AlterField(
             model_name='admissiontask',
             name='type',
-            field=models.CharField(choices=[('ARCHIVE', 'PDF Export'), ('CANVAS', 'Canvas'), ('CONFIRMATION_SUCCESS', 'Confirmation success attestation'), ('GENERAL_RECAP', 'PDF recap for a general education admission'), ('CONTINUING_RECAP', 'PDF recap for a continuing education admission'), ('DOCTORATE_RECAP', 'PDF recap for a doctorate education admission')], max_length=20),
+            field=models.CharField(
+                choices=[
+                    ('ARCHIVE', 'PDF Export'),
+                    ('CANVAS', 'Canvas'),
+                    ('CONFIRMATION_SUCCESS', 'Confirmation success attestation'),
+                    ('GENERAL_RECAP', 'PDF recap for a general education admission'),
+                    ('CONTINUING_RECAP', 'PDF recap for a continuing education admission'),
+                    ('DOCTORATE_RECAP', 'PDF recap for a doctorate education admission'),
+                ],
+                max_length=20,
+            ),
         ),
     ]

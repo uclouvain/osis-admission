@@ -26,7 +26,7 @@
 
     {% panel _('Belgian diploma') %}
 
-      {% field_data _('Academic graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
+      {% field_data _('Year of graduation from secondary school') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
 
       {% field_data _('Community of education') etudes_secondaires.diplome_belge.communaute|enum_display:'BelgianCommunitiesOfEducation' %}
 
@@ -96,7 +96,7 @@
 
     {% panel _('Foreign diploma') %}
 
-      {% field_data _('Academic graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
+      {% field_data _('Year of graduation from secondary school') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
 
       {% field_data _('What diploma did you get (or will you get)?') etudes_secondaires.diplome_etranger.type_diplome|enum_display:'ForeignDiplomaTypes' %}
 
@@ -107,12 +107,12 @@
         {% if ue_or_assimilated %}
           {% field_data _('Has this diploma been subject to a decision of equivalence provided by the French-speaking community of Belgium?') etudes_secondaires.diplome_etranger.equivalence|enum_display:'Equivalence' %}
           {% if etudes_secondaires.diplome_etranger.equivalence == 'YES' %}
-            {% field_data _('A double-sided copy of the final equivalence decision') etudes_secondaires.diplome_etranger.decision_final_equivalence_ue %}
+            {% field_data _("A double-sided copy of the final equivalence decision (possibly with the DAES or the admission test for the first cycle of higher education in case of restrictive equivalence)") etudes_secondaires.diplome_etranger.decision_final_equivalence_ue %}
           {% elif etudes_secondaires.diplome_etranger.equivalence == 'PENDING' %}
             {% field_data _('Proof of the final equivalence decision') etudes_secondaires.diplome_etranger.preuve_decision_equivalence %}
           {% endif %}
         {% else %}
-          {% field_data _('A double-sided copy of the final equivalence decision') etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue %}
+          {% field_data _("A double-sided copy of the final equivalence decision issued by the Ministry of the French Community of Belgium (possibly with the DAES or the admission test for the first cycle of higher education if your equivalence doesn't give access to the desired programme)") etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue %}
         {% endif %}
       {% endif %}
 

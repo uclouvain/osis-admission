@@ -60,18 +60,20 @@ class AdmissionPersonForm(AdmissionModelForm):
     first_name = forms.CharField(
         required=False,
         label=_('First name'),
-        help_text=get_example_text('Frédéric <del>frederic FREDERIC</del>'),
         widget=forms.TextInput(
             attrs={
-                'placeholder': get_example_text('Frédéric'),
+                'placeholder': get_example_text('Maria'),
             },
         ),
     )
 
     middle_name = forms.CharField(
         required=False,
-        label=_('Other names'),
-        help_text=get_example_text('Pierre, Paul, Jacques <del>pierre, paul, JACQUES)</del>'),
+        label=_('Other first names'),
+        help_text=_(
+            "Please indicate your other first names in accordance with your identity document. "
+            "If no other first name is mentioned on your identity document, you don't need to indicate anything."
+        ),
         widget=forms.TextInput(
             attrs={
                 'placeholder': get_example_text('Pierre, Paul, Jacques'),
@@ -82,10 +84,9 @@ class AdmissionPersonForm(AdmissionModelForm):
     last_name = forms.CharField(
         required=False,
         label=_('Last name'),
-        help_text=get_example_text('Van der Elst / Vanderelst <del>VANDERELST</del>'),
         widget=forms.TextInput(
             attrs={
-                'placeholder': get_example_text('Van der Elst / Vanderelst'),
+                'placeholder': get_example_text('Smith'),
             },
         ),
     )
@@ -141,7 +142,6 @@ class AdmissionPersonForm(AdmissionModelForm):
 
     birth_place = forms.CharField(
         label=_('Birth place'),
-        help_text=get_example_text('Louvain-la-Neuve <del>louvain-la-neuve</del> <del>LOUVAIN-LA-NEUVE</del>'),
         widget=forms.TextInput(
             attrs={
                 'placeholder': get_example_text('Louvain-la-Neuve'),
@@ -158,6 +158,7 @@ class AdmissionPersonForm(AdmissionModelForm):
         label=_('Contact language'),
         required=False,
         choices=settings.LANGUAGES,
+        help_text=_('This choice will define the language of communication throughout your admission process.'),
     )
 
     # Proof of identity
@@ -199,6 +200,13 @@ class AdmissionPersonForm(AdmissionModelForm):
                 'placeholder': get_example_text('85.07.30-001.33'),
             },
         ),
+        help_text=_(
+            'The Belgian national register number (or NISS, Social Security Identification Number) is a '
+            'number composed of 11 digits, the first 6 of which refer to the date of birth of the concerned '
+            'person. This number is assigned to every person living in Belgium when they register with '
+            'the municipality (or other official body). It can be found on the Belgian identity card or on the '
+            'residence permit.'
+        ),
     )
 
     id_card_number = forms.CharField(
@@ -221,13 +229,13 @@ class AdmissionPersonForm(AdmissionModelForm):
     # Already registered
     last_registration_year = AcademicYearField(
         required=False,
-        label=_('What was your last year of UCLouvain enrollment?'),
+        label=_('What is your last year of UCLouvain enrollment?'),
         past_only=True,
     )
 
     already_registered = RadioBooleanField(
         required=False,
-        label='',
+        label=_("Have you previously been registered at UCLouvain?"),
     )
 
     last_registration_id = forms.CharField(

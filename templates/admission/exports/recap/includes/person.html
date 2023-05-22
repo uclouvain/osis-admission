@@ -63,14 +63,14 @@
   {% endif %}
 {% endpanel %}
 
-{% panel _("Have you previously been registered at UCLouvain?") %}
+{% panel _("Former UCLouvain student") %}
   {% if identification.annee_derniere_inscription_ucl %}
-    <p>{% trans "Yes" %}</p>
+    {% field_data _('Have you previously been registered at UCLouvain?') _('Yes') %}
     <div class="row">
       {% field_data _("Last registration year") identification.annee_derniere_inscription_ucl|get_academic_year "col-md-6" %}
       {% field_data _("Your previous NOMA (registration id)") identification.noma_derniere_inscription_ucl "col-md-6" %}
     </div>
   {% else %}
-    {% trans "No" %}
+    {% field_data _('Have you previously been registered at UCLouvain?') _('No') %}
   {% endif %}
 {% endpanel %}
