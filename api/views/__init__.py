@@ -51,6 +51,7 @@ from admission.api.views.signatures import RequestSignaturesAPIView
 from admission.api.views.approvals import *
 from admission.api.views.confirmation import *
 from admission.api.views.doctorate import DoctorateAPIView
+from admission.api.views.jury import *
 from admission.api.views.training import *
 from admission.api.views.accounting import DoctorateAccountingView, GeneralAccountingView
 from admission.api.views.references import RetrieveScholarshipView, RetrieveCampusView, ListCampusView

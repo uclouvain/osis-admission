@@ -312,6 +312,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'retrieve_accounting',
             'update_accounting',
             'submit_proposition',
+            'retrieve_jury_preparation',
         ]
         forbidden_actions = [
             'retrieve_confirmation',
@@ -534,6 +535,8 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             'update_training_choice',
             'request_signatures',
             'submit_proposition',
+            'retrieve_jury_preparation',
+            'list_jury_members',
         ]
         forbidden_actions = [
             'add_approval',

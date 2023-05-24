@@ -201,10 +201,22 @@ msgid ""
 "A member should be either internal or external, please check the fields."
 msgstr ""
 
+msgid "A non doctor member must have a justification."
+msgstr ""
+
 msgid "A or B card"
 msgstr ""
 
 msgid "A or B card with refugee mention"
+msgstr ""
+
+msgid "A promoter can not be president."
+msgstr ""
+
+msgid "A promoter can not be removed from the jury."
+msgstr ""
+
+msgid "A promoter can not be updated from the jury."
 msgstr ""
 
 msgid "A specific education"
@@ -364,6 +376,9 @@ msgstr ""
 msgid "Add a custom mail template for <em>%(description)s</em>"
 msgstr ""
 
+msgid "Add a new member"
+msgstr ""
+
 msgid "Add a paper"
 msgstr ""
 
@@ -475,6 +490,27 @@ msgstr "Already a member of the supervisory panel."
 msgid "An education type"
 msgstr ""
 
+msgid "An external member must have a country."
+msgstr ""
+
+msgid "An external member must have a first name."
+msgstr ""
+
+msgid "An external member must have a gender."
+msgstr ""
+
+msgid "An external member must have a last name."
+msgstr ""
+
+msgid "An external member must have a title."
+msgstr ""
+
+msgid "An external member must have an email."
+msgstr ""
+
+msgid "An external member must have an institute."
+msgstr ""
+
 msgid ""
 "An integer greater than zero indicating the position of the item in relation "
 "to the others. Important point: the questions are displayed together "
@@ -555,6 +591,10 @@ msgstr ""
 
 #, python-format
 msgid "Are you sure you want to refuse \"%(object)s\"?"
+msgstr ""
+
+#, python-format
+msgid "Are you sure you want to remove \"%(prenom)s %(nom)s\" from the jury?"
 msgstr ""
 
 #, python-format
@@ -859,6 +899,9 @@ msgstr ""
 msgid "Can update the information related to the admission cotutelle"
 msgstr ""
 
+msgid "Can update the information related to the admission jury"
+msgstr ""
+
 msgid "Can update the information related to the admission project"
 msgstr ""
 
@@ -902,6 +945,9 @@ msgid "Can view the information related to language knowledge"
 msgstr ""
 
 msgid "Can view the information related to the admission cotutelle"
+msgstr ""
+
+msgid "Can view the information related to the admission jury"
 msgstr ""
 
 msgid "Can view the information related to the admission project"
@@ -1056,6 +1102,9 @@ msgid "Closed"
 msgstr ""
 
 msgid "Comment"
+msgstr ""
+
+msgid "Comment about jury"
 msgstr ""
 
 msgid "Comment from CDD manager"
@@ -1311,6 +1360,9 @@ msgstr ""
 msgid "Cotutelle request document"
 msgstr ""
 
+msgid "Cotutelle thesis"
+msgstr ""
+
 msgid "Country"
 msgstr ""
 
@@ -1462,11 +1514,24 @@ msgstr ""
 msgid "Defense"
 msgstr ""
 
-msgctxt "tab"
+msgctxt "doctorate tab"
 msgid "Defense"
 msgstr ""
 
 msgid "Defense date"
+msgstr ""
+
+msgid "Defense indicative date"
+msgstr ""
+
+msgid "Defense language"
+msgstr ""
+
+msgid "Defense method"
+msgstr ""
+
+msgctxt "admission tab"
+msgid "Defense method"
 msgstr ""
 
 msgid "Definitive admission date to doctorate"
@@ -1541,6 +1606,9 @@ msgstr ""
 msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"
 msgstr ""
 
+msgid "Doctor"
+msgstr ""
+
 msgid "Doctoral program proposition"
 msgstr ""
 
@@ -1576,10 +1644,8 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
-#, fuzzy
-#| msgid "Membre CA not found."
 msgid "Document not found."
-msgstr "Supervisory panel member not found."
+msgstr ""
 
 msgid "Document to be requested"
 msgstr ""
@@ -1588,6 +1654,9 @@ msgid "Documents"
 msgstr ""
 
 msgid "Documents to be requested now"
+msgstr ""
+
+msgid "Does not have a doctor title"
 msgstr ""
 
 msgid "Done in"
@@ -1682,6 +1751,9 @@ msgid "Education name"
 msgstr ""
 
 msgid "Education type"
+msgstr ""
+
+msgid "Email"
 msgstr ""
 
 msgid "Employer"
@@ -1838,6 +1910,9 @@ msgid "Failure of the confirmation paper"
 msgstr ""
 
 msgid "Failure of the test"
+msgstr ""
+
+msgid "Female"
 msgstr ""
 
 msgctxt "admission gender"
@@ -2272,12 +2347,20 @@ msgstr ""
 msgid "Identity picture of the candidate"
 msgstr ""
 
+msgid ""
+"If necessary, please finish inputting doctoral activities and complete the "
+"defense preparation below before submitting the jury proposition."
+msgstr ""
+
 msgid "If other, specify"
 msgstr ""
 
 msgid ""
 "If you submit the activity, you will no longer be able to modify the "
 "seminar, nor the different activities within it."
+msgstr ""
+
+msgid "Important information:"
 msgstr ""
 
 msgid ""
@@ -2325,6 +2408,14 @@ msgid "In person"
 msgstr ""
 
 msgid "In review"
+msgstr ""
+
+msgid ""
+"Information about a potential cotutelle are to be inputted in the \"Doctoral "
+"project\" part."
+msgstr ""
+
+msgid "Institute"
 msgstr ""
 
 msgctxt "admission"
@@ -2403,7 +2494,31 @@ msgstr ""
 msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
+msgid "JURY_APPROUVE_ADRE"
+msgstr ""
+
+msgid "JURY_APPROUVE_CA"
+msgstr ""
+
+msgid "JURY_APPROUVE_CDD"
+msgstr ""
+
+msgid "JURY_REFUSE_ADRE"
+msgstr ""
+
+msgid "JURY_REFUSE_CDD"
+msgstr ""
+
+msgid "JURY_SOUMIS"
+msgstr ""
+
 msgid "Journal"
+msgstr ""
+
+msgid "Jury approval"
+msgstr ""
+
+msgid "Jury composition"
 msgstr ""
 
 msgid "Justification letter"
@@ -2520,11 +2635,17 @@ msgstr ""
 msgid "Long-term resident card"
 msgstr ""
 
+msgid "Lookup somebody"
+msgstr ""
+
 msgid "MANAGEMENT"
 msgstr "Management"
 
 msgid "MATHEMATICS"
 msgstr "Mathematics"
+
+msgid "MEMBRE"
+msgstr ""
 
 msgid "Madam"
 msgstr ""
@@ -2692,6 +2813,12 @@ msgid ""
 "application has been submitted to UCLouvain by the applicant"
 msgstr ""
 
+msgid "Main institute"
+msgstr ""
+
+msgid "Male"
+msgstr ""
+
 msgctxt "admission gender"
 msgid "Male"
 msgstr ""
@@ -2765,6 +2892,9 @@ msgstr ""
 msgid "Member of supervision group not invited."
 msgstr ""
 
+msgid "Members"
+msgstr ""
+
 msgid "Membre CA not found."
 msgstr "Supervisory panel member not found."
 
@@ -2784,6 +2914,16 @@ msgid "Message sent successfully"
 msgstr ""
 
 msgid "Message subject"
+msgstr ""
+
+msgid ""
+"Method 1 (the private defense and the public defense are separated by at "
+"least a month"
+msgstr ""
+
+msgid ""
+"Method 2 (The private defense and the public defense are organised the same "
+"day, and subjected to an admissibility condition)"
 msgstr ""
 
 msgid "Missing"
@@ -2927,6 +3067,9 @@ msgstr ""
 msgid "No general enrolment"
 msgstr ""
 
+msgid "No jury found."
+msgstr ""
+
 msgid "No languages knowledge provided."
 msgstr ""
 
@@ -2949,6 +3092,9 @@ msgid "No."
 msgstr ""
 
 msgid "Noma"
+msgstr ""
+
+msgid "Non doctor reason"
 msgstr ""
 
 msgid "Non-retrievable attachment"
@@ -3063,6 +3209,12 @@ msgstr ""
 msgid "Other first names"
 msgstr ""
 
+msgid "Other institute"
+msgstr ""
+
+msgid "Other institute (if necessary)"
+msgstr ""
+
 msgid "Other international scholarship"
 msgstr ""
 
@@ -3104,6 +3256,9 @@ msgstr ""
 
 msgid "PHYSICS"
 msgstr "Physics"
+
+msgid "PRESIDENT"
+msgstr ""
 
 msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
@@ -3236,6 +3391,9 @@ msgid ""
 "don't need to indicate anything."
 msgstr ""
 
+msgid "Please justify why the member does not have a doctor title"
+msgstr ""
+
 msgid ""
 "Please note that this document will be removed from the list of the missing "
 "documents."
@@ -3293,6 +3451,9 @@ msgstr ""
 msgid "Pre-admission submission date"
 msgstr ""
 
+msgid "President"
+msgstr ""
+
 #, python-format
 msgctxt "female gender"
 msgid "President of the %(cdd_title)s"
@@ -3336,6 +3497,9 @@ msgid "Professional"
 msgstr ""
 
 msgid "Professional email"
+msgstr ""
+
+msgid "Professor"
 msgstr ""
 
 msgid "Program proposition"
@@ -3401,6 +3565,9 @@ msgid "Proof of the final equivalence decision"
 msgstr ""
 
 msgid "Proposed new deadline"
+msgstr ""
+
+msgid "Proposed thesis title"
 msgstr ""
 
 msgid "Proposition not found."
@@ -3508,6 +3675,11 @@ msgstr ""
 msgid "Reduced registration fees"
 msgstr ""
 
+msgid ""
+"Refer to the specific measures of your doctoral commission to know if one of "
+"these method is mandatory to you."
+msgstr ""
+
 msgid "Reference"
 msgstr ""
 
@@ -3564,6 +3736,14 @@ msgid "Rejection reason"
 msgstr ""
 
 msgid "Relationship"
+msgstr ""
+
+msgctxt "jury member"
+msgid "Remove"
+msgstr ""
+
+msgctxt "jury member"
+msgid "Remove?"
 msgstr ""
 
 msgid "Reorientation"
@@ -3737,6 +3917,9 @@ msgstr ""
 msgid "SEARCH_SCHOLARSHIP"
 msgstr "Search scholarship"
 
+msgid "SECRETAIRE"
+msgstr ""
+
 msgid "SELF_FUNDING"
 msgstr "Self-funding"
 
@@ -3832,6 +4015,9 @@ msgstr ""
 msgid "Secondary studies must be completed."
 msgstr ""
 
+msgid "Secretary"
+msgstr ""
+
 msgid "Sector"
 msgstr ""
 
@@ -3875,6 +4061,15 @@ msgid "Sender"
 msgstr ""
 
 msgid "Services"
+msgstr ""
+
+msgid "Set as member"
+msgstr ""
+
+msgid "Set as president"
+msgstr ""
+
+msgid "Set as secretary"
 msgstr ""
 
 msgid "Several applications"
@@ -3976,6 +4171,9 @@ msgid "Specificities"
 msgstr ""
 
 msgid "Specified"
+msgstr ""
+
+msgid "Specify if other"
 msgstr ""
 
 msgid "Sport affiliation"
@@ -4093,6 +4291,11 @@ msgid "Text"
 msgstr ""
 
 msgid "Text size"
+msgstr ""
+
+msgid ""
+"The \"doctoral training\" must be completed before submitting the defense "
+"preparation and the jury proposition."
 msgstr ""
 
 msgid "The <strong>additional training</strong> has been completed: yes / no."
@@ -4263,6 +4466,9 @@ msgstr ""
 msgid "The first name of the student"
 msgstr ""
 
+msgid "The jury is not in progress"
+msgstr ""
+
 msgid "The last name of the candidate"
 msgstr ""
 
@@ -4281,7 +4487,13 @@ msgstr ""
 msgid "The maximum number of documents must be a positive number."
 msgstr ""
 
+msgid "The member is already in the jury."
+msgstr ""
+
 msgid "The member is not external."
+msgstr ""
+
+msgid "The member was not found in the jury."
 msgstr ""
 
 msgid "The mimetypes must be a list with at least one mimetype."
@@ -4471,12 +4683,21 @@ msgid ""
 "%(languages)s."
 msgstr ""
 
+msgid ""
+"This is a temporary title and it will be modifiable later depending on the "
+"jury analysis."
+msgstr ""
+
 msgid "This page is currently under construction."
 msgstr ""
 
 msgid "Timetable"
 msgstr ""
 
+msgid "Title"
+msgstr ""
+
+msgctxt "jury"
 msgid "Title"
 msgstr ""
 
@@ -4657,6 +4878,9 @@ msgid "Update"
 msgstr ""
 
 msgid "Update doctorate admission"
+msgstr ""
+
+msgid "Update member"
 msgstr ""
 
 msgid "Upload"
@@ -4917,6 +5141,12 @@ msgid "You must be the request promoter to access this admission"
 msgstr ""
 
 msgid "You must set a reference promoter."
+msgstr ""
+
+msgid "You need to set a member as president."
+msgstr ""
+
+msgid "You need to set a member as secretary."
 msgstr ""
 
 msgid "You seem to have unsaved modifications, they will be lost."

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.76
+  version: 1.0.77
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1914,6 +1914,294 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConfirmationPaperCanvas'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/doctorate/{uuid}/jury/preparation:
+    get:
+      operationId: retrieve_jury_preparation
+      description: Get the Jury of a doctorate
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JuryDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: update_jury_preparation
+      description: Update the jury preparation information
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifierJuryCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JuryIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/doctorate/{uuid}/jury/members:
+    get:
+      operationId: list_jury_members
+      description: Get the members of a jury
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MembreJuryDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: create_jury_members
+      description: Add a new member to the jury
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AjouterMembreCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembreJuryIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/doctorate/{uuid}/jury/members/{member_uuid}:
+    get:
+      operationId: retrieve_jury_member
+      description: Get the members of a jury
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: member_uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembreJuryDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    put:
+      operationId: update_jury_member
+      description: Update a member of the jury
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: member_uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifierMembreCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JuryIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    patch:
+      operationId: update_role_jury_member
+      description: Update the role of a member of the jury
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: member_uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifierRoleMembreCommand'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JuryIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    delete:
+      operationId: remove_jury_member
+      description: Remove a member
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: member_uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema: {}
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -5330,6 +5618,8 @@ components:
                     $ref: '#/components/schemas/ActionLink'
                   retrieve_course_enrollment:
                     $ref: '#/components/schemas/ActionLink'
+                  retrieve_jury_preparation:
+                    $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
               pdf_recapitulatif:
@@ -5660,6 +5950,8 @@ components:
             retrieve_complementary_training:
               $ref: '#/components/schemas/ActionLink'
             retrieve_course_enrollment:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_jury_preparation:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -6690,6 +6982,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             retrieve_course_enrollment:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_jury_preparation:
+              $ref: '#/components/schemas/ActionLink'
+            list_jury_members:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         erreurs:
@@ -7485,6 +7781,135 @@ components:
           format: uuid
       required:
       - uuid
+    JuryDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        titre_propose:
+          type: string
+        cotutelle:
+          type: boolean
+        institution_cotutelle:
+          type: string
+        membres:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              role:
+                type: string
+              est_promoteur:
+                type: boolean
+              matricule:
+                type: string
+              institution:
+                type: string
+              autre_institution:
+                type: string
+              pays:
+                type: string
+              nom:
+                type: string
+              prenom:
+                type: string
+              titre:
+                type: string
+              justification_non_docteur:
+                type: string
+              genre:
+                type: string
+              email:
+                type: string
+            required:
+            - uuid
+            - role
+            - est_promoteur
+            - matricule
+            - institution
+            - autre_institution
+            - pays
+            - nom
+            - prenom
+            - titre
+            - justification_non_docteur
+            - genre
+            - email
+        formule_defense:
+          type: string
+        date_indicative:
+          type: string
+          format: date
+          nullable: true
+        langue_redaction:
+          type: string
+        langue_soutenance:
+          type: string
+        commentaire:
+          type: string
+        situation_comptable:
+          type: boolean
+          nullable: true
+        approbation_pdf:
+          type: array
+          items:
+            type: string
+      required:
+      - uuid
+      - titre_propose
+      - cotutelle
+      - institution_cotutelle
+      - membres
+      - formule_defense
+      - langue_redaction
+      - langue_soutenance
+      - commentaire
+      - approbation_pdf
+    MembreJuryDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+        role:
+          type: string
+        est_promoteur:
+          type: boolean
+        matricule:
+          type: string
+        institution:
+          type: string
+        autre_institution:
+          type: string
+        pays:
+          type: string
+        nom:
+          type: string
+        prenom:
+          type: string
+        titre:
+          type: string
+        justification_non_docteur:
+          type: string
+        genre:
+          type: string
+        email:
+          type: string
+      required:
+      - uuid
+      - role
+      - est_promoteur
+      - matricule
+      - institution
+      - autre_institution
+      - pays
+      - nom
+      - prenom
+      - titre
+      - justification_non_docteur
+      - genre
+      - email
     DoctorateDTO:
       type: object
       properties:
@@ -7565,6 +7990,14 @@ components:
             submit_training:
               $ref: '#/components/schemas/ActionLink'
             assent_training:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_jury_preparation:
+              $ref: '#/components/schemas/ActionLink'
+            update_jury_preparation:
+              $ref: '#/components/schemas/ActionLink'
+            list_jury_members:
+              $ref: '#/components/schemas/ActionLink'
+            create_jury_members:
               $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
@@ -9666,6 +10099,64 @@ components:
       - nouvelle_echeance
       - justification_succincte
       - lettre_justification
+    JuryIdentityDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+    ModifierJuryCommand:
+      type: object
+      properties:
+        titre_propose:
+          type: string
+        formule_defense:
+          type: string
+        date_indicative:
+          type: string
+          format: date
+        langue_redaction:
+          type: string
+        langue_soutenance:
+          type: string
+        commentaire:
+          type: string
+      required:
+      - titre_propose
+      - formule_defense
+      - date_indicative
+      - langue_redaction
+      - langue_soutenance
+      - commentaire
+    MembreJuryIdentityDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+    AjouterMembreCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        institution:
+          type: string
+        autre_institution:
+          type: string
+        pays:
+          type: string
+        nom:
+          type: string
+        prenom:
+          type: string
+        titre:
+          type: string
+        justification_non_docteur:
+          type: string
+        genre:
+          type: string
+        email:
+          type: string
     DoctoralTrainingBatch:
       type: object
       properties:
@@ -10199,6 +10690,29 @@ components:
       required:
       - proces_verbal_ca
       - avis_renouvellement_mandat_recherche
+    ModifierMembreCommand:
+      type: object
+      properties:
+        matricule:
+          type: string
+        institution:
+          type: string
+        autre_institution:
+          type: string
+        pays:
+          type: string
+        nom:
+          type: string
+        prenom:
+          type: string
+        titre:
+          type: string
+        justification_non_docteur:
+          type: string
+        genre:
+          type: string
+        email:
+          type: string
     ModifierChoixFormationGeneraleCommand:
       type: object
       properties:
@@ -10546,6 +11060,13 @@ components:
       required:
       - uuid_proposition
       - uuid_membre
+    ModifierRoleMembreCommand:
+      type: object
+      properties:
+        role:
+          type: string
+      required:
+      - role
     Error:
       type: object
       properties:

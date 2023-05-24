@@ -292,9 +292,9 @@ TAB_TREES = {
             Tab('complementary-training', _('Complementary training')),
             Tab('course-enrollment', _('Course enrollment')),
         ],
-        Tab('defense', pgettext('tab', 'Defense'), 'person-chalkboard'): [
-            # TODO
-            # Tab('jury', _('Jury')),
+        Tab('defense', pgettext('doctorate tab', 'Defense'), 'person-chalkboard'): [
+            Tab('jury-preparation', pgettext('admission tab', 'Defense method')),
+            Tab('jury', _('Jury composition')),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('history-all', _('All history')),
@@ -395,6 +395,8 @@ def default_tab_context(context):
 
     if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
         active_tab = match.namespaces[2]
+    elif len(match.namespaces) > 3 and match.namespaces[3] == 'jury-member':
+        active_tab = 'jury'
 
     tab_tree = TAB_TREES[get_current_context(context['view'].get_permission_object())]
     active_parent = get_active_parent(tab_tree, active_tab)
@@ -488,6 +490,7 @@ def field_data(
     translate_data=False,
     inline=False,
     html_tag='',
+    tooltip=None,
 ):
     if context.get('all_inline') is True:
         inline = True
@@ -521,6 +524,7 @@ def field_data(
         'hide_empty': hide_empty,
         'html_tag': html_tag,
         'inline': inline,
+        'tooltip': tooltip,
     }
 
 

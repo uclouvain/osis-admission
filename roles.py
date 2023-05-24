@@ -28,7 +28,7 @@ from admission.auth.predicates import (
     is_enrolled,
     is_part_of_education_group,
     is_pre_admission,
-    submitted_confirmation_paper,
+    submitted_confirmation_paper, is_jury_in_progress,
 )
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
@@ -75,6 +75,8 @@ def base_program_manager_rules():
         'admission.refuse_activity': is_part_of_education_group & is_enrolled,
         'admission.restore_activity': is_part_of_education_group & is_enrolled,
         # -- Jury
+        'admission.view_admission_jury': is_part_of_education_group & is_enrolled & is_jury_in_progress,
+        'admission.change_admission_jury': is_part_of_education_group & is_enrolled & is_jury_in_progress,
         # -- Défense
         # -- Soutenance
     }

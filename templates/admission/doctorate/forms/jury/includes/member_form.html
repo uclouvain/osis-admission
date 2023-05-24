@@ -1,0 +1,74 @@
+{% load i18n bootstrap3 %}
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+{% bootstrap_form_errors form %}
+<form class="no-prevent-quitting" method="post" id="form">
+  {% csrf_token %}
+
+  <div class="row">
+    <div class="col-md-3">
+      {% bootstrap_field form.institution_principale %}
+    </div>
+    <div class="col-md-9 ucl_hide">
+      {% bootstrap_field form.institution form_group_class="form-group required_field" %}
+    </div>
+  </div>
+  {% bootstrap_field form.autre_institution %}
+  <div class="ucl_show">{% bootstrap_field form.matricule form_group_class="form-group required_field" %}</div>
+  <div class="ucl_hide">
+    <div class="row">
+      <div class="col-md-4">
+        {% bootstrap_field form.nom form_group_class="form-group required_field" %}
+      </div>
+      <div class="col-md-4">
+        {% bootstrap_field form.prenom form_group_class="form-group required_field" %}
+      </div>
+      <div class="col-md-4">
+        {% bootstrap_field form.email form_group_class="form-group required_field" %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        {% bootstrap_field form.genre form_group_class="form-group required_field" %}
+      </div>
+      <div class="col-md-6">
+        {% bootstrap_field form.pays form_group_class="form-group required_field" %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        {% bootstrap_field form.titre form_group_class="form-group required_field" %}
+      </div>
+    </div>
+    {% bootstrap_field form.justification_non_docteur form_group_class="form-group required_field" %}
+  </div>
+
+  <div class="text-center">
+    {% if cancel %}<a class="btn btn-default" href="{% url 'admission:doctorate:jury' jury.uuid %}">{% trans 'Cancel' %}</a>{% endif %}
+    <button class="btn btn-primary" type="submit">
+      <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
+      {{ submit_label|default:_('Add') }}
+    </button>
+  </div>
+</form>
