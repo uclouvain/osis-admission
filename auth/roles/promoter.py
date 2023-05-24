@@ -35,6 +35,7 @@ from admission.auth.predicates import (
     is_enrolled,
     is_part_of_committee_and_invited,
     is_pre_admission,
+    is_jury_in_progress,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -75,12 +76,14 @@ class Promoter(RoleModel):
             'admission.view_admission_training_choice': is_admission_request_promoter,
             'admission.view_admission_cotutelle': is_admission_request_promoter,
             'admission.view_admission_supervision': is_admission_request_promoter,
+            'admission.view_admission_jury': is_admission_request_promoter,
             # A promoter can approve as long as he is invited to the admission committee
             'admission.approve_proposition': is_part_of_committee_and_invited,
             # Once the candidate is enrolling, a promoter can
             'admission.view_admission_confirmation': is_admission_request_promoter & is_enrolled,
             'admission.change_admission_confirmation': is_admission_request_promoter & confirmation_paper_in_progress,
             'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
+            'admission.change_admission_jury': is_admission_request_promoter & is_enrolled & is_jury_in_progress,
             # Doctoral training
             'admission.view_doctoral_training': promoter_and_enrolled & ~is_pre_admission,
             'admission.view_complementary_training': promoter_and_enrolled & complementary_training_enabled,

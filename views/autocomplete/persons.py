@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,9 +34,12 @@ from base.models.person import Person
 __all__ = [
     'CandidatesAutocomplete',
     'PromotersAutocomplete',
+    'JuryMembersAutocomplete',
 ]
 
 __namespace__ = False
+
+from base.models.student import Student
 
 
 class PersonsAutocomplete(LoginRequiredMixin):
@@ -83,6 +86,25 @@ class PromotersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetVie
         qs = (
             Person.objects.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
             .filter(Exists(Promoter.objects.filter(person=OuterRef('pk'))))  # Is a promoter
+            .order_by('last_name', 'first_name')
+            .values(
+                'first_name',
+                'last_name',
+                'global_id',
+            )
+        )
+        return qs if q else []
+
+
+class JuryMembersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
+    urlpatterns = 'jury-members'
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', '')
+
+        qs = (
+            Person.objects.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
+            .exclude(Exists(Student.objects.filter(person=OuterRef('pk'))))
             .order_by('last_name', 'first_name')
             .values(
                 'first_name',

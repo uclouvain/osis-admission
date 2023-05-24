@@ -116,6 +116,10 @@ urlpatterns = [
     path('propositions/doctorate/<uuid:uuid>/confirmation/last', views.LastConfirmationAPIView),
     path('propositions/doctorate/<uuid:uuid>/confirmation/last/canvas', views.LastConfirmationCanvasAPIView),
     path('propositions/doctorate/<uuid:uuid>/supervised_confirmation', views.SupervisedConfirmationAPIView),
+    # Jury
+    path('propositions/doctorate/<uuid:uuid>/jury/preparation', views.JuryPreparationAPIView),
+    path('propositions/doctorate/<uuid:uuid>/jury/members', views.JuryMembersListAPIView),
+    path('propositions/doctorate/<uuid:uuid>/jury/members/<uuid:member_uuid>', views.JuryMemberDetailAPIView),
     # Doctorate
     path('propositions/doctorate/<uuid:uuid>/doctorate', views.DoctorateAPIView),
     # Training

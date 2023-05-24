@@ -36,6 +36,7 @@ from admission.auth.predicates import (
     is_being_enrolled,
     is_enrolled,
     confirmation_paper_in_progress,
+    is_jury_in_progress,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -49,6 +50,7 @@ _CANDIDATE_RULESET = {
     'view_admission_project': is_admission_request_author,
     'view_admission_cotutelle': is_admission_request_author,
     'view_admission_supervision': is_admission_request_author,
+    'view_admission_jury': is_admission_request_author,
     'view_admission_training_choice': is_admission_request_author,
     'download_doctorateadmission_pdf_recap': is_admission_request_author,
     # A candidate can view as long as he's the author and he is being enrolled
@@ -67,6 +69,8 @@ _CANDIDATE_RULESET = {
     'change_admission_secondary_studies': is_admission_request_author & unconfirmed_proposition,
     'change_admission_languages': is_admission_request_author & unconfirmed_proposition,
     'change_admission_accounting': is_admission_request_author & unconfirmed_proposition,
+    # Can edit while the jury is not submitted
+    'change_admission_jury': is_admission_request_author & is_jury_in_progress,
     # Project tabs and supervision group edition are accessible as long as signing has not begun
     'change_admission_training_choice': is_admission_request_author & in_progress,
     'change_admission_project': is_admission_request_author & in_progress,

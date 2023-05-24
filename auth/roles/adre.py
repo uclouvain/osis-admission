@@ -63,6 +63,7 @@ class AdreSecretary(RoleModel):
             'admission.view_admission_project': rules.always_allow,
             'admission.view_admission_cotutelle': rules.always_allow,
             'admission.view_admission_supervision': rules.always_allow,
+            'admission.view_admission_jury': rules.always_allow,
             'admission.view_admission_languages': rules.always_allow,
             'admission.view_admission_confirmation': rules.always_allow & is_enrolled,
             'admission.upload_pdf_confirmation': rules.always_allow & is_enrolled,
