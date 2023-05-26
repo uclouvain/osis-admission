@@ -23,52 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import mimetypes
-from pathlib import Path
-from urllib.parse import urlparse
 
-from django.conf import settings
-from django.contrib.staticfiles.finders import find
-from django.core.files.storage import default_storage
 from django.template.loader import render_to_string
-from django.urls import get_script_prefix
 from weasyprint import HTML
 
-
-def django_url_fetcher(url):  # pragma: no cover
-    """
-    Django URL fetcher to prevent network requests
-
-    @see https://github.com/fdemmer/django-weasyprint/blob/main/django_weasyprint/utils.py
-    """
-    from weasyprint import default_url_fetcher
-
-    # load static files directly from disk
-    if url.startswith('file:'):
-        mime_type, encoding = mimetypes.guess_type(url)
-        url_path = urlparse(url).path
-        data = {
-            'mime_type': mime_type,
-            'encoding': encoding,
-            'filename': Path(url_path).name,
-        }
-
-        default_media_url = settings.MEDIA_URL in ('', get_script_prefix())
-        if not default_media_url and url_path.startswith(settings.MEDIA_URL):
-            media_root = settings.MEDIA_ROOT
-            if isinstance(settings.MEDIA_ROOT, Path):
-                media_root = f'{settings.MEDIA_ROOT}/'
-            path = url_path.replace(settings.MEDIA_URL, media_root, 1)
-            data['file_obj'] = default_storage.open(path)
-            return data
-
-        elif settings.STATIC_URL and url_path.startswith(settings.STATIC_URL):
-            path = url_path.replace(settings.STATIC_URL, '', 1)
-            data['file_obj'] = open(find(path), 'rb')
-            return data
-
-    # Fall back to weasyprint default fetcher
-    return default_url_fetcher(url)
+from osis_common.utils.url_fetcher import django_url_fetcher
 
 
 def get_pdf_from_template(template_name, stylesheets, context) -> bytes:
