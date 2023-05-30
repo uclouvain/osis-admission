@@ -101,6 +101,9 @@ class AdmissionAdminMixin(admin.ModelAdmin):
     ]
     search_fields = [
         'reference',
+        'candidate__global_id',
+        'candidate__last_name',
+        'candidate__first_name',
     ]
     readonly_fields = [
         'detailed_status',
