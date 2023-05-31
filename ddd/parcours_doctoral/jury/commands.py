@@ -28,6 +28,7 @@ from typing import List, Optional
 
 import attr
 
+from admission.ddd.parcours_doctoral.jury.dtos.verificateur import VerificateurDTO
 from osis_common.ddd import interface
 
 
@@ -95,3 +96,19 @@ class ModifierRoleMembreCommand(interface.CommandRequest):
     uuid_jury: str
     uuid_membre: str
     role: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererVerificateursQuery(interface.QueryRequest):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierVerificateurCommand(interface.QueryRequest):
+    entite_ucl_id: str
+    matricule: Optional[str]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierVerificateursCommand(interface.QueryRequest):
+    verificateurs: List['ModifierVerificateurCommand']
