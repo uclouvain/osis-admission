@@ -11,7 +11,7 @@ class VerificateurIdentityFactory(factory.Factory):
         model = VerificateurIdentity
         abstract = False
 
-    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    code = 'FOO'
 
 
 class VerificateurFactory(factory.Factory):
@@ -19,6 +19,6 @@ class VerificateurFactory(factory.Factory):
         model = Verificateur
         abstract = False
 
-    entity_id = factory.SubFactory(VerificateurIdentityFactory)
+    entity_id = factory.SubFactory(VerificateurIdentityFactory, code=factory.SelfAttribute('..entite_ucl_id.code'))
     entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory)
     matricule = None

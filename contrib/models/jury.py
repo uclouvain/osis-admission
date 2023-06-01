@@ -173,3 +173,19 @@ class JuryMember(models.Model):
                 name='admission_jurymember_constraint',
             ),
         ]
+
+
+class Verificateur(models.Model):
+    entity = models.OneToOneField(
+        'base.Entity',
+        verbose_name=_("Entity"),
+        on_delete=models.CASCADE,
+        editable=False,
+    )
+    person = models.ForeignKey(
+        'base.Person',
+        verbose_name=_("Person"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )

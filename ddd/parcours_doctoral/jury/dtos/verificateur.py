@@ -32,6 +32,6 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True)
 class VerificateurDTO(interface.DTO):
-    uuid: str
+    code: str
     entite_ucl_id: str
     matricule: Optional[str]

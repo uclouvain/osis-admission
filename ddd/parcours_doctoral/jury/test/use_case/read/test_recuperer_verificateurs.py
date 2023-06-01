@@ -49,10 +49,10 @@ class TestRecupererJury(TestCase):
         )
         self.assertEqual(len(verificateurs), 2)
         verificateur = verificateurs[0]
-        self.assertEqual(verificateur.uuid, 'uuid-verificateur')
+        self.assertEqual(verificateur.code, 'uuid-entity')
         self.assertEqual(verificateur.entite_ucl_id, 'uuid-entity')
         self.assertIsNone(verificateur.matricule)
         verificateur = verificateurs[1]
-        self.assertEqual(verificateur.uuid, 'uuid-verificateur2')
+        self.assertEqual(verificateur.code, 'uuid-other-entity')
         self.assertEqual(verificateur.entite_ucl_id, 'uuid-other-entity')
         self.assertEqual(verificateur.matricule, 'matricule')

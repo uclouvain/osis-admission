@@ -59,5 +59,6 @@ class TestModifierJury(TestCase):
 
         self.assertEqual(len(VerificateurInMemoryRepository.entities), 2)
         verificateur = VerificateurInMemoryRepository.entities[0]
+        self.assertEqual(verificateur.entity_id.code, 'uuid-entity')
         self.assertEqual(verificateur.entite_ucl_id.code, 'uuid-entity')
         self.assertEqual(verificateur.matricule, '012345')

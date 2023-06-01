@@ -39,12 +39,10 @@ class VerificateurInMemoryRepository(InMemoryGenericRepository, IVerificateurRep
     def reset(cls):
         cls.entities = [
             VerificateurFactory(
-                entity_id__uuid='uuid-verificateur',
                 entite_ucl_id__code='uuid-entity',
                 matricule=None,
             ),
             VerificateurFactory(
-                entity_id__uuid='uuid-verificateur2',
                 entite_ucl_id__code='uuid-other-entity',
                 matricule='matricule',
             ),
@@ -66,7 +64,7 @@ class VerificateurInMemoryRepository(InMemoryGenericRepository, IVerificateurRep
     @classmethod
     def _load_verificateur_dto(cls, verificateur: Verificateur) -> VerificateurDTO:
         return VerificateurDTO(
-            uuid=verificateur.entity_id.uuid,
+            code=str(verificateur.entity_id.code),
             entite_ucl_id=str(verificateur.entite_ucl_id.code),
             matricule=verificateur.matricule,
         )

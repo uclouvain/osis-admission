@@ -27,13 +27,13 @@ from typing import Optional
 
 import attr
 
-from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity
+from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity, EntityCode
 from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
 class VerificateurIdentity(interface.EntityIdentity):
-    uuid: str
+    code: attr.ib(type=EntityCode)
 
 
 @attr.dataclass(slots=True, hash=False, eq=False)

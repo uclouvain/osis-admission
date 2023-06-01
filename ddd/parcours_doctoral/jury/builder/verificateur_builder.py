@@ -47,7 +47,7 @@ class VerificateurBuilder(interface.RootEntityBuilder):
     ) -> List['Verificateur']:
         return [
             Verificateur(
-                entity_id=VerificateurIdentity(uuid=str(uuid.uuid4())),
+                entity_id=VerificateurIdentity(code=verificateur.entite_ucl_id),
                 entite_ucl_id=UCLEntityIdentity(code=verificateur.entite_ucl_id),
                 matricule=verificateur.matricule,
             )
