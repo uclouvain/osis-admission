@@ -30,23 +30,26 @@ from admission.ddd.parcours_doctoral.jury.commands import (
     ModifierMembreCommand,
     RetirerMembreCommand,
     ModifierRoleMembreCommand,
-    RecupererJuryMembreQuery,
+    RecupererJuryMembreQuery, RecupererVerificateursQuery, ModifierVerificateursCommand,
 )
 from admission.ddd.parcours_doctoral.jury.use_case.read.recuperer_jury_membre_service import recuperer_jury_membre
 from admission.ddd.parcours_doctoral.jury.use_case.read.recuperer_jury_service import recuperer_jury
+from admission.ddd.parcours_doctoral.jury.use_case.read.recuperer_verificateurs_service import recuperer_verificateurs
 from admission.ddd.parcours_doctoral.jury.use_case.write.ajouter_membre_service import ajouter_membre
 from admission.ddd.parcours_doctoral.jury.use_case.write.modifier_jury_service import modifier_jury
 from admission.ddd.parcours_doctoral.jury.use_case.write.modifier_membre_service import modifier_membre
 from admission.ddd.parcours_doctoral.jury.use_case.write.modifier_role_membre import modifier_role_membre
+from admission.ddd.parcours_doctoral.jury.use_case.write.modifier_verificateurs_service import modifier_verificateurs
 from admission.ddd.parcours_doctoral.jury.use_case.write.retirer_membre_service import retirer_membre
 from admission.infrastructure.admission.doctorat.preparation.repository.groupe_de_supervision import (
     GroupeDeSupervisionRepository,
 )
 from admission.infrastructure.parcours_doctoral.jury.repository.jury import JuryRepository
+from admission.infrastructure.parcours_doctoral.jury.repository.verificateur import VerificateurRepository
 
 _jury_repository = JuryRepository()
 _groupe_de_supervisition_repository = GroupeDeSupervisionRepository()
-
+_verificateur_repository = VerificateurRepository()
 
 COMMAND_HANDLERS = {
     RecupererJuryQuery: lambda msg_bus, cmd: recuperer_jury(
@@ -56,6 +59,10 @@ COMMAND_HANDLERS = {
     RecupererJuryMembreQuery: lambda msg_bus, cmd: recuperer_jury_membre(
         cmd,
         jury_repository=_jury_repository,
+    ),
+    RecupererVerificateursQuery: lambda msg_bus, cmd: recuperer_verificateurs(
+        cmd,
+        verificateur_repository=_verificateur_repository,
     ),
     ModifierJuryCommand: lambda msg_bus, cmd: modifier_jury(
         cmd,
@@ -77,5 +84,9 @@ COMMAND_HANDLERS = {
     ModifierRoleMembreCommand: lambda msg_bus, cmd: modifier_role_membre(
         cmd,
         jury_repository=_jury_repository,
+    ),
+    ModifierVerificateursCommand: lambda msg_bus, cmd: modifier_verificateurs(
+        cmd,
+        verificateur_repository=_verificateur_repository,
     ),
 }

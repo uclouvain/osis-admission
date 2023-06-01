@@ -34,4 +34,5 @@ from osis_common.ddd import interface
 class VerificateurDTO(interface.DTO):
     code: str
     entite_ucl_id: str
+    sector: str
     matricule: Optional[str]

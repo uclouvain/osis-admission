@@ -40,4 +40,5 @@ class VerificateurIdentity(interface.EntityIdentity):
 class Verificateur(interface.RootEntity):
     entity_id: 'VerificateurIdentity'
     entite_ucl_id: 'UCLEntityIdentity'
+    sector: str
     matricule: Optional[str]

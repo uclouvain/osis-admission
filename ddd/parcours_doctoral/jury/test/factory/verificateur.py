@@ -21,4 +21,5 @@ class VerificateurFactory(factory.Factory):
 
     entity_id = factory.SubFactory(VerificateurIdentityFactory, code=factory.SelfAttribute('..entite_ucl_id.code'))
     entite_ucl_id = factory.SubFactory(UclEntityIdentityFactory)
+    sector = 'SST'
     matricule = None
