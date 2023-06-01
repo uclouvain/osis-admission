@@ -27,6 +27,7 @@ import uuid
 from typing import List
 
 from admission.ddd.parcours_doctoral.jury.domain.model.verificateurs import Verificateur, VerificateurIdentity
+from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity
 from osis_common.ddd import interface
 
 
@@ -47,7 +48,7 @@ class VerificateurBuilder(interface.RootEntityBuilder):
         return [
             Verificateur(
                 entity_id=VerificateurIdentity(uuid=str(uuid.uuid4())),
-                entite_ucl_id=verificateur.entite_ucl_id,
+                entite_ucl_id=UCLEntityIdentity(code=verificateur.entite_ucl_id),
                 matricule=verificateur.matricule,
             )
             for verificateur in cmd.verificateurs

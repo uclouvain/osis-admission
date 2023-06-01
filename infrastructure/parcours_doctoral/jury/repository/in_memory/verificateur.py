@@ -25,27 +25,29 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.parcours_doctoral.jury.domain.model.jury import Jury, JuryIdentity
 from admission.ddd.parcours_doctoral.jury.domain.model.verificateurs import Verificateur
-from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO, MembreJuryDTO
 from admission.ddd.parcours_doctoral.jury.dtos.verificateur import VerificateurDTO
-from admission.ddd.parcours_doctoral.jury.repository.i_jury import IJuryRepository
 from admission.ddd.parcours_doctoral.jury.repository.i_verificateur import IVerificateurRepository
-from admission.ddd.parcours_doctoral.jury.test.factory.jury import JuryFactory, MembreJuryFactory
-from admission.ddd.parcours_doctoral.jury.validator.exceptions import (
-    JuryNonTrouveException,
-    MembreNonTrouveDansJuryException,
-)
+from admission.ddd.parcours_doctoral.jury.test.factory.verificateur import VerificateurFactory
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
 class VerificateurInMemoryRepository(InMemoryGenericRepository, IVerificateurRepository):
-    entities: List[Jury] = list()
+    entities: List[Verificateur] = list()
 
     @classmethod
     def reset(cls):
         cls.entities = [
-            VerificateurFactory(),
+            VerificateurFactory(
+                entity_id__uuid='uuid-verificateur',
+                entite_ucl_id__code='uuid-entity',
+                matricule=None,
+            ),
+            VerificateurFactory(
+                entity_id__uuid='uuid-verificateur2',
+                entite_ucl_id__code='uuid-other-entity',
+                matricule='matricule',
+            ),
         ]
 
     @classmethod
@@ -65,6 +67,6 @@ class VerificateurInMemoryRepository(InMemoryGenericRepository, IVerificateurRep
     def _load_verificateur_dto(cls, verificateur: Verificateur) -> VerificateurDTO:
         return VerificateurDTO(
             uuid=verificateur.entity_id.uuid,
-            entite_ucl_id=str(verificateur.entite_ucl_id),
+            entite_ucl_id=str(verificateur.entite_ucl_id.code),
             matricule=verificateur.matricule,
         )
