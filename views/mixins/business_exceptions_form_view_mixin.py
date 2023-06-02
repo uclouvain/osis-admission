@@ -46,7 +46,6 @@ class BusinessExceptionFormViewMixin:
                 form.add_error(self._error_mapping.get(status_code), exception.message)
             return self.form_invalid(form=form)
         except BusinessException as exception:
-            messages.error(self.request, _("Some errors have been encountered."))
             status_code = getattr(exception, 'status_code', None)
             form.add_error(self._error_mapping.get(status_code), exception.message)
             return self.form_invalid(form=form)

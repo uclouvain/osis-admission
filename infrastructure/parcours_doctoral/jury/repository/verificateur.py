@@ -27,7 +27,7 @@ from typing import List
 
 from django.db.models import Prefetch
 
-from admission.contrib.models.jury import Verificateur as VerificateurORM
+from admission.contrib.models.jury import Controller
 from admission.ddd.parcours_doctoral.jury.domain.model.verificateurs import Verificateur, VerificateurIdentity
 from admission.ddd.parcours_doctoral.jury.dtos.verificateur import VerificateurDTO
 from admission.ddd.parcours_doctoral.jury.repository.i_verificateur import IVerificateurRepository
@@ -35,14 +35,30 @@ from base.models.entity_version import find_all_current_entities_version, Entity
 from base.models.enums.entity_type import INSTITUTE
 from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity
 
-SECTORS_ACRONYMS = ['SST', 'SSH']
+SECTORS_ACRONYMS = ['SST', 'SSH', 'SSS']
 
 
 class VerificateurRepository(IVerificateurRepository):
     @classmethod
+    def get(cls, entity_id):
+        raise NotImplementedError
+
+    @classmethod
+    def search(cls, entity_ids=None, **kwargs):
+        raise NotImplementedError
+
+    @classmethod
+    def delete(cls, entity_id, **kwargs) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    def save(cls, entity) -> None:
+        raise NotImplementedError
+
+    @classmethod
     def get_list(cls) -> List['Verificateur']:  # type: ignore[override]
         queryset = (
-            VerificateurORM.objects.all()
+            Controller.objects.all()
             .select_related('person')
             .prefetch_related(
                 Prefetch(
@@ -60,8 +76,8 @@ class VerificateurRepository(IVerificateurRepository):
             ) for verificateur in queryset
         ]
 
-        # Add institutes without a verificateur yet
-        codes = {verificateur.code for verificateur in verificateurs}
+        # Add institutes without a controller yet
+        codes = {verificateur.entite_ucl_id.code for verificateur in verificateurs}
         for sector in SECTORS_ACRONYMS:
             try:
                 sector = find_all_current_entities_version().select_related('entity').get(acronym=sector)
@@ -96,7 +112,7 @@ class VerificateurRepository(IVerificateurRepository):
     def _load_verificateur_dto(cls, verificateur: Verificateur) -> VerificateurDTO:
         return VerificateurDTO(
             code=str(verificateur.entity_id.code),
-            entite_ucl_id=str(verificateur.entite_ucl_id.code),
+            entite_code=str(verificateur.entite_ucl_id.code),
             sector=verificateur.sector,
             matricule=verificateur.matricule,
         )

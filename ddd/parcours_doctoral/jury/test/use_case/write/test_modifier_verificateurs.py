@@ -46,11 +46,11 @@ class TestModifierJury(TestCase):
             ModifierVerificateursCommand(
                 verificateurs=[
                     ModifierVerificateurCommand(
-                        entite_ucl_id='uuid-entity',
+                        entite_code='uuid-entity',
                         matricule='012345'
                     ),
                     ModifierVerificateurCommand(
-                        entite_ucl_id='uuid-other-entity',
+                        entite_code='uuid-other-entity',
                         matricule='matricule',
                     ),
                 ]

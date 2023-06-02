@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,17 +22,29 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-from typing import Optional
-
-import attr
-
-from osis_common.ddd import interface
+# ##############################################################################
+from dal import autocomplete
 
 
-@attr.dataclass(frozen=True, slots=True)
-class VerificateurDTO(interface.DTO):
-    code: str
-    entite_code: str
-    sector: str
-    matricule: Optional[str]
+from django import forms
+from django.forms import formset_factory
+from django.utils.translation import gettext_lazy as _
+
+
+class ControllerForm(forms.Form):
+    entite_code = forms.CharField(disabled=True, widget=forms.HiddenInput())
+
+    matricule = forms.CharField(
+        label=_('Lookup somebody'),
+        required=False,
+        widget=autocomplete.ListSelect2(
+            url="admission:autocomplete:jury-members",
+            attrs={
+                'data-minimum-input-length': 3,
+                'data-placeholder': _('Last name / First name / Global id'),
+            },
+        ),
+    )
+
+
+ControllersFormset = formset_factory(ControllerForm, extra=0)

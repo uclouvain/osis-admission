@@ -65,7 +65,7 @@ class VerificateurInMemoryRepository(InMemoryGenericRepository, IVerificateurRep
     def _load_verificateur_dto(cls, verificateur: Verificateur) -> VerificateurDTO:
         return VerificateurDTO(
             code=str(verificateur.entity_id.code),
-            entite_ucl_id=str(verificateur.entite_ucl_id.code),
+            entite_code=str(verificateur.entite_ucl_id.code),
             sector=verificateur.sector,
             matricule=verificateur.matricule,
         )

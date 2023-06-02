@@ -74,5 +74,13 @@
         </a>
       </li>
     {% endif %}
+    {% if perms.admission.change_controller %}
+      <li>
+        <a href="{% url 'admission:config:jury-controllers-config' %}">
+          <span class="fa fa-tools"></span>
+          {% trans 'Institutes controllers configuration' %}
+        </a>
+      </li>
+    {% endif %}
   </ul>
 </li>

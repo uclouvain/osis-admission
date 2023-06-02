@@ -175,7 +175,7 @@ class JuryMember(models.Model):
         ]
 
 
-class Verificateur(models.Model):
+class Controller(models.Model):
     entity = models.OneToOneField(
         'base.Entity',
         verbose_name=_("Entity"),

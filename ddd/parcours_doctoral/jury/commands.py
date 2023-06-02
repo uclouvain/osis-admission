@@ -105,7 +105,7 @@ class RecupererVerificateursQuery(interface.QueryRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class ModifierVerificateurCommand(interface.QueryRequest):
-    entite_ucl_id: str
+    entite_code: str
     matricule: Optional[str]
 
 
