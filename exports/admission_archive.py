@@ -98,7 +98,7 @@ def admission_pdf_archive(task_uuid, language=None):
         post_process_params={
             PostProcessingEnums.MERGE_PDF.name: {
                 'pages_dimension': PageFormatEnums.A4.name,
-                'output_filename': 'pdf_archive',
+                'output_filename': f'pdf_archive_{generated_uuid}',
             },
         },
     )
