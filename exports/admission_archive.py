@@ -31,6 +31,7 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import AdmissionTask, DoctorateAdmission, SupervisionActor
 from admission.contrib.models.doctorate import PropositionProxy
+from admission.exceptions import MergePDFException
 from admission.exports.utils import admission_generate_pdf
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
@@ -101,6 +102,9 @@ def admission_pdf_archive(task_uuid, language=None):
             },
         },
     )
+
+    if output.get('error'):
+        raise MergePDFException(output['error'])
 
     admission.archived_record_signatures_sent = [uuid.UUID(output[PostProcessingEnums.MERGE_PDF.name]['output'][0])]
     admission.save(update_fields=['archived_record_signatures_sent'])
