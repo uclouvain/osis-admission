@@ -112,10 +112,7 @@
     </span>
   </div>
   <div class="min-width">
-    <span>
-      {% translate 'Status:' %} <span class="label label-admission-primary">{{ admission.statut|enum_display:'ChoixStatutPropositionGenerale' }}</span>
-      {{ admission.date_changement_statut|date:'d/m/Y' }}
-    </span>
+    {% include 'admission/includes/admission_status.html' with display_on_load=True %}
     {% if admission.soumise_le %}
       <br>
       <span>

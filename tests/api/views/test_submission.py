@@ -58,7 +58,11 @@ from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
-from admission.tests.factories.person import IncompletePersonForBachelorFactory, IncompletePersonForIUFCFactory
+from admission.tests.factories.person import (
+    IncompletePersonForBachelorFactory,
+    IncompletePersonForIUFCFactory,
+    CompletePersonForBachelorFactory,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma

@@ -23,7 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
+import copy
+from typing import List, Optional, Dict
 
 import attr
 
@@ -34,8 +35,9 @@ from osis_common.ddd import interface
 @attr.dataclass
 class StatutChecklist(interface.ValueObject):
     libelle: str
-    enfants: List['StatutChecklist'] = []
+    enfants: List['StatutChecklist'] = attr.Factory(list)
     statut: Optional[ChoixStatutChecklist] = None
+    extra: Dict[str, any] = attr.Factory(dict)
 
     # @property
     # def statut(self) -> Optional[ChoixStatutChecklist]:
@@ -67,3 +69,17 @@ class StatutsChecklistGenerale:
     parcours_anterieur: StatutChecklist
     financabilite: StatutChecklist
     specificites_formation: StatutChecklist
+
+    @classmethod
+    def from_dict(cls, checklist_en_tant_que_dict: Dict[str, Dict[str, any]]):
+        checklist_by_tab = {}
+        for key, item in checklist_en_tant_que_dict.items():
+            tab_data = copy.deepcopy(item)
+            statut = tab_data.pop('statut', None)
+            checklist_by_tab[key] = StatutChecklist(
+                libelle=tab_data.pop('libelle', ''),
+                statut=statut and ChoixStatutChecklist[statut],
+                enfants=tab_data.pop('enfants', []),
+                extra=tab_data,
+            )
+        return cls(**checklist_by_tab)

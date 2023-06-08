@@ -29,7 +29,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import has_scope, is_debug, is_entity_manager
+from admission.auth.predicates import has_scope, is_debug, is_entity_manager, checklist_is_initialized
 from education_group.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
 
@@ -89,6 +89,6 @@ class CentralManager(EntityRoleModel):
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
             'admission.view_documents_management': is_entity_manager,
-            'admission.view_checklist': is_entity_manager,
+            'admission.view_checklist': is_entity_manager & checklist_is_initialized,
         }
         return RuleSet(ruleset)

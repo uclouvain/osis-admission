@@ -540,6 +540,13 @@ msgstr ""
 msgid "Application fees"
 msgstr ""
 
+msgid "Application fees request message"
+msgstr ""
+
+#, python-format
+msgid "Application fees: <strong>&euro;%(amount)s</strong>"
+msgstr ""
+
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 
@@ -618,19 +625,40 @@ msgstr ""
 msgid "Assimilation"
 msgstr ""
 
+msgid "Assimilation 1"
+msgstr ""
+
 msgid "Assimilation 1 situation types"
+msgstr ""
+
+msgid "Assimilation 2"
 msgstr ""
 
 msgid "Assimilation 2 situation types"
 msgstr ""
 
+msgid "Assimilation 3"
+msgstr ""
+
 msgid "Assimilation 3 situation types"
+msgstr ""
+
+msgid "Assimilation 4"
+msgstr ""
+
+msgid "Assimilation 5"
 msgstr ""
 
 msgid "Assimilation 5 situation types"
 msgstr ""
 
+msgid "Assimilation 6"
+msgstr ""
+
 msgid "Assimilation 6 situation types"
+msgstr ""
+
+msgid "Assimilation 7"
 msgstr ""
 
 msgid "Assimilation situation"
@@ -974,6 +1002,9 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
+msgid "Cancel the application fees request"
+msgstr ""
+
 msgid "Cancelled application"
 msgstr ""
 
@@ -1098,6 +1129,10 @@ msgstr ""
 msgid "Civil status"
 msgstr ""
 
+msgid "Close"
+msgstr ""
+
+msgctxt "modal"
 msgid "Close"
 msgstr ""
 
@@ -1587,6 +1622,9 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
+msgid "Dispensed"
+msgstr ""
+
 msgid "Display according education"
 msgstr ""
 
@@ -1603,6 +1641,9 @@ msgid "Do not reorder values, and keep the same count"
 msgstr ""
 
 msgid "Do you have a high school diploma?"
+msgstr ""
+
+msgid "Do you want to request the application fees now?"
 msgstr ""
 
 msgid ""
@@ -1685,6 +1726,9 @@ msgstr ""
 msgid "Double degree scholarship"
 msgstr ""
 
+msgid "Double degree:"
+msgstr ""
+
 msgid "Double or triple diplomation"
 msgstr ""
 
@@ -1695,6 +1739,12 @@ msgid "Dr."
 msgstr ""
 
 msgid "Dutch"
+msgstr ""
+
+#, python-format
+msgid ""
+"E-mail requesting the application fees sent to the candidate on %(date)s by "
+"%(author)s."
 msgstr ""
 
 msgid "ECONOMY"
@@ -1767,6 +1817,11 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
+msgid ""
+"Email sent to the candidate to inform him that he must pay the application "
+"fees to finalize an application for general education"
+msgstr ""
+
 msgid "Employer"
 msgstr ""
 
@@ -1832,6 +1887,9 @@ msgstr ""
 msgid "Erasmus mundus scholarship"
 msgstr ""
 
+msgid "Erasmus mundus:"
+msgstr ""
+
 msgid "Estimated time to complete the doctorate (in months)"
 msgstr ""
 
@@ -1891,6 +1949,9 @@ msgid "External enrollment change"
 msgstr ""
 
 msgid "External reorientation"
+msgstr ""
+
+msgid "External reorientation / modification"
 msgstr ""
 
 msgid "FAC free documents"
@@ -2180,6 +2241,9 @@ msgstr ""
 msgid "Household composition, or a copy of your birth certificate"
 msgstr ""
 
+msgid "I am a long-term resident in the European Union outside Belgium"
+msgstr ""
+
 msgid ""
 "I am a long-term resident in the European Union outside Belgium "
 "(assimilation 7)"
@@ -2208,6 +2272,10 @@ msgstr ""
 msgid ""
 "I am aware that no additional documents specific to quota studies can be "
 "added after my online application has been confirmed."
+msgstr ""
+
+msgid ""
+"I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS"
 msgstr ""
 
 msgid ""
@@ -2467,6 +2535,9 @@ msgid "International for general education"
 msgstr ""
 
 msgid "International scholarship"
+msgstr ""
+
+msgid "International:"
 msgstr ""
 
 msgid "Internship framework agreement"
@@ -2949,6 +3020,9 @@ msgstr ""
 msgid "Modification date"
 msgstr ""
 
+msgid "Modification requested"
+msgstr ""
+
 msgid "Modified"
 msgstr ""
 
@@ -2972,6 +3046,9 @@ msgid "Must be in the process of the enrolment"
 msgstr ""
 
 msgid "Must not be pre-admission"
+msgstr ""
+
+msgid "Must pay"
 msgstr ""
 
 msgid "My father"
@@ -3331,6 +3408,12 @@ msgid "Passport number"
 msgstr ""
 
 msgid "Past confirmation papers"
+msgstr ""
+
+msgid "Payed"
+msgstr ""
+
+msgid "Pending application fees"
 msgstr ""
 
 msgid "Pending validation from management"
@@ -3763,6 +3846,9 @@ msgstr ""
 msgid "Relationship"
 msgstr ""
 
+msgid "Remind the applicant"
+msgstr ""
+
 msgctxt "jury member"
 msgid "Remove"
 msgstr ""
@@ -3772,6 +3858,9 @@ msgid "Remove?"
 msgstr ""
 
 msgid "Reorientation"
+msgstr ""
+
+msgid "Reorientation requested"
 msgstr ""
 
 msgid "Replace a document"
@@ -3983,6 +4072,9 @@ msgstr "Statistics"
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Submitted confirmation"
 
+msgid "SYST_REUSSITE"
+msgstr "System success"
+
 msgid "Salary slips"
 msgstr ""
 
@@ -4082,6 +4174,9 @@ msgid "Send an information email"
 msgstr ""
 
 msgid "Send the message"
+msgstr ""
+
+msgid "Send to applicant"
 msgstr ""
 
 msgid "Sender"
@@ -4369,6 +4464,9 @@ msgid ""
 "being generated, please come back later to get it."
 msgstr ""
 
+msgid "The checklist must be initialized."
+msgstr ""
+
 msgid ""
 "The child of a member of staff may, under some conditions, benefit from a "
 "reduction of the registration fee for any registration for a bachelor's or "
@@ -4545,6 +4643,9 @@ msgid ""
 "required language."
 msgstr ""
 
+msgid "The payment has not been made."
+msgstr ""
+
 msgid "The person concerned"
 msgstr ""
 
@@ -4557,6 +4658,12 @@ msgid ""
 msgstr ""
 
 msgid "The proposition has already been confirmed or is cancelled"
+msgstr ""
+
+msgid "The proposition must be concerned by the payment."
+msgstr ""
+
+msgid "The proposition must not be concerned by the payment."
 msgstr ""
 
 msgid "The public comment about the approval/refusal"
@@ -4586,6 +4693,13 @@ msgstr ""
 
 #, python-format
 msgid "The status has been changed to %(status)s."
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"The status of the request is currently \"{current_status}\". Only the status "
+"\"{from_status}\" allows you to move to the \"{to_status}\" status for the "
+"application fees."
 msgstr ""
 
 msgid "The submitted information is not consistent with information requested."
@@ -4720,6 +4834,11 @@ msgid ""
 msgstr ""
 
 msgid "This page is currently under construction."
+msgstr ""
+
+msgid ""
+"This status change will close the transaction in the payment application. "
+"The applicant will still need to be informed."
 msgstr ""
 
 msgid "Timetable"
@@ -4958,6 +5077,9 @@ msgstr ""
 msgid "Viewed by"
 msgstr ""
 
+msgid "Visualize"
+msgstr ""
+
 msgid "WBI - Wallonie Bruxelles International"
 msgstr ""
 
@@ -5165,6 +5287,12 @@ msgid ""
 msgstr ""
 
 msgid "You must be invited to complete this admission."
+msgstr ""
+
+msgid "You must be invited to pay the application fees by a manager."
+msgstr ""
+
+msgid "You must be invited to pay the application fees by the system."
 msgstr ""
 
 msgid "You must be the reference promoter to access this admission"

@@ -32,6 +32,7 @@ from base.models.utils.utils import ChoiceEnum
 
 class ChoixStatutPropositionGenerale(ChoiceEnum):
     EN_BROUILLON = _('In draft')
+    FRAIS_DOSSIER_EN_ATTENTE = _('Pending application fees')
     CONFIRMEE = _('Confirmed application (by student)')
     COMPLETEE = _('Completed application')
     ANNULEE = _('Cancelled application')
@@ -61,3 +62,4 @@ class ChoixStatutChecklist(ChoiceEnum):
     GEST_BLOCAGE = _("GEST_BLOCAGE")
     GEST_BLOCAGE_ULTERIEUR = _("GEST_BLOCAGE_ULTERIEUR")
     GEST_REUSSITE = _("GEST_REUSSITE")
+    SYST_REUSSITE = _("SYST_REUSSITE")

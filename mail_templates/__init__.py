@@ -32,6 +32,7 @@ try:
     from .submission import *
     from .training import *
     from .document import *
+    from .checklist import *
 except DuplicateMailTemplateIdentifier:
     import sys
 

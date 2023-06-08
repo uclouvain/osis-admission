@@ -423,6 +423,7 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+@freezegun.freeze_time('2023-01-01')
 class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
     file_uuid = str(uuid.uuid4())
 

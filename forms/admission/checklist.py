@@ -59,7 +59,7 @@ class AssimilationForm(forms.Form):
     date_debut = forms.DateField(
         widget=DateInput(
             attrs={
-                'hx-trigger': 'keyup changed delay:1s',
+                'hx-trigger': 'change changed delay:1s',
             }
         ),
         label=_("Assimilation start date"),

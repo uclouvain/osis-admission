@@ -619,6 +619,13 @@ msgstr "Une autre adresse"
 msgid "Application fees"
 msgstr "Frais de dossier"
 
+msgid "Application fees request message"
+msgstr "Message de demande de paiement des frais de dossier"
+
+#, python-format
+msgid "Application fees: <strong>&euro;%(amount)s</strong>"
+msgstr "Montant des frais de dossier : <strong>%(amount)s €</strong>"
+
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 "Demande d'allocation d'études auprès de la Communauté française de Belgique"
@@ -702,20 +709,41 @@ msgstr "Assimilé(e),Non assimilé(e)"
 msgid "Assimilation"
 msgstr "Assimilation"
 
+msgid "Assimilation 1"
+msgstr "Assimilation 1"
+
 msgid "Assimilation 1 situation types"
 msgstr "Types de situation de l'assimilation 1"
+
+msgid "Assimilation 2"
+msgstr "Assimilation 2"
 
 msgid "Assimilation 2 situation types"
 msgstr "Types de situation de l'assimilation 2"
 
+msgid "Assimilation 3"
+msgstr "Assimilation 3"
+
 msgid "Assimilation 3 situation types"
 msgstr "Types de situation de l'assimilation 3"
+
+msgid "Assimilation 4"
+msgstr "Assimilation 4"
+
+msgid "Assimilation 5"
+msgstr "Assimilation 5"
 
 msgid "Assimilation 5 situation types"
 msgstr "Types de situation de l'assimilation 5"
 
+msgid "Assimilation 6"
+msgstr "Assimilation 6"
+
 msgid "Assimilation 6 situation types"
 msgstr "Types de situation de l'assimilation 6"
+
+msgid "Assimilation 7"
+msgstr "Assimilation 7"
 
 msgid "Assimilation situation"
 msgstr "Situation d'assimilation"
@@ -1068,6 +1096,9 @@ msgstr "Peut voir les informations relatives aux études secondaires"
 msgid "Cancel"
 msgstr "Annuler"
 
+msgid "Cancel the application fees request"
+msgstr "Annuler la demande des frais de dossier"
+
 msgid "Cancelled application"
 msgstr "Demande annulée"
 
@@ -1200,6 +1231,10 @@ msgstr "Ville"
 msgid "Civil status"
 msgstr "État civil"
 
+msgid "Close"
+msgstr "Fermer"
+
+msgctxt "modal"
 msgid "Close"
 msgstr "Fermer"
 
@@ -1740,6 +1775,9 @@ msgstr "Équivalence du diplôme"
 msgid "Disabled"
 msgstr "Désactivé"
 
+msgid "Dispensed"
+msgstr "Dispensé"
+
 msgid "Display according education"
 msgstr "Affichage selon la formation"
 
@@ -1757,6 +1795,9 @@ msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
 
 msgid "Do you have a high school diploma?"
 msgstr "Avez-vous obtenu un diplôme de fin d'études secondaires ?"
+
+msgid "Do you want to request the application fees now?"
+msgstr "Voulez-vous réclamer les frais de dossier maintenant ?"
 
 msgid ""
 "Do you wish to join the sports activities? If so, the cost of this "
@@ -1840,6 +1881,9 @@ msgstr "Statut dossier"
 msgid "Double degree scholarship"
 msgstr "Bourse double diplomation"
 
+msgid "Double degree:"
+msgstr "Bourse double diplomation:"
+
 msgid "Double or triple diplomation"
 msgstr "Double ou triple diplomation"
 
@@ -1851,6 +1895,13 @@ msgstr "Dr."
 
 msgid "Dutch"
 msgstr "Néerlandais"
+
+#, python-format
+msgid ""
+"E-mail requesting the application fees sent to the candidate on %(date)s by "
+"%(author)s."
+msgstr ""
+"Mail réclamant les frais de dossier au candidat le %(date)s par %(author)s."
 
 msgid "ECONOMY"
 msgstr "Economie"
@@ -1922,6 +1973,13 @@ msgstr "Type d'enseignement"
 msgid "Email"
 msgstr "Email"
 
+msgid ""
+"Email sent to the candidate to inform him that he must pay the application "
+"fees to finalize an application for general education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer de la nécessité de payer les frais "
+"de dossier pour finaliser une demande en formation générale"
+
 msgid "Employer"
 msgstr "Employeur"
 
@@ -1989,6 +2047,9 @@ msgstr "Bourse Erasmus Mundus"
 msgid "Erasmus mundus scholarship"
 msgstr "Bourse Erasmus Mundus"
 
+msgid "Erasmus mundus:"
+msgstr "Erasmus Mundus :"
+
 msgid "Estimated time to complete the doctorate (in months)"
 msgstr "Durée prévue pour la réalisation du doctorat (en mois)"
 
@@ -2049,6 +2110,9 @@ msgstr "Modification d'inscription externe"
 
 msgid "External reorientation"
 msgstr "Réorientation externe"
+
+msgid "External reorientation / modification"
+msgstr "Modification / réorientation externe"
 
 msgid "FAC free documents"
 msgstr "Documents libres FAC"
@@ -2371,6 +2435,9 @@ msgstr "Composition de ménage ou acte de mariage"
 msgid "Household composition, or a copy of your birth certificate"
 msgstr "Composition de ménage, ou copie de votre acte de naissance"
 
+msgid "I am a long-term resident in the European Union outside Belgium"
+msgstr "Je suis résident·e de longue durée en Union Européenne hors Belgique "
+
 msgid ""
 "I am a long-term resident in the European Union outside Belgium "
 "(assimilation 7)"
@@ -2415,6 +2482,12 @@ msgstr ""
 "J'ai pris connaissance qu'aucun document supplémentaire spécifique aux "
 "études contingentées ne pourra être ajouté après la confirmation de ma "
 "demande en ligne."
+
+msgid ""
+"I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS"
+msgstr ""
+"Je suis pris·e en charge par le CPAS, ou par un home du CPAS ou désigné par "
+"le CPAS"
 
 msgid ""
 "I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS "
@@ -2749,6 +2822,9 @@ msgstr "Internationale pour les formation générales"
 
 msgid "International scholarship"
 msgstr "Bourse internationale"
+
+msgid "International:"
+msgstr "Bourse internationale :"
 
 msgid "Internship framework agreement"
 msgstr "Convention cadre de stages"
@@ -3314,6 +3390,9 @@ msgstr "Auteur modif."
 msgid "Modification date"
 msgstr "Date modif."
 
+msgid "Modification requested"
+msgstr "Modification demandée"
+
 msgid "Modified"
 msgstr "Modifée"
 
@@ -3338,6 +3417,9 @@ msgstr "Doit être en cours inscription"
 
 msgid "Must not be pre-admission"
 msgstr "Ne doit pas être une pré-admission"
+
+msgid "Must pay"
+msgstr "Doit payer"
 
 msgid "My father"
 msgstr "Mon père"
@@ -3704,6 +3786,12 @@ msgstr "Numéro de passeport"
 
 msgid "Past confirmation papers"
 msgstr "Epreuves de confirmation passées"
+
+msgid "Payed"
+msgstr "Payés"
+
+msgid "Pending application fees"
+msgstr "Frais de dossier en attente"
 
 msgid "Pending validation from management"
 msgstr "En attente de validation de la direction"
@@ -4180,6 +4268,9 @@ msgstr "Motif de refus"
 msgid "Relationship"
 msgstr "Lien de parenté"
 
+msgid "Remind the applicant"
+msgstr "Rappeler au candidat"
+
 msgctxt "jury member"
 msgid "Remove"
 msgstr "Retirer"
@@ -4190,6 +4281,9 @@ msgstr "Retirer ?"
 
 msgid "Reorientation"
 msgstr "Réorientation"
+
+msgid "Reorientation requested"
+msgstr "Modification demandée"
 
 msgid "Replace a document"
 msgstr "Remplacer un document"
@@ -4408,6 +4502,9 @@ msgstr "Statistiques"
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Confirmation soumise"
 
+msgid "SYST_REUSSITE"
+msgstr "Système réussite"
+
 msgid "Salary slips"
 msgstr "Fiches de rémunération"
 
@@ -4508,6 +4605,9 @@ msgstr "Envoyer un e-mail d'information"
 
 msgid "Send the message"
 msgstr "Envoyer le message"
+
+msgid "Send to applicant"
+msgstr "Envoyer au candidat"
 
 msgid "Sender"
 msgstr "Expéditeur"
@@ -4826,6 +4926,9 @@ msgstr ""
 "L’attestation de réussite de l’épreuve de confirmation est en cours de "
 "génération, veuillez revenir plus tard pour y accéder."
 
+msgid "The checklist must be initialized."
+msgstr "La checklist doit être initialisée."
+
 msgid ""
 "The child of a member of staff may, under some conditions, benefit from a "
 "reduction of the registration fee for any registration for a bachelor's or "
@@ -5033,6 +5136,9 @@ msgstr ""
 "L'option {index} doit avoir un identifiant et une traduction pour chaque "
 "langue requise."
 
+msgid "The payment has not been made."
+msgstr "Le paiement n'a pas a été réalisé."
+
 msgid "The person concerned"
 msgstr "La personne concernée"
 
@@ -5049,6 +5155,12 @@ msgstr ""
 
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr "La proposition a déjà été confirmée ou est annulée"
+
+msgid "The proposition must be concerned by the payment."
+msgstr "La proposition doit être concernée par le paiement."
+
+msgid "The proposition must not be concerned by the payment."
+msgstr "La proposition ne doit pas être concernée par le paiement."
 
 msgid "The public comment about the approval/refusal"
 msgstr "Le commentaire public de la décision"
@@ -5079,6 +5191,16 @@ msgstr "La date de début ne peut être postérieure à la date de fin"
 #, python-format
 msgid "The status has been changed to %(status)s."
 msgstr "Le statut a bien été modifié pour : %(status)s."
+
+#, python-brace-format
+msgid ""
+"The status of the request is currently \"{current_status}\". Only the status "
+"\"{from_status}\" allows you to move to the \"{to_status}\" status for the "
+"application fees."
+msgstr ""
+"Le statut de la demande est actuellement \"{current_status}\". Seul le "
+"statut \"{from_status}\" permet de passer à l'état \"{to_status}\" pour les "
+"frais de dossier."
 
 msgid "The submitted information is not consistent with information requested."
 msgstr ""
@@ -5232,6 +5354,13 @@ msgstr ""
 
 msgid "This page is currently under construction."
 msgstr "Cette page est en cours de construction."
+
+msgid ""
+"This status change will close the transaction in the payment application. "
+"The applicant will still need to be informed."
+msgstr ""
+"Ce changement d'état va clore la transaction dans l'application de paiement. "
+"Il restera à informer le/la candidat·e."
 
 msgid "Timetable"
 msgstr "Grille horaire"
@@ -5479,6 +5608,9 @@ msgstr "Vue le"
 
 msgid "Viewed by"
 msgstr "Vue par"
+
+msgid "Visualize"
+msgstr "Visualiser"
 
 msgid "WBI - Wallonie Bruxelles International"
 msgstr "WBI - Wallonie Bruxelles International"
@@ -5728,6 +5860,13 @@ msgstr ""
 
 msgid "You must be invited to complete this admission."
 msgstr "Vous devez être invité à compléter cette admission."
+
+msgid "You must be invited to pay the application fees by a manager."
+msgstr ""
+"Vous devez être invité par un gestionnaire à payer les frais de dossier."
+
+msgid "You must be invited to pay the application fees by the system."
+msgstr "Vous devez être invité par le système à payer les frais de dossier."
 
 msgid "You must be the reference promoter to access this admission"
 msgstr ""
