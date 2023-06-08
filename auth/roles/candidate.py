@@ -38,6 +38,8 @@ from admission.auth.predicates import (
     confirmation_paper_in_progress,
     is_invited_to_complete,
     is_jury_in_progress,
+    is_invited_to_pay_after_submission,
+    is_invited_to_pay_after_request,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -130,6 +132,9 @@ _CANDIDATE_RULESET = {
     # A candidate can edit some tabs after the proposition has been submitted
     'view_generaleducationadmission_documents': is_admission_request_author & is_invited_to_complete,
     'change_generaleducationadmission_documents': is_admission_request_author & is_invited_to_complete,
+    'pay_generaleducationadmission_fees': is_admission_request_author & is_invited_to_pay_after_submission,
+    'pay_generaleducationadmission_fees_after_request': is_admission_request_author
+    & is_invited_to_pay_after_request,
     # Continuing admission
     # A candidate can view as long as he's the author
     'view_continuingeducationadmission': is_admission_request_author,

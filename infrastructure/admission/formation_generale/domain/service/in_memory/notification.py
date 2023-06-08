@@ -37,3 +37,7 @@ class NotificationInMemory(INotification):
     @classmethod
     def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> EmailMessage:
         pass
+
+    @classmethod
+    def demande_paiement_frais_dossier(cls, proposition: Proposition):
+        pass

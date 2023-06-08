@@ -36,10 +36,12 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
 from admission.contrib.models import AdmissionTask
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
 from base.models.person import Person
 
@@ -67,6 +69,10 @@ class Notification(INotification):
 
     @classmethod
     def confirmer_soumission(cls, proposition: Proposition) -> None:
+        # The candidate will be notified only when the proposition is confirmed
+        if proposition.statut != ChoixStatutPropositionGenerale.CONFIRMEE:
+            return
+
         admission = BaseAdmission.objects.select_related('candidate').get(uuid=proposition.entity_id.uuid)
 
         # Create the async task to generate the pdf recap
@@ -108,3 +114,26 @@ class Notification(INotification):
         EmailNotificationHandler.create(candidate_email_message, person=candidate)
 
         return candidate_email_message
+
+    @classmethod
+    def demande_paiement_frais_dossier(cls, proposition: Proposition) -> EmailMessage:
+        admission = (
+            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            .select_related('candidate')
+            .get(uuid=proposition.entity_id.uuid)
+        )
+
+        # Notifier le candidat via mail
+        with translation.override(admission.candidate.language):
+            common_tokens = cls.get_common_tokens(proposition, admission.candidate)
+            common_tokens['admission_reference'] = admission.formatted_reference
+
+        email_message = generate_email(
+            ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
+            admission.candidate.language,
+            common_tokens,
+            recipients=[admission.candidate],
+        )
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+        return email_message

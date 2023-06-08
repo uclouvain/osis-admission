@@ -140,6 +140,8 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             forbidden_actions=[
                 'retrieve_documents',
                 'update_documents',
+                'pay_after_submission',
+                'pay_after_request',
             ],
         )
 

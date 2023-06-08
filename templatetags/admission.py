@@ -33,9 +33,7 @@ from typing import Union, Optional, List
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
-from django.template.defaultfilters import date
 from django.urls import NoReverseMatch, reverse
-from django.utils.dateparse import parse_datetime
 from django.utils.safestring import SafeString
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from rules.templatetags import rules
@@ -822,7 +820,19 @@ def get_country_name(country: Optional[Country]):
 
 @register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
 def checklist_state_button(context, **kwargs):
-    expected_attrs = {arg_name: kwargs.pop(arg_name, None) for arg_name in ['label', 'icon', 'state', 'class', 'tab']}
+    expected_attrs = {
+        arg_name: kwargs.pop(arg_name, None)
+        for arg_name in [
+            'label',
+            'icon',
+            'state',
+            'class',
+            'tab',
+            'disabled',
+            'open_modal',
+            'htmx_post',
+        ]
+    }
     return {
         'current': context['current'] or context['initial'],
         **expected_attrs,

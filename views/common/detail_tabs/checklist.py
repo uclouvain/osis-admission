@@ -23,43 +23,58 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
 from typing import Dict, Set
 
-from django.core.exceptions import BadRequest
+from django import forms
+from django.conf import settings
 from django.shortcuts import resolve_url
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, FormView
 from osis_comment.models import CommentEntry
+from osis_history.models import HistoryEntry
+from osis_mail_template.models import MailTemplate
 from rest_framework import serializers, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.parsers import FormParser
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
+from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.emplacement_document import DocumentsAssimilation
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
+    SpecifierPaiementNecessaireCommand,
+    EnvoyerRappelPaiementCommand,
+    SpecifierPaiementPlusNecessaireCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+)
 from admission.forms.admission.checklist import CommentForm, AssimilationForm
+from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
 from admission.views.doctorate.mixins import LoadDossierViewMixin
+from base.utils.htmx import HtmxPermissionRequiredMixin
+from infrastructure.messages_bus import message_bus_instance
+from osis_common.ddd.interface import BusinessException
+from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
     'ChecklistView',
     'ChangeStatusView',
     'ChangeExtraView',
     'SaveCommentView',
+    'ApplicationFeesView',
 ]
 
 
 __namespace__ = False
 
 
-class ChecklistView(LoadDossierViewMixin, TemplateView):
-    urlpatterns = 'checklist'
-    template_name = "admission/general_education/checklist.html"
-    permission_required = 'admission.view_checklist'
+class RequestApplicationFeesContextDataMixin(LoadDossierViewMixin):
     extra_context = {
         'checklist_tabs': {
             'assimilation': _("Assimilation"),
@@ -72,6 +87,63 @@ class ChecklistView(LoadDossierViewMixin, TemplateView):
         },
         'hide_files': True,
     }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['last_request'] = (
+            HistoryEntry.objects.filter(
+                object_uuid=self.admission_uuid,
+                tags__contains=['proposition', 'application-fees-payment', 'request'],
+            )
+            .order_by('-created')
+            .first()
+        )
+
+        context['application_fees_amount'] = MONTANT_FRAIS_DOSSIER
+
+        # Checklist specificities
+        context['fees_already_payed'] = bool(
+            self.admission.checklist.get('current')
+            and self.admission.checklist['current']['frais_dossier']['statut']
+            == ChoixStatutChecklist.SYST_REUSSITE.name
+        )
+
+        # Get the email to submit
+        mail_template = MailTemplate.objects.get(
+            identifier=ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
+            language=self.admission.candidate.language,
+        )
+
+        proposition = self.proposition
+
+        # Needed to get the complete reference
+        with translation.override(proposition.langue_contact_candidat):
+            tokens = {
+                'admission_reference': proposition.reference,
+                'candidate_first_name': proposition.prenom_candidat,
+                'candidate_last_name': proposition.nom_candidat,
+                'training_title': '',  # Not used in the email
+                'admission_link_front': settings.ADMISSION_FRONTEND_LINK.format(
+                    context='general-education',
+                    uuid=self.admission_uuid,
+                ),
+                'admission_link_back': '{}{}'.format(
+                    settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                    resolve_url('admission:general-education', uuid=self.admission_uuid),
+                ),
+            }
+
+            context['request_message_subject'] = mail_template.render_subject(tokens)
+            context['request_message_body'] = mail_template.body_as_html(tokens)
+
+        return context
+
+
+class ChecklistView(RequestApplicationFeesContextDataMixin, TemplateView):
+    urlpatterns = 'checklist'
+    template_name = "admission/general_education/checklist.html"
+    permission_required = 'admission.view_checklist'
 
     @classmethod
     def checklist_documents_by_tab(cls) -> Dict[str, Set[str]]:
@@ -103,12 +175,14 @@ class ChecklistView(LoadDossierViewMixin, TemplateView):
 
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
+            # Retrieve data related to the proposition
             command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
                 RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(uuid_proposition=self.admission_uuid),
             )
 
             context['resume_proposition'] = command_result.resume
 
+            # Initialize forms
             tab_names = list(self.extra_context['checklist_tabs'].keys())
             comments = {
                 c.tags[0]: c
@@ -131,6 +205,7 @@ class ChecklistView(LoadDossierViewMixin, TemplateView):
                 ),
             )
 
+            # Documents
             admission_documents = command_result.emplacements_documents
 
             context['documents'] = {
@@ -141,6 +216,7 @@ class ChecklistView(LoadDossierViewMixin, TemplateView):
                 ]
                 for tab_name, tab_documents in self.checklist_documents_by_tab().items()
             }
+
         return context
 
 
@@ -148,6 +224,58 @@ class ChangeStatusSerializer(serializers.Serializer):
     tab_name = serializers.CharField()
     status = serializers.ChoiceField(choices=ChoixStatutChecklist.choices(), required=False)
     extra = serializers.DictField(default={}, required=False)
+
+
+class ApplicationFeesView(
+    RequestApplicationFeesContextDataMixin,
+    HtmxPermissionRequiredMixin,
+    HtmxMixin,
+    FormView,
+):
+    name = 'application-fees'
+    urlpatterns = {'application-fees': 'application-fees/<str:status>'}
+    permission_required = 'admission.view_checklist'
+    template_name = 'admission/general_education/includes/checklist/application_fees_request.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/application_fees_request.html'
+    cmd = SpecifierPaiementNecessaireCommand
+    form_class = forms.Form
+
+    def post(self, request, *args, **kwargs):
+        current_status = self.kwargs.get('status')
+        remind = self.request.GET.get('remind')
+
+        if current_status == ChoixStatutChecklist.GEST_BLOCAGE.name:
+            if remind:
+                cmd = EnvoyerRappelPaiementCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            else:
+                cmd = SpecifierPaiementNecessaireCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+        else:
+            cmd = SpecifierPaiementPlusNecessaireCommand(
+                uuid_proposition=self.admission_uuid,
+                gestionnaire=self.request.user.person.global_id,
+                statut_checklist_frais_dossier=self.kwargs['status'],
+            )
+
+        errors = []
+
+        try:
+            message_bus_instance.invoke(cmd)
+        except BusinessException as exception:
+            errors.append({'message': exception.message, 'tags': 'error'})
+
+        response = self.get(request, *args, **kwargs)
+
+        if errors:
+            response.status_code = HTTP_400_BAD_REQUEST
+            response['HX-Trigger'] = json.dumps({'messages': errors})
+
+        return response
 
 
 class ChangeStatusView(LoadDossierViewMixin, APIView):

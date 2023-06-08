@@ -36,9 +36,15 @@ from admission.auth.predicates import (
     is_being_enrolled,
     confirmation_paper_in_progress,
     is_invited_to_complete,
+    is_invited_to_pay_after_submission,
+    is_invited_to_pay_after_request,
+    checklist_is_initialized,
 )
 from admission.auth.roles.cdd_configurator import CddConfigurator
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
+)
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -233,3 +239,90 @@ class PredicatesTestCase(TestCase):
         for status in ChoixStatutPropositionGenerale.get_names():
             admission.status = status
             self.assertEqual(is_invited_to_complete(admission.candidate.user, admission), status in valid_statuses)
+
+    def test_is_invited_to_pay_after_submission(self):
+        admission_without_checklist = GeneralEducationAdmissionFactory(checklist={})
+        admission_with_checklist = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+        )
+
+        # The checklist must not be initialized and the status must be one of the following
+        valid_statuses = {
+            ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+        }
+
+        for status in ChoixStatutPropositionGenerale.get_names():
+            admission_without_checklist.status = status
+            status_is_valid = status in valid_statuses
+            self.assertEqual(
+                is_invited_to_pay_after_submission(
+                    admission_without_checklist.candidate.user,
+                    admission_without_checklist,
+                ),
+                status_is_valid,
+                f'Without checklist, the status "{status}" must{"" if status_is_valid else " not "} be accepted',
+            )
+
+            admission_with_checklist.status = status
+            self.assertFalse(
+                is_invited_to_pay_after_submission(
+                    admission_with_checklist.candidate.user,
+                    admission_with_checklist,
+                ),
+                f'With checklist, the status "{status}" must not be accepted',
+            )
+
+    def test_is_invited_to_pay_after_request(self):
+        admission_without_checklist = GeneralEducationAdmissionFactory(checklist={})
+        admission_with_checklist = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+        )
+        admission_with_checklist.checklist['current']['frais_dossier'][
+            'statut'
+        ] = ChoixStatutChecklist.GEST_BLOCAGE.name
+
+        # The checklist must be initialized and the status must be one of the following
+        valid_statuses = {
+            ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+        }
+
+        for status in ChoixStatutPropositionGenerale.get_names():
+            admission_with_checklist.status = status
+            status_is_valid = status in valid_statuses
+            self.assertEqual(
+                is_invited_to_pay_after_request(
+                    admission_with_checklist.candidate.user,
+                    admission_with_checklist,
+                ),
+                status in valid_statuses,
+                f'With checklist, the status "{status}" must{"" if status_is_valid else " not"} be accepted',
+            )
+
+            admission_without_checklist.status = status
+            self.assertFalse(
+                is_invited_to_pay_after_request(
+                    admission_without_checklist.candidate.user,
+                    admission_without_checklist,
+                ),
+                'Without checklist, this status must not be accepted: {}'.format(status),
+            )
+
+    def test_checklist_is_initialized(self):
+        admission_without_checklist = GeneralEducationAdmissionFactory(checklist={})
+        admission_with_checklist = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+        )
+
+        self.assertFalse(
+            checklist_is_initialized(
+                admission_without_checklist.candidate.user,
+                admission_without_checklist,
+            ),
+        )
+
+        self.assertTrue(
+            checklist_is_initialized(
+                admission_with_checklist.candidate.user,
+                admission_with_checklist,
+            ),
+        )

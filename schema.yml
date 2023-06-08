@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.78
+  version: 1.0.79
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -3321,7 +3321,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
+                $ref: '#/components/schemas/GeneralEducationPropositionIdentityWithStatus'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -5035,6 +5035,78 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/general-education/{uuid}/pay-application-fees:
+    post:
+      operationId: pay_application_fees_after_submission
+      description: Pay the application fees of the proposition after its submission.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayerFraisDossierPropositionSuiteSoumissionCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/general-education/{uuid}/pay-application-fees-after-request:
+    post:
+      operationId: pay_application_fees_after_request
+      description: Pay the application fees of the proposition after a manager request.
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayerFraisDossierPropositionSuiteDemandeCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/continuing-education:
     post:
       operationId: create_continuing_training_choice
@@ -5728,6 +5800,10 @@ components:
                   retrieve_documents:
                     $ref: '#/components/schemas/ActionLink'
                   update_documents:
+                    $ref: '#/components/schemas/ActionLink'
+                  pay_after_submission:
+                    $ref: '#/components/schemas/ActionLink'
+                  pay_after_request:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
@@ -9251,6 +9327,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_documents:
               $ref: '#/components/schemas/ActionLink'
+            pay_after_submission:
+              $ref: '#/components/schemas/ActionLink'
+            pay_after_request:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         erreurs:
@@ -10195,6 +10275,31 @@ components:
       - sigle_formation
       - annee_formation
       - matricule_candidat
+    GeneralEducationPropositionIdentityWithStatus:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/ChoixStatutPropositionGenerale'
+    ChoixStatutPropositionGenerale:
+      enum:
+      - EN_BROUILLON
+      - FRAIS_DOSSIER_EN_ATTENTE
+      - CONFIRMEE
+      - COMPLETEE
+      - ANNULEE
+      - A_COMPLETER_POUR_SIC
+      - A_COMPLETER_POUR_FAC_CDD
+      - TRAITEMENT_SIC
+      - TRAITEMENT_FAC_CDD
+      - ATTENTE_VALIDATION_DIRECTION
+      - INSCRIPTION_AUTORISEE
+      - INSCRIPTION_REFUSEE
+      - CLOTUREE
+      - EN_RECOURS
+      type: string
     CompleterEmplacementsDocumentsParCandidatCommand:
       type: object
       properties:
@@ -10202,6 +10307,20 @@ components:
           type: object
       required:
       - reponses_documents_a_completer
+    PayerFraisDossierPropositionSuiteSoumissionCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+      required:
+      - uuid_proposition
+    PayerFraisDossierPropositionSuiteDemandeCommand:
+      type: object
+      properties:
+        uuid_proposition:
+          type: string
+      required:
+      - uuid_proposition
     InitierPropositionContinueCommand:
       type: object
       properties:

@@ -26,7 +26,10 @@
 import factory
 
 from admission.contrib.models import GeneralEducationAdmission
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -62,6 +65,46 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
         EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
 
 
+def get_checklist():
+    return {
+        'donnees_personnelles': {
+            'libelle': '',
+            'enfants': '',
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'frais_dossier': {
+            'libelle': '',
+            'enfants': '',
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'assimilation': {
+            'libelle': '',
+            'enfants': '',
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'choix_formation': {
+            'libelle': '',
+            'enfants': '',
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'parcours_anterieur': {
+            'libelle': '',
+            'enfants': '',
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'financabilite': {
+            'libelle': '',
+            'enfants': '',
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'specificites_formation': {
+            'libelle': '',
+            'enfants': '',
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+    }
+
+
 class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     class Meta:
         model = GeneralEducationAdmission
@@ -79,6 +122,7 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
     last_update_author = factory.SubFactory(PersonFactory)
     determined_academic_year = factory.SubFactory(AcademicYearFactory, current=True)
+    checklist = factory.Dict({'default': True})  # This default value is overriden in a post generation method
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):
@@ -115,3 +159,21 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def create_accounting(self, create, extracted, **kwargs):
         AccountingFactory(admission_id=self.pk)
+
+    @factory.post_generation
+    def initialize_checklist(self, create, extracted, **kwargs):
+        if self.checklist != {'default': True}:
+            return
+
+        self.checklist = (
+            {}
+            if self.status
+            in {
+                ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+                ChoixStatutPropositionGenerale.ANNULEE.name,
+            }
+            else {
+                'initial': get_checklist(),
+                'current': get_checklist(),
+            }
+        )

@@ -194,6 +194,13 @@ class PropositionInMemoryRepository(
                 formation_id=FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
                 bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
             ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI-CONFIRMED'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
+                curriculum=['file1.pdf'],
+                est_confirmee=True,
+            ),
         ]
 
     @classmethod

@@ -35,7 +35,7 @@ from admission.api.serializers.fields import (
     RelatedInstituteField,
 )
 from admission.api.serializers.mixins import IncludedFieldsMixin
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.commands import CompleterPropositionCommand, InitierPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -68,6 +68,7 @@ __all__ = [
     "GeneralEducationPropositionDTOSerializer",
     "ContinuingEducationPropositionDTOSerializer",
     "PROPOSITION_ERROR_SCHEMA",
+    "GeneralEducationPropositionIdentityWithStatusSerializer",
 ]
 
 PROPOSITION_ERROR_SCHEMA = {
@@ -102,6 +103,15 @@ class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
 
 class PropositionIdentityDTOSerializer(serializers.Serializer):
     uuid = serializers.ReadOnlyField()
+
+
+class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GeneralEducationAdmission
+        fields = [
+            "uuid",
+            "status",
+        ]
 
 
 class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
@@ -194,6 +204,9 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
                 'destroy_proposition',
                 'retrieve_documents',
                 'update_documents',
+                # Payment
+                'pay_after_submission',
+                'pay_after_request',
             ]
         }
     )
@@ -420,6 +433,9 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
                 'submit_proposition',
                 'retrieve_documents',
                 'update_documents',
+                # Payment
+                'pay_after_submission',
+                'pay_after_request',
             ]
         }
     )

@@ -271,7 +271,10 @@ class SubmitGeneralEducationPropositionSchema(VerifySchema):
     response_description = "Proposition verification errors"
     serializer_mapping = {
         'GET': serializers.PropositionErrorsSerializer,
-        'POST': (serializers.SubmitPropositionSerializer, serializers.PropositionIdentityDTOSerializer),
+        'POST': (
+            serializers.SubmitPropositionSerializer,
+            serializers.GeneralEducationPropositionIdentityWithStatusSerializer,
+        ),
     }
 
     def get_operation_id(self, path, method):
@@ -328,9 +331,10 @@ class SubmitGeneralEducationPropositionView(
         serializer = serializers.SubmitPropositionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionGeneraleCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
-        proposition_id = message_bus_instance.invoke(cmd)
-        valuate_experiences(self.get_permission_object())
-        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        message_bus_instance.invoke(cmd)
+        admission = self.get_permission_object()
+        valuate_experiences(admission)
+        serializer = serializers.GeneralEducationPropositionIdentityWithStatusSerializer(instance=admission)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
