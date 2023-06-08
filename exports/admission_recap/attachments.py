@@ -27,11 +27,9 @@ from io import BytesIO
 from typing import List, Optional, Dict
 
 import img2pdf
-from django.conf import settings
-from django.utils.translation import gettext as _, ngettext
+from django.utils.translation import override
 
-from admission.constants import IMAGE_MIME_TYPES, DEFAULT_MIME_TYPES
-from admission.contrib.models import AdmissionFormItemInstantiation
+from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
@@ -42,9 +40,22 @@ from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.validator._should_comptabilite_etre_completee import recuperer_champs_requis_dto
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL, ACCOUNTING_LABEL
+from admission.ddd.admission.enums.emplacement_document import (
+    DocumentsIdentification,
+    DocumentsEtudesSecondaires,
+    DocumentsConnaissancesLangues,
+    DocumentsCurriculum,
+    DocumentsQuestionsSpecifiques,
+    DocumentsComptabilite,
+    DocumentsProjetRecherche,
+    DocumentsCotutelle,
+    DocumentsSupervision,
+    IdentifiantBaseEmplacementDocument,
+)
+from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.utils import format_academic_year
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
@@ -54,16 +65,43 @@ from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 
 class Attachment:
-    def __init__(self, label: str, uuids: List[str]):
-        self.label = label
-        self.uuids = uuids
+    def __init__(
+        self,
+        identifier: str,
+        label: str,
+        uuids: List[str],
+        sub_identifier='',
+        sub_identifier_label='',
+        required=False,
+        candidate_language_label='',
+        candidate_language='',
+        label_interpolation: Optional[dict] = None,
+    ):
+        self.identifier = f'{sub_identifier}.{identifier}' if sub_identifier else identifier
+        self.label = self._get_label(label, sub_identifier_label, label_interpolation)
+
+        self.uuids = [str(uuid) for uuid in uuids]
+        self.required = required
+
+        if candidate_language_label:
+            self.candidate_language_label = candidate_language_label
+        else:
+            with override(language=candidate_language):
+                self.candidate_language_label = str(self._get_label(label, sub_identifier_label, label_interpolation))
+
+    @staticmethod
+    def _get_label(base_label: str, sub_label: str, label_interpolation: Optional[dict]):
+        label = (f'{base_label} - {sub_label}' if sub_label else base_label)
+        if label_interpolation:
+            return label % label_interpolation
+        return label
 
     def get_raw(self, token: Optional[str], metadata: Optional[Dict], default_content: BytesIO) -> BytesIO:
         """
         Returns the raw content of an attachment if a token is specified and the mimetype is supported else a default
         content.
         """
-        if token and metadata and metadata.get('mimetype') in DEFAULT_MIME_TYPES:
+        if token and metadata and metadata.get('mimetype') in SUPPORTED_MIME_TYPES:
             raw_content = get_raw_content_remotely(token)
             if not raw_content:
                 return default_content
@@ -73,7 +111,7 @@ class Attachment:
         return default_content
 
     def __eq__(self, other):
-        return self.label == other.label and self.uuids == other.uuids if isinstance(other, Attachment) else False
+        return isinstance(other, Attachment) and self.identifier == other.identifier
 
     def __str__(self):
         return self.label
@@ -81,31 +119,76 @@ class Attachment:
 
 def get_identification_attachments(context: ResumePropositionDTO) -> List[Attachment]:
     """Returns the identification attachments."""
-    attachments = [Attachment(_('Identity picture'), context.identification.photo_identite)]
+    attachments = [
+        Attachment(
+            identifier='PHOTO_IDENTITE',
+            label=DocumentsIdentification['PHOTO_IDENTITE'],
+            uuids=context.identification.photo_identite,
+            required=True,
+            candidate_language=context.identification.langue_contact,
+        )
+    ]
     if context.identification.numero_carte_identite or context.identification.numero_registre_national_belge:
-        attachments.append(Attachment(_('Identity card (both sides)'), context.identification.carte_identite))
+        attachments.append(
+            Attachment(
+                identifier='CARTE_IDENTITE',
+                label=DocumentsIdentification['CARTE_IDENTITE'],
+                uuids=context.identification.carte_identite,
+                required=True,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
     if context.identification.numero_passeport:
-        attachments.append(Attachment(_('Passport'), context.identification.passeport))
+        attachments.append(
+            Attachment(
+                identifier='PASSEPORT',
+                label=DocumentsIdentification['PASSEPORT'],
+                uuids=context.identification.passeport,
+                required=True,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
     return attachments
 
 
 def get_secondary_studies_attachments(
     context: ResumePropositionDTO,
-    language: str,
-    specific_questions: List[AdmissionFormItemInstantiation],
+    specific_questions: List[QuestionSpecifiqueDTO],
     need_translations: bool = None,
     ue_or_assimilated: bool = None,
 ) -> List[Attachment]:
     """Returns the secondary studies attachments."""
     attachments = []
+    got_diploma = context.etudes_secondaires.diplome_etudes_secondaires
     if context.proposition.formation.type == TrainingType.BACHELOR.name:
         if context.etudes_secondaires.diplome_belge:
-            attachments.append(Attachment(_('High school diploma'), context.etudes_secondaires.diplome_belge.diplome))
+            attachments.append(
+                Attachment(
+                    identifier='DIPLOME_BELGE_DIPLOME',
+                    label=DocumentsEtudesSecondaires['DIPLOME_BELGE_DIPLOME'],
+                    uuids=context.etudes_secondaires.diplome_belge.diplome,
+                    required=got_diploma == GotDiploma.YES.name
+                    or bool(
+                        # Required if it is specified but not the alternative field
+                        got_diploma == GotDiploma.THIS_YEAR.name
+                        and context.etudes_secondaires.diplome_belge.diplome
+                        and not context.etudes_secondaires.diplome_belge.certificat_inscription
+                    ),
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
             if context.etudes_secondaires.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name:
                 attachments.append(
                     Attachment(
-                        _('Certificate of enrolment or school attendance'),
-                        context.etudes_secondaires.diplome_belge.certificat_inscription,
+                        identifier='DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
+                        label=DocumentsEtudesSecondaires['DIPLOME_BELGE_CERTIFICAT_INSCRIPTION'],
+                        uuids=context.etudes_secondaires.diplome_belge.certificat_inscription,
+                        required=bool(
+                            # Required if it is specified but not the alternative field
+                            context.etudes_secondaires.diplome_belge.certificat_inscription
+                            and not context.etudes_secondaires.diplome_belge.diplome
+                        ),
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
         elif context.etudes_secondaires.diplome_etranger:
@@ -114,89 +197,122 @@ def get_secondary_studies_attachments(
                     if context.etudes_secondaires.diplome_etranger.equivalence == Equivalence.YES.name:
                         attachments.append(
                             Attachment(
-                                _(
-                                    "A double-sided copy of the final equivalence decision (possibly with the DAES or "
-                                    "the admission test for the first cycle of higher education in case of "
-                                    "restrictive equivalence)"
-                                ),
-                                context.etudes_secondaires.diplome_etranger.decision_final_equivalence_ue,
+                                identifier='DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE',
+                                label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE'],
+                                uuids=context.etudes_secondaires.diplome_etranger.decision_final_equivalence_ue,
+                                required=True,
+                                candidate_language=context.identification.langue_contact,
                             )
                         )
                     elif context.etudes_secondaires.diplome_etranger.equivalence == Equivalence.PENDING.name:
                         attachments.append(
                             Attachment(
-                                _('Proof of the final equivalence decision'),
-                                context.etudes_secondaires.diplome_etranger.preuve_decision_equivalence,
+                                identifier='DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE',
+                                label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE'],
+                                uuids=context.etudes_secondaires.diplome_etranger.preuve_decision_equivalence,
+                                required=True,
+                                candidate_language=context.identification.langue_contact,
                             )
                         )
                 else:
                     attachments.append(
                         Attachment(
-                            _(
-                                "A double-sided copy of the final equivalence decision issued by the Ministry of the "
-                                "French Community of Belgium (possibly with the DAES or the admission test for the "
-                                "first cycle of higher education if your equivalence doesn't give access to the "
-                                "desired programme)"
-                            ),
-                            context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
+                            identifier='DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE',
+                            label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE'],
+                            uuids=context.etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue,
+                            required=True,
+                            candidate_language=context.identification.langue_contact,
                         )
                     )
 
             attachments.append(
-                Attachment(_('High school diploma'), context.etudes_secondaires.diplome_etranger.diplome),
+                Attachment(
+                    identifier='DIPLOME_ETRANGER_DIPLOME',
+                    label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'],
+                    uuids=context.etudes_secondaires.diplome_etranger.diplome,
+                    required=not ue_or_assimilated
+                    or (got_diploma == GotDiploma.YES.name)
+                    or bool(
+                        got_diploma == GotDiploma.THIS_YEAR.name
+                        and context.etudes_secondaires.diplome_etranger.diplome
+                        and not context.etudes_secondaires.diplome_etranger.certificat_inscription
+                    ),
+                    candidate_language=context.identification.langue_contact,
+                ),
             )
+
             if need_translations:
                 attachments.append(
                     Attachment(
-                        _('A certified translation of your high school diploma'),
-                        context.etudes_secondaires.diplome_etranger.traduction_diplome,
+                        identifier='DIPLOME_ETRANGER_TRADUCTION_DIPLOME',
+                        label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'],
+                        uuids=context.etudes_secondaires.diplome_etranger.traduction_diplome,
+                        required=not ue_or_assimilated
+                        or (got_diploma == GotDiploma.YES.name)
+                        or bool(
+                            got_diploma == GotDiploma.THIS_YEAR.name
+                            and context.etudes_secondaires.diplome_etranger.diplome
+                        ),
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
 
             if context.etudes_secondaires.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name and ue_or_assimilated:
                 attachments.append(
                     Attachment(
-                        _('Certificate of enrolment or school attendance'),
-                        context.etudes_secondaires.diplome_etranger.certificat_inscription,
+                        identifier='DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
+                        label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION'],
+                        uuids=context.etudes_secondaires.diplome_etranger.certificat_inscription,
+                        required=bool(
+                            context.etudes_secondaires.diplome_etranger.certificat_inscription
+                            and not context.etudes_secondaires.diplome_etranger.diplome
+                        ),
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
                 if need_translations:
                     attachments.append(
                         Attachment(
-                            _('A certified translation of your certificate of enrolment or school attendance'),
-                            context.etudes_secondaires.diplome_etranger.traduction_certificat_inscription,
+                            identifier='DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
+                            label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION'],
+                            uuids=context.etudes_secondaires.diplome_etranger.traduction_certificat_inscription,
+                            required=bool(context.etudes_secondaires.diplome_etranger.certificat_inscription),
+                            candidate_language=context.identification.langue_contact,
                         )
                     )
 
             attachments.append(
                 Attachment(
-                    _('A transcript or your last year at high school'),
-                    context.etudes_secondaires.diplome_etranger.releve_notes,
+                    identifier='DIPLOME_ETRANGER_RELEVE_NOTES',
+                    label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'],
+                    uuids=context.etudes_secondaires.diplome_etranger.releve_notes,
+                    required=True,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
             if need_translations:
                 attachments.append(
                     Attachment(
-                        _(
-                            'A certified translation of your official transcript of marks for your final year of '
-                            'secondary education'
-                        ),
-                        context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
+                        identifier='DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES',
+                        label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES'],
+                        uuids=context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
+                        required=True,
+                        candidate_language=context.identification.langue_contact,
                     )
                 )
 
         elif context.etudes_secondaires.alternative_secondaires:
             attachments.append(
                 Attachment(
-                    _(
-                        'Certificate of successful completion of the admission test for the first cycle of higher '
-                        'education'
-                    ),
-                    context.etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle,
+                    identifier='ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE',
+                    label=DocumentsEtudesSecondaires['ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE'],
+                    uuids=context.etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle,
+                    required=not context.curriculum.candidat_est_potentiel_vae,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
 
-    attachments.extend(get_dynamic_questions_attachments(specific_questions, context, language))
+    attachments.extend(get_dynamic_questions_attachments(specific_questions))
 
     return attachments
 
@@ -204,17 +320,26 @@ def get_secondary_studies_attachments(
 def get_languages_attachments(context: ResumePropositionDTO) -> List[Attachment]:
     """Returns the languages attachments."""
     return [
-        Attachment(_('Certificate of language knowledge') + f' - {language.nom_langue}', language.certificat)
+        Attachment(
+            identifier='CERTIFICAT_CONNAISSANCE_LANGUE',
+            label=DocumentsConnaissancesLangues['CERTIFICAT_CONNAISSANCE_LANGUE'],
+            sub_identifier=language.langue,
+            sub_identifier_label=language.nom_langue,
+            uuids=language.certificat,
+            required=False,
+            candidate_language=context.identification.langue_contact,
+        )
         for language in context.connaissances_langues
     ]
 
 
 def get_curriculum_attachments(
     context: ResumePropositionDTO,
-    specific_questions: List[AdmissionFormItemInstantiation],
-    language: str,
+    specific_questions: List[QuestionSpecifiqueDTO],
     display_equivalence: bool,
     display_curriculum: bool,
+    require_equivalence: bool,
+    require_curriculum: bool,
     **kwargs,
 ) -> List[Attachment]:
     """Returns the curriculum attachments."""
@@ -223,18 +348,26 @@ def get_curriculum_attachments(
     if display_equivalence:
         attachments.append(
             Attachment(
-                _(
-                    'Copy of the equivalence decision delivered by the French Community of Belgium making your '
-                    '2nd cycle diploma (bac+5) equivalent to the academic grade of a corresponding master.',
-                ),
-                context.proposition.equivalence_diplome,
+                identifier='DIPLOME_EQUIVALENCE',
+                label=DocumentsCurriculum['DIPLOME_EQUIVALENCE'],
+                uuids=context.proposition.equivalence_diplome,
+                required=require_equivalence,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
     if display_curriculum:
-        attachments.append(Attachment(_('Curriculum vitae detailed, dated and signed'), context.proposition.curriculum))
+        attachments.append(
+            Attachment(
+                identifier='CURRICULUM',
+                label=DocumentsCurriculum['CURRICULUM'],
+                uuids=context.proposition.curriculum,
+                required=require_curriculum,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
 
-    attachments.extend(get_dynamic_questions_attachments(specific_questions, context, language))
+    attachments.extend(get_dynamic_questions_attachments(specific_questions))
 
     return attachments
 
@@ -248,28 +381,84 @@ def get_curriculum_academic_experience_attachments(
     attachments = []
     if context.est_proposition_doctorale or context.est_proposition_generale:
         if experience.type_releve_notes == TranscriptType.ONE_FOR_ALL_YEARS.name:
-            attachments.append(Attachment(_('Transcript'), experience.releve_notes))
+            attachments.append(
+                Attachment(
+                    identifier='RELEVE_NOTES',
+                    label=DocumentsCurriculum['RELEVE_NOTES'],
+                    uuids=experience.releve_notes,
+                    required=True,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
             if translation_required:
-                attachments.append(Attachment(_('Transcript translation'), experience.traduction_releve_notes))
+                attachments.append(
+                    Attachment(
+                        identifier='TRADUCTION_RELEVE_NOTES',
+                        label=DocumentsCurriculum['TRADUCTION_RELEVE_NOTES'],
+                        uuids=experience.traduction_releve_notes,
+                        required=True,
+                        candidate_language=context.identification.langue_contact,
+                    )
+                )
         elif experience.type_releve_notes == TranscriptType.ONE_A_YEAR.name:
             for annee in experience.annees:
-                suffix = f' - {annee.annee}'
-                attachments.append(Attachment(_('Transcript') + suffix, annee.releve_notes))
+                sub_identifier = str(annee.annee)
+                attachments.append(
+                    Attachment(
+                        identifier='RELEVE_NOTES_ANNUEL',
+                        label=DocumentsCurriculum['RELEVE_NOTES_ANNUEL'],
+                        sub_identifier=sub_identifier,
+                        sub_identifier_label=sub_identifier,
+                        uuids=annee.releve_notes,
+                        required=True,
+                        candidate_language=context.identification.langue_contact,
+                    )
+                )
                 if translation_required:
                     attachments.append(
                         Attachment(
-                            _('Transcript translation') + suffix,
-                            annee.traduction_releve_notes,
+                            identifier='TRADUCTION_RELEVE_NOTES_ANNUEL',
+                            label=DocumentsCurriculum['TRADUCTION_RELEVE_NOTES_ANNUEL'],
+                            sub_identifier=sub_identifier,
+                            sub_identifier_label=sub_identifier,
+                            uuids=annee.traduction_releve_notes,
+                            required=True,
+                            candidate_language=context.identification.langue_contact,
                         )
                     )
 
-    if context.est_proposition_doctorale:
-        attachments.append(Attachment(_('Dissertation summary'), experience.resume_memoire))
+    if experience.a_obtenu_diplome:
+        if context.est_proposition_doctorale:
+            attachments.append(
+                Attachment(
+                    identifier='RESUME_MEMOIRE',
+                    label=DocumentsCurriculum['RESUME_MEMOIRE'],
+                    uuids=experience.resume_memoire,
+                    required=True,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
 
-    attachments.append(Attachment(_('Graduate degree'), experience.diplome))
+        attachments.append(
+            Attachment(
+                identifier='DIPLOME',
+                label=DocumentsCurriculum['DIPLOME'],
+                uuids=experience.diplome,
+                required=True,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
 
-    if translation_required:
-        attachments.append(Attachment(_('Graduate degree translation'), experience.traduction_diplome))
+        if translation_required:
+            attachments.append(
+                Attachment(
+                    identifier='TRADUCTION_DIPLOME',
+                    label=DocumentsCurriculum['TRADUCTION_DIPLOME'],
+                    uuids=experience.traduction_diplome,
+                    required=True,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
 
     return attachments
 
@@ -282,45 +471,56 @@ def get_curriculum_non_academic_experience_attachments(
     attachments = []
     if context.est_proposition_doctorale or context.est_proposition_generale:
         if experience.type != ActivityType.OTHER.name:
-            attachments.append(Attachment(CURRICULUM_ACTIVITY_LABEL[experience.type], experience.certificat))
+            attachments.append(
+                Attachment(
+                    identifier='CERTIFICAT_EXPERIENCE',
+                    label=CURRICULUM_ACTIVITY_LABEL[experience.type],
+                    uuids=experience.certificat,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
         return attachments
 
 
 def get_specific_questions_attachments(
     context: ResumePropositionDTO,
-    specific_questions: List[AdmissionFormItemInstantiation],
+    specific_questions: List[QuestionSpecifiqueDTO],
     eligible_for_reorientation: bool,
     eligible_for_modification: bool,
-    language: str,
 ) -> List[Attachment]:
     """Returns the specific questions attachments."""
     attachments = []
     if context.est_proposition_continue and context.proposition.pays_nationalite_ue_candidat is False:
         attachments.append(
             Attachment(
-                _(
-                    'Copy of the residence permit covering the entire course, including the evaluation test '
-                    '(except for courses organised online)'
-                ),
-                context.proposition.copie_titre_sejour,
+                identifier='COPIE_TITRE_SEJOUR',
+                label=DocumentsQuestionsSpecifiques['COPIE_TITRE_SEJOUR'],
+                uuids=context.proposition.copie_titre_sejour,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
     if eligible_for_reorientation and context.proposition.est_reorientation_inscription_externe:
         attachments.append(
             Attachment(
-                _('Certificate of regular enrolment'),
-                context.proposition.attestation_inscription_reguliere,
+                identifier='ATTESTATION_INSCRIPTION_REGULIERE',
+                label=DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE'],
+                uuids=context.proposition.attestation_inscription_reguliere,
+                required=True,
+                candidate_language=context.identification.langue_contact,
             )
         )
     if eligible_for_modification and context.proposition.est_modification_inscription_externe:
         attachments.append(
             Attachment(
-                _('Registration modification form'),
-                context.proposition.formulaire_modification_inscription,
+                identifier='FORMULAIRE_MODIFICATION_INSCRIPTION',
+                label=DocumentsQuestionsSpecifiques['FORMULAIRE_MODIFICATION_INSCRIPTION'],
+                uuids=context.proposition.formulaire_modification_inscription,
+                required=True,
+                candidate_language=context.identification.langue_contact,
             )
         )
-    attachments.extend(get_dynamic_questions_attachments(specific_questions, context, language))
+    attachments.extend(get_dynamic_questions_attachments(specific_questions))
     return attachments
 
 
@@ -336,23 +536,28 @@ def get_accounting_attachments(
     if last_fr_institutes:
         attachments.append(
             Attachment(
-                ngettext(
-                    'Certificate stating the absence of debts towards the institution attended '
-                    'during the academic year %(academic_year)s: %(names)s',
-                    'Certificates stating the absence of debts towards the institutions attended '
-                    'during the academic year %(academic_year)s: %(names)s',
-                    len(last_fr_institutes.noms),
-                )
-                % {
+                identifier='ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
+                label=DocumentsComptabilite['ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT'],
+                label_interpolation={
                     'academic_year': format_academic_year(last_fr_institutes.annee),
                     'names': ', '.join(last_fr_institutes.noms),
+                    'count': len(last_fr_institutes.noms),
                 },
-                context.comptabilite.attestation_absence_dette_etablissement,
+                uuids=context.comptabilite.attestation_absence_dette_etablissement,
+                required=True,
+                candidate_language=context.identification.langue_contact,
             )
         )
 
     if getattr(context.comptabilite, 'enfant_personnel', None):
-        attachments.append(Attachment(_('Staff child certificate'), context.comptabilite.attestation_enfant_personnel))
+        attachments.append(
+            Attachment(
+                identifier='ATTESTATION_ENFANT_PERSONNEL',
+                label=DocumentsComptabilite['ATTESTATION_ENFANT_PERSONNEL'],
+                uuids=context.comptabilite.attestation_enfant_personnel,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
 
     if with_assimilation:
         fields = recuperer_champs_requis_dto(
@@ -360,9 +565,18 @@ def get_accounting_attachments(
             comptabilite=context.comptabilite,
         )
         for field in fields:
-            if field in ACCOUNTING_LABEL:
-                label = ACCOUNTING_LABEL[field] % {'person_concerned': formatted_relationship}
-                attachments.append(Attachment(label, getattr(context.comptabilite, field)))
+            field_id = field.upper()
+            if field_id in DocumentsComptabilite:
+                attachments.append(
+                    Attachment(
+                        identifier=field_id,
+                        label=DocumentsComptabilite[field_id],
+                        label_interpolation={'person_concerned': formatted_relationship},
+                        uuids=getattr(context.comptabilite, field),
+                        required=True,
+                        candidate_language=context.identification.langue_contact,
+                    )
+                )
 
     return attachments
 
@@ -371,14 +585,48 @@ def get_research_project_attachments(context: ResumePropositionDTO) -> List[Atta
     """Returns the research project attachments."""
     attachments = []
     if context.proposition.type_financement == ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name:
-        attachments.append(Attachment(_('Scholarship proof'), context.proposition.bourse_preuve))
+        attachments.append(
+            Attachment(
+                identifier='PREUVE_BOURSE',
+                label=DocumentsProjetRecherche['PREUVE_BOURSE'],
+                uuids=context.proposition.bourse_preuve,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
 
     attachments += [
-        Attachment(_('Research project'), context.proposition.documents_projet),
-        Attachment(_("Doctoral program proposition"), context.proposition.proposition_programme_doctoral),
-        Attachment(_("Complementary training proposition"), context.proposition.projet_formation_complementaire),
-        Attachment(_("Gantt graph"), context.proposition.graphe_gantt),
-        Attachment(_("Recommendation letters"), context.proposition.lettres_recommandation),
+        Attachment(
+            identifier='DOCUMENTS_PROJET',
+            label=DocumentsProjetRecherche['DOCUMENTS_PROJET'],
+            uuids=context.proposition.documents_projet,
+            required=True,
+            candidate_language=context.identification.langue_contact,
+        ),
+        Attachment(
+            identifier='PROPOSITION_PROGRAMME_DOCTORAL',
+            label=DocumentsProjetRecherche['PROPOSITION_PROGRAMME_DOCTORAL'],
+            uuids=context.proposition.proposition_programme_doctoral,
+            required=True,
+            candidate_language=context.identification.langue_contact,
+        ),
+        Attachment(
+            identifier='PROJET_FORMATION_COMPLEMENTAIRE',
+            label=DocumentsProjetRecherche['PROJET_FORMATION_COMPLEMENTAIRE'],
+            uuids=context.proposition.projet_formation_complementaire,
+            candidate_language=context.identification.langue_contact,
+        ),
+        Attachment(
+            identifier='GRAPHE_GANTT',
+            label=DocumentsProjetRecherche['GRAPHE_GANTT'],
+            uuids=context.proposition.graphe_gantt,
+            candidate_language=context.identification.langue_contact,
+        ),
+        Attachment(
+            identifier='LETTRES_RECOMMANDATION',
+            label=DocumentsProjetRecherche['LETTRES_RECOMMANDATION'],
+            uuids=context.proposition.lettres_recommandation,
+            candidate_language=context.identification.langue_contact,
+        ),
     ]
 
     return attachments
@@ -393,11 +641,24 @@ def get_cotutelle_attachments(context: ResumePropositionDTO) -> List[Attachment]
         and context.groupe_supervision.cotutelle.cotutelle
     ):
         attachments += [
-            Attachment(_('Cotutelle opening request'), context.groupe_supervision.cotutelle.demande_ouverture),
-            Attachment(_('Cotutelle convention'), context.groupe_supervision.cotutelle.convention),
             Attachment(
-                _('Other documents concerning cotutelle'),
-                context.groupe_supervision.cotutelle.autres_documents,
+                identifier='DEMANDE_OUVERTURE',
+                label=DocumentsCotutelle['DEMANDE_OUVERTURE'],
+                uuids=context.groupe_supervision.cotutelle.demande_ouverture,
+                required=True,
+                candidate_language=context.identification.langue_contact,
+            ),
+            Attachment(
+                identifier='CONVENTION',
+                label=DocumentsCotutelle['CONVENTION'],
+                uuids=context.groupe_supervision.cotutelle.convention,
+                candidate_language=context.identification.langue_contact,
+            ),
+            Attachment(
+                identifier='AUTRES_DOCUMENTS',
+                label=DocumentsCotutelle['AUTRES_DOCUMENTS'],
+                uuids=context.groupe_supervision.cotutelle.autres_documents,
+                candidate_language=context.identification.langue_contact,
             ),
         ]
     return attachments
@@ -410,43 +671,56 @@ def get_supervision_group_attachments(context: ResumePropositionDTO) -> List[Att
         if supervision_member.pdf and supervision_member.statut == ChoixEtatSignature.APPROVED.name:
             attachments.append(
                 Attachment(
-                    _('Approbation by pdf of %(member)s')
-                    % {'member': f'{supervision_member.promoteur.prenom} {supervision_member.promoteur.nom}'},
-                    supervision_member.pdf,
+                    identifier='APPROBATION_PDF',
+                    label=DocumentsSupervision['APPROBATION_PDF'],
+                    sub_identifier=supervision_member.promoteur.uuid,
+                    sub_identifier_label=f'{supervision_member.promoteur.prenom} {supervision_member.promoteur.nom}',
+                    uuids=supervision_member.pdf,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
     for supervision_member in context.groupe_supervision.signatures_membres_CA:
         if supervision_member.pdf and supervision_member.statut == ChoixEtatSignature.APPROVED.name:
             attachments.append(
                 Attachment(
-                    _('Approbation by pdf of %(member)s')
-                    % {'member': f'{supervision_member.membre_CA.prenom} {supervision_member.membre_CA.nom}'},
-                    supervision_member.pdf,
+                    identifier='APPROBATION_PDF',
+                    label=DocumentsSupervision['APPROBATION_PDF'],
+                    sub_identifier=supervision_member.membre_CA.uuid,
+                    sub_identifier_label=f'{supervision_member.membre_CA.prenom} {supervision_member.membre_CA.nom}',
+                    uuids=supervision_member.pdf,
+                    candidate_language=context.identification.langue_contact,
                 )
             )
     return attachments
 
 
 def get_dynamic_questions_attachments(
-    specific_questions: List[AdmissionFormItemInstantiation],
-    context: ResumePropositionDTO,
-    language: str,
+    specific_questions: List[QuestionSpecifiqueDTO],
+    with_base_identifier=True,
 ):
     """Returns the dynamic questions attachments."""
+    prefix = f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.' if with_base_identifier else ''
     return [
         Attachment(
-            question.form_item.title.get(language, settings.LANGUAGE_CODE_FR),
-            context.proposition.reponses_questions_specifiques.get(str(question.form_item.uuid), []),
+            identifier=f'{prefix}{question.uuid}',
+            label=question.label,
+            uuids=question.valeur or [],
+            required=question.requis,
+            candidate_language_label=question.label_langue_candidat,
         )
         for question in specific_questions
-        if question.form_item.type == TypeItemFormulaire.DOCUMENT.name
+        if question.type == TypeItemFormulaire.DOCUMENT.name
     ]
 
 
-def get_training_choice_attachments(
-    context: ResumePropositionDTO,
-    specific_questions: List[AdmissionFormItemInstantiation],
-    language,
-) -> List[Attachment]:
+def get_training_choice_attachments(specific_questions: List[QuestionSpecifiqueDTO]) -> List[Attachment]:
     """Returns the training choice attachments."""
-    return get_dynamic_questions_attachments(specific_questions, context, language)
+    return get_dynamic_questions_attachments(specific_questions)
+
+
+def get_documents_attachments(specific_questions: List[QuestionSpecifiqueDTO]) -> List[Attachment]:
+    """Returns the additional attachments."""
+    return get_dynamic_questions_attachments(
+        specific_questions,
+        with_base_identifier=False,
+    )

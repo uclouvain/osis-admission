@@ -73,6 +73,12 @@ class PropositionDTO(interface.DTO):
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
 
+    documents_demandes: Dict
+    documents_libres_fac_candidats: List[str]
+    documents_libres_sic_candidats: List[str]
+    documents_libres_fac_uclouvain: List[str]
+    documents_libres_sic_uclouvain: List[str]
+
 
 @attr.dataclass(frozen=True, slots=True)
 class PropositionGestionnaireDTO(PropositionDTO):

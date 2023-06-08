@@ -95,6 +95,8 @@ class Proposition(interface.RootEntity):
 
     profil_soumis_candidat: ProfilCandidat = None
 
+    documents_demandes: Dict = attr.Factory(dict)
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
@@ -135,6 +137,18 @@ class Proposition(interface.RootEntity):
             self.formulaire_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
+
+    def reclamer_documents_par_sic(self):
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC
+
+    def reclamer_documents_par_fac(self):
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD
+
+    def completer_documents_par_candidat(self):
+        self.statut = {
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC: ChoixStatutPropositionGenerale.TRAITEMENT_SIC,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD: ChoixStatutPropositionGenerale.TRAITEMENT_FAC_CDD,
+        }.get(self.statut)
 
     def completer_curriculum(
         self,

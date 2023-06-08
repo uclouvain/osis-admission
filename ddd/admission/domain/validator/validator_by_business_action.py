@@ -25,13 +25,13 @@
 # ##############################################################################
 
 import datetime
-from typing import List, Optional, Tuple, Set
+from typing import List, Optional, Dict
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
 from admission.ddd.admission.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.validator import *
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
@@ -109,4 +109,21 @@ class CoordonneesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return [
             ShouldAdresseDomicileLegalCandidatEtreCompletee(adresse=self.domicile_legal),
             ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(adresse=self.adresse_correspondance),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DocumentsDemandesCompletesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    documents_reclames: List[EmplacementDocument]
+    reponses_documents_a_completer: Dict[str, List[str]]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldCompleterTousLesDocumentsReclames(
+                documents_reclames=self.documents_reclames,
+                reponses_documents_a_completer=self.reponses_documents_a_completer,
+            ),
         ]

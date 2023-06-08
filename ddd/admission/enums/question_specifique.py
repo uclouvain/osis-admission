@@ -25,6 +25,7 @@
 # ##############################################################################
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from base.models.utils.utils import ChoiceEnum
 
 
@@ -84,9 +85,12 @@ class Onglets(ChoiceEnum):
     CURRICULUM = _('Curriculum')
     CHOIX_FORMATION = _('Training choice')
     INFORMATIONS_ADDITIONNELLES = _('Additional information')
+    DOCUMENTS = _('Documents')
 
 
 class CritereItemFormulaireFormation(ChoiceEnum):
+    # Ordre notable des éléments lors de la récupération des questions (par ordre alphabétique)
     TOUTE_FORMATION = _('Every education')
     TYPE_DE_FORMATION = _('An education type')
     UNE_FORMATION = _('A specific education')
+    UNE_SEULE_ADMISSION = _('Only one admission')

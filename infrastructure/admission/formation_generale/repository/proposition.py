@@ -287,6 +287,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile)
             if admission.submitted_profile
             else None,
+            documents_demandes=admission.requested_documents,
         )
 
     @classmethod
@@ -313,7 +314,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
                 campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.sigle_entite_gestion,  # from annotation
+                sigle_entite_gestion=admission.training_management_faculty
+                or admission.sigle_entite_gestion,  # from annotation
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
@@ -338,6 +340,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             attestation_inscription_reguliere=admission.regular_registration_proof,
             pdf_recapitulatif=admission.pdf_recap,
+            documents_demandes=admission.requested_documents,
+            documents_libres_fac_candidats=admission.fac_documents,
+            documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
+            documents_libres_sic_candidats=admission.sic_documents,
+            documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
         )
 
     @classmethod

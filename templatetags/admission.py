@@ -28,12 +28,14 @@ import re
 from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
-from typing import Optional, Union
+from typing import Union, Optional, List
 
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
+from django.template.defaultfilters import date
 from django.urls import NoReverseMatch, reverse
+from django.utils.dateparse import parse_datetime
 from django.utils.safestring import SafeString
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from rules.templatetags import rules
@@ -42,14 +44,14 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES
+from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
-from admission.ddd.admission.enums import TYPES_ITEMS_LECTURE_SEULE, TypeItemFormulaire
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.repository.i_proposition import formater_reference
@@ -62,7 +64,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import format_academic_year, get_uuid_value
+from admission.utils import format_academic_year
 from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
@@ -305,6 +307,9 @@ TAB_TREES = {
         # TODO Documents
     },
     CONTEXT_GENERAL: {
+        Tab('documents', _('Documents'), 'folder-open'): [
+            Tab('documents', _('Documents'), 'folder-open'),
+        ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
@@ -522,6 +527,28 @@ def get_image_file_url(file_uuids):
     return ''
 
 
+@register.inclusion_tag('admission/dummy.html')
+def document_component(document_write_token, document_metadata):
+    """Display the right editor component depending on the file type."""
+    if document_metadata:
+        if document_metadata.get('mimetype') == PDF_MIME_TYPE:
+            return {
+                'template': 'osis_document/editor.html',
+                'value': document_write_token,
+                'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+            }
+        elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
+            return {
+                'template': 'admission/image.html',
+                'url': document_metadata.get('url'),
+                'alt': document_metadata.get('name'),
+            }
+    return {
+        'template': 'admission/no_document.html',
+        'message': _('Non-retrievable document') if document_write_token else _('No document'),
+    }
+
+
 @register.filter
 def phone_spaced(phone, with_optional_zero=False):
     if not phone:
@@ -693,30 +720,8 @@ def concat(*args):
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
-def multiple_field_data(context, configurations, data, title=_('Specificities')):
-    """Display the answers of the specific questions based on a list of configurations and a data dictionary"""
-    current_language = get_language()
-
-    if not data:
-        data = {}
-
-    for field_instantiation in configurations:
-        field = field_instantiation.form_item
-        if field.type in TYPES_ITEMS_LECTURE_SEULE:
-            value = field.text.get(current_language, '')
-        elif field.type == TypeItemFormulaire.DOCUMENT.name:
-            value = [get_uuid_value(token) for token in data.get(str(field.uuid), [])]
-        elif field.type == TypeItemFormulaire.SELECTION.name:
-            current_value = data.get(str(field.uuid))
-            selected_options = set(current_value) if isinstance(current_value, list) else {current_value}
-            value = ', '.join(
-                [value.get(current_language) for value in field.values if value.get('key') in selected_options]
-            )
-        else:
-            value = data.get(str(field.uuid))
-        setattr(field, 'value', value)
-        setattr(field, 'translated_title', field.title.get(current_language))
-
+def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specificities')):
+    """Display the answers of the specific questions based on a list of configurations."""
     return {
         'fields': configurations,
         'title': title,
@@ -740,6 +745,12 @@ def get_first_truthy_value(*args):
 def get_item(dictionary, value):
     """Returns the value of a key in a dictionary if it exists else the value itself"""
     return dictionary.get(value, value)
+
+
+@register.filter
+def get_item_or_none(dictionary, value):
+    """Returns the value of a key in a dictionary if it exists else None"""
+    return dictionary.get(value)
 
 
 @register.simple_tag

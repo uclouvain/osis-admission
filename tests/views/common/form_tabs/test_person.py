@@ -28,7 +28,7 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.shortcuts import resolve_url
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -41,7 +41,7 @@ from admission.forms.admission.person import AdmissionPersonForm, Identification
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import CandidateFactory, SicManagementRoleFactory
+from admission.tests.factories.roles import SicManagementRoleFactory
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -52,6 +52,7 @@ from base.tests.factories.person_address import PersonAddressFactory
 from reference.tests.factories.country import CountryFactory
 
 
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class PersonFormTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):

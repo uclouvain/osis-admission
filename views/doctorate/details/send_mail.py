@@ -40,7 +40,7 @@ from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.serv
     Notification as NotificationEpreuveConfirmation,
 )
 from admission.mail_templates import CONFIRMATION_PAPER_TEMPLATES_IDENTIFIERS
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
@@ -49,7 +49,7 @@ __all__ = [
 ]
 
 
-class DoctorateSendMailView(HtmxMixin, LoadDossierViewMixin, FormView):
+class DoctorateSendMailView(HtmxMixin, AdmissionFormMixin, LoadDossierViewMixin, FormView):
     template_name = 'admission/doctorate/forms/send_mail.html'
     htmx_template_name = 'admission/doctorate/forms/send_mail_htmx.html'
     form_class = CddDoctorateSendMailForm
@@ -102,5 +102,5 @@ class DoctorateSendMailView(HtmxMixin, LoadDossierViewMixin, FormView):
                 cc_membres_ca=form.cleaned_data['cc_membres_ca'],
             )
         )
-        messages.info(self.request, _("Message sent successfully"))
+        self.message_on_success = _("Message sent successfully")
         return super().form_valid(form)

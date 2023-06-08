@@ -48,7 +48,6 @@ class IProfilCandidatTranslator(interface.DomainService):
     NB_MAX_ANNEES_CV_REQUISES = 5
     MOIS_DEBUT_ANNEE_ACADEMIQUE = 9
     MOIS_FIN_ANNEE_ACADEMIQUE = 1
-    NB_MOIS_MIN_VAE = 36
 
     @classmethod
     @abstractmethod

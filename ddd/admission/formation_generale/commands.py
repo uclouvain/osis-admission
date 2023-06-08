@@ -23,10 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import Dict, List, Optional
 
 import attr
 
+from admission.ddd.admission import commands
 from osis_common.ddd import interface
 
 
@@ -205,3 +207,91 @@ class RecupererElementsConfirmationQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPropositionGestionnaireQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererDocumentsPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererDocumentsReclamesPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererQuestionsSpecifiquesQuery(commands.RecupererQuestionsSpecifiquesQuery):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecalculerEmplacementsDocumentsNonLibresPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ReclamerDocumentsAuCandidatParSICCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiants_emplacements: List[str]
+    a_echeance_le: datetime.date
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ReclamerDocumentsAuCandidatParFACCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiants_emplacements: List[str]
+    a_echeance_le: datetime.date
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterEmplacementsDocumentsParCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+    reponses_documents_a_completer: Dict[str, List[str]]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentLibreNonReclamableCommand(
+    commands.InitialiserEmplacementDocumentLibreNonReclamableCommand
+):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentLibreAReclamerCommand(commands.InitialiserEmplacementDocumentLibreAReclamerCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentAReclamerCommand(commands.InitialiserEmplacementDocumentAReclamerCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierReclamationEmplacementDocumentCommand(commands.ModifierReclamationEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnnulerReclamationEmplacementDocumentCommand(commands.AnnulerReclamationEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerEmplacementDocumentCommand(commands.SupprimerEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplacerEmplacementDocumentCommand(commands.RemplacerEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplirEmplacementDocumentParGestionnaireCommand(commands.RemplirEmplacementDocumentParGestionnaireCommand):
+    pass

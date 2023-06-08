@@ -54,6 +54,8 @@ READ_ACTIONS_BY_TAB = {
     'internal-note': 'admission.view_internalnote',
     'debug': 'admission.view_debug_info',
     'comments': 'admission.view_enrolment_application',
+    # Documents
+    'documents': 'admission.view_documents_management',
 }
 
 # Association between a write-only tab name (path name) and a permission
@@ -79,4 +81,6 @@ UPDATE_ACTIONS_BY_TAB = {
     'doctoral-training': '',
     'complementary-training': '',
     'course-enrollment': '',
+    # Management
+    'documents': 'admission.view_documents_management',
 }

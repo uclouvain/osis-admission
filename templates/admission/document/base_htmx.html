@@ -1,0 +1,106 @@
+{% load i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div id="document-tabs">
+  {% translate 'Filter by documents' %}
+  <ul
+      class="nav nav-tabs btn-group"
+      role="tablist"
+  >
+    <li
+        role="presentation"
+        id="received-item"
+        class="{% if next == 'received' %}active{% endif %}"
+    >
+      <a
+          class="btn btn-primary"
+          href="#received"
+          data-toggle="pill"
+          aria-controls="received"
+          role="tab"
+      >
+        <i class="fa-solid fa-paperclip"></i>
+        {% translate 'Received' %}
+      </a>
+    </li>
+    <li
+        id="missing-item"
+        role="presentation"
+        class="{% if next == 'missing' %}active{% endif %}"
+    >
+      <a
+          class="btn btn-primary"
+          href="#missing"
+          data-toggle="pill"
+          aria-controls="missing"
+          role="tab"
+      >
+        <i class="fa-solid fa-link-slash"></i>
+        {% translate 'Missing' %}
+      </a>
+    </li>
+    <li
+        id="uclouvain-item"
+        role="presentation"
+        class="{% if next == 'uclouvain' %}active{% endif %}"
+    >
+      <a
+          class="btn btn-primary"
+          href="#uclouvain"
+          data-toggle="pill"
+          aria-controls="uclouvain"
+          role="tab"
+      >
+        <i class="fa-solid fa-school"></i>
+        {% translate 'UCLouvain' %}
+      </a>
+    </li>
+  </ul>
+</div>
+<div id="document-tab-content" class="tab-content">
+  <div role="tabpanel" class="tab-pane {% if next == 'received' %}active{% endif %}" id="received">
+    {% include 'admission/document/received_documents.html' %}
+  </div>
+  <div role="tabpanel" class="tab-pane {% if next == 'missing' %}active{% endif %}" id="missing">
+    {% include 'admission/document/missing_documents.html' %}
+  </div>
+  <div role="tabpanel" class="tab-pane {% if next == 'uclouvain' %}active{% endif %}" id="uclouvain">
+    {% include 'admission/document/uclouvain_documents.html' %}
+  </div>
+
+  <div class="text-right mt-1">
+    <button
+        class="btn btn-primary"
+        data-toggle="modal"
+        data-target="#request-all-form-modal"
+    >
+      <i class="fa-solid fa-envelope"></i>
+      {% translate 'Request the documents from the candidate' %}
+    </button>
+  </div>
+
+  {% include 'admission/document/request_all_documents_modal.html' %}
+</div>

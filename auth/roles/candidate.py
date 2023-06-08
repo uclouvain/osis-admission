@@ -36,6 +36,7 @@ from admission.auth.predicates import (
     is_being_enrolled,
     is_enrolled,
     confirmation_paper_in_progress,
+    is_invited_to_complete,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -122,6 +123,9 @@ _CANDIDATE_RULESET = {
     'change_generaleducationadmission': is_admission_request_author & in_progress,
     'delete_generaleducationadmission': is_admission_request_author & in_progress,
     'submit_generaleducationadmission': is_admission_request_author & in_progress,
+    # A candidate can edit some tabs after the proposition has been submitted
+    'view_generaleducationadmission_documents': is_admission_request_author & is_invited_to_complete,
+    'change_generaleducationadmission_documents': is_admission_request_author & is_invited_to_complete,
     # Continuing admission
     # A candidate can view as long as he's the author
     'view_continuingeducationadmission': is_admission_request_author,

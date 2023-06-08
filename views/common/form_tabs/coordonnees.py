@@ -28,7 +28,7 @@ from django.views.generic import FormView
 
 from admission.ddd import BE_ISO_CODE
 from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
 from reference.models.country import Country
@@ -36,9 +36,11 @@ from reference.models.country import Country
 __all__ = ['AdmissionCoordonneesFormView']
 
 
-class AdmissionCoordonneesFormView(LoadDossierViewMixin, FormView):
+class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
     template_name = 'admission/forms/coordonnees.html'
     permission_required = 'admission.change_admission_coordinates'
+    update_requested_documents = True
+    update_admission_author = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

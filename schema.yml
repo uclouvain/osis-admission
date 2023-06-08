@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.74
+  version: 1.0.76
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -3043,6 +3043,74 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/general-education/{uuid}/documents:
+    get:
+      operationId: list_general_documents
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DocumentSpecificQuestion'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+    post:
+      operationId: create_general_documents
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleterEmplacementsDocumentsParCandidatCommand'
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/continuing-education/{uuid}:
     get:
       operationId: retrieve_continuing_education_proposition
@@ -5366,6 +5434,10 @@ components:
                   submit_proposition:
                     $ref: '#/components/schemas/ActionLink'
                   destroy_proposition:
+                    $ref: '#/components/schemas/ActionLink'
+                  retrieve_documents:
+                    $ref: '#/components/schemas/ActionLink'
+                  update_documents:
                     $ref: '#/components/schemas/ActionLink'
                 readOnly: true
                 default: {}
@@ -8742,6 +8814,10 @@ components:
               $ref: '#/components/schemas/ActionLink'
             submit_proposition:
               $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         erreurs:
@@ -9080,6 +9156,42 @@ components:
       - attestation_boursier
       - titre_identite_sejour_longue_duree_ue
       - titre_sejour_belgique
+    DocumentSpecificQuestion:
+      type: object
+      properties:
+        uuid:
+          type: string
+        type:
+          type: string
+        title:
+          type: object
+        text:
+          type: object
+        help_text:
+          type: object
+        configuration:
+          type: object
+        values:
+          type: array
+          items:
+            type: object
+        tab:
+          type: string
+        tab_name:
+          type: string
+        required:
+          type: boolean
+      required:
+      - uuid
+      - type
+      - title
+      - text
+      - help_text
+      - configuration
+      - values
+      - tab
+      - tab_name
+      - required
     ContinuingEducationPropositionDTO:
       type: object
       properties:
@@ -9592,6 +9704,13 @@ components:
       - sigle_formation
       - annee_formation
       - matricule_candidat
+    CompleterEmplacementsDocumentsParCandidatCommand:
+      type: object
+      properties:
+        reponses_documents_a_completer:
+          type: object
+      required:
+      - reponses_documents_a_completer
     InitierPropositionContinueCommand:
       type: object
       properties:

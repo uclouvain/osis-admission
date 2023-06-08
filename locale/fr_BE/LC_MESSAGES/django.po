@@ -349,6 +349,12 @@ msgstr "Crédits acquis"
 msgid "Acronym / Title"
 msgstr "Sigle / Intitulé"
 
+msgid "Acronym of the management entity"
+msgstr "Sigle de l'entité de gestion"
+
+msgid "Acronym of the training"
+msgstr "Sigle de la formation"
+
 msgid "Actions"
 msgstr "Actions"
 
@@ -382,6 +388,9 @@ msgstr "Sous-type d'activité"
 
 msgid "Activity type"
 msgstr "Type d'activité"
+
+msgid "Actor"
+msgstr "Acteur"
 
 msgid "Actors as list items"
 msgstr "Acteurs en tant qu'éléments de liste"
@@ -440,6 +449,12 @@ msgstr "Ajouter une activité"
 
 msgid "Add an internal note"
 msgstr "Ajouter une note interne"
+
+msgid "Additional documents to complete by the candidate"
+msgstr "Documents additionnels à compléter par le candidat"
+
+msgid "Additional documents uploaded by a manager"
+msgstr "Documents additionnels téléversés par un gestionnaire"
 
 msgid "Additional information"
 msgstr "Informations complémentaires"
@@ -531,13 +546,18 @@ msgid ""
 "to the others. Important point: the questions are displayed together "
 "according to the field \"Display according to training\" (the elements for "
 "all trainings, then the elements for a type of training, then the elements "
-"for a specific training)."
+"for a specific training and finally the elements associated with a single "
+"admission)."
 msgstr ""
 "Entier supérieur à zéro indiquant la position de l’élément par rapport aux "
 "autres. Point important : les questions sont affichées groupées suivant le "
 "champ \"Affichage selon la formation\" (les éléments pour toutes les "
 "formations, puis les éléments pour un type de formation, puis les éléments "
-"pour une formation spécifique)."
+"pour une formation spécifique et enfin les éléments associés à une admission "
+"unique)."
+
+msgid "Analysis folder"
+msgstr "Dossier d'analyse"
 
 msgid "Ancient languages"
 msgstr "Langues anciennes"
@@ -583,10 +603,6 @@ msgstr "Demandes"
 msgid "Approbation by pdf"
 msgstr "Approbation par pdf"
 
-#, python-format
-msgid "Approbation by pdf of %(member)s"
-msgstr "Approbation par pdf de %(member)s"
-
 msgid "Approvals"
 msgstr "Approbations"
 
@@ -621,6 +637,9 @@ msgstr "Êtes-vous sûr de vouloir refuser \"%(object)s\" ?"
 #, python-format
 msgid "Are you sure you want to restore \"%(object)s\"?"
 msgstr "Êtes-vous sûr de vouloir remettre \"%(object)s\" au statut soumis ?"
+
+msgid "Are you sure your want to delete this document?"
+msgstr "Êtes-vous sûr de vouloir supprimer ce document ?"
 
 msgid ""
 "Are you the child of a member of the staff of the UCLouvain or the Martin V "
@@ -686,6 +705,9 @@ msgstr "Auteur"
 
 msgid "Authors"
 msgstr "Auteurs et autrices"
+
+msgid "Automatically required"
+msgstr "Requis automatiquement"
 
 msgid "BIC/SWIFT code identifying the bank from which the account was opened"
 msgstr "Code BIC/SWIFT identifiant la banque dont provient le compte"
@@ -1041,6 +1063,9 @@ msgstr "Attestation de réussite"
 msgid "Certificate of enrolment or school attendance"
 msgstr "Certificat d'inscription ou de fréquentation scolaire"
 
+msgid "Certificate of experience"
+msgstr "Attestation d'une expérience"
+
 msgid "Certificate of failure"
 msgstr "Attestation d'échec"
 
@@ -1137,6 +1162,14 @@ msgstr "Commentaires"
 msgid "Communication attestation"
 msgstr "Attestation de communication"
 
+#, python-brace-format
+msgid ""
+"Communication to the candidate, in <span class=\"label label-admission-"
+"primary\">{language_code}]</span>"
+msgstr ""
+"Communication au candidat, en langue <span class=\"label label-admission-"
+"primary\">{language_code}</span>"
+
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
 
@@ -1154,6 +1187,9 @@ msgstr "Formation complémentaire non activée"
 
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
+
+msgid "Completed after the request"
+msgstr "Complété après la réclamation"
 
 msgid "Completed application"
 msgstr "Demande complétée"
@@ -1496,6 +1532,9 @@ msgstr "Formation doctorale"
 msgid "Data protection"
 msgstr "Protection des données"
 
+msgid "Date"
+msgstr "Date"
+
 msgid "Date of confirmation"
 msgstr "Date de l'épreuve de confirmation"
 
@@ -1517,6 +1556,9 @@ msgstr "Date de publication"
 msgid "Date the application is sent to the supervision group"
 msgstr "Date d’envoi de la demande au comité d’accompagnement"
 
+msgid "Deadline"
+msgstr "Échéance"
+
 msgid "Deadline extended"
 msgstr "Nouvelle échéance"
 
@@ -1526,8 +1568,14 @@ msgstr "Date limite pour la confirmation"
 msgid "Deadline for confirmation:"
 msgstr "Date limite pour la confirmation :"
 
+msgid "Deadline for the candidate to upload documents"
+msgstr "Date limite de téléversement des documents par le candidat"
+
 msgid "Deadline of the confirmation paper (DD/MM/YYYY)"
 msgstr "Date limite pour la confirmation (JJ/MM/AAAA)"
+
+msgid "Deadline on"
+msgstr "Échéance le"
 
 msgid "Debug"
 msgstr "Debug"
@@ -1560,6 +1608,9 @@ msgstr "Date de l'admission définitive :"
 msgid "Delete"
 msgstr "Supprimer"
 
+msgid "Delete the document"
+msgstr "Supprimer le document"
+
 msgid "Delete?"
 msgstr "Supprimer ?"
 
@@ -1571,6 +1622,9 @@ msgstr "Description de l'activité"
 
 msgid "Description of your communication"
 msgstr "Description de votre communication"
+
+msgid "Designate the document as to be requested"
+msgstr "Désigner le document comme étant à réclamer"
 
 msgid "Desired training"
 msgstr "Formation souhaitée"
@@ -1654,6 +1708,18 @@ msgstr "Demandes d'inscription en doctorat"
 msgid "Document"
 msgstr "Document"
 
+msgid "Document not found."
+msgstr "Document non trouvé."
+
+msgid "Document to be requested"
+msgstr "Document à réclamer"
+
+msgid "Documents"
+msgstr "Documents"
+
+msgid "Documents to be requested now"
+msgstr "Documents à réclamer maintenant"
+
 msgid "Done in"
 msgstr "Fait à"
 
@@ -1674,6 +1740,9 @@ msgstr "Bourse double diplomation"
 
 msgid "Double or triple diplomation"
 msgstr "Double ou triple diplomation"
+
+msgid "Download the document"
+msgstr "Télécharger un document"
 
 msgid "Dr."
 msgstr "Dr."
@@ -1870,6 +1939,9 @@ msgstr "Modification d'inscription externe"
 msgid "External reorientation"
 msgstr "Réorientation externe"
 
+msgid "FAC free documents"
+msgstr "Documents libres FAC"
+
 msgid "FAC/CDD processing"
 msgstr "Traitement FAC/CDD"
 
@@ -1905,8 +1977,17 @@ msgctxt "admission sex"
 msgid "Female"
 msgstr "Féminin"
 
+msgid "File"
+msgstr "Fichier"
+
 msgid "File MIME types"
 msgstr "Types de fichier MIME"
+
+msgid "File name"
+msgstr "Nom du fichier"
+
+msgid "Filter by documents"
+msgstr "Filtrer par documents"
 
 msgctxt "tab"
 msgid "Finalization"
@@ -2014,6 +2095,24 @@ msgstr "Ancien étudiant UCLouvain"
 msgid "Fraudster (ARES)"
 msgstr "Fraudeur (ARES)"
 
+msgid "Free and requestable by FAC"
+msgstr "Libre et réclamable par FAC"
+
+msgid "Free and requestable by SIC"
+msgstr "Libre et réclamable par SIC"
+
+msgid "Free and uploaded by FAC for the candidate"
+msgstr "Libre et téléversé par FAC pour le candidat"
+
+msgid "Free and uploaded by FAC for the managers"
+msgstr "Libre et téléversé par FAC pour les gestionnaires"
+
+msgid "Free and uploaded by SIC for the candidate"
+msgstr "Libre et téléversé par SIC pour le candidat"
+
+msgid "Free and uploaded by SIC for the managers"
+msgstr "Libre et téléversé par SIC pour les gestionnaires"
+
 msgid "French"
 msgstr "Français"
 
@@ -2060,6 +2159,9 @@ msgstr "Inscriptions en formation générale"
 
 msgid "Generate the PDF recap"
 msgstr "Générer le PDF récapitulatif"
+
+msgid "Generated by the system"
+msgstr "Généré par le système"
 
 msgid "Generic"
 msgstr "Générique"
@@ -2492,6 +2594,9 @@ msgstr "Bourse internationale"
 msgid "Internship framework agreement"
 msgstr "Convention cadre de stages"
 
+msgid "Invalid date"
+msgstr "Date invalide"
+
 #, python-format
 msgid "Invalid property: %(config_params)s"
 msgid_plural "Invalid properties: %(config_params)s"
@@ -2617,6 +2722,12 @@ msgstr "Lien vers la page liée à la formation doctorale (front-office)"
 
 msgid "List"
 msgstr "Liste"
+
+msgid "List a missing document"
+msgstr "Lister un document manquant"
+
+msgid "List of the requested documents with the reason"
+msgstr "Liste des documents réclamés avec la raison associée"
 
 msgid "List of the values that the Selection elements can take (one per row)."
 msgstr ""
@@ -2762,6 +2873,41 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat pour lui confirmer la bonne prise en compte de sa "
 "demande par l'UCLouvain"
+
+msgid ""
+"Mail sent to the candidate to inform him that some FAC documents are missing "
+"or invalid in his application for doctorate education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que des documents FAC sont "
+"manquants ou invalides dans sa demande en doctorat"
+
+msgid ""
+"Mail sent to the candidate to inform him that some FAC documents are missing "
+"or invalid in his application for general education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que des documents FAC sont "
+"manquants ou invalides dans sa demande en formation générale"
+
+msgid ""
+"Mail sent to the candidate to inform him that some SIC documents are missing "
+"or invalid in his application for continuing education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que des documents SIC sont "
+"manquants ou invalides dans sa demande en formation continue"
+
+msgid ""
+"Mail sent to the candidate to inform him that some SIC documents are missing "
+"or invalid in his application for doctorate education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que des documents SIC sont "
+"manquants ou invalides dans sa demande en doctorat"
+
+msgid ""
+"Mail sent to the candidate to inform him that some SIC documents are missing "
+"or invalid in his application for general education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que des documents SIC sont "
+"manquants ou invalides dans sa demande en formation générale"
 
 msgid ""
 "Mail sent to the candidate to inform of the refusal of complementary "
@@ -2935,11 +3081,17 @@ msgstr "Corps du message"
 msgid "Message for the candidate"
 msgstr "Message pour le candidat"
 
+msgid "Message object"
+msgstr "Sujet du message"
+
 msgid "Message sent successfully"
 msgstr "Message envoyé avec succès"
 
 msgid "Message subject"
 msgstr "Sujet du message"
+
+msgid "Missing"
+msgstr "Manquants"
 
 msgid "Modern languages"
 msgstr "Langues modernes"
@@ -3027,6 +3179,9 @@ msgstr "Nom de l'activité"
 msgid "Name of the event"
 msgstr "Nom de l'événement"
 
+msgid "Name of the management entity"
+msgstr "Nom de l'entité de gestion"
+
 msgid "Name of the manifestation"
 msgstr "Nom de la manifestation"
 
@@ -3069,6 +3224,13 @@ msgstr "Raison de non-soutenance"
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
 
+msgid "No document"
+msgstr "Pas de document"
+
+msgid "No document is defined as requestable. At least one is required."
+msgstr ""
+"Aucun document n'est spécifié comme réclamable. Au-moins un est requis."
+
 msgid "No enrolment application"
 msgstr "Aucune demande d'inscription n'a été trouvée"
 
@@ -3077,6 +3239,9 @@ msgstr "Aucune inscription en formation générale n'a été trouvée"
 
 msgid "No languages knowledge provided."
 msgstr "Aucune connaissance des langues renseignée."
+
+msgid "No longer designate the document as to be requested"
+msgstr "Ne plus désigner le document comme étant à réclamer"
 
 msgid "No one invited"
 msgstr "Aucun invité"
@@ -3099,6 +3264,9 @@ msgstr "Noma"
 msgid "Non-retrievable attachment"
 msgstr "Pièce jointe non récupérable"
 
+msgid "Non-retrievable document"
+msgstr "Document non récupérable"
+
 msgid "None of these proposals are relevant to me"
 msgstr "Aucune de ces propositions ne me correspond"
 
@@ -3110,6 +3278,12 @@ msgstr "Non-UE"
 
 msgid "Not VIP"
 msgstr "Non-VIP"
+
+msgid "Not analyzed"
+msgstr "Non analysé"
+
+msgid "Not free"
+msgstr "Non libre"
 
 msgid "Not fundable"
 msgstr "Non-finançable"
@@ -3162,6 +3336,9 @@ msgstr "Événement en ligne"
 
 msgid "Online or in person"
 msgstr "En ligne ou en présentiel"
+
+msgid "Only one admission"
+msgstr "Une seule admission"
 
 msgid "Opinion of the CA following the format provided by the CDD"
 msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
@@ -3385,6 +3562,13 @@ msgstr ""
 "Nous vous invitons à indiquer vos autres prénoms conformément à votre "
 "document d'identité. Si aucun autre prénom n'est mentionné sur votre "
 "document d'identité, vous ne devez rien indiquer."
+
+msgid ""
+"Please note that this document will be removed from the list of the missing "
+"documents."
+msgstr ""
+"Veuillez noter que ce document sera retiré de la liste des documents "
+"manquants."
 
 msgid "Please provide a copy of your curriculum."
 msgstr "Merci de fournir une copie de votre curriculum."
@@ -3642,12 +3826,18 @@ msgstr "Boutons radios"
 msgid "Rank in diploma"
 msgstr "Rang dans le diplôme"
 
+msgid "Reason"
+msgstr "Raison"
+
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"
 
 #, python-format
 msgid "Recap of the proposition %(reference)s"
 msgstr "Récapitulatif de la proposition %(reference)s"
+
+msgid "Received"
+msgstr "Reçus"
 
 msgid "Recent certificate of support from the CPAS"
 msgstr "Attestation récente de prise en charge par le CPAS"
@@ -3672,6 +3862,9 @@ msgstr "Référence"
 msgid "Reference DIAL.Pr"
 msgstr "Référence DIAL.Pr"
 
+msgid "Reference of the admission"
+msgstr "Référence de la proposition"
+
 msgid "Reference promoter"
 msgstr "Promoteur de référence"
 
@@ -3679,7 +3872,7 @@ msgid "Reference promoter assent"
 msgstr "Avis du promoteur de référence"
 
 msgid "Reference promoter comment"
-msgstr "Commentaire deu promoteur de référence"
+msgstr "Commentaire du promoteur de référence"
 
 msgid "Reference:"
 msgstr "Référence :"
@@ -3724,14 +3917,35 @@ msgstr "Lien de parenté"
 msgid "Reorientation"
 msgstr "Réorientation"
 
+msgid "Replace a document"
+msgstr "Remplacer un document"
+
+msgid "Replace the document"
+msgstr "Remplacer le document"
+
 msgid "Report of the supervisory panel"
 msgstr "Procès-verbal du comité d'accompagnement"
 
 msgid "Reporting categories"
 msgstr "Catégories de reporting"
 
+msgid "Request now"
+msgstr "Réclamer maintenant"
+
 msgid "Request of a new deadline for the confirmation paper"
 msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
+
+msgid "Request the documents from the candidate"
+msgstr "Réclamer les documents au candidat"
+
+msgid "Requested"
+msgstr "Réclamé"
+
+msgid "Requested documents"
+msgstr "Documents réclamés"
+
+msgid "Requested on"
+msgstr "Réclamé le"
 
 msgid "Require changes"
 msgstr "Demander des changements"
@@ -3894,6 +4108,9 @@ msgstr ""
 "Types d'activité pour la catégorie Service institutionnel, didactique et "
 "d'expertise scientifique"
 
+msgid "SIC free documents"
+msgstr "Documents libres SIC"
+
 msgid "SIC status"
 msgstr "Statut SIC"
 
@@ -3991,6 +4208,9 @@ msgstr "Comité de sélection"
 
 msgid "Selection type"
 msgstr "Type de sélection"
+
+msgid "Send"
+msgstr "Envoyer"
 
 msgid "Send a mail"
 msgstr "Envoyer un e-mail"
@@ -4120,8 +4340,8 @@ msgstr "Documents spécifiques aux études contingentées"
 msgid "Specific profile"
 msgstr "Profil particulier"
 
-msgid "Specific questions"
-msgstr "Questions spécifiques"
+msgid "Specific question"
+msgstr "Question spécifique"
 
 msgid "Specificities"
 msgstr "Spécificités"
@@ -4202,9 +4422,6 @@ msgstr "Résumé de la communication"
 msgid "Supervision"
 msgstr "Supervision"
 
-msgid "Supervision group"
-msgstr "Groupe de supervision"
-
 msgid "Supervision group not found."
 msgstr "Groupe de supervision non trouvé."
 
@@ -4219,6 +4436,9 @@ msgstr "Procès-verbal de l'épreuve de confirmation"
 
 msgid "Supporting documents"
 msgstr "Justificatifs"
+
+msgid "System"
+msgstr "Système"
 
 msgid "TO_BE_COMPLETED"
 msgstr "À compléter"
@@ -4239,6 +4459,9 @@ msgstr ""
 "Prend en considération la langue des études secondaires et des études "
 "supérieures. Des études en Belgique sont considérées comme des études en "
 "français et en anglais."
+
+msgid "Teaching campus of the training"
+msgstr "Campus d'enseignement de la formation"
 
 msgid "Text"
 msgstr "Texte"
@@ -4338,6 +4561,9 @@ msgstr ""
 "Le comité demande au candidat de présenter une <strong>nouvelle épreuve</"
 "strong> <u>avant</u> le :"
 
+msgid "The completed documents are different from the ones that are requested."
+msgstr "Les documents complétés sont différents de ceux qui sont réclamés."
+
 msgid "The configuration is not valid for a document field: "
 msgstr "La configuration n'est pas valide pour un champ document : "
 
@@ -4383,6 +4609,24 @@ msgctxt "male gender"
 msgid "The doctoral student"
 msgstr "Le doctorant"
 
+msgid "The document has been deleted"
+msgstr "Le document a été supprimé"
+
+msgid "The document has been designated as to be requested"
+msgstr "Le document a été désigné comme étant à réclamer"
+
+msgid "The document has been replaced"
+msgstr "Le document a été remplacé"
+
+msgid "The document has been uploaded"
+msgstr "Le document a été téléversé"
+
+msgid "The document is no longer designated as to be requested"
+msgstr "Le document n'est plus désigné comme étant à réclamer"
+
+msgid "The documents have been requested to the candidate"
+msgstr "Les documents ont été réclamés au candidat"
+
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
 
@@ -4397,6 +4641,9 @@ msgid ""
 "The educational experiences that have been valuated from this admission."
 msgstr ""
 "Les expériences académiques qui ont été valorisées via cette admission."
+
+msgid "The element has not been found."
+msgstr "L'élément n'a pas été trouvé"
 
 msgid "The experiences that have been valuated from this admission."
 msgstr "Les expériences qui ont été valorisées via cette admission."
@@ -4683,12 +4930,21 @@ msgstr "A compléter (par étudiant) pour Fac/CDD"
 msgid "To be completed (by student) for SIC"
 msgstr "A compléter (par étudiant) pour SIC"
 
+msgid "To be requested"
+msgstr "À réclamer"
+
 msgid ""
 "To be uploaded in your dossier on the doctoral platform as soon as possible "
 "after the confirmation test"
 msgstr ""
 "À téléverser dans votre dossier sur la plateforme doctorale dans les plus "
 "brefs délais après l’épreuve de confirmation"
+
+msgid ""
+"To visualize and edit a document, please select it in the list opposite."
+msgstr ""
+"Pour visualiser et éditer un document, merci d'en sélectionner un dans la "
+"liste ci-contre."
 
 msgid "Token"
 msgstr "Token"
@@ -4763,6 +5019,15 @@ msgstr "Personnel scientifique UCLouvain"
 msgid "UCL_COURSE"
 msgstr "Cours UCL"
 
+msgid "UCLouvain"
+msgstr "UCLouvain"
+
+msgid "UCLouvain FAC free documents"
+msgstr "Documents UCLouvain libres FAC"
+
+msgid "UCLouvain SIC free documents"
+msgstr "Documents UCLouvain libres SIC"
+
 msgid "UCLouvain logo"
 msgstr "Logo de l'UCLouvain"
 
@@ -4801,6 +5066,9 @@ msgstr ""
 msgid "Unique business number"
 msgstr "Numéro unique d'entreprise"
 
+msgid "Unknown"
+msgstr "Inconnu(e)"
+
 msgid "Unknown birth date"
 msgstr "Date de naissance exacte inconnue"
 
@@ -4818,6 +5086,12 @@ msgstr "Mettre à jour"
 
 msgid "Update doctorate admission"
 msgstr "Mettre à jour admission en doctorat"
+
+msgid "Upload"
+msgstr "Téléverser"
+
+msgid "Upload a document"
+msgstr "Téléverser un document"
 
 msgid "Upload the opinion on the renewal of the research mandate"
 msgstr "Téléverser l'avis sur le renouvellement du mandat de recherche"
@@ -4947,6 +5221,9 @@ msgstr "Année"
 
 msgid "Year of graduation from secondary school"
 msgstr "Année d'obtention du diplôme d'études secondaires"
+
+msgid "Year of the training"
+msgstr "Année de la formation"
 
 msgid "Year without registration for the training."
 msgstr "Année sans inscription à la formation."
@@ -5094,6 +5371,9 @@ msgid ""
 msgstr ""
 "Vous devez être membre de la commission doctorale pour accéder à cette "
 "admission"
+
+msgid "You must be invited to complete this admission."
+msgstr "Vous devez être invité à compléter cette admission."
 
 msgid "You must be the reference promoter to access this admission"
 msgstr ""
