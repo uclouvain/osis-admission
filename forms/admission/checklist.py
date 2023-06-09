@@ -28,10 +28,20 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CommentForm(forms.Form):
-    comment = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), label=_("Comment"))
+    comment = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                'rows': 2,
+                'hx-trigger': 'keyup changed delay:1s',
+            }
+        ),
+        label=_("Comment"),
+        required=False,
+    )
 
-    def __init__(self, comment, *args, **kwargs):
+    def __init__(self, comment, form_url, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['comment'].widget.attrs['hx-post'] = form_url
         if comment:
             self.fields['comment'].initial = comment.content
             self.fields['comment'].label += _(" (last update by {author} on {date} at {time}):").format(
@@ -46,4 +56,15 @@ class DateInput(forms.DateInput):
 
 
 class AssimilationForm(forms.Form):
-    date_debut = forms.DateField(widget=DateInput(), label=_("Assimilation start date"))
+    date_debut = forms.DateField(
+        widget=DateInput(
+            attrs={
+                'hx-trigger': 'keyup changed delay:1s',
+            }
+        ),
+        label=_("Assimilation start date"),
+    )
+
+    def __init__(self, form_url, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['date_debut'].widget.attrs['hx-post'] = form_url

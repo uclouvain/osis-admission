@@ -25,6 +25,8 @@
 # ##############################################################################
 from typing import Dict, Set
 
+from django.core.exceptions import BadRequest
+from django.shortcuts import resolve_url
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 from osis_comment.models import CommentEntry
@@ -33,20 +35,14 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO, ResumeEtEmplacementsDocumentsPropositionDTO
-from admission.ddd.admission.enums import OngletsDemande
+from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.emplacement_document import DocumentsAssimilation
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererResumePropositionQuery,
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
 from admission.forms.admission.checklist import CommentForm, AssimilationForm
-from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
-    EmplacementsDocumentsPropositionTranslator,
-)
 from admission.views.doctorate.mixins import LoadDossierViewMixin
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
 __all__ = [
     'ChecklistView',
@@ -117,15 +113,21 @@ class ChecklistView(LoadDossierViewMixin, TemplateView):
                 c.tags[0]: c
                 for c in CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__contained_by=tab_names)
             }
+
             context['comment_forms'] = {
                 tab_name: CommentForm(
-                    prefix=tab_name,
                     comment=comments.get(tab_name, None),
+                    form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
                 )
                 for tab_name in tab_names
             }
             context['assimilation_form'] = AssimilationForm(
                 initial=self.admission.checklist.get('current', {}).get('assimilation', {}).get('extra'),
+                form_url=resolve_url(
+                    f'{self.base_namespace}:change-checklist-extra',
+                    uuid=self.admission_uuid,
+                    tab='assimilation',
+                ),
             )
 
             admission_documents = command_result.emplacements_documents
@@ -148,55 +150,71 @@ class ChangeStatusSerializer(serializers.Serializer):
 
 
 class ChangeStatusView(LoadDossierViewMixin, APIView):
-    urlpatterns = 'change-checklist-status'
+    urlpatterns = {'change-checklist-status': 'change-checklist-status/<str:tab>/<str:status>'}
     permission_required = 'admission.view_checklist'
     parser_classes = [FormParser]
 
     def post(self, request, *args, **kwargs):
-        serializer = ChangeStatusSerializer(data=request.data)
+        serializer = ChangeStatusSerializer(
+            data={
+                'tab_name': self.kwargs['tab'],
+                'status': self.kwargs['status'],
+            }
+        )
         serializer.is_valid(raise_exception=True)
+
         admission = self.get_permission_object()
+
         if admission.checklist['current'] is None:
             admission.checklist['current'] = {}
-        admission.checklist['current'][serializer.validated_data['tab_name']] = {
-            'statut': serializer.validated_data['status'],
-            **serializer.validated_data['extra'],
-        }
+
+        admission.checklist['current'].setdefault(serializer.validated_data['tab_name'], {})
+        admission.checklist['current'][serializer.validated_data['tab_name']]['statut'] = serializer.validated_data[
+            'status'
+        ]
+
         admission.save(update_fields=['checklist'])
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ChangeExtraSerializer(serializers.Serializer):
-    tab_name = serializers.CharField()
-    extra = serializers.JSONField(default={}, required=False, binary=True)
+class ChangeAssimilationExtraSerializer(serializers.Serializer):
+    date_debut = serializers.DateField()
 
 
 class ChangeExtraView(LoadDossierViewMixin, APIView):
-    urlpatterns = 'change-checklist-extra'
+    urlpatterns = {'change-checklist-extra': 'change-checklist-extra/<str:tab>'}
     permission_required = 'admission.view_checklist'
     parser_classes = [FormParser]
+    serializer_class_by_tab: Dict[str, type(serializers.Serializer)] = {
+        'assimilation': ChangeAssimilationExtraSerializer,
+    }
+
+    def get_serializer(self, data):
+        if self.kwargs['tab'] not in self.serializer_class_by_tab:
+            raise NotImplementedError
+        return self.serializer_class_by_tab[self.kwargs['tab']](data=data)
 
     def post(self, request, *args, **kwargs):
-        serializer = ChangeExtraSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         admission = self.get_permission_object()
-        tab_name = serializer.validated_data['tab_name']
+        tab_name = self.kwargs['tab']
         if admission.checklist['current'] is None:
             admission.checklist['current'] = {}
         admission.checklist['current'].setdefault(tab_name, {'extra': {}})
         admission.checklist['current'][tab_name].setdefault('extra', {})
-        admission.checklist['current'][tab_name]['extra'].update(serializer.validated_data['extra'])
+        admission.checklist['current'][tab_name]['extra'].update(serializer.validated_data)
         admission.save(update_fields=['checklist'])
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CommentSerializer(serializers.Serializer):
-    tab_name = serializers.CharField()
     comment = serializers.CharField(allow_blank=True)
 
 
 class SaveCommentView(LoadDossierViewMixin, APIView):
-    urlpatterns = 'save-comment'
+    urlpatterns = {'save-comment': 'save-comment/<str:tab>'}
     permission_required = 'admission.view_checklist'
     parser_classes = [FormParser]
 
@@ -205,7 +223,7 @@ class SaveCommentView(LoadDossierViewMixin, APIView):
         serializer.is_valid(raise_exception=True)
         CommentEntry.objects.update_or_create(
             object_uuid=self.admission_uuid,
-            tags=[serializer.validated_data['tab_name']],
+            tags=[self.kwargs['tab']],
             defaults={
                 'content': serializer.validated_data['comment'],
                 'author': self.request.user.person,

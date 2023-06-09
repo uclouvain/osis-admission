@@ -45,22 +45,24 @@
     {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
     {% url base_namespace|add:":update:accounting" view.kwargs.uuid as accounting_url %}
 
-    <div id="tabs-content" class="tab-content">
+    <div
+        id="tabs-content"
+        class="tab-content"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    >
       {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation %}
         <div role="tabpanel" class="tab-pane in active" id="assimilation">
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
-            {% checklist_state_button label=initial_state_label icon='user' state=initial.statut class='muted' %}
-            {% checklist_state_button label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}
-            {% checklist_state_button label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
-            {% checklist_state_button label=_("To be completed for application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}
-            {% checklist_state_button label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
+            {% checklist_state_button tab='assimilation' label=initial_state_label icon='user' state=initial.statut class='muted' %}
+            {% checklist_state_button tab='assimilation' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}
+            {% checklist_state_button tab='assimilation' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
+            {% checklist_state_button tab='assimilation' label=_("To be completed for application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}
+            {% checklist_state_button tab='assimilation' label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
           </div>
 
           {% bootstrap_form comment_forms.assimilation %}
-          <form>
-            {% bootstrap_form assimilation_form %}
-          </form>
+          {% bootstrap_form assimilation_form %}
 
           <div class="info-part">
             {% firstof person_url|add:'?next=assimilation' as contextual_person_url %}
@@ -78,10 +80,10 @@
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
-            {% checklist_state_button label=initial_state_label icon='user' state=initial.statut class='muted' %}
-            {% checklist_state_button label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud=0 %}
-            {% checklist_state_button label=_("Fraudster") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud=1 %}
-            {% checklist_state_button label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
+            {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' %}
+            {% checklist_state_button tab='donnees_personnelles' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud=0 %}
+            {% checklist_state_button tab='donnees_personnelles' label=_("Fraudster") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud=1 %}
+            {% checklist_state_button tab='donnees_personnelles' label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
           </div>
 
           {% bootstrap_form comment_forms.donnees_personnelles %}
@@ -186,67 +188,14 @@
 
           refreshDocuments();
 
-          // Save state button status
-          $('.status-group .btn-group button').on('click', function () {
-              if (!$(this).is('.active')) {
-                  const $btn = $(this);
-                  const iconClasses = $btn.find('i')[0].className;
-                  $btn.find('i')[0].className = 'fas fa-spinner fa-spin-pulse';
-                  $btn.parents('.btn-group').find('button').removeClass([
-                      'active',
-                      'btn-muted',
-                      'btn-info',
-                      'btn-warning',
-                      'btn-danger',
-                      'btn-success',
-                  ].join(' ')).addClass('btn-default');
-                  $.post('./change-checklist-status', {
-                      tab_name: $btn.parents('.tab-pane').attr('id'),
-                      status: $btn.data('status'),
-                      extra: JSON.stringify($btn.data('extra')),
-                  }, function () {
-                      $btn.find('i')[0].className = iconClasses;
-                      $btn.addClass(['active', $btn.data('class')].join(' ')).removeClass('btn-default');
-                      const currentTabHref = $('#checklist-menu').find('.active').attr('href');
-                      htmx.ajax('GET', './checklist', '#checklist-menu').then(() => {
-                          $('#checklist-menu').find('li').removeClass('active').filter('[href="' + currentTabHref + '"]').addClass('active');
-                      });
-                  }, 'json');
-              }
-          });
-
-          /**
-           * Save comment value
-           */
-          const intervals = {};
-
-          function saveComment (elem) {
-              const $formGroup = $(elem);
-              const $textarea = $(elem).find('textarea');
-              $formGroup.addClass('saving fa-spinner');
-              $textarea.attr('readonly', 'readonly');
-              $.post('./save-comment', {
-                  tab_name: $formGroup.parents('.tab-pane').attr('id'),
-                  comment: $textarea.val(),
-              }, function () {
-                  $formGroup.removeClass('saving fa-spinner');
-                  $textarea.attr('readonly', null);
-                  delete intervals[$textarea[0].name];
-              }, 'json');
-          }
-
           function autogrow () {
               if (this.scrollHeight > this.clientHeight) {
                   this.style.height = `${this.scrollHeight}px`;
               }
           }
 
-          $('textarea[name$="-comment"]').on('input', function () {
+          $('textarea[name="comment"]').on('input', function () {
               autogrow.call(this);
-              if (intervals[this.name]) {
-                  clearTimeout(intervals[this.name]);
-              }
-              intervals[this.name] = setTimeout(saveComment, 1000, this.parentNode);
           });
 
           $('#checklist-menu li[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -270,37 +219,6 @@
           });
 
           // TODO find a way to genericly save extra and status
-          /**
-           * Save date value
-           */
-          let interval = null;
-
-          function saveDate (elem) {
-              const $formGroup = $(elem);
-              const $input = $(elem).find('textarea, input');
-              const data = {};
-              $($input.parents('form').serializeArray()).each(function (index, obj) {
-                  data[obj.name] = obj.value;
-              });
-
-              $formGroup.addClass('saving fa-spinner');
-              $input.attr('readonly', 'readonly');
-              $.post('./change-checklist-extra', {
-                  tab_name: $formGroup.parents('.tab-pane').attr('id'),
-                  extra: JSON.stringify(data),
-              }, function () {
-                  $formGroup.removeClass('saving fa-spinner');
-                  $input.attr('readonly', null);
-                  delete intervals[$input[0].name];
-              }, 'json');
-          }
-
-          $('#id_date_debut').on('change', function () {
-              if (interval) {
-                  clearTimeout(interval);
-              }
-              interval = setTimeout(saveDate, 1000, this.parentNode);
-          });
 
           let configurationCache = null;
 
@@ -316,7 +234,7 @@
                   $('#info-viewer-tab').hide();
               }
 
-              $('textarea[name$="-comment"]:visible').each(autogrow);
+              $('textarea[name="comment"]:visible').each(autogrow);
           });
 
           let bound = false;
@@ -366,6 +284,52 @@
 
           {# Manage HTMX requests #}
 
+          $('#tabs-content').on('htmx:beforeRequest', function(event) {
+              const elt = event.originalEvent.detail.elt;
+              const formGroup = event.originalEvent.detail.elt.closest('.form-group');
+              formGroup.style.pointerEvents = 'none';
+
+              if (elt.classList.contains('checklist-state-button')) {
+                  {# Click on checklist state button #}
+                  const siblingsButton = formGroup.querySelectorAll('button');
+                  for (let i = 0; i < siblingsButton.length; i++) {
+                      siblingsButton[i].classList.remove(
+                        'active',
+                        'btn-muted',
+                        'btn-info',
+                        'btn-warning',
+                        'btn-danger',
+                        'btn-success',
+                      )
+                      siblingsButton[i].classList.add('btn-default');
+                  }
+                  elt.classList.add(elt.dataset.class, 'active');
+                  elt.querySelector('i').className = 'fas fa-spinner fa-spin-pulse';
+              } else {
+                  formGroup.classList.add("saving", "fa-spinner");
+                  elt.readOnly = true;
+              }
+          });
+          $('#tabs-content').on('htmx:afterRequest', function(event) {
+              const elt = event.originalEvent.detail.elt;
+              const formGroup = event.originalEvent.detail.elt.closest('.form-group');
+              formGroup.style.pointerEvents = 'initial';
+
+              if (elt.classList.contains('checklist-state-button')) {
+                  {# Click on checklist state button #}
+                  elt.classList.remove('btn-default');
+                  elt.querySelector('i').className = 'fas fa-' + elt.dataset.icon;
+                  // Change the state icon in the list of the tabs
+                  const currentTabHref = $('#checklist-menu').find('.active').attr('href');
+                  htmx.ajax('GET', './checklist', '#checklist-menu').then(() => {
+                      $('#checklist-menu').find('li').removeClass('active').filter('[href="' + currentTabHref + '"]').addClass('active');
+                  });
+              } else {
+                formGroup.classList.remove("saving", "fa-spinner");
+                elt.readOnly = false;
+              }
+          });
+
           {# When a form is submitted #}
           const base_details_url = "{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='custom_identifier' %}";
           $('#document-content').on('formValidation', function(event) {
@@ -374,7 +338,7 @@
                   $('#document-content .modal').modal('hide');
                   $('#document-content .collapse').collapse('hide');
 
-                  {# Load the details of a documents if the form has an impact on it #}
+                  {# Refresh the details of a document if the form has an impact on it #}
                   if (event.originalEvent.detail.refresh_details) {
                       htmx.ajax(
                           'GET',
