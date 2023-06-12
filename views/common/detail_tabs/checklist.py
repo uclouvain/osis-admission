@@ -31,6 +31,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 from osis_comment.models import CommentEntry
 from rest_framework import serializers, status
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -153,6 +154,7 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
     urlpatterns = {'change-checklist-status': 'change-checklist-status/<str:tab>/<str:status>'}
     permission_required = 'admission.view_checklist'
     parser_classes = [FormParser]
+    authentication_classes = [SessionAuthentication]
 
     def post(self, request, *args, **kwargs):
         serializer = ChangeStatusSerializer(
@@ -189,6 +191,7 @@ class ChangeExtraView(LoadDossierViewMixin, APIView):
     serializer_class_by_tab: Dict[str, type(serializers.Serializer)] = {
         'assimilation': ChangeAssimilationExtraSerializer,
     }
+    authentication_classes = [SessionAuthentication]
 
     def get_serializer(self, data):
         if self.kwargs['tab'] not in self.serializer_class_by_tab:
@@ -217,6 +220,7 @@ class SaveCommentView(LoadDossierViewMixin, APIView):
     urlpatterns = {'save-comment': 'save-comment/<str:tab>'}
     permission_required = 'admission.view_checklist'
     parser_classes = [FormParser]
+    authentication_classes = [SessionAuthentication]
 
     def post(self, request, *args, **kwargs):
         serializer = CommentSerializer(data=request.data)
