@@ -33,7 +33,7 @@
       data-icon="{{ icon }}"
       hx-swap="none"
       hx-post="{% url view.base_namespace|add:':change-checklist-status' uuid=view.kwargs.uuid tab=tab status=state %}"
-      {% if extra %}data-extra="{{ extra|to_json }}"{% endif %}
+      {% if extra %}hx-vals="{{ extra|to_json }}"{% endif %}
   >
     <i class="fas fa-{{ icon }}"></i>
     {{ label }}
