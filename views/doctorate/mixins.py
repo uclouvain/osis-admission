@@ -221,15 +221,13 @@ class AdmissionFormMixin(AdmissionViewMixin):
     def htmx_trigger_form(self, is_valid: bool):
         """Add a JS event to listen for when the form is submitted through HTMX."""
         self.custom_headers = {
-            'HX-Trigger': json.dumps(
-                {
-                    "formValidation": {
-                        "is_valid": is_valid,
-                        "message": str(self.message_on_success if is_valid else self.message_on_failure),
-                        **self.htmx_trigger_form_extra,
-                    }
+            'HX-Trigger': {
+                "formValidation": {
+                    "is_valid": is_valid,
+                    "message": str(self.message_on_success if is_valid else self.message_on_failure),
+                    **self.htmx_trigger_form_extra,
                 }
-            )
+            }
         }
 
     def update_current_admission_on_form_valid(self, form, admission):
@@ -237,7 +235,7 @@ class AdmissionFormMixin(AdmissionViewMixin):
         pass
 
     def form_valid(self, form):
-        messages.success(self.request, self.message_on_success)
+        messages.success(self.request, str(self.message_on_success))
 
         # Update the last update author of the admission
         author = getattr(self.request.user, 'person')
@@ -266,12 +264,18 @@ class AdmissionFormMixin(AdmissionViewMixin):
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
         # Add custom headers
-        for k, v in self.custom_headers.items():
-            response.headers[k] = v
+        for header_key, header_value in self.custom_headers.items():
+            current_data_str = response.headers.get(header_key)
+            if current_data_str:
+                current_data = json.loads(current_data_str)
+                current_data.update(header_value)
+            else:
+                current_data = header_value
+            response.headers[header_key] = json.dumps(current_data)
         return response
 
     def form_invalid(self, form):
-        messages.error(self.request, self.message_on_failure)
+        messages.error(self.request, str(self.message_on_failure))
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=False)
         return super().form_invalid(form)

@@ -70,6 +70,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
     permission_required = 'admission.view_documents_management'
     urlpatterns = 'documents'
     form_class = RequestAllDocumentsForm
+    name = 'document-list'
 
     retrieve_documents_command = {
         CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,

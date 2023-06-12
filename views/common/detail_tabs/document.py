@@ -80,6 +80,7 @@ class BaseUploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequ
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
+    name = 'upload-free-document'
 
     @property
     def document_type(self) -> str:
@@ -155,6 +156,7 @@ class RequestFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequire
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
+    name = 'request-free-candidate-document'
 
     def form_valid(self, form) -> HttpResponse:
         document_id = message_bus_instance.invoke(
@@ -179,6 +181,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
     htmx_template_name = 'admission/document/document_detail.html'
     permission_required = 'admission.view_documents_management'
     urlpatterns = {'detail': 'detail/<str:identifier>'}
+    name = 'document-detail'
 
     def get_context_data(self, **kwargs):
         from osis_document.api.utils import get_remote_token
@@ -228,6 +231,7 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
         'refresh_list': True,
     }
     permission_required = 'admission.view_documents_management'
+    name = 'document-action'
 
     @property
     def document_identifier(self):

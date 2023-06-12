@@ -352,7 +352,7 @@
               }
           })
 
-          const htmxErrorsMessages = $('#pnl_error_messages');
+          const htmxErrorsMessages = document.getElementById('pnl_error_messages');
           const errorsByStatus = {
               404: "{% translate 'The element has not been found.' %}",
           };
@@ -361,17 +361,13 @@
           $('#document-content').on('htmx:responseError', function(event) {
               $('#document-content .modal').modal('hide');
               $('#document-content .collapse').collapse('hide');
-              htmxErrorsMessages.text(
-                  errorsByStatus[event.originalEvent.detail.xhr.status] ||
-                  "{% translate 'Some errors have been encountered.' %}"
-              );
-              htmxErrorsMessages.removeClass('hidden');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-          });
 
-          $('#document-content').on('htmx:beforeSend', function(event) {
-              htmxErrorsMessages.addClass('hidden');
-              htmxErrorsMessages.text('');
+              htmxErrorsMessages.textContent = errorsByStatus[event.originalEvent.detail.xhr.status] || "{% translate 'Some errors have been encountered.' %}";
+              computeToastsDuration()
+
+              htmxErrorsMessages.classList.remove('show', 'hidden');
+              void htmxErrorsMessages.offsetWidth; {# To trigger CSS transition #}
+              htmxErrorsMessages.classList.add('show');
           });
 
       })(jQuery);
