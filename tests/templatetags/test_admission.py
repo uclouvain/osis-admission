@@ -70,6 +70,7 @@ from admission.templatetags.admission import (
     has_value,
     document_component,
     get_item_or_none,
+    part_of_dict,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -331,6 +332,46 @@ class AdmissionFieldsDataTestCase(TestCase):
         self.assertEqual(result['name'], 'My field label')
         self.assertEqual(result['data'], '')
 
+    def test_field_data_with_all_inline(self):
+        result = field_data(
+            context={'all_inline': True},
+            name='My field label',
+            data='value',
+        )
+        self.assertEqual(result['inline'], True)
+
+        result = field_data(
+            context={'all_inline': True},
+            name='My field label',
+            data='value',
+            inline=False,
+        )
+        self.assertEqual(result['inline'], True)
+
+    def test_field_data_without_files(self):
+        result = field_data(
+            context={'hide_files': True},
+            name='My field label',
+            data=['my_file'],
+        )
+        self.assertEqual(result['data'], None)
+        self.assertEqual(result['hide_empty'], True)
+
+    def test_field_data_without_files_load(self):
+        result = field_data(
+            context={'load_files': False},
+            name='My field label',
+            data=['my_file'],
+        )
+        self.assertEqual(result['data'], _('Specified'))
+
+        result = field_data(
+            context={'load_files': False},
+            name='My field label',
+            data=[],
+        )
+        self.assertEqual(result['data'], _('Not specified'))
+
 
 class DisplayTagTestCase(TestCase):
     def test_comma(self):
@@ -533,6 +574,15 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         self.assertFalse(has_value({}, ['value1']))
         self.assertFalse(has_value({'value2': 10}, ['value1']))
         self.assertTrue(has_value({'value1': False}, ['value1']))
+
+    def test_part_of_dict(self):
+        self.assertTrue(part_of_dict({}, {}))
+        self.assertTrue(part_of_dict({'a': 1}, {'a': 1}))
+        self.assertTrue(part_of_dict({'a': 1}, {'a': 1, 'b': 2}))
+        self.assertFalse(part_of_dict({'a': 1}, {'a': 2}))
+        self.assertFalse(part_of_dict({'a': 1}, {'b': 1}))
+        self.assertTrue(part_of_dict({}, {'a': 1}))
+        self.assertFalse(part_of_dict({'a': 1}, {}))
 
 
 class AdmissionTagsTestCase(TestCase):

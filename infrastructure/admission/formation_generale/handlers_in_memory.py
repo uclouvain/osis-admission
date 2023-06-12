@@ -298,4 +298,15 @@ COMMAND_HANDLERS = {
             emplacement_document_repository=_emplacement_document_repository,
         )
     ),
+    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery: (
+        lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_non_libres_proposition(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
+        )
+    ),
 }

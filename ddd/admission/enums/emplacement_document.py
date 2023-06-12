@@ -195,15 +195,7 @@ DocumentsQuestionsSpecifiques = {
 # The keys corresponding to the attributes (in uppercase) of the following domain models:
 # admission.ddd.admission.formation_generale.domain.model._comptabilite.Comptabilite
 # admission.ddd.admission.doctorat.preparation.domain.model._comptabilite.Comptabilite
-DocumentsComptabilite = {
-    'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT': ngettext_lazy(
-        'Certificate stating the absence of debts towards the institution attended '
-        'during the academic year %(academic_year)s: %(names)s',
-        'Certificates stating the absence of debts towards the institutions attended '
-        'during the academic year %(academic_year)s: %(names)s',
-        'count',
-    ),
-    'ATTESTATION_ENFANT_PERSONNEL': _('Staff child certificate'),
+DocumentsAssimilation = {
     'CARTE_RESIDENT_LONGUE_DUREE': _('Copy of both sides of the EC long-term resident card (D or L card)'),
     'CARTE_CIRE_SEJOUR_ILLIMITE_ETRANGER': _(
         "Copy of both sides of the Certificate of Registration in the Register of Foreigners CIRE - "
@@ -269,6 +261,17 @@ DocumentsComptabilite = {
         'Copy of both sides of the identity document proving the long-term stay in a member state of the European Union'
     ),
     'TITRE_SEJOUR_BELGIQUE': _('Copy of both sides of the residence permit in Belgium'),
+}
+DocumentsComptabilite = {
+    'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT': ngettext_lazy(
+        'Certificate stating the absence of debts towards the institution attended '
+        'during the academic year %(academic_year)s: %(names)s',
+        'Certificates stating the absence of debts towards the institutions attended '
+        'during the academic year %(academic_year)s: %(names)s',
+        'count',
+    ),
+    'ATTESTATION_ENFANT_PERSONNEL': _('Staff child certificate'),
+    **DocumentsAssimilation,
 }
 
 

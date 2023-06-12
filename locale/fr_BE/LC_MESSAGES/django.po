@@ -20,6 +20,10 @@ msgstr ""
 msgid " (h/w)"
 msgstr " (h/s)"
 
+#, python-brace-format
+msgid " (last update by {author} on {date} at {time}):"
+msgstr " (dernière modification par {author} le {date} à {time}) :"
+
 #, python-format
 msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
 msgstr "%(added)s ECTS ajoutés dont %(validated)s validés par la CDD."
@@ -678,6 +682,9 @@ msgstr "Situation d'assimilation"
 msgid "Assimilation situation that applies to you"
 msgstr "Situation d’assimilation qui vous correspond"
 
+msgid "Assimilation start date"
+msgstr "Date de début d'assimilation"
+
 msgid "Attachment: Doctoral training"
 msgstr "Annexe : Formation doctorale"
 
@@ -1122,6 +1129,9 @@ msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
 msgid "Checkboxes"
 msgstr "Cases à cocher"
 
+msgid "Checklist"
+msgstr "Checklist"
+
 msgid "Chemistry"
 msgstr "Chimie"
 
@@ -1130,6 +1140,9 @@ msgstr "Enfant d'un membre du personnel de l'UCLouvain ou de l'entité Martin V"
 
 msgid "Chosen assimilation"
 msgstr "Assimilation choisie"
+
+msgid "Citizenship"
+msgstr "Nationalité"
 
 msgid "City"
 msgstr "Ville"
@@ -1586,6 +1599,12 @@ msgstr "Décision confirmant l'octroi de la protection subsidiaire"
 msgid "Decision confirming the granting of temporary protection"
 msgstr "Décision confirmant l'octroi de la protection temporaire"
 
+msgid "Declared assimilated"
+msgstr "Déclaré(e) assimilé(e)"
+
+msgid "Declared not assimilated"
+msgstr "Déclaré(e) non assimilé(e)"
+
 msgid "Dedicated time (in EFT)"
 msgstr "Temps consacré (en EFT)"
 
@@ -1917,6 +1936,9 @@ msgstr "Date (prévue) de délivrance du diplôme"
 msgid "Expected date of graduation (signed document)"
 msgstr "Date (prévue) de délivrance du diplôme (document signé)"
 
+msgid "Expert opinion"
+msgstr "Avis expert"
+
 msgid "Export"
 msgstr "Exporter"
 
@@ -1992,6 +2014,9 @@ msgstr "Filtrer par documents"
 msgctxt "tab"
 msgid "Finalization"
 msgstr "Finalisation"
+
+msgid "Financeability"
+msgstr "Financabilité"
 
 msgid "Financing"
 msgstr "Financement"
@@ -2092,6 +2117,9 @@ msgstr "La formation n'est pas disponible pour cette année."
 msgid "Former UCLouvain student"
 msgstr "Ancien étudiant UCLouvain"
 
+msgid "Fraudster"
+msgstr "Fraudeur"
+
 msgid "Fraudster (ARES)"
 msgstr "Fraudeur (ARES)"
 
@@ -2135,6 +2163,18 @@ msgstr "Équivalent temps plein (en %)"
 
 msgid "GEOGRAPHY"
 msgstr "Géographie"
+
+msgid "GEST_BLOCAGE"
+msgstr "Gestionnaire blocage"
+
+msgid "GEST_BLOCAGE_ULTERIEUR"
+msgstr "Gestionnaire blocage ultérieur"
+
+msgid "GEST_EN_COURS"
+msgstr "Gestionnaire en cours"
+
+msgid "GEST_REUSSITE"
+msgstr "Gestionnaire réussite"
 
 msgid "Gantt graph"
 msgstr "Graphe de Gantt"
@@ -2428,6 +2468,12 @@ msgstr ""
 
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
+
+msgid "INITIAL_CANDIDAT"
+msgstr "Initial candidat"
+
+msgid "INITIAL_NON_CONCERNE"
+msgstr "Initial non concerné(e)"
 
 msgid "INSCRIPTION"
 msgstr "Inscription"
@@ -3281,6 +3327,9 @@ msgstr "Non-VIP"
 
 msgid "Not analyzed"
 msgstr "Non analysé"
+
+msgid "Not concerned"
+msgstr "Non concerné(e)"
 
 msgid "Not free"
 msgstr "Non libre"
@@ -4191,6 +4240,9 @@ msgstr "Les études secondaires doivent être complétées."
 msgid "Sector"
 msgstr "Secteur"
 
+msgid "Select a document"
+msgstr "Sélectionner un document"
+
 msgid "Select a mail template"
 msgstr "Sélectionner un template d'email"
 
@@ -4924,11 +4976,20 @@ msgstr "Intitulé de la formation"
 msgid "To"
 msgstr "À"
 
+msgid "To be completed"
+msgstr "À compléter"
+
 msgid "To be completed (by student) for FAC/CDD"
 msgstr "A compléter (par étudiant) pour Fac/CDD"
 
 msgid "To be completed (by student) for SIC"
 msgstr "A compléter (par étudiant) pour SIC"
+
+msgid "To be completed for application"
+msgstr "À compléter pour inscription"
+
+msgid "To be processed"
+msgstr "À traiter"
 
 msgid "To be requested"
 msgstr "À réclamer"
@@ -4973,6 +5034,9 @@ msgstr ""
 
 msgid "Training choice"
 msgstr "Choix de formation"
+
+msgid "Training specificities"
+msgstr "Spécificités de la formation"
 
 msgid "Training title"
 msgstr "Intitulé formation"

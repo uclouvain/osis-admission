@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from unittest.mock import ANY, patch
+from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -67,6 +67,7 @@ class ExportPdfTestCase(TestCase):
         call_command("process_admission_tasks")
         save.assert_called()
         confirm.assert_called_with('a-token')
+        post_processing.assert_called()
         async_task.refresh_from_db()
         self.assertEqual(async_task.state, TaskState.DONE.name)
 

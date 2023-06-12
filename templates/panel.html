@@ -1,4 +1,5 @@
 {% load admission %}
+
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
 * designed to manage the core business of higher education institutions,
@@ -6,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,19 +25,22 @@
 {% endcomment %}
 
 <div class="panel panel-default {{ additional_class }}" {% for name, value in attributes.items %} {{ name }}="{{ value|stringformat:'s' }}"{% endfor %}>
-    {% if title %}
-    <div class="panel-heading">
-        <h{{ title_level }} class="panel-title">
-            {{ title }}
-        </h{{ title_level }}>
-    </div>
+  {% if title %}
+  <div class="panel-heading">
+    {% if edit_button %}
+      <a class="btn btn-default pull-right btn-sm" href="{{ edit_button }}"><i class="fas fa-edit"></i></a>
     {% endif %}
-    <div class="panel-body">
-        {{ panel_body }}
-    </div>
-    {% if panel_footer|strip %}
-    <div class="panel-footer clearfix">
-      {{ panel_footer }}
-    </div>
-    {% endif %}
+    <h{{ title_level }} class="panel-title">
+        {{ title }}
+    </h{{ title_level }}>
+  </div>
+  {% endif %}
+  <div class="panel-body">
+      {{ panel_body }}
+  </div>
+  {% if panel_footer|strip %}
+  <div class="panel-footer clearfix">
+    {{ panel_footer }}
+  </div>
+  {% endif %}
 </div>

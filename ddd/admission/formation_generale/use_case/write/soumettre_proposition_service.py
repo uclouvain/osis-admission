@@ -38,6 +38,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import IInscriptionTardive
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
@@ -137,7 +138,7 @@ def soumettre_proposition(
         est_inscription_tardive,
         profil_candidat_soumis,
     )
-
+    proposition.checklist_initiale = Checklist.initialiser(proposition, profil_candidat_translator)
     proposition_repository.save(proposition)
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)

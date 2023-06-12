@@ -20,6 +20,10 @@ msgstr ""
 msgid " (h/w)"
 msgstr ""
 
+#, python-brace-format
+msgid " (last update by {author} on {date} at {time}):"
+msgstr ""
+
 #, python-format
 msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
 msgstr ""
@@ -595,6 +599,9 @@ msgstr ""
 msgid "Assimilation situation that applies to you"
 msgstr ""
 
+msgid "Assimilation start date"
+msgstr ""
+
 msgid "Attachment: Doctoral training"
 msgstr ""
 
@@ -1021,6 +1028,9 @@ msgstr ""
 msgid "Checkboxes"
 msgstr ""
 
+msgid "Checklist"
+msgstr ""
+
 msgid "Chemistry"
 msgstr ""
 
@@ -1028,6 +1038,9 @@ msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr ""
 
 msgid "Chosen assimilation"
+msgstr ""
+
+msgid "Citizenship"
 msgstr ""
 
 msgid "City"
@@ -1437,6 +1450,12 @@ msgstr ""
 msgid "Decision confirming the granting of temporary protection"
 msgstr ""
 
+msgid "Declared assimilated"
+msgstr ""
+
+msgid "Declared not assimilated"
+msgstr ""
+
 msgid "Dedicated time (in EFT)"
 msgstr ""
 
@@ -1766,6 +1785,9 @@ msgstr ""
 msgid "Expected date of graduation (signed document)"
 msgstr ""
 
+msgid "Expert opinion"
+msgstr ""
+
 msgid "Export"
 msgstr ""
 
@@ -1842,6 +1864,9 @@ msgctxt "tab"
 msgid "Finalization"
 msgstr ""
 
+msgid "Financeability"
+msgstr ""
+
 msgid "Financing"
 msgstr ""
 
@@ -1915,6 +1940,9 @@ msgstr ""
 msgid "Former UCLouvain student"
 msgstr ""
 
+msgid "Fraudster"
+msgstr ""
+
 msgid "Fraudster (ARES)"
 msgstr ""
 
@@ -1958,6 +1986,18 @@ msgstr ""
 
 msgid "GEOGRAPHY"
 msgstr "Geography"
+
+msgid "GEST_BLOCAGE"
+msgstr "Management blocked"
+
+msgid "GEST_BLOCAGE_ULTERIEUR"
+msgstr "Management blocked later"
+
+msgid "GEST_EN_COURS"
+msgstr "Management in progress"
+
+msgid "GEST_REUSSITE"
+msgstr "Management success"
 
 msgid "Gantt graph"
 msgstr ""
@@ -2187,6 +2227,12 @@ msgstr ""
 
 msgid "IBAN account number"
 msgstr ""
+
+msgid "INITIAL_CANDIDAT"
+msgstr "Initial candidate"
+
+msgid "INITIAL_NON_CONCERNE"
+msgstr "Initial not concerned"
 
 msgid "INSCRIPTION"
 msgstr "Enrollment"
@@ -2924,6 +2970,9 @@ msgid "Not VIP"
 msgstr ""
 
 msgid "Not analyzed"
+msgstr ""
+
+msgid "Not concerned"
 msgstr ""
 
 msgid "Not free"
@@ -3786,6 +3835,9 @@ msgstr ""
 msgid "Sector"
 msgstr ""
 
+msgid "Select a document"
+msgstr ""
+
 msgid "Select a mail template"
 msgstr ""
 
@@ -4443,10 +4495,19 @@ msgstr ""
 msgid "To"
 msgstr ""
 
+msgid "To be completed"
+msgstr ""
+
 msgid "To be completed (by student) for FAC/CDD"
 msgstr ""
 
 msgid "To be completed (by student) for SIC"
+msgstr ""
+
+msgid "To be completed for application"
+msgstr ""
+
+msgid "To be processed"
 msgstr ""
 
 msgid "To be requested"
@@ -4486,6 +4547,9 @@ msgid "Training certificate, with dates, justifying the specified period"
 msgstr ""
 
 msgid "Training choice"
+msgstr ""
+
+msgid "Training specificities"
 msgstr ""
 
 msgid "Training title"
