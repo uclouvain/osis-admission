@@ -95,6 +95,7 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.add_internalnote': is_part_of_education_group,
             'admission.view_internalnote': is_part_of_education_group,
             'admission.view_documents_management': is_part_of_education_group,
+            'admission.view_checklist': is_part_of_education_group,
             'admission.view_debug_info': is_part_of_education_group & is_debug,
             # Exports
             'admission.download_doctorateadmission_pdf_recap': is_part_of_education_group,
