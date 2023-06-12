@@ -146,7 +146,7 @@ class ChecklistView(LoadDossierViewMixin, TemplateView):
 class ChangeStatusSerializer(serializers.Serializer):
     tab_name = serializers.CharField()
     status = serializers.ChoiceField(choices=ChoixStatutChecklist.choices(), required=False)
-    extra = serializers.JSONField(default={}, required=False, binary=True)
+    extra = serializers.DictField(default={}, required=False)
 
 
 class ChangeStatusView(LoadDossierViewMixin, APIView):
@@ -159,6 +159,7 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
             data={
                 'tab_name': self.kwargs['tab'],
                 'status': self.kwargs['status'],
+                'extra': request.data.dict(),
             }
         )
         serializer.is_valid(raise_exception=True)
@@ -169,9 +170,10 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
             admission.checklist['current'] = {}
 
         admission.checklist['current'].setdefault(serializer.validated_data['tab_name'], {})
-        admission.checklist['current'][serializer.validated_data['tab_name']]['statut'] = serializer.validated_data[
-            'status'
-        ]
+        admission.checklist['current'][serializer.validated_data['tab_name']] = {
+            'statut': serializer.validated_data['status'],
+            **serializer.validated_data['extra'],
+        }
 
         admission.save(update_fields=['checklist'])
 

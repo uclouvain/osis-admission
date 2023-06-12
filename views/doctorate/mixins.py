@@ -254,12 +254,13 @@ class AdmissionFormMixin(AdmissionViewMixin):
             self.htmx_trigger_form(is_valid=True)
             return self.render_to_response(self.get_context_data(form=form))
 
+        return super().form_valid(form)
+
+    def get_checklist_redirect_url(self):
         # If specified, return to the correct checklist tab
         if 'next' in self.request.GET:
             url = resolve_url(f'admission:{self.current_context}:checklist', uuid=self.admission_uuid)
-            return HttpResponseRedirect(f"{url}{'#' + self.request.GET['next']}")
-
-        return super().form_valid(form)
+            return f"{url}#{self.request.GET['next']}"
 
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)

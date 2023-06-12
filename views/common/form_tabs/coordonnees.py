@@ -145,4 +145,7 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
         return self.forms
 
     def get_success_url(self):
-        return reverse(f'admission:{self.current_context}:coordonnees', kwargs=self.kwargs)
+        return self.get_checklist_redirect_url() or reverse(
+            f'admission:{self.current_context}:coordonnees',
+            kwargs=self.kwargs,
+        )
