@@ -56,5 +56,6 @@ class JurySecretary(RoleModel):
             'admission.view_admission_project': rules.always_allow,
             'admission.view_admission_cotutelle': rules.always_allow,
             'admission.view_admission_supervision': rules.always_allow,
+            'admission.view_admission_jury': rules.always_allow,
         }
         return RuleSet(ruleset)

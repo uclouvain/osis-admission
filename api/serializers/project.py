@@ -137,6 +137,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
                     'retrieve_complementary_training',
                     'retrieve_course_enrollment',
                     'destroy_proposition',
+                    'retrieve_jury_preparation',
                 ]
             },
         }
@@ -329,6 +330,9 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'retrieve_doctoral_training': DOCTORATE_ACTION_LINKS['retrieve_doctoral_training'],
             'retrieve_complementary_training': DOCTORATE_ACTION_LINKS['retrieve_complementary_training'],
             'retrieve_course_enrollment': DOCTORATE_ACTION_LINKS['retrieve_course_enrollment'],
+            # Jury
+            'retrieve_jury_preparation': DOCTORATE_ACTION_LINKS['retrieve_jury_preparation'],
+            'list_jury_members': DOCTORATE_ACTION_LINKS['list_jury_members'],
         }
     )
     reponses_questions_specifiques = AnswerToSpecificQuestionField()

@@ -99,6 +99,8 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
 
     curriculum = factory.LazyFunction(lambda: [uuid.uuid4()])
 
+    thesis_proposed_title = 'Thesis title'
+
     class Params:
         with_cotutelle = factory.Trait(
             cotutelle=True,
@@ -124,6 +126,28 @@ class DoctorateAdmissionFactory(factory.DjangoModelFactory):
                 },
                 "identification": {
                     "gender": "H",
+                    "last_name": "Doe",
+                    "first_name": "John",
+                    "country_of_citizenship": "BE",
+                },
+            },
+        )
+        passed_confirmation = factory.Trait(
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            post_enrolment_status=ChoixStatutDoctorat.PASSED_CONFIRMATION.name,
+            submitted_profile={
+                "coordinates": {
+                    "city": "Louvain-La-Neuves",
+                    "email": "user@uclouvain.be",
+                    "place": "",
+                    "street": "Place de l'Université",
+                    "country": "BE",
+                    "postal_box": "",
+                    "postal_code": "1348",
+                    "street_number": "2",
+                },
+                "identification": {
+                    "gender": "M",
                     "last_name": "Doe",
                     "first_name": "John",
                     "country_of_citizenship": "BE",

@@ -37,11 +37,12 @@ from django.views.generic.base import ContextMixin
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
-from admission.contrib.models.base import AdmissionViewer, BaseAdmission
-from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
+from admission.contrib.models.base import AdmissionViewer
+from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand, GetCotutelleCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, CotutelleDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
@@ -58,6 +59,8 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveCon
 from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
 )
+from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryQuery
+from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO
 from admission.templatetags.admission import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.utils import (
     get_cached_admission_perm_obj,
@@ -138,6 +141,14 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             return last_confirmation_paper
         except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
             raise Http404(e.message)
+
+    @cached_property
+    def jury(self) -> 'JuryDTO':
+        return message_bus_instance.invoke(RecupererJuryQuery(uuid_jury=self.admission_uuid))
+
+    @cached_property
+    def cotutelle(self) -> 'CotutelleDTO':
+        return message_bus_instance.invoke(GetCotutelleCommand(uuid_proposition=self.admission_uuid))
 
     def get_permission_object(self):
         return self.admission

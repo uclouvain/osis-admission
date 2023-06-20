@@ -207,12 +207,16 @@
 {% block script %}
   {# Add either form scripts or osis-documents for detail #}
   {{ block.super }}
+  <script src="{% static 'admission/popover.js' %}"></script>
+  <script>
+    $(function () {
+      initializePopover();
+    });
+  </script>
   {% if form %}
     {{ form.media.js }}
-    <script src="{% static 'admission/popover.js' %}"></script>
     <script>
       $(function () {
-          initializePopover();
           // Prevent to submit data from form inputs in disabled containers
           $('form').on('submit', function() {
               $(this).find('div[disabled] *').prop('disabled', true);

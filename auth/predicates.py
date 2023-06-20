@@ -67,6 +67,12 @@ def signing_in_progress(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("The jury is not in progress"))
+def is_jury_in_progress(self, user: User, obj: DoctorateAdmission):
+    return obj.post_enrolment_status == ChoixStatutDoctorat.PASSED_CONFIRMATION.name
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("The proposition has already been confirmed or is cancelled"))
 def unconfirmed_proposition(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_AVANT_SOUMISSION

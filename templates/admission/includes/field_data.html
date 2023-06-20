@@ -6,7 +6,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,15 @@
 {% if not hide_empty or data %}
 {% if css_class %}<div class="{{ css_class }}">{% endif %}
 <dl>
-  <dt>{{ name|safe }}</dt>
+  <dt>
+    {{ name|safe }}
+    {% if tooltip %}<a
+          tabindex="0"
+          class="fa fa-info-circle popover-buttons"
+          data-content="<p>{{ tooltip|force_escape }}</p>"
+          role="button"
+      ></a>{% endif %}
+  </dt>
   {% with data|default_if_none_or_empty:_('Not specified') as data_to_display %}
   <dd>
     {% if html_tag and data %}<{{ html_tag }}>{{ data_to_display }}</{{ html_tag }}>

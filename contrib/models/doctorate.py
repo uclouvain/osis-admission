@@ -64,6 +64,7 @@ __all__ = [
 ]
 
 from ...ddd.admission.dtos.conditions import InfosDetermineesDTO
+from ...ddd.parcours_doctoral.jury.domain.model.enums import FormuleDefense
 
 
 class DoctorateAdmission(BaseAdmission):
@@ -311,6 +312,46 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
     )
 
+    # Jury
+    thesis_proposed_title = models.CharField(
+        max_length=255,
+        verbose_name=_("Proposed thesis title"),
+        default='',
+        blank=True,
+    )
+    defense_method = models.CharField(
+        max_length=255,
+        verbose_name=_("Defense method"),
+        choices=FormuleDefense.choices(),
+        default='',
+        blank=True,
+    )
+    defense_indicative_date = models.DateField(
+        verbose_name=_("Defense indicative date"),
+        null=True,
+        blank=True,
+    )
+    defense_language = models.CharField(
+        max_length=255,
+        verbose_name=_("Defense language"),
+        choices=ChoixLangueRedactionThese.choices(),
+        default=ChoixLangueRedactionThese.UNDECIDED.name,
+        blank=True,
+    )
+    comment_about_jury = models.TextField(
+        default="",
+        verbose_name=_("Comment about jury"),
+        blank=True,
+    )
+    accounting_situation = models.BooleanField(
+        null=True,
+        blank=True,
+    )
+    jury_approval = FileField(
+        verbose_name=_("Jury approval"),
+        upload_to=admission_directory_path,
+    )
+
     # The following properties are here to alias the training_id field to doctorate_id
     @property
     def doctorate(self):
@@ -381,6 +422,8 @@ class DoctorateAdmission(BaseAdmission):
                 'change_admission_supervision',
                 _("Can update the information related to the admission supervision"),
             ),
+            ('view_admission_jury', _("Can view the information related to the admission jury")),
+            ('change_admission_jury', _("Can update the information related to the admission jury")),
             ('view_admission_confirmation', _("Can view the information related to the confirmation paper")),
             (
                 'change_admission_confirmation',
