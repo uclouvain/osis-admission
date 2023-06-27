@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -31,35 +31,41 @@
 {% display activity.city "," activity.country as location %}
 {% display activity.start_date|date:"d/m/Y" as period %}
 
-<div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
-  <h3 class="panel-title">
-    {% include "admission/doctorate/details/training/_panel_title.html" with remove_batch_action=True %}
-    {% include "admission/doctorate/details/training/_activity_title.html" %}
-    <div class="clearfix"></div>
-  </h3>
-</div>
 <div
-  id="a-{{ activity.uuid }}"
-  class="panel-collapse collapse"
-  role="tabpanel"
-  aria-labelledby="h-{{ activity.uuid }}"
+  class="subpanel panel-{{ activity|status_as_class }}"
+  data-status="{{ activity.status }}"
+  data-type="{{ activity.category }}"
 >
-  <div class="panel-body">
-    <p>
-      {% display activity.authors "<br/>"|safe activity.title "<br/>"|safe location "<br/>"|safe period "<br/>"|safe %}
-      {% display activity.is_online|format_is_online "-" website "<br/>"|safe activity.organizing_institution %}
-    </p>
-    {% if activity.participating_proof %}
-      <div class="form-group">
-        <strong class="d-block">{% trans "Certificate of participation in the presentation" %}</strong>
-        {% document_visualizer activity.participating_proof %}
-      </div>
-    {% endif %}
-    {% if activity.comment %}
-      <div class="form-group">
-        <strong class="d-block">{% trans "Comments" %}</strong>
-        {{ activity.comment|linebreaks }}
-      </div>
-    {% endif %}
+  <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
+    <h3 class="panel-title">
+      {% include "admission/doctorate/details/training/_panel_title.html" with remove_batch_action=True %}
+      {% include "admission/doctorate/details/training/_activity_title.html" %}
+      <div class="clearfix"></div>
+    </h3>
+  </div>
+  <div
+    id="a-{{ activity.uuid }}"
+    class="panel-collapse collapse"
+    role="tabpanel"
+    aria-labelledby="h-{{ activity.uuid }}"
+  >
+    <div class="panel-body">
+      <p>
+        {% display activity.authors "<br/>"|safe activity.title "<br/>"|safe location "<br/>"|safe period "<br/>"|safe %}
+        {% display activity.is_online|format_is_online "-" website "<br/>"|safe activity.organizing_institution %}
+      </p>
+      {% if activity.participating_proof %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Certificate of participation in the presentation" %}</strong>
+          {% document_visualizer activity.participating_proof %}
+        </div>
+      {% endif %}
+      {% if activity.comment %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Comments" %}</strong>
+          {{ activity.comment|linebreaks }}
+        </div>
+      {% endif %}
+    </div>
   </div>
 </div>

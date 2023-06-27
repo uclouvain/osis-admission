@@ -330,11 +330,11 @@ msgstr "Année académique :"
 msgid "Accept"
 msgstr "Accepter"
 
-msgid "Accept these activities"
-msgstr "Accepter ces activités"
+msgid "Accept selected activities"
+msgstr "Accepter les activités sélectionnées"
 
-msgid "Accept these courses"
-msgstr "Accepter ces cours"
+msgid "Accept selected courses"
+msgstr "Accepter les cours sélectionnées"
 
 msgid "Accepted"
 msgstr "Acceptée"
@@ -887,6 +887,7 @@ msgstr "Chimie"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr "Carte CIRE, séjour illimité ou d'étranger"
 
+msgctxt "CategorieActivite"
 msgid "COMMUNICATION"
 msgstr "Communication orale (hors conférence)"
 
@@ -897,8 +898,9 @@ msgstr ""
 msgid "COMPLEMENTARY_TRAINING"
 msgstr "Formation complémentaire"
 
+msgctxt "CategorieActivite"
 msgid "CONFERENCE"
-msgstr "Conférence"
+msgstr "Colloques et conférences"
 
 msgid "CONFERENCE PUBLICATION types"
 msgstr "Types d'activité pour une communication dans la catégorie Conférence"
@@ -912,8 +914,9 @@ msgstr "Confirmation"
 msgid "CONFIRMATION_TO_BE_REPEATED"
 msgstr "Confirmation à représenter"
 
+msgctxt "CategorieActivite"
 msgid "COURSE"
-msgstr "Cours"
+msgstr "Cours suivis"
 
 msgid "COURSE types"
 msgstr "Types d'activité pour la catégorie Cours"
@@ -1301,6 +1304,14 @@ msgstr "Attestation de réussite de l'épreuve de confirmation"
 msgid "Confirmed application (by student)"
 msgstr "Demande confirmée (par étudiant)"
 
+msgid ""
+"Consult the credits grid released by your domain doctoral commission. Refer "
+"to the website of your commission for more details."
+msgstr ""
+"Référez-vous à la grille de crédits communiquées par votre commission "
+"doctorale de domaine. Consultez le site web de votre commission pour plus de "
+"détails."
+
 msgid "Contact"
 msgstr "Contact"
 
@@ -1540,8 +1551,8 @@ msgstr "Cours avec évaluation"
 msgid "Courses"
 msgstr "Cours"
 
-msgid "Courses and training"
-msgstr "Cours et formation"
+msgid "Courses taken"
+msgstr "Cours suivis"
 
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
@@ -1859,6 +1870,9 @@ msgstr "ECTS pour la participation"
 
 msgid "ECTS for the participation"
 msgstr "ECTS pour la participation"
+
+msgid "ECTS must be positive"
+msgstr "ECTS doit être positif"
 
 msgid "EFT"
 msgstr "EFT"
@@ -3553,6 +3567,9 @@ msgstr "Avis du comité d'accompagnement suivant le format fourni par la CDD"
 msgid "Opinion on the renewal of the research mandate"
 msgstr "Avis sur le renouvellement du mandat de recherche"
 
+msgid "Oral communication"
+msgstr "Communication orale"
+
 msgid "Oral expose"
 msgstr "Exposé oral"
 
@@ -3596,6 +3613,7 @@ msgstr "Autres prénoms"
 msgid "Others"
 msgstr "Autres"
 
+msgctxt "CategorieActivite"
 msgid "PAPER"
 msgstr "Épreuve"
 
@@ -3635,8 +3653,9 @@ msgstr "Pré-admission"
 msgid "PRIVATE_DEFENSE"
 msgstr "Défense privée"
 
+msgctxt "CategorieActivite"
 msgid "PUBLICATION"
-msgstr "Publication"
+msgstr "Publications"
 
 msgid "PUBLICATION types"
 msgstr "Types d'activité pour la catégorie Publication"
@@ -3673,6 +3692,9 @@ msgstr "Participation"
 
 msgid "Participation certification"
 msgstr "Certificat de participation"
+
+msgid "Participation to symposium/conference"
+msgstr "Participation à des colloques/conférences"
 
 msgid "Passport"
 msgstr "Passeport"
@@ -3808,6 +3830,13 @@ msgstr "Merci de fournir une copie de votre passeport."
 
 msgid "Please provide one of these two identification information:"
 msgstr "Veuillez fournir l’une de ces deux informations d’identification :"
+
+msgid ""
+"Please refer to the specifics disposition of your domain doctoral commission "
+"for your activities choice."
+msgstr ""
+"Veuillez consulter les dispositions particulières de votre commission "
+"doctorale de domaine pour le choix des activités."
 
 msgid "Please specify at least one identity number."
 msgstr "Merci de spécifier au-moins un numéro d'identité."
@@ -4012,11 +4041,11 @@ msgstr ""
 "La commission de proximité doit être remplie uniquement si l'entité du "
 "doctorat est CDE, CLSM ou CDSS"
 
-msgid "Publication"
-msgstr "Publication"
-
 msgid "Publication status"
 msgstr "Statut de publication"
+
+msgid "Publications"
+msgstr "Publications"
 
 msgid "Published"
 msgstr "Publié"
@@ -4042,8 +4071,9 @@ msgstr "Refusée"
 msgid "REJECTED"
 msgstr "Rejeté"
 
+msgctxt "CategorieActivite"
 msgid "RESIDENCY"
-msgstr "Séjour de perfectionnement de recherche"
+msgstr "Séjours de recherche"
 
 msgid "RESIDENCY types"
 msgstr ""
@@ -4341,14 +4371,16 @@ msgstr "SECRETAIRE"
 msgid "SELF_FUNDING"
 msgstr "Fonds propres"
 
+msgctxt "CategorieActivite"
 msgid "SEMINAR"
-msgstr "Séminaire de recherche : assistance"
+msgstr "Séminaires suivis"
 
 msgid "SEMINAR types"
 msgstr "Types d'activité pour la catégorie Séminaire de recherche : assistance"
 
+msgctxt "CategorieActivite"
 msgid "SERVICE"
-msgstr "Service institutionnel, didactique et d'expertise scientifique"
+msgstr "Services"
 
 msgid "SERVICE types"
 msgstr ""
@@ -4414,9 +4446,6 @@ msgstr "Date de démarrage de la bourse"
 msgid "Sciences"
 msgstr "Sciences"
 
-msgid "Scientific communication"
-msgstr "Communication scientifique"
-
 msgid "Scientific residencies"
 msgstr "Séjours scientifiques"
 
@@ -4461,6 +4490,9 @@ msgstr "Comité de sélection"
 
 msgid "Selection type"
 msgstr "Type de sélection"
+
+msgid "Seminar taken"
+msgstr "Séminaires suivis"
 
 msgid "Send"
 msgstr "Envoyer"
@@ -4659,11 +4691,11 @@ msgstr "Date de soumission :"
 msgid "Submit"
 msgstr "Soumettre"
 
-msgid "Submit these activities"
-msgstr "Soumettre ces activités"
+msgid "Submit selected activities"
+msgstr "Soumettre les activités sélectionnées"
 
-msgid "Submit these courses"
-msgstr "Soumettre ces cours"
+msgid "Submit selected courses"
+msgstr "Soumettre les cours sélectionnées"
 
 msgid "Submitted"
 msgstr "Soumis pour publication"
@@ -4872,6 +4904,16 @@ msgstr ""
 
 msgid "The decision of the signing actor"
 msgstr "La décision du signataire"
+
+msgid ""
+"The declaration of you doctoral training activities must be consistent with "
+"the specifics disposition of your domain. Please refer to those on the "
+"website of your Domain Doctoral Commission for more information."
+msgstr ""
+"La déclaration de vos activités de formation doctorale doit être conforme "
+"aux dispositions particulières de votre domaine. Veuillez consulter ces "
+"dispositions sur la page web de votre Commission Doctorale de Domaine (CDD) "
+"pour plus d’informations."
 
 msgctxt "female gender"
 msgid "The doctoral student"
@@ -5320,6 +5362,7 @@ msgstr "Type de formation"
 msgid "UCLOUVAIN_SCIENTIFIC_STAFF"
 msgstr "Personnel scientifique UCLouvain"
 
+msgctxt "CategorieActivite"
 msgid "UCL_COURSE"
 msgstr "Cours UCL"
 
@@ -5406,6 +5449,10 @@ msgstr "Téléverser l'avis sur le renouvellement du mandat de recherche"
 msgid "VAE"
 msgstr "Valorisation des acquis de l'expérience"
 
+msgctxt "CategorieActivite"
+msgid "VAE"
+msgstr "Valorisation des acquis de l'expérience"
+
 msgid "VALID"
 msgstr "Valide"
 
@@ -5418,8 +5465,8 @@ msgstr "VIP"
 msgid "VIP candidate"
 msgstr "Candidat VIP"
 
-msgid "Validate these courses"
-msgstr "Valider ces cours"
+msgid "Validate selected courses"
+msgstr "Valider les cours sélectionnées"
 
 msgid "Validated"
 msgstr "Validé"
