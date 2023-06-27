@@ -68,3 +68,45 @@ class AssimilationForm(forms.Form):
     def __init__(self, form_url, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['date_debut'].widget.attrs['hx-post'] = form_url
+
+
+class ChoixFormationForm(forms.Form):
+    type_demande = forms.ChoiceField(
+        widget=forms.Select(
+            attrs={
+                'hx-trigger': 'changed',
+            }
+        ),
+        label=_("Proposition type"),
+    )
+    annee_academique = forms.ChoiceField(
+        widget=forms.Select(
+            attrs={
+                'hx-trigger': 'changed',
+            }
+        ),
+        label=_("Academic year"),
+    )
+    formation = forms.ChoiceField(
+        widget=forms.Select(
+            attrs={
+                'hx-trigger': 'changed',
+            }
+        ),
+        label=_("Training"),
+    )
+    poursuite_cycle = forms.ChoiceField(
+        widget=forms.Select(
+            attrs={
+                'hx-trigger': 'changed',
+            }
+        ),
+        label=_("Cycle pursuit"),
+    )
+
+    def __init__(self, form_url, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['type_demande'].widget.attrs['hx-post'] = form_url
+        self.fields['annee_academique'].widget.attrs['hx-post'] = form_url
+        self.fields['formation'].widget.attrs['hx-post'] = form_url
+        self.fields['poursuite_cycle'].widget.attrs['hx-post'] = form_url

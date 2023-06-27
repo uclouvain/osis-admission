@@ -42,7 +42,7 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
-from admission.forms.admission.checklist import CommentForm, AssimilationForm
+from admission.forms.admission.checklist import CommentForm, AssimilationForm, ChoixFormationForm
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 
 __all__ = [
@@ -128,6 +128,14 @@ class ChecklistView(LoadDossierViewMixin, TemplateView):
                     f'{self.base_namespace}:change-checklist-extra',
                     uuid=self.admission_uuid,
                     tab='assimilation',
+                ),
+            )
+            context['choix_formation_form'] = ChoixFormationForm(
+                initial=self.admission.checklist.get('current', {}).get('choix_formation', {}).get('extra'),
+                form_url=resolve_url(
+                    f'{self.base_namespace}:change-checklist-extra',
+                    uuid=self.admission_uuid,
+                    tab='choix_formation',
                 ),
             )
 

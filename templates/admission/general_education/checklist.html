@@ -111,8 +111,44 @@
       {% endwith %}
       {% with initial=original_admission.checklist.initial.choix_formation current=original_admission.checklist.current.choix_formation %}
         <div role="tabpanel" class="tab-pane" id="choix_formation">
-          <p>{% trans "This page is currently under construction." %}</p>
+          <div class="form-group btn-group status-group" role="group">
+            {% translate initial.libelle as initial_state_label %}
+            {% checklist_state_button tab='choix_formation' label=initial_state_label icon='user' state=initial.statut class='muted' %}
+            {% checklist_state_button tab='choix_formation' label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
+          </div>
+
+          {% bootstrap_form comment_forms.choix_formation %}
+          {% panel _("Proposition features") %}
+            {% bootstrap_form choix_formation_form %}
+          {% endpanel %}
+
           <div class="info-part">
+            {% field_data _("Proposition submission") resume_proposition.proposition.soumise_le %}
+
+            {% if resume_proposition.proposition.est_reorientation_inscription_externe %}
+            {% field_data _("External reorientation/modification") _("Reorientation asked by the candidate") %}
+            {% elif resume_proposition.proposition.est_modification_inscription_externe %}
+            {% field_data _("External reorientation/modification") _("Modification asked by the candidate") %}
+            {% endif %}
+
+            {% if resume_proposition.proposition.bourse_erasmus_mundus or resume_proposition.proposition.bourse_double_diplome or resume_proposition.proposition.bourse_internationale %}
+              <dl>
+                <dt>{% trans "Specific profile" %}</dt>
+                <dd>
+                {% if resume_proposition.proposition.bourse_erasmus_mundus %}
+                  {% trans "Erasmus Mundus" %} : {{ resume_proposition.proposition.bourse_erasmus_mundus.nom_court }}
+                {% elif resume_proposition.proposition.bourse_double_diplome %}
+                  {% trans "Double diplomation" %} : {{ resume_proposition.proposition.bourse_double_diplome.nom_court }}
+                {% elif resume_proposition.proposition.bourse_internationale %}
+                  {% trans "International scholarship" %} : {{ resume_proposition.proposition.bourse_internationale.nom_court }}
+                {% endif %}
+                </dd>
+              </dl>
+            {% endif %}
+
+            {% panel _("Parcours") %}
+              TODO
+            {% endpanel %}
           </div>
         </div>
       {% endwith %}

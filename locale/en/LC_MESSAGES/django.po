@@ -1439,6 +1439,9 @@ msgstr ""
 msgid "Custom mail templates"
 msgstr ""
 
+msgid "Cycle pursuit"
+msgstr ""
+
 msgid "DD/scholarship/EM?"
 msgstr ""
 
@@ -1677,6 +1680,11 @@ msgstr ""
 msgid "Double degree scholarship"
 msgstr ""
 
+#, fuzzy
+#| msgid "Publication"
+msgid "Double diplomation"
+msgstr "Publication"
+
 msgid "Double or triple diplomation"
 msgstr ""
 
@@ -1880,6 +1888,9 @@ msgid "External enrollment change"
 msgstr ""
 
 msgid "External reorientation"
+msgstr ""
+
+msgid "External reorientation/modification"
 msgstr ""
 
 msgid "FAC free documents"
@@ -2932,6 +2943,9 @@ msgstr ""
 msgid "Modern languages"
 msgstr ""
 
+msgid "Modification asked by the candidate"
+msgstr ""
+
 msgid "Modification author"
 msgstr ""
 
@@ -3281,6 +3295,9 @@ msgstr ""
 msgid "Page size"
 msgstr ""
 
+msgid "Parcours"
+msgstr ""
+
 msgid "Parent certificate of support from the CPAS"
 msgstr ""
 
@@ -3570,7 +3587,16 @@ msgstr ""
 msgid "Proposed thesis title"
 msgstr ""
 
+msgid "Proposition features"
+msgstr ""
+
 msgid "Proposition not found."
+msgstr ""
+
+msgid "Proposition submission"
+msgstr ""
+
+msgid "Proposition type"
 msgstr ""
 
 msgid "Proximity Commission for Dental Sciences (DENT)"
@@ -3747,6 +3773,9 @@ msgid "Remove?"
 msgstr ""
 
 msgid "Reorientation"
+msgstr ""
+
+msgid "Reorientation asked by the candidate"
 msgstr ""
 
 msgid "Replace a document"
