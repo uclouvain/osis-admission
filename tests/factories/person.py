@@ -23,7 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import operator
+import uuid
 
 import factory
 
@@ -119,8 +121,8 @@ class CompletePersonFactory(PersonFactory):
             person=self,
             obtained_diploma=False,
             country=CountryFactory(iso_code="BE"),
-            transcript=['transcript.pdf'],
-            transcript_translation=['transcript_translation.pdf'],
+            transcript=[uuid.uuid4()],
+            transcript_translation=[uuid.uuid4()],
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
@@ -191,6 +193,8 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
         )
         ProfessionalExperienceFactory(
             person=self,
+            start_date=datetime.date(current_year - 1, 1, 1),
+            end_date=datetime.date(current_year - 1, 3, 31),
         )
 
 

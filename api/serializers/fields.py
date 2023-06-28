@@ -377,6 +377,27 @@ DOCTORATE_ACTION_LINKS = {
         'method': 'GET',
         'params': ['uuid'],
     },
+    # Jury
+    'retrieve_jury_preparation': {
+        'path_name': 'admission_api_v1:jury-preparation',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_jury_preparation': {
+        'path_name': 'admission_api_v1:jury-preparation',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'list_jury_members': {
+        'path_name': 'admission_api_v1:jury-members-list',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'create_jury_members': {
+        'path_name': 'admission_api_v1:jury-members-list',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
     # Accounting
     'retrieve_accounting': {
         'path_name': 'admission_api_v1:doctorate_accounting',
@@ -470,6 +491,17 @@ GENERAL_EDUCATION_ACTION_LINKS = {
     'update_accounting': {
         'path_name': 'admission_api_v1:general_accounting',
         'method': 'PUT',
+        'params': ['uuid'],
+    },
+    # Documents
+    'retrieve_documents': {
+        'path_name': 'admission_api_v1:general_documents',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
+    'update_documents': {
+        'path_name': 'admission_api_v1:general_documents',
+        'method': 'POST',
         'params': ['uuid'],
     },
 }

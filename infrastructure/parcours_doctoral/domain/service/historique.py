@@ -26,19 +26,12 @@
 from email.message import EmailMessage
 
 from django.conf import settings
-from django.utils import translation
-from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat
 from admission.ddd.parcours_doctoral.domain.service.i_historique import IHistorique
+from admission.infrastructure.utils import get_message_to_historize
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from osis_history.utilities import add_history_entry
-
-FORMATTED_EMAIL_FOR_HISTORY = """{sender_label} : {sender}
-{recipient_label} : {recipient}
-{cc}{subject_label} : {subject}
-
-{message}"""
 
 
 class Historique(IHistorique):
@@ -46,30 +39,12 @@ class Historique(IHistorique):
     def historiser_message_au_doctorant(cls, doctorat: Doctorat, matricule_emetteur: str, message: EmailMessage):
         emetteur = PersonneConnueUclTranslator.get(matricule_emetteur)
 
-        plain_text_content = ""
-        for part in message.walk():
-            # Mail payload is decoded to bytes then decode to utf8
-            if part.get_content_type() == "text/plain":
-                plain_text_content = part.get_payload(decode=True).decode(settings.DEFAULT_CHARSET)
+        message_a_historiser = get_message_to_historize(message)
 
-        format_args = {
-            'sender_label': _("Sender"),
-            'recipient_label': _("Recipient"),
-            'subject_label': _("Subject"),
-            'sender': message.get("From"),
-            'recipient': message.get("To"),
-            'cc': "CC : {}\n".format(message.get("Cc")) if message.get("Cc") else '',
-            'subject': message.get("Subject"),
-            'message': plain_text_content,
-        }
-        with translation.override(settings.LANGUAGE_CODE_FR):
-            message_fr = FORMATTED_EMAIL_FOR_HISTORY.format(**format_args)
-        with translation.override(settings.LANGUAGE_CODE_EN):
-            message_en = FORMATTED_EMAIL_FOR_HISTORY.format(**format_args)
         add_history_entry(
             doctorat.entity_id.uuid,
-            message_fr,
-            message_en,
+            message_a_historiser[settings.LANGUAGE_CODE_FR],
+            message_a_historiser[settings.LANGUAGE_CODE_EN],
             "{emetteur.prenom} {emetteur.nom}".format(emetteur=emetteur),
             tags=["doctorat", "message"],
         )

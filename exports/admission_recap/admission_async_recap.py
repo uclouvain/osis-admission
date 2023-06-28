@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db.models import Subquery
 
 from admission.contrib.models import (
     AdmissionTask,
@@ -36,20 +35,10 @@ from admission.exports.admission_recap.admission_recap import admission_pdf_reca
 
 def _base_education_admission_pdf_recap_from_task(task_uuid: str, admission_class):
     """Generates the admission pdf for an admission and save it."""
-    admission = admission_class.objects.select_related(
-        'training__academic_year',
-        'candidate__country_of_citizenship',
-        'candidate__belgianhighschooldiploma',
-        'candidate__foreignhighschooldiploma__linguistic_regime',
-    ).get(
-        pk=Subquery(
-            AdmissionTask.objects.values('admission_id').filter(task__uuid=task_uuid)[:1],
-        )
-    )
-
-    token = admission_pdf_recap(admission, admission.candidate.language)
-    admission.pdf_recap = [token]
-    admission.save(update_fields=['pdf_recap'])
+    task = AdmissionTask.objects.select_related('admission__candidate').get(task__uuid=task_uuid)
+    token = admission_pdf_recap(task.admission, task.admission.candidate.language, admission_class)
+    task.admission.pdf_recap = [token]
+    task.admission.save(update_fields=['pdf_recap'])
 
 
 def general_education_admission_pdf_recap_from_task(task_uuid: str):

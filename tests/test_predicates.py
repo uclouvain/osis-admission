@@ -35,11 +35,14 @@ from admission.auth.predicates import (
     is_enrolled,
     is_being_enrolled,
     confirmation_paper_in_progress,
+    is_invited_to_complete,
 )
 from admission.auth.roles.cdd_configurator import CddConfigurator
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddConfiguratorFactory, PromoterRoleFactory
 from admission.tests.factories.supervision import PromoterFactory as PromoterActorFactory, _ProcessFactory
 from base.tests.factories.entity import EntityFactory
@@ -218,3 +221,15 @@ class PredicatesTestCase(TestCase):
                 confirmation_paper_in_progress(admission.candidate.user, admission),
                 'This status must not be accepted: {}'.format(status),
             )
+
+    def test_is_invited_to_complete(self):
+        admission = GeneralEducationAdmissionFactory()
+
+        valid_statuses = {
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD.name,
+        }
+
+        for status in ChoixStatutPropositionGenerale.get_names():
+            admission.status = status
+            self.assertEqual(is_invited_to_complete(admission.candidate.user, admission), status in valid_statuses)

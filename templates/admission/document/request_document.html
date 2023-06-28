@@ -1,0 +1,85 @@
+{% load i18n bootstrap3 admission %}
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<form
+    id="request-form"
+    hx-post="{% url request.resolver_match.namespace|add:':candidate-request' uuid=request.resolver_match.kwargs.uuid identifier=request.resolver_match.kwargs.identifier %}"
+    method="post"
+    hx-swap="outerHTML"
+>
+  {% bootstrap_form_errors request_form %}
+  {% csrf_token %}
+  {% bootstrap_field request_form.is_requested %}
+  {% if request_form.is_requested.value %}
+    <div id="reason-container" class="flex-content-no-wrap">
+      <div id="reason-message-container">
+        {% field_data request_form.reason.label request_reason|linebreaks %}
+      </div>
+      <button
+          class="btn btn-primary"
+          type="button"
+          data-toggle="modal"
+          data-target="#request-form-modal"
+      >
+        <i class="fa-solid fa-pen-to-square"></i>
+      </button>
+    </div>
+  {% endif %}
+  {% include 'admission/document/single_document_request_modal.html' %}
+  {% include 'admission/document/request_cancel_confirm_modal.html' %}
+</form>
+
+<script>
+  $(function () {
+    const isRequested = $('#id_is_requested').prop('checked');
+
+    $('#id_is_requested').change(function() {
+      if (this.checked) {
+        $('#request-form-modal').modal('show');
+      } else {
+        {% if document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES %}
+          $('#cancel-request-form-modal').modal('show');
+        {% else %}
+          $('#cancel-request-form-modal button[type="submit"]').click();
+        {% endif %}
+      }
+    });
+
+    $('#request-form-modal').on('shown.bs.modal', function () {
+      $('#request-form-modal textarea').focus();
+    });
+
+    $('.cancel-button').on('click', function () {
+      $('#id_is_requested').prop('checked', isRequested);
+    });
+
+    $('#request-form').on('htmx:beforeSend', function (evt) {
+      $('.modal').modal('hide');
+    });
+
+    {% if request_form.is_bound and not request_form.is_valid %}
+      $('#request-form-modal').modal('show');
+    {% endif %}
+  });
+</script>

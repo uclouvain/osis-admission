@@ -26,6 +26,7 @@
 from typing import List
 
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from osis_common.ddd import interface
 
 
@@ -36,4 +37,14 @@ class ISuperQuestionSpecifiqueTranslator(interface.DomainService):
         proposition_uuid: str,
         onglets: List[str] = None,
     ) -> List['QuestionSpecifique']:
+        raise NotImplementedError
+
+    @classmethod
+    def search_dto_by_proposition(
+        cls,
+        proposition_uuid: str,
+        onglets: List[str] = None,
+        type: str = None,
+        requis: bool = None,
+    ) -> List['QuestionSpecifiqueDTO']:
         raise NotImplementedError

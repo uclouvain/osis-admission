@@ -46,6 +46,7 @@ from admission.ddd.admission.enums import (
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import comptabilite_non_remplie, Comptabilite
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -92,8 +93,12 @@ class Proposition(interface.RootEntity):
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
     est_inscription_tardive: bool = False
+    checklist_initiale: Optional[StatutsChecklistGenerale] = None
+    checklist_actuelle: Optional[StatutsChecklistGenerale] = None
 
     profil_soumis_candidat: ProfilCandidat = None
+
+    documents_demandes: Dict = attr.Factory(dict)
 
     def modifier_choix_formation(
         self,
@@ -135,6 +140,18 @@ class Proposition(interface.RootEntity):
             self.formulaire_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
+
+    def reclamer_documents_par_sic(self):
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC
+
+    def reclamer_documents_par_fac(self):
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD
+
+    def completer_documents_par_candidat(self):
+        self.statut = {
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC: ChoixStatutPropositionGenerale.TRAITEMENT_SIC,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD: ChoixStatutPropositionGenerale.TRAITEMENT_FAC_CDD,
+        }.get(self.statut)
 
     def completer_curriculum(
         self,

@@ -137,6 +137,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
                     'retrieve_complementary_training',
                     'retrieve_course_enrollment',
                     'destroy_proposition',
+                    'retrieve_jury_preparation',
                 ]
             },
         }
@@ -191,6 +192,8 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
                 'submit_proposition',
                 # Proposition
                 'destroy_proposition',
+                'retrieve_documents',
+                'update_documents',
             ]
         }
     )
@@ -199,6 +202,7 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
     erreurs = None
     reponses_questions_specifiques = None
     elements_confirmation = None
+    documents_demandes = None
 
     class Meta:
         source = FormationGeneralePropositionDTO
@@ -326,6 +330,9 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'retrieve_doctoral_training': DOCTORATE_ACTION_LINKS['retrieve_doctoral_training'],
             'retrieve_complementary_training': DOCTORATE_ACTION_LINKS['retrieve_complementary_training'],
             'retrieve_course_enrollment': DOCTORATE_ACTION_LINKS['retrieve_course_enrollment'],
+            # Jury
+            'retrieve_jury_preparation': DOCTORATE_ACTION_LINKS['retrieve_jury_preparation'],
+            'list_jury_members': DOCTORATE_ACTION_LINKS['list_jury_members'],
         }
     )
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
@@ -411,12 +418,15 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
                 # Proposition
                 'destroy_proposition',
                 'submit_proposition',
+                'retrieve_documents',
+                'update_documents',
             ]
         }
     )
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
     elements_confirmation = None
+    documents_demandes = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

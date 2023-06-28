@@ -34,12 +34,12 @@
   {% for field in fields %}
     <div class="row">
       <div class="col-md-12">
-        {% if field.form_item.type == 'MESSAGE' %}
-          <p class="plain-text-widget {{ field.form_item.configuration.CLASSE_CSS }}">{{ field.form_item.value }}</p>
-        {% elif field.form_item.configuration.TAILLE_TEXTE == 'LONG' and field.form_item.value %}
-          {% field_data field.form_item.translated_title field.form_item.value|linebreaks %}
+        {% if field.type == 'MESSAGE' %}
+          <p class="plain-text-widget {{ field.configuration.CLASSE_CSS }}">{{ field.valeur_formatee }}</p>
+        {% elif field.configuration.TAILLE_TEXTE == 'LONG' and field.valeur_formatee %}
+          {% field_data field.label field.valeur_formatee|linebreaks %}
         {% else %}
-          {% field_data field.form_item.translated_title field.form_item.value %}
+          {% field_data field.label field.valeur_formatee %}
         {% endif %}
       </div>
     </div>

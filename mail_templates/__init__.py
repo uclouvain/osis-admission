@@ -31,6 +31,7 @@ try:
     from .confirmation_paper import *
     from .submission import *
     from .training import *
+    from .document import *
 except DuplicateMailTemplateIdentifier:
     import sys
 

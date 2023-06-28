@@ -31,7 +31,8 @@ from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireFormation,
     CritereItemFormulaireNationaliteCandidat,
     CritereItemFormulaireLangueEtudes,
-    CritereItemFormulaireVIP, Onglets,
+    CritereItemFormulaireVIP,
+    Onglets,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
 
@@ -90,6 +91,7 @@ class AdmissionFormItemInstantiationFactory(factory.DjangoModelFactory):
 
     education_group_type = None
     education_group = None
+    admission = None
     required = False
 
     weight = factory.fuzzy.FuzzyInteger(1, 10)

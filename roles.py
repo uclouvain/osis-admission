@@ -28,20 +28,20 @@ from admission.auth.predicates import (
     is_enrolled,
     is_part_of_education_group,
     is_pre_admission,
-    submitted_confirmation_paper,
+    submitted_confirmation_paper, is_jury_in_progress,
 )
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
+from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_configurator import CddConfigurator
+from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.jury_secretary import JurySecretary
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
-from admission.auth.roles.central_manager import CentralManager
 from osis_role import role
-from admission.auth.roles.candidate import Candidate
 
 role.role_manager.register(Candidate)
 role.role_manager.register(AdreSecretary)
@@ -75,6 +75,8 @@ def base_program_manager_rules():
         'admission.refuse_activity': is_part_of_education_group & is_enrolled,
         'admission.restore_activity': is_part_of_education_group & is_enrolled,
         # -- Jury
+        'admission.view_admission_jury': is_part_of_education_group & is_enrolled & is_jury_in_progress,
+        'admission.change_admission_jury': is_part_of_education_group & is_enrolled & is_jury_in_progress,
         # -- Défense
         # -- Soutenance
     }

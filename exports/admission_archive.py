@@ -31,12 +31,13 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import AdmissionTask, DoctorateAdmission, SupervisionActor
 from admission.contrib.models.doctorate import PropositionProxy
+from admission.exceptions import MergePDFException
 from admission.exports.utils import admission_generate_pdf
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
 from base.models.student import Student
 from osis_document.api.utils import confirm_remote_upload, launch_post_processing
-from osis_document.contrib.post_processing.post_processing_enums import PostProcessingEnums
+from osis_document.contrib.post_processing.post_processing_enums import PostProcessingEnums, PageFormatEnums
 from osis_profile.models import EducationalExperience
 from osis_signature.enums import SignatureState
 from osis_signature.models import StateHistory
@@ -94,7 +95,15 @@ def admission_pdf_archive(task_uuid, language=None):
             str(file_uuid) for file_uuid in [generated_uuid] + admission.project_document + admission.gantt_graph
         ],
         post_processing_types=[PostProcessingEnums.MERGE_PDF.name],
+        post_process_params={
+            PostProcessingEnums.MERGE_PDF.name: {
+                'output_filename': f'pdf_archive_{generated_uuid}',
+            },
+        },
     )
+
+    if output.get('error'):
+        raise MergePDFException(output['error'])
 
     admission.archived_record_signatures_sent = [uuid.UUID(output[PostProcessingEnums.MERGE_PDF.name]['output'][0])]
     admission.save(update_fields=['archived_record_signatures_sent'])

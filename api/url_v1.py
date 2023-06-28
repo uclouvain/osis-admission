@@ -116,6 +116,10 @@ urlpatterns = [
     path('propositions/doctorate/<uuid:uuid>/confirmation/last', views.LastConfirmationAPIView),
     path('propositions/doctorate/<uuid:uuid>/confirmation/last/canvas', views.LastConfirmationCanvasAPIView),
     path('propositions/doctorate/<uuid:uuid>/supervised_confirmation', views.SupervisedConfirmationAPIView),
+    # Jury
+    path('propositions/doctorate/<uuid:uuid>/jury/preparation', views.JuryPreparationAPIView),
+    path('propositions/doctorate/<uuid:uuid>/jury/members', views.JuryMembersListAPIView),
+    path('propositions/doctorate/<uuid:uuid>/jury/members/<uuid:member_uuid>', views.JuryMemberDetailAPIView),
     # Doctorate
     path('propositions/doctorate/<uuid:uuid>/doctorate', views.DoctorateAPIView),
     # Training
@@ -143,6 +147,7 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/accounting', views.GeneralAccountingView),
     _path('propositions/general-education/<uuid:uuid>/', include(general_education_view_set_router.urls)),
     path('propositions/general-education/<uuid:uuid>/submit', views.SubmitGeneralEducationPropositionView),
+    path('propositions/general-education/<uuid:uuid>/documents', views.GeneralRequestedDocumentListView),
     # > Continuing education
     path('propositions/continuing-education', views.ContinuingTrainingChoiceAPIView),
     path('propositions/continuing-education/<uuid:uuid>', views.ContinuingPropositionView),

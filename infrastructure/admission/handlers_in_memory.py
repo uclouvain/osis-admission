@@ -29,6 +29,13 @@ from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_d
     ListerToutesDemandesInMemory,
 )
 
+from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+    emplacement_document_in_memory_repository,
+)
+
+_emplacement_document_repository = emplacement_document_in_memory_repository
+
+
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
         cmd,

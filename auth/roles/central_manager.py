@@ -80,11 +80,15 @@ class CentralManager(EntityRoleModel):
             'admission.change_admission_cotutelle': is_entity_manager,
             'admission.view_admission_supervision': is_entity_manager,
             'admission.change_admission_supervision': is_entity_manager,
+            'admission.view_admission_jury': is_entity_manager,
+            'admission.change_admission_jury': is_entity_manager,
             'admission.add_supervision_member': is_entity_manager,
             'admission.remove_supervision_member': is_entity_manager,
             'admission.view_internalnote': is_entity_manager,
             'admission.view_debug_info': is_entity_manager & is_debug,
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
+            'admission.view_documents_management': is_entity_manager,
+            'admission.view_checklist': is_entity_manager,
         }
         return RuleSet(ruleset)

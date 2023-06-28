@@ -64,6 +64,10 @@ from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_y
 
 @freezegun.freeze_time('2020-10-15')
 class ElementsConfirmationTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        ProfilCandidatInMemoryTranslator.reset()
+
     def test_recuperer_elements_confirmation_doctorat(self):
         elements = message_bus_in_memory_instance.invoke(
             RecupererElementsConfirmationDoctoratQuery(uuid_proposition="uuid-SC3DP")

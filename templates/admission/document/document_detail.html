@@ -1,0 +1,100 @@
+{% load osis_document %}
+{% load i18n admission bootstrap3 %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div id="document-details">
+  {% if not document_identifier %}
+    <p id="empty-document-details">
+      {% translate 'To visualize and edit a document, please select it in the list opposite.' %}
+      <i id="empty-document-icon" class="fa-solid fa-file-import"></i>
+    </p>
+  {% else %}
+    {# Viewer for received or internal documents or default content if there is no document #}
+    {% document_component document_write_token document_metadata %}
+
+    {# Actions #}
+    <div
+        class="btn-group mt-1"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    >
+      {% if document_uuid %}
+        {# Received or internal documents #}
+        <a
+            class="btn btn-default"
+            href="{{ document_metadata.url }}?dl=1"
+            target="_blank"
+            title="{% translate 'Download the document' %}"
+        >
+          <i class="fas fa-download"></i>
+        </a>
+        {% if editable_document %}
+          <button
+              class="btn btn-danger"
+              data-toggle="modal"
+              data-target="#delete-confirm-modal"
+              title="{% translate 'Delete the document' %}"
+          >
+            <i class="fas fa-trash"></i>
+          </button>
+          {% include 'admission/document/delete_confirm_modal.html' %}
+          <button
+              class="btn btn-default"
+              data-toggle="modal"
+              data-target="#document-replace-modal"
+              title="{% translate 'Replace the document' %}"
+          >
+            <i class="fa-solid fa-upload"></i>
+          </button>
+          <div>
+            {% include 'admission/document/replace_document_modal.html' %}
+          </div>
+
+        {% endif %}
+
+      {% elif editable_document %}
+        {# Missing documents #}
+        <button
+            class="btn btn-default"
+            data-toggle="modal"
+            data-target="#document-upload-modal"
+            title="{% translate 'Upload a document' %}"
+        >
+          <i class="fa-solid fa-upload"></i>
+        </button>
+        <div>
+          {% include 'admission/document/upload_document_modal.html' %}
+        </div>
+      {% endif %}
+    </div>
+
+    {% if editable_document and requestable_document %}
+      <div>
+        {% if document_uuid %}<hr>{% endif %}
+        {% include 'admission/document/request_document.html' %}
+      </div>
+    {% endif %}
+  {% endif %}
+</div>

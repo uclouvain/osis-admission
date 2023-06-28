@@ -28,12 +28,14 @@ import re
 from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
-from typing import Optional, Union
+from typing import Union, Optional, List
 
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
+from django.template.defaultfilters import date
 from django.urls import NoReverseMatch, reverse
+from django.utils.dateparse import parse_datetime
 from django.utils.safestring import SafeString
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from rules.templatetags import rules
@@ -42,14 +44,14 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES
+from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
-from admission.ddd.admission.enums import TYPES_ITEMS_LECTURE_SEULE, TypeItemFormulaire
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.repository.i_proposition import formater_reference
@@ -62,7 +64,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import format_academic_year, get_uuid_value
+from admission.utils import format_academic_year
 from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
@@ -171,7 +173,7 @@ def reduce_list_separated(arg1, arg2, separator=", "):
 
 
 @register_panel('panel.html', takes_context=True)
-def panel(context, title='', title_level=4, additional_class='', **kwargs):
+def panel(context, title='', title_level=4, additional_class='', edit_button='', **kwargs):
     """
     Template tag for panel
     :param title: the panel title
@@ -182,6 +184,8 @@ def panel(context, title='', title_level=4, additional_class='', **kwargs):
     context['title'] = title
     context['title_level'] = title_level
     context['additional_class'] = additional_class
+    if edit_button:
+        context['edit_button'] = edit_button
     context['attributes'] = {k.replace('_', '-'): v for k, v in kwargs.items()}
     return context
 
@@ -288,9 +292,9 @@ TAB_TREES = {
             Tab('complementary-training', _('Complementary training')),
             Tab('course-enrollment', _('Course enrollment')),
         ],
-        Tab('defense', pgettext('tab', 'Defense'), 'person-chalkboard'): [
-            # TODO
-            # Tab('jury', _('Jury')),
+        Tab('defense', pgettext('doctorate tab', 'Defense'), 'person-chalkboard'): [
+            Tab('jury-preparation', pgettext('admission tab', 'Defense method')),
+            Tab('jury', _('Jury composition')),
         ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('history-all', _('All history')),
@@ -305,6 +309,12 @@ TAB_TREES = {
         # TODO Documents
     },
     CONTEXT_GENERAL: {
+        Tab('documents', _('Documents'), 'folder-open'): [
+            Tab('documents', _('Documents'), 'folder-open'),
+        ],
+        Tab('checklist', _('Checklist'), 'list-check'): [
+            Tab('checklist', _('Checklist'), 'list-check'),
+        ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
@@ -385,6 +395,8 @@ def default_tab_context(context):
 
     if len(match.namespaces) > 2 and match.namespaces[2] != 'update':
         active_tab = match.namespaces[2]
+    elif len(match.namespaces) > 3 and match.namespaces[3] == 'jury-member':
+        active_tab = 'jury'
 
     tab_tree = TAB_TREES[get_current_context(context['view'].get_permission_object())]
     active_parent = get_active_parent(tab_tree, active_tab)
@@ -478,11 +490,16 @@ def field_data(
     translate_data=False,
     inline=False,
     html_tag='',
+    tooltip=None,
 ):
-    for_pdf = context.get('for_pdf')
+    if context.get('all_inline') is True:
+        inline = True
 
     if isinstance(data, list):
-        if for_pdf:
+        if context.get('hide_files') is True:
+            data = None
+            hide_empty = True
+        elif context.get('load_files') is False:
             data = _('Specified') if data else _('Not specified')
         elif data:
             template_string = "{% load osis_document %}{% document_visualizer files %}"
@@ -495,7 +512,7 @@ def field_data(
     elif translate_data is True:
         data = _(data)
 
-    if inline is True or for_pdf:
+    if inline is True:
         if name and name[-1] not in ':?!.':
             name = _("%(label)s:") % {'label': name}
         css_class = (css_class + ' inline-field-data') if css_class else 'inline-field-data'
@@ -507,6 +524,7 @@ def field_data(
         'hide_empty': hide_empty,
         'html_tag': html_tag,
         'inline': inline,
+        'tooltip': tooltip,
     }
 
 
@@ -520,6 +538,28 @@ def get_image_file_url(file_uuids):
             if metadata and metadata.get('mimetype') in IMAGE_MIME_TYPES:
                 return metadata.get('url')
     return ''
+
+
+@register.inclusion_tag('admission/dummy.html')
+def document_component(document_write_token, document_metadata):
+    """Display the right editor component depending on the file type."""
+    if document_metadata:
+        if document_metadata.get('mimetype') == PDF_MIME_TYPE:
+            return {
+                'template': 'osis_document/editor.html',
+                'value': document_write_token,
+                'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+            }
+        elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
+            return {
+                'template': 'admission/image.html',
+                'url': document_metadata.get('url'),
+                'alt': document_metadata.get('name'),
+            }
+    return {
+        'template': 'admission/no_document.html',
+        'message': _('Non-retrievable document') if document_write_token else _('No document'),
+    }
 
 
 @register.filter
@@ -693,34 +733,13 @@ def concat(*args):
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
-def multiple_field_data(context, configurations, data, title=_('Specificities')):
-    """Display the answers of the specific questions based on a list of configurations and a data dictionary"""
-    current_language = get_language()
-
-    if not data:
-        data = {}
-
-    for field_instantiation in configurations:
-        field = field_instantiation.form_item
-        if field.type in TYPES_ITEMS_LECTURE_SEULE:
-            value = field.text.get(current_language, '')
-        elif field.type == TypeItemFormulaire.DOCUMENT.name:
-            value = [get_uuid_value(token) for token in data.get(str(field.uuid), [])]
-        elif field.type == TypeItemFormulaire.SELECTION.name:
-            current_value = data.get(str(field.uuid))
-            selected_options = set(current_value) if isinstance(current_value, list) else {current_value}
-            value = ', '.join(
-                [value.get(current_language) for value in field.values if value.get('key') in selected_options]
-            )
-        else:
-            value = data.get(str(field.uuid))
-        setattr(field, 'value', value)
-        setattr(field, 'translated_title', field.title.get(current_language))
-
+def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specificities')):
+    """Display the answers of the specific questions based on a list of configurations."""
     return {
         'fields': configurations,
         'title': title,
-        'for_pdf': context.get('for_pdf'),
+        'all_inline': context.get('all_inline'),
+        'load_files': context.get('load_files'),
     }
 
 
@@ -742,10 +761,22 @@ def get_item(dictionary, value):
     return dictionary.get(value, value)
 
 
+@register.filter
+def get_item_or_none(dictionary, value):
+    """Returns the value of a key in a dictionary if it exists else None"""
+    return dictionary.get(value)
+
+
 @register.simple_tag
 def get_item_or_default(dictionary, value, default=None):
     """Returns the value of a key in a dictionary if it exists else the default value itself"""
     return dictionary.get(value, default)
+
+
+@register.filter
+def part_of_dict(member, container):
+    """Check if a dict is containing into another one"""
+    return member.items() <= container.items()
 
 
 @register.simple_tag
@@ -787,3 +818,19 @@ def get_country_name(country: Optional[Country]):
     if not country:
         return ''
     return getattr(country, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
+
+
+@register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
+def checklist_state_button(context, **kwargs):
+    expected_attrs = {arg_name: kwargs.pop(arg_name, None) for arg_name in ['label', 'icon', 'state', 'class', 'tab']}
+    return {
+        'current': context['current'] or context['initial'],
+        **expected_attrs,
+        'extra': kwargs,
+        'view': context['view'],
+    }
+
+
+@register.filter
+def edit_button(string, url):
+    return str(string) + f'<a class="btn btn-default" href="{url}"><i class="fas fa-edit"></i></a>'

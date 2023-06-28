@@ -101,6 +101,9 @@ class AdmissionAdminMixin(admin.ModelAdmin):
     ]
     search_fields = [
         'reference',
+        'candidate__global_id',
+        'candidate__last_name',
+        'candidate__first_name',
     ]
     readonly_fields = [
         'detailed_status',
@@ -328,7 +331,7 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
         AcademicYearListFilter,
     ]
     raw_id_fields = ['education_group']
-    autocomplete_fields = ['form_item']
+    autocomplete_fields = ['form_item', 'admission']
     form = AdmissionFormItemInstantiationForm
 
     @admin.display(boolean=True, description=_('Is active?'))

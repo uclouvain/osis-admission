@@ -7,6 +7,8 @@
 openapi-generator-cli generate -i admission/schema.yml -g python -o ../osis-portal/osis-admission-sdk --additional-properties packageName=osis_admission_sdk --additional-properties projectName=osis_admission_sdk
 ```
 
+openapi-generator-cli 5.4.0
+
 ## Type checking
 
 Install dependencies

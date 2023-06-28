@@ -39,12 +39,12 @@ from django.utils import translation
 from django.utils.translation import gettext as _
 from django.views import View
 
+from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -57,7 +57,6 @@ from admission.templatetags.admission import (
     sortable_header_div,
     strip,
     update_tab_path_from_detail,
-    multiple_field_data,
     get_first_truthy_value,
     get_item,
     interpolate,
@@ -69,17 +68,12 @@ from admission.templatetags.admission import (
     formatted_language,
     get_item_or_default,
     has_value,
+    document_component,
+    get_item_or_none,
+    part_of_dict,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.form_item import (
-    DocumentAdmissionFormItemFactory,
-    AdmissionFormItemInstantiationFactory,
-    MessageAdmissionFormItemFactory,
-    TextAdmissionFormItemFactory,
-    RadioButtonSelectionAdmissionFormItemFactory,
-    CheckboxSelectionAdmissionFormItemFactory,
-)
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
@@ -338,6 +332,46 @@ class AdmissionFieldsDataTestCase(TestCase):
         self.assertEqual(result['name'], 'My field label')
         self.assertEqual(result['data'], '')
 
+    def test_field_data_with_all_inline(self):
+        result = field_data(
+            context={'all_inline': True},
+            name='My field label',
+            data='value',
+        )
+        self.assertEqual(result['inline'], True)
+
+        result = field_data(
+            context={'all_inline': True},
+            name='My field label',
+            data='value',
+            inline=False,
+        )
+        self.assertEqual(result['inline'], True)
+
+    def test_field_data_without_files(self):
+        result = field_data(
+            context={'hide_files': True},
+            name='My field label',
+            data=['my_file'],
+        )
+        self.assertEqual(result['data'], None)
+        self.assertEqual(result['hide_empty'], True)
+
+    def test_field_data_without_files_load(self):
+        result = field_data(
+            context={'load_files': False},
+            name='My field label',
+            data=['my_file'],
+        )
+        self.assertEqual(result['data'], _('Specified'))
+
+        result = field_data(
+            context={'load_files': False},
+            name='My field label',
+            data=[],
+        )
+        self.assertEqual(result['data'], _('Not specified'))
+
 
 class DisplayTagTestCase(TestCase):
     def test_comma(self):
@@ -413,58 +447,50 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(admission.training_management_faculty, 'FFC')
         self.assertEqual(formatted_reference(admission), f'M-FFC22-{str(admission)}')
 
+    def test_document_component(self):
+        # No metadata and no token
+        component = document_component('', {})
+        self.assertEqual(component, {'template': 'admission/no_document.html', 'message': _('No document')})
 
-@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl.com/document/', LANGUAGE_CODE='en')
-class MultipleFieldDataTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.configurations = [
-            AdmissionFormItemInstantiationFactory(
-                form_item=MessageAdmissionFormItemFactory(),
-            ),
-            AdmissionFormItemInstantiationFactory(
-                form_item=TextAdmissionFormItemFactory(),
-            ),
-            AdmissionFormItemInstantiationFactory(
-                form_item=DocumentAdmissionFormItemFactory(),
-            ),
-            AdmissionFormItemInstantiationFactory(
-                form_item=RadioButtonSelectionAdmissionFormItemFactory(),
-            ),
-            AdmissionFormItemInstantiationFactory(
-                form_item=CheckboxSelectionAdmissionFormItemFactory(),
-            ),
-        ]
+        # No metadata with a token
+        component = document_component('token', {})
+        self.assertEqual(
+            component, {'template': 'admission/no_document.html', 'message': _('Non-retrievable document')}
+        )
 
-    def test_multiple_field_data_return_right_values_with_valid_data(self):
-        first_uuid = uuid.uuid4()
-        result = multiple_field_data(
-            context={'for_pdf': False},
-            configurations=self.configurations,
-            data={
-                str(self.configurations[1].form_item.uuid): 'My response',
-                str(self.configurations[2].form_item.uuid): [str(first_uuid), 'other-token'],
-                str(self.configurations[3].form_item.uuid): '1',
-                str(self.configurations[4].form_item.uuid): ['1', '2'],
+        # With metadata for a PDF file
+        component = document_component(
+            'token',
+            {
+                'mimetype': PDF_MIME_TYPE,
             },
         )
-        self.assertEqual(result['fields'][0].form_item.value, 'My very short message.')
-        self.assertEqual(result['fields'][1].form_item.value, 'My response')
-        self.assertEqual(result['fields'][2].form_item.value, [first_uuid, 'other-token'])
-        self.assertEqual(result['fields'][3].form_item.value, 'One')
-        self.assertEqual(result['fields'][4].form_item.value, 'One, Two')
-
-    def test_multiple_field_data_return_right_values_with_empty_data(self):
-        result = multiple_field_data(
-            context={'for_pdf': False},
-            configurations=self.configurations,
-            data={},
+        self.assertEqual(
+            component,
+            {
+                'template': 'osis_document/editor.html',
+                'value': 'token',
+                'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+            },
         )
-        self.assertEqual(result['fields'][0].form_item.value, 'My very short message.')
-        self.assertEqual(result['fields'][1].form_item.value, None)
-        self.assertEqual(result['fields'][2].form_item.value, [])
-        self.assertEqual(result['fields'][3].form_item.value, '')
-        self.assertEqual(result['fields'][4].form_item.value, '')
+
+        # With metadata for a PNG file
+        component = document_component(
+            'token',
+            {
+                'mimetype': PNG_MIME_TYPE,
+                'url': 'url',
+                'name': 'name',
+            },
+        )
+        self.assertEqual(component, {'template': 'admission/image.html', 'url': 'url', 'alt': 'name'})
+
+    def test_get_item_or_none(self):
+        dictionary = {
+            'a': 1,
+        }
+        self.assertEqual(get_item_or_none(dictionary, 'a'), 1)
+        self.assertEqual(get_item_or_none(dictionary, 'b'), None)
 
 
 class SimpleAdmissionTemplateTagsTestCase(TestCase):
@@ -548,6 +574,15 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         self.assertFalse(has_value({}, ['value1']))
         self.assertFalse(has_value({'value2': 10}, ['value1']))
         self.assertTrue(has_value({'value1': False}, ['value1']))
+
+    def test_part_of_dict(self):
+        self.assertTrue(part_of_dict({}, {}))
+        self.assertTrue(part_of_dict({'a': 1}, {'a': 1}))
+        self.assertTrue(part_of_dict({'a': 1}, {'a': 1, 'b': 2}))
+        self.assertFalse(part_of_dict({'a': 1}, {'a': 2}))
+        self.assertFalse(part_of_dict({'a': 1}, {'b': 1}))
+        self.assertTrue(part_of_dict({}, {'a': 1}))
+        self.assertFalse(part_of_dict({'a': 1}, {}))
 
 
 class AdmissionTagsTestCase(TestCase):

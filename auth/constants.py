@@ -50,10 +50,16 @@ READ_ACTIONS_BY_TAB = {
     'doctoral-training': 'admission.view_doctoral_training',
     'complementary-training': 'admission.view_complementary_training',
     'course-enrollment': 'admission.view_course_enrollment',
+    # Jury
+    'jury-preparation': 'admission.view_admission_jury',
+    'jury': 'admission.view_admission_jury',
     # Management
     'internal-note': 'admission.view_internalnote',
     'debug': 'admission.view_debug_info',
     'comments': 'admission.view_enrolment_application',
+    'checklist': 'admission.view_checklist',
+    # Documents
+    'documents': 'admission.view_documents_management',
 }
 
 # Association between a write-only tab name (path name) and a permission
@@ -79,4 +85,9 @@ UPDATE_ACTIONS_BY_TAB = {
     'doctoral-training': '',
     'complementary-training': '',
     'course-enrollment': '',
+    # Management
+    'documents': 'admission.view_documents_management',
+    # Jury
+    'jury-preparation': 'admission.change_admission_jury',
+    'jury': 'admission.change_admission_jury',
 }

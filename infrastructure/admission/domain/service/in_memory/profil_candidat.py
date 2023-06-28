@@ -26,11 +26,9 @@
 
 import datetime
 from dataclasses import dataclass
-from functools import reduce
 from typing import Dict, List, Optional
 
 import attr
-from dateutil import relativedelta
 
 from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
@@ -1019,17 +1017,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         return {annee: False for annee in annees}
 
     @classmethod
-    def compte_nombre_mois(cls, nb_total_mois, experience_courante: ExperienceNonAcademique):
-        delta = relativedelta.relativedelta(experience_courante.date_fin, experience_courante.date_debut)
-        return nb_total_mois + (12 * delta.years + delta.months) + 1
-
-    @classmethod
     def est_potentiel_vae(cls, matricule: str) -> bool:
-        experiences = [experience for experience in cls.experiences_non_academiques if experience.personne == matricule]
-        return (
-            reduce(lambda total, experience: cls.compte_nombre_mois(total, experience), experiences, 0)
-            >= cls.NB_MOIS_MIN_VAE
-        )
+        curriculum = cls.get_curriculum(matricule, datetime.date.today().year)
+        return curriculum.candidat_est_potentiel_vae
 
     @classmethod
     def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
@@ -1040,14 +1030,19 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_connaissances_langues(cls, matricule: str) -> List[ConnaissanceLangueDTO]:
-        return [ConnaissanceLangueDTO(
-            nom_langue=connaissance.langue.nom_langue,
-            langue=connaissance.langue.code_langue,
-            comprehension_orale=connaissance.comprehension_orale,
-            capacite_orale=connaissance.capacite_orale,
-            capacite_ecriture=connaissance.capacite_ecriture,
-            certificat=connaissance.certificat,
-        ) for connaissance in cls.connaissances_langues if connaissance.personne == matricule]
+        return [
+            ConnaissanceLangueDTO(
+                nom_langue_fr=connaissance.langue.nom_langue,
+                nom_langue_en=connaissance.langue.nom_langue,
+                langue=connaissance.langue.code_langue,
+                comprehension_orale=connaissance.comprehension_orale,
+                capacite_orale=connaissance.capacite_orale,
+                capacite_ecriture=connaissance.capacite_ecriture,
+                certificat=connaissance.certificat,
+            )
+            for connaissance in cls.connaissances_langues
+            if connaissance.personne == matricule
+        ]
 
     @classmethod
     def recuperer_toutes_informations_candidat(
