@@ -630,10 +630,11 @@ def training_categories(activities):
     added, validated = 0, 0
 
     categories = {
-        _("Participation"): [0, 0],
-        _("Scientific communication"): [0, 0],
-        _("Publication"): [0, 0],
-        _("Courses and training"): [0, 0],
+        _("Participation to symposium/conference"): [0, 0],
+        _("Oral communication"): [0, 0],
+        _("Seminar taken"): [0, 0],
+        _("Publications"): [0, 0],
+        _("Courses taken"): [0, 0],
         _("Services"): [0, 0],
         _("VAE"): [0, 0],
         _("Scientific residencies"): [0, 0],
@@ -651,19 +652,18 @@ def training_categories(activities):
 
         # Increment category counts
         index = int(activity.status == StatutActivite.ACCEPTEE.name)
-        if (
-            activity.category == CategorieActivite.CONFERENCE.name
-            or activity.category == CategorieActivite.SEMINAR.name
-        ):
-            categories[_("Participation")][index] += activity.ects
+        if activity.category == CategorieActivite.CONFERENCE.name:
+            categories[_("Participation to symposium/conference")][index] += activity.ects
+        elif activity.category == CategorieActivite.SEMINAR.name:
+            categories[_("Seminar taken")][index] += activity.ects
         elif activity.category == CategorieActivite.COMMUNICATION.name and (
             activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
         ):
-            categories[_("Scientific communication")][index] += activity.ects
+            categories[_("Oral communication")][index] += activity.ects
         elif activity.category == CategorieActivite.PUBLICATION.name and (
             activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
         ):
-            categories[_("Publication")][index] += activity.ects
+            categories[_("Publications")][index] += activity.ects
         elif activity.category == CategorieActivite.SERVICE.name:
             categories[_("Services")][index] += activity.ects
         elif (
@@ -675,7 +675,7 @@ def training_categories(activities):
         elif activity.category == CategorieActivite.VAE.name:
             categories[_("VAE")][index] += activity.ects
         elif activity.category in [CategorieActivite.COURSE.name, CategorieActivite.UCL_COURSE.name]:
-            categories[_("Courses and training")][index] += activity.ects
+            categories[_("Courses taken")][index] += activity.ects
         elif (
             activity.category == CategorieActivite.PAPER.name
             and activity.type == ChoixTypeEpreuve.CONFIRMATION_PAPER.name
