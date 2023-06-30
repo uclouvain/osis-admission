@@ -369,9 +369,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             attestation_inscription_reguliere=admission.regular_registration_proof,
             pdf_recapitulatif=admission.pdf_recap,
             documents_demandes=admission.requested_documents,
-            documents_libres_fac_candidats=admission.fac_documents,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
-            documents_libres_sic_candidats=admission.sic_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
         )
 

@@ -233,7 +233,7 @@ class PredicatesTestCase(TestCase):
 
         valid_statuses = {
             ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
-            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD.name,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
         }
 
         for status in ChoixStatutPropositionGenerale.get_names():

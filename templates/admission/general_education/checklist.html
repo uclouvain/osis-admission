@@ -41,30 +41,35 @@
     </div>
 
     {% include "admission/general_education/checklist_menu.html" %}
+    {% url base_namespace|add:":checklist" view.kwargs.uuid as checklist_url %}
+    {% concat '?next=' checklist_url '&next_hash_url=' as next_base_url %}
     {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
     {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
     {% url base_namespace|add:":update:accounting" view.kwargs.uuid as accounting_url %}
     {% url base_namespace|add:":update:training_choice" view.kwargs.uuid as training_choice_url %}
-
 
     <div
         id="tabs-content"
         class="tab-content"
         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
     >
-      {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation next_url='?next=assimilation' %}
+      {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation next_url=next_base_url|add:'assimilation' %}
         <div role="tabpanel" class="tab-pane in active" id="assimilation">
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
             {% checklist_state_button tab='assimilation' label=initial_state_label icon='user' state=initial.statut class='muted' %}
-            {% checklist_state_button tab='assimilation' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}
             {% checklist_state_button tab='assimilation' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
-            {% checklist_state_button tab='assimilation' label=_("To be completed for application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}
-            {% checklist_state_button tab='assimilation' label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
+            {% checklist_state_button tab='assimilation' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}
+            {% checklist_state_button tab='assimilation' label=_("To be completed after application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}
+            {% translate "Validated" context "assimilation-checklist" as validated_label %}
+            {% checklist_state_button tab='assimilation' label=validated_label icon='check' state='GEST_REUSSITE' class='success' %}
           </div>
 
           {% bootstrap_form comment_forms.assimilation %}
-          {% bootstrap_form assimilation_form %}
+
+          <form method="post" >
+            {% bootstrap_form assimilation_form %}
+          </form>
 
           <div class="info-part">
             {% firstof person_url|add:next_url as contextual_person_url %}
@@ -75,7 +80,7 @@
         </div>
       {% endwith %}
 
-      {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles %}
+      {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
@@ -88,8 +93,8 @@
           {% bootstrap_form comment_forms.donnees_personnelles %}
 
           <div class="info-part">
-            {% include 'admission/exports/recap/includes/person.html' with identification=resume_proposition.identification edit_button=person_url|add:'?next=donnees_personnelles' %}
-            {% include 'admission/exports/recap/includes/coordonnees.html' with coordonnees=resume_proposition.coordonnees edit_button=coordonnees_url|add:'?next=donnees_personnelles' %}
+            {% include 'admission/exports/recap/includes/person.html' with identification=resume_proposition.identification edit_button=person_url|add:next_url %}
+            {% include 'admission/exports/recap/includes/coordonnees.html' with coordonnees=resume_proposition.coordonnees edit_button=coordonnees_url|add:next_url %}
           </div>
         </div>
       {% endwith %}
@@ -101,7 +106,8 @@
           </div>
         </div>
       {% endwith %}
-      {% with next_url='?next=frais_dossier' %}
+
+      {% with next_url=next_base_url|add:'frais_dossier' %}
         <div role="tabpanel" class="tab-pane" id="frais_dossier">
           {% include 'admission/general_education/includes/checklist/application_fees_request.html' %}
 
@@ -192,12 +198,16 @@
                 class="form-control"
                 hx-target="#document-details"
                 hx-swap="outerHTML"
+                {# Normally, the identifier must be pass through an url param but trigger a request from a option #}
+                {# doesn't work with Chrome so we trigger a request from the select and pass the identifier through a query param. #}
+                hx-trigger="change, selectDocumentEvent"
+                hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}"
+                name="identifier"
             >
               <option disabled selected value>{% translate 'Select a document' %}</option>
               {% for document in documents %}
                 <option
-                    hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier=document.identifiant %}"
-                    value="{{ document.identifier }}"
+                    value="{{ document.identifiant }}"
                 >
                   {{ document.libelle }}
                 </option>
@@ -218,9 +228,24 @@
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
   <script>
       (function ($) {
+          const defaultTab = '#assimilation';
+
           function refreshDocuments() {
-              const documentsSelectorToDisplay = `${window.location.hash || '#assimilation'}-documents`;
-              $('.documents-tab').addClass('hidden').filter(documentsSelectorToDisplay).removeClass('hidden');
+              const selectedTab = window.location.hash || defaultTab;
+              const currentSelect = $(`${selectedTab}-documents-select`);
+              $('.documents-tab').addClass('hidden').filter(`${selectedTab}-documents`).removeClass('hidden');
+              currentSelect.prop("selectedIndex", currentSelect.find('option').length > 1 ? 1 : 0);
+              htmx.ajax(
+                  'GET',
+                  '{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}',
+                  {
+                      target: '#document-details',
+                      swap: 'outerHTML',
+                      values: {
+                          'identifier': currentSelect.val(),
+                      }
+                  },
+              );
           }
 
           // Activate tab from hash on first load
@@ -608,6 +633,10 @@
       color: #888;
     }
 
+    .modal .media-right a:first-child {
+      display: none;
+    }
+
     #application-fees-request-email-modal .message-content {
       border: 1px solid #ddd;
       padding: 1em;
@@ -616,6 +645,21 @@
 
     .checklist-state-button {
       transition-duration: 0.5s;
+    }
+
+    input:invalid {
+      color: #a94442 !important;
+    }
+
+    input:invalid::after{
+      content: 'Invalid content';
+      width: min-content;
+    }
+
+    #checklist-menu i {
+      width: 1em;
+      display: inline-block;
+      margin-right: 5px;
     }
 
   </style>

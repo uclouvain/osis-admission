@@ -167,7 +167,7 @@ class Proposition(interface.RootEntity):
         self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC
 
     def reclamer_documents_par_fac(self):
-        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC
 
     def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self):
         self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -191,8 +191,8 @@ class Proposition(interface.RootEntity):
 
     def completer_documents_par_candidat(self):
         self.statut = {
-            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC: ChoixStatutPropositionGenerale.TRAITEMENT_SIC,
-            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD: ChoixStatutPropositionGenerale.TRAITEMENT_FAC_CDD,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC,
         }.get(self.statut)
 
     def completer_curriculum(

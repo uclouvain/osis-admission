@@ -90,8 +90,6 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
 
         # Add the 'LIBRE' documents uploaded by the managers
         for champ_documents_libres in [
-            'documents_libres_sic_candidats',
-            'documents_libres_fac_candidats',
             'documents_libres_sic_uclouvain',
             'documents_libres_fac_uclouvain',
         ]:
@@ -130,8 +128,6 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
 
         # Add the 'LIBRE' documents uploaded by the managers
         for type_document, uuids_documents in [
-            (TypeEmplacementDocument.LIBRE_CANDIDAT_FAC, resume_dto.proposition.documents_libres_fac_candidats),
-            (TypeEmplacementDocument.LIBRE_CANDIDAT_SIC, resume_dto.proposition.documents_libres_sic_candidats),
             (TypeEmplacementDocument.LIBRE_INTERNE_FAC, resume_dto.proposition.documents_libres_fac_uclouvain),
             (TypeEmplacementDocument.LIBRE_INTERNE_SIC, resume_dto.proposition.documents_libres_sic_uclouvain),
         ]:

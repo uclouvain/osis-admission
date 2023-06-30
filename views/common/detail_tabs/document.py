@@ -49,6 +49,7 @@ from admission.forms.admission.document import (
     RequestDocumentForm,
     ReplaceDocumentForm,
     UploadDocumentForm,
+    RequestFreeDocumentWithDefaultFileForm,
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
@@ -66,13 +67,13 @@ __all__ = [
     'RequestCandidateDocumentView',
     'ReplaceDocumentView',
     'RequestFreeCandidateDocumentView',
+    'RequestFreeCandidateDocumentWithDefaultFileView',
     'UploadDocumentByManagerView',
-    'UploadFreeCandidateDocumentView',
     'UploadFreeInternalDocumentView',
 ]
 
 
-class BaseUploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
+class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     form_class = UploadFreeDocumentForm
     permission_required = 'admission.view_documents_management'
     template_name = 'admission/document/upload_free_document.html'
@@ -81,10 +82,16 @@ class BaseUploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequ
         'refresh_list': True,
     }
     name = 'upload-free-document'
+    urlpatterns = 'free-internal-upload'
+    message_on_success = _('The document has been uploaded')
 
     @property
-    def document_type(self) -> str:
-        raise NotImplementedError
+    def document_type(self):
+        return (
+            TypeEmplacementDocument.LIBRE_INTERNE_FAC.name
+            if ProgramManager.belong_to(self.request.user.person)
+            else TypeEmplacementDocument.LIBRE_INTERNE_SIC.name
+        )
 
     def form_valid(self, form) -> HttpResponse:
         document_id = message_bus_instance.invoke(
@@ -98,32 +105,6 @@ class BaseUploadFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequ
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
         return super().form_valid(self.form_class())
-
-
-class UploadFreeCandidateDocumentView(BaseUploadFreeCandidateDocumentView):
-    urlpatterns = 'free-candidate-upload'
-    message_on_success = _('The document has been uploaded')
-
-    @property
-    def document_type(self):
-        return (
-            TypeEmplacementDocument.LIBRE_CANDIDAT_FAC.name
-            if ProgramManager.belong_to(self.request.user.person)
-            else TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name
-        )
-
-
-class UploadFreeInternalDocumentView(BaseUploadFreeCandidateDocumentView):
-    urlpatterns = 'free-internal-upload'
-    message_on_success = _('The document has been uploaded')
-
-    @property
-    def document_type(self):
-        return (
-            TypeEmplacementDocument.LIBRE_INTERNE_FAC.name
-            if ProgramManager.belong_to(self.request.user.person)
-            else TypeEmplacementDocument.LIBRE_INTERNE_SIC.name
-        )
 
 
 def can_edit_document(person: Person, document: AdmissionDocument) -> bool:
@@ -147,16 +128,11 @@ def can_edit_document(person: Person, document: AdmissionDocument) -> bool:
     return False
 
 
-class RequestFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    form_class = RequestFreeDocumentForm
-    template_name = 'admission/document/request_free_document.html'
-    htmx_template_name = 'admission/document/request_free_document.html'
-    urlpatterns = 'free-candidate-request'
+class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     permission_required = 'admission.view_documents_management'
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
-    name = 'request-free-candidate-document'
 
     def form_valid(self, form) -> HttpResponse:
         document_id = message_bus_instance.invoke(
@@ -170,10 +146,27 @@ class RequestFreeCandidateDocumentView(AdmissionFormMixin, HtmxPermissionRequire
                 ),
                 libelle=form.cleaned_data['file_name'],
                 raison=form.cleaned_data['reason'],
+                uuid_document=form.cleaned_data['file'][0] if form.cleaned_data.get('file') else '',
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
         return super().form_valid(self.form_class())
+
+
+class RequestFreeCandidateDocumentView(BaseRequestFreeCandidateDocument):
+    form_class = RequestFreeDocumentForm
+    template_name = 'admission/document/request_free_document.html'
+    htmx_template_name = 'admission/document/request_free_document.html'
+    urlpatterns = 'free-candidate-request'
+    name = 'request-free-candidate-document'
+
+
+class RequestFreeCandidateDocumentWithDefaultFileView(BaseRequestFreeCandidateDocument):
+    form_class = RequestFreeDocumentWithDefaultFileForm
+    template_name = 'admission/document/request_free_document_with_default_file.html'
+    htmx_template_name = 'admission/document/request_free_document_with_default_file.html'
+    urlpatterns = 'free-candidate-request-with-default-file'
+    name = 'request-free-candidate-document-with-default-file'
 
 
 class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, TemplateView):
@@ -189,7 +182,8 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
 
         context = TemplateView().get_context_data(**kwargs)
 
-        document_identifier = self.kwargs.get('identifier')
+        # The identifier can be pass either through an url param or a query param.
+        document_identifier = self.request.GET.get('identifier', self.kwargs.get('identifier'))
 
         document = get_document_from_identifier(self.admission, document_identifier)
         context['EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES'] = EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES
@@ -200,7 +194,8 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['document_identifier'] = document_identifier
         context['document_type'] = document.type
         context['requestable_document'] = document.requestable
-        context['editable_document'] = can_edit_document(self.request.user.person, document)
+        editable_document = can_edit_document(self.request.user.person, document)
+        context['editable_document'] = editable_document
 
         if document.uuids:
             context['document_uuid'] = document.uuids[0]
@@ -218,6 +213,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
             candidate_language=self.admission.candidate.language,
             initial=request_initial,
             auto_requested=document.automatically_required,
+            editable_document=editable_document,
         )
 
         context['replace_form'] = ReplaceDocumentForm(mimetypes=document.mimetypes)
@@ -257,6 +253,10 @@ class RequestCandidateDocumentView(DocumentFormView):
     htmx_template_name = 'admission/document/request_document.html'
     urlpatterns = {'candidate-request': 'candidate-request/<str:identifier>'}
 
+    @cached_property
+    def editable_document(self):
+        return can_edit_document(self.request.user.person, self.document)
+
     def has_permission(self):
         return super().has_permission() and self.document.requestable is True
 
@@ -271,12 +271,15 @@ class RequestCandidateDocumentView(DocumentFormView):
             else ''
         )
 
+        context['editable_document'] = self.editable_document
+
         return context
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['candidate_language'] = self.admission.candidate.language
         kwargs['auto_requested'] = self.document.automatically_required
+        kwargs['editable_document'] = self.editable_document
         return kwargs
 
     def form_valid(self, form):

@@ -28,6 +28,7 @@ from typing import Optional
 from django.utils.translation import gettext_noop as _
 
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
@@ -80,6 +81,7 @@ class Checklist(interface.DomainService):
                 if pays_nationalite_europeen
                 else _("Declared not assimilated")
                 if not proposition.comptabilite.type_situation_assimilation
+                or proposition.comptabilite.type_situation_assimilation == TypeSituationAssimilation.AUCUNE_ASSIMILATION
                 else _("Declared assimilated"),
                 statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE
                 if pays_nationalite_europeen

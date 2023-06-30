@@ -320,7 +320,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
         # Check admission status and last modification data
         self.admission.refresh_from_db()
-        self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_SIC.name)
+        self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.last_update_author, self.admission.candidate)
 

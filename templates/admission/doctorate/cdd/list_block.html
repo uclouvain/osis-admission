@@ -39,7 +39,7 @@
 {% endblock %}
 
 {% block list_block_row_result %}
-  <td><a href="{% url 'admission:doctorate:project' admission.uuid %}">{{ admission.numero_demande }}</a></td>
+  <td><a href="{% url 'admission:doctorate' admission.uuid %}">{{ admission.numero_demande }}</a></td>
   <td>{{ admission.nom_candidat }}</td>
   <td>{{ admission.formation }}</td>
   <td>{{ admission.nationalite|default_if_none:'' }}</td>

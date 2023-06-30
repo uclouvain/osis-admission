@@ -104,7 +104,7 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.general_admission.requested_documents[sic_free_requestable_document_id] = {
             'last_actor': '0123456789',
             'reason': 'My reason',
-            'type': TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name,
+            'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
             'last_action_at': '2020-01-01T00:00:00',
             'status': StatutEmplacementDocument.RECLAME.name,
             'requested_at': '2020-01-01T00:00:00',
@@ -130,7 +130,7 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.obj, self.general_admission)
         self.assertEqual(document.field, 'specific_question_answers')
         self.assertEqual(document.uuids, self.general_admission.specific_question_answers[specific_question_uuid])
-        self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name)
+        self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name)
         self.assertEqual(document.requestable, True)
         self.assertEqual(document.specific_question_uuid, specific_question_uuid)
         self.assertEqual(document.status, StatutEmplacementDocument.RECLAME.name)
@@ -241,31 +241,7 @@ class TestGetDocumentFromIdentifier(TestCase):
         document = get_document_from_identifier(self.general_admission, f'{base_identifier}.{file_uuid}')
         self.assertIsNone(document)
 
-        # TypeEmplacementDocument.LIBRE_CANDIDAT_SIC
-        self.general_admission.sic_documents = [file_uuid]
-        self.general_admission.save()
-
-        document = get_document_from_identifier(self.general_admission, f'{base_identifier}.{file_uuid}')
-        self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission)
-        self.assertEqual(document.field, 'sic_documents')
-        self.assertEqual(document.uuids, [file_uuid])
-        self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name)
-        self.assertEqual(document.requestable, False)
-        self.assertEqual(document.specific_question_uuid, '')
-        self.assertEqual(document.status, StatutEmplacementDocument.VALIDE.name)
-        self.assertEqual(document.reason, '')
-        self.assertEqual(document.requested_at, '')
-        self.assertEqual(document.deadline_at, '')
-        self.assertEqual(document.last_action_at, '')
-        self.assertEqual(document.last_actor, '0123456')
-        self.assertEqual(document.automatically_required, False)
-        self.assertEqual(document.mimetypes, [JPEG_MIME_TYPE])
-        self.assertEqual(document.label, 'My file')
-        self.assertEqual(document.document_submitted_by, '0123456')
-
         # TypeEmplacementDocument.LIBRE_INTERNE_SIC
-        self.general_admission.sic_documents = []
         self.general_admission.uclouvain_sic_documents = [file_uuid]
         self.general_admission.save()
 
@@ -288,32 +264,8 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.label, 'My file')
         self.assertEqual(document.document_submitted_by, '0123456')
 
-        # TypeEmplacementDocument.LIBRE_CANDIDAT_FAC
-        self.general_admission.uclouvain_sic_documents = []
-        self.general_admission.fac_documents = [file_uuid]
-        self.general_admission.save()
-
-        document = get_document_from_identifier(self.general_admission, f'{base_identifier}.{file_uuid}')
-        self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission)
-        self.assertEqual(document.field, 'fac_documents')
-        self.assertEqual(document.uuids, [file_uuid])
-        self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_CANDIDAT_FAC.name)
-        self.assertEqual(document.requestable, False)
-        self.assertEqual(document.specific_question_uuid, '')
-        self.assertEqual(document.status, StatutEmplacementDocument.VALIDE.name)
-        self.assertEqual(document.reason, '')
-        self.assertEqual(document.requested_at, '')
-        self.assertEqual(document.deadline_at, '')
-        self.assertEqual(document.last_action_at, '')
-        self.assertEqual(document.last_actor, '0123456')
-        self.assertEqual(document.automatically_required, False)
-        self.assertEqual(document.mimetypes, [JPEG_MIME_TYPE])
-        self.assertEqual(document.label, 'My file')
-        self.assertEqual(document.document_submitted_by, '0123456')
-
         # TypeEmplacementDocument.LIBRE_INTERNE_FAC
-        self.general_admission.fac_documents = []
+        self.general_admission.uclouvain_sic_documents = []
         self.general_admission.uclouvain_fac_documents = [file_uuid]
         self.general_admission.save()
 

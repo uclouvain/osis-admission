@@ -78,12 +78,6 @@ class PropositionInMemoryRepository(
         'BE': 'Belgium',
         'FR': 'France',
     }
-    documents_libres_sic_candidats = {
-        'uuid-MASTER-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f140'],
-    }
-    documents_libres_fac_candidats = {
-        'uuid-MASTER-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f141'],
-    }
     documents_libres_sic_uclouvain = {
         'uuid-MASTER-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f142'],
     }
@@ -256,8 +250,6 @@ class PropositionInMemoryRepository(
             attestation_inscription_reguliere=proposition.attestation_inscription_reguliere,
             pdf_recapitulatif=[],
             documents_demandes=proposition.documents_demandes,
-            documents_libres_sic_candidats=cls.documents_libres_sic_candidats.get(proposition.entity_id.uuid, []),
-            documents_libres_fac_candidats=cls.documents_libres_fac_candidats.get(proposition.entity_id.uuid, []),
             documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
         )

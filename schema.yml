@@ -10288,17 +10288,17 @@ components:
       - EN_BROUILLON
       - FRAIS_DOSSIER_EN_ATTENTE
       - CONFIRMEE
-      - COMPLETEE
       - ANNULEE
       - A_COMPLETER_POUR_SIC
-      - A_COMPLETER_POUR_FAC_CDD
-      - TRAITEMENT_SIC
-      - TRAITEMENT_FAC_CDD
+      - COMPLETEE_POUR_SIC
+      - TRAITEMENT_FAC
+      - A_COMPLETER_POUR_FAC
+      - COMPLETEE_POUR_FAC
+      - RETOUR_DE_FAC
       - ATTENTE_VALIDATION_DIRECTION
       - INSCRIPTION_AUTORISEE
       - INSCRIPTION_REFUSEE
       - CLOTUREE
-      - EN_RECOURS
       type: string
     CompleterEmplacementsDocumentsParCandidatCommand:
       type: object

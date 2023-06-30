@@ -34,17 +34,17 @@ class ChoixStatutPropositionGenerale(ChoiceEnum):
     EN_BROUILLON = _('In draft')
     FRAIS_DOSSIER_EN_ATTENTE = _('Pending application fees')
     CONFIRMEE = _('Confirmed application (by student)')
-    COMPLETEE = _('Completed application')
     ANNULEE = _('Cancelled application')
     A_COMPLETER_POUR_SIC = _('To be completed (by student) for SIC')
-    A_COMPLETER_POUR_FAC_CDD = _('To be completed (by student) for FAC/CDD')
-    TRAITEMENT_SIC = _('Processing by SIC')
-    TRAITEMENT_FAC_CDD = _('Processing by Fac/CDD')
+    COMPLETEE_POUR_SIC = _('Completed (by student) for SIC')
+    TRAITEMENT_FAC = _('Processing by Fac/CDD')
+    A_COMPLETER_POUR_FAC = _('To be completed (by student) for FAC')
+    COMPLETEE_POUR_FAC = _('Completed (by student) for FAC')
+    RETOUR_DE_FAC = _('Feedback from FAC')
     ATTENTE_VALIDATION_DIRECTION = _('Pending validation from management')
     INSCRIPTION_AUTORISEE = _('Enrollment allowed')
     INSCRIPTION_REFUSEE = _('Enrollment denied')
     CLOTUREE = _('Closed')
-    EN_RECOURS = _('Under appeal')
 
 
 CHOIX_DIPLOME_OBTENU = {GotDiploma.YES.name, GotDiploma.THIS_YEAR.name}

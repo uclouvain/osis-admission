@@ -53,6 +53,9 @@
   <link href="{% static "osis_document/osis-document.css" %}" rel="stylesheet" />
 
   <style>
+    #document-tabs a:hover {
+      color: #555;
+    }
     #document-container {
       display: flex;
       min-height: max(60vh, 250px);
@@ -62,6 +65,10 @@
       max-height: max(40vh, 100px);
       overflow-y: auto;
       overflow-x: hidden;
+    }
+
+    .scrollable-document table {
+      margin-bottom: 8px;
     }
 
     .reset-button {
@@ -151,6 +158,10 @@
       color: #888;
     }
 
+    .modal .media-right a:first-child {
+      display: none;
+    }
+
   </style>
 {% endblock %}
 
@@ -163,6 +174,7 @@
 
   <script>
       $(document).ready(function () {
+          let configurationCache = new BaseCache('admission_documents_configuration');
           const htmxErrorsMessages = document.getElementById('pnl_error_messages');
           const errorsByStatus = {
               404: "{% translate 'The element has not been found.' %}",
@@ -173,9 +185,37 @@
           $("#document-lists").resizable({
               containment: "#document-container",
               handles: "e",
+              stop: function(event, ui) {
+                  // Save the split size
+                  configurationCache.setItem(
+                      'split_size',
+                      `${100 * (ui.size.width / document.getElementById('document-container').offsetWidth)}%`,
+                  );
+              },
           });
 
+          // Update the split size if specified
+          const splitSize = configurationCache.getItem('split_size');
+
+          if (splitSize) {
+              document.getElementById('document-lists').style.width = splitSize;
+          }
+
           let selectedRowId;
+
+          {# Unselect the current document when selecting a new tab #}
+          $('#document-container').on('show.bs.tab', function () {
+              if (selectedRowId) {
+                  selectedRowId = null;
+                  $("#document-lists tbody tr.selected").removeClass('selected');
+                  htmx.ajax('GET', base_details_url, { target: '#document-details', swap: 'outerHTML'});
+              }
+          });
+
+          {# Scroll at the bottom of a collapsable content after opening #}
+          $('#document-container').on('shown.bs.collapse', function (event) {
+              event.target.scrollIntoView(true);
+          });
 
           {# Select a document #}
           $(document).on('click', '#document-lists tbody.selectable tr:not(.tab-name)', function(){
@@ -214,30 +254,30 @@
                               values: {'next': nextTab}
                           }
                       ).then(function(response) {
-                          {#Select the right document in the list #}
-                          const row = $(`tr[data-document-id="${selectedRow}"]`);
-                          if (row.length) {
-                            row.addClass('selected');
-                            row.parents('.scrollable-document')[0].scrollTop = row.position().top;
-                          } else {
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          {# Select the right document in the list #}
+                          const row = document.querySelector(`tr[data-document-id="${selectedRow}"]`)
+                          if (row) {
+                              row.classList.add('selected');
+                              setTimeout(function() {
+                                  row.scrollIntoView(true);
+                              }, 50);
                           }
                       })
                   }
 
-                      {# Load the details of a document if the form has an impact on it #}
-                      if (event.originalEvent.detail.refresh_details) {
-                          htmx.ajax(
-                              'GET',
-                              base_details_url.replace('custom_identifier', event.originalEvent.detail.refresh_details),
-                              {
-                                  target: '#document-details',
-                                  swap: 'outerHTML',
-                              }
-                          )
-                      }
+                  {# Load the details of a document if the form has an impact on it #}
+                  if (event.originalEvent.detail.refresh_details) {
+                      htmx.ajax(
+                          'GET',
+                          base_details_url.replace('custom_identifier', event.originalEvent.detail.refresh_details),
+                          {
+                              target: '#document-details',
+                              swap: 'outerHTML',
+                          }
+                      )
                   }
-              })
+              }
+          })
 
           {# When an error is encountered #}
           $('#document-container').on('htmx:responseError', function(event) {

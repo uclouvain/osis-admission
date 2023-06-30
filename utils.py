@@ -23,11 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import json
 import uuid
 from collections import defaultdict
 from typing import Dict, Union
 
+from django.contrib import messages
 from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
@@ -171,3 +172,14 @@ def get_doctoral_cdd_managers(education_group_id) -> QuerySet[Person]:
     return Person.objects.filter(
         id__in=ProgramManager.objects.filter(education_group_id=education_group_id).values('person_id')
     )
+
+
+def add_messages_into_htmx_response(request, response):
+    msgs = list(messages.get_messages(request))
+
+    if msgs:
+        response['HX-Trigger'] = json.dumps(
+            {
+                'messages': [{'message': str(msg.message), 'tags': msg.tags} for msg in msgs],
+            },
+        )

@@ -171,7 +171,7 @@ def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
 def is_invited_to_complete(self, user: User, obj: GeneralEducationAdmission):
     return obj.status in {
         ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
-        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD.name,
+        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
     }
 
 
