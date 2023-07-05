@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import copy
 from typing import List, Optional, Dict
 
 import attr
@@ -74,12 +73,10 @@ class StatutsChecklistGenerale:
     def from_dict(cls, checklist_en_tant_que_dict: Dict[str, Dict[str, any]]):
         checklist_by_tab = {}
         for key, item in checklist_en_tant_que_dict.items():
-            tab_data = copy.deepcopy(item)
-            statut = tab_data.pop('statut', None)
             checklist_by_tab[key] = StatutChecklist(
-                libelle=tab_data.pop('libelle', ''),
-                statut=statut and ChoixStatutChecklist[statut],
-                enfants=tab_data.pop('enfants', []),
-                extra=tab_data,
+                libelle=item.get('libelle', ''),
+                statut=ChoixStatutChecklist[item['statut']] if item.get('statut') else None,
+                enfants=item.get('enfants', []),
+                extra=item.get('extra', {}),
             )
         return cls(**checklist_by_tab)

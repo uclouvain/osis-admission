@@ -49,7 +49,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
     EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
-    EMPLACEMENTS_DOCUMENTS_INTERNES,
     OngletsDemande,
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
 )
@@ -454,6 +453,95 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form_item_instantiation.admission.last_update_author, self.sic_manager_user.person)
 
     @freezegun.freeze_time('2022-01-01')
+    def test_general_sic_manager_requests_a_free_document_with_a_default_file(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request-with-default-file',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        # Submit an invalid form
+        response = self.client.post(url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            data={
+                'file_name': 'My file name',
+                'reason': 'My reason',
+                'file_0': ['file_0-token'],
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Create a specific question linked to the admission
+        form_item_instantiation: AdmissionFormItemInstantiation = (
+            AdmissionFormItemInstantiation.objects.select_related('form_item', 'admission')
+            .filter(
+                admission=self.general_admission,
+            )
+            .first()
+        )
+        self.assertIsNotNone(form_item_instantiation)
+
+        self.assertEqual(form_item_instantiation.form_item.type, TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(
+            form_item_instantiation.form_item.title,
+            {
+                'en': 'My file name',
+                'fr-be': 'My file name',
+            },
+        )
+
+        self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
+        self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
+        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(
+            form_item_instantiation.display_according_education,
+            CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+        )
+        self.assertEqual(form_item_instantiation.tab, Onglets.DOCUMENTS.name)
+
+        # Save information about the request into the admission
+        desired_result = {
+            f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
+                'last_actor': self.sic_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                'last_action_at': '2022-01-01T00:00:00',
+                'deadline_at': '',
+                'requested_at': '',
+                'status': StatutEmplacementDocument.VALIDE.name,
+                'automatically_required': False,
+            }
+        }
+        self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
+
+        # Check that a default answer to the specific question has been specified
+        self.assertEqual(
+            len(
+                form_item_instantiation.admission.specific_question_answers.get(
+                    str(form_item_instantiation.form_item.uuid), []
+                ),
+            ),
+            1,
+        )
+
+        # Check last modification data
+        self.assertEqual(form_item_instantiation.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(form_item_instantiation.admission.last_update_author, self.sic_manager_user.person)
+
+    @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_requests_a_free_document(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -526,6 +614,95 @@ class DocumentViewTestCase(TestCase):
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
+
+        # Check last modification data
+        self.assertEqual(form_item_instantiation.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(form_item_instantiation.admission.last_update_author, self.fac_manager_user.person)
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_fac_manager_requests_a_free_document_with_a_default_file(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request-with-default-file',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        # Submit an invalid form
+        response = self.client.post(url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            data={
+                'file_name': 'My file name',
+                'reason': 'My reason',
+                'file_0': ['file_0-token'],
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Create a specific question linked to the admission
+        form_item_instantiation: AdmissionFormItemInstantiation = (
+            AdmissionFormItemInstantiation.objects.select_related('form_item', 'admission')
+            .filter(
+                admission=self.general_admission,
+            )
+            .first()
+        )
+        self.assertIsNotNone(form_item_instantiation)
+
+        self.assertEqual(form_item_instantiation.form_item.type, TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(
+            form_item_instantiation.form_item.title,
+            {
+                'en': 'My file name',
+                'fr-be': 'My file name',
+            },
+        )
+
+        self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
+        self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
+        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(
+            form_item_instantiation.display_according_education,
+            CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+        )
+        self.assertEqual(form_item_instantiation.tab, Onglets.DOCUMENTS.name)
+
+        # Save information about the request into the admission
+        desired_result = {
+            f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
+                'last_actor': self.fac_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+                'last_action_at': '2022-01-01T00:00:00',
+                'deadline_at': '',
+                'requested_at': '',
+                'status': StatutEmplacementDocument.VALIDE.name,
+                'automatically_required': False,
+            }
+        }
+        self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
+
+        # Check that a default answer to the specific question has been specified
+        self.assertEqual(
+            len(
+                form_item_instantiation.admission.specific_question_answers.get(
+                    str(form_item_instantiation.form_item.uuid), []
+                ),
+            ),
+            1,
+        )
 
         # Check last modification data
         self.assertEqual(form_item_instantiation.admission.modified_at, datetime.datetime.now())

@@ -35,7 +35,7 @@ from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
-from django.utils.translation import get_language, gettext_lazy as _, pgettext
+from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext_noop
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
@@ -775,6 +775,11 @@ def get_item_or_default(dictionary, value, default=None):
 def part_of_dict(member, container):
     """Check if a dict is containing into another one"""
     return member.items() <= container.items()
+
+
+@register.simple_tag
+def is_current_checklist_status(current, state, extra):
+    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {}))
 
 
 @register.simple_tag
