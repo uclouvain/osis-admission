@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import copy
 from typing import Optional
 
 from django.utils.translation import gettext_noop as _
@@ -55,7 +56,7 @@ class Checklist(interface.DomainService):
             a_paye_frais_dossier=a_paye_frais_dossier,
         )
         proposition.checklist_initiale = checklist_initiale
-        proposition.checklist_actuelle = checklist_initiale
+        proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
 
     @classmethod
     def recuperer_checklist_initiale(

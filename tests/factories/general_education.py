@@ -69,37 +69,44 @@ def get_checklist():
     return {
         'donnees_personnelles': {
             'libelle': '',
-            'enfants': '',
+            'enfants': [],
+            'extra': {},
             'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         },
         'frais_dossier': {
             'libelle': '',
-            'enfants': '',
+            'enfants': [],
+            'extra': {},
             'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         },
         'assimilation': {
             'libelle': '',
-            'enfants': '',
+            'enfants': [],
+            'extra': {},
             'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         },
         'choix_formation': {
             'libelle': '',
-            'enfants': '',
+            'enfants': [],
+            'extra': {},
             'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         },
         'parcours_anterieur': {
             'libelle': '',
-            'enfants': '',
+            'enfants': [],
+            'extra': {},
             'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         },
         'financabilite': {
             'libelle': '',
-            'enfants': '',
+            'enfants': [],
+            'extra': {},
             'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         },
         'specificites_formation': {
             'libelle': '',
-            'enfants': '',
+            'enfants': [],
+            'extra': {},
             'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         },
     }

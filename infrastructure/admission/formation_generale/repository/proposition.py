@@ -106,9 +106,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     @classmethod
     def _serialize(cls, inst, field, value):
         if isinstance(value, StatutChecklist):
-            checklist_item_as_dict = attrs.asdict(value, value_serializer=cls._serialize)
-            checklist_item_as_dict.update(checklist_item_as_dict.pop('extra', {}))
-            return checklist_item_as_dict
+            return attrs.asdict(value, value_serializer=cls._serialize)
 
         if isinstance(value, Enum):
             return value.name

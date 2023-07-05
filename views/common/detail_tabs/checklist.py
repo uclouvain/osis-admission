@@ -298,14 +298,15 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
 
         admission = self.get_permission_object()
 
-        if admission.checklist['current'] is None:
+        if admission.checklist.get('current') is None:
             admission.checklist['current'] = {}
 
         admission.checklist['current'].setdefault(serializer.validated_data['tab_name'], {})
-        admission.checklist['current'][serializer.validated_data['tab_name']] = {
-            'statut': serializer.validated_data['status'],
-            **serializer.validated_data['extra'],
-        }
+        tab_data = admission.checklist['current'][serializer.validated_data['tab_name']]
+        tab_data['statut'] = serializer.validated_data['status']
+        tab_data['libelle'] = ''
+        tab_data.setdefault('extra', {})
+        tab_data['extra'].update(serializer.validated_data['extra'])
 
         admission.save(update_fields=['checklist'])
 
@@ -334,11 +335,14 @@ class ChangeExtraView(AdmissionFormMixin, FormView):
     def form_valid(self, form):
         admission = self.get_permission_object()
         tab_name = self.kwargs['tab']
+
         if admission.checklist.get('current') is None:
             admission.checklist['current'] = {}
-        admission.checklist['current'].setdefault(tab_name, {'extra': {}})
-        admission.checklist['current'][tab_name].setdefault('extra', {})
-        admission.checklist['current'][tab_name]['extra'].update(form.cleaned_data)
+
+        admission.checklist['current'].setdefault(tab_name, {})
+        tab_data = admission.checklist['current'][tab_name]
+        tab_data.setdefault('extra', {})
+        tab_data['extra'].update(form.cleaned_data)
         admission.save(update_fields=['checklist'])
         return super().form_valid(form)
 
