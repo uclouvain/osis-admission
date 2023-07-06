@@ -28,7 +28,9 @@ from typing import Dict, Set
 from django import forms
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import resolve_url
+from django.http import HttpResponse
+from django.shortcuts import resolve_url, redirect
+from django.urls import reverse
 from django.utils import translation
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -48,6 +50,7 @@ from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPro
 from admission.ddd.admission.enums.emplacement_document import DocumentsAssimilation
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
+    ModifierChecklistChoixFormationCommand,
     SpecifierPaiementNecessaireCommand,
     EnvoyerRappelPaiementCommand,
     SpecifierPaiementPlusNecessaireCommand,
@@ -55,12 +58,11 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
-from admission.forms.admission.checklist import CommentForm, AssimilationForm
+from admission.forms.admission.checklist import CommentForm, AssimilationForm, ChoixFormationForm
 from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
 from admission.utils import add_messages_into_htmx_response
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_common.utils.htmx import HtmxMixin
 
@@ -70,10 +72,15 @@ __all__ = [
     'ChangeExtraView',
     'SaveCommentView',
     'ApplicationFeesView',
+    'ChoixFormationFormView',
+    'ChoixFormationDetailView',
 ]
 
 
 __namespace__ = False
+
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.messages_bus import message_bus_instance
 
 
 class RequestApplicationFeesContextDataMixin(LoadDossierViewMixin):
@@ -376,3 +383,62 @@ class SaveCommentView(AdmissionFormMixin, FormView):
             },
         )
         return super().form_valid(CommentForm(comment=comment, form_url=self.form_url))
+
+
+class ChoixFormationFormView(LoadDossierViewMixin, FormView):
+    urlpatterns = 'choix-formation-update'
+    permission_required = 'admission.view_checklist'
+    template_name = 'admission/general_education/checklist/choix_formation_form.html'
+    form_class = ChoixFormationForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.htmx:
+            return redirect(
+                reverse('admission:general-education:checklist', kwargs={'uuid': self.admission_uuid})
+                + '#choix_formation'
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['formation'] = self.proposition.formation
+        return kwargs
+
+    def get_initial(self):
+        return {
+            'type_demande': self.proposition.type,
+            'annee_academique': self.proposition.annee_calculee,
+            'formation': self.proposition.formation.sigle,
+            'poursuite_cycle': self.proposition.poursuite_de_cycle,
+        }
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                ModifierChecklistChoixFormationCommand(
+                    uuid_proposition=str(self.kwargs['uuid']),
+                    type_demande=form.cleaned_data['type_demande'],
+                    sigle_formation=form.cleaned_data['formation'],
+                    annee_formation=form.cleaned_data['annee_academique'],
+                    poursuite_de_cycle=form.cleaned_data['poursuite_cycle'],
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                form.add_error(None, exception.message)
+            return self.form_invalid(form)
+        return HttpResponse(headers={'HX-Refresh': 'true'})
+
+
+class ChoixFormationDetailView(LoadDossierViewMixin, TemplateView):
+    urlpatterns = 'choix-formation-detail'
+    permission_required = 'admission.view_checklist'
+    template_name = 'admission/general_education/checklist/choix_formation_detail.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.htmx:
+            return redirect(
+                reverse('admission:general-education:checklist', kwargs={'uuid': self.admission_uuid})
+                + '#choix_formation'
+            )
+        return super().dispatch(request, *args, **kwargs)

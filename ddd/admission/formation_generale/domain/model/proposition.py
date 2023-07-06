@@ -49,6 +49,7 @@ from admission.ddd.admission.formation_generale.domain.model._comptabilite impor
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    PoursuiteDeCycle,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -107,6 +108,9 @@ class Proposition(interface.RootEntity):
 
     documents_demandes: Dict = attr.Factory(dict)
 
+    poursuite_de_cycle_a_specifier: bool = False
+    poursuite_de_cycle: PoursuiteDeCycle = PoursuiteDeCycle.TO_BE_DETERMINED
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
@@ -121,6 +125,17 @@ class Proposition(interface.RootEntity):
         self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
         self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
+
+    def modifier_checklist_choix_formation(
+        self,
+        type_demande: 'TypeDemande',
+        formation_id: FormationIdentity,
+        poursuite_de_cycle: 'PoursuiteDeCycle',
+    ):
+        self.type_demande = type_demande
+        self.formation_id = formation_id
+        self.annee_calculee = formation_id.annee
+        self.poursuite_de_cycle = poursuite_de_cycle
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionGenerale.ANNULEE

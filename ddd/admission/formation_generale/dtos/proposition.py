@@ -102,6 +102,9 @@ class PropositionGestionnaireDTO(PropositionDTO):
     nationalite_ue_candidat: Optional[bool]
     photo_identite_candidat: List[str]
 
+    poursuite_de_cycle_a_specifier: bool
+    poursuite_de_cycle: str
+
     candidat_a_plusieurs_demandes: bool
 
     titre_access: str

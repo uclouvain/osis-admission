@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,9 +34,12 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True, auto_attribs=True)
 class RechercherFormationGeneraleQuery(interface.QueryRequest):
-    type_formation: str
-    intitule_formation: str
+    intitule_formation: Optional[str] = ''
+    sigle: Optional[str] = ''
+    terme_de_recherche: Optional[str] = ''
+    type_formation: Optional[str] = ''
     campus: Optional[str] = ''
+    annee: Optional[int] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -77,6 +80,16 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
     bourse_erasmus_mundus: Optional[str] = ''
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    type_demande: str
+    sigle_formation: str
+    annee_formation: int
+    poursuite_de_cycle: str
 
 
 @attr.dataclass(frozen=True, slots=True)
