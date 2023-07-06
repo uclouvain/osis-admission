@@ -73,6 +73,7 @@ class InitialiserEmplacementDocumentLibreAReclamerCommand(interface.CommandReque
     libelle: str
     raison: str
     auteur: str
+    uuid_document: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

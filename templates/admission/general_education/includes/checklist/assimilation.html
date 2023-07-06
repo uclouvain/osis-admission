@@ -26,7 +26,7 @@
 
 {% with comptabilite=resume_proposition.comptabilite contextual_comptabilite_url=comptabilite_url|add:next_url %}
   {% if not comptabilite.type_situation_assimilation or comptabilite.type_situation_assimilation == 'AUCUNE_ASSIMILATION' %}
-    {% translate 'You specified that no assimilation proposals applies to you.' as chosen_assimilation %}
+    {% translate 'Not assimilated' as chosen_assimilation %}
   {% elif comptabilite.type_situation_assimilation == 'AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE' %}
     {% display _('Assimilation 1') ' - ' comptabilite.sous_type_situation_assimilation_1|enum_display:'ChoixAssimilation1' as chosen_assimilation %}
   {% elif comptabilite.type_situation_assimilation == 'REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE' %}

@@ -23,13 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import json
 from typing import Dict, Set
 
 from django import forms
 from django.conf import settings
+from django.contrib import messages
 from django.shortcuts import resolve_url
 from django.utils import translation
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView, FormView
 from osis_comment.models import CommentEntry
@@ -56,7 +57,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.forms.admission.checklist import CommentForm, AssimilationForm
 from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from admission.utils import add_messages_into_htmx_response
+from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -262,18 +264,18 @@ class ApplicationFeesView(
                 statut_checklist_frais_dossier=self.kwargs['status'],
             )
 
-        errors = []
-
+        has_error = False
         try:
             message_bus_instance.invoke(cmd)
         except BusinessException as exception:
-            errors.append({'message': exception.message, 'tags': 'error'})
+            has_error = True
+            messages.error(request, exception.message)
 
         response = self.get(request, *args, **kwargs)
 
-        if errors:
+        if has_error:
             response.status_code = HTTP_400_BAD_REQUEST
-            response['HX-Trigger'] = json.dumps({'messages': errors})
+            add_messages_into_htmx_response(request=request, response=response)
 
         return response
 
@@ -296,71 +298,81 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
 
         admission = self.get_permission_object()
 
-        if admission.checklist['current'] is None:
+        if admission.checklist.get('current') is None:
             admission.checklist['current'] = {}
 
         admission.checklist['current'].setdefault(serializer.validated_data['tab_name'], {})
-        admission.checklist['current'][serializer.validated_data['tab_name']] = {
-            'statut': serializer.validated_data['status'],
-            **serializer.validated_data['extra'],
-        }
+        tab_data = admission.checklist['current'][serializer.validated_data['tab_name']]
+        tab_data['statut'] = serializer.validated_data['status']
+        tab_data['libelle'] = ''
+        tab_data.setdefault('extra', {})
+        tab_data['extra'].update(serializer.validated_data['extra'])
 
         admission.save(update_fields=['checklist'])
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ChangeAssimilationExtraSerializer(serializers.Serializer):
-    date_debut = serializers.DateField()
-
-
-class ChangeExtraView(LoadDossierViewMixin, APIView):
+class ChangeExtraView(AdmissionFormMixin, FormView):
     urlpatterns = {'change-checklist-extra': 'change-checklist-extra/<str:tab>'}
     permission_required = 'admission.view_checklist'
-    parser_classes = [FormParser]
-    serializer_class_by_tab: Dict[str, type(serializers.Serializer)] = {
-        'assimilation': ChangeAssimilationExtraSerializer,
-    }
-    authentication_classes = [SessionAuthentication]
+    template_name = 'admission/forms/default_form.html'
 
-    def get_serializer(self, data):
-        if self.kwargs['tab'] not in self.serializer_class_by_tab:
-            raise NotImplementedError
-        return self.serializer_class_by_tab[self.kwargs['tab']](data=data)
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['form_url'] = resolve_url(
+            f'{self.base_namespace}:change-checklist-extra',
+            uuid=self.admission_uuid,
+            tab=self.kwargs['tab'],
+        )
+        return form_kwargs
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def get_form_class(self):
+        return {
+            'assimilation': AssimilationForm,
+        }[self.kwargs['tab']]
+
+    def form_valid(self, form):
         admission = self.get_permission_object()
         tab_name = self.kwargs['tab']
-        if admission.checklist['current'] is None:
+
+        if admission.checklist.get('current') is None:
             admission.checklist['current'] = {}
-        admission.checklist['current'].setdefault(tab_name, {'extra': {}})
-        admission.checklist['current'][tab_name].setdefault('extra', {})
-        admission.checklist['current'][tab_name]['extra'].update(serializer.validated_data)
+
+        admission.checklist['current'].setdefault(tab_name, {})
+        tab_data = admission.checklist['current'][tab_name]
+        tab_data.setdefault('extra', {})
+        tab_data['extra'].update(form.cleaned_data)
         admission.save(update_fields=['checklist'])
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return super().form_valid(form)
 
 
-class CommentSerializer(serializers.Serializer):
-    comment = serializers.CharField(allow_blank=True)
-
-
-class SaveCommentView(LoadDossierViewMixin, APIView):
+class SaveCommentView(AdmissionFormMixin, FormView):
     urlpatterns = {'save-comment': 'save-comment/<str:tab>'}
     permission_required = 'admission.view_checklist'
-    parser_classes = [FormParser]
-    authentication_classes = [SessionAuthentication]
+    form_class = CommentForm
+    template_name = 'admission/forms/default_form.html'
 
-    def post(self, request, *args, **kwargs):
-        serializer = CommentSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        CommentEntry.objects.update_or_create(
+    @cached_property
+    def form_url(self):
+        return resolve_url(
+            f'{self.base_namespace}:save-comment',
+            uuid=self.admission_uuid,
+            tab=self.kwargs['tab'],
+        )
+
+    def get_form_kwargs(self):
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs['form_url'] = self.form_url
+        return form_kwargs
+
+    def form_valid(self, form):
+        comment, _ = CommentEntry.objects.update_or_create(
             object_uuid=self.admission_uuid,
             tags=[self.kwargs['tab']],
             defaults={
-                'content': serializer.validated_data['comment'],
+                'content': form.cleaned_data['comment'],
                 'author': self.request.user.person,
             },
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return super().form_valid(CommentForm(comment=comment, form_url=self.form_url))

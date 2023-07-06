@@ -23,10 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
 from typing import List
 
-from ckeditor.fields import RichTextFormField
 from django import forms
+from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
 
@@ -79,6 +80,14 @@ class RequestFreeDocumentForm(forms.Form):
     )
 
 
+class RequestFreeDocumentWithDefaultFileForm(RequestFreeDocumentForm):
+    file = AdmissionFileUploadField(
+        label=_('File'),
+        max_files=1,
+        min_files=1,
+    )
+
+
 class RequestDocumentForm(forms.Form):
     is_requested = forms.BooleanField(
         label=_('Document to be requested'),
@@ -90,7 +99,7 @@ class RequestDocumentForm(forms.Form):
         required=False,
     )
 
-    def __init__(self, candidate_language, auto_requested=False, *args, **kwargs):
+    def __init__(self, candidate_language, auto_requested=False, editable_document=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.fields['reason'].label = mark_safe(
@@ -106,6 +115,10 @@ class RequestDocumentForm(forms.Form):
             self.fields['is_requested'].widget.attrs['title'] = _('Automatically required')
             if self.data.get('is_requested', self.initial.get('is_requested')):
                 self.fields['is_requested'].widget.attrs['onclick'] = 'return false'
+
+        if not editable_document:
+            self.fields['is_requested'].disabled = True
+            self.fields['reason'].disabled = True
 
     def clean(self):
         cleaned_data = super().clean()
@@ -134,9 +147,9 @@ class RequestAllDocumentsForm(forms.Form):
         label=_('Message object'),
     )
 
-    message_content = RichTextFormField(
+    message_content = forms.CharField(
         label=_('Message for the candidate'),
-        config_name='link_only',
+        widget=forms.Textarea(),
     )
 
     def __init__(self, documents: List[EmplacementDocumentDTO], *args, **kwargs):
@@ -145,8 +158,13 @@ class RequestAllDocumentsForm(forms.Form):
         documents_choices = []
         initial_document_choices = []
 
-        self.fields['message_content'].widget.config['extraAllowedContent'] = 'span(*)[*]{*};ul(*)[*]{*}'
-        self.fields['message_content'].widget.config['language'] = get_language()
+        self.fields['message_content'].widget.attrs['data-config'] = json.dumps(
+            {
+                **settings.CKEDITOR_CONFIGS['link_only'],
+                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                'language': get_language(),
+            }
+        )
 
         for document in documents:
             if document.statut == StatutEmplacementDocument.A_RECLAMER.name:

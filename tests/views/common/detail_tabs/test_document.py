@@ -49,7 +49,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
     EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
-    EMPLACEMENTS_DOCUMENTS_INTERNES,
     OngletsDemande,
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
 )
@@ -146,7 +145,7 @@ class DocumentViewTestCase(TestCase):
             pdf_recap=[uuid.uuid4()],
         )
 
-    def _create_a_free_document(self, user: User, document_type: str, url='', data=None):
+    def _create_a_free_document(self, user: User, document_type: str, url='', data=None, with_file=False):
         """Create a document of a specific type using the given user."""
 
         if document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
@@ -156,10 +155,11 @@ class DocumentViewTestCase(TestCase):
                 'file_name': 'My file name',
                 'reason': 'My reason',
             }
+            if with_file:
+                default_data['file_0'] = ['file_0-token']
+                default_data['file_name'] += ' with default file'
         elif document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES:
-            default_base_url = 'admission:general-education:document:' + (
-                'free-internal-upload' if document_type in EMPLACEMENTS_DOCUMENTS_INTERNES else 'free-candidate-upload'
-            )
+            default_base_url = 'admission:general-education:document:free-internal-upload'
             default_data = {
                 'author': user.person.global_id,
                 'file_name': 'My file name',
@@ -193,9 +193,10 @@ class DocumentViewTestCase(TestCase):
             self.sic_manager_user,
             TypeEmplacementDocument.LIBRE_INTERNE_SIC.name,
         )
-        self.sic_free_non_requestable_candidate_document = self._create_a_free_document(
+        self.sic_free_requestable_candidate_document_with_default_file = self._create_a_free_document(
             self.sic_manager_user,
-            TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name,
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+            with_file=True,
         )
         self.sic_free_requestable_document = self._create_a_free_document(
             self.sic_manager_user,
@@ -207,168 +208,14 @@ class DocumentViewTestCase(TestCase):
             self.fac_manager_user,
             TypeEmplacementDocument.LIBRE_INTERNE_FAC.name,
         )
-        self.fac_free_non_requestable_candidate_document = self._create_a_free_document(
+        self.fac_free_requestable_candidate_document_with_default_file = self._create_a_free_document(
             self.fac_manager_user,
-            TypeEmplacementDocument.LIBRE_CANDIDAT_FAC.name,
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+            with_file=True,
         )
         self.fac_free_requestable_document = self._create_a_free_document(
             self.fac_manager_user,
             TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
-        )
-
-    # The manager uploads a free document that the candidate can view but not edit
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_sic_manager_uploads_free_and_readonly_document_for_candidate(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        url = resolve_url(
-            'admission:general-education:document:free-candidate-upload',
-            uuid=self.general_admission.uuid,
-        )
-
-        # Retrieve the empty form
-        response = self.client.get(url, **self.default_headers)
-
-        self.assertEqual(response.status_code, 200)
-
-        # Submit an invalid form
-        # Empty data
-        response = self.client.post(
-            url,
-            data={},
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
-        self.assertIn(
-            AdmissionFileUploadField.default_error_messages['min_files'],
-            response.context['form'].errors.get('file', []),
-        )
-
-        # Too much files
-        response = self.client.post(
-            url,
-            data={
-                'file_0': ['file_0-token'],
-                'file_1': ['file_1-token'],
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            AdmissionFileUploadField.default_error_messages['max_files'],
-            response.context['form'].errors.get('file', []),
-        )
-
-        # Submit a valid form
-        response = self.client.post(
-            url,
-            data={
-                'file_name': 'My file name',
-                'file_0': ['file_0-token'],
-            },
-            **self.default_headers,
-        )
-
-        # Check response
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['form'].data, {})
-
-        # Save the file into the admission
-        self.general_admission.refresh_from_db()
-        self.assertNotEqual(self.general_admission.sic_documents, [])
-        self.assertEqual(self.general_admission.fac_documents, [])
-
-        # Check last modification data
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-
-        # Save the author and the explicit name into the file
-        self.change_remote_metadata_patcher.assert_called_once_with(
-            token='file_0-token',
-            metadata={
-                'author': self.sic_manager_user.person.global_id,
-                'explicit_name': 'My file name',
-            },
-        )
-
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_fac_manager_uploads_free_and_readonly_document_for_candidate(self):
-        self.client.force_login(user=self.fac_manager_user)
-
-        url = resolve_url(
-            'admission:general-education:document:free-candidate-upload',
-            uuid=self.general_admission.uuid,
-        )
-
-        # Retrieve the empty form
-        response = self.client.get(url, **self.default_headers)
-
-        self.assertEqual(response.status_code, 200)
-
-        # Submit an invalid form
-        # Empty data
-        response = self.client.post(
-            url,
-            data={},
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
-        self.assertIn(
-            AdmissionFileUploadField.default_error_messages['min_files'],
-            response.context['form'].errors.get('file', []),
-        )
-
-        # Too much files
-        response = self.client.post(
-            url,
-            data={
-                'file_0': ['file_0-token'],
-                'file_1': ['file_1-token'],
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            AdmissionFileUploadField.default_error_messages['max_files'],
-            response.context['form'].errors.get('file', []),
-        )
-
-        # Submit a valid form
-        response = self.client.post(
-            url,
-            data={
-                'file_name': 'My file name',
-                'file_0': ['file_0-token'],
-            },
-            **self.default_headers,
-        )
-
-        # Check response
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['form'].data, {})
-
-        # Save the file into the admission
-        self.general_admission.refresh_from_db()
-        self.assertNotEqual(self.general_admission.fac_documents, [])
-        self.assertEqual(self.general_admission.sic_documents, [])
-
-        # Check last modification data
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-
-        # Save the author and the explicit name into the file
-        self.change_remote_metadata_patcher.assert_called_once_with(
-            token='file_0-token',
-            metadata={
-                'author': self.fac_manager_user.person.global_id,
-                'explicit_name': 'My file name',
-            },
         )
 
     # The manager uploads a free document that only the other managers can view
@@ -606,6 +453,95 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form_item_instantiation.admission.last_update_author, self.sic_manager_user.person)
 
     @freezegun.freeze_time('2022-01-01')
+    def test_general_sic_manager_requests_a_free_document_with_a_default_file(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request-with-default-file',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        # Submit an invalid form
+        response = self.client.post(url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            data={
+                'file_name': 'My file name',
+                'reason': 'My reason',
+                'file_0': ['file_0-token'],
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Create a specific question linked to the admission
+        form_item_instantiation: AdmissionFormItemInstantiation = (
+            AdmissionFormItemInstantiation.objects.select_related('form_item', 'admission')
+            .filter(
+                admission=self.general_admission,
+            )
+            .first()
+        )
+        self.assertIsNotNone(form_item_instantiation)
+
+        self.assertEqual(form_item_instantiation.form_item.type, TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(
+            form_item_instantiation.form_item.title,
+            {
+                'en': 'My file name',
+                'fr-be': 'My file name',
+            },
+        )
+
+        self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
+        self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
+        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(
+            form_item_instantiation.display_according_education,
+            CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+        )
+        self.assertEqual(form_item_instantiation.tab, Onglets.DOCUMENTS.name)
+
+        # Save information about the request into the admission
+        desired_result = {
+            f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
+                'last_actor': self.sic_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                'last_action_at': '2022-01-01T00:00:00',
+                'deadline_at': '',
+                'requested_at': '',
+                'status': StatutEmplacementDocument.VALIDE.name,
+                'automatically_required': False,
+            }
+        }
+        self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
+
+        # Check that a default answer to the specific question has been specified
+        self.assertEqual(
+            len(
+                form_item_instantiation.admission.specific_question_answers.get(
+                    str(form_item_instantiation.form_item.uuid), []
+                ),
+            ),
+            1,
+        )
+
+        # Check last modification data
+        self.assertEqual(form_item_instantiation.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(form_item_instantiation.admission.last_update_author, self.sic_manager_user.person)
+
+    @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_requests_a_free_document(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -683,6 +619,95 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form_item_instantiation.admission.modified_at, datetime.datetime.now())
         self.assertEqual(form_item_instantiation.admission.last_update_author, self.fac_manager_user.person)
 
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_fac_manager_requests_a_free_document_with_a_default_file(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request-with-default-file',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        # Submit an invalid form
+        response = self.client.post(url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            data={
+                'file_name': 'My file name',
+                'reason': 'My reason',
+                'file_0': ['file_0-token'],
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Create a specific question linked to the admission
+        form_item_instantiation: AdmissionFormItemInstantiation = (
+            AdmissionFormItemInstantiation.objects.select_related('form_item', 'admission')
+            .filter(
+                admission=self.general_admission,
+            )
+            .first()
+        )
+        self.assertIsNotNone(form_item_instantiation)
+
+        self.assertEqual(form_item_instantiation.form_item.type, TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(
+            form_item_instantiation.form_item.title,
+            {
+                'en': 'My file name',
+                'fr-be': 'My file name',
+            },
+        )
+
+        self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
+        self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
+        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(
+            form_item_instantiation.display_according_education,
+            CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+        )
+        self.assertEqual(form_item_instantiation.tab, Onglets.DOCUMENTS.name)
+
+        # Save information about the request into the admission
+        desired_result = {
+            f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
+                'last_actor': self.fac_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+                'last_action_at': '2022-01-01T00:00:00',
+                'deadline_at': '',
+                'requested_at': '',
+                'status': StatutEmplacementDocument.VALIDE.name,
+                'automatically_required': False,
+            }
+        }
+        self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
+
+        # Check that a default answer to the specific question has been specified
+        self.assertEqual(
+            len(
+                form_item_instantiation.admission.specific_question_answers.get(
+                    str(form_item_instantiation.form_item.uuid), []
+                ),
+            ),
+            1,
+        )
+
+        # Check last modification data
+        self.assertEqual(form_item_instantiation.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(form_item_instantiation.admission.last_update_author, self.fac_manager_user.person)
+
     # The manager updates the reason of a free document that the candidate must upload
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_general_sic_manager_updates_the_request_of_a_free_document(self, frozen_time):
@@ -707,10 +732,9 @@ class DocumentViewTestCase(TestCase):
             [
                 # Because they are read only
                 self.sic_free_non_requestable_internal_document,
-                self.sic_free_non_requestable_candidate_document,
                 # Or created by a fac manager
                 self.fac_free_non_requestable_internal_document,
-                self.fac_free_non_requestable_candidate_document,
+                self.fac_free_requestable_candidate_document_with_default_file,
                 self.fac_free_requestable_document,
                 # Or created by the system
                 f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -832,10 +856,9 @@ class DocumentViewTestCase(TestCase):
             [
                 # Because they are read only
                 self.fac_free_non_requestable_internal_document,
-                self.fac_free_non_requestable_candidate_document,
                 # Or created by a sic manager
                 self.sic_free_non_requestable_internal_document,
-                self.sic_free_non_requestable_candidate_document,
+                self.sic_free_requestable_candidate_document_with_default_file,
                 self.sic_free_requestable_document,
                 # Or created by the system
                 f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -1179,10 +1202,9 @@ class DocumentViewTestCase(TestCase):
             [
                 # Because they are read only
                 self.sic_free_non_requestable_internal_document,
-                self.sic_free_non_requestable_candidate_document,
                 # Or created by a fac manager
                 self.fac_free_non_requestable_internal_document,
-                self.fac_free_non_requestable_candidate_document,
+                self.fac_free_requestable_candidate_document_with_default_file,
                 self.fac_free_requestable_document,
                 # Or created by the system
                 f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -1289,10 +1311,9 @@ class DocumentViewTestCase(TestCase):
             [
                 # Because they are read only
                 self.fac_free_non_requestable_internal_document,
-                self.fac_free_non_requestable_candidate_document,
                 # Or created by a fac manager
                 self.sic_free_non_requestable_internal_document,
-                self.sic_free_non_requestable_candidate_document,
+                self.sic_free_requestable_candidate_document_with_default_file,
                 self.sic_free_requestable_document,
                 # Or created by the system
                 f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -1538,7 +1559,7 @@ class DocumentViewTestCase(TestCase):
         for identifier in [
             # A SIC manager cannot delete FAC documents
             self.fac_free_non_requestable_internal_document,
-            self.fac_free_non_requestable_candidate_document,
+            self.fac_free_requestable_candidate_document_with_default_file,
             self.fac_free_requestable_document,
             # A manager cannot delete a system document
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -1570,26 +1591,6 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 204)
         self.general_admission.refresh_from_db()
         self.assertNotIn(document_uuid, self.general_admission.uclouvain_sic_documents)
-
-        # Check last modification data
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-
-        # Candidate document
-        document_uuid = uuid.UUID(self.sic_free_non_requestable_candidate_document.split('.')[-1])
-        self.assertIn(document_uuid, self.general_admission.sic_documents)
-        response = self.client.delete(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=self.sic_free_non_requestable_candidate_document,
-            ),
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 204)
-        self.general_admission.refresh_from_db()
-        self.assertNotIn(document_uuid, self.general_admission.sic_documents)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -1664,7 +1665,7 @@ class DocumentViewTestCase(TestCase):
         for identifier in [
             # A FAC manager cannot delete SIC documents
             self.sic_free_non_requestable_internal_document,
-            self.sic_free_non_requestable_candidate_document,
+            self.sic_free_requestable_candidate_document_with_default_file,
             self.sic_free_requestable_document,
             # A manager cannot delete a system document
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -1695,26 +1696,6 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 204)
         self.general_admission.refresh_from_db()
         self.assertNotIn(document_uuid, self.general_admission.uclouvain_fac_documents)
-
-        # Check last modification data
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
-
-        # Candidate document
-        self.general_admission.refresh_from_db()
-        document_uuid = uuid.UUID(self.fac_free_non_requestable_candidate_document.split('.')[-1])
-        self.assertIn(document_uuid, self.general_admission.fac_documents)
-        response = self.client.delete(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=self.fac_free_non_requestable_candidate_document,
-            ),
-        )
-
-        self.assertEqual(response.status_code, 204)
-        self.general_admission.refresh_from_db()
-        self.assertNotIn(document_uuid, self.general_admission.fac_documents)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -1780,7 +1761,7 @@ class DocumentViewTestCase(TestCase):
         for identifier in [
             # A SIC manager cannot replace FAC documents
             self.fac_free_non_requestable_internal_document,
-            self.fac_free_non_requestable_candidate_document,
+            self.fac_free_requestable_candidate_document_with_default_file,
             self.fac_free_requestable_document,
             # Or system ones
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -1827,32 +1808,6 @@ class DocumentViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertNotIn(old_document_uuid, self.general_admission.uclouvain_sic_documents)
         self.assertEqual(len(self.general_admission.uclouvain_sic_documents), 1)
-
-        # Check last modification data
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-
-        # Candidate document
-        self.change_remote_metadata_patcher.reset_mock()
-        old_document_uuid = uuid.UUID(self.sic_free_non_requestable_candidate_document.split('.')[-1])
-        self.assertIn(old_document_uuid, self.general_admission.sic_documents)
-        self.assertEqual(len(self.general_admission.sic_documents), 1)
-        response = self.client.post(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=self.sic_free_non_requestable_candidate_document,
-            ),
-            data={
-                'file_0': ['file_0-token'],
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.general_admission.refresh_from_db()
-        self.assertNotIn(old_document_uuid, self.general_admission.sic_documents)
-        self.assertEqual(len(self.general_admission.sic_documents), 1)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -2032,7 +1987,7 @@ class DocumentViewTestCase(TestCase):
         for identifier in [
             # A FAC manager cannot replace SIC documents
             self.sic_free_non_requestable_internal_document,
-            self.sic_free_non_requestable_candidate_document,
+            self.sic_free_requestable_candidate_document_with_default_file,
             self.sic_free_requestable_document,
             # Or system ones
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -2083,32 +2038,6 @@ class DocumentViewTestCase(TestCase):
                 'explicit_name': 'My file name',
             },
         )
-
-        # Candidate document
-        self.change_remote_metadata_patcher.reset_mock()
-        old_document_uuid = uuid.UUID(self.fac_free_non_requestable_candidate_document.split('.')[-1])
-        self.assertIn(old_document_uuid, self.general_admission.fac_documents)
-        self.assertEqual(len(self.general_admission.fac_documents), 1)
-        response = self.client.post(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=self.fac_free_non_requestable_candidate_document,
-            ),
-            data={
-                'file_0': ['file_0-token'],
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.general_admission.refresh_from_db()
-        self.assertNotIn(old_document_uuid, self.general_admission.fac_documents)
-        self.assertEqual(len(self.general_admission.fac_documents), 1)
-
-        # Check last modification data
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
 
         # Save the author and the explicit name into the file
         self.change_remote_metadata_patcher.assert_called_once_with(
@@ -2195,7 +2124,7 @@ class DocumentViewTestCase(TestCase):
         for identifier in [
             # A SIC manager cannot upload FAC documents
             self.fac_free_non_requestable_internal_document,
-            self.fac_free_non_requestable_candidate_document,
+            self.fac_free_requestable_candidate_document_with_default_file,
             self.fac_free_requestable_document,
             # Or system ones
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -2246,32 +2175,6 @@ class DocumentViewTestCase(TestCase):
                 'explicit_name': 'My file name',
             },
         )
-
-        # Candidate document
-        self.change_remote_metadata_patcher.reset_mock()
-        old_document_uuid = uuid.UUID(self.sic_free_non_requestable_candidate_document.split('.')[-1])
-        self.assertIn(old_document_uuid, self.general_admission.sic_documents)
-        self.assertEqual(len(self.general_admission.sic_documents), 1)
-        response = self.client.post(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=self.sic_free_non_requestable_candidate_document,
-            ),
-            data={
-                'file_0': ['file_0-token'],
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.general_admission.refresh_from_db()
-        self.assertNotIn(old_document_uuid, self.general_admission.sic_documents)
-        self.assertEqual(len(self.general_admission.sic_documents), 1)
-
-        # Check last modification data
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
         # Save the author and the explicit name into the file
         self.change_remote_metadata_patcher.assert_called_once_with(
@@ -2447,7 +2350,7 @@ class DocumentViewTestCase(TestCase):
         for identifier in [
             # A FAC manager cannot upload SIC documents
             self.sic_free_non_requestable_internal_document,
-            self.sic_free_non_requestable_candidate_document,
+            self.sic_free_requestable_candidate_document_with_default_file,
             self.sic_free_requestable_document,
             # Or system ones
             f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
@@ -2498,32 +2401,6 @@ class DocumentViewTestCase(TestCase):
                 'explicit_name': 'My file name',
             },
         )
-
-        # Candidate document
-        self.change_remote_metadata_patcher.reset_mock()
-        old_document_uuid = uuid.UUID(self.fac_free_non_requestable_candidate_document.split('.')[-1])
-        self.assertIn(old_document_uuid, self.general_admission.fac_documents)
-        self.assertEqual(len(self.general_admission.fac_documents), 1)
-        response = self.client.post(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=self.fac_free_non_requestable_candidate_document,
-            ),
-            data={
-                'file_0': ['file_0-token'],
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.general_admission.refresh_from_db()
-        self.assertNotIn(old_document_uuid, self.general_admission.fac_documents)
-        self.assertEqual(len(self.general_admission.fac_documents), 1)
-
-        # Check last modification data
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
 
         # Save the author and the explicit name into the file
         self.change_remote_metadata_patcher.assert_called_once_with(
@@ -2614,10 +2491,20 @@ class DocumentViewTestCase(TestCase):
         self.assertCountEqual(
             form.fields['documents'].choices,
             [
+                (
+                    self.sic_free_requestable_candidate_document_with_default_file,
+                    '<span class="fa-solid fa-link-slash"></span> My file name with default file',
+                ),
                 (self.sic_free_requestable_document, '<span class="fa-solid fa-link-slash"></span> My file name'),
             ],
         )
-        self.assertCountEqual(form['documents'].value(), [self.sic_free_requestable_document])
+        self.assertCountEqual(
+            form['documents'].value(),
+            [
+                self.sic_free_requestable_document,
+                self.sic_free_requestable_candidate_document_with_default_file,
+            ],
+        )
 
         # Post an invalid form -> missing fields
         response = self.client.post(
@@ -2740,6 +2627,12 @@ class DocumentViewTestCase(TestCase):
             form.fields['documents'].choices,
             [
                 (
+                    self.fac_free_requestable_candidate_document_with_default_file,
+                    '<span class="fa-solid fa-link-slash"></span> '
+                    '<span class="fa-solid fa-building-columns"></span> '
+                    'My file name with default file',
+                ),
+                (
                     self.fac_free_requestable_document,
                     '<span class="fa-solid fa-link-slash"></span> '
                     '<span class="fa-solid fa-building-columns"></span> '
@@ -2747,7 +2640,13 @@ class DocumentViewTestCase(TestCase):
                 ),
             ],
         )
-        self.assertCountEqual(form['documents'].value(), [self.fac_free_requestable_document])
+        self.assertCountEqual(
+            form['documents'].value(),
+            [
+                self.fac_free_requestable_document,
+                self.fac_free_requestable_candidate_document_with_default_file,
+            ],
+        )
 
         # Simulate that the field is not missing but still requested
         self.general_admission.refresh_from_db()
@@ -2761,6 +2660,12 @@ class DocumentViewTestCase(TestCase):
         self.assertCountEqual(
             form.fields['documents'].choices,
             [
+                (
+                    self.fac_free_requestable_candidate_document_with_default_file,
+                    '<span class="fa-solid fa-link-slash"></span> '
+                    '<span class="fa-solid fa-building-columns"></span> '
+                    'My file name with default file',
+                ),
                 (
                     self.fac_free_requestable_document,
                     '<span class="fa-solid fa-paperclip"></span> '

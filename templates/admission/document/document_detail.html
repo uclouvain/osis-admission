@@ -90,7 +90,7 @@
       {% endif %}
     </div>
 
-    {% if editable_document and requestable_document %}
+    {% if requestable_document %}
       <div>
         {% if document_uuid %}<hr>{% endif %}
         {% include 'admission/document/request_document.html' %}

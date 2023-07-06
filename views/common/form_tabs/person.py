@@ -48,7 +48,7 @@ class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, UpdateVi
         return self.admission.candidate
 
     def get_success_url(self):
-        return self.get_checklist_redirect_url() or reverse(
+        return self.next_url or reverse(
             f'admission:{self.current_context}:person',
             kwargs=self.kwargs,
         )

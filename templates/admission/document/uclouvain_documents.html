@@ -69,18 +69,35 @@
       </tbody>
     </table>
   </div>
-  <button
-      class="btn btn-primary"
-      data-toggle="collapse"
-      data-target="#upload-internal-document-form"
-      hx-get="{% url request.resolver_match.namespace|add:':document:free-internal-upload' uuid=view.kwargs.uuid %}"
-      hx-target="#upload-internal-document-form"
-      hx-trigger="click once"
-  >
-    <i class="fa-solid fa-upload"></i>
-    {% translate 'Upload a document' %}
-    <i class="fa-solid fa-paperclip"></i>
-  </button>
+
+  <div class="row mt-1">
+    <div class="col-md-6 ">
+      <button
+          class="btn btn-primary"
+          data-toggle="collapse"
+          data-target="#upload-internal-document-form"
+          hx-get="{% url request.resolver_match.namespace|add:':document:free-internal-upload' uuid=view.kwargs.uuid %}"
+          hx-target="#upload-internal-document-form"
+          hx-trigger="click once"
+      >
+        <i class="fa-solid fa-upload"></i>
+        {% translate 'Upload a document' %}
+        <i class="fa-solid fa-paperclip"></i>
+      </button>
+    </div>
+
+    <div class="col-md-6 text-right">
+      <button
+          class="btn btn-primary"
+          data-toggle="modal"
+          data-target="#request-all-form-modal"
+      >
+        <i class="fa-solid fa-envelope"></i>
+        {% translate 'Request the documents from the candidate' %}
+      </button>
+    </div>
+  </div>
+
 
   <div id="upload-internal-document-form" class="collapse mt-1 media">
   </div>

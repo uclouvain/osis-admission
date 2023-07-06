@@ -1026,9 +1026,7 @@ class SectionsAttachmentsTestCase(TestCase):
             est_reorientation_inscription_externe=None,
             formulaire_modification_inscription=['uuid-formulaire-modification-inscription'],
             documents_demandes={},
-            documents_libres_sic_candidats=[],
             documents_libres_sic_uclouvain=[],
-            documents_libres_fac_candidats=[],
             documents_libres_fac_uclouvain=[],
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(

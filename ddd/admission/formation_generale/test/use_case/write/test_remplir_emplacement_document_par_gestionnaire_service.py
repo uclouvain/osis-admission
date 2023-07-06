@@ -169,52 +169,6 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
         self.assertEqual(document.requis_automatiquement, False)
 
     @freezegun.freeze_time('2023-01-01', as_kwarg='freeze_time')
-    def test_should_remplir_emplacement_document_sic_non_reclamable_candidat(self, freeze_time):
-        # Initialiser un emplacement de document libre sic
-        identifiant_emplacement_document_depose = self.message_bus.invoke(
-            InitialiserEmplacementDocumentLibreNonReclamableCommand(
-                uuid_proposition=self.uuid_proposition,
-                auteur='0123456789',
-                type_emplacement=TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name,
-                libelle='Nom du document',
-                uuid_document='uuid-document',
-            )
-        )
-
-        self.assertIsNotNone(identifiant_emplacement_document_depose)
-
-        freeze_time.move_to('2023-01-03')
-        identifiant_document_modifie = self.message_bus.invoke(
-            RemplirEmplacementDocumentParGestionnaireCommand(
-                uuid_proposition=self.uuid_proposition,
-                auteur='987654321',
-                uuid_document='nouvel-uuid-document',
-                identifiant_emplacement=identifiant_emplacement_document_depose.identifiant,
-            )
-        )
-
-        self.assertIsNotNone(identifiant_document_modifie)
-
-        document = self.repository.get(entity_id=identifiant_emplacement_document_depose)
-
-        self.assertIsNotNone(document)
-
-        self.assertRegex(document.entity_id.identifiant, self.regex_identifiant_gestionnaire)
-        self.assertEqual(document.entity_id.proposition_id.uuid, self.uuid_proposition)
-        self.assertEqual(identifiant_document_modifie, identifiant_emplacement_document_depose)
-        self.assertEqual(document.libelle, 'Nom du document')
-        self.assertEqual(document.uuids_documents, ['nouvel-uuid-document'])
-        self.assertEqual(document.dernier_acteur, '0123456789')
-        self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_CANDIDAT_SIC)
-        self.assertEqual(document.statut, StatutEmplacementDocument.VALIDE)
-        self.assertEqual(document.justification_gestionnaire, '')
-        self.assertEqual(document.reclame_le, None)
-        self.assertEqual(document.a_echeance_le, None)
-        self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 1))
-        self.assertEqual(document.document_soumis_par, '987654321')
-        self.assertEqual(document.requis_automatiquement, False)
-
-    @freezegun.freeze_time('2023-01-01', as_kwarg='freeze_time')
     def test_should_remplir_emplacement_document_fac_reclamable(self, freeze_time):
         # Initialiser un emplacement de document libre fac
         identifiant_emplacement_document_depose = self.message_bus.invoke(
@@ -298,52 +252,6 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
         self.assertEqual(document.uuids_documents, ['nouvel-uuid-document'])
         self.assertEqual(document.dernier_acteur, '0123456789')
         self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_INTERNE_FAC)
-        self.assertEqual(document.statut, StatutEmplacementDocument.VALIDE)
-        self.assertEqual(document.justification_gestionnaire, '')
-        self.assertEqual(document.reclame_le, None)
-        self.assertEqual(document.a_echeance_le, None)
-        self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 1))
-        self.assertEqual(document.document_soumis_par, '987654321')
-        self.assertEqual(document.requis_automatiquement, False)
-
-    @freezegun.freeze_time('2023-01-01', as_kwarg='freeze_time')
-    def test_should_remplir_emplacement_document_fac_non_reclamable_candidat(self, freeze_time):
-        # Initialiser un emplacement de document libre fac
-        identifiant_emplacement_document_depose = self.message_bus.invoke(
-            InitialiserEmplacementDocumentLibreNonReclamableCommand(
-                uuid_proposition=self.uuid_proposition,
-                auteur='0123456789',
-                type_emplacement=TypeEmplacementDocument.LIBRE_CANDIDAT_FAC.name,
-                libelle='Nom du document',
-                uuid_document='uuid-document',
-            )
-        )
-
-        self.assertIsNotNone(identifiant_emplacement_document_depose)
-
-        freeze_time.move_to('2023-01-03')
-        identifiant_document_modifie = self.message_bus.invoke(
-            RemplirEmplacementDocumentParGestionnaireCommand(
-                uuid_proposition=self.uuid_proposition,
-                auteur='987654321',
-                uuid_document='nouvel-uuid-document',
-                identifiant_emplacement=identifiant_emplacement_document_depose.identifiant,
-            )
-        )
-
-        self.assertIsNotNone(identifiant_document_modifie)
-
-        document = self.repository.get(entity_id=identifiant_emplacement_document_depose)
-
-        self.assertIsNotNone(document)
-
-        self.assertRegex(document.entity_id.identifiant, self.regex_identifiant_gestionnaire)
-        self.assertEqual(document.entity_id.proposition_id.uuid, self.uuid_proposition)
-        self.assertEqual(identifiant_document_modifie, identifiant_emplacement_document_depose)
-        self.assertEqual(document.libelle, 'Nom du document')
-        self.assertEqual(document.uuids_documents, ['nouvel-uuid-document'])
-        self.assertEqual(document.dernier_acteur, '0123456789')
-        self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_CANDIDAT_FAC)
         self.assertEqual(document.statut, StatutEmplacementDocument.VALIDE)
         self.assertEqual(document.justification_gestionnaire, '')
         self.assertEqual(document.reclame_le, None)

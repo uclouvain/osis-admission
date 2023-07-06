@@ -66,6 +66,10 @@
       </div>
     </div>
   {% endwith %}
+  <p>
+    <strong>{% translate 'Contact language'%} </strong>
+    <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>
+  </p>
   <button
       id="object-reset-button"
       class="btn btn-primary btn-sm reset-button"
@@ -83,6 +87,8 @@
   </button>
   {% bootstrap_field form.message_content %}
   <div id="hidden-message-content" class="hidden"></div>
+  {% include 'admission/document/message_content_reset_confirm_modal.html' %}
+  {% include 'admission/document/message_object_reset_confirm_modal.html' %}
   <script>
       $(document).ready(function () {
           const requestedDocuments = {{ requested_documents|safe }};
@@ -102,18 +108,23 @@
           {# Manage the CKEDITOR instance #}
           initializeCKEditor('id_message_content');
 
+          $('button[name="request-all-form"]').on('click', function(){
+              instance.updateElement();
+          });
+
           $('#request-all-documents-form').on('submit', function () {
               removeEditor('#id_message_content');
           })
 
           CKEDITOR.on('instanceReady', function(){
               instance = CKEDITOR.instances['id_message_content'];
-              $('#content-reset-button').click();
+              {% if not form.is_bound %}
+                  $('#content-reset-confirm-button').click();
+              {% endif %}
           });
 
           {# Reset the content of the message #}
-          $('#content-reset-button').click(function(event) {
-
+          $('#content-reset-confirm-button').click(function(event) {
               event.preventDefault();
 
               if (!instance) return;
@@ -144,10 +155,39 @@
           });
 
           {# Reset the content of the object #}
-          $('#object-reset-button').click(function(event) {
+          $('#object-reset-confirm-button').click(function(event) {
               event.preventDefault();
               $('#id_message_object').val(defaultObject);
           });
+
+          const messageContentResetConfirmModal = $('#message-content-reset-confirm-modal');
+          const messageObjectResetConfirmModal = $('#message-object-reset-confirm-modal');
+
+          {# Manage reset confirm modals #}
+          $('#content-reset-button').click(function(event){
+              event.preventDefault();
+              messageContentResetConfirmModal.modal('show');
+          });
+
+          $('#object-reset-button').click(function(event){
+              event.preventDefault();
+              messageObjectResetConfirmModal.modal('show');
+          });
+
+          messageContentResetConfirmModal.find('button').click(function(event){
+              event.stopPropagation();
+              messageContentResetConfirmModal.modal('hide');
+          })
+          messageObjectResetConfirmModal.find('button').click(function(event){
+              event.stopPropagation();
+              messageObjectResetConfirmModal.modal('hide');
+          })
+
       });
   </script>
 </div>
+
+{% if request.htmx %}
+  {# Update the admission status in the header #}
+  {% include 'admission/includes/admission_status.html' with display_on_load=False %}
+{% endif %}

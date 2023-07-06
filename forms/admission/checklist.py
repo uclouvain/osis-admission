@@ -32,14 +32,16 @@ class CommentForm(forms.Form):
         widget=forms.Textarea(
             attrs={
                 'rows': 2,
-                'hx-trigger': 'keyup changed delay:1s',
+                'hx-trigger': 'keyup changed delay:2s',
+                'hx-target': 'closest .form-group',
+                'hx-swap': 'outerHTML',
             }
         ),
         label=_("Comment"),
         required=False,
     )
 
-    def __init__(self, comment, form_url, *args, **kwargs):
+    def __init__(self, form_url, comment=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['comment'].widget.attrs['hx-post'] = form_url
         if comment:
@@ -59,8 +61,11 @@ class AssimilationForm(forms.Form):
     date_debut = forms.DateField(
         widget=DateInput(
             attrs={
-                'hx-trigger': 'change changed delay:1s',
-            }
+                'hx-trigger': 'change changed delay:2s',
+                'hx-target': 'closest .form-group',
+                'hx-validate': 'true',
+                'hx-swap': 'outerHTML',
+            },
         ),
         label=_("Assimilation start date"),
     )

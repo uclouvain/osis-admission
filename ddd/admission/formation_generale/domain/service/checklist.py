@@ -23,11 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import copy
 from typing import Optional
 
 from django.utils.translation import gettext_noop as _
 
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
@@ -54,7 +56,7 @@ class Checklist(interface.DomainService):
             a_paye_frais_dossier=a_paye_frais_dossier,
         )
         proposition.checklist_initiale = checklist_initiale
-        proposition.checklist_actuelle = checklist_initiale
+        proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
 
     @classmethod
     def recuperer_checklist_initiale(
@@ -80,6 +82,7 @@ class Checklist(interface.DomainService):
                 if pays_nationalite_europeen
                 else _("Declared not assimilated")
                 if not proposition.comptabilite.type_situation_assimilation
+                or proposition.comptabilite.type_situation_assimilation == TypeSituationAssimilation.AUCUNE_ASSIMILATION
                 else _("Declared assimilated"),
                 statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE
                 if pays_nationalite_europeen

@@ -106,9 +106,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     @classmethod
     def _serialize(cls, inst, field, value):
         if isinstance(value, StatutChecklist):
-            checklist_item_as_dict = attrs.asdict(value, value_serializer=cls._serialize)
-            checklist_item_as_dict.update(checklist_item_as_dict.pop('extra', {}))
-            return checklist_item_as_dict
+            return attrs.asdict(value, value_serializer=cls._serialize)
 
         if isinstance(value, Enum):
             return value.name
@@ -369,9 +367,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             attestation_inscription_reguliere=admission.regular_registration_proof,
             pdf_recapitulatif=admission.pdf_recap,
             documents_demandes=admission.requested_documents,
-            documents_libres_fac_candidats=admission.fac_documents,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
-            documents_libres_sic_candidats=admission.sic_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
         )
 

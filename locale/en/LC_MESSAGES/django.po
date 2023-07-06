@@ -403,7 +403,7 @@ msgstr ""
 msgid "Add an internal note"
 msgstr ""
 
-msgid "Additional documents to complete by the candidate"
+msgid "Additional documents that can be requested from the candidate"
 msgstr ""
 
 msgid "Additional documents uploaded by a manager"
@@ -609,6 +609,12 @@ msgid "Are you sure you want to restore \"%(object)s\"?"
 msgstr ""
 
 msgid "Are you sure your want to delete this document?"
+msgstr ""
+
+msgid "Are you sure your want to reset the content of the message?"
+msgstr ""
+
+msgid "Are you sure your want to reset the object of the message?"
 msgstr ""
 
 msgid ""
@@ -1185,10 +1191,13 @@ msgstr ""
 msgid "Complementary training proposition"
 msgstr ""
 
-msgid "Completed after the request"
+msgid "Completed (by student) for FAC"
 msgstr ""
 
-msgid "Completed application"
+msgid "Completed (by student) for SIC"
+msgstr ""
+
+msgid "Completed after the request"
 msgstr ""
 
 msgid "Configuration"
@@ -1954,9 +1963,6 @@ msgstr ""
 msgid "External reorientation / modification"
 msgstr ""
 
-msgid "FAC free documents"
-msgstr ""
-
 msgid "FAC/CDD processing"
 msgstr ""
 
@@ -1982,6 +1988,9 @@ msgid "Failure of the confirmation paper"
 msgstr ""
 
 msgid "Failure of the test"
+msgstr ""
+
+msgid "Feedback from FAC"
 msgstr ""
 
 msgid "Female"
@@ -2099,13 +2108,7 @@ msgstr ""
 msgid "Free and requestable by SIC"
 msgstr ""
 
-msgid "Free and uploaded by FAC for the candidate"
-msgstr ""
-
 msgid "Free and uploaded by FAC for the managers"
-msgstr ""
-
-msgid "Free and uploaded by SIC for the candidate"
 msgstr ""
 
 msgid "Free and uploaded by SIC for the managers"
@@ -2684,6 +2687,9 @@ msgstr ""
 msgid "Link to the admission supervisory panel (front-office)"
 msgstr ""
 
+msgid "Link to the admissions (front-office)"
+msgstr ""
+
 msgid "Link to the complementary training panel (front-office)"
 msgstr ""
 
@@ -3206,6 +3212,9 @@ msgstr ""
 msgid "Not analyzed"
 msgstr ""
 
+msgid "Not assimilated"
+msgstr ""
+
 msgid "Not concerned"
 msgstr ""
 
@@ -3595,9 +3604,6 @@ msgid "Private email"
 msgstr ""
 
 msgid "Processing by Fac/CDD"
-msgstr ""
-
-msgid "Processing by SIC"
 msgstr ""
 
 msgid "Professional"
@@ -4049,9 +4055,6 @@ msgid "SERVICE"
 msgstr "Services"
 
 msgid "SERVICE types"
-msgstr ""
-
-msgid "SIC free documents"
 msgstr ""
 
 msgid "SIC status"
@@ -4869,13 +4872,13 @@ msgstr ""
 msgid "To be completed"
 msgstr ""
 
-msgid "To be completed (by student) for FAC/CDD"
+msgid "To be completed (by student) for FAC"
 msgstr ""
 
 msgid "To be completed (by student) for SIC"
 msgstr ""
 
-msgid "To be completed for application"
+msgid "To be completed after application"
 msgstr ""
 
 msgid "To be processed"
@@ -4996,9 +4999,6 @@ msgstr ""
 msgid "Undecided"
 msgstr ""
 
-msgid "Under appeal"
-msgstr ""
-
 msgid "Undertake and declaration"
 msgstr ""
 
@@ -5040,6 +5040,9 @@ msgstr ""
 msgid "Upload a document"
 msgstr ""
 
+msgid "Upload a received document"
+msgstr ""
+
 msgid "Upload the opinion on the renewal of the research mandate"
 msgstr ""
 
@@ -5065,6 +5068,10 @@ msgstr ""
 msgid "Validate selected courses"
 msgstr ""
 
+msgid "Validated"
+msgstr ""
+
+msgctxt "assimilation-checklist"
 msgid "Validated"
 msgstr ""
 

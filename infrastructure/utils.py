@@ -94,8 +94,6 @@ def dto_to_dict(dto):
 
 
 FREE_MANAGER_DOCUMENT_TYPE_BY_MODEL_FIELD = {
-    'fac_documents': TypeEmplacementDocument.LIBRE_CANDIDAT_FAC.name,
-    'sic_documents': TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name,
     'uclouvain_sic_documents': TypeEmplacementDocument.LIBRE_INTERNE_SIC.name,
     'uclouvain_fac_documents': TypeEmplacementDocument.LIBRE_INTERNE_FAC.name,
 }

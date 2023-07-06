@@ -25,16 +25,11 @@
  */
 function initializeCKEditor(textareaId) {
     const textarea = document.getElementById(textareaId);
-    // const instance = CKEDITOR.instances[textareaId];
-    // if(instance) {
-    //     instance.destroy();
-    // }
     return CKEDITOR.replace(textarea.id, JSON.parse(textarea.getAttribute('data-config')));
 }
 
 function removeEditor(textareaId) {
     const instance = CKEDITOR.instances[textareaId];
-    console.log('instance to destroyed', instance);
     if (instance) {
         instance.destroy();
     }

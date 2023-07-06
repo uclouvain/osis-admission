@@ -251,6 +251,7 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+@freezegun.freeze_time('2023-01-01')
 class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
