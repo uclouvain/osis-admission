@@ -198,9 +198,9 @@
                 class="form-control"
                 hx-target="#document-details"
                 hx-swap="outerHTML"
-                {# Normally, the identifier must be pass through an url param but trigger a request from a option #}
+                {# Normally, the identifier must be pass through an url param but trigger a request from an option #}
                 {# doesn't work with Chrome so we trigger a request from the select and pass the identifier through a query param. #}
-                hx-trigger="change, selectDocumentEvent"
+                hx-trigger="change"
                 hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}"
                 name="identifier"
             >
