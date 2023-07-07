@@ -1,3 +1,4 @@
+{% load admission %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -46,6 +47,9 @@
             <i aria-hidden="true"></i>
           {% endif %}
           {{ checklist_tabs|get_item:checklist_item_name }}
+          {% if checklist_additional_icons and checklist_additional_icons|get_item_or_none:checklist_item_name %}
+            <i class="{{ checklist_additional_icons|get_item:checklist_item_name }}"></i>
+          {% endif %}
         </a>
       </li>
     {% endwith %}

@@ -238,11 +238,15 @@ def get_document_from_identifier(
 
         document_type = TypeEmplacementDocument.SYSTEME.name
         document_status = StatutEmplacementDocument.VALIDE.name
+        domain_identifier = document_identifier_parts[1]
 
-        if document_identifier_parts[1] == 'DOSSIER_ANALYSE':
-            obj = admission
-            field = 'pdf_recap'
-            document_uuids = admission.pdf_recap
+        obj = admission
+        field = CORRESPONDANCE_CHAMPS_SYSTEME.get(domain_identifier, '')
+
+        if obj and field:
+            document_uuids = getattr(obj, field, [])
+            model_attribute = type(obj)._meta.get_field(field)
+            document_mimetypes = model_attribute.mimetypes
 
     # Categorized documents
     else:
@@ -485,4 +489,10 @@ CORRESPONDANCE_CHAMPS_COTUTELLE = {
 
 CORRESPONDANCE_CHAMPS_SUPERVISION = {
     'APPROBATION_PDF': 'pdf_from_candidate',
+}
+
+CORRESPONDANCE_CHAMPS_SYSTEME = {
+    'DOSSIER_ANALYSE': 'pdf_recap',
+    'ATTESTATION_ACCORD_FACULTAIRE': 'fac_approval_certificate',
+    'ATTESTATION_REFUS_FACULTAIRE': 'fac_refusal_certificate',
 }

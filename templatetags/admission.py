@@ -36,6 +36,7 @@ from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext_noop
+from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
@@ -611,6 +612,11 @@ def has_perm(context, perm, obj=None):
     return rules.has_perm(perm, context['request'].user, obj)
 
 
+@register.simple_tag
+def not_bool(value: bool):
+    return not value
+
+
 @register.simple_tag(takes_context=True)
 def can_read_tab(context, tab_name, obj=None):
     """Return true if the specified tab can be opened in reading mode for this admission, otherwise return False"""
@@ -850,3 +856,13 @@ def checklist_state_button(context, **kwargs):
 @register.filter
 def edit_button(string, url):
     return str(string) + f'<a class="btn btn-default" href="{url}"><i class="fas fa-edit"></i></a>'
+
+
+@register.filter
+def history_entry_message(history_entry: Optional[HistoryEntry]):
+    if history_entry:
+        return {
+            settings.LANGUAGE_CODE_FR: history_entry.message_fr,
+            settings.LANGUAGE_CODE_EN: history_entry.message_en,
+        }[get_language()]
+    return ''

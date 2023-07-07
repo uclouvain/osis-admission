@@ -23,18 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List, Dict
+
 from dal_select2.views import Select2ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-__namespace__ = False
-
 from django.http import JsonResponse
 
+from admission.ddd.admission.formation_generale.commands import RechercherFormationsGereesQuery
+from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
 from infrastructure.messages_bus import message_bus_instance
 
+__namespace__ = False
+
+
 __all__ = [
     'GeneralEducationTrainingsAutocomplete',
+    'ManagedGeneralEducationTrainingsAutocomplete',
 ]
 
 
@@ -63,3 +68,29 @@ class GeneralEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView)
             },
             content_type='application/json',
         )
+
+
+class ManagedGeneralEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView):
+    urlpatterns = 'managed-general-education-trainings'
+
+    def get_list(self) -> List[BaseFormationDTO]:
+        return message_bus_instance.invoke(
+            RechercherFormationsGereesQuery(
+                terme_recherche=self.q,
+                annee=self.forwarded.get('annee_academique'),
+                matricule_gestionnaire=self.request.user.person.global_id,
+            )
+        )
+
+    def autocomplete_results(self, results):
+        # Do nothing as we already filter in get_list
+        return results
+
+    def results(self, results: List[BaseFormationDTO]) -> List[Dict]:
+        return [
+            {
+                'id': str(result.uuid),
+                'text': f'{result.sigle} - {result.intitule} ({result.lieu_enseignement})',
+            }
+            for result in results
+        ]

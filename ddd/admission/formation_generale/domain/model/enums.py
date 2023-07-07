@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Iterable
 
 from django.utils.translation import gettext_lazy as _
 
@@ -37,7 +38,7 @@ class ChoixStatutPropositionGenerale(ChoiceEnum):
     ANNULEE = _('Cancelled application')
     A_COMPLETER_POUR_SIC = _('To be completed (by student) for SIC')
     COMPLETEE_POUR_SIC = _('Completed (by student) for SIC')
-    TRAITEMENT_FAC = _('Processing by Fac/CDD')
+    TRAITEMENT_FAC = _('Processing by Fac')
     A_COMPLETER_POUR_FAC = _('To be completed (by student) for FAC')
     COMPLETEE_POUR_FAC = _('Completed (by student) for FAC')
     RETOUR_DE_FAC = _('Feedback from FAC')
@@ -46,6 +47,10 @@ class ChoixStatutPropositionGenerale(ChoiceEnum):
     INSCRIPTION_REFUSEE = _('Enrollment denied')
     CLOTUREE = _('Closed')
 
+    @classmethod
+    def get_specific_values(cls, keys: Iterable[str]):
+        return ', '.join([str(getattr(cls, key).value) for key in keys])
+
 
 CHOIX_DIPLOME_OBTENU = {GotDiploma.YES.name, GotDiploma.THIS_YEAR.name}
 
@@ -53,6 +58,48 @@ STATUTS_PROPOSITION_GENERALE_NON_SOUMISE = {
     ChoixStatutPropositionGenerale.EN_BROUILLON.name,
     ChoixStatutPropositionGenerale.ANNULEE.name,
 }
+
+# Le gestionnaire FAC a la main
+STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC = {
+    ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name,
+    ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
+}
+
+# Le gestionnaire FAC a la main ou attend une réponse du candidat
+STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS = STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC | {
+    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
+}
+
+# Le gestionnaire SIC a la main
+STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC = {
+    ChoixStatutPropositionGenerale.CONFIRMEE.name,
+    ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+    ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
+}
+
+# Le gestionnaire SIC a la main ou attend une réponse du candidat
+STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS = STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC | {
+    ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+}
+
+# Le candidat doit répondre à une demande du système ou d'un gestionnaire
+STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_CANDIDAT = {
+    ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
+}
+
+STATUTS_PROPOSITION_GENERALE_SOUMISE = (
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS
+    | STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS
+    | {
+        ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
+        ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+        ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+        ChoixStatutPropositionGenerale.CLOTUREE.name,
+    }
+)
 
 
 class ChoixStatutChecklist(ChoiceEnum):

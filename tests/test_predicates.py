@@ -38,15 +38,20 @@ from admission.auth.predicates import (
     is_invited_to_complete,
     is_invited_to_pay_after_submission,
     is_invited_to_pay_after_request,
-    checklist_is_initialized,
+    in_fac_status,
+    in_fac_status_extended,
+    in_sic_status,
+    in_sic_status_extended,
+    is_submitted,
 )
 from admission.auth.roles.cdd_configurator import CddConfigurator
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CddConfiguratorFactory, PromoterRoleFactory
@@ -327,22 +332,78 @@ class PredicatesTestCase(TestCase):
                 'Just after submission, this status must not be accepted: {}'.format(status),
             )
 
-    def test_checklist_is_initialized(self):
-        admission_without_checklist = GeneralEducationAdmissionFactory(checklist={})
-        admission_with_checklist = GeneralEducationAdmissionFactory(
-            status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
-        )
+    def test_in_fac_status(self):
+        admission = GeneralEducationAdmissionFactory()
 
-        self.assertFalse(
-            checklist_is_initialized(
-                admission_without_checklist.candidate.user,
-                admission_without_checklist,
-            ),
-        )
+        valid_statuses = {
+            ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name,
+            ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
+        }
 
-        self.assertTrue(
-            checklist_is_initialized(
-                admission_with_checklist.candidate.user,
-                admission_with_checklist,
-            ),
-        )
+        for status in ChoixStatutPropositionGenerale.get_names():
+            admission.status = status
+            self.assertEqual(
+                in_fac_status(admission.candidate.user, admission),
+                status in valid_statuses,
+            )
+
+    def test_in_fac_status_extended(self):
+        admission = GeneralEducationAdmissionFactory()
+
+        valid_statuses = {
+            ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name,
+            ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
+        }
+
+        for status in ChoixStatutPropositionGenerale.get_names():
+            admission.status = status
+            self.assertEqual(
+                in_fac_status_extended(admission.candidate.user, admission),
+                status in valid_statuses,
+            )
+
+    def test_in_sic_status(self):
+        admission = GeneralEducationAdmissionFactory()
+
+        valid_statuses = {
+            ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
+            ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+        }
+
+        for status in ChoixStatutPropositionGenerale.get_names():
+            admission.status = status
+            self.assertEqual(
+                in_sic_status(admission.candidate.user, admission),
+                status in valid_statuses,
+            )
+
+    def test_in_sic_status_extended(self):
+        admission = GeneralEducationAdmissionFactory()
+
+        valid_statuses = {
+            ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
+            ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+            ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+        }
+
+        for status in ChoixStatutPropositionGenerale.get_names():
+            admission.status = status
+            self.assertEqual(
+                in_sic_status_extended(admission.candidate.user, admission),
+                status in valid_statuses,
+            )
+
+    def test_is_submitted(self):
+        admission = GeneralEducationAdmissionFactory()
+
+        for status in ChoixStatutPropositionGenerale.get_names():
+            admission.status = status
+            self.assertEqual(
+                is_submitted(admission.candidate.user, admission),
+                status in STATUTS_PROPOSITION_GENERALE_SOUMISE,
+                status,
+            )

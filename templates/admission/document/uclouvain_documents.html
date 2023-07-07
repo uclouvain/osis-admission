@@ -48,7 +48,7 @@
             >
               <td class="auto-width">
                 <i class="fa-solid fa-school"></i>
-                {% if document.type in EMPLACEMENTS_FAC %}
+                {% if document.type in EMPLACEMENTS_FAC or document.est_emplacement_systeme_fac %}
                   <i class="fa-solid fa-building-columns"></i>
                 {% endif %}
                 {{ document.libelle }}

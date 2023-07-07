@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -66,49 +66,21 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
 
 
 def get_checklist():
+    default_content = {
+        'libelle': '',
+        'enfants': [],
+        'extra': {},
+        'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+    }
     return {
-        'donnees_personnelles': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'frais_dossier': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'assimilation': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'choix_formation': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'parcours_anterieur': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'financabilite': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'specificites_formation': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
+        'donnees_personnelles': default_content,
+        'frais_dossier': default_content,
+        'assimilation': default_content,
+        'choix_formation': default_content,
+        'parcours_anterieur': default_content,
+        'financabilite': default_content,
+        'specificites_formation': default_content,
+        'decision_facultaire': default_content,
     }
 
 

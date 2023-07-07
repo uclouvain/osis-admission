@@ -412,6 +412,15 @@ msgstr ""
 msgid "Add an internal note"
 msgstr ""
 
+msgid "Additional approval condition"
+msgstr ""
+
+msgid "Additional approval conditions"
+msgstr ""
+
+msgid "Additional conditions"
+msgstr ""
+
 msgid "Additional documents that can be requested from the candidate"
 msgstr ""
 
@@ -419,6 +428,9 @@ msgid "Additional documents uploaded by a manager"
 msgstr ""
 
 msgid "Additional information"
+msgstr ""
+
+msgid "Additional trainings"
 msgstr ""
 
 msgid "Admission"
@@ -580,6 +592,15 @@ msgstr ""
 msgid "Approbation by pdf"
 msgstr ""
 
+msgid "Approval"
+msgstr ""
+
+msgid "Approval certificate of faculty"
+msgstr ""
+
+msgid "Approval for another training"
+msgstr ""
+
 msgid "Approvals"
 msgstr ""
 
@@ -593,7 +614,16 @@ msgstr ""
 msgid "Archived record when signatures were sent"
 msgstr ""
 
+msgid "Are there any additional conditions (subject to ...)?"
+msgstr ""
+
+msgid "Are there any additional trainings?"
+msgstr ""
+
 msgid "Are you a non-resident (as defined in decree)?"
+msgstr ""
+
+msgid "Are you confirming that the application will be sent to the SIC?"
 msgstr ""
 
 msgid ""
@@ -1032,6 +1062,9 @@ msgstr ""
 msgid "Candidate not found."
 msgstr ""
 
+msgid "Candidate's country of nationality"
+msgstr ""
+
 msgid "Candidate:"
 msgstr ""
 
@@ -1228,6 +1261,12 @@ msgstr ""
 msgid "Confirm restoring activity to submitted"
 msgstr ""
 
+msgid "Confirm the status change"
+msgstr ""
+
+msgid "Confirm the submit"
+msgstr ""
+
 msgctxt "tab"
 msgid "Confirmation"
 msgstr ""
@@ -1269,6 +1308,9 @@ msgid "Contact details"
 msgstr ""
 
 msgid "Contact language"
+msgstr ""
+
+msgid "Contact person for the design of the annual program"
 msgstr ""
 
 msgid "Context"
@@ -1566,6 +1608,9 @@ msgstr ""
 msgid "Decision confirming the granting of temporary protection"
 msgstr ""
 
+msgid "Decision of the faculty"
+msgstr ""
+
 msgid "Declared assimilated"
 msgstr ""
 
@@ -1723,6 +1768,21 @@ msgstr ""
 msgid "Documents"
 msgstr ""
 
+msgid ""
+"Documents requested by the SIC are still expected from the candidate. The "
+"application could be sent to the faculty once they have been received."
+msgstr ""
+
+msgid ""
+"Documents requested by the faculty are still expected from the candidate. "
+"The application could be sent to the SIC once they have been received."
+msgstr ""
+
+msgid ""
+"Documents requested by the faculty are still expected from the candidate. "
+"The application will be sent to the SIC once they have been received."
+msgstr ""
+
 msgid "Documents to be requested now"
 msgstr ""
 
@@ -1730,6 +1790,9 @@ msgid "Does not have a doctor title"
 msgstr ""
 
 msgid "Done in"
+msgstr ""
+
+msgid "Dossier"
 msgstr ""
 
 msgid "Dossier confirmation"
@@ -1844,9 +1907,17 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
+msgid "Email of the contact person for the design of the annual program"
+msgstr ""
+
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fees to finalize an application for general education"
+msgstr ""
+
+msgid ""
+"Email sent to the faculty when the SIC submits the application during the "
+"faculty decision process."
 msgstr ""
 
 msgid "Employer"
@@ -1867,6 +1938,9 @@ msgid "End date"
 msgstr ""
 
 msgid "English"
+msgstr ""
+
+msgid "English name"
 msgstr ""
 
 msgid "English value"
@@ -1897,6 +1971,9 @@ msgid "Enrolment management"
 msgstr ""
 
 msgid "Enrolments"
+msgstr ""
+
+msgid "Enter a list of values."
 msgstr ""
 
 msgid "Entities"
@@ -2005,6 +2082,21 @@ msgstr ""
 msgid "FSR - Fonds Speciaux de Recherche"
 msgstr "FSR - Fonds Spéciaux de Recherche"
 
+msgid "Faculty approval certificate"
+msgstr ""
+
+msgid "Faculty comment about the collaborative program"
+msgstr ""
+
+msgid "Faculty comment for the SIC"
+msgstr ""
+
+msgid "Faculty process"
+msgstr ""
+
+msgid "Faculty refusal reason"
+msgstr ""
+
 msgid "Failure of the confirmation paper"
 msgstr ""
 
@@ -2054,6 +2146,9 @@ msgid "Financing type"
 msgstr ""
 
 msgid "First name"
+msgstr ""
+
+msgid "First name and last name"
 msgstr ""
 
 msgid "First name in use"
@@ -2129,6 +2224,9 @@ msgstr ""
 msgid "Fraudster (ARES)"
 msgstr ""
 
+msgid "Free additional approval conditions"
+msgstr ""
+
 msgid "Free and requestable by FAC"
 msgstr ""
 
@@ -2142,6 +2240,9 @@ msgid "Free and uploaded by SIC for the managers"
 msgstr ""
 
 msgid "French"
+msgstr ""
+
+msgid "French name"
 msgstr ""
 
 msgid "French value"
@@ -2472,6 +2573,11 @@ msgid ""
 "seminar, nor the different activities within it."
 msgstr ""
 
+msgid ""
+"If you want, you can save these information and directly send the "
+"application to the SIC by selecting the appropriate button below."
+msgstr ""
+
 msgid "Important information:"
 msgstr ""
 
@@ -2732,10 +2838,21 @@ msgstr ""
 msgid "Link to the doctoral training panel (front-office)"
 msgstr ""
 
+msgid "Link to the page of the documents of the admission (back-office)"
+msgstr ""
+
+msgid ""
+"Link to the page of the faculty decision in the checklist of the admission "
+"(back-office)"
+msgstr ""
+
 msgid "List"
 msgstr ""
 
 msgid "List a missing document"
+msgstr ""
+
+msgid "List of LUs of the additional module or others"
 msgstr ""
 
 msgid "List of the requested documents with the reason"
@@ -3139,6 +3256,9 @@ msgstr ""
 msgid "Name of the activity"
 msgstr ""
 
+msgid "Name of the contact person for the design of the annual program"
+msgstr ""
+
 msgid "Name of the event"
 msgstr ""
 
@@ -3215,6 +3335,9 @@ msgstr ""
 msgid "No scholarship found."
 msgstr ""
 
+msgid "No specific profile"
+msgstr ""
+
 msgid "No training found."
 msgstr ""
 
@@ -3243,6 +3366,9 @@ msgid "Not UE"
 msgstr ""
 
 msgid "Not VIP"
+msgstr ""
+
+msgid "Not all the conditions have been found."
 msgstr ""
 
 msgid "Not analyzed"
@@ -3275,6 +3401,10 @@ msgid "Number of days participating"
 msgstr ""
 
 msgid "Number of values mismatch"
+msgstr ""
+
+msgid ""
+"Number of years required for the full program (including additional training)"
 msgstr ""
 
 msgid "OTHER"
@@ -3342,7 +3472,13 @@ msgstr ""
 msgid "Other documents concerning cotutelle"
 msgstr ""
 
+msgid "Other faculty refusal reason"
+msgstr ""
+
 msgid "Other first names"
+msgstr ""
+
+msgid "Other information about additional trainings"
 msgstr ""
 
 msgid "Other institute"
@@ -3358,6 +3494,15 @@ msgid "Other members of the supervisory panel"
 msgstr ""
 
 msgid "Other names"
+msgstr ""
+
+msgid "Other reason"
+msgstr ""
+
+msgid "Other training"
+msgstr ""
+
+msgid "Other training accepted by the faculty"
 msgstr ""
 
 msgid "Others"
@@ -3513,6 +3658,9 @@ msgid ""
 "Please check the details of the activity to fill in all mandatory fields"
 msgstr ""
 
+msgid "Please confirm the change to this new status."
+msgstr ""
+
 msgid ""
 "Please fill in all the required information in the 'Personal Data > "
 "Coordinates' tab."
@@ -3642,7 +3790,7 @@ msgctxt "admission"
 msgid "Private email"
 msgstr ""
 
-msgid "Processing by Fac/CDD"
+msgid "Processing by Fac"
 msgstr ""
 
 msgid "Professional"
@@ -3814,6 +3962,9 @@ msgstr ""
 msgid "Reason for exceeding the deadline"
 msgstr ""
 
+msgid "Reason for refusal"
+msgstr ""
+
 #, python-format
 msgid "Recap of the proposition %(reference)s"
 msgstr ""
@@ -3864,6 +4015,24 @@ msgid "Reference promoter comment"
 msgstr ""
 
 msgid "Reference:"
+msgstr ""
+
+msgid "Refusal"
+msgstr ""
+
+msgid "Refusal certificate of faculty"
+msgstr ""
+
+msgid "Refusal reason"
+msgstr ""
+
+msgid "Refusal reason categories"
+msgstr ""
+
+msgid "Refusal reason category"
+msgstr ""
+
+msgid "Refusal reasons"
 msgstr ""
 
 msgid "Refuse activity"
@@ -4111,6 +4280,9 @@ msgstr "Services"
 msgid "SERVICE types"
 msgstr ""
 
+msgid "SIC comment for the faculty"
+msgstr ""
+
 msgid "SIC status"
 msgstr ""
 
@@ -4140,6 +4312,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Save"
+msgstr ""
+
+msgid "Save and transfer to SIC"
 msgstr ""
 
 msgid "Save and view result"
@@ -4206,6 +4381,13 @@ msgstr ""
 msgid "Select for batch action"
 msgstr ""
 
+#, python-format
+msgid "Select valid choices. %(value)s is not one of the available choices."
+msgid_plural ""
+"Select valid choices. %(value)s are not among the available choices."
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Selection"
 msgstr ""
 
@@ -4233,7 +4415,13 @@ msgstr ""
 msgid "Send the message"
 msgstr ""
 
+msgid "Send to SIC"
+msgstr ""
+
 msgid "Send to applicant"
+msgstr ""
+
+msgid "Send to faculty"
 msgstr ""
 
 msgid "Sender"
@@ -4466,6 +4654,9 @@ msgstr "To be verified"
 msgid "Tab"
 msgstr ""
 
+msgid "Taken in charge"
+msgstr ""
+
 msgid ""
 "Takes into account the language of secondary and higher education. Studies "
 "in Belgium are considered as both French and English studies."
@@ -4527,9 +4718,6 @@ msgstr ""
 msgid ""
 "The certificate of achievement of the confirmation paper in PDF format is "
 "being generated, please come back later to get it."
-msgstr ""
-
-msgid "The checklist must be initialized."
 msgstr ""
 
 msgid ""
@@ -4631,6 +4819,12 @@ msgstr ""
 msgid "The dossier has been confirmed with the following address:"
 msgstr ""
 
+msgid "The dossier is currently in SIC"
+msgstr ""
+
+msgid "The dossier is currently in faculty"
+msgstr ""
+
 #, python-format
 msgid "The educational experience '%(education_name)s' is not completed."
 msgstr ""
@@ -4658,6 +4852,24 @@ msgid "The first name of the signing actor"
 msgstr ""
 
 msgid "The first name of the student"
+msgstr ""
+
+#, python-format
+msgid ""
+"The global status of the application must be one of the following in order "
+"to submit the dossier to the SIC: %(statuses)s."
+msgstr ""
+
+#, python-format
+msgid ""
+"The global status of the application must be one of the following in order "
+"to submit the dossier to the faculty: %(statuses)s."
+msgstr ""
+
+#, python-format
+msgid ""
+"The global status of the application must be one of the following to realize "
+"this action: %(statuses)s."
 msgstr ""
 
 msgid "The jury is not in progress"
@@ -4726,6 +4938,15 @@ msgid "The proposition has already been confirmed or is cancelled"
 msgstr ""
 
 msgid "The proposition must be concerned by the payment."
+msgstr ""
+
+msgid "The proposition must be managed by FAC to realized this action."
+msgstr ""
+
+msgid "The proposition must be managed by SIC to realized this action."
+msgstr ""
+
+msgid "The proposition must be submitted to realize this action."
 msgstr ""
 
 msgid "The proposition must not be concerned by the payment."
@@ -4941,6 +5162,9 @@ msgid "To be completed (by student) for SIC"
 msgstr ""
 
 msgid "To be completed after application"
+msgstr ""
+
+msgid "To be completed by SIC"
 msgstr ""
 
 msgid "To be processed"
@@ -5182,6 +5406,14 @@ msgid "What was your NOMA (registration id)?"
 msgstr ""
 
 msgid ""
+"When accepting a proposition, all the required information in the approval "
+"form must be specified."
+msgstr ""
+
+msgid "When refusing a proposition, the reason must be specified."
+msgstr ""
+
+msgid ""
 "When you have submitted your application, you have agreed to the following:"
 msgstr ""
 
@@ -5276,7 +5508,19 @@ msgstr ""
 msgid "Yes, only in Tournai (10 EUR)"
 msgstr ""
 
+#, python-format
+msgid ""
+"You are about to submit the application to the Faculty. This action will "
+"send an email to %(recipient)s."
+msgstr ""
+
 msgid "You are registering as"
+msgstr ""
+
+#, python-format
+msgid ""
+"You can search for an additional training by name or acronym, or paste in a "
+"list of acronyms separated by the \"%(separator)s\" character."
 msgstr ""
 
 msgid "You cannot fill in a language more than once, please correct the form."

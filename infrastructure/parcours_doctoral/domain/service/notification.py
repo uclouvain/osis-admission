@@ -36,7 +36,6 @@ from admission.contrib.models.doctorate import DoctorateAdmission, DoctorateProx
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.parcours_doctoral.domain.model.doctorat import Doctorat
 from admission.ddd.parcours_doctoral.domain.service.i_notification import INotification
-from base.models.person import Person
 from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification

@@ -479,6 +479,15 @@ msgstr "Ajouter une activité"
 msgid "Add an internal note"
 msgstr "Ajouter une note interne"
 
+msgid "Additional approval condition"
+msgstr "Condition complémentaire d'acceptation"
+
+msgid "Additional approval conditions"
+msgstr "Conditions complémentaires d'acceptation"
+
+msgid "Additional conditions"
+msgstr "Conditions complémentaires"
+
 msgid "Additional documents that can be requested from the candidate"
 msgstr "Documents additionnels réclamables au candidat"
 
@@ -487,6 +496,9 @@ msgstr "Documents additionnels téléversés par un gestionnaire"
 
 msgid "Additional information"
 msgstr "Informations complémentaires"
+
+msgid "Additional trainings"
+msgstr "Compléments de formation"
 
 msgid "Admission"
 msgstr "Admission"
@@ -660,6 +672,15 @@ msgstr "Demandes"
 msgid "Approbation by pdf"
 msgstr "Approbation par pdf"
 
+msgid "Approval"
+msgstr "Approbation"
+
+msgid "Approval certificate of faculty"
+msgstr "Attestation d'accord facultaire"
+
+msgid "Approval for another training"
+msgstr "Accord pour une autre formation "
+
 msgid "Approvals"
 msgstr "Approbations"
 
@@ -673,8 +694,17 @@ msgstr "Date approximative d'achèvement de la thèse :"
 msgid "Archived record when signatures were sent"
 msgstr "Fiche archivée lors de l'envoi des signatures"
 
+msgid "Are there any additional conditions (subject to ...)?"
+msgstr "Y a-t-il des conditions complémentaires (\"sous réserve de ...\") ?"
+
+msgid "Are there any additional trainings?"
+msgstr "Y a-t-il des compléments de formation ?"
+
 msgid "Are you a non-resident (as defined in decree)?"
 msgstr "Êtes-vous non-résident (au sens du décret) ?"
+
+msgid "Are you confirming that the application will be sent to the SIC?"
+msgstr "Confirmez-vous l'envoi du dossier en SIC ?"
 
 msgid ""
 "Are you currently enrolled in the first year of a bachelor's degree at a "
@@ -1126,8 +1156,11 @@ msgstr "Nationalité du candidat"
 msgid "Candidate not found."
 msgstr "Candidat non trouvé."
 
+msgid "Candidate's country of nationality"
+msgstr "Pays de la nationalité du candidat"
+
 msgid "Candidate:"
-msgstr "Candidat :"
+msgstr "Candidat :"
 
 msgid "Canvas"
 msgstr "Canvas"
@@ -1332,6 +1365,12 @@ msgstr "Confirmer et envoyer le message"
 msgid "Confirm restoring activity to submitted"
 msgstr "Confirmer la remise au statut soumise de cette activité"
 
+msgid "Confirm the status change"
+msgstr "Confirmer le changement de statut"
+
+msgid "Confirm the submit"
+msgstr "Confirmer l'envoi"
+
 msgctxt "tab"
 msgid "Confirmation"
 msgstr "Confirmation"
@@ -1377,6 +1416,9 @@ msgstr "Coordonnées"
 
 msgid "Contact language"
 msgstr "Langue de contact"
+
+msgid "Contact person for the design of the annual program"
+msgstr "Personne de contact pour la composition du programme annuel"
 
 msgid "Context"
 msgstr "Contexte"
@@ -1719,6 +1761,9 @@ msgstr "Décision confirmant l'octroi de la protection subsidiaire"
 msgid "Decision confirming the granting of temporary protection"
 msgstr "Décision confirmant l'octroi de la protection temporaire"
 
+msgid "Decision of the faculty"
+msgstr "Décision de la faculté"
+
 msgid "Declared assimilated"
 msgstr "Déclaré(e) assimilé(e)"
 
@@ -1878,6 +1923,27 @@ msgstr "Document à réclamer"
 msgid "Documents"
 msgstr "Documents"
 
+msgid ""
+"Documents requested by the SIC are still expected from the candidate. The "
+"application could be sent to the faculty once they have been received."
+msgstr ""
+"Des documents réclamés au candidat par le SIC sont encore attendus. L'envoi "
+"du dossier en faculté pourra être réalisé après leur réception."
+
+msgid ""
+"Documents requested by the faculty are still expected from the candidate. "
+"The application could be sent to the SIC once they have been received."
+msgstr ""
+"Des documents réclamés au candidat par la faculté sont encore attendus. "
+"L'envoi du dossier en SIC pourra être réalisé après leur réception."
+
+msgid ""
+"Documents requested by the faculty are still expected from the candidate. "
+"The application will be sent to the SIC once they have been received."
+msgstr ""
+"Des documents réclamés au candidat par la faculté sont encore attendus. "
+"L'envoi du dossier en SIC pourra être réalisé après leur réception."
+
 msgid "Documents to be requested now"
 msgstr "Documents à réclamer maintenant"
 
@@ -1886,6 +1952,9 @@ msgstr "N'est pas porteur du titre de docteur"
 
 msgid "Done in"
 msgstr "Fait à"
+
+msgid "Dossier"
+msgstr "Dossier"
 
 msgid "Dossier confirmation"
 msgstr "Confirmation dossier"
@@ -2000,12 +2069,23 @@ msgstr "Type d'enseignement"
 msgid "Email"
 msgstr "Email"
 
+msgid "Email of the contact person for the design of the annual program"
+msgstr ""
+"E-mail de la personne de contact pour la composition du programme annuel"
+
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fees to finalize an application for general education"
 msgstr ""
 "E-mail envoyé au candidat pour l'informer de la nécessité de payer les frais "
 "de dossier pour finaliser une demande en formation générale"
+
+msgid ""
+"Email sent to the faculty when the SIC submits the application during the "
+"faculty decision process."
+msgstr ""
+"E-mail envoyé à la faculté quand le SIC envoie le dossier lors du processus "
+"de décision facultaire."
 
 msgid "Employer"
 msgstr "Employeur"
@@ -2028,6 +2108,9 @@ msgstr "Date de fin"
 
 msgid "English"
 msgstr "Anglais"
+
+msgid "English name"
+msgstr "Nom en anglais"
 
 msgid "English value"
 msgstr "Valeur en anglais"
@@ -2058,6 +2141,9 @@ msgstr "Gestion des inscriptions"
 
 msgid "Enrolments"
 msgstr "Inscriptions"
+
+msgid "Enter a list of values."
+msgstr "Saisissez une liste de valeurs."
 
 msgid "Entities"
 msgstr "Entité(s)"
@@ -2165,6 +2251,21 @@ msgstr "FRIA"
 msgid "FSR - Fonds Speciaux de Recherche"
 msgstr "FSR - Fonds Spéciaux de Recherche"
 
+msgid "Faculty approval certificate"
+msgstr "Attestation de refus facultaire"
+
+msgid "Faculty comment about the collaborative program"
+msgstr "Commentaire facultaire concernant le programme conjoint"
+
+msgid "Faculty comment for the SIC"
+msgstr "Commentaire de la Faculté pour le SIC"
+
+msgid "Faculty process"
+msgstr "Traitement facultaire"
+
+msgid "Faculty refusal reason"
+msgstr "Motif de refus facultaire"
+
 msgid "Failure of the confirmation paper"
 msgstr "Échec de l'épreuve de confirmation"
 
@@ -2215,6 +2316,9 @@ msgstr "Type de financement"
 
 msgid "First name"
 msgstr "Prénom"
+
+msgid "First name and last name"
+msgstr "Prénom et nom"
 
 msgid "First name in use"
 msgstr "Prénom d'usage"
@@ -2315,6 +2419,9 @@ msgstr "Fraudeur"
 msgid "Fraudster (ARES)"
 msgstr "Fraudeur (ARES)"
 
+msgid "Free additional approval conditions"
+msgstr "Conditions complémentaires d'acceptation libres"
+
 msgid "Free and requestable by FAC"
 msgstr "Libre et réclamable par FAC"
 
@@ -2329,6 +2436,9 @@ msgstr "Libre et téléversé par SIC pour les gestionnaires"
 
 msgid "French"
 msgstr "Français"
+
+msgid "French name"
+msgstr "Nom en français"
 
 msgid "French value"
 msgstr "Valeur en français"
@@ -2731,6 +2841,14 @@ msgstr ""
 "Si vous soumettez l'activité, vous ne pourrez plus modifier le séminaire, ni "
 "les différentes activités en faisant partie."
 
+msgid ""
+"If you want, you can save these information and directly send the "
+"application to the SIC by selecting the appropriate button below."
+msgstr ""
+"Si vous le souhaitez, vous pouvez sauvegarder ces informations et "
+"directement transmettre le dossier à SIC en sélectionnant le bouton "
+"approprié ci-dessous."
+
 msgid "Important information:"
 msgstr "Informations importantes"
 
@@ -3018,11 +3136,24 @@ msgstr "Lien vers la page liée à la formation doctorale (back-office)"
 msgid "Link to the doctoral training panel (front-office)"
 msgstr "Lien vers la page liée à la formation doctorale (front-office)"
 
+msgid "Link to the page of the documents of the admission (back-office)"
+msgstr "Lien vers la page des documents de l'admission (back-office)"
+
+msgid ""
+"Link to the page of the faculty decision in the checklist of the admission "
+"(back-office)"
+msgstr ""
+"Lien vers la page de décision facultaire dans la checklist de l'admission "
+"(back-office)"
+
 msgid "List"
 msgstr "Liste"
 
 msgid "List a missing document"
 msgstr "Lister un document manquant"
+
+msgid "List of LUs of the additional module or others"
+msgstr "Liste des UEs du module complémentaire ou autres"
 
 msgid "List of the requested documents with the reason"
 msgstr "Liste des documents réclamés avec la raison associée"
@@ -3512,6 +3643,9 @@ msgstr "Nom dans la langue de la manifestation"
 msgid "Name of the activity"
 msgstr "Nom de l'activité"
 
+msgid "Name of the contact person for the design of the annual program"
+msgstr "Nom de la personne de contact pour la composition du programme annuel"
+
 msgid "Name of the event"
 msgstr "Nom de l'événement"
 
@@ -3591,6 +3725,9 @@ msgstr "Aucun pot ne correspond."
 msgid "No scholarship found."
 msgstr "Bourse non trouvée."
 
+msgid "No specific profile"
+msgstr "Pas de profil particulier"
+
 msgid "No training found."
 msgstr "Formation non trouvée."
 
@@ -3620,6 +3757,9 @@ msgstr "Non-UE"
 
 msgid "Not VIP"
 msgstr "Non-VIP"
+
+msgid "Not all the conditions have been found."
+msgstr "Toutes les conditions n'ont pas été trouvées."
 
 msgid "Not analyzed"
 msgstr "Non analysé"
@@ -3652,6 +3792,12 @@ msgstr "Nombre de jours de participation"
 
 msgid "Number of values mismatch"
 msgstr "Le nombre de valeurs ne correspond pas"
+
+msgid ""
+"Number of years required for the full program (including additional training)"
+msgstr ""
+"Nombre d'années à prévoir pour le programme complet (y compris pour les "
+"compléments de formation)"
 
 msgid "OTHER"
 msgstr "Autre"
@@ -3719,8 +3865,14 @@ msgstr "Autres documents relatifs à la cotutelle"
 msgid "Other documents concerning cotutelle"
 msgstr "Autres documents relatifs à la cotutelle"
 
+msgid "Other faculty refusal reason"
+msgstr "Autre motif de refus facultaire"
+
 msgid "Other first names"
 msgstr "Autres prénoms"
+
+msgid "Other information about additional trainings"
+msgstr "Autres informations à propos des compléments de formation"
 
 msgid "Other institute"
 msgstr "Autre institution"
@@ -3736,6 +3888,15 @@ msgstr "Autres membres du comité d’accompagnement"
 
 msgid "Other names"
 msgstr "Autres prénoms"
+
+msgid "Other reason"
+msgstr "Autre raison"
+
+msgid "Other training"
+msgstr "Autre formation"
+
+msgid "Other training accepted by the faculty"
+msgstr "Autre formation acceptée par la facultée"
 
 msgid "Others"
 msgstr "Autres"
@@ -3898,6 +4059,9 @@ msgstr ""
 "Veuillez vérifier le détail de l’activité pour renseigner tous les champs "
 "obligatoires"
 
+msgid "Please confirm the change to this new status."
+msgstr "Merci de confirmer le changement vers ce nouveau statut."
+
 msgid ""
 "Please fill in all the required information in the 'Personal Data > "
 "Coordinates' tab."
@@ -4047,8 +4211,8 @@ msgctxt "admission"
 msgid "Private email"
 msgstr "E-mail privé"
 
-msgid "Processing by Fac/CDD"
-msgstr "Traitement en Fac/CDD"
+msgid "Processing by Fac"
+msgstr "Traitement en Fac"
 
 msgid "Professional"
 msgstr "Professionnel"
@@ -4233,6 +4397,9 @@ msgstr "Raison"
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"
 
+msgid "Reason for refusal"
+msgstr "Motif de refus"
+
 #, python-format
 msgid "Recap of the proposition %(reference)s"
 msgstr "Récapitulatif de la proposition %(reference)s"
@@ -4287,6 +4454,24 @@ msgstr "Commentaire du promoteur de référence"
 
 msgid "Reference:"
 msgstr "Référence :"
+
+msgid "Refusal"
+msgstr "Refus"
+
+msgid "Refusal certificate of faculty"
+msgstr "Attestation de refus facultaire"
+
+msgid "Refusal reason"
+msgstr "Motif de refus"
+
+msgid "Refusal reason categories"
+msgstr "Catégories des motifs de refus"
+
+msgid "Refusal reason category"
+msgstr "Catégorie d'un motif de refus"
+
+msgid "Refusal reasons"
+msgstr "Motifs de refus"
 
 msgid "Refuse activity"
 msgstr "Refuser l'activité"
@@ -4541,11 +4726,14 @@ msgstr ""
 "Types d'activité pour la catégorie Service institutionnel, didactique et "
 "d'expertise scientifique"
 
+msgid "SIC comment for the faculty"
+msgstr "Commentaire de SIC pour la Faculté"
+
 msgid "SIC status"
 msgstr "Statut SIC"
 
 msgid "SIC:"
-msgstr "SIC :"
+msgstr "SIC :"
 
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
@@ -4571,6 +4759,9 @@ msgstr "Enregistrer"
 msgctxt "admission"
 msgid "Save"
 msgstr "Enregistrer"
+
+msgid "Save and transfer to SIC"
+msgstr "Enregistrer et transmettre en SIC"
 
 msgid "Save and view result"
 msgstr "Enregistrer et voir le résultat"
@@ -4636,6 +4827,13 @@ msgstr "Veuillez sélectionner au moins une activité"
 msgid "Select for batch action"
 msgstr "Sélectionner pour une action en masse"
 
+#, python-format
+msgid "Select valid choices. %(value)s is not one of the available choices."
+msgid_plural ""
+"Select valid choices. %(value)s are not among the available choices."
+msgstr[0] "Sélectionnez des choix valides. %(value)s n’en fait pas partie."
+msgstr[1] "Sélectionnez des choix valides. %(value)s n’en font pas partie."
+
 msgid "Selection"
 msgstr "Sélection"
 
@@ -4663,8 +4861,14 @@ msgstr "Envoyer un e-mail d'information"
 msgid "Send the message"
 msgstr "Envoyer le message"
 
+msgid "Send to SIC"
+msgstr "Envoyer en SIC"
+
 msgid "Send to applicant"
 msgstr "Envoyer au candidat"
+
+msgid "Send to faculty"
+msgstr "Envoyer en faculté"
 
 msgid "Sender"
 msgstr "Expéditeur"
@@ -4912,6 +5116,9 @@ msgstr "Pour vérification"
 msgid "Tab"
 msgstr "Onglet"
 
+msgid "Taken in charge"
+msgstr "Pris en charge"
+
 msgid ""
 "Takes into account the language of secondary and higher education. Studies "
 "in Belgium are considered as both French and English studies."
@@ -4988,9 +5195,6 @@ msgid ""
 msgstr ""
 "L’attestation de réussite de l’épreuve de confirmation est en cours de "
 "génération, veuillez revenir plus tard pour y accéder."
-
-msgid "The checklist must be initialized."
-msgstr "La checklist doit être initialisée."
 
 msgid ""
 "The child of a member of staff may, under some conditions, benefit from a "
@@ -5113,6 +5317,12 @@ msgstr "La demande a été confirmée sous le nom :"
 msgid "The dossier has been confirmed with the following address:"
 msgstr "La demande a été confirmée avec pour adresse :"
 
+msgid "The dossier is currently in SIC"
+msgstr "Le dossier est actuellement en SIC"
+
+msgid "The dossier is currently in faculty"
+msgstr "Le dossier est actuellement en faculté"
+
 #, python-format
 msgid "The educational experience '%(education_name)s' is not completed."
 msgstr "L'expérience académique '%(education_name)s' est incomplète."
@@ -5142,6 +5352,30 @@ msgstr "Le prénom du signataire"
 
 msgid "The first name of the student"
 msgstr "Le prénom de l'étudiant"
+
+#, python-format
+msgid ""
+"The global status of the application must be one of the following in order "
+"to submit the dossier to the SIC: %(statuses)s."
+msgstr ""
+"Le statut global de la demande doit être l'un des suivants pour pouvoir "
+"envoyer le dossier en SIC : %(statuses)s."
+
+#, python-format
+msgid ""
+"The global status of the application must be one of the following in order "
+"to submit the dossier to the faculty: %(statuses)s."
+msgstr ""
+"Le statut global de la demande doit être l'un des suivants pour pouvoir "
+"envoyer le dossier en faculté : %(statuses)s."
+
+#, python-format
+msgid ""
+"The global status of the application must be one of the following to realize "
+"this action: %(statuses)s."
+msgstr ""
+"Le statut global de la demande doit être l'un des suivants pour pouvoir "
+"réaliser cette action : %(statuses)s."
 
 msgid "The jury is not in progress"
 msgstr "Le jury n'est pas en cours"
@@ -5221,6 +5455,15 @@ msgstr "La proposition a déjà été confirmée ou est annulée"
 
 msgid "The proposition must be concerned by the payment."
 msgstr "La proposition doit être concernée par le paiement."
+
+msgid "The proposition must be managed by FAC to realized this action."
+msgstr "La proposition doit être gérée par FAC pour réaliser cette action."
+
+msgid "The proposition must be managed by SIC to realized this action."
+msgstr "La proposition doit être gérée par SIC pour réaliser cette action."
+
+msgid "The proposition must be submitted to realize this action."
+msgstr "La proposition doit être soumise pour réaliser cette action."
 
 msgid "The proposition must not be concerned by the payment."
 msgstr "La proposition ne doit pas être concernée par le paiement."
@@ -5461,6 +5704,9 @@ msgstr "A compléter (par étudiant) pour SIC"
 
 msgid "To be completed after application"
 msgstr "À compléter après inscription"
+
+msgid "To be completed by SIC"
+msgstr "À compléter par SIC"
 
 msgid "To be processed"
 msgstr "À traiter"
@@ -5714,6 +5960,16 @@ msgid "What was your NOMA (registration id)?"
 msgstr "Quel était votre NOMA (numéro de matricule) ?"
 
 msgid ""
+"When accepting a proposition, all the required information in the approval "
+"form must be specified."
+msgstr ""
+"Pour accepter une proposition, toutes les informations requises dans le "
+"formulaire d'acceptation doivent être spécifiées"
+
+msgid "When refusing a proposition, the reason must be specified."
+msgstr "Pour refuser une proposition, le motif doit être spécifié."
+
+msgid ""
 "When you have submitted your application, you have agreed to the following:"
 msgstr ""
 "Lors de la confirmation de votre demande, vous avez accepté les points "
@@ -5821,8 +6077,24 @@ msgstr "Oui, sur Saint-Gilles uniquement (10 EUR)"
 msgid "Yes, only in Tournai (10 EUR)"
 msgstr "Oui, sur Tournai uniquement (10 EUR)"
 
+#, python-format
+msgid ""
+"You are about to submit the application to the Faculty. This action will "
+"send an email to %(recipient)s."
+msgstr ""
+"Vous êtes sur le point de soumettre le dossier en Faculté. Cette action "
+"enverra un mail à l'adresse %(recipient)s."
+
 msgid "You are registering as"
 msgstr "Vous vous inscrivez à titre"
+
+#, python-format
+msgid ""
+"You can search for an additional training by name or acronym, or paste in a "
+"list of acronyms separated by the \"%(separator)s\" character."
+msgstr ""
+"Vous pouvez rechercher un complément de formation par son nom ou son code, "
+"ou bien coller une liste de codes séparés par le caractère \"%(separator)s\"."
 
 msgid "You cannot fill in a language more than once, please correct the form."
 msgstr ""

@@ -39,6 +39,9 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.service.i_comptabilite import IComptabiliteTranslator
+from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
+    IQuestionSpecifiqueTranslator,
+)
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
@@ -81,10 +84,11 @@ def recuperer_resume_et_emplacements_documents_non_libres_proposition(
     )
 
     # WHEN
-    emplacements_documents = emplacements_documents_demande_translator.recuperer_emplacements_documents_non_libres_dto(
+    emplacements_documents = emplacements_documents_demande_translator.recuperer_emplacements_dto(
         personne_connue_translator=personne_connue_translator,
         resume_dto=resume_dto,
         questions_specifiques=questions_specifiques_dtos,
+        avec_documents_libres=False,
     )
 
     # THEN

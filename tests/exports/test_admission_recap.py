@@ -1029,6 +1029,8 @@ class SectionsAttachmentsTestCase(TestCase):
             documents_demandes={},
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_uclouvain=[],
+            certificat_refus_fac=[],
+            certificat_approbation_fac=[],
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',

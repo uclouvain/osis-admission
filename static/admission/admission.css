@@ -90,6 +90,20 @@ textarea {
   width: max-content;
 }
 
+/* To override the bootstrap fieldset style */
+fieldset.custom-fieldset {
+  border: 1px solid #ddd;
+  padding: inherit;
+}
+
+fieldset.custom-fieldset > legend {
+  font-size: 1em;
+  width: fit-content;
+  border: none;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
 @media (min-width: 990px) {
   .tabsbar-collapse {
     width: auto;
@@ -234,6 +248,7 @@ textarea {
   width: 1%;
   white-space: nowrap;
 }
+
 .auto-width {
   width: auto;
 }
@@ -244,4 +259,13 @@ textarea {
 
 #parcours .tab-pane {
   overflow-x: auto;
+}
+
+.toast-messages-container {
+  z-index: 2000;
+  top: 0;
+}
+
+.comment-content {
+  white-space: pre-wrap;
 }
