@@ -665,7 +665,7 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
     learning_unit_year = forms.CharField(
         label=_("Learning unit"),
         widget=autocomplete.ListSelect2(
-            url='admission:autocomplete:learning-unit-years',
+            url='admission:autocomplete:learning-unit-years-and-classes',
             attrs={
                 'data-html': True,
                 'data-minimum-input-length': 2,

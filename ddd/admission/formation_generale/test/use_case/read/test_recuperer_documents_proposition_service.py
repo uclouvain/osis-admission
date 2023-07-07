@@ -257,7 +257,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertIsNotNone(document)
         self.assertEqual(document.libelle, DocumentsSysteme['DOSSIER_ANALYSE'])
         self.assertEqual(document.libelle_langue_candidat, DocumentsSysteme['DOSSIER_ANALYSE'])
-        self.assertEqual(document.document_uuids, [])
+        self.assertEqual(document.document_uuids, ['recap.pdf'])
         self.assertEqual(document.type, TypeEmplacementDocument.SYSTEME.name)
         self.assertEqual(document.statut, StatutEmplacementDocument.VALIDE.name)
         self.assertEqual(document.justification_gestionnaire, '')

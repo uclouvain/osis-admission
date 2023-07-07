@@ -57,6 +57,7 @@ from admission.contrib.models import (
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
+from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
@@ -180,6 +181,9 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'double_degree_scholarship',
         'international_scholarship',
         'erasmus_mundus_scholarship',
+        'additional_approval_conditions',
+        'other_training_accepted_by_fac',
+        'additional_trainings',
     ]
 
     @staticmethod
@@ -377,6 +381,24 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         return False
 
 
+class DisplayTranslatedNameMixin:
+    search_fields = ['name_fr', 'name_en']
+
+
+class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
+    list_display = ['name_fr', 'name_en']
+
+
+class RefusalReasonAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
+    autocomplete_fields = ['category']
+    list_display = ['name_fr', 'name_en', 'category']
+    list_filter = ['category']
+
+
+class AdditionalApprovalConditionAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
+    list_display = ['name_fr', 'name_en']
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
@@ -388,6 +410,9 @@ admin.site.register(ContinuingEducationAdmission, ContinuingEducationAdmissionAd
 admin.site.register(BaseAdmission, BaseAdmissionAdmin)
 admin.site.register(AdmissionViewer, AdmissionViewerAdmin)
 admin.site.register(Accounting, AccountingAdmin)
+admin.site.register(RefusalReasonCategory, RefusalReasonCategoryAdmin)
+admin.site.register(RefusalReason, RefusalReasonAdmin)
+admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):

@@ -30,19 +30,15 @@ from .tokens import GENERAL_ADMISSION_TAG, admission_common_tokens
 
 __all__ = [
     'ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL',
+    'ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL',
 ]
 
 
-DOCUMENT_TOKENS = admission_common_tokens + [
+CHECKLIST_TOKENS = admission_common_tokens + [
     Token(
         name='admission_reference',
         description=_('Reference of the admission'),
         example='L-ESPO24-100.102',
-    ),
-    Token(
-        name='admissions_link_front',
-        description=_("Link to the admissions (front-office)"),
-        example="http://dev.studies.uclouvain.be/somewhere",
     ),
 ]
 
@@ -54,5 +50,40 @@ templates.register(
         'an application for general education'
     ),
     tag=GENERAL_ADMISSION_TAG,
-    tokens=DOCUMENT_TOKENS,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='admissions_link_front',
+            description=_("Link to the admissions (front-office)"),
+            example="http://dev.studies.uclouvain.be/somewhere",
+        ),
+    ],
+)
+
+
+ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL = 'osis-admission-send-to-fac-at-fac-decision-general'
+templates.register(
+    ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
+    description=_(
+        'Email sent to the faculty when the SIC submits the application during the faculty decision process.',
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='admission_link_back_for_fac_approval_checklist',
+            description=_("Link to the page of the faculty decision in the checklist of the admission (back-office)"),
+            example="http://dev.studies.uclouvain.be/somewhere",
+        ),
+        Token(
+            name='admission_link_back_for_uclouvain_documents',
+            description=_("Link to the page of the documents of the admission (back-office)"),
+            example="http://dev.studies.uclouvain.be/somewhere",
+        ),
+        Token(
+            name='candidate_nationality_country',
+            description=_("Candidate's country of nationality"),
+            example="http://dev.studies.uclouvain.be/somewhere",
+        ),
+    ],
 )

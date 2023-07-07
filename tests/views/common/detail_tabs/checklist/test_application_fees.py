@@ -135,9 +135,9 @@ class ApplicationFeesViewTestCase(TestCase):
         # Ask again
         response = self.client.post(url, **self.default_headers)
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
         htmx_trigger = json.loads(response['HX-Trigger'])
-        self.assertEqual(len(htmx_trigger.get('messages')), 1)
+        self.assertTrue(len(htmx_trigger.get('messages')) > 1)
 
     def test_remind_the_payment_of_the_application_fees_to_the_candidate(self):
         self.client.force_login(user=self.sic_manager_user)

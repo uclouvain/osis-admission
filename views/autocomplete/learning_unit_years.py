@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,17 +23,27 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List, Dict
+
+from django.conf import settings
+from django.utils.translation import get_language
+
 from base.models.enums.learning_container_year_types import LearningContainerYearType
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand, SearchDetailClassesEffectivesCommand
 from infrastructure.messages_bus import message_bus_instance
-from learning_unit.views.autocomplete import LearningUnitYearAutoComplete
+from learning_unit.views.autocomplete import LearningUnitYearAutoComplete as BaseLearningUnitYearAutoComplete
 
 __all__ = [
+    'LearningUnitYearAndClassesAutocomplete',
     'LearningUnitYearAutocomplete',
 ]
 
+__namespace__ = False
 
-class LearningUnitYearAutocomplete(LearningUnitYearAutoComplete):
+
+class LearningUnitYearAndClassesAutocomplete(BaseLearningUnitYearAutoComplete):
+    urlpatterns = 'learning-unit-years-and-classes'
+
     def get_list(self):
         sigle = self.q.upper()
         annee = self.forwarded.get('annee')
@@ -50,3 +60,47 @@ class LearningUnitYearAutocomplete(LearningUnitYearAutoComplete):
         full_results = result_unites_enseignement + result_classes
 
         return sorted(full_results, key=lambda t: t.code if hasattr(t, "code") else t.code_complet_classe)
+
+
+class LearningUnitYearAutocomplete(BaseLearningUnitYearAutoComplete):
+    urlpatterns = 'learning-unit-years'
+    title_attribute = {
+        settings.LANGUAGE_CODE_FR: 'full_title',
+        settings.LANGUAGE_CODE_EN: 'full_title_en',
+    }
+
+    def get_list(self):
+        search = self.q
+        year = self.forwarded.get('year')
+
+        if not search or not year:
+            return []
+
+        return message_bus_instance.invoke(
+            LearningUnitAndPartimSearchCommand(
+                annee_academique=year,
+                avec_mobilite=False,
+                terme_de_recherche=search,
+            )
+        )
+
+    def autocomplete_results(self, results):
+        # Do nothing as we already filter in the `get_list` method
+        return results
+
+    def results(self, results) -> List[Dict]:
+        title_attribute = self.title_attribute[get_language()]
+        results = [
+            {
+                'original_id': dto.code,
+                'id': dto.code,
+                'text': f"{dto.code} - {getattr(dto, title_attribute)}",
+            }
+            for dto in results
+        ]
+        return sorted(results, key=lambda elt: elt['text'])
+
+    @classmethod
+    def dtos_to_choices(cls, dtos):
+        title_attribute = cls.title_attribute[get_language()]
+        return [(dto.code, f"{dto.code} - {getattr(dto, title_attribute)}") for dto in dtos]

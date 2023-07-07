@@ -25,6 +25,7 @@
 # ##############################################################################
 from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
 from .lister_propositions_candidat_service import lister_propositions_candidat
+from .rechercher_formations_gerees_service import rechercher_formations_gerees
 from .rechercher_formations_service import rechercher_formations, rechercher_formations
 from .recuperer_comptabilite_service import recuperer_comptabilite
 from .recuperer_documents_proposition_service import recuperer_documents_proposition

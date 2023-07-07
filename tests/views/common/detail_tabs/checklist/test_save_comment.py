@@ -79,7 +79,7 @@ class SaveCommentViewTestCase(TestCase):
         )
 
         # Check the response
-        response = self.client.post(url, data={'comment': 'Test comment'}, **self.default_headers)
+        response = self.client.post(url, data={'donnees_personnelles-comment': 'Test comment'}, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
@@ -107,12 +107,20 @@ class SaveCommentViewTestCase(TestCase):
         )
 
         with freezegun.freeze_time('2021-12-31T08:15'):
-            response = self.client.post(url, data={'comment': 'Test comment'}, **self.default_headers)
+            response = self.client.post(
+                url,
+                data={'donnees_personnelles-comment': 'Test comment'},
+                **self.default_headers,
+            )
             # Check the response
             self.assertEqual(response.status_code, 200)
 
         with freezegun.freeze_time('2021-12-31T08:20'):
-            response = self.client.post(url, data={'comment': 'Test comment 2'}, **self.default_headers)
+            response = self.client.post(
+                url,
+                data={'donnees_personnelles-comment': 'Test comment 2'},
+                **self.default_headers,
+            )
             # Check the response
             self.assertEqual(response.status_code, 200)
 

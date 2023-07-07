@@ -29,8 +29,11 @@ from typing import Dict, List, Optional, Union
 import attr
 
 from admission.ddd.admission.dtos.bourse import BourseDTO
+from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
+from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO
 from osis_common.ddd import interface
 
 
@@ -77,6 +80,9 @@ class PropositionDTO(interface.DTO):
     documents_libres_fac_uclouvain: List[str]
     documents_libres_sic_uclouvain: List[str]
 
+    certificat_refus_fac: List[str]
+    certificat_approbation_fac: List[str]
+
     @property
     def candidat_vip(self) -> bool:
         return any(
@@ -114,3 +120,16 @@ class PropositionGestionnaireDTO(PropositionDTO):
     est_inscription_tardive: bool
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]
+
+    motif_refus_fac: Optional[MotifRefusDTO]
+
+    autre_formation_choisie_fac: Optional['BaseFormationDTO']
+    avec_conditions_complementaires: Optional[bool]
+    conditions_complementaires: List[str]
+    avec_complements_formation: Optional[bool]
+    complements_formation: Optional[List['LearningUnitPartimDTO']]
+    commentaire_complements_formation: str
+    nombre_annees_prevoir_programme: Optional[int]
+    nom_personne_contact_programme_annuel_annuel: str
+    email_personne_contact_programme_annuel_annuel: str
+    commentaire_programme_conjoint: str

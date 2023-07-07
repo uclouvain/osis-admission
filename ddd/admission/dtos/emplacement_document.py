@@ -28,6 +28,7 @@ from typing import Optional, List
 
 import attr
 
+from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, DocumentsSystemeFAC
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
 
@@ -52,3 +53,8 @@ class EmplacementDocumentDTO(interface.Entity):
     nom_onglet_langue_candidat: str
     uuid_proposition: str
     requis_automatiquement: bool
+
+    def est_emplacement_systeme_fac(self):
+        return (
+            self.type == TypeEmplacementDocument.SYSTEME.name and self.identifiant.split('.')[-1] in DocumentsSystemeFAC
+        )

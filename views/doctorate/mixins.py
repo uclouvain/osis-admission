@@ -217,6 +217,7 @@ class AdmissionFormMixin(AdmissionViewMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.custom_headers = {}
+        self.htmx_refresh = False
         self.htmx_trigger_form_extra = {**self.default_htmx_trigger_form_extra}
 
     def htmx_trigger_form(self, is_valid: bool):
@@ -254,7 +255,10 @@ class AdmissionFormMixin(AdmissionViewMixin):
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=True)
             response = self.render_to_response(self.get_context_data(form=form))
-            add_messages_into_htmx_response(request=self.request, response=response)
+            if self.htmx_refresh:
+                response.headers['HX-Refresh'] = 'true'
+            else:
+                add_messages_into_htmx_response(request=self.request, response=response)
             return response
 
         return super().form_valid(form)

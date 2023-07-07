@@ -33,6 +33,9 @@ from admission.ddd.admission.enums import TypeSituationAssimilation, Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -41,6 +44,14 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
+)
+from admission.ddd.admission.formation_generale.domain.validator import ShouldSpecifierMotifRefusFacultaire
+from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
+    ShouldSpecifierInformationsAcceptationFacultaire,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    SituationPropositionNonSICException,
+    SituationPropositionNonFACException,
 )
 from osis_common.ddd import interface
 
@@ -133,4 +144,33 @@ class Checklist(interface.DomainService):
                 libelle=_('Not concerned'),
                 statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
             ),
+            decision_facultaire=StatutChecklist(
+                libelle=_('To be processed'),
+                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+            ),
         )
+
+    @classmethod
+    def verifier_sic_peut_soumettre_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition):
+        if proposition.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC:
+            raise SituationPropositionNonSICException
+
+    @classmethod
+    def verifier_fac_peut_donner_decision(cls, proposition: Proposition):
+        if proposition.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC:
+            raise SituationPropositionNonFACException
+
+    @classmethod
+    def verifier_fac_peut_donner_decision_refus(cls, proposition: Proposition):
+        cls.verifier_fac_peut_donner_decision(proposition=proposition)
+        ShouldSpecifierMotifRefusFacultaire(proposition=proposition).validate()
+
+    @classmethod
+    def verifier_fac_peut_donner_decision_acceptation(cls, proposition: Proposition):
+        cls.verifier_fac_peut_donner_decision(proposition=proposition)
+        ShouldSpecifierInformationsAcceptationFacultaire(proposition=proposition).validate()
+
+    @classmethod
+    def verifier_fac_peut_modifier_informations_decision_facultaire(cls, proposition: Proposition):
+        if proposition.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS:
+            raise SituationPropositionNonFACException
