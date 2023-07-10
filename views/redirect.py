@@ -23,21 +23,53 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.utils.functional import cached_property
 from django.views.generic import RedirectView
+
+from admission.views.common.detail_tabs.checklist import ChecklistView
+from admission.views.common.detail_tabs.documents import DocumentView
+from admission.views.common.detail_tabs.person import AdmissionPersonDetailView
+from admission.views.doctorate.mixins import AdmissionViewMixin
 
 __all__ = ['AdmissionRedirectView']
 __namespace__ = False
 
 
-class AdmissionRedirectView(RedirectView):
+class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     urlpatterns = {
         'doctorate': 'doctorate/<uuid:uuid>/',
         'general-education': 'general-education/<uuid:uuid>/',
         'continuing-education': 'continuing-education/<uuid:uuid>/',
     }
 
+    @cached_property
+    def can_access_checklist(self):
+        self.permission_required = ChecklistView.permission_required
+        return super().has_permission()
+
+    @cached_property
+    def can_access_documents_management(self):
+        self.permission_required = DocumentView.permission_required
+        return super().has_permission()
+
+    @cached_property
+    def can_access_person_tab(self):
+        self.permission_required = AdmissionPersonDetailView.permission_required
+        return super().has_permission()
+
+    def has_permission(self):
+        return self.can_access_checklist or self.can_access_documents_management or self.can_access_person_tab
+
+    @property
+    def current_context(self):
+        return self.request.resolver_match.url_name
+
     @property
     def pattern_name(self):
-        namespace = self.request.resolver_match.url_name
-        return f'admission:{namespace}:checklist'
+        if self.can_access_checklist:
+            tab_name = 'checklist'
+        elif self.can_access_documents_management:
+            tab_name = 'documents'
+        else:
+            tab_name = 'person'
+        return f"admission:{self.current_context}:{tab_name}"

@@ -30,6 +30,7 @@ from admission.ddd.admission.domain.service.i_calendrier_inscription import ICal
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.enums.question_specifique import Onglets
@@ -68,6 +69,7 @@ def soumettre_proposition(
     notification: 'INotification',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     inscription_tardive_service: 'IInscriptionTardive',
+    paiement_frais_dossier_service: 'IPaiementFraisDossier',
     historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
@@ -123,22 +125,32 @@ def soumettre_proposition(
         profil_candidat_translator=profil_candidat_translator,
     )
 
+    doit_payer_frais_dossier = paiement_frais_dossier_service.doit_payer(
+        elements_confirmation=cmd.elements_confirmation,
+    )
+
     profil_candidat_soumis = ProfilSoumisCandidatTranslator().recuperer(
-        profil_candidat_translator=profil_candidat_translator, matricule_candidat=proposition.matricule_candidat
+        profil_candidat_translator=profil_candidat_translator,
+        matricule_candidat=proposition.matricule_candidat,
     )
 
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
     # THEN
     proposition.soumettre(
-        formation_id,
-        pool,
-        cmd.elements_confirmation,
-        type_demande,
-        est_inscription_tardive,
-        profil_candidat_soumis,
+        formation_id=formation_id,
+        pool=pool,
+        elements_confirmation=cmd.elements_confirmation,
+        type_demande=type_demande,
+        est_inscription_tardive=est_inscription_tardive,
+        profil_candidat_soumis=profil_candidat_soumis,
+        doit_payer_frais_dossier=doit_payer_frais_dossier,
     )
-    proposition.checklist_initiale = Checklist.initialiser(proposition, profil_candidat_translator)
+    Checklist.initialiser(
+        proposition=proposition,
+        profil_candidat_translator=profil_candidat_translator,
+        a_paye_frais_dossier=False,
+    )
     proposition_repository.save(proposition)
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)

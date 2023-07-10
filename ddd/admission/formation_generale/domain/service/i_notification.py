@@ -40,3 +40,8 @@ class INotification(interface.DomainService):
     @abstractmethod
     def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> EmailMessage:
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def demande_paiement_frais_dossier(cls, proposition: Proposition) -> EmailMessage:
+        raise NotImplementedError

@@ -25,15 +25,24 @@
 {% endcomment %}
 
 <div class="btn-group" role="group">
+  {% is_current_checklist_status current state extra as is_current_status %}
   <button
       type="button"
-      class="checklist-state-button btn btn-default {% if current.statut == state and extra|part_of_dict:current %}btn-{{ class }} active{% endif %}"
+      class="checklist-state-button btn btn-default {% if is_current_status %}btn-{{ class }} active{% endif %}"
       data-status="{{ state }}"
       data-class="btn-{{ class }}"
       data-icon="{{ icon }}"
+      {% if disabled or is_current_status %}disabled{% endif %}
+      {% if extra %}hx-vals="{{ extra|to_json }}"{% endif %}
+      {% if open_modal %}
+      data-toggle="modal"
+      data-target="{{ open_modal }}"
+      {% elif htmx_post %}
+        hx-post="{{ htmx_post }}"
+      {% else %}
       hx-swap="none"
       hx-post="{% url view.base_namespace|add:':change-checklist-status' uuid=view.kwargs.uuid tab=tab status=state %}"
-      {% if extra %}hx-vals="{{ extra|to_json }}"{% endif %}
+      {% endif %}
   >
     <i class="fas fa-{{ icon }}"></i>
     {{ label }}

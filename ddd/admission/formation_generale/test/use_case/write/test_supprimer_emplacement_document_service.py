@@ -126,7 +126,7 @@ class TestSupprimerEmplacementDocument(TestCase):
             InitialiserEmplacementDocumentLibreNonReclamableCommand(
                 uuid_proposition=self.uuid_proposition,
                 auteur='0123456789',
-                type_emplacement=TypeEmplacementDocument.LIBRE_CANDIDAT_SIC.name,
+                type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 libelle='Nom du document',
                 uuid_document=str(uuid.uuid4()),
             )
@@ -207,7 +207,7 @@ class TestSupprimerEmplacementDocument(TestCase):
             InitialiserEmplacementDocumentLibreNonReclamableCommand(
                 uuid_proposition=self.uuid_proposition,
                 auteur='0123456789',
-                type_emplacement=TypeEmplacementDocument.LIBRE_CANDIDAT_FAC.name,
+                type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
                 libelle='Nom du document',
                 uuid_document=str(uuid.uuid4()),
             )

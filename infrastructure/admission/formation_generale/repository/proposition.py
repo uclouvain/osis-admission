@@ -312,8 +312,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.submitted_profile
             else None,
             documents_demandes=admission.requested_documents,
-            checklist_initiale=checklist_initiale and StatutsChecklistGenerale(**checklist_initiale),
-            checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale(**checklist_actuelle),
+            checklist_initiale=checklist_initiale and StatutsChecklistGenerale.from_dict(checklist_initiale),
+            checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
         )
 
     @classmethod
@@ -367,9 +367,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             attestation_inscription_reguliere=admission.regular_registration_proof,
             pdf_recapitulatif=admission.pdf_recap,
             documents_demandes=admission.requested_documents,
-            documents_libres_fac_candidats=admission.fac_documents,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
-            documents_libres_sic_candidats=admission.sic_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
         )
 

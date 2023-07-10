@@ -26,6 +26,7 @@ class Migration(migrations.Migration):
             model_name='accounting',
             name='assimilation_5_situation_type',
             field=models.CharField(
+                blank=True,
                 choices=[
                     (
                         'A_NATIONALITE_UE',

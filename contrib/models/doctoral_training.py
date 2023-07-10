@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 import contextlib
 from uuid import uuid4
 
+from django.core import validators
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save
@@ -124,10 +125,15 @@ class Activity(models.Model):
     )
     ects = models.DecimalField(
         verbose_name=_("ECTS credits"),
-        max_digits=4,
-        decimal_places=2,
+        help_text=_(
+            'Consult the credits grid released by your domain doctoral commission.'
+            ' Refer to the website of your commission for more details.'
+        ),
+        max_digits=3,
+        decimal_places=1,
         blank=True,
         default=0,
+        validators=[validators.MinValueValidator(0)],
     )
     status = models.CharField(
         max_length=20,

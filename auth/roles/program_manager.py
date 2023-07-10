@@ -26,7 +26,12 @@
 import rules
 from django.db import models
 
-from admission.auth.predicates import has_education_group_of_types, is_part_of_education_group, is_debug
+from admission.auth.predicates import (
+    has_education_group_of_types,
+    is_part_of_education_group,
+    is_debug,
+    checklist_is_initialized,
+)
 from base.models.education_group import EducationGroup
 from base.models.enums.education_group_types import TrainingType
 from continuing_education.models.continuing_education_training import CONTINUING_EDUCATION_TRAINING_TYPES
@@ -95,7 +100,7 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.add_internalnote': is_part_of_education_group,
             'admission.view_internalnote': is_part_of_education_group,
             'admission.view_documents_management': is_part_of_education_group,
-            'admission.view_checklist': is_part_of_education_group,
+            'admission.view_checklist': is_part_of_education_group & checklist_is_initialized,
             'admission.view_debug_info': is_part_of_education_group & is_debug,
             # Exports
             'admission.download_doctorateadmission_pdf_recap': is_part_of_education_group,

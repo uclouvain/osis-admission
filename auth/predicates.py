@@ -38,7 +38,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
+)
 from admission.ddd.parcours_doctoral.domain.model.enums import (
     ChoixStatutDoctorat,
     STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS,
@@ -168,8 +171,32 @@ def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
 def is_invited_to_complete(self, user: User, obj: GeneralEducationAdmission):
     return obj.status in {
         ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
-        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD.name,
+        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
     }
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be invited to pay the application fees by the system."))
+def is_invited_to_pay_after_submission(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name and not obj.checklist.get(
+        'current'
+    )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be invited to pay the application fees by a manager."))
+def is_invited_to_pay_after_request(self, user: User, obj: GeneralEducationAdmission):
+    return (
+        obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
+        and obj.checklist.get('current', {}).get('frais_dossier', {}).get('statut')
+        == ChoixStatutChecklist.GEST_BLOCAGE.name
+    )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The checklist must be initialized."))
+def checklist_is_initialized(self, user: User, obj: GeneralEducationAdmission):
+    return bool(obj.checklist.get('initial'))
 
 
 @predicate

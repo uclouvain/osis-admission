@@ -209,8 +209,6 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
 
         # Save the file into the admission
         field_name = {
-            TypeEmplacementDocument.LIBRE_CANDIDAT_SIC: 'sic_documents',
-            TypeEmplacementDocument.LIBRE_CANDIDAT_FAC: 'fac_documents',
             TypeEmplacementDocument.LIBRE_INTERNE_SIC: 'uclouvain_sic_documents',
             TypeEmplacementDocument.LIBRE_INTERNE_FAC: 'uclouvain_fac_documents',
         }[emplacement_document.type]

@@ -211,6 +211,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             forbidden_actions=[
                 'retrieve_documents',
                 'update_documents',
+                'pay_after_submission',
+                'pay_after_request',
             ],
         )
 
@@ -312,7 +314,6 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'retrieve_accounting',
             'update_accounting',
             'submit_proposition',
-            'retrieve_jury_preparation',
         ]
         forbidden_actions = [
             'retrieve_confirmation',
@@ -320,6 +321,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'retrieve_doctoral_training',
             'retrieve_complementary_training',
             'retrieve_course_enrollment',
+            'retrieve_jury_preparation',
         ]
 
         self.assertActionLinks(proposition['links'], allowed_actions, forbidden_actions)
@@ -535,8 +537,6 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             'update_training_choice',
             'request_signatures',
             'submit_proposition',
-            'retrieve_jury_preparation',
-            'list_jury_members',
         ]
         forbidden_actions = [
             'add_approval',
@@ -546,6 +546,8 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             'retrieve_doctoral_training',
             'retrieve_complementary_training',
             'retrieve_course_enrollment',
+            'retrieve_jury_preparation',
+            'list_jury_members',
         ]
         self.assertActionLinks(response.data['links'], allowed_actions, forbidden_actions)
 

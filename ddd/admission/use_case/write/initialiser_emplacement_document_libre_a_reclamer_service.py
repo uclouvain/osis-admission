@@ -42,6 +42,8 @@ def initialiser_emplacement_document_libre_a_reclamer(
         raison=cmd.raison,
     )
 
+    emplacement_document.remplir_par_gestionnaire(uuid_document=cmd.uuid_document, auteur=cmd.auteur)
+
     emplacement_document_repository.save(entity=emplacement_document, auteur=cmd.auteur)
 
     return emplacement_document.entity_id

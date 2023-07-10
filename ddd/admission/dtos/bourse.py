@@ -34,3 +34,6 @@ class BourseDTO(interface.DTO):
     nom_court: str
     nom_long: str
     type: str
+
+    def __str__(self):
+        return self.nom_long or self.nom_court

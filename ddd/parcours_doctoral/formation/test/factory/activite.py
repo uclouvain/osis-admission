@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -239,7 +239,7 @@ class ActiviteFactory(factory.Factory):
     doctorat_id = factory.SubFactory(_DoctoratIdentityFactory)
     categorie = factory.Iterator(CategorieActivite._member_map_.values())
     contexte = ContexteFormation.DOCTORAL_TRAINING
-    ects = factory.Faker("pydecimal", left_digits=2, right_digits=2, positive=True)
+    ects = factory.Faker("pydecimal", left_digits=2, right_digits=1, positive=True)
 
     @factory.post_generation
     def generate_dto(self, *args, **kwargs):

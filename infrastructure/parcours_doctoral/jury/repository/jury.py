@@ -137,10 +137,8 @@ class JuryRepository(IJuryRepository):
         if entity.membres is not None:
             doctorate = DoctorateAdmission.objects.get(uuid=entity.entity_id.uuid)
             for membre in entity.membres:
-                if membre.est_promoteur and membre.matricule:
-                    promoter = SupervisionActor.objects.get(
-                        process=doctorate.supervision_group_id, person__global_id=membre.matricule
-                    )
+                if membre.est_promoteur:
+                    promoter = SupervisionActor.objects.get(id=membre.matricule)
                     JuryMember.objects.update_or_create(
                         uuid=membre.uuid,
                         doctorate=doctorate,
@@ -245,23 +243,40 @@ class JuryRepository(IJuryRepository):
     ) -> Jury:
         def _get_membrejury_from_model(membre: JuryMember) -> MembreJury:
             if membre.promoter is not None:
-                return MembreJury(
-                    uuid=str(membre.uuid),
-                    role=membre.role,
-                    est_promoteur=True,
-                    matricule=membre.promoter.person.global_id,
-                    institution=INSTITUTION_UCL,
-                    autre_institution=membre.other_institute,
-                    pays=str(membre.promoter.person.country_of_citizenship)
-                    if membre.promoter.person.country_of_citizenship
-                    else '',
-                    nom=membre.promoter.person.last_name,
-                    prenom=membre.promoter.person.first_name,
-                    titre='',
-                    justification_non_docteur='',
-                    genre=membre.promoter.person.gender,
-                    email=membre.promoter.person.email,
-                )
+                if membre.promoter.person is not None:
+                    return MembreJury(
+                        uuid=str(membre.uuid),
+                        role=membre.role,
+                        est_promoteur=True,
+                        matricule=str(membre.promoter.id),
+                        institution=INSTITUTION_UCL,
+                        autre_institution=membre.other_institute,
+                        pays=str(membre.promoter.person.country_of_citizenship)
+                        if membre.promoter.person.country_of_citizenship
+                        else '',
+                        nom=membre.promoter.person.last_name,
+                        prenom=membre.promoter.person.first_name,
+                        titre='',
+                        justification_non_docteur='',
+                        genre=membre.promoter.person.gender,
+                        email=membre.promoter.person.email,
+                    )
+                else:
+                    return MembreJury(
+                        uuid=str(membre.uuid),
+                        role=membre.role,
+                        est_promoteur=True,
+                        matricule=str(membre.promoter.id),
+                        institution=membre.promoter.institute,
+                        autre_institution=membre.other_institute,
+                        pays=str(membre.promoter.country),
+                        nom=membre.promoter.last_name,
+                        prenom=membre.promoter.first_name,
+                        titre='',
+                        justification_non_docteur='',
+                        genre='',
+                        email=membre.promoter.email,
+                    )
             elif membre.person is not None:
                 return MembreJury(
                     uuid=str(membre.uuid),

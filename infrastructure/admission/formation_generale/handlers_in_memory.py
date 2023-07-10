@@ -48,9 +48,17 @@ from admission.infrastructure.admission.domain.service.in_memory.calendrier_insc
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.historique import HistoriqueInMemory
+from admission.infrastructure.admission.domain.service.in_memory.historique import (
+    HistoriqueInMemory as HistoriqueGlobalInMemory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.historique import (
+    HistoriqueInMemory as HistoriqueFormationGeneraleInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
+    PaiementFraisDossierInMemory,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
@@ -93,10 +101,13 @@ _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _academic_year_repository = AcademicYearInMemoryRepository()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
-_historique = HistoriqueInMemory()
+_historique_global = HistoriqueGlobalInMemory()
+_historique_formation_generale = HistoriqueFormationGeneraleInMemory()
 _emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
+_paiement_frais_dossier = PaiementFraisDossierInMemory()
+_notification = NotificationInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -111,7 +122,7 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_generale_translator,
         bourse_translator=_bourse_translator,
         maximum_propositions_service=_maximum_propositions_autorisees,
-        historique=_historique,
+        historique=_historique_global,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -130,7 +141,7 @@ COMMAND_HANDLERS = {
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
         proposition_repository=_proposition_repository,
-        historique=_historique,
+        historique=_historique_global,
     ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
@@ -153,10 +164,11 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         questions_specifiques_translator=_question_specific_translator,
         element_confirmation=ElementsConfirmationInMemory(),
-        notification=NotificationInMemory(),
+        notification=_notification,
         maximum_propositions_service=_maximum_propositions_autorisees,
         inscription_tardive_service=InscriptionTardiveInMemory(),
-        historique=_historique,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
+        historique=_historique_global,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -232,15 +244,15 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         emplacement_document_repository=_emplacement_document_repository,
-        notification=NotificationInMemory(),
-        historique=_historique,
+        notification=_notification,
+        historique=_historique_global,
     ),
     ReclamerDocumentsAuCandidatParFACCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_fac(
         cmd,
         proposition_repository=_proposition_repository,
         emplacement_document_repository=_emplacement_document_repository,
-        notification=NotificationInMemory(),
-        historique=_historique,
+        notification=_notification,
+        historique=_historique_global,
     ),
     RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
         cmd,
@@ -257,7 +269,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             emplacement_document_repository=_emplacement_document_repository,
-            historique=_historique,
+            historique=_historique_global,
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -307,6 +319,44 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+        )
+    ),
+    SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+        notification=_notification,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
+        historique=_historique_formation_generale,
+    ),
+    EnvoyerRappelPaiementCommand: lambda msg_bus, cmd: envoyer_rappel_paiement(
+        cmd,
+        proposition_repository=_proposition_repository,
+        notification=_notification,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
+        historique=_historique_formation_generale,
+    ),
+    SpecifierPaiementPlusNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_plus_necessaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
+        historique=_historique_formation_generale,
+    ),
+    PayerFraisDossierPropositionSuiteSoumissionCommand: (
+        lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_soumission(
+            cmd,
+            proposition_repository=_proposition_repository,
+            notification=_notification,
+            paiement_frais_dossier_service=_paiement_frais_dossier,
+            historique=_historique_formation_generale,
+            profil_candidat_translator=_profil_candidat_translator,
+        )
+    ),
+    PayerFraisDossierPropositionSuiteDemandeCommand: (
+        lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_demande(
+            cmd,
+            proposition_repository=_proposition_repository,
+            paiement_frais_dossier_service=_paiement_frais_dossier,
+            historique=_historique_formation_generale,
         )
     ),
 }

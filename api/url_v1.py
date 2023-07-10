@@ -148,6 +148,14 @@ urlpatterns = [
     _path('propositions/general-education/<uuid:uuid>/', include(general_education_view_set_router.urls)),
     path('propositions/general-education/<uuid:uuid>/submit', views.SubmitGeneralEducationPropositionView),
     path('propositions/general-education/<uuid:uuid>/documents', views.GeneralRequestedDocumentListView),
+    path(
+        'propositions/general-education/<uuid:uuid>/pay-application-fees',
+        views.PayApplicationFeesAfterSubmissionView,
+    ),
+    path(
+        'propositions/general-education/<uuid:uuid>/pay-application-fees-after-request',
+        views.PayApplicationFeesAfterRequestView,
+    ),
     # > Continuing education
     path('propositions/continuing-education', views.ContinuingTrainingChoiceAPIView),
     path('propositions/continuing-education/<uuid:uuid>', views.ContinuingPropositionView),

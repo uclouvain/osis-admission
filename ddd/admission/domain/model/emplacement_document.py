@@ -72,6 +72,8 @@ class EmplacementDocument(interface.Entity):
         self.statut = StatutEmplacementDocument.RECLAME
 
     def remplir_par_gestionnaire(self, uuid_document: str, auteur: str):
+        if not uuid_document:
+            return
         self.uuids_documents = [uuid_document]
         self.statut = StatutEmplacementDocument.VALIDE
         self.document_soumis_par = auteur

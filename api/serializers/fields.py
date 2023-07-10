@@ -504,6 +504,17 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'method': 'POST',
         'params': ['uuid'],
     },
+    # Payment
+    'pay_after_submission': {
+        'path_name': 'admission_api_v1:pay_after_submission',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
+    'pay_after_request': {
+        'path_name': 'admission_api_v1:pay_after_request',
+        'method': 'POST',
+        'params': ['uuid'],
+    },
 }
 
 CONTINUING_EDUCATION_ACTION_LINKS = {

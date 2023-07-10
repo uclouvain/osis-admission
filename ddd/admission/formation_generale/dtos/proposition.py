@@ -74,10 +74,19 @@ class PropositionDTO(interface.DTO):
     pdf_recapitulatif: List[str]
 
     documents_demandes: Dict
-    documents_libres_fac_candidats: List[str]
-    documents_libres_sic_candidats: List[str]
     documents_libres_fac_uclouvain: List[str]
     documents_libres_sic_uclouvain: List[str]
+
+    @property
+    def candidat_vip(self) -> bool:
+        return any(
+            bourse
+            for bourse in [
+                self.bourse_internationale,
+                self.bourse_double_diplome,
+                self.bourse_erasmus_mundus,
+            ]
+        )
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -102,14 +111,3 @@ class PropositionGestionnaireDTO(PropositionDTO):
     est_inscription_tardive: bool
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]
-
-    @property
-    def candidat_vip(self) -> bool:
-        return any(
-            bourse
-            for bourse in [
-                self.bourse_internationale,
-                self.bourse_double_diplome,
-                self.bourse_erasmus_mundus,
-            ]
-        )

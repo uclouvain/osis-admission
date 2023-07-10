@@ -22,11 +22,15 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<ul id="checklist-menu" class="list-group">
+<ul id="checklist-menu" class="list-group" hx-swap-oob="true">
   {% for checklist_item_name, checklist_item in original_admission.checklist.initial.items %}
     {% with initial=original_admission.checklist.initial|get_item:checklist_item_name current=original_admission.checklist.current|get_item:checklist_item_name %}
       {% firstof current.statut initial.statut as statut %}
-      <li class="list-group-item {% if forloop.first %}active{% endif %}" data-toggle="tab"  href="#{{ checklist_item_name }}">
+      <li
+          class="list-group-item{% if current_item and current_item == checklist_item_name or not current_item and forloop.first %} active{% endif %}"
+          data-toggle="tab"
+          href="#{{ checklist_item_name }}"
+      >
         <a>
           {% if statut == 'INITIAL_NON_CONCERNE' %}
             <i class="fas fa-xmark text-muted"></i>
@@ -36,8 +40,10 @@
             <i class="fas fa-circle-stop text-danger"></i>
           {% elif statut == 'GEST_BLOCAGE_ULTERIEUR' %}
             <i class="fas fa-circle-arrow-right text-info"></i>
-          {% elif statut == 'GEST_REUSSITE' %}
+          {% elif statut == 'GEST_REUSSITE' or statut == 'SYST_REUSSITE' %}
             <i class="fas fa-check text-success"></i>
+          {% else %}
+            <i aria-hidden="true"></i>
           {% endif %}
           {{ checklist_tabs|get_item:checklist_item_name }}
         </a>

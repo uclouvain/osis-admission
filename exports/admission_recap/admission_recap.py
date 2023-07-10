@@ -94,7 +94,7 @@ def admission_pdf_recap(
         # If too much memory usage -> use temporary files or subprocess
         with pdf.open_outline() as outline:
             for section in pdf_sections:
-                outline_item = OutlineItem(section.label, page_count)
+                outline_item = OutlineItem(str(section.label), page_count)
                 content = BytesIO(section.content)
 
                 # Add section data
@@ -106,7 +106,7 @@ def admission_pdf_recap(
                 # Add section attachments
                 for attachment in section.attachments:
                     if attachment.uuids:
-                        outline_item.children.append(OutlineItem(attachment.label, page_count))
+                        outline_item.children.append(OutlineItem(str(attachment.label), page_count))
                     for attachment_uuid in attachment.uuids:
                         token = file_tokens.get(attachment_uuid)
                         raw_content = attachment.get_raw(

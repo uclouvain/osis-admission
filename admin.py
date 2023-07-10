@@ -53,6 +53,7 @@ from admission.contrib.models import (
     DoctorateAdmission,
     GeneralEducationAdmission,
     Scholarship,
+    Accounting,
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
@@ -88,7 +89,15 @@ class AdmissionAdminForm(forms.ModelForm):
         self.fields['valuated_secondary_studies_person'].queryset = Person.objects.filter(pk=self.instance.candidate.pk)
 
 
-class AdmissionAdminMixin(admin.ModelAdmin):
+class ReadOnlyFilesMixin:
+    def get_readonly_fields(self, request, obj=None):
+        # Also mark all FileField as readonly (since we don't have admin widget yet)
+        return self.readonly_fields + [
+            field.name for field in self.model._meta.get_fields(include_parents=True) if isinstance(field, FileField)
+        ]
+
+
+class AdmissionAdminMixin(ReadOnlyFilesMixin, admin.ModelAdmin):
     form = AdmissionAdminForm
 
     list_display = [
@@ -124,12 +133,6 @@ class AdmissionAdminMixin(admin.ModelAdmin):
     def has_add_permission(self, request):
         # Prevent adding from admin site as we lose all business checks
         return False
-
-    def get_readonly_fields(self, request, obj=None):
-        # Also mark all FileField as readonly (since we don't have admin widget yet)
-        return self.readonly_fields + [
-            field.name for field in self.model._meta.get_fields(include_parents=True) if isinstance(field, FileField)
-        ]
 
     @admin.display(description=_('Candidate'))
     def candidate_fmt(self, obj):
@@ -356,6 +359,13 @@ class AdmissionViewerAdmin(admin.ModelAdmin):
     ]
 
 
+class AccountingAdmin(ReadOnlyFilesMixin, admin.ModelAdmin):
+    autocomplete_fields = ['admission']
+    list_display = ['admission']
+    search_fields = ['admission__reference']
+    readonly_fields = []
+
+
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference']
@@ -377,6 +387,7 @@ admin.site.register(GeneralEducationAdmission, GeneralEducationAdmissionAdmin)
 admin.site.register(ContinuingEducationAdmission, ContinuingEducationAdmissionAdmin)
 admin.site.register(BaseAdmission, BaseAdmissionAdmin)
 admin.site.register(AdmissionViewer, AdmissionViewerAdmin)
+admin.site.register(Accounting, AccountingAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):

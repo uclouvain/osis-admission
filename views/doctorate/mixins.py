@@ -28,7 +28,7 @@ from typing import Union
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -66,6 +66,7 @@ from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
+    add_messages_into_htmx_response,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
@@ -150,27 +151,14 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     def cotutelle(self) -> 'CotutelleDTO':
         return message_bus_instance.invoke(GetCotutelleCommand(uuid_proposition=self.admission_uuid))
 
-    def get_permission_object(self):
-        return self.admission
-
-    @property
-    def is_doctorate(self):
-        return self.current_context == CONTEXT_DOCTORATE
-
-    @property
-    def is_continuing(self):
-        return self.current_context == CONTEXT_CONTINUING
-
-    @property
-    def is_general(self):
-        return self.current_context == CONTEXT_GENERAL
-
-    @cached_property
-    def base_namespace(self):
-        return ':'.join(self.request.resolver_match.namespaces[:2])
-
     def update_current_admission_on_form_valid(self, form, admission):
         pass
+
+    @cached_property
+    def next_url(self):
+        url = self.request.GET.get('next', '')
+        hash_url = self.request.GET.get('next_hash_url', '')
+        return f'{url}#{hash_url}' if hash_url else url
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -178,6 +166,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['base_namespace'] = self.base_namespace
         context['base_template'] = f'admission/{self.formatted_current_context}/tab_layout.html'
         context['original_admission'] = self.admission
+        context['next_url'] = self.next_url
 
         if self.is_doctorate:
             try:
@@ -196,6 +185,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             context['admission'] = self.proposition
         else:
             context['admission'] = self.admission
+
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -263,7 +253,9 @@ class AdmissionFormMixin(AdmissionViewMixin):
 
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=True)
-            return self.render_to_response(self.get_context_data(form=form))
+            response = self.render_to_response(self.get_context_data(form=form))
+            add_messages_into_htmx_response(request=self.request, response=response)
+            return response
 
         return super().form_valid(form)
 
@@ -288,6 +280,8 @@ class AdmissionFormMixin(AdmissionViewMixin):
 
     def form_invalid(self, form):
         messages.error(self.request, str(self.message_on_failure))
+        response = super().form_invalid(form)
         if self.request.htmx:
             self.htmx_trigger_form(is_valid=False)
-        return super().form_invalid(form)
+            add_messages_into_htmx_response(request=self.request, response=response)
+        return response

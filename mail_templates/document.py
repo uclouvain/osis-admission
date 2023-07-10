@@ -79,6 +79,11 @@ DOCUMENT_TOKENS = admission_common_tokens + [
         description=_('Acronym of the management entity'),
         example='ESPO',
     ),
+    Token(
+        name='admissions_link_front',
+        description=_("Link to the admissions (front-office)"),
+        example="http://dev.studies.uclouvain.be/somewhere",
+    ),
 ]
 
 ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL = 'osis-admission-request-sic-documents-general'

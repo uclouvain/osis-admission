@@ -48,6 +48,8 @@
             <tr
                 {% if document.statut == 'A_RECLAMER' %}
                   class="bg-danger"
+                {% elif document.statut == 'RECLAME' %}
+                  class="bg-info"
                 {% else %}
                   class="bg-warning"
                 {% endif %}
@@ -76,7 +78,7 @@
               </span>
               </td>
               <td class="min-width">
-                {% if document.statut == 'RECLAME' %}
+                {% if document.reclame_le %}
                   {% translate 'Requested on' %} {{ document.reclame_le|date:'DATE_FORMAT' }}<br>
                   {% translate 'Deadline on' %} {{ document.a_echeance_le|date:'DATE_FORMAT' }}
                 {% elif document.derniere_action_le %}
@@ -90,18 +92,33 @@
     </table>
   </div>
 
-  <button
-      class="btn btn-primary"
-      data-toggle="collapse"
-      data-target="#request-document-form"
-      hx-get="{% url request.resolver_match.namespace|add:':document:free-candidate-request' uuid=view.kwargs.uuid %}"
-      hx-target="#request-document-form"
-      hx-trigger="click once"
-  >
-    <i class="fa-solid fa-plus"></i>
-    {% translate 'List a missing document' %}
-    <i class="fa-solid fa-paperclip"></i>
-  </button>
+  <div class="row mt-1">
+    <div class="col-md-6 ">
+      <button
+          class="btn btn-primary"
+          data-toggle="collapse"
+          data-target="#request-document-form"
+          hx-get="{% url request.resolver_match.namespace|add:':document:free-candidate-request' uuid=view.kwargs.uuid %}"
+          hx-target="#request-document-form"
+          hx-trigger="click once"
+      >
+        <i class="fa-solid fa-plus"></i>
+        {% translate 'List a missing document' %}
+        <i class="fa-solid fa-paperclip"></i>
+      </button>
+    </div>
+
+    <div class="col-md-6 text-right">
+      <button
+          class="btn btn-primary"
+          data-toggle="modal"
+          data-target="#request-all-form-modal"
+      >
+        <i class="fa-solid fa-envelope"></i>
+        {% translate 'Request the documents from the candidate' %}
+      </button>
+    </div>
+  </div>
 
   <div id="request-document-form" class="collapse mt-1 media">
   </div>

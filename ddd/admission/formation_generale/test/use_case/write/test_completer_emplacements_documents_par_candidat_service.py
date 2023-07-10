@@ -122,7 +122,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(TestCase):
 
         # Le statut de la proposition a changé
         self.assertEqual(proposition_id, proposition.entity_id)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.TRAITEMENT_FAC_CDD)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC)
 
     def test_should_pas_reclames_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
@@ -198,4 +198,4 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(TestCase):
 
         # Le statut de la proposition a changé
         self.assertEqual(proposition_id, proposition.entity_id)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.TRAITEMENT_SIC)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC)

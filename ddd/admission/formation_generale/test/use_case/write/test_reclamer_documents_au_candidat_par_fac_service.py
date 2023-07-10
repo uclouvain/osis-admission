@@ -90,7 +90,7 @@ class ReclamerDocumentsAuCandidatParFacTestCase(TestCase):
         # Le statut de la proposition a changé
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition_id, proposition.entity_id)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC)
 
     def test_should_pas_reclames_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):

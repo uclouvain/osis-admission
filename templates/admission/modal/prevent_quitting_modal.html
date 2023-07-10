@@ -110,7 +110,8 @@
                   bubbles: true,
                   cancelable: true,
                 });
-                form.querySelector('button[type="submit"]').dispatchEvent(event);
+                const submitButton = form.querySelector('button[type="submit"]') ?? document.querySelector(`button[form="${form.id}"`);
+                submitButton.dispatchEvent(event);
               });
               // Do not show browser popup
               doBrowserPrevent = false;

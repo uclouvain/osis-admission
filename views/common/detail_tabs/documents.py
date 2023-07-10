@@ -200,10 +200,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             ),
             'training_acronym': formation.sigle,
             'training_year': format_academic_year(self.proposition.annee_calculee),
-            'admission_link_front': settings.ADMISSION_FRONTEND_LINK.format(
-                context=self.current_context,
-                uuid=self.proposition.uuid,
-            ),
+            'admissions_link_front': f'{settings.OSIS_PORTAL_URL}admission/',
             'request_deadline': f'<span id="request_deadline">_</span>',  # Will be updated through JS
             'management_entity_name': management_entity.get('title') if management_entity else '',
             'management_entity_acronym': formation.sigle_entite_gestion,

@@ -170,14 +170,14 @@ class Accounting(models.Model):
         verbose_name=_('Certificate of support from the CPAS'),
     )
     relationship = models.CharField(
-        blank=False,
+        blank=True,
         choices=LienParente.choices(),
         default='',
         max_length=32,
         verbose_name=_('Relationship'),
     )
     assimilation_5_situation_type = models.CharField(
-        blank=False,
+        blank=True,
         choices=ChoixAssimilation5.choices(),
         default='',
         max_length=100,

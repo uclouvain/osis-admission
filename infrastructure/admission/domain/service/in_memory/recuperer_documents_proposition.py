@@ -43,18 +43,6 @@ class EmplacementsDocumentsPropositionInMemoryTranslator(IEmplacementsDocumentsP
             'author': '00321234',
             'uploaded_at': '2023-01-04T00:00:00',
         },
-        '24de0c3d-3c06-4c93-8eb4-c8648f04f140': {
-            'mimetype': PDF_MIME_TYPE,
-            'explicit_name': 'My candidate sic file',
-            'author': '00987890',
-            'uploaded_at': '2023-01-05T00:00:00',
-        },
-        '24de0c3d-3c06-4c93-8eb4-c8648f04f141': {
-            'mimetype': PDF_MIME_TYPE,
-            'explicit_name': 'My candidate fac file',
-            'author': '00321234',
-            'uploaded_at': '2023-01-01T00:00:00',
-        },
         '24de0c3d-3c06-4c93-8eb4-c8648f04f142': {
             'mimetype': PDF_MIME_TYPE,
             'explicit_name': 'My uclouvain sic file',

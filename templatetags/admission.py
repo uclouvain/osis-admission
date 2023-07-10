@@ -33,11 +33,9 @@ from typing import Union, Optional, List
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
-from django.template.defaultfilters import date
 from django.urls import NoReverseMatch, reverse
-from django.utils.dateparse import parse_datetime
 from django.utils.safestring import SafeString
-from django.utils.translation import get_language, gettext_lazy as _, pgettext
+from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext_noop
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
@@ -630,10 +628,11 @@ def training_categories(activities):
     added, validated = 0, 0
 
     categories = {
-        _("Participation"): [0, 0],
-        _("Scientific communication"): [0, 0],
-        _("Publication"): [0, 0],
-        _("Courses and training"): [0, 0],
+        _("Participation to symposium/conference"): [0, 0],
+        _("Oral communication"): [0, 0],
+        _("Seminar taken"): [0, 0],
+        _("Publications"): [0, 0],
+        _("Courses taken"): [0, 0],
         _("Services"): [0, 0],
         _("VAE"): [0, 0],
         _("Scientific residencies"): [0, 0],
@@ -651,19 +650,18 @@ def training_categories(activities):
 
         # Increment category counts
         index = int(activity.status == StatutActivite.ACCEPTEE.name)
-        if (
-            activity.category == CategorieActivite.CONFERENCE.name
-            or activity.category == CategorieActivite.SEMINAR.name
-        ):
-            categories[_("Participation")][index] += activity.ects
+        if activity.category == CategorieActivite.CONFERENCE.name:
+            categories[_("Participation to symposium/conference")][index] += activity.ects
+        elif activity.category == CategorieActivite.SEMINAR.name:
+            categories[_("Seminar taken")][index] += activity.ects
         elif activity.category == CategorieActivite.COMMUNICATION.name and (
             activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
         ):
-            categories[_("Scientific communication")][index] += activity.ects
+            categories[_("Oral communication")][index] += activity.ects
         elif activity.category == CategorieActivite.PUBLICATION.name and (
             activity.parent_id is None or activity.parent.category == CategorieActivite.CONFERENCE.name
         ):
-            categories[_("Publication")][index] += activity.ects
+            categories[_("Publications")][index] += activity.ects
         elif activity.category == CategorieActivite.SERVICE.name:
             categories[_("Services")][index] += activity.ects
         elif (
@@ -675,7 +673,7 @@ def training_categories(activities):
         elif activity.category == CategorieActivite.VAE.name:
             categories[_("VAE")][index] += activity.ects
         elif activity.category in [CategorieActivite.COURSE.name, CategorieActivite.UCL_COURSE.name]:
-            categories[_("Courses and training")][index] += activity.ects
+            categories[_("Courses taken")][index] += activity.ects
         elif (
             activity.category == CategorieActivite.PAPER.name
             and activity.type == ChoixTypeEpreuve.CONFIRMATION_PAPER.name
@@ -780,6 +778,11 @@ def part_of_dict(member, container):
 
 
 @register.simple_tag
+def is_current_checklist_status(current, state, extra):
+    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {}))
+
+
+@register.simple_tag
 def has_value(iterable, values):
     return any(value in iterable for value in values)
 
@@ -822,7 +825,19 @@ def get_country_name(country: Optional[Country]):
 
 @register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
 def checklist_state_button(context, **kwargs):
-    expected_attrs = {arg_name: kwargs.pop(arg_name, None) for arg_name in ['label', 'icon', 'state', 'class', 'tab']}
+    expected_attrs = {
+        arg_name: kwargs.pop(arg_name, None)
+        for arg_name in [
+            'label',
+            'icon',
+            'state',
+            'class',
+            'tab',
+            'disabled',
+            'open_modal',
+            'htmx_post',
+        ]
+    }
     return {
         'current': context['current'] or context['initial'],
         **expected_attrs,

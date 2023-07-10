@@ -28,6 +28,7 @@ from typing import Dict, Optional, List
 
 import attr
 from django.utils.timezone import now
+from django.utils.translation import gettext_noop as __
 
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.formation import FormationIdentity
@@ -45,8 +46,14 @@ from admission.ddd.admission.enums import (
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import comptabilite_non_remplie, Comptabilite
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutsChecklistGenerale,
+    StatutChecklist,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -126,8 +133,12 @@ class Proposition(interface.RootEntity):
         type_demande: TypeDemande,
         est_inscription_tardive: bool,
         profil_candidat_soumis: ProfilCandidat,
+        doit_payer_frais_dossier: bool,
     ):
-        self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
+        if doit_payer_frais_dossier:
+            self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
+        else:
+            self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
         self.type_demande = type_demande
         self.annee_calculee = formation_id.annee
         self.formation_id = formation_id
@@ -141,16 +152,47 @@ class Proposition(interface.RootEntity):
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
 
+    def payer_frais_dossier(self):
+        self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
+
+    def payer_frais_dossier_suite_demande(self):
+        self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
+
+        self.checklist_actuelle.frais_dossier = StatutChecklist(
+            libelle=__('Payed'),
+            statut=ChoixStatutChecklist.SYST_REUSSITE,
+        )
+
     def reclamer_documents_par_sic(self):
         self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC
 
     def reclamer_documents_par_fac(self):
-        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC
+
+    def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self):
+        self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
+        self.checklist_actuelle.frais_dossier = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Must pay'),
+        )
+
+    def specifier_paiement_frais_dossier_plus_necessaire_par_gestionnaire(self, statut_checklist_cible: str):
+        self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
+        self.checklist_actuelle.frais_dossier = {
+            ChoixStatutChecklist.INITIAL_NON_CONCERNE.name: StatutChecklist(
+                statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+                libelle=__('Not concerned'),
+            ),
+            ChoixStatutChecklist.GEST_REUSSITE.name: StatutChecklist(
+                statut=ChoixStatutChecklist.GEST_REUSSITE,
+                libelle=__('Dispensed'),
+            ),
+        }[statut_checklist_cible]
 
     def completer_documents_par_candidat(self):
         self.statut = {
-            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC: ChoixStatutPropositionGenerale.TRAITEMENT_SIC,
-            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC_CDD: ChoixStatutPropositionGenerale.TRAITEMENT_FAC_CDD,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC,
         }.get(self.statut)
 
     def completer_curriculum(

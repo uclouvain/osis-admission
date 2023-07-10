@@ -23,10 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import copy
+from typing import Optional
+
 from django.utils.translation import gettext_noop as _
 
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.enums import TypeSituationAssimilation
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
@@ -41,10 +48,30 @@ class Checklist(interface.DomainService):
         cls,
         proposition: Proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-    ) -> StatutsChecklistGenerale:
+        a_paye_frais_dossier: bool,
+    ):
+        checklist_initiale = cls.recuperer_checklist_initiale(
+            proposition=proposition,
+            profil_candidat_translator=profil_candidat_translator,
+            a_paye_frais_dossier=a_paye_frais_dossier,
+        )
+        proposition.checklist_initiale = checklist_initiale
+        proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
+
+    @classmethod
+    def recuperer_checklist_initiale(
+        cls,
+        proposition: Proposition,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        a_paye_frais_dossier: bool,
+    ) -> Optional[StatutsChecklistGenerale]:
+        if proposition.statut != ChoixStatutPropositionGenerale.CONFIRMEE:
+            return
+
         pays_nationalite_europeen = profil_candidat_translator.get_identification(
             proposition.matricule_candidat
         ).pays_nationalite_europeen
+
         return StatutsChecklistGenerale(
             donnees_personnelles=StatutChecklist(
                 libelle=_("To be processed"),
@@ -55,6 +82,7 @@ class Checklist(interface.DomainService):
                 if pays_nationalite_europeen
                 else _("Declared not assimilated")
                 if not proposition.comptabilite.type_situation_assimilation
+                or proposition.comptabilite.type_situation_assimilation == TypeSituationAssimilation.AUCUNE_ASSIMILATION
                 else _("Declared assimilated"),
                 statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE
                 if pays_nationalite_europeen
@@ -82,8 +110,14 @@ class Checklist(interface.DomainService):
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
+            # L'initialisation de la checklist nécessite le paiement des frais de dossier s'ils sont requis
             frais_dossier=StatutChecklist(
-                libelle=_("To be processed"),
-                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+                libelle=_('Payed'),
+                statut=ChoixStatutChecklist.SYST_REUSSITE,
+            )
+            if a_paye_frais_dossier
+            else StatutChecklist(
+                libelle=_('Not concerned'),
+                statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
             ),
         )

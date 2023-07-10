@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
@@ -47,8 +46,14 @@ from admission.infrastructure.admission.domain.service.elements_confirmation imp
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
-from admission.infrastructure.admission.domain.service.historique import Historique
+from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
+from admission.infrastructure.admission.formation_generale.domain.service.historique import (
+    Historique as HistoriqueFormationGenerale,
+)
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
+from admission.infrastructure.admission.formation_generale.domain.service.paiement_frais_dossier import (
+    PaiementFraisDossier,
+)
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
@@ -77,7 +82,7 @@ COMMAND_HANDLERS = {
         formation_translator=FormationGeneraleTranslator(),
         bourse_translator=BourseTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
-        historique=Historique(),
+        historique=HistoriqueGlobal(),
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -96,7 +101,7 @@ COMMAND_HANDLERS = {
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
-        historique=Historique(),
+        historique=HistoriqueGlobal(),
     ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
@@ -122,7 +127,8 @@ COMMAND_HANDLERS = {
         notification=Notification(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         inscription_tardive_service=InscriptionTardive(),
-        historique=Historique(),
+        paiement_frais_dossier_service=PaiementFraisDossier(),
+        historique=HistoriqueGlobal(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -199,14 +205,14 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         emplacement_document_repository=EmplacementDocumentRepository(),
         notification=Notification(),
-        historique=Historique(),
+        historique=HistoriqueGlobal(),
     ),
     ReclamerDocumentsAuCandidatParFACCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_fac(
         cmd,
         proposition_repository=PropositionRepository(),
         emplacement_document_repository=EmplacementDocumentRepository(),
         notification=Notification(),
-        historique=Historique(),
+        historique=HistoriqueGlobal(),
     ),
     RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
         cmd,
@@ -223,7 +229,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             emplacement_document_repository=EmplacementDocumentRepository(),
-            historique=Historique(),
+            historique=HistoriqueGlobal(),
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -273,6 +279,44 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+        )
+    ),
+    SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        notification=Notification(),
+        paiement_frais_dossier_service=PaiementFraisDossier(),
+        historique=HistoriqueFormationGenerale(),
+    ),
+    EnvoyerRappelPaiementCommand: lambda msg_bus, cmd: envoyer_rappel_paiement(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        notification=Notification(),
+        paiement_frais_dossier_service=PaiementFraisDossier(),
+        historique=HistoriqueFormationGenerale(),
+    ),
+    SpecifierPaiementPlusNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_plus_necessaire(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        paiement_frais_dossier_service=PaiementFraisDossier(),
+        historique=HistoriqueFormationGenerale(),
+    ),
+    PayerFraisDossierPropositionSuiteSoumissionCommand: (
+        lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_soumission(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            notification=Notification(),
+            paiement_frais_dossier_service=PaiementFraisDossier(),
+            historique=HistoriqueFormationGenerale(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+        )
+    ),
+    PayerFraisDossierPropositionSuiteDemandeCommand: (
+        lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_demande(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            paiement_frais_dossier_service=PaiementFraisDossier(),
+            historique=HistoriqueFormationGenerale(),
         )
     ),
 }

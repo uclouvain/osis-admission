@@ -25,6 +25,8 @@
 # ##############################################################################
 from unittest import TestCase, mock
 
+import freezegun
+
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     NombrePropositionsSoumisesDepasseException,
@@ -53,6 +55,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
 
 
+@freezegun.freeze_time('2023-01-01')
 class TestVerifierPropositionService(TestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):

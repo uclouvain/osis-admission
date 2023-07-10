@@ -234,7 +234,9 @@ class JuryMembersListApiTestCase(APITestCase):
         self.assertEqual(membre.first_name, "nouveau prenom")
 
         response = self.client.get(self.url, format="json")
-        self.assertEqual(response.json()[-1]['prenom'], "nouveau prenom")
+        created_member = next((member for member in response.json() if member['uuid'] == str(membre.uuid)), None)
+        self.assertIsNotNone(created_member)
+        self.assertEqual(created_member['prenom'], "nouveau prenom")
 
     def test_jury_get_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)

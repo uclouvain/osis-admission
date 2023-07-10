@@ -267,10 +267,10 @@ msgstr ""
 msgid "Accept"
 msgstr ""
 
-msgid "Accept these activities"
+msgid "Accept selected activities"
 msgstr ""
 
-msgid "Accept these courses"
+msgid "Accept selected courses"
 msgstr ""
 
 msgid "Accepted"
@@ -403,7 +403,7 @@ msgstr ""
 msgid "Add an internal note"
 msgstr ""
 
-msgid "Additional documents to complete by the candidate"
+msgid "Additional documents that can be requested from the candidate"
 msgstr ""
 
 msgid "Additional documents uploaded by a manager"
@@ -540,6 +540,13 @@ msgstr ""
 msgid "Application fees"
 msgstr ""
 
+msgid "Application fees request message"
+msgstr ""
+
+#, python-format
+msgid "Application fees: <strong>&euro;%(amount)s</strong>"
+msgstr ""
+
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 
@@ -604,6 +611,12 @@ msgstr ""
 msgid "Are you sure your want to delete this document?"
 msgstr ""
 
+msgid "Are you sure your want to reset the content of the message?"
+msgstr ""
+
+msgid "Are you sure your want to reset the object of the message?"
+msgstr ""
+
 msgid ""
 "Are you the child of a member of the staff of the UCLouvain or the Martin V "
 "entity?"
@@ -618,19 +631,40 @@ msgstr ""
 msgid "Assimilation"
 msgstr ""
 
+msgid "Assimilation 1"
+msgstr ""
+
 msgid "Assimilation 1 situation types"
+msgstr ""
+
+msgid "Assimilation 2"
 msgstr ""
 
 msgid "Assimilation 2 situation types"
 msgstr ""
 
+msgid "Assimilation 3"
+msgstr ""
+
 msgid "Assimilation 3 situation types"
+msgstr ""
+
+msgid "Assimilation 4"
+msgstr ""
+
+msgid "Assimilation 5"
 msgstr ""
 
 msgid "Assimilation 5 situation types"
 msgstr ""
 
+msgid "Assimilation 6"
+msgstr ""
+
 msgid "Assimilation 6 situation types"
+msgstr ""
+
+msgid "Assimilation 7"
 msgstr ""
 
 msgid "Assimilation situation"
@@ -797,6 +831,7 @@ msgstr "Chemistry"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr ""
 
+msgctxt "CategorieActivite"
 msgid "COMMUNICATION"
 msgstr "Oral communication (excluding conference)"
 
@@ -806,6 +841,7 @@ msgstr ""
 msgid "COMPLEMENTARY_TRAINING"
 msgstr "Complementary training"
 
+msgctxt "CategorieActivite"
 msgid "CONFERENCE"
 msgstr "Conference, symposium"
 
@@ -821,8 +857,9 @@ msgstr "Confirmation paper"
 msgid "CONFIRMATION_TO_BE_REPEATED"
 msgstr "Confirmation to be repeated"
 
+msgctxt "CategorieActivite"
 msgid "COURSE"
-msgstr "Course"
+msgstr "Courses taken"
 
 msgid "COURSE types"
 msgstr ""
@@ -971,6 +1008,9 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
+msgid "Cancel the application fees request"
+msgstr ""
+
 msgid "Cancelled application"
 msgstr ""
 
@@ -1098,6 +1138,10 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
+msgctxt "modal"
+msgid "Close"
+msgstr ""
+
 msgid "Closed"
 msgstr ""
 
@@ -1147,10 +1191,13 @@ msgstr ""
 msgid "Complementary training proposition"
 msgstr ""
 
-msgid "Completed after the request"
+msgid "Completed (by student) for FAC"
 msgstr ""
 
-msgid "Completed application"
+msgid "Completed (by student) for SIC"
+msgstr ""
+
+msgid "Completed after the request"
 msgstr ""
 
 msgid "Configuration"
@@ -1195,6 +1242,11 @@ msgid "Confirmation success attestation"
 msgstr ""
 
 msgid "Confirmed application (by student)"
+msgstr ""
+
+msgid ""
+"Consult the credits grid released by your domain doctoral commission. Refer "
+"to the website of your commission for more details."
 msgstr ""
 
 msgid "Contact"
@@ -1393,8 +1445,8 @@ msgstr ""
 msgid "Courses"
 msgstr ""
 
-msgid "Courses and training"
-msgstr "Courses and training"
+msgid "Courses taken"
+msgstr ""
 
 msgid "Create new doctorate admission"
 msgstr ""
@@ -1579,6 +1631,9 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
+msgid "Dispensed"
+msgstr ""
+
 msgid "Display according education"
 msgstr ""
 
@@ -1595,6 +1650,9 @@ msgid "Do not reorder values, and keep the same count"
 msgstr ""
 
 msgid "Do you have a high school diploma?"
+msgstr ""
+
+msgid "Do you want to request the application fees now?"
 msgstr ""
 
 msgid ""
@@ -1677,6 +1735,9 @@ msgstr ""
 msgid "Double degree scholarship"
 msgstr ""
 
+msgid "Double degree:"
+msgstr ""
+
 msgid "Double or triple diplomation"
 msgstr ""
 
@@ -1687,6 +1748,12 @@ msgid "Dr."
 msgstr ""
 
 msgid "Dutch"
+msgstr ""
+
+#, python-format
+msgid ""
+"E-mail requesting the application fees sent to the candidate on %(date)s by "
+"%(author)s."
 msgstr ""
 
 msgid "ECONOMY"
@@ -1706,6 +1773,9 @@ msgid "ECTS for participating"
 msgstr ""
 
 msgid "ECTS for the participation"
+msgstr ""
+
+msgid "ECTS must be positive"
 msgstr ""
 
 msgid "EFT"
@@ -1754,6 +1824,11 @@ msgid "Education type"
 msgstr ""
 
 msgid "Email"
+msgstr ""
+
+msgid ""
+"Email sent to the candidate to inform him that he must pay the application "
+"fees to finalize an application for general education"
 msgstr ""
 
 msgid "Employer"
@@ -1821,6 +1896,9 @@ msgstr ""
 msgid "Erasmus mundus scholarship"
 msgstr ""
 
+msgid "Erasmus mundus:"
+msgstr ""
+
 msgid "Estimated time to complete the doctorate (in months)"
 msgstr ""
 
@@ -1882,7 +1960,7 @@ msgstr ""
 msgid "External reorientation"
 msgstr ""
 
-msgid "FAC free documents"
+msgid "External reorientation / modification"
 msgstr ""
 
 msgid "FAC/CDD processing"
@@ -1910,6 +1988,9 @@ msgid "Failure of the confirmation paper"
 msgstr ""
 
 msgid "Failure of the test"
+msgstr ""
+
+msgid "Feedback from FAC"
 msgstr ""
 
 msgid "Female"
@@ -2027,13 +2108,7 @@ msgstr ""
 msgid "Free and requestable by SIC"
 msgstr ""
 
-msgid "Free and uploaded by FAC for the candidate"
-msgstr ""
-
 msgid "Free and uploaded by FAC for the managers"
-msgstr ""
-
-msgid "Free and uploaded by SIC for the candidate"
 msgstr ""
 
 msgid "Free and uploaded by SIC for the managers"
@@ -2169,6 +2244,9 @@ msgstr ""
 msgid "Household composition, or a copy of your birth certificate"
 msgstr ""
 
+msgid "I am a long-term resident in the European Union outside Belgium"
+msgstr ""
+
 msgid ""
 "I am a long-term resident in the European Union outside Belgium "
 "(assimilation 7)"
@@ -2197,6 +2275,10 @@ msgstr ""
 msgid ""
 "I am aware that no additional documents specific to quota studies can be "
 "added after my online application has been confirmed."
+msgstr ""
+
+msgid ""
+"I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS"
 msgstr ""
 
 msgid ""
@@ -2458,6 +2540,9 @@ msgstr ""
 msgid "International scholarship"
 msgstr ""
 
+msgid "International:"
+msgstr ""
+
 msgid "Internship framework agreement"
 msgstr ""
 
@@ -2600,6 +2685,9 @@ msgid "Link to the admission confirmation paper panel (front-office)"
 msgstr ""
 
 msgid "Link to the admission supervisory panel (front-office)"
+msgstr ""
+
+msgid "Link to the admissions (front-office)"
 msgstr ""
 
 msgid "Link to the complementary training panel (front-office)"
@@ -2938,6 +3026,9 @@ msgstr ""
 msgid "Modification date"
 msgstr ""
 
+msgid "Modification requested"
+msgstr ""
+
 msgid "Modified"
 msgstr ""
 
@@ -2961,6 +3052,9 @@ msgid "Must be in the process of the enrolment"
 msgstr ""
 
 msgid "Must not be pre-admission"
+msgstr ""
+
+msgid "Must pay"
 msgstr ""
 
 msgid "My father"
@@ -3118,6 +3212,9 @@ msgstr ""
 msgid "Not analyzed"
 msgstr ""
 
+msgid "Not assimilated"
+msgstr ""
+
 msgid "Not concerned"
 msgstr ""
 
@@ -3184,6 +3281,9 @@ msgstr ""
 msgid "Opinion on the renewal of the research mandate"
 msgstr ""
 
+msgid "Oral communication"
+msgstr ""
+
 msgid "Oral expose"
 msgstr "Oral exposé"
 
@@ -3227,6 +3327,7 @@ msgstr ""
 msgid "Others"
 msgstr ""
 
+msgctxt "CategorieActivite"
 msgid "PAPER"
 msgstr "Examination"
 
@@ -3266,8 +3367,9 @@ msgstr "Pre-admission"
 msgid "PRIVATE_DEFENSE"
 msgstr ""
 
+msgctxt "CategorieActivite"
 msgid "PUBLICATION"
-msgstr "Publication"
+msgstr "Publications"
 
 msgid "PUBLICATION types"
 msgstr ""
@@ -3305,6 +3407,9 @@ msgstr ""
 msgid "Participation certification"
 msgstr ""
 
+msgid "Participation to symposium/conference"
+msgstr ""
+
 msgid "Passport"
 msgstr ""
 
@@ -3312,6 +3417,12 @@ msgid "Passport number"
 msgstr ""
 
 msgid "Past confirmation papers"
+msgstr ""
+
+msgid "Payed"
+msgstr ""
+
+msgid "Pending application fees"
 msgstr ""
 
 msgid "Pending validation from management"
@@ -3416,6 +3527,11 @@ msgstr ""
 msgid "Please provide one of these two identification information:"
 msgstr ""
 
+msgid ""
+"Please refer to the specifics disposition of your domain doctoral commission "
+"for your activities choice."
+msgstr ""
+
 msgid "Please specify at least one identity number."
 msgstr ""
 
@@ -3488,9 +3604,6 @@ msgid "Private email"
 msgstr ""
 
 msgid "Processing by Fac/CDD"
-msgstr ""
-
-msgid "Processing by SIC"
 msgstr ""
 
 msgid "Professional"
@@ -3609,10 +3722,10 @@ msgid ""
 "CDE, CLSM or CDSS"
 msgstr ""
 
-msgid "Publication"
-msgstr "Publication"
-
 msgid "Publication status"
+msgstr ""
+
+msgid "Publications"
 msgstr ""
 
 msgid "Published"
@@ -3634,8 +3747,9 @@ msgstr "Declined"
 msgid "REJECTED"
 msgstr "Rejected"
 
+msgctxt "CategorieActivite"
 msgid "RESIDENCY"
-msgstr "Advanced research residency"
+msgstr "Research residency"
 
 msgid "RESIDENCY types"
 msgstr ""
@@ -3738,6 +3852,9 @@ msgstr ""
 msgid "Relationship"
 msgstr ""
 
+msgid "Remind the applicant"
+msgstr ""
+
 msgctxt "jury member"
 msgid "Remove"
 msgstr ""
@@ -3747,6 +3864,9 @@ msgid "Remove?"
 msgstr ""
 
 msgid "Reorientation"
+msgstr ""
+
+msgid "Reorientation requested"
 msgstr ""
 
 msgid "Replace a document"
@@ -3923,19 +4043,18 @@ msgstr ""
 msgid "SELF_FUNDING"
 msgstr "Self-funding"
 
+msgctxt "CategorieActivite"
 msgid "SEMINAR"
-msgstr "Research seminar: attendance"
+msgstr "Seminar taken"
 
 msgid "SEMINAR types"
 msgstr ""
 
+msgctxt "CategorieActivite"
 msgid "SERVICE"
-msgstr "Institutional, didactic and scientific expertise service"
+msgstr "Services"
 
 msgid "SERVICE types"
-msgstr ""
-
-msgid "SIC free documents"
 msgstr ""
 
 msgid "SIC status"
@@ -3955,6 +4074,9 @@ msgstr "Statistics"
 
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Submitted confirmation"
+
+msgid "SYST_REUSSITE"
+msgstr "System success"
 
 msgid "Salary slips"
 msgstr ""
@@ -3992,9 +4114,6 @@ msgid "Scholarship start date"
 msgstr ""
 
 msgid "Sciences"
-msgstr ""
-
-msgid "Scientific communication"
 msgstr ""
 
 msgid "Scientific residencies"
@@ -4042,6 +4161,9 @@ msgstr ""
 msgid "Selection type"
 msgstr ""
 
+msgid "Seminar taken"
+msgstr ""
+
 msgid "Send"
 msgstr ""
 
@@ -4055,6 +4177,9 @@ msgid "Send an information email"
 msgstr ""
 
 msgid "Send the message"
+msgstr ""
+
+msgid "Send to applicant"
 msgstr ""
 
 msgid "Sender"
@@ -4221,10 +4346,10 @@ msgstr ""
 msgid "Submit"
 msgstr ""
 
-msgid "Submit these activities"
+msgid "Submit selected activities"
 msgstr ""
 
-msgid "Submit these courses"
+msgid "Submit selected courses"
 msgstr ""
 
 msgid "Submitted"
@@ -4342,6 +4467,9 @@ msgid ""
 "being generated, please come back later to get it."
 msgstr ""
 
+msgid "The checklist must be initialized."
+msgstr ""
+
 msgid ""
 "The child of a member of staff may, under some conditions, benefit from a "
 "reduction of the registration fee for any registration for a bachelor's or "
@@ -4403,6 +4531,12 @@ msgstr ""
 msgid "The decision of the signing actor"
 msgstr ""
 
+msgid ""
+"The declaration of you doctoral training activities must be consistent with "
+"the specifics disposition of your domain. Please refer to those on the "
+"website of your Domain Doctoral Commission for more information."
+msgstr ""
+
 msgctxt "female gender"
 msgid "The doctoral student"
 msgstr ""
@@ -4443,10 +4577,8 @@ msgid ""
 "The educational experiences that have been valuated from this admission."
 msgstr ""
 
-#, fuzzy
-#| msgid "Membre CA not found."
 msgid "The element has not been found."
-msgstr "Supervisory panel member not found."
+msgstr ""
 
 msgid "The experiences that have been valuated from this admission."
 msgstr ""
@@ -4514,6 +4646,9 @@ msgid ""
 "required language."
 msgstr ""
 
+msgid "The payment has not been made."
+msgstr ""
+
 msgid "The person concerned"
 msgstr ""
 
@@ -4526,6 +4661,12 @@ msgid ""
 msgstr ""
 
 msgid "The proposition has already been confirmed or is cancelled"
+msgstr ""
+
+msgid "The proposition must be concerned by the payment."
+msgstr ""
+
+msgid "The proposition must not be concerned by the payment."
 msgstr ""
 
 msgid "The public comment about the approval/refusal"
@@ -4555,6 +4696,13 @@ msgstr ""
 
 #, python-format
 msgid "The status has been changed to %(status)s."
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"The status of the request is currently \"{current_status}\". Only the status "
+"\"{from_status}\" allows you to move to the \"{to_status}\" status for the "
+"application fees."
 msgstr ""
 
 msgid "The submitted information is not consistent with information requested."
@@ -4691,6 +4839,11 @@ msgstr ""
 msgid "This page is currently under construction."
 msgstr ""
 
+msgid ""
+"This status change will close the transaction in the payment application. "
+"The applicant will still need to be informed."
+msgstr ""
+
 msgid "Timetable"
 msgstr ""
 
@@ -4719,13 +4872,13 @@ msgstr ""
 msgid "To be completed"
 msgstr ""
 
-msgid "To be completed (by student) for FAC/CDD"
+msgid "To be completed (by student) for FAC"
 msgstr ""
 
 msgid "To be completed (by student) for SIC"
 msgstr ""
 
-msgid "To be completed for application"
+msgid "To be completed after application"
 msgstr ""
 
 msgid "To be processed"
@@ -4815,8 +4968,9 @@ msgstr ""
 msgid "UCLOUVAIN_SCIENTIFIC_STAFF"
 msgstr "UCLouvain scientific staff"
 
+msgctxt "CategorieActivite"
 msgid "UCL_COURSE"
-msgstr "UCL Course"
+msgstr "UCL Courses"
 
 msgid "UCLouvain"
 msgstr ""
@@ -4843,9 +4997,6 @@ msgid "UUID"
 msgstr ""
 
 msgid "Undecided"
-msgstr ""
-
-msgid "Under appeal"
 msgstr ""
 
 msgid "Undertake and declaration"
@@ -4889,9 +5040,16 @@ msgstr ""
 msgid "Upload a document"
 msgstr ""
 
+msgid "Upload a received document"
+msgstr ""
+
 msgid "Upload the opinion on the renewal of the research mandate"
 msgstr ""
 
+msgid "VAE"
+msgstr "Valorisation of experience"
+
+msgctxt "CategorieActivite"
 msgid "VAE"
 msgstr "Valorisation of experience"
 
@@ -4907,9 +5065,13 @@ msgstr ""
 msgid "VIP candidate"
 msgstr ""
 
-msgid "Validate these courses"
+msgid "Validate selected courses"
 msgstr ""
 
+msgid "Validated"
+msgstr ""
+
+msgctxt "assimilation-checklist"
 msgid "Validated"
 msgstr ""
 
@@ -4920,6 +5082,9 @@ msgid "Viewed at"
 msgstr ""
 
 msgid "Viewed by"
+msgstr ""
+
+msgid "Visualize"
 msgstr ""
 
 msgid "WBI - Wallonie Bruxelles International"
@@ -5129,6 +5294,12 @@ msgid ""
 msgstr ""
 
 msgid "You must be invited to complete this admission."
+msgstr ""
+
+msgid "You must be invited to pay the application fees by a manager."
+msgstr ""
+
+msgid "You must be invited to pay the application fees by the system."
 msgstr ""
 
 msgid "You must be the reference promoter to access this admission"

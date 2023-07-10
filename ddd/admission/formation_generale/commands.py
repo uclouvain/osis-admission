@@ -300,3 +300,33 @@ class RemplirEmplacementDocumentParGestionnaireCommand(commands.RemplirEmplaceme
 @attr.dataclass(frozen=True, slots=True)
 class RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+# Paiement des frais de dossier
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierPaiementNecessaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EnvoyerRappelPaiementCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierPaiementPlusNecessaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    statut_checklist_frais_dossier: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PayerFraisDossierPropositionSuiteSoumissionCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PayerFraisDossierPropositionSuiteDemandeCommand(interface.CommandRequest):
+    uuid_proposition: str
