@@ -63,3 +63,9 @@ class ChoixStatutChecklist(ChoiceEnum):
     GEST_BLOCAGE_ULTERIEUR = _("GEST_BLOCAGE_ULTERIEUR")
     GEST_REUSSITE = _("GEST_REUSSITE")
     SYST_REUSSITE = _("SYST_REUSSITE")
+
+
+class PoursuiteDeCycle(ChoiceEnum):
+    TO_BE_DETERMINED = _("TO_BE_DETERMINED")
+    YES = _("YES")
+    NO = _("NO")

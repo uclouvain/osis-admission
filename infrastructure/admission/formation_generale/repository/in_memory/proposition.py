@@ -273,6 +273,8 @@ class PropositionInMemoryRepository(
             nationalite_candidat=candidat.pays_nationalite,
             nationalite_ue_candidat=candidat.pays_nationalite_europeen,
             photo_identite_candidat=candidat.photo_identite,
+            poursuite_de_cycle_a_specifier=proposition.poursuite_de_cycle_a_specifier,
+            poursuite_de_cycle=proposition.poursuite_de_cycle,
             candidat_a_plusieurs_demandes=any(
                 proposition.statut == ChoixStatutPropositionGenerale.EN_BROUILLON for proposition in propositions
             ),

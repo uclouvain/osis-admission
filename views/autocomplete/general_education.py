@@ -23,34 +23,43 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
-from typing import List, Optional
+from dal_select2.views import Select2ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
-from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
-from admission.ddd.admission.dtos.formation import FormationDTO
+__namespace__ = False
+
+from django.http import JsonResponse
+
+from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
+from infrastructure.messages_bus import message_bus_instance
+
+__all__ = [
+    'GeneralEducationTrainingsAutocomplete',
+]
 
 
-class IFormationGeneraleTranslator(IFormationTranslator):
-    @classmethod
-    @abstractmethod
-    def get(cls, entity_id: FormationIdentity) -> Formation:
-        raise NotImplementedError
+class GeneralEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView):
+    urlpatterns = 'general-education-trainings'
 
-    @classmethod
-    @abstractmethod
-    def get_dto(cls, sigle: str, annee: int) -> FormationDTO:
-        raise NotImplementedError
+    def get(self, request, *args, **kwargs):
+        education_list = message_bus_instance.invoke(
+            RechercherFormationGeneraleQuery(
+                terme_de_recherche=self.q,
+                annee=self.forwarded.get('annee_academique'),
+            )
+        )
 
-    @classmethod
-    @abstractmethod
-    def search(
-        cls,
-        type: Optional[str],
-        annee: Optional[int],
-        sigle: Optional[str],
-        intitule: str,
-        terme_de_recherche: Optional[str],
-        campus: Optional[str],
-    ) -> List['FormationDTO']:
-        raise NotImplementedError
+        results = [
+            {
+                'id': formation.sigle,
+                'text': f'{formation.sigle} - {formation.intitule}',
+            }
+            for formation in education_list
+        ]
+        return JsonResponse(
+            {
+                'pagination': {'more': False},
+                'results': results,
+            },
+            content_type='application/json',
+        )
