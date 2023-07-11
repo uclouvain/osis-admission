@@ -1911,6 +1911,9 @@ msgstr "Dr."
 msgid "Dutch"
 msgstr "Néerlandais"
 
+msgid "Dynamic questions about \"Specificities\" sub-tab"
+msgstr "Questions dynamiques du sous-onglet \"Spécificités\""
+
 #, python-format
 msgid ""
 "E-mail requesting the application fees sent to the candidate on %(date)s by "
@@ -2816,6 +2819,9 @@ msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 "L'institution doit être renseignée quand le doctorat a déjà été réalisé "
 "partiellement ou complètement"
+
+msgid "Insufficient"
+msgstr "Insuffisant"
 
 msgid "Internal comment"
 msgstr "Commentaire interne"
@@ -4841,6 +4847,9 @@ msgstr "Profil soumis"
 
 msgid "Successful test"
 msgstr "Epreuve réussie"
+
+msgid "Sufficient"
+msgstr "Suffisant"
 
 msgctxt "paper summary"
 msgid "Summary"

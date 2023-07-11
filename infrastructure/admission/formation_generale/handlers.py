@@ -317,6 +317,7 @@ COMMAND_HANDLERS = {
             paiement_frais_dossier_service=PaiementFraisDossier(),
             historique=HistoriqueFormationGenerale(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         )
     ),
     PayerFraisDossierPropositionSuiteDemandeCommand: (
