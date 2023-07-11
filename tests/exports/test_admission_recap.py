@@ -103,6 +103,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionFormationContinueDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos import (
     ComptabiliteDTO,
     PropositionDTO as PropositionFormationGeneraleDTO,
@@ -2518,6 +2519,43 @@ class SectionsAttachmentsTestCase(TestCase):
             )
             self.assertTrue(attachments[0].required)
 
+            # The pool is not open...
+            with freezegun.freeze_time('2023-10-1'):
+                section = get_specific_questions_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 0)
+
+                # ...but we simulate its opening after the submission of the proposition to allow
+                # the managers to manually choose the reorientation
+                with mock.patch.multiple(
+                    self.general_bachelor_context.proposition,
+                    statut=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+                ):
+                    section = get_specific_questions_section(
+                        self.general_bachelor_context,
+                        self.empty_questions,
+                        False,
+                    )
+                    attachments = section.attachments
+
+                    self.assertEqual(len(attachments), 1)
+
+                    self.assertEqual(attachments[0].identifier, 'ATTESTATION_INSCRIPTION_REGULIERE')
+                    self.assertEqual(
+                        attachments[0].label,
+                        DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE'],
+                    )
+                    self.assertEqual(
+                        attachments[0].uuids,
+                        self.general_bachelor_context.proposition.attestation_inscription_reguliere,
+                    )
+                    self.assertTrue(attachments[0].required)
+
         with mock.patch.multiple(
             self.general_bachelor_context.proposition,
             est_non_resident_au_sens_decret=False,
@@ -2557,6 +2595,43 @@ class SectionsAttachmentsTestCase(TestCase):
                 self.general_bachelor_context.proposition.formulaire_modification_inscription,
             )
             self.assertTrue(attachments[0].required)
+
+            # The pool is not open...
+            with freezegun.freeze_time('2023-10-1'):
+                section = get_specific_questions_section(
+                    self.general_bachelor_context,
+                    self.empty_questions,
+                    False,
+                )
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 0)
+
+                # ...but we simulate its opening after the submission of the proposition to allow
+                # the managers to manually choose the reorientation
+                with mock.patch.multiple(
+                    self.general_bachelor_context.proposition,
+                    statut=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+                ):
+                    section = get_specific_questions_section(
+                        self.general_bachelor_context,
+                        self.empty_questions,
+                        False,
+                    )
+                    attachments = section.attachments
+
+                    self.assertEqual(len(attachments), 1)
+
+                    self.assertEqual(attachments[0].identifier, 'FORMULAIRE_MODIFICATION_INSCRIPTION')
+                    self.assertEqual(
+                        attachments[0].label,
+                        DocumentsQuestionsSpecifiques['FORMULAIRE_MODIFICATION_INSCRIPTION'],
+                    )
+                    self.assertEqual(
+                        attachments[0].uuids,
+                        self.general_bachelor_context.proposition.formulaire_modification_inscription,
+                    )
+                    self.assertTrue(attachments[0].required)
 
         with mock.patch.multiple(
             self.general_bachelor_context.proposition,

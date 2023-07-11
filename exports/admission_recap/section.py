@@ -29,8 +29,12 @@ from typing import Optional, List, Dict
 import weasyprint
 from django.conf import settings
 from django.utils import formats
-from django.utils.translation import gettext as _, pgettext, override
+from django.utils.translation import gettext as _, override
 
+from admission.calendar.admission_calendar import (
+    AdmissionPoolExternalReorientationCalendar,
+    AdmissionPoolExternalEnrollmentChangeCalendar,
+)
 from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
@@ -42,6 +46,7 @@ from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueD
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande, IdentifiantBaseEmplacementDocument
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 from admission.exports.admission_recap.attachments import (
     Attachment,
     get_identification_attachments,
@@ -340,7 +345,20 @@ def get_specific_questions_section(
     load_content: bool,
 ) -> Section:
     """Returns the specific questions section."""
-    pools = CalendrierInscription.get_pool_ouverts() if context.est_proposition_generale else []
+    if context.est_proposition_generale:
+        # Get the open pools or simulate the opening of the required pools (reorientation and modification)
+        # after the submission of the proposition as the managers can manually change these characteristics
+        pools = (
+            CalendrierInscription.get_pool_ouverts()
+            if context.proposition.statut in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+            else [
+                (AdmissionPoolExternalReorientationCalendar.event_reference, 0),
+                (AdmissionPoolExternalEnrollmentChangeCalendar.event_reference, 0),
+            ]
+        )
+    else:
+        pools = []
+
     eligible_for_reorientation = CalendrierInscription.eligible_a_la_reorientation(
         program=context.proposition.formation.type,
         sigle=context.proposition.formation.sigle,
