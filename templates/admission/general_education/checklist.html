@@ -207,9 +207,17 @@
       {% endwith %}
       {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
-          <p>{% trans "This page is currently under construction." %}</p>
-          <div class="info-part">
+          <div class="form-group btn-group status-group" role="group">
+            {% checklist_state_button tab='specificites_formation' label=_("Not concerned") icon='xmark' state='INITIAL_NON_CONCERNE' class='muted' %}
+            {% checklist_state_button tab='specificites_formation' label=_("To be processed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
+            {% checklist_state_button tab='specificites_formation' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
+            {% checklist_state_button tab='specificites_formation' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' %}
           </div>
+
+          {% bootstrap_form comment_forms.specificites_formation %}
+
+          {% multiple_field_data questions_specifiques title=_('Dynamic questions about "Specificities" sub-tab') %}
+
         </div>
       {% endwith %}
     </div>

@@ -1756,6 +1756,9 @@ msgstr ""
 msgid "Dutch"
 msgstr ""
 
+msgid "Dynamic questions about \"Specificities\" sub-tab"
+msgstr ""
+
 #, python-format
 msgid ""
 "E-mail requesting the application fees sent to the candidate on %(date)s by "
@@ -2529,6 +2532,9 @@ msgid "Institution Federation Wallonie-Bruxelles"
 msgstr ""
 
 msgid "Institution should be set when PhD has been set to yes or partial"
+msgstr ""
+
+msgid "Insufficient"
 msgstr ""
 
 msgid "Internal comment"
@@ -4392,6 +4398,9 @@ msgid "Submitted profile"
 msgstr ""
 
 msgid "Successful test"
+msgstr ""
+
+msgid "Sufficient"
 msgstr ""
 
 msgctxt "paper summary"

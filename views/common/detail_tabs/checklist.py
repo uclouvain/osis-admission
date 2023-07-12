@@ -47,6 +47,7 @@ from rest_framework.views import APIView
 
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
+from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import DocumentsAssimilation
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
@@ -54,6 +55,7 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementNecessaireCommand,
     EnvoyerRappelPaiementCommand,
     SpecifierPaiementPlusNecessaireCommand,
+    RecupererQuestionsSpecifiquesQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -190,6 +192,13 @@ class ChecklistView(RequestApplicationFeesContextDataMixin, TemplateView):
             )
 
             context['resume_proposition'] = command_result.resume
+
+            context['questions_specifiques'] = message_bus_instance.invoke(
+                RecupererQuestionsSpecifiquesQuery(
+                    uuid_proposition=self.admission_uuid,
+                    onglets=[Onglets.INFORMATIONS_ADDITIONNELLES.name],
+                )
+            )
 
             # Initialize forms
             tab_names = list(self.extra_context['checklist_tabs'].keys())
