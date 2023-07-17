@@ -47,7 +47,7 @@ from rest_framework.views import APIView
 
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import DocumentsAssimilation
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
@@ -168,12 +168,15 @@ class ChecklistView(RequestApplicationFeesContextDataMixin, TemplateView):
 
         return {
             'assimilation': assimilation_documents,
-            'financabilite': {},
+            'financabilite': set(),
             'frais_dossier': assimilation_documents,
-            'choix_formation': {},
-            'parcours_anterieur': {},
+            'choix_formation': {
+                'ATTESTATION_INSCRIPTION_REGULIERE',
+                'FORMULAIRE_MODIFICATION_INSCRIPTION',
+            },
+            'parcours_anterieur': set(),
             'donnees_personnelles': assimilation_documents,
-            'specificites_formation': {},
+            'specificites_formation': set(),
         }
 
     def get_template_names(self):
@@ -225,6 +228,12 @@ class ChecklistView(RequestApplicationFeesContextDataMixin, TemplateView):
 
             # Documents
             admission_documents = command_result.emplacements_documents
+            question_specifiques_documents_uuids = [
+                valeur
+                for question in context['questions_specifiques']
+                for valeur in question.valeur
+                if question.type == TypeItemFormulaire.DOCUMENT.name
+            ]
 
             context['documents'] = {
                 tab_name: [
@@ -234,6 +243,12 @@ class ChecklistView(RequestApplicationFeesContextDataMixin, TemplateView):
                 ]
                 for tab_name, tab_documents in self.checklist_documents_by_tab().items()
             }
+            context['documents']['specificites_formation'] += [
+                document
+                for document_uuid in question_specifiques_documents_uuids
+                for document in admission_documents
+                if document_uuid in document.document_uuids
+            ]
 
         return context
 

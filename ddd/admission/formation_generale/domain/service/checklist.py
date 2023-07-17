@@ -123,7 +123,7 @@ class Checklist(interface.DomainService):
             if nombre_questions < 2
             else StatutChecklist(
                 libelle=_("To be processed"),
-                statut=ChoixStatutChecklist.GEST_BLOCAGE,
+                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
             choix_formation=StatutChecklist(
                 libelle=_("To be processed"),

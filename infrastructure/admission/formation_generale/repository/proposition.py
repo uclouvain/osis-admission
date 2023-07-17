@@ -35,6 +35,7 @@ from django.utils.translation import get_language
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
 from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -395,6 +396,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule=proposition.matricule_candidat,
             annee_courante=annee_courante,
         )
+        poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name and any(
+            annee.resultat == Result.SUCCESS.name or annee.resultat == Result.SUCCESS_WITH_RESIDUAL_CREDITS.name
+            for experience in curriculum.experiences_academiques
+            for annee in experience.annees
+            if experience.pays == BE_ISO_CODE
+        )
 
         return PropositionGestionnaireDTO(
             **dto_to_dict(proposition),
@@ -413,15 +420,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else '',
             nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
-            poursuite_de_cycle_a_specifier=(
-                proposition.formation.type == TrainingType.BACHELOR.name
-                and any(
-                    annee.resultat == Result.SUCCESS.name
-                    for experience in curriculum.experiences_academiques
-                    for annee in experience.annees
-                )
-            ),
-            poursuite_de_cycle=admission.cycle_pursuit,
+            poursuite_de_cycle_a_specifier=poursuite_de_cycle_a_specifier,
+            poursuite_de_cycle=admission.cycle_pursuit if poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
             titre_access='',  # TODO
             candidat_assimile=admission.accounting
