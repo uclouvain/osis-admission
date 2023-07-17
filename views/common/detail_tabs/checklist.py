@@ -231,7 +231,7 @@ class ChecklistView(RequestApplicationFeesContextDataMixin, TemplateView):
             question_specifiques_documents_uuids = [
                 valeur
                 for question in context['questions_specifiques']
-                for valeur in question.valeur
+                for valeur in (question.valeur if question.valeur else [])
                 if question.type == TypeItemFormulaire.DOCUMENT.name
             ]
 
