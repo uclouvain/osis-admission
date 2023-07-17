@@ -170,6 +170,7 @@
 
           <div class="info-part">
             {% field_data _("Proposition submission") admission.soumise_le %}
+            {% if admission.est_inscription_tardive %}<p>{% trans "Late enrollment" %}</p>{% endif %}
 
             {% if admission.est_reorientation_inscription_externe %}
             {% field_data _("External reorientation/modification") _("Reorientation asked by the candidate") %}
@@ -182,11 +183,13 @@
                 <dt>{% trans "Specific profile" %}</dt>
                 <dd>
                 {% if admission.bourse_erasmus_mundus %}
-                  {% trans "Erasmus Mundus" %} : {{ admission.bourse_erasmus_mundus.nom_court }}
-                {% elif admission.bourse_double_diplome %}
-                  {% trans "Double diplomation" %} : {{ admission.bourse_double_diplome.nom_court }}
-                {% elif admission.bourse_internationale %}
-                  {% trans "International scholarship" %} : {{ admission.bourse_internationale.nom_court }}
+                  <p>{% trans "Erasmus Mundus" %} : {{ admission.bourse_erasmus_mundus.nom_court }}</p>
+                {% endif %}
+                {% if admission.bourse_double_diplome %}
+                  <p>{% trans "Double diplomation" %} : {{ admission.bourse_double_diplome.nom_court }}</p>
+                {% endif %}
+                {% if admission.bourse_internationale %}
+                  <p>{% trans "International scholarship" %} : {{ admission.bourse_internationale.nom_court }}</p>
                 {% endif %}
                 </dd>
               </dl>
@@ -208,15 +211,20 @@
       {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
           <div class="form-group btn-group status-group" role="group">
-            {% checklist_state_button tab='specificites_formation' label=_("Not concerned") icon='xmark' state='INITIAL_NON_CONCERNE' class='muted' %}
-            {% checklist_state_button tab='specificites_formation' label=_("To be processed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
+            {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
+              {% checklist_state_button tab='specificites_formation' label=_("Not concerned") icon='xmark' state='INITIAL_NON_CONCERNE' class='muted' %}
+            {% else %}
+              {% checklist_state_button tab='specificites_formation' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='muted' %}
+            {% endif %}
             {% checklist_state_button tab='specificites_formation' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
             {% checklist_state_button tab='specificites_formation' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' %}
           </div>
 
           {% bootstrap_form comment_forms.specificites_formation %}
 
-          {% multiple_field_data questions_specifiques title=_('Dynamic questions about "Specificities" sub-tab') %}
+          <div class="info-part">
+            {% multiple_field_data questions_specifiques title=_('Dynamic questions about "Specificities" sub-tab') %}
+          </div>
 
         </div>
       {% endwith %}

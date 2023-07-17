@@ -31,6 +31,7 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
+from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
 )
@@ -52,6 +53,7 @@ def recuperer_resume_et_emplacements_documents_non_libres_proposition(
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
+    question_specifique_translator: 'IQuestionSpecifiqueTranslator',
 ) -> ResumeEtEmplacementsDocumentsPropositionDTO:
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -73,11 +75,16 @@ def recuperer_resume_et_emplacements_documents_non_libres_proposition(
         comptabilite_dto=comptabilite_dto,
     )
 
+    questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
+        proposition_uuid=cmd.uuid_proposition,
+        type=TypeItemFormulaire.DOCUMENT.name,
+    )
+
     # WHEN
     emplacements_documents = emplacements_documents_demande_translator.recuperer_emplacements_documents_non_libres_dto(
         personne_connue_translator=personne_connue_translator,
         resume_dto=resume_dto,
-        questions_specifiques=[],
+        questions_specifiques=questions_specifiques_dtos,
     )
 
     # THEN

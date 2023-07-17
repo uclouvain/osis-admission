@@ -93,7 +93,9 @@ class ChoixFormationForm(forms.Form):
     )
     formation = forms.CharField(
         label=_("Training"),
-        widget=autocomplete.ListSelect2(url="admission:autocomplete:general-education-trainings"),
+        widget=autocomplete.ListSelect2(
+            forward=['annee_academique'], url="admission:autocomplete:general-education-trainings"
+        ),
     )
     poursuite_cycle = forms.ChoiceField(
         label=_("Cycle pursuit"),
