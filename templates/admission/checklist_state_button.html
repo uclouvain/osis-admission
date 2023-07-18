@@ -27,6 +27,7 @@
 <div class="btn-group" role="group">
   {% is_current_checklist_status current state extra as is_current_status %}
   <button
+      id="{{ tab }}-{{ state }}{% if sub_id %}-{{ sub_id }}{% endif %}"
       type="button"
       class="checklist-state-button btn btn-default {% if is_current_status %}btn-{{ class }} active{% endif %}"
       data-status="{{ state }}"

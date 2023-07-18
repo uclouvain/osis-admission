@@ -836,6 +836,7 @@ def checklist_state_button(context, **kwargs):
             'disabled',
             'open_modal',
             'htmx_post',
+            'sub_id',
         ]
     }
     return {

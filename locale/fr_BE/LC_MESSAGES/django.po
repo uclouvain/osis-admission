@@ -263,6 +263,9 @@ msgid ""
 msgstr ""
 "Un membre doit être soit interne, soit externe, veuillez vérifier les champs."
 
+msgid "A new version of the analysis folder has been generated."
+msgstr "Une nouvelle version du dossier d'analyse a été générée."
+
 msgid "A non doctor member must have a justification."
 msgstr ""
 "Un membre non porteur du titre de docteur doit avoir une justification."
@@ -2135,9 +2138,6 @@ msgstr "Modification / réorientation externe"
 msgid "External reorientation/modification"
 msgstr "Réorientation/modification externe"
 
-msgid "FAC/CDD processing"
-msgstr "Traitement FAC/CDD"
-
 msgid "FNRS"
 msgstr "FNRS"
 
@@ -2370,6 +2370,9 @@ msgstr "Admission en formation générale"
 
 msgid "General enrolments"
 msgstr "Inscriptions en formation générale"
+
+msgid "Generate an analysis folder"
+msgstr "Générer un dossier d'analyse"
 
 msgid "Generate the PDF recap"
 msgstr "Générer le PDF récapitulatif"

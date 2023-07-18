@@ -55,8 +55,11 @@ class PayApplicationFeesAfterSubmissionViewTestCase(APITestCase):
             ),
             training=Master120TrainingFactory(),
             status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
-            checklist={},
         )
+        self.admission.checklist['current']['frais_dossier']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        self.admission.checklist['current']['frais_dossier']['extra'] = {'initial': '1'}
+        self.original_checklist = self.admission.checklist
+        self.admission.save()
 
         self.url = resolve_url('admission_api_v1:pay_after_submission', uuid=self.admission.uuid)
 
@@ -74,12 +77,6 @@ class PayApplicationFeesAfterSubmissionViewTestCase(APITestCase):
         # Check the update of the admission
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
-        self.assertIn('initial', self.admission.checklist)
-        self.assertEqual(
-            self.admission.checklist['initial']['frais_dossier']['statut'],
-            ChoixStatutChecklist.SYST_REUSSITE.name,
-        )
-        self.assertEqual(self.admission.checklist['initial']['frais_dossier']['libelle'], 'Payed')
         self.assertIn('current', self.admission.checklist)
         self.assertEqual(
             self.admission.checklist['current']['frais_dossier']['statut'],
@@ -118,7 +115,7 @@ class PayApplicationFeesAfterSubmissionViewTestCase(APITestCase):
         # Check that the admission hasn't changed
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name)
-        self.assertEqual(self.admission.checklist, {})
+        self.assertEqual(self.admission.checklist, self.original_checklist)
 
     def test_pay_application_fees_with_candidate_is_forbidden_if_he_has_not_been_invited_to_do_it(self):
         self.client.force_authenticate(user=self.admission.candidate.user)

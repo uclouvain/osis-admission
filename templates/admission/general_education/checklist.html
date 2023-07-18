@@ -311,7 +311,7 @@
               }
           }
 
-          $('textarea[name="comment"]').on('input', function () {
+          $('#tabs-content').on('input', 'textarea[name="comment"]', function () {
               autogrow.call(this);
           });
 
@@ -320,7 +320,7 @@
               window.location.hash = tabPaneId;
 
               // refresh comment height
-              autogrow.call($(tabPaneId).find('textarea[name$="-comment"]')[0]);
+              autogrow.call($(tabPaneId).find('textarea[name="comment"]')[0]);
 
               refreshDocuments();
 
@@ -440,6 +440,11 @@
                   elt.readOnly = true;
               }
           });
+
+          $('#tabs-content').on('htmx:afterSettle', function(event){
+            $('textarea[name="comment"]:visible').each(autogrow);
+          });
+
           $('#tabs-content').on('htmx:afterRequest', function(event) {
               // Do not remove spinner if we are going to refresh the page
               if (event.originalEvent.detail.xhr.getResponseHeader('hx-refresh') === 'true') {
@@ -723,11 +728,6 @@
 
     input:invalid {
       color: #a94442 !important;
-    }
-
-    input:invalid::after{
-      content: 'Invalid content';
-      width: min-content;
     }
 
     #checklist-menu i {

@@ -70,7 +70,7 @@ class TestPayerFraisDossierPropositionSuiteSoumission(TestCase):
         cls.paiement_courant = next(
             paiement
             for paiement in PaiementFraisDossierInMemory.paiements
-            if paiement.uuid_proposition == 'uuid-MASTER-SCI'
+            if paiement.uuid_proposition == 'uuid-MASTER-SCI-CONFIRMED'
         )
 
     def setUp(self) -> None:
@@ -78,9 +78,9 @@ class TestPayerFraisDossierPropositionSuiteSoumission(TestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.candidat = self.candidat_translator.profil_candidats[1]
-        self.proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-MASTER-SCI'))
+        self.proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-MASTER-SCI-CONFIRMED'))
         self.proposition.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
-        self.command = PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition='uuid-MASTER-SCI')
+        self.command = PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition='uuid-MASTER-SCI-CONFIRMED')
 
     def test_should_payer_frais_etre_ok_si_paiement_realise(self):
         with mock.patch.multiple(self.paiement_courant, effectue=True):
@@ -95,8 +95,6 @@ class TestPayerFraisDossierPropositionSuiteSoumission(TestCase):
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.CONFIRMEE)
         self.assertEqual(proposition.checklist_actuelle.frais_dossier.statut, ChoixStatutChecklist.SYST_REUSSITE)
         self.assertEqual(proposition.checklist_actuelle.frais_dossier.libelle, 'Payed')
-        self.assertEqual(proposition.checklist_initiale.frais_dossier.statut, ChoixStatutChecklist.SYST_REUSSITE)
-        self.assertEqual(proposition.checklist_initiale.frais_dossier.libelle, 'Payed')
 
     def test_should_lever_exception_si_frais_pas_encore_payes(self):
         with mock.patch.multiple(self.paiement_courant, effectue=False):

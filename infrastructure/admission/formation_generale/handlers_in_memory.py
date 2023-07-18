@@ -357,8 +357,6 @@ COMMAND_HANDLERS = {
             notification=_notification,
             paiement_frais_dossier_service=_paiement_frais_dossier,
             historique=_historique_formation_generale,
-            profil_candidat_translator=_profil_candidat_translator,
-            questions_specifiques_translator=_question_specific_translator,
         )
     ),
     PayerFraisDossierPropositionSuiteDemandeCommand: (

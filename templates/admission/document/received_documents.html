@@ -83,11 +83,11 @@
               </span>
               </td>
               <td class="min-width">
-                {% if document.statut == 'A_RECLAMER' %}
-                  {{ document.derniere_action_le|date:'DATETIME_FORMAT' }}
-                {% elif document.statut == 'RECLAME' %}
+                {% if document.statut == 'RECLAME' or document.statut == 'A_RECLAMER' and document.reclame_le %}
                   {% translate 'Requested on' %} {{ document.reclame_le|date:'DATE_FORMAT' }}<br>
                   {% translate 'Deadline on' %} {{ document.a_echeance_le|date:'DATE_FORMAT' }}
+                {% elif document.statut == 'A_RECLAMER' %}
+                  {{ document.derniere_action_le|date:'DATETIME_FORMAT' }}
                 {% elif not document.document_soumis_le %}
                   {% translate 'Unknown' %}
                 {% elif document.document_soumis_le < proposition.soumise_le %}

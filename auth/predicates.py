@@ -178,18 +178,22 @@ def is_invited_to_complete(self, user: User, obj: GeneralEducationAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be invited to pay the application fees by the system."))
 def is_invited_to_pay_after_submission(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name and not obj.checklist.get(
-        'current'
+    checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
+    return (
+        obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
+        and checklist_info.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and bool(checklist_info.get('extra', {}).get('initial'))
     )
 
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be invited to pay the application fees by a manager."))
 def is_invited_to_pay_after_request(self, user: User, obj: GeneralEducationAdmission):
+    checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
     return (
         obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
-        and obj.checklist.get('current', {}).get('frais_dossier', {}).get('statut')
-        == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and checklist_info.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and not bool(checklist_info.get('extra', {}).get('initial'))
     )
 
 

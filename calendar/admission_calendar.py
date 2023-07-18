@@ -232,7 +232,8 @@ class AdmissionPoolExternalEnrollmentChangeCalendar(PoolCalendar):
         """Candidat déjà inscrit l'année N à un autre établissement CF
         (informatiquement : a répondu "oui" à la question sur la modif)"""
         return bool(
-            training_type == TrainingType.BACHELOR
+            isinstance(proposition, PropositionGenerale)
+            and training_type == TrainingType.BACHELOR
             and proposition.est_modification_inscription_externe
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
@@ -263,7 +264,8 @@ class AdmissionPoolExternalReorientationCalendar(PoolCalendar):
         """Candidat déjà inscrit l'année N à un autre établissement CF
         (informatiquement : a répondu ""oui"" à la question sur la réori.)"""
         return bool(
-            training_type == TrainingType.BACHELOR
+            isinstance(proposition, PropositionGenerale)
+            and training_type == TrainingType.BACHELOR
             and proposition.est_reorientation_inscription_externe
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
@@ -291,8 +293,9 @@ class AdmissionPoolVipCalendar(PoolCalendar):
         """Candidat est en Double diplôme, Erasmus mundus, BoursierI
         (informatiquement : a coché oui pour une des 3 questions)"""
         return (
+            isinstance(proposition, PropositionGenerale)
             # 2e cycle
-            training_type.name in SECOND_CYCLE_TYPES
+            and training_type.name in SECOND_CYCLE_TYPES
             # bourses
             and any(
                 [
@@ -330,7 +333,8 @@ class AdmissionPoolHueUclPathwayChangeCalendar(PoolCalendar):
         (informatiquement : identification / dernière année UCLouvain = N-1)"""
         hors_ue_plus_5 = not ue_plus_5
         return (
-            hors_ue_plus_5
+            isinstance(proposition, PropositionGenerale)
+            and hors_ue_plus_5
             and annee_derniere_inscription_ucl == annee_academique - 1
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
@@ -362,6 +366,8 @@ class AdmissionPoolInstituteChangeCalendar(PoolCalendar):
     ) -> bool:
         """Candidat inscrit à un autre établissement Belge en N-1
         (informatiquement : curriculum / en N-1 supérieur belge non-diplômé*)"""
+        if not isinstance(proposition, PropositionGenerale):
+            return False
         if residential_address is None:
             raise AdresseDomicileLegalNonCompleteeException()
         return (
@@ -396,7 +402,8 @@ class AdmissionPoolUe5BelgianCalendar(PoolCalendar):
         """Candidat ayant la nationalité dans UE ou 5 pays (Suisse, Islande, Norvège, Liechtenstein, Monaco)
         et un diplôme d'accès Belge"""
         return (
-            ue_plus_5
+            isinstance(proposition, PropositionGenerale)
+            and ue_plus_5
             and any(belgian_diploma in access_diplomas for belgian_diploma in DIPLOMES_ACCES_BELGE)
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
@@ -426,7 +433,8 @@ class AdmissionPoolUe5NonBelgianCalendar(PoolCalendar):
         """Candidat ayant la nationalité dans UE ou 5 pays (Suisse, Islande, Norvège, Liechtenstein, Monaco)
         et un diplôme d'accès non-belge"""
         return (
-            ue_plus_5
+            isinstance(proposition, PropositionGenerale)
+            and ue_plus_5
             and not any(belgian_diploma in access_diplomas for belgian_diploma in DIPLOMES_ACCES_BELGE)
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
@@ -454,6 +462,8 @@ class AdmissionPoolHue5BelgiumResidencyCalendar(PoolCalendar):
         **kwargs,
     ) -> bool:
         """Candidat ayant la nationalité Hors(UE+5) et résident en Belgique"""
+        if not isinstance(proposition, PropositionGenerale):
+            return False
         if residential_address is None:  # pragma: no cover
             raise AdresseDomicileLegalNonCompleteeException()
         return (
@@ -487,6 +497,8 @@ class AdmissionPoolHue5ForeignResidencyCalendar(PoolCalendar):
         **kwargs,
     ) -> bool:
         """Candidat ayant la nationalité HUE et résident à l'étranger"""
+        if not isinstance(proposition, PropositionGenerale):
+            return False
         if residential_address is None:  # pragma: no cover
             raise AdresseDomicileLegalNonCompleteeException()
         return (
@@ -513,4 +525,7 @@ class AdmissionPoolNonResidentQuotaCalendar(PoolCalendar):
     @classmethod
     def matches_criteria(cls, sigle: str, proposition: 'PropositionGenerale', **kwargs) -> bool:
         """Candidat inscrit à la formation contingentée, et il n'est pas résident"""
-        return est_formation_contingentee_et_non_resident(sigle, proposition)
+        return isinstance(proposition, PropositionGenerale) and est_formation_contingentee_et_non_resident(
+            sigle,
+            proposition,
+        )

@@ -28,7 +28,19 @@ from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Exists, OuterRef, Subquery, Prefetch, F, Value, Case, When
+from django.db.models import (
+    Exists,
+    OuterRef,
+    Subquery,
+    Prefetch,
+    F,
+    Value,
+    Case,
+    When,
+    ExpressionWrapper,
+    Q,
+    BooleanField,
+)
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
@@ -643,22 +655,31 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     ) -> ResumeCandidatDTO:
         has_default_language = cls.has_default_language()
 
-        queryset = Person.objects.prefetch_related(
-            Prefetch(
-                'professionalexperience_set',
-                queryset=ProfessionalExperience.objects.all().order_by('-start_date', '-end_date'),
-            ),
-            Prefetch(
-                'personaddress_set',
-                queryset=PersonAddress.objects.filter(
-                    label__in=[PersonAddressType.RESIDENTIAL.name, PersonAddressType.CONTACT.name],
-                ).select_related('country'),
-            ),
-        ).select_related(
-            'country_of_citizenship',
-            'birth_country',
-            'last_registration_year',
-            'graduated_from_high_school_year',
+        queryset = (
+            Person.objects.prefetch_related(
+                Prefetch(
+                    'professionalexperience_set',
+                    queryset=ProfessionalExperience.objects.all().order_by('-start_date', '-end_date'),
+                ),
+                Prefetch(
+                    'personaddress_set',
+                    queryset=PersonAddress.objects.filter(
+                        label__in=[PersonAddressType.RESIDENTIAL.name, PersonAddressType.CONTACT.name],
+                    ).select_related('country'),
+                ),
+            )
+            .select_related(
+                'country_of_citizenship',
+                'birth_country',
+                'last_registration_year',
+                'graduated_from_high_school_year',
+            )
+            .annotate(
+                secondary_studies_are_valuated=ExpressionWrapper(
+                    Q(baseadmission__isnull=False),
+                    output_field=BooleanField(),
+                )
+            )
         )
 
         is_doctorate = formation in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
@@ -733,10 +754,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             etudes_secondaires=cls._get_secondary_studies_dto(
                 candidate=candidate,
                 has_default_language=has_default_language,
-                valuated_secondary_studies=curriculum_dto.candidat_est_potentiel_vae,
+                valuated_secondary_studies=candidate.secondary_studies_are_valuated,  # From annotation
                 formation=formation,
             ),
-            connaissances_langues=cls._get_language_knowledge_dto(candidate)
-            if is_doctorate
-            else None,
+            connaissances_langues=cls._get_language_knowledge_dto(candidate) if is_doctorate else None,
         )
