@@ -39,6 +39,11 @@ DOCUMENT_TOKENS = admission_common_tokens + [
         description=_('Reference of the admission'),
         example='L-ESPO24-100.102',
     ),
+    Token(
+        name='admissions_link_front',
+        description=_("Link to the admissions (front-office)"),
+        example="http://dev.studies.uclouvain.be/somewhere",
+    ),
 ]
 
 ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL = 'osis-admission-request-application-fees-general'

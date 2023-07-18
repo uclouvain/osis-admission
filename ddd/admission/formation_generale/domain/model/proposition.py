@@ -170,9 +170,6 @@ class Proposition(interface.RootEntity):
     def payer_frais_dossier(self):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
 
-    def payer_frais_dossier_suite_demande(self):
-        self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
-
         self.checklist_actuelle.frais_dossier = StatutChecklist(
             libelle=__('Payed'),
             statut=ChoixStatutChecklist.SYST_REUSSITE,

@@ -201,6 +201,9 @@ msgid ""
 "A member should be either internal or external, please check the fields."
 msgstr ""
 
+msgid "A new version of the analysis folder has been generated."
+msgstr ""
+
 msgid "A non doctor member must have a justification."
 msgstr ""
 
@@ -1975,9 +1978,6 @@ msgstr ""
 msgid "External reorientation/modification"
 msgstr ""
 
-msgid "FAC/CDD processing"
-msgstr ""
-
 msgid "FNRS"
 msgstr ""
 
@@ -2183,6 +2183,9 @@ msgid "General education admission"
 msgstr ""
 
 msgid "General enrolments"
+msgstr ""
+
+msgid "Generate an analysis folder"
 msgstr ""
 
 msgid "Generate the PDF recap"

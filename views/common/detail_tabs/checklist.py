@@ -62,9 +62,16 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.forms.admission.checklist import CommentForm, AssimilationForm, ChoixFormationForm
 from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
-from admission.utils import add_messages_into_htmx_response
+from admission.utils import (
+    add_messages_into_htmx_response,
+    get_portal_admission_list_url,
+    get_backoffice_admission_url,
+    get_portal_admission_url,
+)
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_common.utils.htmx import HtmxMixin
 
@@ -80,9 +87,6 @@ __all__ = [
 
 
 __namespace__ = False
-
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from infrastructure.messages_bus import message_bus_instance
 
 
 class RequestApplicationFeesContextDataMixin(LoadDossierViewMixin):
@@ -134,15 +138,13 @@ class RequestApplicationFeesContextDataMixin(LoadDossierViewMixin):
                 'admission_reference': proposition.reference,
                 'candidate_first_name': proposition.prenom_candidat,
                 'candidate_last_name': proposition.nom_candidat,
-                'training_title': '',  # Not used in the email
-                'admission_link_front': settings.ADMISSION_FRONTEND_LINK.format(
-                    context='general-education',
-                    uuid=self.admission_uuid,
-                ),
-                'admission_link_back': '{}{}'.format(
-                    settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
-                    resolve_url('admission:general-education', uuid=self.admission_uuid),
-                ),
+                'training_title': {
+                    settings.LANGUAGE_CODE_FR: self.admission.training.title,
+                    settings.LANGUAGE_CODE_EN: self.admission.training.title_english,
+                }[proposition.langue_contact_candidat],
+                'admissions_link_front': get_portal_admission_list_url(),
+                'admission_link_front': get_portal_admission_url('general-education', self.admission_uuid),
+                'admission_link_back': get_backoffice_admission_url('general-education', self.admission_uuid),
             }
 
             context['request_message_subject'] = mail_template.render_subject(tokens)

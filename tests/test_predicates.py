@@ -245,41 +245,53 @@ class PredicatesTestCase(TestCase):
         admission_with_checklist = GeneralEducationAdmissionFactory(
             status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
         )
+        admission_with_checklist.checklist['current']['frais_dossier'] = {
+            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+            'extra': {'initial': '1'},
+        }
+        admission_with_checklist.save()
 
-        # The checklist must not be initialized and the status must be one of the following
+        # The checklist must be initialized and the status must be one of the following
         valid_statuses = {
             ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
         }
 
         for status in ChoixStatutPropositionGenerale.get_names():
-            admission_without_checklist.status = status
+            admission_with_checklist.status = status
             status_is_valid = status in valid_statuses
             self.assertEqual(
                 is_invited_to_pay_after_submission(
-                    admission_without_checklist.candidate.user,
-                    admission_without_checklist,
-                ),
-                status_is_valid,
-                f'Without checklist, the status "{status}" must{"" if status_is_valid else " not "} be accepted',
-            )
-
-            admission_with_checklist.status = status
-            self.assertFalse(
-                is_invited_to_pay_after_submission(
                     admission_with_checklist.candidate.user,
                     admission_with_checklist,
+                ),
+                status_is_valid,
+                f'With checklist, the status "{status}" must{"" if status_is_valid else " not "} be accepted',
+            )
+
+            admission_without_checklist.status = status
+            self.assertFalse(
+                is_invited_to_pay_after_submission(
+                    admission_without_checklist.candidate.user,
+                    admission_without_checklist,
                 ),
                 f'With checklist, the status "{status}" must not be accepted',
             )
 
     def test_is_invited_to_pay_after_request(self):
         admission_without_checklist = GeneralEducationAdmissionFactory(checklist={})
+        admission_just_submitted = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+        )
+        admission_just_submitted.checklist['current']['frais_dossier'] = {
+            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+            'extra': {'initial': '1'},
+        }
         admission_with_checklist = GeneralEducationAdmissionFactory(
             status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
         )
-        admission_with_checklist.checklist['current']['frais_dossier'][
-            'statut'
-        ] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        admission_with_checklist.checklist['current']['frais_dossier'] = {
+            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+        }
 
         # The checklist must be initialized and the status must be one of the following
         valid_statuses = {
@@ -305,6 +317,14 @@ class PredicatesTestCase(TestCase):
                     admission_without_checklist,
                 ),
                 'Without checklist, this status must not be accepted: {}'.format(status),
+            )
+            admission_just_submitted.status = status
+            self.assertFalse(
+                is_invited_to_pay_after_request(
+                    admission_just_submitted.candidate.user,
+                    admission_just_submitted,
+                ),
+                'Just after submission, this status must not be accepted: {}'.format(status),
             )
 
     def test_checklist_is_initialized(self):

@@ -150,7 +150,6 @@ def soumettre_proposition(
         proposition=proposition,
         profil_candidat_translator=profil_candidat_translator,
         questions_specifiques_translator=questions_specifiques_translator,
-        a_paye_frais_dossier=False,
     )
     proposition_repository.save(proposition)
     notification.confirmer_soumission(proposition)
