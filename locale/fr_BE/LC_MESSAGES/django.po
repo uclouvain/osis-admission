@@ -330,6 +330,9 @@ msgstr "Année académique"
 msgid "Academic year:"
 msgstr "Année académique :"
 
+msgid "Academics trainings view"
+msgstr "Vue formations académiques"
+
 msgid "Accept"
 msgstr "Accepter"
 
@@ -344,6 +347,9 @@ msgstr "Acceptée"
 
 msgid "Access condition:"
 msgstr "Condition d'accès :"
+
+msgid "Access title"
+msgstr "Titre d'accès"
 
 msgid "Access to regulated professions"
 msgstr "Accès aux professions réglementées"
@@ -2107,6 +2113,9 @@ msgstr "Date (prévue) de délivrance du diplôme"
 msgid "Expected date of graduation (signed document)"
 msgstr "Date (prévue) de délivrance du diplôme (document signé)"
 
+msgid "Experiences"
+msgstr "Expériences"
+
 msgid "Expert opinion"
 msgstr "Avis expert"
 
@@ -2194,6 +2203,9 @@ msgstr "Finalisation"
 
 msgid "Financeability"
 msgstr "Financabilité"
+
+msgid "Financeability view"
+msgstr "Vue financabilité"
 
 msgid "Financing"
 msgstr "Financement"
@@ -4245,6 +4257,9 @@ msgstr "Lettres de recommandation"
 msgid "Reduced registration fees"
 msgstr "Réduction des droits d’inscription"
 
+msgid "Reduction"
+msgstr "Allègement"
+
 msgid ""
 "Refer to the specific measures of your doctoral commission to know if one of "
 "these method is mandatory to you."
@@ -5704,6 +5719,9 @@ msgstr ""
 "Lors de la confirmation de votre demande, vous avez accepté les points "
 "suivants :"
 
+msgid "Whole view"
+msgstr "Vue complète"
+
 msgid "Work contract"
 msgstr "Type de contrat de travail"
 
@@ -5765,6 +5783,9 @@ msgstr "Année de la formation"
 
 msgid "Year without registration for the training."
 msgstr "Année sans inscription à la formation."
+
+msgid "Years"
+msgstr "Années"
 
 msgid "Yes"
 msgstr "Oui"

@@ -237,3 +237,11 @@ textarea {
 .auto-width {
   width: auto;
 }
+
+.flag-icon {
+  height: 1em;
+}
+
+#parcours .tab-pane {
+  overflow-x: auto;
+}
