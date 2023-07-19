@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -216,13 +216,24 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
         raise FormationNonTrouveeException
 
     @classmethod
-    def search(cls, type: str, annee: Optional[int], intitule: str, campus: Optional[str]) -> List['FormationDTO']:
+    def search(
+        cls,
+        type: str,
+        annee: Optional[int],
+        sigle: Optional[str],
+        intitule: Optional[str],
+        terme_de_recherche: Optional[str],
+        campus: Optional[str],
+    ) -> List['FormationDTO']:
         return [
             cls._build_dto(entity=training)
             for training in cls.trainings
             if training.entity_id.annee == annee
             and training.type_formation.name == type
-            and intitule in training.intitule
+            and (
+                (intitule and intitule in training.intitule)
+                or (terme_de_recherche and terme_de_recherche in training.intitule)
+            )
             and (not campus or training.campus == campus)
         ]
 

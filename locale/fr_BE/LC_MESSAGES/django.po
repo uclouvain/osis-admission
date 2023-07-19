@@ -1644,6 +1644,9 @@ msgstr "Template d'email personnalisé enregistré avec succès."
 msgid "Custom mail templates"
 msgstr "Templates d'email personnalisé"
 
+msgid "Cycle pursuit"
+msgstr "Poursuite de cycle"
+
 msgid "DD/scholarship/EM?"
 msgstr "DD/boursier/EM ?"
 
@@ -1893,6 +1896,9 @@ msgstr "Bourse double diplomation"
 msgid "Double degree:"
 msgstr "Bourse double diplomation:"
 
+msgid "Double diplomation"
+msgstr "Double diplomation"
+
 msgid "Double or triple diplomation"
 msgstr "Double ou triple diplomation"
 
@@ -1904,6 +1910,9 @@ msgstr "Dr."
 
 msgid "Dutch"
 msgstr "Néerlandais"
+
+msgid "Dynamic questions about \"Specificities\" sub-tab"
+msgstr "Questions dynamiques du sous-onglet \"Spécificités\""
 
 #, python-format
 msgid ""
@@ -2123,6 +2132,9 @@ msgstr "Réorientation externe"
 msgid "External reorientation / modification"
 msgstr "Modification / réorientation externe"
 
+msgid "External reorientation/modification"
+msgstr "Réorientation/modification externe"
+
 msgid "FAC/CDD processing"
 msgstr "Traitement FAC/CDD"
 
@@ -2197,6 +2209,9 @@ msgstr "Prénom d'usage"
 
 msgid "First name of the account holder"
 msgstr "Prénom du titulaire du compte"
+
+msgid "First year of"
+msgstr "Première année de"
 
 msgctxt "female gender"
 msgid ""
@@ -2805,6 +2820,9 @@ msgstr ""
 "L'institution doit être renseignée quand le doctorat a déjà été réalisé "
 "partiellement ou complètement"
 
+msgid "Insufficient"
+msgstr "Insuffisant"
+
 msgid "Internal comment"
 msgstr "Commentaire interne"
 
@@ -3390,6 +3408,9 @@ msgstr "Manquants"
 msgid "Modern languages"
 msgstr "Langues modernes"
 
+msgid "Modification asked by the candidate"
+msgstr "Modification demandée par le candidat"
+
 msgid "Modification author"
 msgstr "Auteur modif."
 
@@ -3760,6 +3781,9 @@ msgstr "Page"
 msgid "Page size"
 msgstr "Taille de la page"
 
+msgid "Parcours"
+msgstr "Parcours"
+
 msgid "Parent certificate of support from the CPAS"
 msgstr "Attestation de prise en charge du parent par le CPAS"
 
@@ -4092,8 +4116,17 @@ msgstr "Nouvelle échéance proposée"
 msgid "Proposed thesis title"
 msgstr "Titre proposé pour la thèse"
 
+msgid "Proposition features"
+msgstr "Caractéristiques de la demande"
+
 msgid "Proposition not found."
 msgstr "Proposition non trouvée."
+
+msgid "Proposition submission"
+msgstr "Soumission de la demande"
+
+msgid "Proposition type"
+msgstr "Type de la demande"
 
 msgid "Proximity Commission for Dental Sciences (DENT)"
 msgstr "Commission de proximité de sciences dentaires (DENT)"
@@ -4287,6 +4320,9 @@ msgstr "Retirer ?"
 
 msgid "Reorientation"
 msgstr "Réorientation"
+
+msgid "Reorientation asked by the candidate"
+msgstr "Réorientation demandé par le candidat"
 
 msgid "Reorientation requested"
 msgstr "Modification demandée"
@@ -4812,6 +4848,9 @@ msgstr "Profil soumis"
 msgid "Successful test"
 msgstr "Epreuve réussie"
 
+msgid "Sufficient"
+msgstr "Suffisant"
+
 msgctxt "paper summary"
 msgid "Summary"
 msgstr "Résumé"
@@ -4842,6 +4881,9 @@ msgstr "Système"
 
 msgid "TO_BE_COMPLETED"
 msgstr "À compléter"
+
+msgid "TO_BE_DETERMINED"
+msgstr "À déterminer"
 
 msgid "TO_BE_VALIDATED"
 msgstr "Pour validation"

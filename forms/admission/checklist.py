@@ -23,8 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+
+from dal import autocomplete
 from django import forms
 from django.utils.translation import gettext_lazy as _
+
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
+from admission.forms import get_academic_year_choices
+from base.models.academic_year import AcademicYear
 
 
 class CommentForm(forms.Form):
@@ -73,3 +81,34 @@ class AssimilationForm(forms.Form):
     def __init__(self, form_url, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['date_debut'].widget.attrs['hx-post'] = form_url
+
+
+class ChoixFormationForm(forms.Form):
+    type_demande = forms.ChoiceField(
+        label=_("Proposition type"),
+        choices=TypeDemande.choices(),
+    )
+    annee_academique = forms.ChoiceField(
+        label=_("Academic year"),
+    )
+    formation = forms.CharField(
+        label=_("Training"),
+        widget=autocomplete.ListSelect2(
+            forward=['annee_academique'], url="admission:autocomplete:general-education-trainings"
+        ),
+    )
+    poursuite_cycle = forms.ChoiceField(
+        label=_("Cycle pursuit"),
+        choices=PoursuiteDeCycle.choices(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        formation = kwargs.pop('formation')
+        super().__init__(*args, **kwargs)
+        today = datetime.date.today()
+        try:
+            current_year = AcademicYear.objects.get(start_date__lte=today, end_date__gt=today).year
+        except AcademicYear.DoesNotExist:
+            current_year = today.year
+        self.fields['annee_academique'].choices = get_academic_year_choices(current_year - 2, current_year + 2)
+        self.fields['formation'].widget.choices = [(formation.sigle, f'{formation.sigle} - {formation.intitule}')]

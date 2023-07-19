@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,12 +40,15 @@ def rechercher_formations(
     # GIVEN
     annee_inscription = annee_inscription_formation_translator.recuperer(
         AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT,
+        cmd.annee,
     )
 
     # THEN
     return formation_generale_translator.search(
         type=cmd.type_formation,
         annee=annee_inscription,
+        sigle=cmd.sigle,
         intitule=cmd.intitule_formation,
+        terme_de_recherche=cmd.terme_de_recherche,
         campus=cmd.campus,
     )

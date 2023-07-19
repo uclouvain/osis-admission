@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
+from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
+    modifier_checklist_choix_formation,
+)
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
@@ -97,6 +100,11 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
         bourse_translator=BourseTranslator(),
+    ),
+    ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationGeneraleTranslator(),
     ),
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
@@ -279,6 +287,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
         )
     ),
     SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(
@@ -309,6 +318,7 @@ COMMAND_HANDLERS = {
             paiement_frais_dossier_service=PaiementFraisDossier(),
             historique=HistoriqueFormationGenerale(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         )
     ),
     PayerFraisDossierPropositionSuiteDemandeCommand: (

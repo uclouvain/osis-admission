@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from enum import Enum
 from typing import List, Optional
 
@@ -34,6 +35,7 @@ from django.utils.translation import get_language
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
 from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -58,16 +60,22 @@ from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from admission.infrastructure.utils import dto_to_dict
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.models.student import Student
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from osis_common.ddd.interface import ApplicationService
 from osis_history.models import HistoryEntry
+
+from osis_profile.models.enums.curriculum import Result
 
 
 class PropositionRepository(GlobalPropositionRepository, IPropositionRepository):
@@ -177,6 +185,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     and attrs.asdict(entity.checklist_actuelle, value_serializer=cls._serialize)
                     or {},
                 },
+                'cycle_pursuit': entity.poursuite_de_cycle.name,
             },
         )
 
@@ -374,8 +383,28 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     @classmethod
     def _load_dto_for_gestionnaire(cls, admission: GeneralEducationAdmission) -> 'PropositionGestionnaireDTO':
         is_french_language = get_language() == settings.LANGUAGE_CODE_FR
+        proposition = cls._load_dto(admission)
+        annee_courante = (
+            GetCurrentAcademicYear()
+            .get_starting_academic_year(
+                datetime.date.today(),
+                AcademicYearRepository,
+            )
+            .year
+        )
+        curriculum = ProfilCandidatTranslator.get_curriculum(
+            matricule=proposition.matricule_candidat,
+            annee_courante=annee_courante,
+        )
+        poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name and any(
+            annee.resultat == Result.SUCCESS.name or annee.resultat == Result.SUCCESS_WITH_RESIDUAL_CREDITS.name
+            for experience in curriculum.experiences_academiques
+            for annee in experience.annees
+            if experience.pays == BE_ISO_CODE
+        )
+
         return PropositionGestionnaireDTO(
-            **dto_to_dict(cls._load_dto(admission)),
+            **dto_to_dict(proposition),
             type=admission.type_demande,
             date_changement_statut=admission.status_updated_at,  # from annotation
             genre_candidat=admission.candidate.gender,
@@ -391,6 +420,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else '',
             nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
+            poursuite_de_cycle_a_specifier=poursuite_de_cycle_a_specifier,
+            poursuite_de_cycle=admission.cycle_pursuit if poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
             titre_access='',  # TODO
             candidat_assimile=admission.accounting

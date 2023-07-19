@@ -1491,6 +1491,9 @@ msgstr ""
 msgid "Custom mail templates"
 msgstr ""
 
+msgid "Cycle pursuit"
+msgstr ""
+
 msgid "DD/scholarship/EM?"
 msgstr ""
 
@@ -1738,6 +1741,9 @@ msgstr ""
 msgid "Double degree:"
 msgstr ""
 
+msgid "Double diplomation"
+msgstr ""
+
 msgid "Double or triple diplomation"
 msgstr ""
 
@@ -1748,6 +1754,9 @@ msgid "Dr."
 msgstr ""
 
 msgid "Dutch"
+msgstr ""
+
+msgid "Dynamic questions about \"Specificities\" sub-tab"
 msgstr ""
 
 #, python-format
@@ -1963,6 +1972,9 @@ msgstr ""
 msgid "External reorientation / modification"
 msgstr ""
 
+msgid "External reorientation/modification"
+msgstr ""
+
 msgid "FAC/CDD processing"
 msgstr ""
 
@@ -2036,6 +2048,9 @@ msgid "First name in use"
 msgstr ""
 
 msgid "First name of the account holder"
+msgstr ""
+
+msgid "First year of"
 msgstr ""
 
 msgctxt "female gender"
@@ -2517,6 +2532,9 @@ msgid "Institution Federation Wallonie-Bruxelles"
 msgstr ""
 
 msgid "Institution should be set when PhD has been set to yes or partial"
+msgstr ""
+
+msgid "Insufficient"
 msgstr ""
 
 msgid "Internal comment"
@@ -3020,6 +3038,9 @@ msgstr ""
 msgid "Modern languages"
 msgstr ""
 
+msgid "Modification asked by the candidate"
+msgstr ""
+
 msgid "Modification author"
 msgstr ""
 
@@ -3383,6 +3404,9 @@ msgstr ""
 msgid "Page size"
 msgstr ""
 
+msgid "Parcours"
+msgstr ""
+
 msgid "Parent certificate of support from the CPAS"
 msgstr ""
 
@@ -3683,7 +3707,16 @@ msgstr ""
 msgid "Proposed thesis title"
 msgstr ""
 
+msgid "Proposition features"
+msgstr ""
+
 msgid "Proposition not found."
+msgstr ""
+
+msgid "Proposition submission"
+msgstr ""
+
+msgid "Proposition type"
 msgstr ""
 
 msgid "Proximity Commission for Dental Sciences (DENT)"
@@ -3864,6 +3897,9 @@ msgid "Remove?"
 msgstr ""
 
 msgid "Reorientation"
+msgstr ""
+
+msgid "Reorientation asked by the candidate"
 msgstr ""
 
 msgid "Reorientation requested"
@@ -4364,6 +4400,9 @@ msgstr ""
 msgid "Successful test"
 msgstr ""
 
+msgid "Sufficient"
+msgstr ""
+
 msgctxt "paper summary"
 msgid "Summary"
 msgstr ""
@@ -4394,6 +4433,11 @@ msgstr ""
 
 msgid "TO_BE_COMPLETED"
 msgstr "To be completed"
+
+#, fuzzy
+#| msgid "TO_BE_VERIFIED"
+msgid "TO_BE_DETERMINED"
+msgstr "To be verified"
 
 msgid "TO_BE_VALIDATED"
 msgstr "To be validated"

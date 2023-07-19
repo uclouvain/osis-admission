@@ -159,8 +159,45 @@
       {% endwith %}
       {% with initial=original_admission.checklist.initial.choix_formation current=original_admission.checklist.current.choix_formation %}
         <div role="tabpanel" class="tab-pane" id="choix_formation">
-          <p>{% trans "This page is currently under construction." %}</p>
+          <div class="form-group btn-group status-group" role="group">
+            {% translate initial.libelle as initial_state_label %}
+            {% checklist_state_button tab='choix_formation' label=initial_state_label icon='user' state=initial.statut class='muted' %}
+            {% checklist_state_button tab='choix_formation' label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' %}
+          </div>
+
+          {% bootstrap_form comment_forms.choix_formation %}
+          {% include "admission/general_education/checklist/choix_formation_detail.html" %}
+
           <div class="info-part">
+            {% field_data _("Proposition submission") admission.soumise_le %}
+            {% if admission.est_inscription_tardive %}<p>{% trans "Late enrollment" %}</p>{% endif %}
+
+            {% if admission.est_reorientation_inscription_externe %}
+            {% field_data _("External reorientation/modification") _("Reorientation asked by the candidate") %}
+            {% elif admission.est_modification_inscription_externe %}
+            {% field_data _("External reorientation/modification") _("Modification asked by the candidate") %}
+            {% endif %}
+
+            {% if admission.bourse_erasmus_mundus or admission.bourse_double_diplome or admission.bourse_internationale %}
+              <dl>
+                <dt>{% trans "Specific profile" %}</dt>
+                <dd>
+                {% if admission.bourse_erasmus_mundus %}
+                  <p>{% trans "Erasmus Mundus" %} : {{ admission.bourse_erasmus_mundus.nom_court }}</p>
+                {% endif %}
+                {% if admission.bourse_double_diplome %}
+                  <p>{% trans "Double diplomation" %} : {{ admission.bourse_double_diplome.nom_court }}</p>
+                {% endif %}
+                {% if admission.bourse_internationale %}
+                  <p>{% trans "International scholarship" %} : {{ admission.bourse_internationale.nom_court }}</p>
+                {% endif %}
+                </dd>
+              </dl>
+            {% endif %}
+
+            {% panel _("Parcours") %}
+              TODO
+            {% endpanel %}
           </div>
         </div>
       {% endwith %}
@@ -173,9 +210,22 @@
       {% endwith %}
       {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
-          <p>{% trans "This page is currently under construction." %}</p>
-          <div class="info-part">
+          <div class="form-group btn-group status-group" role="group">
+            {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
+              {% checklist_state_button tab='specificites_formation' label=_("Not concerned") icon='xmark' state='INITIAL_NON_CONCERNE' class='muted' %}
+            {% else %}
+              {% checklist_state_button tab='specificites_formation' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='muted' %}
+            {% endif %}
+            {% checklist_state_button tab='specificites_formation' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
+            {% checklist_state_button tab='specificites_formation' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' %}
           </div>
+
+          {% bootstrap_form comment_forms.specificites_formation %}
+
+          <div class="info-part">
+            {% multiple_field_data questions_specifiques title=_('Dynamic questions about "Specificities" sub-tab') %}
+          </div>
+
         </div>
       {% endwith %}
     </div>
@@ -360,6 +410,10 @@
               }
 
               const formGroup = elt.closest('.form-group');
+              if (formGroup === null) {
+                  elt.classList.add("saving");
+                  return ;
+              }
               formGroup.style.pointerEvents = 'none';
 
               if (elt.classList.contains('checklist-state-button')) {
@@ -382,11 +436,15 @@
                   }
                   elt.querySelector('i').className = 'fas fa-spinner fa-spin-pulse';
               } else {
-                  formGroup.classList.add("saving", "fa-spinner");
+                  formGroup.classList.add("saving");
                   elt.readOnly = true;
               }
           });
           $('#tabs-content').on('htmx:afterRequest', function(event) {
+              // Do not remove spinner if we are going to refresh the page
+              if (event.originalEvent.detail.xhr.getResponseHeader('hx-refresh') === 'true') {
+                  return ;
+              }
               let elt = event.originalEvent.detail.elt;
 
               if (elt.dataset.checklistButton) {
@@ -394,7 +452,11 @@
               }
 
               const formGroup = elt.closest('.form-group');
-              if (formGroup) formGroup.style.pointerEvents = 'initial';
+              if (formGroup === null) {
+                  elt.classList.remove("saving");
+                  return ;
+              }
+              formGroup.style.pointerEvents = 'initial';
 
               if (elt.classList.contains('checklist-state-button')) {
                   {# Click on checklist state button #}
@@ -411,7 +473,7 @@
                       $('#checklist-menu').find('li').removeClass('active').filter('[href="' + currentTabHref + '"]').addClass('active');
                   });
               } else {
-                  if (formGroup) formGroup.classList.remove("saving", "fa-spinner");
+                  if (formGroup) formGroup.classList.remove("saving");
                   elt.readOnly = false;
               }
           });
@@ -566,6 +628,7 @@
       top: 50%;
       font-size: 2em;
       margin-top: -1em;
+      content: "\f110";
       font-family: "Font Awesome 6 Free";
       font-weight: 900;
       -webkit-animation-name: fa-spin;
@@ -578,6 +641,17 @@
       animation-iteration-count: infinite;
       -webkit-animation-timing-function: steps(8);
       animation-timing-function: steps(8);
+    }
+
+    #tabs-content a.saving::before {
+        left: -1.5em;
+        top: 0;
+        margin-top: 0;
+        font-size: 1.5em;
+    }
+
+    #tabs-content a.saving::after {
+        left: 0;
     }
 
     {# Document details #}

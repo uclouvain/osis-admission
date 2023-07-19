@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -93,9 +93,11 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
     @classmethod
     def search(
         cls,
-        type: str,
+        type: Optional[str],
         annee: Optional[int],
+        sigle: Optional[str],
         intitule: Optional[str],
+        terme_de_recherche: Optional[str],
         campus: Optional[str],
     ) -> List['FormationDTO']:
         from infrastructure.messages_bus import message_bus_instance
@@ -108,7 +110,9 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 annee=annee,
                 campus=campus,
                 est_inscriptible=True,
+                sigle=sigle,
                 intitule=intitule,
+                terme_de_recherche=terme_de_recherche,
                 types=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
                     type,
                     list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),

@@ -31,7 +31,10 @@ from rest_framework.settings import api_settings
 
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    PoursuiteDeCycle,
+)
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
 from osis_common.ddd.interface import BusinessException
@@ -110,6 +113,11 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
         verbose_name=_('Late enrollment'),
     )
+    cycle_pursuit = models.CharField(
+        choices=PoursuiteDeCycle.choices(),
+        max_length=30,
+        default=PoursuiteDeCycle.TO_BE_DETERMINED.name,
+    )
 
     class Meta:
         verbose_name = _("General education admission")
@@ -149,9 +157,10 @@ class GeneralEducationAdmission(BaseAdmission):
     def update_requested_documents(self):
         """Update the requested documents depending on the admission data."""
         from admission.ddd.admission.formation_generale.commands import (
-            RecalculerEmplacementsDocumentsNonLibresPropositionCommand
+            RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
         )
         from infrastructure.messages_bus import message_bus_instance
+
         message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
 
 
