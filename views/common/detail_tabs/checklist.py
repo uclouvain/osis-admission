@@ -47,6 +47,7 @@ from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
 from admission.ddd import MONTANT_FRAIS_DOSSIER
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import DocumentsAssimilation
@@ -273,7 +274,11 @@ class ChecklistView(RequestApplicationFeesContextDataMixin, TemplateView):
         for experience_non_academique in resume.curriculum.experiences_non_academiques:
             date_courante = experience_non_academique.date_debut
             while True:
-                annee = date_courante.year if date_courante.month >= 9 else date_courante.year - 1
+                annee = (
+                    date_courante.year
+                    if date_courante.month >= IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE
+                    else date_courante.year - 1
+                )
                 if experience_non_academique not in experiences_non_academiques.get(annee, []):
                     experiences_non_academiques.setdefault(annee, []).append(experience_non_academique)
                 if date_courante == experience_non_academique.date_fin:

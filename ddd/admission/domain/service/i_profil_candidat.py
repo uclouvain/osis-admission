@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -47,7 +47,8 @@ from osis_common.ddd import interface
 class IProfilCandidatTranslator(interface.DomainService):
     NB_MAX_ANNEES_CV_REQUISES = 5
     MOIS_DEBUT_ANNEE_ACADEMIQUE = 9
-    MOIS_FIN_ANNEE_ACADEMIQUE = 1
+    MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER = 9
+    MOIS_FIN_ANNEE_ACADEMIQUE_A_VALORISER = 1
 
     @classmethod
     @abstractmethod
