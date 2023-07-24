@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import List
 
 import factory
@@ -111,19 +112,60 @@ class AnneeExperienceAcademiqueDTOFactory(factory.Factory):
         model = AnneeExperienceAcademiqueDTO
         abstract = False
 
+    annee = 2020
+    resultat = ''
+    releve_notes = []
+    traduction_releve_notes = []
+    credits_inscrits = None
+    credits_acquis = None
+
 
 class ExperienceAcademiqueDTOFactory(factory.Factory):
-    annees: List[AnneeExperienceAcademiqueDTOFactory] = []
-
     class Meta:
         model = ExperienceAcademiqueDTO
         abstract = False
+
+    uuid = ''
+    pays = ''
+    nom_pays = ''
+    nom_institut = ''
+    adresse_institut = ''
+    code_institut = ''
+    communaute_institut = ''
+    regime_linguistique = ''
+    nom_regime_linguistique = ''
+    type_releve_notes = ''
+    releve_notes = []
+    traduction_releve_notes = []
+    annees: List[AnneeExperienceAcademiqueDTOFactory] = []
+    a_obtenu_diplome = False
+    diplome = []
+    traduction_diplome = []
+    rang_diplome = ''
+    date_prevue_delivrance_diplome = None
+    titre_memoire = ''
+    note_memoire = ''
+    resume_memoire = []
+    grade_obtenu = ''
+    systeme_evaluation = ''
+    nom_formation = ''
+    type_enseignement = ''
 
 
 class ExperienceNonAcademiqueDTOFactory(factory.Factory):
     class Meta:
         model = ExperienceNonAcademiqueDTO
         abstract = False
+
+    uuid = ''
+    employeur = ''
+    date_debut = datetime.date(2020, 9, 1)
+    date_fin = datetime.date(2020, 10, 15)
+    type = ''
+    certificat = []
+    fonction = ''
+    secteur = ''
+    autre_activite = ''
 
 
 class CurriculumDTOFactory(factory.Factory):

@@ -267,6 +267,9 @@ msgstr ""
 msgid "Academic year:"
 msgstr ""
 
+msgid "Academics trainings view"
+msgstr ""
+
 msgid "Accept"
 msgstr ""
 
@@ -280,6 +283,9 @@ msgid "Accepted"
 msgstr ""
 
 msgid "Access condition:"
+msgstr ""
+
+msgid "Access title"
 msgstr ""
 
 msgid "Access to regulated professions"
@@ -1947,6 +1953,9 @@ msgstr ""
 msgid "Expected date of graduation (signed document)"
 msgstr ""
 
+msgid "Experiences"
+msgstr ""
+
 msgid "Expert opinion"
 msgstr ""
 
@@ -2033,6 +2042,9 @@ msgid "Finalization"
 msgstr ""
 
 msgid "Financeability"
+msgstr ""
+
+msgid "Financeability view"
 msgstr ""
 
 msgid "Financing"
@@ -3825,6 +3837,9 @@ msgstr ""
 msgid "Reduced registration fees"
 msgstr ""
 
+msgid "Reduction"
+msgstr ""
+
 msgid ""
 "Refer to the specific measures of your doctoral commission to know if one of "
 "these method is mandatory to you."
@@ -5170,6 +5185,9 @@ msgid ""
 "When you have submitted your application, you have agreed to the following:"
 msgstr ""
 
+msgid "Whole view"
+msgstr ""
+
 msgid "Work contract"
 msgstr ""
 
@@ -5219,6 +5237,9 @@ msgid "Year of the training"
 msgstr ""
 
 msgid "Year without registration for the training."
+msgstr ""
+
+msgid "Years"
 msgstr ""
 
 msgid "Yes"

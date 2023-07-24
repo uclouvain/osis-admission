@@ -565,7 +565,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
         return {
-            'minimal_date': datetime.date(minimal_year, IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
+            'minimal_date': datetime.date(
+                minimal_year,
+                IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER,
+                1,
+            ),
             'last_registration_year': last_registration_year,
             'highschool_diploma_year': graduated_from_high_school_year,
         }

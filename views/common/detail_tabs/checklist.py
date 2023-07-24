@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import Dict, Set
 
 from django import forms
@@ -46,6 +47,7 @@ from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
 from admission.ddd import MONTANT_FRAIS_DOSSIER
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import DocumentsAssimilation
@@ -252,7 +254,49 @@ class ChecklistView(RequestApplicationFeesContextDataMixin, TemplateView):
                 if document_uuid in document.document_uuids
             ]
 
+            # Experiences
+            context['experiences'] = self._get_experiences(command_result.resume)
+
         return context
+
+    def _get_experiences(self, resume):
+        experiences = {}
+
+        for experience_academique in resume.curriculum.experiences_academiques:
+            for annee_academique in experience_academique.annees:
+                experiences.setdefault(annee_academique.annee, [])
+                if experience_academique.a_obtenu_diplome:
+                    experiences[annee_academique.annee].insert(0, experience_academique)
+                else:
+                    experiences[annee_academique.annee].append(experience_academique)
+
+        experiences_non_academiques = {}
+        for experience_non_academique in resume.curriculum.experiences_non_academiques:
+            date_courante = experience_non_academique.date_debut
+            while True:
+                annee = (
+                    date_courante.year
+                    if date_courante.month >= IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE
+                    else date_courante.year - 1
+                )
+                if experience_non_academique not in experiences_non_academiques.get(annee, []):
+                    experiences_non_academiques.setdefault(annee, []).append(experience_non_academique)
+                if date_courante == experience_non_academique.date_fin:
+                    break
+                date_courante = min(
+                    date_courante.replace(year=date_courante.year + 1), experience_non_academique.date_fin
+                )
+        for annee, experiences_annee in experiences_non_academiques.items():
+            experiences_annee.sort(key=lambda x: x.date_fin, reverse=True)
+            experiences.setdefault(annee, []).extend(experiences_annee)
+
+        etudes_secondaires = resume.etudes_secondaires
+        if etudes_secondaires and etudes_secondaires.annee_diplome_etudes_secondaires:
+            experiences.setdefault(etudes_secondaires.annee_diplome_etudes_secondaires, []).append(etudes_secondaires)
+
+        experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
+
+        return experiences
 
 
 class ChangeStatusSerializer(serializers.Serializer):
