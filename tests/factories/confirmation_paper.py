@@ -29,6 +29,6 @@ import factory
 from admission.contrib.models import ConfirmationPaper
 
 
-class ConfirmationPaperFactory(factory.DjangoModelFactory):
+class ConfirmationPaperFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ConfirmationPaper

@@ -37,7 +37,7 @@ from admission.ddd.admission.enums.question_specifique import (
 from base.tests.factories.academic_year import AcademicYearFactory
 
 
-class AdmissionFormItemFactory(factory.DjangoModelFactory):
+class AdmissionFormItemFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AdmissionFormItem
 
@@ -85,7 +85,7 @@ class CheckboxSelectionAdmissionFormItemFactory(SelectionAdmissionFormItemFactor
     }
 
 
-class AdmissionFormItemInstantiationFactory(factory.DjangoModelFactory):
+class AdmissionFormItemInstantiationFactory(factory.django.DjangoModelFactory):
     form_item = factory.SubFactory(AdmissionFormItemFactory)
     academic_year = factory.SubFactory(AcademicYearFactory)
 

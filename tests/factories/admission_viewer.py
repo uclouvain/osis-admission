@@ -29,6 +29,6 @@ import factory
 from admission.contrib.models import AdmissionViewer
 
 
-class AdmissionViewerFactory(factory.DjangoModelFactory):
+class AdmissionViewerFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AdmissionViewer
