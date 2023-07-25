@@ -26,10 +26,10 @@
 
 import factory
 from django.conf import settings
+from osis_signature.models import Actor, Process
 
 from admission.contrib.models import SupervisionActor
 from admission.contrib.models.enums.actor_type import ActorType
-from osis_signature.models import Actor, Process
 from ..factories.roles import CaMemberRoleFactory, PromoterRoleFactory
 
 
@@ -46,7 +46,7 @@ class _ActorFactory(factory.django.DjangoModelFactory):
     person = factory.SubFactory('base.tests.factories.person.PersonFactory')
 
 
-class PromoterFactory(factory.DjangoModelFactory):
+class PromoterFactory(factory.django.DjangoModelFactory):
     def __init__(self, process=None, **kwargs):
         super().__init__(**kwargs)
         if process:

@@ -34,7 +34,7 @@ from admission.ddd.admission.enums import (
 )
 
 
-class AccountingFactory(factory.DjangoModelFactory):
+class AccountingFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Accounting
 

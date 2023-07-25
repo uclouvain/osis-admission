@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
 
 import factory
 
@@ -36,12 +35,12 @@ from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
 
-class HighSchoolDiplomaFactory(factory.DjangoModelFactory):
+class HighSchoolDiplomaFactory(factory.django.DjangoModelFactory):
     person = factory.SubFactory('base.tests.factories.person.PersonFactory')
     academic_graduation_year = factory.SubFactory(AcademicYearFactory, current=True)
 
 
-class ScheduleFactory(factory.DjangoModelFactory):
+class ScheduleFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Schedule
 
@@ -68,7 +67,7 @@ class ForeignHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
         model = ForeignHighSchoolDiploma
 
 
-class HighSchoolDiplomaAlternativeFactory(factory.DjangoModelFactory):
+class HighSchoolDiplomaAlternativeFactory(factory.django.DjangoModelFactory):
     person = factory.SubFactory('base.tests.factories.person.PersonFactory')
 
     class Meta:

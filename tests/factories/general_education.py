@@ -33,7 +33,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.tests.factories.utils import generate_proposition_reference
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.person import CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
@@ -42,6 +41,7 @@ from admission.tests.factories.scholarship import (
     ErasmusMundusScholarshipFactory,
     InternationalScholarshipFactory,
 )
+from admission.tests.factories.utils import generate_proposition_reference
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.organization_type import MAIN
@@ -112,7 +112,7 @@ def get_checklist():
     }
 
 
-class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
+class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = GeneralEducationAdmission
 

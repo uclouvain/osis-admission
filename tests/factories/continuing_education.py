@@ -55,7 +55,7 @@ class ContinuingEducationTrainingFactory(EducationGroupYearFactory):
         EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
 
 
-class ContinuingEducationAdmissionFactory(factory.DjangoModelFactory):
+class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ContinuingEducationAdmission
 

@@ -29,6 +29,6 @@ import factory
 from admission.contrib.models.doctorate import InternalNote
 
 
-class InternalNoteFactory(factory.DjangoModelFactory):
+class InternalNoteFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = InternalNote
