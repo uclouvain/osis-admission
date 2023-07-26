@@ -28,9 +28,9 @@ import attr
 import factory.fuzzy
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
-
 # FIXME import this factory from shared kernel when available
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
+from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.learning_unit.tests.factory.ucl_entity import UclEntityIdentityFactory
@@ -38,7 +38,7 @@ from ddd.logic.learning_unit.tests.factory.ucl_entity import UclEntityIdentityFa
 
 class _DoctoratIdentityFactory(factory.Factory):
     class Meta:
-        model = FormationIdentityFactory
+        model = FormationIdentity
         abstract = False
 
     sigle = factory.Sequence(lambda n: 'SIGLE%02d' % n)
