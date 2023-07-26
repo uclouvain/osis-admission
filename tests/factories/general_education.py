@@ -135,6 +135,30 @@ class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
     def create_candidate_role(self, create, extracted, **kwargs):
         CandidateFactory(person=self.candidate)
 
+    @factory.post_generation
+    def create_accounting(self, create, extracted, **kwargs):
+        AccountingFactory(admission_id=self.pk)
+
+    @factory.post_generation
+    def initialize_checklist(self, create, extracted, **kwargs):
+        if self.checklist != {'default': True}:
+            return
+
+        self.checklist = (
+            {}
+            if self.status
+            in {
+                ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+                ChoixStatutPropositionGenerale.ANNULEE.name,
+            }
+            else {
+                'initial': get_checklist(),
+                'current': get_checklist(),
+            }
+        )
+
+
+class GeneralEducationAdmissionFactoryWithTraits(GeneralEducationAdmissionFactory):
     class Params:
         bachelor_with_access_conditions_met = factory.Trait(
             training__education_group_type__name=TrainingType.BACHELOR.name,
@@ -161,26 +185,4 @@ class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
                     "country_of_citizenship": "BE",
                 },
             },
-        )
-
-    @factory.post_generation
-    def create_accounting(self, create, extracted, **kwargs):
-        AccountingFactory(admission_id=self.pk)
-
-    @factory.post_generation
-    def initialize_checklist(self, create, extracted, **kwargs):
-        if self.checklist != {'default': True}:
-            return
-
-        self.checklist = (
-            {}
-            if self.status
-            in {
-                ChoixStatutPropositionGenerale.EN_BROUILLON.name,
-                ChoixStatutPropositionGenerale.ANNULEE.name,
-            }
-            else {
-                'initial': get_checklist(),
-                'current': get_checklist(),
-            }
         )

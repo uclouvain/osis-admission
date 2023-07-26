@@ -34,7 +34,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import E
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory, \
+    GeneralEducationAdmissionFactoryWithTraits
 from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -68,7 +69,7 @@ class PersonDetailViewTestCase(TestCase):
             candidate__language=settings.LANGUAGE_CODE_EN,
         )
 
-        cls.confirmed_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+        cls.confirmed_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactoryWithTraits(
             training=cls.general_admission.training,
             candidate=cls.general_admission.candidate,
             admitted=True,

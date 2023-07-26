@@ -31,7 +31,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import E
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory, \
+    GeneralEducationAdmissionFactoryWithTraits
 from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -70,7 +71,7 @@ class CoordonneesDetailViewTestCase(TestCase):
 
         cls.general_url = resolve_url('admission:general-education:coordonnees', uuid=cls.general_admission.uuid)
 
-        cls.confirmed_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+        cls.confirmed_general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactoryWithTraits(
             training=cls.general_admission.training,
             candidate=cls.general_admission.candidate,
             admitted=True,

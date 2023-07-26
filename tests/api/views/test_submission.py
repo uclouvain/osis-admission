@@ -48,7 +48,8 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 )
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory, \
+    ContinuingEducationAdmissionFactoryWithTraits
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     ProfessionalExperienceFactory,
@@ -61,7 +62,6 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.person import (
     IncompletePersonForBachelorFactory,
     IncompletePersonForIUFCFactory,
-    CompletePersonForBachelorFactory,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -340,15 +340,15 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         cls.error_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=cls.admission.uuid)
 
         # Validation ok
-        cls.admission_ok = ContinuingEducationAdmissionFactory(with_access_conditions_met=True)
+        cls.admission_ok = ContinuingEducationAdmissionFactoryWithTraits(with_access_conditions_met=True)
         cls.candidate_ok = cls.admission_ok.candidate
         cls.ok_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=cls.admission_ok.uuid)
 
-        cls.second_admission_ok = ContinuingEducationAdmissionFactory(
+        cls.second_admission_ok = ContinuingEducationAdmissionFactoryWithTraits(
             with_access_conditions_met=True,
             training=cls.admission_ok.training,
         )
-        cls.third_admission_ok = ContinuingEducationAdmissionFactory(
+        cls.third_admission_ok = ContinuingEducationAdmissionFactoryWithTraits(
             candidate=cls.second_admission_ok.candidate,
             with_access_conditions_met=True,
             training=cls.admission_ok.training,
