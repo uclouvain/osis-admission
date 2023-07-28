@@ -30,5 +30,5 @@ from django.utils.translation import gettext_lazy as _
 
 
 class ActorType(ChoiceEnum):
-    PROMOTER = _("Promoter")
+    PROMOTER = _("Supervisor")
     CA_MEMBER = _("CA Member")

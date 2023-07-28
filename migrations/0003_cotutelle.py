@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name='doctorateadmission',
             name='cotutelle_convention',
             field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=1,
-                                                         verbose_name="Cotutelle convention"),
+                                                         verbose_name="Joint supervision agreement"),
         ),
         migrations.AddField(
             model_name='doctorateadmission',

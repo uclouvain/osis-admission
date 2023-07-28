@@ -130,7 +130,7 @@ class ChoixFormationForm(forms.Form):
         label=_("Academic year"),
     )
     formation = forms.CharField(
-        label=_("Training"),
+        label=_("Course"),
         widget=autocomplete.ListSelect2(
             forward=['annee_academique'], url="admission:autocomplete:general-education-trainings"
         ),
@@ -249,7 +249,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
     )
 
     other_training_accepted_by_fac = TrainingModelChoiceField(
-        label=_('Training'),
+        label=_('Course'),
         queryset=EducationGroupYear.objects.none(),
         to_field_name='uuid',
         required=False,
@@ -297,7 +297,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
         labels = {
             'annual_program_contact_person_name': _('First name and last name'),
             'annual_program_contact_person_email': _('Email'),
-            'other_training_accepted_by_fac': _('Other training'),
+            'other_training_accepted_by_fac': _('Other course'),
         }
         widgets = {
             'prerequisite_courses_fac_comment': CKEditorWidget(config_name='link_only'),

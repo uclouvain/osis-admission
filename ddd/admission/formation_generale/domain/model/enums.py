@@ -32,19 +32,20 @@ from base.models.utils.utils import ChoiceEnum
 
 
 class ChoixStatutPropositionGenerale(ChoiceEnum):
-    EN_BROUILLON = _('In draft')
+    EN_BROUILLON = _('In draft form')
     FRAIS_DOSSIER_EN_ATTENTE = _('Pending application fees')
-    CONFIRMEE = _('Confirmed application (by student)')
+    CONFIRMEE = _('Application confirmed (by student)')
     ANNULEE = _('Cancelled application')
-    A_COMPLETER_POUR_SIC = _('To be completed (by student) for SIC')
+    A_COMPLETER_POUR_SIC = _('To be completed (by student) for the Enrolment Office (SIC)')
     COMPLETEE_POUR_SIC = _('Completed (by student) for SIC')
+
     TRAITEMENT_FAC = _('Processing by Fac')
-    A_COMPLETER_POUR_FAC = _('To be completed (by student) for FAC')
-    COMPLETEE_POUR_FAC = _('Completed (by student) for FAC')
-    RETOUR_DE_FAC = _('Feedback from FAC')
-    ATTENTE_VALIDATION_DIRECTION = _('Pending validation from management')
-    INSCRIPTION_AUTORISEE = _('Enrollment allowed')
-    INSCRIPTION_REFUSEE = _('Enrollment denied')
+    A_COMPLETER_POUR_FAC = _('To be completed (by student) for Fac')
+    COMPLETEE_POUR_FAC = _('Completed (by student) for Fac')
+    RETOUR_DE_FAC = _('Feedback from Fac')
+    ATTENTE_VALIDATION_DIRECTION = _('Awaiting management approval')
+    INSCRIPTION_AUTORISEE = _('Application accepted')
+    INSCRIPTION_REFUSEE = _('Application denied')
     CLOTUREE = _('Closed')
 
     @classmethod

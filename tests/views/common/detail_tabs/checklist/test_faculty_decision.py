@@ -1025,7 +1025,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
 
         self.assertFalse(form.is_valid())
 
-        # Other training
+        # Other course
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_training_accepted_by_fac', []))
 
         # Prerequisite courses

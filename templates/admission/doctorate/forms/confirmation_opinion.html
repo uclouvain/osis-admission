@@ -26,10 +26,10 @@
 {% endcomment %}
 
 {% block tab_content_header %}
-  <h3>{% trans "Confirmation paper" %}</h3>
+  <h3>{% trans "Confirmation exam" %}</h3>
 {% endblock %}
 
 {% block form_content %}
-  {% field_data _("Date of confirmation:") confirmation_paper.date 'inline-field-data' %}
+  {% field_data _("Confirmation exam date:") confirmation_paper.date 'inline-field-data' %}
   {% bootstrap_field form.avis_renouvellement_mandat_recherche %}
 {% endblock %}

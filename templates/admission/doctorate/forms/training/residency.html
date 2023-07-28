@@ -29,7 +29,7 @@
     {% trans "Add a residency" %}
   {% else %}
     {% blocktrans with category=view.activity.get_category_display trimmed %}
-      Edit activity of type <em>{{ category }}</em>
+      Edit <em>{{ category }}</em> activity.
     {% endblocktrans %}
   {% endif %}
 </h2>
@@ -50,7 +50,7 @@
   {% bootstrap_field form.city form_group_class="form-group col-md-4 required_field" %}
 </div>
 
-<h3>{% trans "Your participation to the event" %}</h3>
+<h3>{% trans "Your participation in the event" %}</h3>
 <div class="row">
   {% bootstrap_field_with_tooltip form.ects classes="form-group col-md-4 required_field" %}
 </div>

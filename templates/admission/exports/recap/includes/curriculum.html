@@ -23,9 +23,9 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 {% if display_equivalence or display_curriculum or specific_questions %}
-  {% panel _('Specificities') %}
+  {% panel _('Specific aspects') %}
     {% if display_equivalence %}
-      {% field_data _('Copy of the equivalence decision delivered by the French Community of Belgium making your 2nd cycle diploma (bac+5) equivalent to the academic grade of a corresponding master.') proposition.equivalence_diplome %}
+      {% field_data _("Copy of equivalency decision issued by the French Community of Belgium making your bachelor's diploma (bac+5) equivalent to the academic rank of a corresponding master's degree.") proposition.equivalence_diplome %}
     {% endif %}
     {% if display_curriculum %}
       {% field_data _('Curriculum') proposition.curriculum %}

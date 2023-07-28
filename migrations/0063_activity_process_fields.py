@@ -18,11 +18,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='activity',
             name='reference_promoter_assent',
-            field=models.BooleanField(null=True, verbose_name='Reference promoter assent'),
+            field=models.BooleanField(null=True, verbose_name='Lead supervisor assent'),
         ),
         migrations.AddField(
             model_name='activity',
             name='reference_promoter_comment',
-            field=models.TextField(default='', verbose_name='Reference promoter comment'),
+            field=models.TextField(default='', verbose_name='Lead supervisor comment'),
         ),
     ]

@@ -330,7 +330,7 @@ DOCTORATE_ACTION_LINKS = {
         'method': 'POST',
         'params': ['uuid'],
     },
-    # Confirmation paper
+    # Confirmation exam
     'retrieve_confirmation': {
         'path_name': 'admission_api_v1:confirmation',
         'method': 'GET',

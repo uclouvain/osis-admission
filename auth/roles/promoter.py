@@ -84,7 +84,7 @@ class Promoter(RoleModel):
             'admission.change_admission_confirmation': is_admission_request_promoter & confirmation_paper_in_progress,
             'admission.upload_pdf_confirmation': is_admission_request_promoter & is_enrolled,
             'admission.change_admission_jury': is_admission_request_promoter & is_enrolled & is_jury_in_progress,
-            # Doctoral training
+            # PhD training
             'admission.view_doctoral_training': promoter_and_enrolled & ~is_pre_admission,
             'admission.view_complementary_training': promoter_and_enrolled & complementary_training_enabled,
             'admission.view_course_enrollment': promoter_and_enrolled,

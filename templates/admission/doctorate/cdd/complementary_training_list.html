@@ -29,7 +29,7 @@
 {% block actions-group %}
   {% url "admission:doctorate:complementary-training:add" uuid=view.kwargs.uuid category='COURSE' as add_url %}
   <a href="{{ add_url }}" class="btn btn-default">
-    {% trans "Add a course" %}
+    {% trans "Add a course unit" %}
   </a>
 {% endblock %}
 
@@ -40,7 +40,7 @@
 
   <p>{% lorem %}</p>
 
-  <h4>{% trans "Courses" %}</h4>
+  <h4>{% trans "Course units" %}</h4>
   {% if activities %}
     <div class="filter-status form-group">
       <strong>{% trans "Status" %}</strong>
@@ -80,7 +80,7 @@
     {% trans "This candidate has not created any course yet." %}
     {% url 'admission:doctorate:course-enrollment' uuid=view.kwargs.uuid as enrollment_url %}
     {% blocktrans  trimmed %}
-      <a href="{{ enrollment_url }}">Go to course enrollment</a> or <a href="{{ add_url }}">add a course</a>
+      <a href="{{ enrollment_url }}">Go to course enrolment</a> or <a href="{{ add_url }}">add a course</a>
     {% endblocktrans %}
   {% endif %}
 {% endblock %}
