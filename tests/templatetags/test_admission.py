@@ -36,7 +36,7 @@ from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
 from django.utils import translation
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, pgettext
 from django.views import View
 
 from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
@@ -268,7 +268,10 @@ class AdmissionTabsTestCase(TestCase):
             ),
         }
         result = current_subtabs(context)
-        self.assertEqual(result['subtabs'], TAB_TREES['doctorate'][Tab('doctorate', _('Doctorate'), 'graduation-cap')])
+        self.assertEqual(
+            result['subtabs'],
+            TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap')],
+        )
 
     def test_current_tabs_with_hidden_tab(self):
         context = {

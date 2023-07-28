@@ -25,18 +25,18 @@
 {% endcomment %}
 
 {% if is_continuing %}
-  {% panel _('Specificities') %}
+  {% panel _('Specific aspects') %}
     {% if proposition.pays_nationalite_ue_candidat == False %}
-      {% field_data _('Copy of the residence permit covering the entire course, including the evaluation test (except for courses organised online)') proposition.copie_titre_sejour %}
+      {% field_data _('Copy of residence permit covering entire course, including assessment test (except for online courses).') proposition.copie_titre_sejour %}
     {% endif %}
-    {% field_data _('You are registering as') proposition.inscription_a_titre|enum_display:'ChoixInscriptionATitre' %}
+    {% field_data _('You are enrolling as') proposition.inscription_a_titre|enum_display:'ChoixInscriptionATitre' %}
     {% if proposition.inscription_a_titre == 'PROFESSIONNEL' %}
       {% field_data _('Head office name') proposition.nom_siege_social %}
       <div class="row">
         {% field_data _('Unique business number') proposition.numero_unique_entreprise css_class="col-md-6" %}
         {% field_data _('VAT number') proposition.numero_tva_entreprise css_class="col-md-6" %}
       </div>
-      {% field_data _('Your professional e-mail address') proposition.adresse_mail_professionnelle %}
+      {% field_data _('Your professional email address') proposition.adresse_mail_professionnelle %}
       {% if proposition.type_adresse_facturation == 'AUTRE' and proposition.adresse_facturation %}
         {% panel _("Billing address") %}
           <div class="row">
@@ -49,7 +49,7 @@
           </div>
           <div class="row">
             {% field_data _("Country") proposition.adresse_facturation.nom_pays css_class="col-md-4" %}
-            {% field_data _("Postal code") proposition.adresse_facturation.code_postal css_class="col-md-4" %}
+            {% field_data _("Postcode") proposition.adresse_facturation.code_postal css_class="col-md-4" %}
             {% field_data _("City") proposition.adresse_facturation.ville css_class="col-md-4" %}
           </div>
         {% endpanel %}
@@ -64,28 +64,28 @@
 {% endif %}
 
 {% if enrolled_for_contingent_training %}
-  {% panel _("Enrollment in a bachelor with quota") %}
-    {% field_data _("Are you a non-resident (as defined in decree)?") proposition.est_non_resident_au_sens_decret %}
+  {% panel _("Enrolment in limited enrolment bachelor's course") %}
+    {% field_data _("Are you a non-resident (as defined by government decree)?") proposition.est_non_resident_au_sens_decret %}
   {% endpanel %}
 {% endif %}
 
 {% if eligible_for_modification %}
-  {% panel _("Registration change") %}
-    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a college or university in the French Community of Belgium?") proposition.est_bachelier_belge %}
+  {% panel _("Change of enrolment") %}
+    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a French Community of Belgium haute ecole or university?") proposition.est_bachelier_belge %}
     {% if proposition.est_bachelier_belge %}
-      {% field_data _('Would you like to change your registration for this academic year at UCLouvain?') proposition.est_modification_inscription_externe %}
+      {% field_data _('Would you like to change your UCLouvain enrolment for this academic year?') proposition.est_modification_inscription_externe %}
       {% if proposition.est_modification_inscription_externe %}
-        {% field_data _("Registration modification form") proposition.formulaire_modification_inscription %}
+        {% field_data _("Change of enrolment form") proposition.formulaire_modification_inscription %}
       {% endif %}
     {% endif %}
   {% endpanel %}
 {% endif %}
 
 {% if eligible_for_reorientation %}
-  {% panel _("Reorientation") %}
-    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a college or university in the French Community of Belgium?") proposition.est_bachelier_belge %}
+  {% panel _("Course change") %}
+    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a French Community of Belgium haute ecole or university?") proposition.est_bachelier_belge %}
     {% if proposition.est_bachelier_belge %}
-      {% field_data _('Would you like to reorient yourself for this academic year at UCLouvain?') proposition.est_reorientation_inscription_externe %}
+      {% field_data _('Would you like to switch courses this academic year at UCLouvain?') proposition.est_reorientation_inscription_externe %}
       {% if proposition.est_reorientation_inscription_externe %}
         {% field_data _("Certificate of regular enrolment") proposition.attestation_inscription_reguliere %}
       {% endif %}

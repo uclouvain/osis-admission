@@ -49,7 +49,7 @@ class JuryMember(models.Model):
     )
     doctorate = models.ForeignKey(
         'admission.DoctorateAdmission',
-        verbose_name=_('Doctorate'),
+        verbose_name=_('PhD'),
         on_delete=models.CASCADE,
         related_name='jury_members',
     )
@@ -64,7 +64,7 @@ class JuryMember(models.Model):
     # Promoter only
     promoter = models.ForeignKey(
         'admission.SupervisionActor',
-        verbose_name=_('Promoter'),
+        verbose_name=_('Supervisor'),
         on_delete=models.PROTECT,
         limit_choices_to={"type": ActorType.PROMOTER.name},
         null=True,
@@ -95,7 +95,7 @@ class JuryMember(models.Model):
         on_delete=models.SET_NULL,
     )
     last_name = models.CharField(
-        verbose_name=_('Last name'),
+        verbose_name=_('Surname'),
         max_length=255,
         default='',
         blank=True,

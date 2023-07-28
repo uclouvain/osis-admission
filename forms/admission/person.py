@@ -69,10 +69,10 @@ class AdmissionPersonForm(AdmissionModelForm):
 
     middle_name = forms.CharField(
         required=False,
-        label=_('Other first names'),
+        label=_('Other given names'),
         help_text=_(
-            "Please indicate your other first names in accordance with your identity document. "
-            "If no other first name is mentioned on your identity document, you don't need to indicate anything."
+            "Please indicate your other given names in accordance with your identity document. "
+            "If there are no other given names on your identity document, you do not need to enter anything."
         ),
         widget=forms.TextInput(
             attrs={
@@ -83,7 +83,7 @@ class AdmissionPersonForm(AdmissionModelForm):
 
     last_name = forms.CharField(
         required=False,
-        label=_('Last name'),
+        label=_('Surname'),
         widget=forms.TextInput(
             attrs={
                 'placeholder': get_example_text('Smith'),
@@ -93,7 +93,7 @@ class AdmissionPersonForm(AdmissionModelForm):
 
     first_name_in_use = forms.CharField(
         required=False,
-        label=_('First name in use'),
+        label=_('Preferred first name'),
         help_text=get_example_text('Martin <del>martin MARTIN</del>'),
         widget=forms.TextInput(
             attrs={
@@ -114,18 +114,18 @@ class AdmissionPersonForm(AdmissionModelForm):
 
     unknown_birth_date = forms.BooleanField(
         required=False,
-        label=_('Unknown birth date'),
+        label=_('Unknown date of birth'),
     )
 
     birth_date = forms.DateField(
         required=False,
-        label=_('Birth date'),
+        label=_('Date of birth'),
         widget=CustomDateInput(),
     )
 
     birth_year = forms.IntegerField(
         required=False,
-        label=_('Birth year'),
+        label=_('Year of birth'),
         widget=forms.NumberInput(attrs={'placeholder': _('yyyy')}),
         min_value=1900,
         max_value=lambda: datetime.date.today().year,
@@ -137,11 +137,11 @@ class AdmissionPersonForm(AdmissionModelForm):
     )
 
     birth_country = AdmissionModelCountryChoiceField(
-        label=_('Birth country'),
+        label=_('Country of birth'),
     )
 
     birth_place = forms.CharField(
-        label=_('Birth place'),
+        label=_('Place of birth'),
         widget=forms.TextInput(
             attrs={
                 'placeholder': get_example_text('Louvain-la-Neuve'),
@@ -175,11 +175,11 @@ class AdmissionPersonForm(AdmissionModelForm):
     )
 
     has_national_number = RadioBooleanField(
-        label=_('Have you got a Belgian national registry number (SSIN)?'),
+        label=_('Do you have a Belgian National Register Number (NISS)?'),
     )
 
     identification_type = forms.ChoiceField(
-        label=_('Please provide one of these two identification information:'),
+        label=_('Please provide one of these two pieces of identification information:'),
         required=False,
         choices=IdentificationType.choices(),
         widget=forms.RadioSelect,
@@ -187,7 +187,7 @@ class AdmissionPersonForm(AdmissionModelForm):
 
     national_number = forms.CharField(
         required=False,
-        label=_('Belgian national registry number (SSIN)'),
+        label=_('Belgian national registry number (NISS)'),
         validators=[
             validators.RegexValidator(
                 r'^(\d{2}[.-]?\d{2}[.-]?\d{2}[.-]?\d{3}[.-]?\d{2})$',
@@ -221,7 +221,7 @@ class AdmissionPersonForm(AdmissionModelForm):
 
     id_photo = FileUploadField(
         required=False,
-        label=_('Identity picture'),
+        label=_('Identification photo'),
         max_files=1,
         mimetypes=IMAGE_MIME_TYPES,
     )
@@ -229,18 +229,18 @@ class AdmissionPersonForm(AdmissionModelForm):
     # Already registered
     last_registration_year = AcademicYearField(
         required=False,
-        label=_('What is your last year of UCLouvain enrollment?'),
+        label=_('What was the most recent year you were enrolled at UCLouvain?'),
         past_only=True,
     )
 
     already_registered = RadioBooleanField(
         required=False,
-        label=_("Have you previously been registered at UCLouvain?"),
+        label=_("Have you previously enrolled at UCLouvain?"),
     )
 
     last_registration_id = forms.CharField(
         required=False,
-        label=_('What was your NOMA (registration id)?'),
+        label=_('What was your NOMA (matriculation number)?'),
         widget=forms.TextInput(
             attrs={
                 'data-mask': '00000000',
@@ -324,7 +324,7 @@ class AdmissionPersonForm(AdmissionModelForm):
             data['last_registration_id'] = ''
 
         if not data.get('first_name') and not data.get('last_name'):
-            self.add_error('first_name', _('This field is required if the last name is missing.'))
+            self.add_error('first_name', _('This field is required if the surname is missing.'))
             self.add_error('last_name', _('This field is required if the first name is missing.'))
 
         is_belgian = data.get('country_of_citizenship') and data.get('country_of_citizenship').iso_code == BE_ISO_CODE

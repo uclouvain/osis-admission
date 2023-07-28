@@ -118,10 +118,10 @@ TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
     extra_context = {
         'checklist_tabs': {
-            'assimilation': _("Assimilation"),
+            'assimilation': _("Belgian student status"),
             'financabilite': _("Financeability"),
             'frais_dossier': _("Application fees"),
-            'choix_formation': _("Training choice"),
+            'choix_formation': _("Course choice"),
             'parcours_anterieur': _("Previous experience"),
             'donnees_personnelles': _("Personal data"),
             'specificites_formation': _("Training specificities"),

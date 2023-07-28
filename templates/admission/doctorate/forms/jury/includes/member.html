@@ -25,7 +25,7 @@
 <div>
 <strong>{% if membre.justification_non_docteur %}<a tabindex="0" class="fa fa-exclamation-triangle popover-buttons" data-content="{{ membre.justification_non_docteur|linebreaksbr }}" role="button" data-original-title="" title=""></a> {% endif %}{% if membre.titre and membre.titre != 'NON_DOCTEUR' %}{{ membre.titre | enum_display:'TitreMembre' }} {% endif %}{{ membre.prenom }} {{ membre.nom }}</strong>
 (<a href="mailto:{{ membre.email }}">{{ membre.email }}</a>) - {{ membre.institution }}{% if membre.autre_institution %}, {{ membre.autre_institution }}{% endif %}
-{% if membre.est_promoteur %} - <strong>{% trans "Promoter" %}</strong>{% endif %}
+{% if membre.est_promoteur %} - <strong>{% trans "Supervisor" %}</strong>{% endif %}
 </div>
 {% if form %}
 <div class="btn-group">

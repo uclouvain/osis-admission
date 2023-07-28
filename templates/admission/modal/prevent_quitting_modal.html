@@ -28,11 +28,11 @@
 
 {% block modal_id %}prevent-quitting-modal{% endblock %}
 
-{% block modal_title %}{% trans "Leave the page?" %}{% endblock %}
+{% block modal_title %}{% trans "Leave page?" %}{% endblock %}
 
 {% block modal_body %}
   <p>
-    {% trans "You seem to have unsaved modifications, they will be lost." %}
+    {% trans "You appear to have unsaved changes, which will be lost." %}
   </p>
 {% endblock %}
 
@@ -128,7 +128,7 @@
           // Cancel the event
           e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
           // Chrome requires returnValue to be set
-          return e.returnValue = "{% trans "Leave the page?" %} {% trans "You seem to have unsaved modifications, they will be lost." %}"
+          return e.returnValue = "{% trans "Leave page?" %} {% trans "You appear to have unsaved changes, which will be lost." %}"
         }
       });
     });

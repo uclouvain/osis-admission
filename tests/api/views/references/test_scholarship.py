@@ -38,8 +38,8 @@ class ScholarshipReferenceTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.scholarships = [
-            DoubleDegreeScholarshipFactory(short_name='DDS-1', long_name='Double degree scholarship 1'),
-            DoubleDegreeScholarshipFactory(short_name='DDS-2', long_name='Double degree scholarship 2'),
+            DoubleDegreeScholarshipFactory(short_name='DDS-1', long_name='Dual degree scholarship 1'),
+            DoubleDegreeScholarshipFactory(short_name='DDS-2', long_name='Dual degree scholarship 2'),
         ]
         cls.user = UserFactory()
 
@@ -50,12 +50,15 @@ class ScholarshipReferenceTestCase(APITestCase):
             format='json',
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {
-            'uuid': str(self.scholarships[0].uuid),
-            'short_name': self.scholarships[0].short_name,
-            'long_name': self.scholarships[0].long_name,
-            'type': self.scholarships[0].type,
-        })
+        self.assertEqual(
+            response.json(),
+            {
+                'uuid': str(self.scholarships[0].uuid),
+                'short_name': self.scholarships[0].short_name,
+                'long_name': self.scholarships[0].long_name,
+                'type': self.scholarships[0].type,
+            },
+        )
 
     def test_return_404_if_unknown_uuid(self):
         self.client.force_authenticate(user=self.user)

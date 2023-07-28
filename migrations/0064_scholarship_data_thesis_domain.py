@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='scholarship_proof',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None, verbose_name='Scholarship proof'),
+            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None, verbose_name='Proof of scholarship'),
         ),
         migrations.AddField(
             model_name='doctorateadmission',
@@ -29,6 +29,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='phd_already_done_thesis_domain',
-            field=models.CharField(blank=True, default='', max_length=255, verbose_name='Thesis domain'),
+            field=models.CharField(blank=True, default='', max_length=255, verbose_name='Thesis field'),
         ),
     ]

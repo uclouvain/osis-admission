@@ -61,10 +61,10 @@ class Accounting(models.Model):
     # Absence of debt
     institute_absence_debts_certificate = FileField(
         upload_to=admission_accounting_directory_path,
-        verbose_name=_('Certificate stating the absence of debts towards the institute'),
+        verbose_name=_('Certificate stating no debts to the institution'),
     )
 
-    # Reduced registration fees
+    # Reduced tuition fee
     french_community_study_allowance_application = models.BooleanField(
         blank=True,
         null=True,
@@ -77,7 +77,7 @@ class Accounting(models.Model):
     )
     staff_child_certificate = FileField(
         upload_to=admission_accounting_directory_path,
-        verbose_name=_('Staff child certificate'),
+        verbose_name=_('Certificate for children of staff'),
     )
 
     # Assimilation
@@ -86,7 +86,7 @@ class Accounting(models.Model):
         choices=TypeSituationAssimilation.choices(),
         default='',
         max_length=100,
-        verbose_name=_('Assimilation situation'),
+        verbose_name=_('Belgian student status'),
     )
     assimilation_1_situation_type = models.CharField(
         blank=True,
@@ -281,7 +281,7 @@ class Accounting(models.Model):
     valid_iban = models.BooleanField(
         blank=True,
         null=True,
-        verbose_name=_('The IBAN account number is valid')
+        verbose_name=_('The IBAN account number is valid'),
     )
     other_format_account_number = models.CharField(
         blank=True,
@@ -293,17 +293,17 @@ class Accounting(models.Model):
         blank=True,
         default='',
         max_length=32,
-        verbose_name=_('BIC/SWIFT code identifying the bank from which the account was opened'),
+        verbose_name=_('BIC/SWIFT code identifying the bank from which the account originates'),
     )
     account_holder_first_name = models.CharField(
         blank=True,
         default='',
         max_length=128,
-        verbose_name=_('First name of the account holder'),
+        verbose_name=_('Account holder first name'),
     )
     account_holder_last_name = models.CharField(
         blank=True,
         default='',
         max_length=128,
-        verbose_name=_('Last name of the account holder'),
+        verbose_name=_('Account holder surname'),
     )

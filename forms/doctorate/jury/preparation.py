@@ -54,7 +54,7 @@ class JuryPreparationForm(forms.Form):
         widget=CustomDateInput(),
     )
     langue_redaction = forms.ChoiceField(
-        label=_("Thesis redacting language"),
+        label=_("Thesis language"),
         choices=ChoixLangueRedactionThese.choices(),
         initial=ChoixLangueRedactionThese.UNDECIDED.name,
         required=True,

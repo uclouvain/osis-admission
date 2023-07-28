@@ -32,8 +32,8 @@ from base.models.utils.utils import ChoiceEnum
 class TypeFormation(ChoiceEnum):
     BACHELIER = _('Bachelor')
     MASTER = _('Master')
-    DOCTORAT = _('Doctorate')
-    AGREGATION_CAPES = _('Aggregation and CAPAES')
+    DOCTORAT = _('PhD')
+    AGREGATION_CAPES = _('Teaching degree and CAPAES')
     FORMATION_CONTINUE = _('Continuing education')
     CERTIFICAT = _("Certificate")
 

@@ -121,7 +121,7 @@
             {% include 'admission/general_education/includes/checklist/assimilation.html' %}
 
             {% firstof training_choice_url|add:next_url as contextual_training_choice %}
-            {% display _("Training") ''|edit_button:contextual_training_choice as button %}
+            {% display _("Course") ''|edit_button:contextual_training_choice as button %}
             {% field_data button resume_proposition.proposition.formation %}
 
             {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}
@@ -129,7 +129,7 @@
             {% endif %}
 
             {% if resume_proposition.proposition.est_reorientation_inscription_externe %}
-              {% field_data _('External reorientation / modification') _('Reorientation requested') %}
+              {% field_data _('External reorientation / modification') _('Course change requested') %}
             {% endif %}
 
             {% if resume_proposition.proposition.est_modification_inscription_externe %}
@@ -154,7 +154,7 @@
             {% if admission.est_inscription_tardive %}<p>{% trans "Late enrollment" %}</p>{% endif %}
 
             {% if admission.est_reorientation_inscription_externe %}
-              {% field_data _("External reorientation/modification") _("Reorientation asked by the candidate") %}
+              {% field_data _("External reorientation/modification") _("Course change asked by the candidate") %}
             {% elif admission.est_modification_inscription_externe %}
               {% field_data _("External reorientation/modification") _("Modification asked by the candidate") %}
             {% endif %}
@@ -204,7 +204,7 @@
           {% bootstrap_form comment_forms.specificites_formation %}
 
           <div class="info-part">
-            {% multiple_field_data questions_specifiques title=_('Dynamic questions about "Specificities" sub-tab') %}
+            {% multiple_field_data questions_specifiques title=_('Dynamic questions about "Specific aspects" sub-tab') %}
           </div>
 
         </div>

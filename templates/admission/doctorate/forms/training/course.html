@@ -26,10 +26,10 @@
 
 <h2>
   {% if not view.kwargs.activity_id %}
-    {% trans "Add a course" %}
+    {% trans "Add a course unit" %}
   {% else %}
     {% blocktrans with category=view.activity.get_category_display trimmed %}
-      Edit activity of type <em>{{ category }}</em>
+      Edit <em>{{ category }}</em> activity.
     {% endblocktrans %}
   {% endif %}
 </h2>

@@ -148,9 +148,9 @@
       {% else %}
         {% display doctorate.autre_bourse_recherche as scholarship_name %}
       {% endif %}
-      {% field_data _("Financing type") doctorate.type_financement|enum_display:"ChoixTypeFinancement"|add:" - "|add:scholarship_name inline=True %}
+      {% field_data _("Funding type") doctorate.type_financement|enum_display:"ChoixTypeFinancement"|add:" - "|add:scholarship_name inline=True %}
     {% else %}
-      {% field_data _("Financing type") doctorate.type_financement|enum_display:"ChoixTypeFinancement" inline=True %}
+      {% field_data _("Funding type") doctorate.type_financement|enum_display:"ChoixTypeFinancement" inline=True %}
     {% endif %}
 
     {% field_data _("Thesis title") admission.project_title inline=True %}
@@ -183,7 +183,7 @@
       {% endfor %}
     </ul>
 
-    {% field_data _("Date of confirmation") confirmation_paper.date inline=True %}
+    {% field_data _("Confirmation exam date") confirmation_paper.date inline=True %}
 
     {% if confirmation_paper.date > confirmation_paper.date_limite %}
       {% field_data _("Reason for exceeding the deadline") " " "to-complete" inline=True %}

@@ -211,7 +211,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
     def get_header(self):
         return [
             _('Application numero'),
-            _('Last name'),
+            _('Surname'),
             _('First name'),
             _('Noma'),
             _('Several applications?'),

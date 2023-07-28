@@ -41,8 +41,8 @@ class ScholarshipAutocompleteTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.scholarships = [
-            DoubleDegreeScholarshipFactory(short_name='DDS-1', long_name='Double degree scholarship 1'),
-            DoubleDegreeScholarshipFactory(short_name='DDS-2', long_name='Double degree scholarship 2'),
+            DoubleDegreeScholarshipFactory(short_name='DDS-1', long_name='Dual degree scholarship 1'),
+            DoubleDegreeScholarshipFactory(short_name='DDS-2', long_name='Dual degree scholarship 2'),
             DoctorateScholarshipFactory(short_name='DS-1', long_name='Doctorate scholarship 1', disabled=True),
             DoctorateScholarshipFactory(short_name='DS-1bis', long_name='Doctorate scholarship 1bis'),
             DoctorateScholarshipFactory(short_name='DS-2', long_name='Doctorate scholarship 2'),

@@ -138,7 +138,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 RecupererDerniereEpreuveConfirmationQuery(self.admission_uuid)
             )
             if not last_confirmation_paper:
-                raise Http404(_('Confirmation paper not found.'))
+                raise Http404(_('Confirmation exam not found.'))
             return last_confirmation_paper
         except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
             raise Http404(e.message)
@@ -208,7 +208,7 @@ class DoctorateAdmissionLastConfirmationMixin(LoadDossierViewMixin):
 
 
 class AdmissionFormMixin(AdmissionViewMixin):
-    message_on_success = _('Your data has been saved.')
+    message_on_success = _('Your data have been saved.')
     message_on_failure = _('Some errors have been encountered.')
     update_requested_documents = False
     update_admission_author = False

@@ -55,7 +55,7 @@ class PromoterFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SupervisionActor
 
-    actor_ptr = factory.SubFactory(_ActorFactory, person__user__first_name="Promoter")
+    actor_ptr = factory.SubFactory(_ActorFactory, person__user__first_name="Supervisor")
     type = ActorType.PROMOTER.name
     person = factory.SelfAttribute('actor_ptr.person')
     process = factory.SelfAttribute('actor_ptr.process')

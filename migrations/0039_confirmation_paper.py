@@ -50,8 +50,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('uuid', models.UUIDField(db_index=True, default=uuid.uuid4, editable=False, unique=True)),
-                ('confirmation_date', models.DateField(blank=True, null=True, verbose_name='Date of confirmation')),
-                ('confirmation_deadline', models.DateField(blank=True, verbose_name='Deadline for confirmation')),
+                ('confirmation_date', models.DateField(blank=True, null=True, verbose_name='Confirmation exam date')),
+                ('confirmation_deadline', models.DateField(blank=True, verbose_name='Confirmation deadline')),
                 (
                     'research_report',
                     osis_document.contrib.fields.FileField(
@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
                         base_field=models.UUIDField(),
                         default=list,
                         size=1,
-                        verbose_name='Report of the supervisory panel',
+                        verbose_name='Support Committee minutes',
                     ),
                 ),
                 (
@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
                         base_field=models.UUIDField(),
                         default=list,
                         size=1,
-                        verbose_name='Opinion on the renewal of the research mandate',
+                        verbose_name='Opinion on research mandate renewal',
                     ),
                 ),
                 (

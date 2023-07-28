@@ -220,7 +220,7 @@ class Activity(models.Model):
     )
     organizing_institution = models.CharField(
         max_length=100,
-        verbose_name=_("Organizing institution"),
+        verbose_name=_("Organising institution"),
         default="",
         blank=True,
     )
@@ -288,7 +288,7 @@ class Activity(models.Model):
         blank=True,
     )
     journal = models.CharField(
-        verbose_name=_("Journal"),
+        verbose_name=_("Journal or publishing house name"),
         max_length=100,
         default="",
         blank=True,
@@ -323,11 +323,11 @@ class Activity(models.Model):
 
     # Process
     reference_promoter_assent = models.BooleanField(
-        verbose_name=_("Reference promoter assent"),
+        verbose_name=_("Lead supervisor assent"),
         null=True,
     )
     reference_promoter_comment = models.TextField(
-        verbose_name=_("Reference promoter comment"),
+        verbose_name=_("Lead supervisor comment"),
         default="",
     )
     cdd_comment = models.TextField(

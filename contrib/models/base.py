@@ -303,7 +303,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
 
     training = models.ForeignKey(
         to="base.EducationGroupYear",
-        verbose_name=_("Training"),
+        verbose_name=_("Course"),
         related_name="+",
         on_delete=models.CASCADE,
     )
