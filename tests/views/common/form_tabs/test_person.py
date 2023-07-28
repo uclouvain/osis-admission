@@ -403,7 +403,7 @@ class PersonFormTestCase(TestCase):
             },
         )
         self.assertFalse(form.is_valid())
-        self.assertIn(_('This field is required if the last name is missing.'), form.errors.get('first_name', []))
+        self.assertIn(_('This field is required if the surname is missing.'), form.errors.get('first_name', []))
         self.assertIn(_('This field is required if the first name is missing.'), form.errors.get('last_name', []))
 
     def test_national_number_fields(self):
@@ -585,7 +585,7 @@ class PersonFormTestCase(TestCase):
         self.assertFalse(response.context['resides_in_belgium'])
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
 
-        # Residential address > Belgium
+        # Legal domicile > Belgium
         residential_address = PersonAddressFactory(
             person=self.general_admission.candidate,
             label=PersonAddressType.RESIDENTIAL.name,
@@ -597,7 +597,7 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['resides_in_belgium'])
 
-        # Residential address > Foreign country
+        # Legal domicile > Foreign country
         residential_address.country = self.france_country
         residential_address.save()
 
@@ -705,7 +705,7 @@ class PersonFormTestCase(TestCase):
         self.assertFalse(response.context['resides_in_belgium'])
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
 
-        # Residential address > Belgium
+        # Legal domicile > Belgium
         residential_address = PersonAddressFactory(
             person=self.continuing_admission.candidate,
             label=PersonAddressType.RESIDENTIAL.name,
@@ -717,7 +717,7 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['resides_in_belgium'])
 
-        # Residential address > Foreign country
+        # Legal domicile > Foreign country
         residential_address.country = self.france_country
         residential_address.save()
 
@@ -763,7 +763,7 @@ class PersonFormTestCase(TestCase):
         self.assertFalse(response.context['resides_in_belgium'])
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
 
-        # Residential address > Belgium
+        # Legal domicile > Belgium
         residential_address = PersonAddressFactory(
             person=self.doctorate_admission.candidate,
             label=PersonAddressType.RESIDENTIAL.name,
@@ -775,7 +775,7 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['resides_in_belgium'])
 
-        # Residential address > Foreign country
+        # Legal domicile > Foreign country
         residential_address.country = self.france_country
         residential_address.save()
 

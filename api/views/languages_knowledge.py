@@ -92,7 +92,7 @@ class LanguagesKnowledgeViewSet(
             raise ValidationError(_("Mandatory languages are missing."))
         duplicate_languages = set([language for language in languages if languages.count(language) > 1])
         if duplicate_languages:
-            raise ValidationError(_("You cannot fill in a language more than once, please correct the form."))
+            raise ValidationError(_("You cannot enter a language more than once, please correct the form."))
 
     def post(self, request, *args, **kwargs):
         person = self.request.user.person

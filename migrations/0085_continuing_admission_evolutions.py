@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='continuingeducationadmission',
             name='billing_address_type',
-            field=models.CharField(blank=True, choices=[('RESIDENTIEL', 'Residential address'), ('CONTACT', 'Contact address'), ('AUTRE', 'Another address')], default='', max_length=30, verbose_name='Billing address type'),
+            field=models.CharField(blank=True, choices=[('RESIDENTIEL', 'Legal domicile'), ('CONTACT', 'Postal address'), ('AUTRE', 'Another address')], default='', max_length=30, verbose_name='Billing address type'),
         ),
         migrations.AddField(
             model_name='continuingeducationadmission',

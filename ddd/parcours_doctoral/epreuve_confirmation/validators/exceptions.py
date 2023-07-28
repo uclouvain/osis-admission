@@ -33,7 +33,7 @@ class EpreuveConfirmationNonTrouveeException(BusinessException):
     status_code = "EPREUVE-CONFIRMATION-1"
 
     def __init__(self, **kwargs):
-        message = _("Confirmation paper not found.")
+        message = _("Confirmation exam not found.")
         super().__init__(message, **kwargs)
 
 
@@ -41,7 +41,7 @@ class EpreuveConfirmationNonCompleteeException(BusinessException):
     status_code = "EPREUVE-CONFIRMATION-2"
 
     def __init__(self, **kwargs):
-        message = _("Confirmation paper not completed.")
+        message = _("Confirmation exam not completed.")
         super().__init__(message, **kwargs)
 
 
@@ -49,7 +49,7 @@ class EpreuveConfirmationDateIncorrecteException(BusinessException):
     status_code = "EPREUVE-CONFIRMATION-3"
 
     def __init__(self, **kwargs):
-        message = _("The date of the confirmation paper cannot be later than its deadline.")
+        message = _("The date of the confirmation exam cannot be later than its deadline.")
         super().__init__(message, **kwargs)
 
 
@@ -82,7 +82,7 @@ class EpreuveConfirmationNonCompleteePourEvaluationException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "The confirmation paper is not completed: please be sure that the confirmation date and report"
+            "The confirmation exam is not completed: please be sure that the confirmation date and report"
             " have been specified.",
         )
         super().__init__(message, **kwargs)

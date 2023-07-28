@@ -54,7 +54,7 @@ class GeneralEducationAdmission(BaseAdmission):
 
     double_degree_scholarship = models.ForeignKey(
         to="admission.Scholarship",
-        verbose_name=_("Double degree scholarship"),
+        verbose_name=_("Dual degree scholarship"),
         related_name="+",
         on_delete=models.PROTECT,
         null=True,
@@ -87,7 +87,7 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
     )
     registration_change_form = FileField(
-        verbose_name=_("Registration change form"),
+        verbose_name=_("Change of enrolment form"),
         max_files=1,
         upload_to=admission_directory_path,
         blank=True,
@@ -172,7 +172,7 @@ class GeneralEducationAdmission(BaseAdmission):
         on_delete=models.PROTECT,
         related_name='+',
         to='base.EducationGroupYear',
-        verbose_name=_('Other training accepted by the faculty'),
+        verbose_name=_('Other course accepted by the faculty'),
     )
     with_prerequisite_courses = models.BooleanField(
         blank=True,

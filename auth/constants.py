@@ -37,7 +37,7 @@ READ_ACTIONS_BY_TAB = {
     # Project
     'project': 'admission.view_admission_project',
     'supervision': 'admission.view_admission_supervision',
-    # Confirmation paper
+    # Confirmation exam
     'confirmation': 'admission.view_admission_confirmation',
     'extension-request': 'admission.view_admission_confirmation',
     # History
@@ -75,7 +75,7 @@ UPDATE_ACTIONS_BY_TAB = {
     # Project
     'project': 'admission.change_admission_project',
     'supervision': 'admission.change_admission_supervision',
-    # Confirmation paper
+    # Confirmation exam
     'confirmation': 'admission.change_admission_confirmation',
     'extension-request': 'admission.change_admission_confirmation_extension',
     # Mails

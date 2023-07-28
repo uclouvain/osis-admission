@@ -25,10 +25,10 @@
 # ##############################################################################
 import datetime
 from typing import Optional
+from unittest import TestCase
 from unittest.mock import ANY
 
 import freezegun
-from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
@@ -44,7 +44,11 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.ddd.admission.formation_generale.commands import (
     RecupererDocumentsPropositionQuery,
 )
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
@@ -62,6 +66,9 @@ class RecupererDocumentsPropositionTestCase(TestCase):
     def setUp(self):
         self.cmd = RecupererDocumentsPropositionQuery(uuid_proposition='uuid-MASTER-SCI')
         self.message_bus = message_bus_in_memory_instance
+
+        proposition = PropositionInMemoryRepository.get(PropositionIdentity(uuid='uuid-MASTER-SCI'))
+        proposition.curriculum = ['file1.pdf']
 
         self.academic_year_repository = AcademicYearInMemoryRepository()
 

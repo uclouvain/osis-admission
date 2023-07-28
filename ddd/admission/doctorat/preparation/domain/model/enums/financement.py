@@ -35,18 +35,18 @@ class ChoixTypeContratTravail(ChoiceEnum):
 
 
 class BourseRecherche(ChoiceEnum):
-    ARC = _("ARC - Action de Recherche Concertee")
-    ARES = _("ARES - Cooperation au developpement")
-    CSC = _("CSC - China Scholarship Council")
-    FSR = _("FSR - Fonds Speciaux de Recherche")
-    ERC = _("ERC - European Research Council")
+    ARC = _("Joint research project (ARC)")
+    ARES = _("Development cooperation (ARES)")
+    CSC = _("China Scholarship Council (CSC)")
+    FSR = _("Fonds Speciaux de Recherche (FSR)")
+    ERC = _("European Research Council (ERC)")
     FNRS = _("FNRS")
-    FONDATION_ST_LUC = _("Fondation St Luc")
-    FONDATION_MONT_GODINNE = _("Fondation Mont Godinne")
-    FRC = _("FRC - Fonds de recherche clinique")
+    FONDATION_ST_LUC = _("Fondation Saint-Luc")
+    FONDATION_MONT_GODINNE = _("Fondation Mont-Godinne")
+    FRC = _("Clinical Research Fund (FRC)")
     FRIA = _("FRIA")
     FRESH = _("FRESH")
-    WBI = _("WBI - Wallonie Bruxelles International")
+    WBI = _("Wallonie Bruxelles International (WBI)")
     OTHER = _('OTHER')
 
 

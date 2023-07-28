@@ -40,18 +40,18 @@ from reference.models.zipcode import ZipCode
 class AdmissionCoordonneesForm(forms.ModelForm):
     show_contact = forms.BooleanField(
         required=False,
-        label=_('I wish to receive my mail at an address other than my legal address'),
+        label=_('I would like to receive my mail at an address other than my legal address'),
     )
 
     private_email = forms.EmailField(
-        label=__('admission', 'Private email'),
+        label=__('admission', 'Personal email'),
         disabled=True,
         required=False,
     )
 
     phone_mobile = forms.CharField(
         required=False,
-        label=__('admission', 'Phone (GSM/mobile)'),
+        label=__('admission', 'Telephone (mobile)'),
         widget=forms.TextInput(
             attrs={
                 'placeholder': get_example_text('+32 490 00 00 00'),
@@ -106,7 +106,7 @@ class AdmissionAddressForm(forms.ModelForm):
 
     postal_code = forms.CharField(
         required=False,
-        label=_('Postal code'),
+        label=_('Postcode'),
         help_text=get_example_text('1234'),
     )
 
@@ -129,7 +129,7 @@ class AdmissionAddressForm(forms.ModelForm):
     # Enable autocompletion only for Belgium postal codes
     be_postal_code = forms.CharField(
         required=False,
-        label=_('Postal code'),
+        label=_('Postcode'),
         help_text=get_example_text('1234'),
     )
 

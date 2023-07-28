@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='supervisionactor',
             name='type',
-            field=models.CharField(choices=[('PROMOTER', 'Promoter'), ('CA_MEMBER', 'CA Member')], max_length=50),
+            field=models.CharField(choices=[('PROMOTER', 'Supervisor'), ('CA_MEMBER', 'CA Member')], max_length=50),
         ),
         migrations.AddField(
             model_name='supervisionactor',

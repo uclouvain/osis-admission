@@ -123,7 +123,7 @@ class LanguagesKnowledgeTestCase(APITestCase):
     def test_languages_knowledge_create_should_fail_if_language_set_more_than_once(self):
         with self.assertRaises(
             ValidationError,
-            msg=_("You cannot fill in a language more than once, please correct the form."),
+            msg=_("You cannot enter a language more than once, please correct the form."),
         ):
             self.create_languages_knowledge_with_admission(
                 [

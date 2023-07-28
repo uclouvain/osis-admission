@@ -35,31 +35,30 @@ msgstr ""
 #, python-format
 msgid ""
 "%(person_concerned)s has a long-term residence permit (B, C, D, F, F+, K, L "
-"or M cards) in Belgium"
+"or M cards) in Belgium."
 msgstr ""
 
 #, python-format
 msgid ""
-"%(person_concerned)s has a residence permit for more than 3 months and "
-"receives professional or replacement income"
+"%(person_concerned)s has a residence permit valid for more than 3 months and "
+"receives professional or replacement income."
 msgstr ""
 
 #, python-format
 msgid ""
-"%(person_concerned)s has the nationality of a country of a Member State of "
-"the European Union"
+"%(person_concerned)s has the nationality of a European Union member state."
 msgstr ""
 
 #, python-format
 msgid ""
 "%(person_concerned)s is a refugee applicant, refugee, stateless person, or "
-"has temporary/subsidiary protection"
+"has temporary/subsidiary protection."
 msgstr ""
 
 #, python-format
 msgid ""
-"%(person_concerned)s is supported by the CPAS, or by a CPAS rest home or "
-"designated by the CPAS"
+"%(person_concerned)s is supported by the CPAS or a CPAS care home, or is "
+"nominated by the CPAS."
 msgstr ""
 
 #, python-format
@@ -143,7 +142,7 @@ msgstr ""
 
 #, python-format
 msgid ""
-"<a href=\"%(enrollment_url)s\">Go to course enrollment</a> or <a "
+"<a href=\"%(enrollment_url)s\">Go to course enrolment</a> or <a "
 "href=\"%(add_url)s\">add a course</a>"
 msgstr ""
 
@@ -166,32 +165,7 @@ msgid ""
 "benefits from an international scholarship or if he/she is Erasmus Mundus."
 msgstr ""
 
-msgid ""
-"A certified translation of your certificate of enrolment or school attendance"
-msgstr ""
-
-msgid "A certified translation of your high school diploma"
-msgstr ""
-
-msgid ""
-"A certified translation of your official transcript of marks for your final "
-"year of secondary education"
-msgstr ""
-
 msgid "A comment is required."
-msgstr ""
-
-msgid ""
-"A double-sided copy of the final equivalence decision (possibly with the "
-"DAES or the admission test for the first cycle of higher education in case "
-"of restrictive equivalence)"
-msgstr ""
-
-msgid ""
-"A double-sided copy of the final equivalence decision issued by the Ministry "
-"of the French Community of Belgium (possibly with the DAES or the admission "
-"test for the first cycle of higher education if your equivalence doesn't "
-"give access to the desired programme)"
 msgstr ""
 
 msgid "A justification is needed when creating a pre-admission."
@@ -225,7 +199,20 @@ msgstr ""
 msgid "A specific education"
 msgstr ""
 
-msgid "A transcript or your last year at high school"
+msgid "A transcript for your last year of secondary school"
+msgstr ""
+
+msgid ""
+"A translation of the enrolment or school attendance certificate by a sworn "
+"translator"
+msgstr ""
+
+msgid ""
+"A translation of your official transcript of marks for your final year of "
+"secondary school by a sworn translator"
+msgstr ""
+
+msgid "A translation of your secondary school diploma by a sworn translator"
 msgstr ""
 
 msgid "ACCEPTED"
@@ -248,12 +235,6 @@ msgstr "Admission in progress"
 
 msgid "ADMITTED"
 msgstr "Admitted"
-
-msgid "ARC - Action de Recherche Concertee"
-msgstr "ARC - Action de Recherche Concertée"
-
-msgid "ARES - Cooperation au developpement"
-msgstr "ARES - Coopération au développement"
 
 msgid "Absence of debt"
 msgstr ""
@@ -291,6 +272,12 @@ msgstr ""
 msgid "Access to regulated professions"
 msgstr ""
 
+msgid "Account holder first name"
+msgstr ""
+
+msgid "Account holder surname"
+msgstr ""
+
 msgid "Account number"
 msgstr ""
 
@@ -304,9 +291,6 @@ msgid "Achieved additional training"
 msgstr ""
 
 msgid "Acquired credit number"
-msgstr ""
-
-msgid "Acquired credits"
 msgstr ""
 
 msgid "Acronym / Title"
@@ -339,7 +323,16 @@ msgstr ""
 msgid "Activity begin date"
 msgstr ""
 
+msgid "Activity date"
+msgstr ""
+
+msgid "Activity description"
+msgstr ""
+
 msgid "Activity end date"
+msgstr ""
+
+msgid "Activity name"
 msgstr ""
 
 msgid "Activity subtype"
@@ -360,25 +353,10 @@ msgstr ""
 msgid "Add"
 msgstr ""
 
-msgid "Add a VAE"
-msgstr ""
-
-msgid "Add a communication"
-msgstr ""
-
-msgid "Add a communication to this conference"
-msgstr ""
-
-msgid "Add a communication to this residency"
-msgstr ""
-
-msgid "Add a communication to this seminar"
-msgstr ""
-
 msgid "Add a conference"
 msgstr ""
 
-msgid "Add a course"
+msgid "Add a course unit"
 msgstr ""
 
 #, python-format
@@ -389,6 +367,18 @@ msgid "Add a new member"
 msgstr ""
 
 msgid "Add a paper"
+msgstr ""
+
+msgid "Add a paper/presentation"
+msgstr ""
+
+msgid "Add a paper/presentation for this conference"
+msgstr ""
+
+msgid "Add a paper/presentation for this residency"
+msgstr ""
+
+msgid "Add a paper/presentation for this seminar"
 msgstr ""
 
 msgid "Add a publication"
@@ -410,6 +400,9 @@ msgid "Add an activity"
 msgstr ""
 
 msgid "Add an internal note"
+msgstr ""
+
+msgid "Add validation of prior experience (VAE)"
 msgstr ""
 
 msgid "Additional approval condition"
@@ -469,17 +462,11 @@ msgstr ""
 msgid "Advanced filters"
 msgstr ""
 
-msgid "Affiliations"
-msgstr ""
-
 #, python-format
 msgid ""
 "After considering the opinion of your supervisory panel, which met on "
 "%(confirmation_date)s, the %(cdd_title)s notes that your doctoral "
 "confirmation paper has been successfully completed."
-msgstr ""
-
-msgid "Aggregation and CAPAES"
 msgstr ""
 
 msgid "All"
@@ -495,12 +482,10 @@ msgstr "All supervisory panel members must have approved the proposition."
 msgid "All history"
 msgstr ""
 
-msgid "All promoters must have approved the proposition."
-msgstr ""
-
-#, no-python-format
-msgid "Allocated time for the thesis (in %)"
-msgstr ""
+#, fuzzy
+#| msgid "All CA members must have approved the proposition."
+msgid "All supervisors must have approved the proposition."
+msgstr "All supervisory panel members must have approved the proposition."
 
 msgid "Already a member."
 msgstr "Already a member of the supervisory panel."
@@ -553,6 +538,15 @@ msgid ""
 msgstr ""
 
 msgid "Another address"
+msgstr ""
+
+msgid "Application accepted"
+msgstr ""
+
+msgid "Application confirmed (by student)"
+msgstr ""
+
+msgid "Application denied"
 msgstr ""
 
 msgid "Application fees"
@@ -617,7 +611,7 @@ msgstr ""
 msgid "Are there any prerequisite courses?"
 msgstr ""
 
-msgid "Are you a non-resident (as defined in decree)?"
+msgid "Are you a non-resident (as defined by government decree)?"
 msgstr ""
 
 msgid "Are you confirming that the application will be sent to the SIC?"
@@ -625,8 +619,10 @@ msgstr ""
 
 msgid ""
 "Are you currently enrolled in the first year of a bachelor's degree at a "
-"college or university in the French Community of Belgium?"
+"French Community of Belgium haute ecole or university?"
 msgstr ""
+"Are you currently enrolled in the first year of a bachelor's degree at a "
+"French Community of Belgium haute école or university?"
 
 #, python-format
 msgid "Are you sure you want to delete \"%(object)s\"?"
@@ -653,18 +649,10 @@ msgstr ""
 msgid "Are you sure your want to reset the object of the message?"
 msgstr ""
 
-msgid ""
-"Are you the child of a member of the staff of the UCLouvain or the Martin V "
-"entity?"
-msgstr ""
-
-msgid "Assent from reference promoter"
-msgstr ""
+msgid "Are you the child of a UCLouvain or Martin V Lycee staff member?"
+msgstr "Are you the child of a UCLouvain or Martin V Lycée staff member?"
 
 msgid "Assimilated,Non-assimilated"
-msgstr ""
-
-msgid "Assimilation"
 msgstr ""
 
 msgid "Assimilation 1"
@@ -703,16 +691,10 @@ msgstr ""
 msgid "Assimilation 7"
 msgstr ""
 
-msgid "Assimilation situation"
-msgstr ""
-
-msgid "Assimilation situation that applies to you"
-msgstr ""
-
 msgid "Assimilation start date"
 msgstr ""
 
-msgid "Attachment: Doctoral training"
+msgid "Attachment: PhD training"
 msgstr ""
 
 msgid "Attachments"
@@ -741,7 +723,13 @@ msgstr ""
 msgid "Automatically required"
 msgstr ""
 
-msgid "BIC/SWIFT code identifying the bank from which the account was opened"
+msgid "Awaiting approval"
+msgstr ""
+
+msgid "Awaiting management approval"
+msgstr ""
+
+msgid "BIC/SWIFT code identifying the bank from which the account originates"
 msgstr ""
 
 msgid "BIOLOGY"
@@ -762,7 +750,13 @@ msgstr ""
 msgid "Belgian diploma"
 msgstr ""
 
-msgid "Belgian national registry number (SSIN)"
+msgid "Belgian education community"
+msgstr ""
+
+msgid "Belgian national registry number (NISS)"
+msgstr ""
+
+msgid "Belgian student status"
 msgstr ""
 
 msgid "Billing address"
@@ -796,18 +790,6 @@ msgid "Billing address type"
 msgstr ""
 
 msgid "Biology"
-msgstr ""
-
-msgid "Birth country"
-msgstr ""
-
-msgid "Birth date"
-msgstr ""
-
-msgid "Birth place"
-msgstr ""
-
-msgid "Birth year"
 msgstr ""
 
 msgid "Body"
@@ -875,11 +857,11 @@ msgid "COMMUNICATION types"
 msgstr ""
 
 msgid "COMPLEMENTARY_TRAINING"
-msgstr "Complementary training"
+msgstr "Further training"
 
 msgctxt "CategorieActivite"
 msgid "CONFERENCE"
-msgstr "Conference, symposium"
+msgstr "Conferences and symposiums"
 
 msgid "CONFERENCE PUBLICATION types"
 msgstr ""
@@ -888,22 +870,19 @@ msgid "CONFERENCE types"
 msgstr ""
 
 msgid "CONFIRMATION_PAPER"
-msgstr "Confirmation paper"
+msgstr "Confirmation exam"
 
 msgid "CONFIRMATION_TO_BE_REPEATED"
-msgstr "Confirmation to be repeated"
+msgstr "Repeat confirmation exam"
 
 msgctxt "CategorieActivite"
 msgid "COURSE"
-msgstr "Courses taken"
+msgstr "Course units, courses and schools"
 
 msgid "COURSE types"
 msgstr ""
 
 msgid "COURSE types for complementary training"
-msgstr ""
-
-msgid "CSC - China Scholarship Council"
 msgstr ""
 
 msgid "CSS class"
@@ -1089,9 +1068,11 @@ msgstr ""
 msgid "Certificate"
 msgstr ""
 
+msgid "Certificate for children of staff"
+msgstr ""
+
 msgid ""
-"Certificate justifying your activity, mentioning this activity, for the "
-"specified period"
+"Certificate justifying and mentioning your activity for the period concerned"
 msgstr ""
 
 msgid "Certificate of achievement"
@@ -1115,31 +1096,29 @@ msgstr ""
 msgid "Certificate of participation in the presentation"
 msgstr ""
 
-msgid "Certificate of regular enrolment"
+msgid "Certificate of passing the bachelor's course entrance exam"
 msgstr ""
 
-msgid ""
-"Certificate of successful completion of the admission test for the first "
-"cycle of higher education"
+msgid "Certificate of regular enrolment"
 msgstr ""
 
 msgid "Certificate of support from the CPAS"
 msgstr ""
 
-msgid "Certificate stating the absence of debts towards the institute"
+msgid "Certificate stating no debts to the institution"
 msgstr ""
 
 #, python-format
 msgid ""
-"Certificate stating the absence of debts towards the institution attended "
-"during the academic year %(academic_year)s: %(names)s"
+"Certificate stating no debts to the institution attended during the academic "
+"year %(academic_year)s: %(names)s"
 msgid_plural ""
-"Certificates stating the absence of debts towards the institutions attended "
-"during the academic year %(academic_year)s: %(names)s"
+"Certificates stating no debts to the institutions attended during the "
+"academic year %(academic_year)s: %(names)s"
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "Certificate, with dates, justifying the specified period"
+msgid "Certificate, with dates, justifying the period concerned"
 msgstr ""
 
 #, python-format
@@ -1150,7 +1129,19 @@ msgstr ""
 msgid "Change <em>%(name)s</em> custom mail template"
 msgstr ""
 
-msgid "Checkboxes"
+msgid "Change of enrolment"
+msgstr ""
+
+msgid "Change of enrolment form"
+msgstr ""
+
+msgid "Change the paper for this residency"
+msgstr ""
+
+msgid "Change the paper for this seminar"
+msgstr ""
+
+msgid "Change the publication for this conference"
 msgstr ""
 
 msgid "Checklist"
@@ -1162,7 +1153,16 @@ msgstr ""
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr ""
 
-msgid "Chosen assimilation"
+msgid "China Scholarship Council (CSC)"
+msgstr ""
+
+msgid "Choice of joint supervision is not yet defined"
+msgstr ""
+
+msgid "Choose your course"
+msgstr ""
+
+msgid "Chosen Belgian student status"
 msgstr ""
 
 msgid "Citizenship"
@@ -1172,6 +1172,9 @@ msgid "City"
 msgstr ""
 
 msgid "Civil status"
+msgstr ""
+
+msgid "Clinical Research Fund (FRC)"
 msgstr ""
 
 msgid "Close"
@@ -1190,7 +1193,7 @@ msgstr ""
 msgid "Comment about jury"
 msgstr ""
 
-msgid "Comment from CDD manager"
+msgid "Comment for PhD Committee manager"
 msgstr ""
 
 msgid "Comment to the candidate:"
@@ -1201,6 +1204,9 @@ msgstr ""
 
 msgctxt "tab"
 msgid "Comments"
+msgstr ""
+
+msgid "Commitment and declaration"
 msgstr ""
 
 msgid "Communication attestation"
@@ -1218,9 +1224,6 @@ msgstr ""
 msgid "Communication with your secondary school"
 msgstr ""
 
-msgid "Community of education"
-msgstr ""
-
 msgid "Complementary training"
 msgstr ""
 
@@ -1230,7 +1233,7 @@ msgstr ""
 msgid "Complementary training proposition"
 msgstr ""
 
-msgid "Completed (by student) for FAC"
+msgid "Completed (by student) for Fac"
 msgstr ""
 
 msgid "Completed (by student) for SIC"
@@ -1274,19 +1277,28 @@ msgstr ""
 msgid "Confirmation date:"
 msgstr ""
 
-msgid "Confirmation paper"
+msgid "Confirmation deadline"
 msgstr ""
 
-msgid "Confirmation paper not completed."
+msgid "Confirmation deadline:"
 msgstr ""
 
-msgid "Confirmation paper not found."
+msgid "Confirmation exam"
+msgstr ""
+
+msgid "Confirmation exam date"
+msgstr ""
+
+msgid "Confirmation exam date:"
+msgstr ""
+
+msgid "Confirmation exam not completed."
+msgstr ""
+
+msgid "Confirmation exam not found."
 msgstr ""
 
 msgid "Confirmation success attestation"
-msgstr ""
-
-msgid "Confirmed application (by student)"
 msgstr ""
 
 msgid ""
@@ -1295,10 +1307,6 @@ msgid ""
 msgstr ""
 
 msgid "Contact"
-msgstr ""
-
-msgctxt "admission"
-msgid "Contact address"
 msgstr ""
 
 msgid "Contact details"
@@ -1325,136 +1333,127 @@ msgstr ""
 msgid "Coordinates"
 msgstr ""
 
-msgid ""
-"Copy of 6 salary slips issued in the 12 months preceding the application"
+msgid "Copy of \"orange card\" enrolment certificate"
 msgstr ""
 
-msgid "Copy of both sides of the A or B Card"
-msgstr ""
-
-msgid ""
-"Copy of both sides of the A or B card (with \"refugee\" written on the back "
-"of the card)"
-msgstr ""
-
-msgid ""
-"Copy of both sides of the Certificate of Registration in the Register of "
-"Foreigners CIRE - unlimited stay (B card) or copy of the foreigner's card - "
-"unlimited stay (C or K card)"
-msgstr ""
-
-msgid "Copy of both sides of the EC long-term resident card (D or L card)"
-msgstr ""
-
-#, python-format
-msgid "Copy of both sides of the identity card of %(person_concerned)s"
-msgstr ""
-
-msgid ""
-"Copy of both sides of the identity document proving the long-term stay in a "
-"member state of the European Union"
+msgid "Copy of 6 payslips issued in the 12 months preceding application"
 msgstr ""
 
 #, python-format
 msgid ""
-"Copy of both sides of the long-term residence permit in Belgium of "
-"%(person_concerned)s (B, C, D, F, F+, K, L or M cards)"
+"Copy of 6 payslips issued in the 12 months preceding application or proof of "
+"receipt of unemployment benefit, pension or allowance from a mutual "
+"insurance company of %(person_concerned)s"
 msgstr ""
 
 msgid ""
-"Copy of both sides of the permanent residence card of a family member of a "
-"European Union citizen (F+ card)"
-msgstr ""
-
-msgid ""
-"Copy of both sides of the residence card of a family member of a European "
-"Union citizen (F card)"
-msgstr ""
-
-msgid "Copy of both sides of the residence permit in Belgium"
-msgstr ""
-
-msgid "Copy of both sides of the residence permit valid for more than 3 months"
+"Copy of Annex 25 or 26 completed by the Office of the Commissioner General "
+"for Refugees and Stateless Persons"
 msgstr ""
 
 #, python-format
 msgid ""
-"Copy of both sides of the residence permit valid for more than 3 months of "
+"Copy of Annex 25 or 26 or A/B Card indicating refugee status or copy of "
+"Foreign Nationals Office decision confirming temporary/subsidiary protection "
+"of %(person_concerned)s or copy of official Foreign Nationals Office or "
+"municipality document proving the stateless status of %(person_concerned)s"
+msgstr ""
+
+msgid ""
+"Copy of Foreign Nationals Office decision granting subsidiary protection"
+msgstr ""
+
+msgid "Copy of Foreign Nationals Office decision granting temporary protection"
+msgstr ""
+
+msgid "Copy of both sides of A or B Card"
+msgstr ""
+
+msgid "Copy of both sides of A or B Card (with \"refugee\" on card back)"
+msgstr ""
+
+msgid ""
+"Copy of both sides of Certificate of Registration in the Foreigners Registry "
+"(CIRE), unlimited stay (B Card), or of Foreign National's Card, unlimited "
+"stay (C or K Card)"
+msgstr ""
+
+msgid "Copy of both sides of EC long-term resident card (D or L Card)"
+msgstr ""
+
+#, python-format
+msgid "Copy of both sides of identity card of %(person_concerned)s"
+msgstr ""
+
+msgid ""
+"Copy of both sides of identity document proving long-term residence in a "
+"European Union member state"
+msgstr ""
+
+#, python-format
+msgid ""
+"Copy of both sides of long-term residence permit in Belgium of "
+"%(person_concerned)s (B, C, D, F, F+, K, L or M Card)"
+msgstr ""
+
+msgid ""
+"Copy of both sides of permanent residence card of a family member of a "
+"European Union citizen (F+ Card)"
+msgstr ""
+
+msgid ""
+"Copy of both sides of residence permit for a family member of a European "
+"Union citizen (F Card)"
+msgstr ""
+
+msgid "Copy of both sides of residence permit in Belgium"
+msgstr ""
+
+msgid "Copy of both sides of residence permit valid for more than 3 months"
+msgstr ""
+
+#, python-format
+msgid ""
+"Copy of both sides of residence permit valid for more than 3 months of "
 "%(person_concerned)s"
 msgstr ""
 
-#, python-format
 msgid ""
-"Copy of the 6 salary slips issued in the 12 months preceding the application "
-"for registration or proof of receipt of unemployment benefit, pension or an "
-"indemnity from the mutual insurance company of %(person_concerned)s"
+"Copy of both sides of the definitive equivalency decision (accompanied, "
+"where applicable, by the DAES or undergraduate exam, in the case of "
+"restrictive equivalency)"
 msgstr ""
 
 msgid ""
-"Copy of the Annex 25 or 26 completed by the Office of the Commissioner "
-"General for Refugees and Stateless Persons"
+"Copy of both sides of the definitive equivalency decision by the Ministry of "
+"the French-speaking Community of Belgium (possibly accompanied by the DAES "
+"or the undergraduate studies exam, if your equivalency does not confer "
+"eligibility for the desired programme)"
 msgstr ""
 
-#, python-format
-msgid ""
-"Copy of the Annex 25 or 26 or the A/B card mentioning the refugee status or "
-"copy of the decision of the Foreigners' Office confirming the temporary/"
-"subsidiary protection of %(person_concerned)s or copy of the official "
-"document from the municipality or the Foreigners' Office proving the "
-"stateless status of %(person_concerned)s"
+msgid "Copy of decision to grant CFWB scholarship"
 msgstr ""
 
 msgid ""
-"Copy of the certificate of scholarship holder issued by the General "
+"Copy of equivalency decision issued by the French Community of Belgium "
+"making your bachelor's diploma (bac+5) equivalent to the academic rank of a "
+"corresponding master's degree."
+msgstr ""
+
+msgid "Copy of guardianship appointment legalised by Belgian authorities"
+msgstr ""
+
+msgid ""
+"Copy of holder's certificate of scholarship issued by the General "
 "Administration for Development Cooperation"
 msgstr ""
 
 msgid ""
-"Copy of the decision of the Foreigners' Office confirming the granting of "
-"subsidiary protection"
-msgstr ""
-
-msgid ""
-"Copy of the decision of the Foreigners' Office confirming the granting of "
-"temporary protection"
-msgstr ""
-
-msgid "Copy of the decision to grant the scholarship from the CFWB"
-msgstr ""
-
-msgid ""
-"Copy of the equivalence decision delivered by the French Community of "
-"Belgium making your 2nd cycle diploma (bac+5) equivalent to the academic "
-"grade of a corresponding master."
-msgstr ""
-
-msgid "Copy of the registration certificate \"orange card\""
-msgstr ""
-
-msgid ""
-"Copy of the residence permit covering the entire course, including the "
-"evaluation test (except for courses organised online)"
-msgstr ""
-
-msgid "Copy of the tutorship act authenticated by the Belgian authorities"
+"Copy of residence permit covering entire course, including assessment test "
+"(except for online courses)."
 msgstr ""
 
 msgid "Cotutelle"
-msgstr ""
-
-msgid "Cotutelle convention"
-msgstr ""
-
-msgid "Cotutelle institution"
-msgstr ""
-
-msgid "Cotutelle is not defined yet"
-msgstr ""
-
-msgid "Cotutelle motivation"
-msgstr ""
-
-msgid "Cotutelle opening request"
 msgstr ""
 
 msgid "Cotutelle request document"
@@ -1466,31 +1465,56 @@ msgstr ""
 msgid "Country"
 msgstr ""
 
+msgid "Country of birth"
+msgstr ""
+
 msgid "Country of citizenship"
+msgstr ""
+
+msgid "Course"
+msgstr ""
+
+msgid "Course change"
+msgstr ""
+
+msgid "Course change asked by the candidate"
+msgstr ""
+
+msgid "Course change requested"
 msgstr ""
 
 msgid "Course choice"
 msgstr ""
 
-msgid "Course code (if needed)"
-msgstr ""
-
 msgid "Course completed"
 msgstr ""
 
-msgid "Course enrollment"
+msgid "Course name"
+msgstr ""
+
+msgctxt "admission"
+msgid "Course name"
 msgstr ""
 
 msgid "Course owner"
 msgstr ""
 
-msgid "Course owner if applicable"
+msgid "Course type"
 msgstr ""
 
-msgid "Course with evaluation"
+msgid "Course unit code (if applicable)"
 msgstr ""
 
-msgid "Courses"
+msgid "Course unit enrolment"
+msgstr ""
+
+msgid "Course unit instructor (if applicable)"
+msgstr ""
+
+msgid "Course unit with evaluation"
+msgstr ""
+
+msgid "Course units"
 msgstr ""
 
 msgid "Courses taken"
@@ -1521,10 +1545,10 @@ msgstr ""
 msgid "Creation date"
 msgstr ""
 
-msgid "Curriculum"
+msgid "Credits earned"
 msgstr ""
 
-msgid "Curriculum vitae detailed, dated and signed"
+msgid "Curriculum"
 msgstr ""
 
 msgid "Custom mail template"
@@ -1546,7 +1570,7 @@ msgid "DD/scholarship/EM?"
 msgstr ""
 
 msgid "DOCTORAL_TRAINING"
-msgstr "Doctoral training"
+msgstr "PhD training"
 
 msgid "Data protection"
 msgstr ""
@@ -1554,22 +1578,10 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-msgid "Date of confirmation"
-msgstr ""
-
-msgid "Date of confirmation:"
-msgstr ""
-
-msgid "Date of presentation"
-msgstr ""
-
-msgid "Date of the activity"
+msgid "Date of birth"
 msgstr ""
 
 msgid "Date of the confirmation paper (DD/MM/YYYY)"
-msgstr ""
-
-msgid "Date of the publication"
 msgstr ""
 
 msgid "Date the application is sent to the supervision group"
@@ -1579,12 +1591,6 @@ msgid "Deadline"
 msgstr ""
 
 msgid "Deadline extended"
-msgstr ""
-
-msgid "Deadline for confirmation"
-msgstr ""
-
-msgid "Deadline for confirmation:"
 msgstr ""
 
 msgid "Deadline for the candidate to upload documents"
@@ -1617,14 +1623,14 @@ msgstr ""
 msgid "Dedicated time (in EFT)"
 msgstr ""
 
+msgid "Defence date"
+msgstr ""
+
 msgid "Defense"
 msgstr ""
 
 msgctxt "doctorate tab"
 msgid "Defense"
-msgstr ""
-
-msgid "Defense date"
 msgstr ""
 
 msgid "Defense indicative date"
@@ -1655,10 +1661,11 @@ msgstr ""
 msgid "Delete?"
 msgstr ""
 
-msgid "Description"
-msgstr ""
+msgctxt "admission decision"
+msgid "Denied"
+msgstr "Rejetée"
 
-msgid "Description of the activity"
+msgid "Description"
 msgstr ""
 
 msgid "Description of your communication"
@@ -1667,19 +1674,25 @@ msgstr ""
 msgid "Designate the document as to be requested"
 msgstr ""
 
-msgid "Desired training"
-msgstr ""
-
 msgid "Detailed curriculum vitae"
 msgstr ""
 
-msgid "Did you graduate from this training?"
+msgid "Detailed curriculum vitae, dated and signed"
+msgstr ""
+
+msgid "Development cooperation (ARES)"
+msgstr ""
+
+msgid "Did you graduate from this course?"
 msgstr ""
 
 msgid "Diploma"
 msgstr ""
 
 msgid "Diploma equivalence"
+msgstr ""
+
+msgid "Diploma translation"
 msgstr ""
 
 msgid "Disabled"
@@ -1691,27 +1704,25 @@ msgstr ""
 msgid "Display according education"
 msgstr ""
 
-msgid "Dissent from reference promoter"
-msgstr ""
-
-msgid "Dissertation score"
+msgid "Dissertation mark"
 msgstr ""
 
 msgid "Dissertation summary"
 msgstr ""
 
+msgid "Dissertation title"
+msgstr ""
+
 msgid "Do not reorder values, and keep the same count"
 msgstr ""
 
-msgid "Do you have a high school diploma?"
+msgid "Do you have a Belgian National Register Number (NISS)?"
+msgstr ""
+
+msgid "Do you have a secondary school diploma?"
 msgstr ""
 
 msgid "Do you want to request the application fees now?"
-msgstr ""
-
-msgid ""
-"Do you wish to join the sports activities? If so, the cost of this "
-"membership will be added to your registration fee."
 msgstr ""
 
 #, python-format
@@ -1721,23 +1732,7 @@ msgstr ""
 msgid "Doctor"
 msgstr ""
 
-msgid "Doctoral program proposition"
-msgstr ""
-
-msgid "Doctoral project"
-msgstr ""
-
-msgctxt "tab"
-msgid "Doctoral project"
-msgstr ""
-
 msgid "Doctoral student:"
-msgstr ""
-
-msgid "Doctoral training"
-msgstr ""
-
-msgid "Doctorate"
 msgstr ""
 
 msgid "Doctorate admission"
@@ -1804,34 +1799,28 @@ msgstr ""
 msgid "Dossier status"
 msgstr ""
 
-msgid "Double degree scholarship"
-msgstr ""
-
 msgid "Double degree:"
 msgstr ""
 
 msgid "Double diplomation"
 msgstr ""
 
-msgid "Double or triple diplomation"
-msgstr ""
-
 msgid "Download the document"
 msgstr ""
 
-msgid "Dr."
+msgid "Dr"
+msgstr ""
+
+msgid "Dual degree scholarship"
+msgstr ""
+
+msgid "Dual or triple degree"
 msgstr ""
 
 msgid "Dutch"
 msgstr ""
 
-msgid "Dynamic questions about \"Specificities\" sub-tab"
-msgstr ""
-
-#, python-format
-msgid ""
-"E-mail requesting the application fees sent to the candidate on %(date)s by "
-"%(author)s."
+msgid "Dynamic questions about \"Specific aspects\" sub-tab"
 msgstr ""
 
 msgid "ECONOMY"
@@ -1859,52 +1848,36 @@ msgstr ""
 msgid "EFT"
 msgstr ""
 
-msgid "ERC - European Research Council"
-msgstr ""
-
 msgid "EU,NEU"
 msgstr ""
 
-msgid "Economic sciences"
+msgid "Economics"
 msgstr ""
 
 msgid "Edit"
 msgstr ""
 
 #, python-format
-msgid "Edit activity of type <em>%(category)s</em>"
+msgid "Edit <em>%(category)s</em> activity."
 msgstr ""
 
 msgid "Edit the communication of this conference"
-msgstr ""
-
-msgid "Edit the communication of this residency"
-msgstr ""
-
-msgid "Edit the communication of this seminar"
-msgstr ""
-
-msgid "Edit the publication of this conference"
 msgstr ""
 
 msgctxt "admission"
 msgid "Education"
 msgstr ""
 
-msgid "Education name"
-msgstr ""
-
-msgctxt "admission"
-msgid "Education name"
-msgstr ""
-
-msgid "Education type"
-msgstr ""
-
 msgid "Email"
 msgstr ""
 
 msgid "Email of the contact person for the design of the annual program"
+msgstr ""
+
+#, python-format
+msgid ""
+"Email requesting the application fees sent to the candidate on %(date)s by "
+"%(author)s."
 msgstr ""
 
 msgid ""
@@ -1918,11 +1891,6 @@ msgid ""
 msgstr ""
 
 msgid "Employer"
-msgstr ""
-
-msgid ""
-"Employment certificate from the employer, with dates, justifying the "
-"specified period"
 msgstr ""
 
 msgid "Enable complementary training tab"
@@ -1949,19 +1917,13 @@ msgstr ""
 msgid "Enroll in a course"
 msgstr ""
 
-msgid "Enrollment allowed"
-msgstr ""
-
-msgid "Enrollment denied"
-msgstr ""
-
-msgid "Enrollment in a bachelor with quota"
-msgstr ""
-
 msgid "Enrolment applications"
 msgstr ""
 
 msgid "Enrolment campus"
+msgstr ""
+
+msgid "Enrolment in limited enrolment bachelor's course"
 msgstr ""
 
 msgid "Enrolment management"
@@ -1985,22 +1947,25 @@ msgstr ""
 msgid "Erasmus Mundus scholarship"
 msgstr ""
 
-msgid "Erasmus mundus scholarship"
-msgstr ""
-
 msgid "Erasmus mundus:"
 msgstr ""
 
-msgid "Estimated time to complete the doctorate (in months)"
+msgid "Estimated time to complete the PhD (in months)"
+msgstr ""
+
+msgid "European Research Council (ERC)"
 msgstr ""
 
 msgid "European Union country"
 msgstr ""
 
-msgid "Evaluation type"
+msgid "Evaluation system"
 msgstr ""
 
 msgid "Event description"
+msgstr ""
+
+msgid "Event name"
 msgstr ""
 
 msgid "Event website"
@@ -2024,7 +1989,7 @@ msgstr ""
 msgid "Expected date of graduation"
 msgstr ""
 
-msgid "Expected date of graduation (signed document)"
+msgid "Expected graduation date (signed diploma)"
 msgstr ""
 
 msgid "Experiences"
@@ -2064,20 +2029,14 @@ msgstr ""
 msgid "FNRS"
 msgstr ""
 
-msgid "FRC - Fonds de recherche clinique"
-msgstr ""
-
 msgid "FREE_COURSE"
-msgstr "Free course"
+msgstr "Open course"
 
 msgid "FRESH"
 msgstr ""
 
 msgid "FRIA"
 msgstr ""
-
-msgid "FSR - Fonds Speciaux de Recherche"
-msgstr "FSR - Fonds Spéciaux de Recherche"
 
 msgid "Faculty approval certificate"
 msgstr ""
@@ -2100,7 +2059,7 @@ msgstr ""
 msgid "Failure of the test"
 msgstr ""
 
-msgid "Feedback from FAC"
+msgid "Feedback from Fac"
 msgstr ""
 
 msgid "Female"
@@ -2115,9 +2074,6 @@ msgid "Female"
 msgstr ""
 
 msgid "File"
-msgstr ""
-
-msgid "File MIME types"
 msgstr ""
 
 msgid "File name"
@@ -2136,22 +2092,10 @@ msgstr ""
 msgid "Financeability view"
 msgstr ""
 
-msgid "Financing"
-msgstr ""
-
-msgid "Financing type"
-msgstr ""
-
 msgid "First name"
 msgstr ""
 
 msgid "First name and last name"
-msgstr ""
-
-msgid "First name in use"
-msgstr ""
-
-msgid "First name of the account holder"
 msgstr ""
 
 msgid "First year of"
@@ -2171,11 +2115,14 @@ msgid ""
 "of the work and announces:"
 msgstr ""
 
-msgid "Fondation Mont Godinne"
+msgid "Fondation Mont-Godinne"
 msgstr ""
 
-msgid "Fondation St Luc"
+msgid "Fondation Saint-Luc"
 msgstr ""
+
+msgid "Fonds Speciaux de Recherche (FSR)"
+msgstr "Fonds Spéciaux de Recherche (FSR)"
 
 msgid ""
 "For a message, it is possible to specify the CSS class that we want to apply "
@@ -2259,6 +2206,16 @@ msgstr ""
 msgid "Full-time equivalent (as %)"
 msgstr ""
 
+msgctxt "curriculum"
+msgid "Function"
+msgstr ""
+
+msgid "Funding"
+msgstr ""
+
+msgid "Funding type"
+msgstr ""
+
 msgid "GEOGRAPHY"
 msgstr "Geography"
 
@@ -2274,7 +2231,7 @@ msgstr "Management in progress"
 msgid "GEST_REUSSITE"
 msgstr "Management success"
 
-msgid "Gantt graph"
+msgid "Gantt chart"
 msgstr ""
 
 msgid "Gender"
@@ -2319,43 +2276,37 @@ msgstr ""
 msgid "Global SIC comments"
 msgstr ""
 
-msgid "Graduate degree"
-msgstr ""
-
-msgid "Graduate degree translation"
+msgid "Grade"
 msgstr ""
 
 msgid "Greek"
+msgstr ""
+
+msgid "Grounds for denied"
 msgstr ""
 
 msgid "HTML"
 msgstr ""
 
 msgid ""
-"Has this diploma been subject to a decision of equivalence provided by the "
-"French-speaking community of Belgium?"
+"Has this diploma been recognised as equivalent by the French Community of "
+"Belgium?"
 msgstr ""
 
 msgid ""
-"Have you applied for a study allowance from the French Community of Belgium?"
+"Have you applied for a student grant from the French Community of Belgium?"
 msgstr ""
 
-msgid "Have you ever started or completed a PhD?"
+msgid "Have you previously enrolled at UCLouvain?"
 msgstr ""
 
-msgid "Have you got a Belgian national registry number (SSIN)?"
-msgstr ""
-
-msgid "Have you previously been registered at UCLouvain?"
+msgid "Have you previously enrolled for a PhD?"
 msgstr ""
 
 msgid "Head office name"
 msgstr ""
 
 msgid "Help text"
-msgstr ""
-
-msgid "High school diploma"
 msgstr ""
 
 msgid ""
@@ -2369,23 +2320,23 @@ msgstr ""
 msgid "Household composition or the marriage certificate"
 msgstr ""
 
-msgid "Household composition, or a copy of your birth certificate"
+msgid "Household composition, or copy of your birth certificate"
 msgstr ""
 
 msgid "I am a long-term resident in the European Union outside Belgium"
 msgstr ""
 
 msgid ""
-"I am a long-term resident in the European Union outside Belgium "
-"(assimilation 7)"
+"I am a long-term resident of the European Union outside Belgium (Belgian "
+"student status category 7)"
 msgstr ""
 
 msgid "I am a refugee"
 msgstr ""
 
 msgid ""
-"I am a refugee, stateless person, or have been granted a subsidiary or "
-"temporary protection (assimilation 2)"
+"I am a refugee or stateless person or have subsidiary/temporary protection "
+"(Belgian student status category 2)"
 msgstr ""
 
 msgid "I am an asylum seeker"
@@ -2406,12 +2357,12 @@ msgid ""
 msgstr ""
 
 msgid ""
-"I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS"
+"I am supported by the CPAS or by a CPAS home or nominated by the CPAS "
+"(Belgian student status category 4)"
 msgstr ""
 
 msgid ""
-"I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS "
-"(assimilation 4)"
+"I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS"
 msgstr ""
 
 msgid "I authorise"
@@ -2431,63 +2382,65 @@ msgid ""
 "level of protection of this data."
 msgstr ""
 
-msgid "I benefit from a Development Cooperation grant"
-msgstr ""
-
-msgid ""
-"I benefit from a grant covered by the paragraph 2 of article 105 of the "
-"decree of 7 November 2013 (assimilation 6)"
-msgstr ""
-
-msgid ""
-"I benefit from a grant given by the study allowance service of the French "
-"Community"
-msgstr ""
-
-msgid "I benefit from subsidiary protection"
-msgstr ""
-
-msgid "I benefit from temporary protection"
-msgstr ""
-
 msgid "I declare on my honour that"
 msgstr ""
 
 msgid "I do not authorize"
 msgstr ""
 
-msgid "I have a foreigner's card"
+msgid "I have a Development Cooperation scholarship"
+msgstr ""
+
+msgid "I have a foreign national card"
 msgstr ""
 
 msgid "I have a long-term resident card"
 msgstr ""
 
 msgid ""
-"I have a permanent residence card as a family member of a European Union "
+"I have a permanent resident card as a family member of a European Union "
 "citizen"
 msgstr ""
 
-msgid "I have a residence card as a family member of an EU citizen."
-msgstr ""
-
 msgid ""
-"I have a residence permit for more than 3 months, and I also have "
-"professional or replacement income (assimilation 3)"
-msgstr ""
-
-msgid ""
-"I have a residence permit for more than 3 months, and I have a professional "
+"I have a residence permit valid for more than 3 months and earn professional "
 "income"
 msgstr ""
 
 msgid ""
-"I have a residence permit for more than 3 months, and I receive a "
-"replacement income"
+"I have a residence permit valid for more than 3 months and earn replacement "
+"income"
 msgstr ""
 
 msgid ""
-"I have a settlement permit or I am a long-term resident in Belgium "
-"(assimilation 1)"
+"I have a residence permit valid for more than 3 months and receive "
+"professional or replacement income (Belgian student status category 3)"
+msgstr ""
+
+msgid "I have a resident card as a family member of a European Union citizen."
+msgstr ""
+
+msgid ""
+"I have a scholarship as referred to in Article 105 S 2 of the Decree of 7 "
+"November 2013 (CFWB or Development Cooperation) (Belgian student status "
+"category 6)"
+msgstr ""
+"I have a scholarship as referred to in Article 105 § 2 of the Decree of 7 "
+"November 2013 (CFWB or Development Cooperation) (Belgian student status "
+"category 6)"
+
+msgid "I have a scholarship from the French Community student grant service"
+msgstr ""
+
+msgid ""
+"I have a settlement permit or am a long-term resident in Belgium (Belgian "
+"student status category 1)"
+msgstr ""
+
+msgid "I have been granted subsidiary protection"
+msgstr ""
+
+msgid "I have been granted temporary protection"
 msgstr ""
 
 msgid ""
@@ -2507,7 +2460,8 @@ msgid ""
 "and accept that my application will be closed."
 msgstr ""
 
-msgid "I wish to receive my mail at an address other than my legal address"
+msgid ""
+"I would like to receive my mail at an address other than my legal address"
 msgstr ""
 
 msgid "IBAN account number"
@@ -2537,6 +2491,12 @@ msgstr ""
 msgid "Identification"
 msgstr ""
 
+msgid "Identification photo"
+msgstr ""
+
+msgid "Identification photo of the candidate"
+msgstr ""
+
 msgid "Identifier"
 msgstr ""
 
@@ -2546,15 +2506,12 @@ msgstr ""
 msgid "Identity card number"
 msgstr ""
 
+msgid "Identity document"
+msgstr ""
+
 msgid ""
 "Identity document proving the long-term stay in a member state of the "
 "European Union"
-msgstr ""
-
-msgid "Identity picture"
-msgstr ""
-
-msgid "Identity picture of the candidate"
 msgstr ""
 
 msgid ""
@@ -2566,8 +2523,8 @@ msgid "If other, specify"
 msgstr ""
 
 msgid ""
-"If you submit the activity, you will no longer be able to modify the "
-"seminar, nor the different activities within it."
+"If you submit the activity, you will no longer be able to modify the seminar "
+"or the various activities within it."
 msgstr ""
 
 msgid ""
@@ -2616,13 +2573,10 @@ msgid ""
 "academic year %(year)s."
 msgstr ""
 
-msgid "In draft"
+msgid "In draft form"
 msgstr ""
 
 msgid "In person"
-msgstr ""
-
-msgid "In review"
 msgstr ""
 
 msgid ""
@@ -2679,6 +2633,9 @@ msgstr ""
 msgid "International:"
 msgstr ""
 
+msgid "Internship certificate, with dates, justifying the period concerned"
+msgstr ""
+
 msgid "Internship framework agreement"
 msgstr ""
 
@@ -2709,7 +2666,7 @@ msgstr ""
 msgid "Is belgian bachelor"
 msgstr ""
 
-msgid "Is it an institution of the Wallonia-Brussels Federation?"
+msgid "Is it a Wallonia-Brussels Federation institution?"
 msgstr ""
 
 msgid "Is non-resident (as defined in decree)"
@@ -2733,7 +2690,16 @@ msgstr ""
 msgid "JURY_SOUMIS"
 msgstr ""
 
-msgid "Journal"
+msgid "Joint research project (ARC)"
+msgstr ""
+
+msgid "Joint supervision agreement"
+msgstr ""
+
+msgid "Joint supervision request"
+msgstr ""
+
+msgid "Journal or publishing house name"
 msgstr ""
 
 msgid "Jury approval"
@@ -2751,10 +2717,13 @@ msgstr ""
 msgid "Keywords"
 msgstr ""
 
+msgid "Knowledge of languages"
+msgstr ""
+
 msgid "Language"
 msgstr ""
 
-msgid "Languages knowledge"
+msgid "Language regime"
 msgstr ""
 
 msgid "Last hour views:"
@@ -2769,19 +2738,13 @@ msgstr ""
 msgid "Last modification (author)"
 msgstr ""
 
-msgid "Last name"
+msgid "Last name / First name / Email"
 msgstr ""
 
-msgid "Last name / First name / E-mail"
-msgstr ""
-
-msgid "Last name / First name / E-mail / NOMA"
+msgid "Last name / First name / Email / NOMA"
 msgstr ""
 
 msgid "Last name / First name / Global id"
-msgstr ""
-
-msgid "Last name of the account holder"
 msgstr ""
 
 msgid "Last registration year"
@@ -2796,16 +2759,31 @@ msgstr ""
 msgid "Latin"
 msgstr ""
 
+msgid "Lead supervisor"
+msgstr ""
+
+msgid "Lead supervisor approval"
+msgstr ""
+
+msgid "Lead supervisor assent"
+msgstr ""
+
+msgid "Lead supervisor comment"
+msgstr ""
+
 msgid "Learning unit"
 msgstr ""
 
-msgid "Leave the page?"
+msgid "Leave page?"
 msgstr ""
 
 msgid "Legal cohabitation certificate"
 msgstr ""
 
-msgid "Linguistic regime"
+msgid "Legal domicile"
+msgstr ""
+
+msgid "Letters of recommendation"
 msgstr ""
 
 msgid "Link to the admission (back-office)"
@@ -2880,6 +2858,9 @@ msgid "MATHEMATICS"
 msgstr "Mathematics"
 
 msgid "MEMBRE"
+msgstr ""
+
+msgid "MIME file types"
 msgstr ""
 
 msgid "Madam"
@@ -3092,6 +3073,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"Mandatory fields are missing in the specific questions of the 'Course "
+"choice' tab"
+msgstr ""
+
+msgid ""
 "Mandatory fields are missing in the specific questions of the 'Previous "
 "Experience > Curriculum vitae' tab."
 msgstr ""
@@ -3099,11 +3085,6 @@ msgstr ""
 msgid ""
 "Mandatory fields are missing in the specific questions of the 'Previous "
 "experience > Secondary studies' tab"
-msgstr ""
-
-msgid ""
-"Mandatory fields are missing in the specific questions of the 'Training "
-"choice' tab"
 msgstr ""
 
 msgid "Mandatory languages are missing."
@@ -3128,6 +3109,9 @@ msgid "Member of supervision group not invited."
 msgstr ""
 
 msgid "Members"
+msgstr ""
+
+msgid "Memberships"
 msgstr ""
 
 msgid "Membre CA not found."
@@ -3188,6 +3172,9 @@ msgstr ""
 msgid "Motivation"
 msgstr ""
 
+msgid "Motivation for joint supervision"
+msgstr ""
+
 #, python-format
 msgid "Move the doctorate to the \"%(status)s\" state?"
 msgstr ""
@@ -3211,16 +3198,16 @@ msgid "My father"
 msgstr ""
 
 msgid ""
-"My father, mother, legal tutor, spouse or legal cohabitant has the "
-"nationality of a country of a Member State of the European Union, or "
-"fulfills the conditions referred to by one of the assimilations from 1 to 4 "
-"(assimilation 5)"
+"My father, mother, legal guardian, spouse or legal cohabitant has the "
+"nationality of a country of a European Union member state, or fulfils the "
+"conditions covered by one of the Belgian student statuses from 1 to 4 "
+"(Belgian student status 5)"
 msgstr ""
 
 msgid "My legal cohabitant"
 msgstr ""
 
-msgid "My legal tutor"
+msgid "My legal guardian"
 msgstr ""
 
 msgid "My mother"
@@ -3233,7 +3220,7 @@ msgid "N/A"
 msgstr ""
 
 msgid "NO"
-msgstr ""
+msgstr "No"
 
 msgid "NON_SOUMISE"
 msgstr ""
@@ -3250,22 +3237,16 @@ msgstr ""
 msgid "Name in the language of the manifestation"
 msgstr ""
 
-msgid "Name of the activity"
-msgstr ""
-
 msgid "Name of the contact person for the design of the annual program"
-msgstr ""
-
-msgid "Name of the event"
 msgstr ""
 
 msgid "Name of the management entity"
 msgstr ""
 
-msgid "Name of the manifestation"
+msgid "Nationality"
 msgstr ""
 
-msgid "Nationality"
+msgid "Negative assessment by lead supervisor"
 msgstr ""
 
 msgid "New deadline"
@@ -3293,9 +3274,6 @@ msgstr ""
 msgid "No continuing enrolment"
 msgstr ""
 
-msgid "No cotutelle"
-msgstr ""
-
 msgid "No defense reason"
 msgstr ""
 
@@ -3314,10 +3292,13 @@ msgstr ""
 msgid "No general enrolment"
 msgstr ""
 
+msgid "No joint supervision"
+msgstr ""
+
 msgid "No jury found."
 msgstr ""
 
-msgid "No languages knowledge provided."
+msgid "No knowledge of languages provided."
 msgstr ""
 
 msgid "No longer designate the document as to be requested"
@@ -3353,7 +3334,7 @@ msgstr ""
 msgid "Non-retrievable document"
 msgstr ""
 
-msgid "None of these proposals are relevant to me"
+msgid "None of these are relevant to me"
 msgstr ""
 
 msgid "Not Belgian"
@@ -3411,9 +3392,6 @@ msgstr "Other"
 msgid "Obtained grade"
 msgstr ""
 
-msgid "Obtained mention"
-msgstr ""
-
 msgid "Offer:"
 msgstr ""
 
@@ -3442,19 +3420,19 @@ msgstr ""
 msgid "Opinion of the CA following the format provided by the CDD"
 msgstr ""
 
-msgid "Opinion on the renewal of the research mandate"
+msgid "Opinion on research mandate renewal"
 msgstr ""
 
 msgid "Oral communication"
 msgstr ""
 
-msgid "Oral expose"
+msgid "Oral presentation"
 msgstr "Oral exposé"
 
-msgid "Organizing country"
+msgid "Organising country"
 msgstr ""
 
-msgid "Organizing institution"
+msgid "Organising institution"
 msgstr ""
 
 msgid "Other"
@@ -3467,13 +3445,19 @@ msgstr ""
 msgid "Other cotutelle-related documents"
 msgstr ""
 
-msgid "Other documents concerning cotutelle"
+msgid "Other course"
+msgstr ""
+
+msgid "Other course accepted by the faculty"
+msgstr ""
+
+msgid "Other documents relating to joint supervision"
 msgstr ""
 
 msgid "Other faculty refusal reason"
 msgstr ""
 
-msgid "Other first names"
+msgid "Other given names"
 msgstr ""
 
 msgid "Other information about prerequisite courses"
@@ -3491,16 +3475,7 @@ msgstr ""
 msgid "Other members of the supervisory panel"
 msgstr ""
 
-msgid "Other names"
-msgstr ""
-
 msgid "Other reason"
-msgstr ""
-
-msgid "Other training"
-msgstr ""
-
-msgid "Other training accepted by the faculty"
 msgstr ""
 
 msgid "Others"
@@ -3514,7 +3489,7 @@ msgid "PARTIAL"
 msgstr "Partially"
 
 msgid "PASSED_CONFIRMATION"
-msgstr "Passed confirmation"
+msgstr "Passed confirmation exam"
 
 msgid "PDF Export"
 msgstr ""
@@ -3544,17 +3519,17 @@ msgid "PRE_ADMISSION"
 msgstr "Pre-admission"
 
 msgid "PRIVATE_DEFENSE"
-msgstr ""
+msgstr "Private defence"
 
 msgctxt "CategorieActivite"
 msgid "PUBLICATION"
-msgstr "Publications"
+msgstr "Publication"
 
 msgid "PUBLICATION types"
 msgstr ""
 
 msgid "PUBLIC_DEFENSE"
-msgstr ""
+msgstr "Public defence"
 
 msgid "Page"
 msgstr ""
@@ -3592,22 +3567,19 @@ msgstr ""
 msgid "Participation to symposium/conference"
 msgstr ""
 
+msgid "Partner institution"
+msgstr ""
+
 msgid "Passport"
 msgstr ""
 
 msgid "Passport number"
 msgstr ""
 
-msgid "Past confirmation papers"
-msgstr ""
-
 msgid "Payed"
 msgstr ""
 
 msgid "Pending application fees"
-msgstr ""
-
-msgid "Pending validation from management"
 msgstr ""
 
 msgid "Permanent residence card of a family member of a European Union citizen"
@@ -3619,11 +3591,27 @@ msgstr ""
 msgid "Personal data"
 msgstr ""
 
+msgctxt "admission"
+msgid "Personal email"
+msgstr ""
+
+msgid "PhD"
+msgstr ""
+
 msgid "PhD already done"
 msgstr ""
 
-msgctxt "admission"
-msgid "Phone (GSM/mobile)"
+msgctxt "tab"
+msgid "PhD project"
+msgstr ""
+
+msgid "PhD proposal"
+msgstr ""
+
+msgid "PhD research project"
+msgstr ""
+
+msgid "PhD training"
 msgstr ""
 
 msgid "Physic"
@@ -3634,6 +3622,9 @@ msgid "Place"
 msgstr ""
 
 msgid "Place (optional)"
+msgstr ""
+
+msgid "Place of birth"
 msgstr ""
 
 msgid ""
@@ -3649,7 +3640,7 @@ msgstr ""
 
 msgid ""
 "Please check the details of the activity (and sub-activities) to fill in all "
-"mandatory fields"
+"the mandatory fields"
 msgstr ""
 
 msgid ""
@@ -3671,7 +3662,7 @@ msgstr ""
 
 msgid ""
 "Please fill in all the required information in the 'Previous experience > "
-"Languages knowledge' tab."
+"Knowledge of languages' tab."
 msgstr ""
 
 msgid ""
@@ -3682,9 +3673,9 @@ msgid "Please fill in at least your last or first name."
 msgstr ""
 
 msgid ""
-"Please indicate your other first names in accordance with your identity "
-"document. If no other first name is mentioned on your identity document, you "
-"don't need to indicate anything."
+"Please indicate your other given names in accordance with your identity "
+"document. If there are no other given names on your identity document, you "
+"do not need to enter anything."
 msgstr ""
 
 msgid "Please justify why the member does not have a doctor title"
@@ -3709,7 +3700,7 @@ msgstr ""
 msgid "Please provide a copy of your passport."
 msgstr ""
 
-msgid "Please provide one of these two identification information:"
+msgid "Please provide one of these two pieces of identification information:"
 msgstr ""
 
 msgid ""
@@ -3731,16 +3722,20 @@ msgstr ""
 msgid "Please specify your Belgian national register number."
 msgstr ""
 
-msgid "Please specify your old NOMA (registration id)."
+msgid "Please specify your old NOMA (matriculation number)."
 msgstr ""
 
 msgid "Post-enrolment status"
 msgstr ""
 
+msgctxt "admission"
+msgid "Postal address"
+msgstr ""
+
 msgid "Postal box"
 msgstr ""
 
-msgid "Postal code"
+msgid "Postcode"
 msgstr ""
 
 msgid "Poster"
@@ -3752,7 +3747,13 @@ msgstr ""
 msgid "Pre-admission submission date"
 msgstr ""
 
+msgid "Preferred first name"
+msgstr ""
+
 msgid "Prerequisite courses"
+msgstr ""
+
+msgid "Presentation date"
 msgstr ""
 
 msgid "President"
@@ -3775,6 +3776,9 @@ msgstr ""
 msgid "Preview <em>%(name)s</em> custom mail template"
 msgstr ""
 
+msgid "Previous confirmation exams"
+msgstr ""
+
 msgid "Previous experience"
 msgstr ""
 
@@ -3785,10 +3789,6 @@ msgid "Previous research experience"
 msgstr ""
 
 msgid "Private"
-msgstr ""
-
-msgctxt "admission"
-msgid "Private email"
 msgstr ""
 
 msgid "Processing by Fac"
@@ -3815,12 +3815,6 @@ msgstr ""
 msgid "Project title"
 msgstr ""
 
-msgid "Promoter"
-msgstr ""
-
-msgid "Promoter not found."
-msgstr ""
-
 msgid "Promoters"
 msgstr ""
 
@@ -3830,16 +3824,21 @@ msgstr ""
 msgid "Proof"
 msgstr ""
 
-msgid "Proof (if needed)"
+msgid "Proof (if applicable)"
+msgstr ""
+
+msgid "Proof of acceptance or publication"
 msgstr ""
 
 msgid "Proof of acceptation by the committee"
 msgstr ""
 
-msgid "Proof of acceptation or publication"
+msgid ""
+"Proof of employment from the employer, with dates, justifying the period in "
+"question"
 msgstr ""
 
-msgid "Proof of identity"
+msgid "Proof of equivalency request"
 msgstr ""
 
 msgid "Proof of participation for the whole activity"
@@ -3862,7 +3861,7 @@ msgstr ""
 msgid "Proof of regular registration"
 msgstr ""
 
-msgid "Proof of the final equivalence decision"
+msgid "Proof of scholarship"
 msgstr ""
 
 msgid "Proposed new deadline"
@@ -3919,7 +3918,16 @@ msgid ""
 "CDE, CLSM or CDSS"
 msgstr ""
 
+msgid "Publication date"
+msgstr ""
+
 msgid "Publication status"
+msgstr ""
+
+msgid "Publication title"
+msgstr ""
+
+msgid "Publication type"
 msgstr ""
 
 msgid "Publications"
@@ -3939,14 +3947,14 @@ msgid ""
 msgstr ""
 
 msgid "REFUSEE"
-msgstr "Declined"
+msgstr "Denied"
 
 msgid "REJECTED"
 msgstr "Rejected"
 
 msgctxt "CategorieActivite"
 msgid "RESIDENCY"
-msgstr "Research residency"
+msgstr "Advanced research residency"
 
 msgid "RESIDENCY types"
 msgstr ""
@@ -3973,20 +3981,17 @@ msgstr ""
 msgid "Received"
 msgstr ""
 
-msgid "Recent certificate of support from the CPAS"
+msgid "Recent CPAS certificate of coverage"
 msgstr ""
 
 #, python-format
-msgid "Recent certificate of support from the CPAS of %(person_concerned)s"
+msgid "Recent CPAS certificate of coverage for %(person_concerned)s"
 msgstr ""
 
 msgid "Recipient"
 msgstr ""
 
-msgid "Recommendation letters"
-msgstr ""
-
-msgid "Reduced registration fees"
+msgid "Reduced tuition fee"
 msgstr ""
 
 msgid "Reduction"
@@ -4004,15 +4009,6 @@ msgid "Reference DIAL.Pr"
 msgstr "Référence DIAL.Pr"
 
 msgid "Reference of the admission"
-msgstr ""
-
-msgid "Reference promoter"
-msgstr ""
-
-msgid "Reference promoter assent"
-msgstr ""
-
-msgid "Reference promoter comment"
 msgstr ""
 
 msgid "Reference:"
@@ -4051,23 +4047,7 @@ msgstr ""
 msgid "Registration certificate"
 msgstr ""
 
-msgid "Registration change"
-msgstr ""
-
-msgid "Registration change form"
-msgstr ""
-
 msgid "Registration fees"
-msgstr ""
-
-msgid "Registration modification form"
-msgstr ""
-
-msgctxt "admission decision"
-msgid "Rejected"
-msgstr "Rejetée"
-
-msgid "Rejection reason"
 msgstr ""
 
 msgid "Relationship"
@@ -4084,22 +4064,10 @@ msgctxt "jury member"
 msgid "Remove?"
 msgstr ""
 
-msgid "Reorientation"
-msgstr ""
-
-msgid "Reorientation asked by the candidate"
-msgstr ""
-
-msgid "Reorientation requested"
-msgstr ""
-
 msgid "Replace a document"
 msgstr ""
 
 msgid "Replace the document"
-msgstr ""
-
-msgid "Report of the supervisory panel"
 msgstr ""
 
 msgid "Reporting categories"
@@ -4146,6 +4114,9 @@ msgstr ""
 msgid "Research report"
 msgstr ""
 
+msgid "Research scholarship"
+msgstr ""
+
 msgid "Research seminar"
 msgstr ""
 
@@ -4167,9 +4138,6 @@ msgstr ""
 msgid "Residence permit valid for more than 3 months with replacement income"
 msgstr ""
 
-msgid "Residential address"
-msgstr ""
-
 msgid "Restore activity to submitted"
 msgstr ""
 
@@ -4185,10 +4153,6 @@ msgstr ""
 msgid "Retaking of the test"
 msgstr ""
 
-msgid "Role"
-msgstr ""
-
-msgctxt "curriculum"
 msgid "Role"
 msgstr ""
 
@@ -4259,7 +4223,7 @@ msgid "Role: SIC management"
 msgstr ""
 
 msgid "SEARCH_SCHOLARSHIP"
-msgstr "Search scholarship"
+msgstr "Research scholarship"
 
 msgid "SECRETAIRE"
 msgstr ""
@@ -4294,7 +4258,7 @@ msgid "SIGNING_IN_PROGRESS"
 msgstr "Signing in progress"
 
 msgid "SOUMISE"
-msgstr ""
+msgstr "Submitted"
 
 msgid "STATISTICS"
 msgstr "Statistics"
@@ -4334,12 +4298,6 @@ msgstr ""
 msgid "Scholarship end date"
 msgstr ""
 
-msgid "Scholarship grant"
-msgstr ""
-
-msgid "Scholarship proof"
-msgstr ""
-
 msgid "Scholarship start date"
 msgstr ""
 
@@ -4356,6 +4314,15 @@ msgid "Search for an EU code (outside the EU of the form)"
 msgstr ""
 
 msgid "Search on portal"
+msgstr ""
+
+msgid "Secondary education type"
+msgstr ""
+
+msgid "Secondary school diploma"
+msgstr ""
+
+msgid "Secondary school graduation year"
 msgstr ""
 
 msgid "Secondary studies"
@@ -4479,17 +4446,17 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Some fields are missing in the 'Affiliations' block in the 'Additional "
+"Some fields are missing in the 'Belgian student status' block in the "
+"'Additional information > Accounting' tab."
+msgstr ""
+
+msgid ""
+"Some fields are missing in the 'Memberships' block in the 'Additional "
 "information > Accounting' tab."
 msgstr ""
 
 msgid ""
-"Some fields are missing in the 'Assimilation' block in the 'Additional "
-"information > Accounting' tab."
-msgstr ""
-
-msgid ""
-"Some fields are missing in the 'Reduced registration fees' block in the "
+"Some fields are missing in the 'Reduced tuition fee' block in the "
 "'Additional information > Accounting' tab."
 msgstr ""
 
@@ -4526,6 +4493,9 @@ msgstr ""
 msgid "Speaking ability"
 msgstr ""
 
+msgid "Specific aspects"
+msgstr ""
+
 msgid "Specific documents for quota studies"
 msgstr ""
 
@@ -4535,9 +4505,6 @@ msgstr ""
 msgid "Specific question"
 msgstr ""
 
-msgid "Specificities"
-msgstr ""
-
 msgid "Specified"
 msgstr ""
 
@@ -4545,9 +4512,6 @@ msgid "Specify if other"
 msgstr ""
 
 msgid "Sport affiliation"
-msgstr ""
-
-msgid "Staff child certificate"
 msgstr ""
 
 msgid "Start"
@@ -4572,9 +4536,6 @@ msgid "Street"
 msgstr ""
 
 msgid "Study language"
-msgstr ""
-
-msgid "Study system"
 msgstr ""
 
 msgid "Subject"
@@ -4623,6 +4584,14 @@ msgstr ""
 msgid "Supervision group not found."
 msgstr ""
 
+msgid "Supervisor"
+msgstr ""
+
+#, fuzzy
+#| msgid "Membre CA not found."
+msgid "Supervisor not found."
+msgstr "Supervisory panel member not found."
+
 msgid "Supervisory panel"
 msgstr ""
 
@@ -4632,10 +4601,19 @@ msgstr ""
 msgid "Supervisory panel report of the confirmation paper"
 msgstr ""
 
+msgid "Support Committee minutes"
+msgstr ""
+
 msgid "Supporting documents"
 msgstr ""
 
+msgid "Surname"
+msgstr ""
+
 msgid "System"
+msgstr ""
+
+msgid "System of education"
 msgstr ""
 
 msgid "TO_BE_COMPLETED"
@@ -4664,6 +4642,13 @@ msgid ""
 msgstr ""
 
 msgid "Teaching campus of the training"
+msgstr ""
+
+msgid "Teaching degree and CAPAES"
+msgstr ""
+
+msgctxt "admission"
+msgid "Telephone (mobile)"
 msgstr ""
 
 msgid "Text"
@@ -4701,6 +4686,11 @@ msgstr ""
 msgid "The NOMA must contain 8 digits."
 msgstr ""
 
+msgid ""
+"The PDF certificate of having passed the confirmation exam is currently "
+"being generated. Please come back later to access it."
+msgstr ""
+
 msgid "The acronym of the scholarship grant"
 msgstr ""
 
@@ -4714,19 +4704,6 @@ msgid "The candidate has several enrolment applications in progress"
 msgstr ""
 
 msgid "The certificate of achievement is being generated."
-msgstr ""
-
-msgid ""
-"The certificate of achievement of the confirmation paper in PDF format is "
-"being generated, please come back later to get it."
-msgstr ""
-
-msgid ""
-"The child of a member of staff may, under some conditions, benefit from a "
-"reduction of the registration fee for any registration for a bachelor's or "
-"master's degree. This parent should contact the Human Resources "
-"Administration of his or her employer to check whether he or she meets these "
-"conditions and, if so, request the certificate confirming this."
 msgstr ""
 
 #, python-format
@@ -4763,8 +4740,8 @@ msgid "The configuration is not valid for a text: "
 msgstr ""
 
 msgid ""
-"The confirmation paper is not completed: please be sure that the "
-"confirmation date and report have been specified."
+"The confirmation exam is not completed: please be sure that the confirmation "
+"date and report have been specified."
 msgstr ""
 
 msgid "The confirmation paper is not in progress"
@@ -4774,6 +4751,9 @@ msgid "The css class must be a string."
 msgstr ""
 
 msgid "The current training is attached to this document."
+msgstr ""
+
+msgid "The date of the confirmation exam cannot be later than its deadline."
 msgstr ""
 
 msgid "The date of the confirmation paper cannot be later than its deadline."
@@ -5006,13 +4986,13 @@ msgstr ""
 msgid "There is no request for a new deadline."
 msgstr ""
 
-msgid "Thesis defences"
+msgid "Thesis defense"
 msgstr ""
 
-msgid "Thesis domain"
+msgid "Thesis field"
 msgstr ""
 
-msgid "Thesis domain should be set when PhD has been set to yes or partial"
+msgid "Thesis field should be set when PhD has been set to yes or partial"
 msgstr ""
 
 msgid "Thesis institute"
@@ -5030,9 +5010,6 @@ msgstr ""
 msgid "Thesis project title"
 msgstr ""
 
-msgid "Thesis redacting language"
-msgstr ""
-
 msgid "Thesis title"
 msgstr ""
 
@@ -5042,7 +5019,7 @@ msgstr ""
 msgid "Thesis-related data"
 msgstr ""
 
-msgid "This activity and potential sub-activities will be deleted"
+msgid "This activity and its potential subactivities will be discontinued"
 msgstr ""
 
 msgid ""
@@ -5103,7 +5080,7 @@ msgstr ""
 msgid "This field is required if the first name is missing."
 msgstr ""
 
-msgid "This field is required if the last name is missing."
+msgid "This field is required if the surname is missing."
 msgstr ""
 
 msgid "This field is required."
@@ -5128,6 +5105,13 @@ msgid ""
 "The applicant will still need to be informed."
 msgstr ""
 
+msgid "Tick boxes"
+msgstr ""
+
+#, no-python-format
+msgid "Time allocated for thesis (in %)"
+msgstr ""
+
 msgid "Timetable"
 msgstr ""
 
@@ -5141,12 +5125,6 @@ msgstr ""
 msgid "Title of the communication"
 msgstr ""
 
-msgid "Title of the dissertation"
-msgstr ""
-
-msgid "Title of the publication"
-msgstr ""
-
 msgid "Title of the training"
 msgstr ""
 
@@ -5156,10 +5134,10 @@ msgstr ""
 msgid "To be completed"
 msgstr ""
 
-msgid "To be completed (by student) for FAC"
+msgid "To be completed (by student) for Fac"
 msgstr ""
 
-msgid "To be completed (by student) for SIC"
+msgid "To be completed (by student) for the Enrolment Office (SIC)"
 msgstr ""
 
 msgid "To be completed after application"
@@ -5180,6 +5158,14 @@ msgid ""
 msgstr ""
 
 msgid ""
+"To enrol in a bachelor's or master's course, the child of a staff member "
+"may, under certain conditions, benefit from a reduced tuition fee. Parents "
+"contact their employer's Human Resources Administration to check whether "
+"they meet the requirements, and if so, request the certificate that confirms "
+"this."
+msgstr ""
+
+msgid ""
 "To visualize and edit a document, please select it in the list opposite."
 msgstr ""
 
@@ -5192,9 +5178,6 @@ msgstr ""
 msgid "Total hourly volume"
 msgstr ""
 
-msgid "Training"
-msgstr ""
-
 msgid "Training acronym"
 msgstr ""
 
@@ -5204,19 +5187,10 @@ msgstr ""
 msgid "Training activity"
 msgstr ""
 
-msgid "Training certificate, with dates, justifying the specified period"
-msgstr ""
-
-msgid "Training choice"
-msgstr ""
-
 msgid "Training specificities"
 msgstr ""
 
 msgid "Training title"
-msgstr ""
-
-msgid "Training type"
 msgstr ""
 
 msgid "Transcript"
@@ -5228,25 +5202,16 @@ msgstr ""
 msgid "Transcript type"
 msgstr ""
 
-msgid "Translation of the transcript"
-msgstr ""
-
 msgid "Tutorship act"
 msgstr ""
 
 msgid "Type"
 msgstr ""
 
-msgid "Type of activity"
-msgstr ""
-
 msgid "Type of communication"
 msgstr ""
 
 msgid "Type of paper"
-msgstr ""
-
-msgid "Type of publication"
 msgstr ""
 
 msgid "Type of training"
@@ -5286,12 +5251,9 @@ msgstr ""
 msgid "Undecided"
 msgstr ""
 
-msgid "Undertake and declaration"
-msgstr ""
-
 msgid ""
-"Unemployment certificate issued by the relevant organisation, justifying the "
-"specified period"
+"Unemployment certificate issued by the relevant body, justifying the period "
+"concerned"
 msgstr ""
 
 msgid "Unique business number"
@@ -5300,10 +5262,10 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-msgid "Unknown birth date"
+msgid "Unknown citizenship"
 msgstr ""
 
-msgid "Unknown citizenship"
+msgid "Unknown date of birth"
 msgstr ""
 
 msgid "Unknown noma"
@@ -5334,11 +5296,11 @@ msgid "Upload the opinion on the renewal of the research mandate"
 msgstr ""
 
 msgid "VAE"
-msgstr "Valorisation of experience"
+msgstr "Validation of prior experience (VAE)"
 
 msgctxt "CategorieActivite"
 msgid "VAE"
-msgstr "Valorisation of experience"
+msgstr "Validation of prior experience (VAE)"
 
 msgid "VALID"
 msgstr "Valid"
@@ -5374,14 +5336,14 @@ msgstr ""
 msgid "Visualize"
 msgstr ""
 
-msgid "WBI - Wallonie Bruxelles International"
-msgstr ""
-
 msgid "WORK_CONTRACT"
 msgstr "Work contract"
 
 msgid "Waiting for signature"
 msgstr "En attente de signature"
+
+msgid "Wallonie Bruxelles International (WBI)"
+msgstr ""
 
 msgid ""
 "We congratulate you on your successful completion of the paper and wish you "
@@ -5394,16 +5356,16 @@ msgstr ""
 msgid "Weight"
 msgstr ""
 
-msgid "What diploma did you get (or will you get)?"
+msgid "What diploma have you obtained (or will obtain)?"
 msgstr ""
 
-msgid "What is your last year of UCLouvain enrollment?"
+msgid "What result did you achieve?"
 msgstr ""
 
-msgid "What result did you get?"
+msgid "What was the most recent year you were enrolled at UCLouvain?"
 msgstr ""
 
-msgid "What was your NOMA (registration id)?"
+msgid "What was your NOMA (matriculation number)?"
 msgstr ""
 
 msgid ""
@@ -5424,7 +5386,7 @@ msgstr ""
 msgid "Work contract"
 msgstr ""
 
-msgid "Work contract should be set when financing type is set to work contract"
+msgid "Work contract should be set when funding type is set to work contract"
 msgstr ""
 
 msgid "Work contract type"
@@ -5434,24 +5396,30 @@ msgid "Working contract type"
 msgstr ""
 
 msgid ""
-"Would you like to be a solidarity student, a program proposed by Louvain "
-"Cooperation, the NGO of UCLouvain? This affiliation will give you access to "
-"a fund for your solidarity projects. If so, the cost of this affiliation, "
-"which is 12 EUR, will be added to your registration fees."
+"Would you like to become a Solidarity Student, that is, a member of a "
+"programme proposed by UCLouvain's NGO, Louvain Cooperation? This membership "
+"will give you access to a fund for your solidarity projects. If so, the "
+"membership cost, which is E12, will be added to your tuition fee."
+msgstr ""
+"Would you like to become a Solidarity Student, that is, a member of a "
+"programme proposed by UCLouvain's NGO, Louvain Coopération? This membership "
+"will give you access to a fund for your solidarity projects. If so, the "
+"membership cost, which is €12, will be added to your tuition fee."
+
+msgid ""
+"Would you like to change your UCLouvain enrolment for this academic year?"
 msgstr ""
 
 msgid ""
-"Would you like to change your registration for this academic year at "
-"UCLouvain?"
+"Would you like to enter an account number so that we can issue a refund?"
 msgstr ""
 
 msgid ""
-"Would you like to enter an account number so that we can process a refund if "
-"necessary?"
+"Would you like to pursue fitness or sport activities? If so, the cost of "
+"membership will be added to your tuition fee."
 msgstr ""
 
-msgid ""
-"Would you like to reorient yourself for this academic year at UCLouvain?"
+msgid "Would you like to switch courses this academic year at UCLouvain?"
 msgstr ""
 
 msgid "Writing ability"
@@ -5463,13 +5431,13 @@ msgstr "Yes"
 msgid "Year"
 msgstr ""
 
-msgid "Year of graduation from secondary school"
+msgid "Year of birth"
 msgstr ""
 
 msgid "Year of the training"
 msgstr ""
 
-msgid "Year without registration for the training."
+msgid "Year without enrolling in the course."
 msgstr ""
 
 msgid "Years"
@@ -5488,25 +5456,28 @@ msgstr ""
 msgid "Yes, in %(year)s."
 msgstr ""
 
-msgid "Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (60 EUR)"
-msgstr ""
+msgid "Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (E60)"
+msgstr "Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (€60)"
 
-msgid "Yes, in Mons and other UCLouvain sites (60 EUR)"
-msgstr ""
+msgid "Yes, in Mons and other UCLouvain campuses (E60)"
+msgstr "Yes, in Mons and other UCLouvain campuses (€60)"
 
-msgid "Yes, in Saint-Gilles and other UCLouvain sites (60 EUR)"
-msgstr ""
+msgid "Yes, in Saint-Gilles and other UCLouvain campuses (E60)"
+msgstr "Yes, in Saint-Gilles and other UCLouvain campuses (€60)"
 
-msgid "Yes, in Tournai and other UCLouvain sites (60 EUR)"
-msgstr ""
+msgid "Yes, in Tournai and other UCLouvain campuses (E60)"
+msgstr "Yes, in Tournai and other UCLouvain campuses (€60)"
 
-msgid "Yes, only in Mons (10 EUR)"
-msgstr ""
+msgid "Yes, only in Mons (E10)"
+msgstr "Yes, only in Mons (€10)"
 
-msgid "Yes, only in Saint-Gilles (10 EUR)"
-msgstr ""
+msgid "Yes, only in Saint-Gilles (E10)"
+msgstr "Yes, only in Saint-Gilles (€10)"
 
-msgid "Yes, only in Tournai (10 EUR)"
+msgid "Yes, only in Tournai (E10)"
+msgstr "Yes, only in Tournai (€10)"
+
+msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
 
 #, python-format
@@ -5515,7 +5486,7 @@ msgid ""
 "send an email to %(recipient)s."
 msgstr ""
 
-msgid "You are registering as"
+msgid "You are enrolling as"
 msgstr ""
 
 #, python-format
@@ -5524,7 +5495,7 @@ msgid ""
 "list of acronyms separated by the \"%(separator)s\" character."
 msgstr ""
 
-msgid "You cannot fill in a language more than once, please correct the form."
+msgid "You cannot enter a language more than once, please correct the form."
 msgstr ""
 
 #, python-format
@@ -5562,10 +5533,6 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#, python-format
-msgid "You have indicated that you will get it in %(year)s."
-msgstr ""
-
 msgid ""
 "You haven't answered to the question about your bank account in the "
 "'Additional information > Accounting' tab."
@@ -5574,17 +5541,22 @@ msgstr ""
 msgid "You haven't yet submitted your application."
 msgstr ""
 
+#, python-format
+msgid "You indicated that you will obtain it in %(year)s."
+msgstr ""
+
 msgid "You must add at least one CA member in order to request signatures."
 msgstr ""
 "You must add at least one supervisory panel member in order to request "
 "signatures."
 
 msgid ""
-"You must add at least one UCLouvain promoter in order to request signatures."
+"You must add at least one UCLouvain supervisor in order to request "
+"signatures."
 msgstr ""
 
 msgid ""
-"You must add at least one external promoter in order to request signatures."
+"You must add at least one external supervisor in order to request signatures."
 msgstr ""
 
 msgid "You must answer the question about external enrollment change."
@@ -5624,7 +5596,7 @@ msgstr ""
 msgid "You must be the request promoter to access this admission"
 msgstr ""
 
-msgid "You must set a reference promoter."
+msgid "You must set a lead supervisor."
 msgstr ""
 
 msgid "You need to set a member as president."
@@ -5633,13 +5605,13 @@ msgstr ""
 msgid "You need to set a member as secretary."
 msgstr ""
 
-msgid "You seem to have unsaved modifications, they will be lost."
+msgid "You specified that no Belgian student status situation applies to you."
 msgstr ""
 
-msgid "You specified that no assimilation proposals applies to you."
+msgid "Your Belgian student status"
 msgstr ""
 
-msgid "Your data has been saved."
+msgid "Your data have been saved."
 msgstr ""
 
 msgid ""
@@ -5650,13 +5622,13 @@ msgstr ""
 msgid "Your note has been added."
 msgstr ""
 
-msgid "Your participation to the event"
+msgid "Your participation in the event"
 msgstr ""
 
-msgid "Your previous NOMA (registration id)"
+msgid "Your previous NOMA (matriculation number)"
 msgstr ""
 
-msgid "Your professional e-mail address"
+msgid "Your professional email address"
 msgstr ""
 
 msgid "academic year"
@@ -5665,10 +5637,10 @@ msgstr ""
 msgid "actions"
 msgstr ""
 
-msgid "by the UCLouvain Registration Service"
+msgid "by the Enrolment Office"
 msgstr ""
 
-msgid "by the University Institute of Continuing Education"
+msgid "by the University Institute for Continuing Education (IUFC)"
 msgstr ""
 
 msgid "candidate"
@@ -5728,7 +5700,7 @@ msgstr ""
 msgid "your legal cohabitant"
 msgstr ""
 
-msgid "your legal tutor"
+msgid "your legal guardian"
 msgstr ""
 
 msgid "your mother"

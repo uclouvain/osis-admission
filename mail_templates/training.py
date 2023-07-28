@@ -58,7 +58,7 @@ training_common_tokens = common_tokens + [
     ),
 ]
 
-# Doctoral training
+# PhD training
 doctoral_training_token = [
     Token(
         name='admission_link_front_doctoral_training',

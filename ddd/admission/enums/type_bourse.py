@@ -29,7 +29,7 @@ from base.models.utils.utils import ChoiceEnum
 
 
 class TypeBourse(ChoiceEnum):
-    DOUBLE_TRIPLE_DIPLOMATION = _('Double or triple diplomation')
+    DOUBLE_TRIPLE_DIPLOMATION = _('Dual or triple degree')
     BOURSE_INTERNATIONALE_DOCTORAT = _('International for doctorate')
     BOURSE_INTERNATIONALE_FORMATION_GENERALE = _('International for general education')
     ERASMUS_MUNDUS = _('Erasmus Mundus')

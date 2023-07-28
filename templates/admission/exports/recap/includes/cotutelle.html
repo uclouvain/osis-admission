@@ -24,15 +24,15 @@
 {% endcomment %}
 {% panel _("Cotutelle") %}
   {% if cotutelle.cotutelle is None %}
-    {% trans "Cotutelle is not defined yet" %}
+    {% trans "Choice of joint supervision is not yet defined" %}
   {% elif cotutelle.cotutelle %}
-    {% field_data _("Is it an institution of the Wallonia-Brussels Federation?") cotutelle.institution_fwb %}
-    {% field_data _("Cotutelle institution") cotutelle.institution %}
-    {% field_data _("Cotutelle motivation") cotutelle.motivation|linebreaks %}
-    {% field_data _("Cotutelle opening request") cotutelle.demande_ouverture %}
-    {% field_data _("Cotutelle convention") cotutelle.convention %}
-    {% field_data _("Other documents concerning cotutelle") cotutelle.autres_documents %}
+    {% field_data _("Is it a Wallonia-Brussels Federation institution?") cotutelle.institution_fwb %}
+    {% field_data _("Partner institution") cotutelle.institution %}
+    {% field_data _("Motivation for joint supervision") cotutelle.motivation|linebreaks %}
+    {% field_data _("Joint supervision request") cotutelle.demande_ouverture %}
+    {% field_data _("Joint supervision agreement") cotutelle.convention %}
+    {% field_data _("Other documents relating to joint supervision") cotutelle.autres_documents %}
   {% else %}
-    {% trans "No cotutelle" %}
+    {% trans "No joint supervision" %}
   {% endif %}
 {% endpanel %}
