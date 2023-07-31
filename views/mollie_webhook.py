@@ -33,6 +33,7 @@ __all__ = [
     'MollieWebHook',
 ]
 
+
 class MollieWebHook(APIView):
     permission_classes = []
 

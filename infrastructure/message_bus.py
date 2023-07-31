@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ from .admission import handlers as admission_handlers
 from .parcours_doctoral import handlers as doctorat_handlers
 from .parcours_doctoral.epreuve_confirmation import handlers as epreuve_confirmation_handlers
 from .parcours_doctoral.formation import handlers as formation_handlers
+from .parcours_doctoral.jury import handlers as jury_handlers
 
 
 class MessageBusCommands(AbstractMessageBusCommands):
@@ -39,6 +40,7 @@ class MessageBusCommands(AbstractMessageBusCommands):
         **doctorat_handlers.COMMAND_HANDLERS,
         **epreuve_confirmation_handlers.COMMAND_HANDLERS,
         **formation_handlers.COMMAND_HANDLERS,
+        **jury_handlers.COMMAND_HANDLERS,
         **preparation_handlers.COMMAND_HANDLERS,
         **validation_handlers.COMMAND_HANDLERS,
         **formation_continue_handlers.COMMAND_HANDLERS,

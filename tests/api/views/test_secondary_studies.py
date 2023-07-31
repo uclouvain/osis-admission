@@ -27,6 +27,7 @@
 from unittest.mock import patch
 from uuid import UUID
 
+import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.urls import reverse
@@ -63,6 +64,7 @@ from reference.tests.factories.language import LanguageFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
+@freezegun.freeze_time('2023-01-01')
 class BelgianHighSchoolDiplomaTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
 from typing import Union
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
@@ -47,6 +48,18 @@ class IHistorique(interface.DomainService):
 
     @classmethod
     def historiser_soumission(cls, proposition: PropositionAdmission):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_demande_complements_sic(cls, proposition: PropositionAdmission, acteur: str, message: EmailMessage):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_demande_complements_fac(cls, proposition: PropositionAdmission, acteur: str, message: EmailMessage):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_completion_documents_par_candidat(cls, proposition: PropositionAdmission):
         raise NotImplementedError
 
     @classmethod

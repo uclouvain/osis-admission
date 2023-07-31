@@ -45,7 +45,7 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
 from admission.forms.doctorate.training.activity import *
 from admission.forms.doctorate.training.activity import ComplementaryCourseForm
 from admission.forms.doctorate.training.processus import RefuseForm
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
 __all__ = [
@@ -63,7 +63,7 @@ __namespace__ = {
 }
 
 
-class TrainingActivityFormMixin(LoadDossierViewMixin):
+class TrainingActivityFormMixin(AdmissionFormMixin, LoadDossierViewMixin):
     """Form mixin for an activity"""
 
     template_name = "admission/doctorate/forms/training.html"
@@ -164,7 +164,7 @@ class TrainingActivityEditView(TrainingActivityFormMixin, generic.UpdateView):
         return self.object
 
 
-class TrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
+class TrainingActivityDeleteView(AdmissionFormMixin, LoadDossierViewMixin, generic.DeleteView):
     urlpatterns = {'delete': 'delete/<uuid:activity_id>'}
     model = Activity
     slug_field = 'uuid'
@@ -188,7 +188,7 @@ class TrainingActivityDeleteView(LoadDossierViewMixin, generic.DeleteView):
         return resolve_url(':'.join(self.request.resolver_match.namespaces), uuid=self.admission_uuid)
 
 
-class TrainingActivityActionFormMixin(LoadDossierViewMixin, SingleObjectMixin, FormMixin):
+class TrainingActivityActionFormMixin(AdmissionFormMixin, LoadDossierViewMixin, SingleObjectMixin, FormMixin):
     model = Activity
     slug_field = 'uuid'
     pk_url_kwarg = "NOT_TO_BE_USED"

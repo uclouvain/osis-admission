@@ -30,7 +30,7 @@ from dal import autocomplete
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import DEFAULT_MIME_TYPES
+from admission.constants import SUPPORTED_MIME_TYPES
 from base.forms.utils.datefield import DATE_FORMAT
 from base.models.academic_year import AcademicYear
 from education_group.templatetags.education_group_extra import format_to_academic_year
@@ -125,7 +125,7 @@ class CustomDateInput(forms.DateInput):
         super().__init__(attrs, format)
 
     class Media:
-        js = ('jquery.mask.min.js',)
+        js = ('js/jquery.mask.min.js',)
 
 
 def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM_SELECTABLE_YEAR):
@@ -143,7 +143,7 @@ def get_example_text(example: str):
 
 class AdmissionFileUploadField(FileUploadField):
     def __init__(self, **kwargs):
-        kwargs.setdefault('mimetypes', DEFAULT_MIME_TYPES)
+        kwargs.setdefault('mimetypes', SUPPORTED_MIME_TYPES)
         super().__init__(**kwargs)
 
 

@@ -36,6 +36,7 @@ from django.views.generic.edit import FormMixin
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.forms.admission.filter import AllAdmissionsFilterForm
+from admission.utils import add_messages_into_htmx_response
 from admission.views import ListPaginator
 from base.views.common import display_error_messages
 from infrastructure.messages_bus import message_bus_instance
@@ -106,9 +107,11 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
 
         if not self.form.is_valid():
             self.object_list = []
+            response = self.form_invalid(form=self.form)
             if self.request.htmx:
                 self.htmx_render_form_errors(self.request, self.form)
-            return self.form_invalid(form=self.form)
+                add_messages_into_htmx_response(request=self.request, response=response)
+            return response
 
         if self.request.GET:
             cache.set(self.cache_key, self.request.GET)

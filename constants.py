@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import re
+
 from django.utils.translation import gettext_lazy as _
 
 FIELD_REQUIRED_MESSAGE = _("This field is required.")
@@ -31,4 +33,6 @@ PDF_MIME_TYPE = 'application/pdf'
 JPEG_MIME_TYPE = 'image/jpeg'
 PNG_MIME_TYPE = 'image/png'
 IMAGE_MIME_TYPES = {JPEG_MIME_TYPE, PNG_MIME_TYPE}
-DEFAULT_MIME_TYPES = {PDF_MIME_TYPE} | IMAGE_MIME_TYPES
+SUPPORTED_MIME_TYPES = {PDF_MIME_TYPE} | IMAGE_MIME_TYPES
+DEFAULT_MIME_TYPES = [PDF_MIME_TYPE]
+UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'

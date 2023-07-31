@@ -31,6 +31,7 @@ from django.utils.functional import cached_property
 from admission.ddd.admission.doctorat.preparation import dtos as dtos_doctorat
 from admission.ddd.admission.doctorat.preparation.dtos import CurriculumDTO
 from admission.ddd.admission.dtos import IdentificationDTO, CoordonneesDTO, EtudesSecondairesDTO
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.formation_continue import dtos as dtos_formation_continue
 from admission.ddd.admission.formation_generale import dtos as dtos_formation_generale
 from osis_common.ddd import interface
@@ -81,3 +82,13 @@ class ResumePropositionDTO(ResumeCandidatDTO):
     @cached_property
     def est_proposition_generale(self):
         return isinstance(self.proposition, dtos_formation_generale.PropositionDTO)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ResumeEtEmplacementsDocumentsPropositionDTO:
+    """
+    DTO contenant l'ensemble des informations relatives à la proposition et au candidat associé.
+    """
+
+    resume: ResumePropositionDTO
+    emplacements_documents: List[EmplacementDocumentDTO]

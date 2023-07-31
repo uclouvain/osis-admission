@@ -68,7 +68,7 @@ class GeneralTrainingChoiceAPIView(
 
     def post(self, request, *args, **kwargs):
         serializer = serializers.InitierPropositionGeneraleCommandSerializer(data=request.data)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(
             general_education_commands.InitierPropositionCommand(
                 **serializer.data,
@@ -103,7 +103,7 @@ class ContinuingTrainingChoiceAPIView(
 
     def post(self, request, *args, **kwargs):
         serializer = serializers.InitierPropositionContinueCommandSerializer(data=request.data)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(
             continuing_education_commands.InitierPropositionCommand(
                 **serializer.data,
@@ -164,7 +164,7 @@ class GeneralUpdateTrainingChoiceAPIView(
 
     def put(self, request, *args, **kwargs):
         serializer = serializers.ModifierChoixFormationGeneraleCommandSerializer(data=request.data)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(
             general_education_commands.ModifierChoixFormationCommand(
                 **serializer.data,
@@ -193,7 +193,7 @@ class DoctorateUpdateAdmissionTypeAPIView(
 
     def put(self, request, *args, **kwargs):
         serializer = serializers.ModifierTypeAdmissionDoctoraleCommandSerializer(data=request.data)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(
             doctorate_education_commands.ModifierTypeAdmissionCommand(
                 **serializer.data,
@@ -221,7 +221,7 @@ class ContinuingUpdateTrainingChoiceAPIView(
 
     def put(self, request, *args, **kwargs):
         serializer = serializers.ModifierChoixFormationContinueCommandSerializer(data=request.data)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(
             continuing_education_commands.ModifierChoixFormationCommand(
                 **serializer.data,

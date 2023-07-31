@@ -92,7 +92,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, self.conference.title)
         self.assertContains(response, _("NON_SOUMISE"))
-        self.assertEqual(repr(self.conference), "Conférence (10 ects, Non soumise)")
+        self.assertEqual(repr(self.conference), "Colloques et conférences (10 ects, Non soumise)")
         self.assertEqual(
             str(self.conference),
             f"Conférence nationale : {self.conference.title}"

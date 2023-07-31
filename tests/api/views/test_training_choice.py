@@ -251,6 +251,7 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+@freezegun.freeze_time('2023-01-01')
 class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -423,6 +424,7 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+@freezegun.freeze_time('2023-01-01')
 class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
     file_uuid = str(uuid.uuid4())
 

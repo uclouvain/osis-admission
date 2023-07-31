@@ -24,10 +24,13 @@
 #
 ##############################################################################
 import datetime
+from functools import reduce
 from typing import List, Optional
 
 import attr
+from dateutil import relativedelta
 
+from admission.ddd import NB_MOIS_MIN_VAE
 from osis_common.ddd import interface
 
 
@@ -93,6 +96,24 @@ class CurriculumDTO(interface.DTO):
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires: Optional[int]
     annee_minimum_a_remplir: Optional[int]
+
+    def _compte_nombre_mois(self, nb_total_mois, experience):
+        delta = relativedelta.relativedelta(experience.date_fin, experience.date_debut)
+        return nb_total_mois + (12 * delta.years + delta.months) + 1
+
+    @property
+    def candidat_est_potentiel_vae(self) -> bool:
+        """
+        Un candidat est potentiel vae si la durée de l'ensemble de ses expériences non academiques est supérieure à 36.
+        """
+        return (
+            reduce(
+                lambda total, experience: self._compte_nombre_mois(total, experience),
+                self.experiences_non_academiques,
+                0,
+            )
+            >= NB_MOIS_MIN_VAE
+        )
 
 
 @attr.dataclass(frozen=True, slots=True)

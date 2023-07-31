@@ -25,8 +25,8 @@
 ##############################################################################
 import uuid
 
-from django.contrib.auth.models import User
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
@@ -376,6 +376,29 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         related_name='+',
         null=True,
         blank=True,
+    )
+
+    requested_documents = models.JSONField(
+        blank=True,
+        default=dict,
+        encoder=DjangoJSONEncoder,
+        verbose_name=_('Requested documents'),
+    )
+    uclouvain_sic_documents = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('UCLouvain SIC free documents'),
+    )
+    uclouvain_fac_documents = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('UCLouvain FAC free documents'),
+    )
+
+    checklist = models.JSONField(
+        blank=True,
+        default=dict,
+        encoder=DjangoJSONEncoder,
     )
 
     class Meta:

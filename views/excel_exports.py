@@ -29,35 +29,34 @@ from typing import Dict
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template.defaultfilters import yesno
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext as _, gettext_lazy
 from django.views import View
-from osis_async.models import AsyncTask
-from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
 
 from admission.contrib.models import Scholarship
+from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.forms.admission.filter import AllAdmissionsFilterForm
+from admission.templatetags.admission import admission_status
+from admission.utils import add_messages_into_htmx_response
 from base.models.campus import Campus
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
+from infrastructure.messages_bus import message_bus_instance
+from osis_async.models import AsyncTask
+from osis_export.contrib.export_mixins import ExportMixin, ExcelFileExportMixin
+from osis_export.models import Export
+from osis_export.models.enums.types import ExportTypes
 
 __all__ = [
     'AdmissionListExcelExportView',
 ]
 
-from osis_export.models import Export
-
-from osis_export.models.enums.types import ExportTypes
-
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
-from admission.forms.admission.filter import AllAdmissionsFilterForm
-from admission.templatetags.admission import admission_status
-from infrastructure.messages_bus import message_bus_instance
 
 FULL_DATE_FORMAT = '%Y/%m/%d, %H:%M:%S'
 
@@ -119,7 +118,12 @@ class BaseAdmissionExcelExportView(
             messages.error(request, self.failure_message)
 
         if self.request.htmx:
-            return HttpResponse(self.success_message if export else self.failure_message)
+            response = HttpResponse(self.success_message if export else self.failure_message)
+            add_messages_into_htmx_response(
+                request=request,
+                response=response,
+            )
+            return response
 
         return HttpResponseRedirect(reverse(self.redirect_url_name))
 

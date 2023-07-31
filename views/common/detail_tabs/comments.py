@@ -23,16 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
+from osis_comment.contrib.mixins import CommentEntryAPIMixin
+from osis_comment.models import CommentEntry
 
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
-from osis_comment.contrib.mixins import CommentEntryAPIMixin
-from osis_comment.models import CommentEntry
+from base.models.utils.utils import ChoiceEnum
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 
 __all__ = [
@@ -40,17 +41,22 @@ __all__ = [
     "AdmissionCommentApiView",
     "COMMENT_TAG_SIC",
     "COMMENT_TAG_FAC",
-    "COMMENT_TAG_APPLICATION_FEES",
-    "COMMENT_TAG_PERSONAL_DATA",
-    "COMMENT_TAG_FAC_PROCESSING",
+    "CheckListTagsEnum",
 ]
 __namespace__ = False
 
 COMMENT_TAG_SIC = 'SIC'
 COMMENT_TAG_FAC = 'FAC'
-COMMENT_TAG_APPLICATION_FEES = 'Application fees'
-COMMENT_TAG_PERSONAL_DATA = 'Personal data'
-COMMENT_TAG_FAC_PROCESSING = 'FAC processing'
+
+
+class CheckListTagsEnum(ChoiceEnum):
+    assimilation = _('Assimilation')
+    financabilite = _('Financeability')
+    frais_dossier = _('Application fees')
+    choix_formation = _('Training choice')
+    parcours_anterieur = _('Previous experience')
+    donnees_personnelles = _('Personal data')
+    specificites_formation = _('Training specificities')
 
 
 class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
@@ -60,9 +66,7 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
     extra_context = {
         'COMMENT_TAG_FAC': COMMENT_TAG_FAC,
         'COMMENT_TAG_SIC': COMMENT_TAG_SIC,
-        'COMMENT_TAG_APPLICATION_FEES': COMMENT_TAG_APPLICATION_FEES,
-        'COMMENT_TAG_PERSONAL_DATA': COMMENT_TAG_PERSONAL_DATA,
-        'COMMENT_TAG_FAC_PROCESSING': COMMENT_TAG_FAC_PROCESSING,
+        'checklist_tags': CheckListTagsEnum.choices(),
         'ckeditor_config': CKEDITOR_CONFIGS['minimal'],
     }
 

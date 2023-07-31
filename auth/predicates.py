@@ -29,7 +29,7 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 from waffle import switch_is_active
 
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -37,6 +37,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import (
     ChoixStatutDoctorat,
@@ -63,6 +67,12 @@ def in_progress(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("Invitations have not been sent"))
 def signing_in_progress(self, user: User, obj: DoctorateAdmission):
     return obj.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The jury is not in progress"))
+def is_jury_in_progress(self, user: User, obj: DoctorateAdmission):
+    return obj.post_enrolment_status == ChoixStatutDoctorat.PASSED_CONFIRMATION.name
 
 
 @predicate(bind=True)
@@ -154,6 +164,43 @@ def is_part_of_committee_and_invited(self, user: User, obj: DoctorateAdmission):
         for actor in obj.supervision_group.actors.all()
         if actor.last_state == SignatureState.INVITED.name
     ]
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be invited to complete this admission."))
+def is_invited_to_complete(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status in {
+        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
+    }
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be invited to pay the application fees by the system."))
+def is_invited_to_pay_after_submission(self, user: User, obj: GeneralEducationAdmission):
+    checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
+    return (
+        obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
+        and checklist_info.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and bool(checklist_info.get('extra', {}).get('initial'))
+    )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be invited to pay the application fees by a manager."))
+def is_invited_to_pay_after_request(self, user: User, obj: GeneralEducationAdmission):
+    checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
+    return (
+        obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
+        and checklist_info.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and not bool(checklist_info.get('extra', {}).get('initial'))
+    )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The checklist must be initialized."))
+def checklist_is_initialized(self, user: User, obj: GeneralEducationAdmission):
+    return bool(obj.checklist.get('initial'))
 
 
 @predicate

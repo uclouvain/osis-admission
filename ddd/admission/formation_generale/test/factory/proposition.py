@@ -41,10 +41,43 @@ from admission.ddd.admission.enums import (
     ChoixAssimilation2,
 )
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutsChecklistGenerale,
+    StatutChecklist,
+)
 from admission.ddd.admission.test.factory.bourse import BourseIdentityFactory
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
+
+
+class StatutChecklistFactory(factory.Factory):
+    class Meta:
+        model = StatutChecklist
+        abstract = False
+
+    libelle = FuzzyText(length=10, chars=string.digits)
+    enfants = factory.List([])
+    statut = ChoixStatutChecklist.INITIAL_CANDIDAT.name
+    extra = factory.Dict({})
+
+
+class StatutsChecklistGeneraleFactory(factory.Factory):
+    class Meta:
+        model = StatutsChecklistGenerale
+        abstract = False
+
+    donnees_personnelles = factory.SubFactory(StatutChecklistFactory)
+    frais_dossier = factory.SubFactory(StatutChecklistFactory)
+    assimilation = factory.SubFactory(StatutChecklistFactory)
+    choix_formation = factory.SubFactory(StatutChecklistFactory)
+    parcours_anterieur = factory.SubFactory(StatutChecklistFactory)
+    financabilite = factory.SubFactory(StatutChecklistFactory)
+    specificites_formation = factory.SubFactory(StatutChecklistFactory)
 
 
 class _ComptabiliteFactory(factory.Factory):
@@ -140,6 +173,8 @@ class PropositionFactory(factory.Factory):
     bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory, uuid='e0e94dd5-3715-49a1-8953-8cc0f99372cb')
     est_reorientation_inscription_externe = False
     est_modification_inscription_externe = False
+    checklist_initiale = None
+    checklist_actuelle = None
 
     class Params:
         est_bachelier_en_reorientation = factory.Trait(
@@ -151,4 +186,9 @@ class PropositionFactory(factory.Factory):
             est_bachelier_belge=True,
             est_modification_inscription_externe=True,
             formulaire_modification_inscription=['uuid-formulaire_modification_inscription'],
+        )
+        est_confirmee = factory.Trait(
+            statut=ChoixStatutPropositionGenerale.CONFIRMEE,
+            checklist_initiale=factory.SubFactory(StatutsChecklistGeneraleFactory),
+            checklist_actuelle=factory.SubFactory(StatutsChecklistGeneraleFactory),
         )

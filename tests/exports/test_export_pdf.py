@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from unittest.mock import ANY, patch
+from unittest.mock import patch
 
 from django.core.management import call_command
 from django.test import TestCase
@@ -33,7 +33,7 @@ from admission.contrib.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from osis_async.models import AsyncTask
 from osis_async.models.enums import TaskState
-from osis_document.contrib.post_processing.post_processing_enums import PostProcessingEnums
+from osis_document.enums import PostProcessingType
 
 
 class ExportPdfTestCase(TestCase):
@@ -56,7 +56,12 @@ class ExportPdfTestCase(TestCase):
         save.return_value = 'a-token'
         confirm.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
         post_processing.return_value = {
-            PostProcessingEnums.MERGE_PDF.name: {'output': ['4bdffb42-552d-415d-9e4c-725f10dce228']}
+            PostProcessingType.MERGE.name: {
+                'output': {
+                    'upload_objects': ['4bdffb42-552d-415d-9e4c-725f10dce228'],
+                    'post_processing_objects': ['1bdffb42-552d-415d-9e4c-725f10dce221'],
+                },
+            }
         }
         async_task = AsyncTask.objects.create(name="Export pdf")
         AdmissionTask.objects.create(
@@ -67,6 +72,7 @@ class ExportPdfTestCase(TestCase):
         call_command("process_admission_tasks")
         save.assert_called()
         confirm.assert_called_with('a-token')
+        post_processing.assert_called()
         async_task.refresh_from_db()
         self.assertEqual(async_task.state, TaskState.DONE.name)
 

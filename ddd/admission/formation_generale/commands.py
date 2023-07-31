@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,18 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import Dict, List, Optional
 
 import attr
 
+from admission.ddd.admission import commands
 from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True, auto_attribs=True)
 class RechercherFormationGeneraleQuery(interface.QueryRequest):
-    type_formation: str
-    intitule_formation: str
+    intitule_formation: Optional[str] = ''
+    sigle: Optional[str] = ''
+    terme_de_recherche: Optional[str] = ''
+    type_formation: Optional[str] = ''
     campus: Optional[str] = ''
+    annee: Optional[int] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -75,6 +80,16 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
     bourse_erasmus_mundus: Optional[str] = ''
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    type_demande: str
+    sigle_formation: str
+    annee_formation: int
+    poursuite_de_cycle: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -204,4 +219,127 @@ class RecupererElementsConfirmationQuery(interface.QueryRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPropositionGestionnaireQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererDocumentsPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererDocumentsReclamesPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererQuestionsSpecifiquesQuery(commands.RecupererQuestionsSpecifiquesQuery):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecalculerEmplacementsDocumentsNonLibresPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ReclamerDocumentsAuCandidatParSICCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiants_emplacements: List[str]
+    a_echeance_le: datetime.date
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ReclamerDocumentsAuCandidatParFACCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiants_emplacements: List[str]
+    a_echeance_le: datetime.date
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterEmplacementsDocumentsParCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+    reponses_documents_a_completer: Dict[str, List[str]]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentLibreNonReclamableCommand(
+    commands.InitialiserEmplacementDocumentLibreNonReclamableCommand
+):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentLibreAReclamerCommand(commands.InitialiserEmplacementDocumentLibreAReclamerCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentAReclamerCommand(commands.InitialiserEmplacementDocumentAReclamerCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierReclamationEmplacementDocumentCommand(commands.ModifierReclamationEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnnulerReclamationEmplacementDocumentCommand(commands.AnnulerReclamationEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerEmplacementDocumentCommand(commands.SupprimerEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplacerEmplacementDocumentCommand(commands.RemplacerEmplacementDocumentCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplirEmplacementDocumentParGestionnaireCommand(commands.RemplirEmplacementDocumentParGestionnaireCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+# Paiement des frais de dossier
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierPaiementNecessaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EnvoyerRappelPaiementCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierPaiementPlusNecessaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    statut_checklist_frais_dossier: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PayerFraisDossierPropositionSuiteSoumissionCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PayerFraisDossierPropositionSuiteDemandeCommand(interface.CommandRequest):
     uuid_proposition: str

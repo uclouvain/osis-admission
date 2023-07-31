@@ -138,9 +138,12 @@
                       {% translate 'Save' %}
                     </button>
                   </li>
-                  {% if can_read_tab and read_url %}
+                  {% if next_url or can_read_tab and read_url %}
                     <li>
-                      <a class="btn" href="{{ read_url }}">
+                      <a
+                          class="btn"
+                          href="{% if next_url %}{{ next_url }}{% else %}{{ read_url }}{% endif %}"
+                      >
                         {% translate 'Cancel' %}
                       </a>
                     </li>
@@ -183,7 +186,12 @@
           <div class="text-right">
             {% can_read_tab tab_context.active_tab as can_read_tab %}
             {% detail_tab_path_from_update view.kwargs.uuid as read_url %}
-            <a href="{{ read_url }}" class="btn btn-default" style="margin-left: 10px;" role="button">
+            <a
+                href="{% if next_url %}{{ next_url }}{% else %}{{ read_url }}{% endif %}"
+                class="btn btn-default"
+                style="margin-left: 10px;"
+                role="button"
+            >
               {% translate 'Cancel' %}
             </a>
             <button class="btn btn-primary" type="submit" form="admission-form">
@@ -207,12 +215,16 @@
 {% block script %}
   {# Add either form scripts or osis-documents for detail #}
   {{ block.super }}
+  <script src="{% static 'admission/popover.js' %}"></script>
+  <script>
+    $(function () {
+      initializePopover();
+    });
+  </script>
   {% if form %}
     {{ form.media.js }}
-    <script src="{% static 'admission/popover.js' %}"></script>
     <script>
       $(function () {
-          initializePopover();
           // Prevent to submit data from form inputs in disabled containers
           $('form').on('submit', function() {
               $(this).find('div[disabled] *').prop('disabled', true);

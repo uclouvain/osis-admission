@@ -23,24 +23,26 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import json
 from typing import Union
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
+from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.base import AdmissionViewer, BaseAdmission
-from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
+from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.contrib.models.base import AdmissionViewer
+from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand, GetCotutelleCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, CotutelleDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
@@ -57,20 +59,20 @@ from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveCon
 from admission.ddd.parcours_doctoral.epreuve_confirmation.validators.exceptions import (
     EpreuveConfirmationNonTrouveeException,
 )
+from admission.ddd.parcours_doctoral.jury.commands import RecupererJuryQuery
+from admission.ddd.parcours_doctoral.jury.dtos.jury import JuryDTO
 from admission.templatetags.admission import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
+    add_messages_into_htmx_response,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
 
-class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
-    message_on_success = _('Your data has been saved.')
-    message_on_failure = _('Some errors have been encountered.')
-
+class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
     @property
     def admission_uuid(self) -> str:
         return self.kwargs.get('uuid', '')
@@ -83,14 +85,35 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
     def formatted_current_context(self):
         return self.current_context.replace('-', '_')
 
+    @cached_property
+    def base_namespace(self):
+        return ':'.join(self.request.resolver_match.namespaces[:2])
+
     @property
-    def admission(self) -> DoctorateAdmission:
+    def admission(self) -> Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]:
         return {
             CONTEXT_DOCTORATE: get_cached_admission_perm_obj,
             CONTEXT_GENERAL: get_cached_general_education_admission_perm_obj,
             CONTEXT_CONTINUING: get_cached_continuing_education_admission_perm_obj,
         }[self.current_context](self.admission_uuid)
 
+    def get_permission_object(self):
+        return self.admission
+
+    @property
+    def is_doctorate(self):
+        return self.current_context == CONTEXT_DOCTORATE
+
+    @property
+    def is_continuing(self):
+        return self.current_context == CONTEXT_CONTINUING
+
+    @property
+    def is_general(self):
+        return self.current_context == CONTEXT_GENERAL
+
+
+class LoadDossierViewMixin(AdmissionViewMixin):
     @cached_property
     def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO]:
         cmd = {
@@ -120,50 +143,30 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
         except (DoctoratNonTrouveException, EpreuveConfirmationNonTrouveeException) as e:
             raise Http404(e.message)
 
-    def get_permission_object(self):
-        return self.admission
-
-    @property
-    def is_doctorate(self):
-        return self.current_context == CONTEXT_DOCTORATE
-
-    @property
-    def is_continuing(self):
-        return self.current_context == CONTEXT_CONTINUING
-
-    @property
-    def is_general(self):
-        return self.current_context == CONTEXT_GENERAL
+    @cached_property
+    def jury(self) -> 'JuryDTO':
+        return message_bus_instance.invoke(RecupererJuryQuery(uuid_jury=self.admission_uuid))
 
     @cached_property
-    def base_namespace(self):
-        return ':'.join(self.request.resolver_match.namespaces[:2])
-
-    def form_valid(self, form):
-        messages.success(self.request, self.message_on_success)
-
-        # Update the last update author of the admission
-        author = getattr(self.request.user, 'person')
-        if author:
-            admission = BaseAdmission.objects.get(uuid=self.admission_uuid)
-            admission.last_update_author = author
-            self.update_current_admission_on_form_valid(form, admission)
-            admission.save()
-
-        return super().form_valid(form)
+    def cotutelle(self) -> 'CotutelleDTO':
+        return message_bus_instance.invoke(GetCotutelleCommand(uuid_proposition=self.admission_uuid))
 
     def update_current_admission_on_form_valid(self, form, admission):
         pass
 
-    def form_invalid(self, form):
-        messages.error(self.request, self.message_on_failure)
-        return super().form_invalid(form)
+    @cached_property
+    def next_url(self):
+        url = self.request.GET.get('next', '')
+        hash_url = self.request.GET.get('next_hash_url', '')
+        return f'{url}#{hash_url}' if hash_url else url
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
         context['base_namespace'] = self.base_namespace
         context['base_template'] = f'admission/{self.formatted_current_context}/tab_layout.html'
+        context['original_admission'] = self.admission
+        context['next_url'] = self.next_url
 
         if self.is_doctorate:
             try:
@@ -182,6 +185,7 @@ class LoadDossierViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextM
             context['admission'] = self.proposition
         else:
             context['admission'] = self.admission
+
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -201,3 +205,83 @@ class DoctorateAdmissionLastConfirmationMixin(LoadDossierViewMixin):
         context = super().get_context_data(**kwargs) if hasattr(super(), 'get_context_data') else {}
         context['confirmation_paper'] = self.last_confirmation_paper
         return context
+
+
+class AdmissionFormMixin(AdmissionViewMixin):
+    message_on_success = _('Your data has been saved.')
+    message_on_failure = _('Some errors have been encountered.')
+    update_requested_documents = False
+    update_admission_author = False
+    default_htmx_trigger_form_extra = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.custom_headers = {}
+        self.htmx_trigger_form_extra = {**self.default_htmx_trigger_form_extra}
+
+    def htmx_trigger_form(self, is_valid: bool):
+        """Add a JS event to listen for when the form is submitted through HTMX."""
+        self.custom_headers = {
+            'HX-Trigger': {
+                "formValidation": {
+                    "is_valid": is_valid,
+                    "message": str(self.message_on_success if is_valid else self.message_on_failure),
+                    **self.htmx_trigger_form_extra,
+                }
+            }
+        }
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        """Override this method to update the current admission on form valid."""
+        pass
+
+    def form_valid(self, form):
+        messages.success(self.request, str(self.message_on_success))
+
+        # Update the last update author of the admission
+        author = getattr(self.request.user, 'person')
+        if self.update_admission_author and author:
+            admission = BaseAdmission.objects.get(uuid=self.admission_uuid)
+            admission.last_update_author = author
+            # Additional updates if needed
+            self.update_current_admission_on_form_valid(form, admission)
+            admission.save()
+
+        # Update the requested documents
+        if self.update_requested_documents and hasattr(self.admission, 'update_requested_documents'):
+            self.admission.update_requested_documents()
+
+        if self.request.htmx:
+            self.htmx_trigger_form(is_valid=True)
+            response = self.render_to_response(self.get_context_data(form=form))
+            add_messages_into_htmx_response(request=self.request, response=response)
+            return response
+
+        return super().form_valid(form)
+
+    def get_checklist_redirect_url(self):
+        # If specified, return to the correct checklist tab
+        if 'next' in self.request.GET:
+            url = resolve_url(f'admission:{self.current_context}:checklist', uuid=self.admission_uuid)
+            return f"{url}#{self.request.GET['next']}"
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        # Add custom headers
+        for header_key, header_value in self.custom_headers.items():
+            current_data_str = response.headers.get(header_key)
+            if current_data_str:
+                current_data = json.loads(current_data_str)
+                current_data.update(header_value)
+            else:
+                current_data = header_value
+            response.headers[header_key] = json.dumps(current_data)
+        return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, str(self.message_on_failure))
+        response = super().form_invalid(form)
+        if self.request.htmx:
+            self.htmx_trigger_form(is_valid=False)
+            add_messages_into_htmx_response(request=self.request, response=response)
+        return response

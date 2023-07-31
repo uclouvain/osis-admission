@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,13 +24,14 @@
 #
 ##############################################################################
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from osis_common.ddd.interface import BusinessException
 
 
 class BusinessExceptionFormViewMixin:
     error_mapping = {}
 
     def __init__(self, *args, **kwargs):
-        self._error_mapping = {exc.value: field for exc, field in self.error_mapping.items()}
+        self._error_mapping = {exc.status_code: field for exc, field in self.error_mapping.items()}
         super().__init__(*args, **kwargs)
 
     def call_command(self, form):
@@ -43,6 +44,11 @@ class BusinessExceptionFormViewMixin:
             for exception in multiple_exceptions.exceptions:
                 status_code = getattr(exception, 'status_code', None)
                 form.add_error(self._error_mapping.get(status_code), exception.message)
+            return self.form_invalid(form=form)
+        except BusinessException as exception:
+            messages.error(self.request, _("Some errors have been encountered."))
+            status_code = getattr(exception, 'status_code', None)
+            form.add_error(self._error_mapping.get(status_code), exception.message)
             return self.form_invalid(form=form)
 
         return super().form_valid(form=form)

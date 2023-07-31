@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -73,8 +73,8 @@
           {% include "admission/doctorate/details/training/"|add:template_name %}
         {% endif %}
       {% endfor %}
-      <button class="btn btn-default" type="submit" name="_submit">{% trans "Submit these courses" %}</button>
-      <button class="btn btn-default" type="submit" name="_accept">{% trans "Validate these courses" %}</button>
+      <button class="btn btn-default" type="submit" name="_submit">{% trans "Submit selected courses" %}</button>
+      <button class="btn btn-default" type="submit" name="_accept">{% trans "Validate selected courses" %}</button>
     </form>
   {% else %}
     {% trans "This candidate has not created any course yet." %}

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import attr
 
 from admission.ddd.parcours_doctoral.formation.business_types import *
 from admission.ddd.parcours_doctoral.formation.domain.validator import *
+from admission.ddd.parcours_doctoral.formation.domain.validator._should_ects_etre_positif import ShouldEctsEtrePositif
 from admission.ddd.parcours_doctoral.formation.dtos import *
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
@@ -60,7 +61,7 @@ class ConferenceValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldConferenceEtreComplete(self.conference, self.activite)]
+        return [ShouldConferenceEtreComplete(self.conference, self.activite), ShouldEctsEtrePositif(self.activite.ects)]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -72,7 +73,10 @@ class ConferenceCommunicationValidatorList(TwoStepsMultipleBusinessExceptionList
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldCommunicationConferenceEtreComplete(self.communication, self.activite)]
+        return [
+            ShouldCommunicationConferenceEtreComplete(self.communication, self.activite),
+            ShouldEctsEtrePositif(self.activite.ects),
+        ]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -84,7 +88,10 @@ class CommunicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldCommunicationEtreComplete(self.communication, self.activite)]
+        return [
+            ShouldCommunicationEtreComplete(self.communication, self.activite),
+            ShouldEctsEtrePositif(self.activite.ects),
+        ]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -96,7 +103,10 @@ class ConferencePublicationValidatorList(TwoStepsMultipleBusinessExceptionListVa
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldPublicationConferenceEtreComplete(self.publication, self.activite)]
+        return [
+            ShouldPublicationConferenceEtreComplete(self.publication, self.activite),
+            ShouldEctsEtrePositif(self.activite.ects),
+        ]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -108,7 +118,10 @@ class PublicationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldPublicationEtreComplete(self.publication, self.activite)]
+        return [
+            ShouldPublicationEtreComplete(self.publication, self.activite),
+            ShouldEctsEtrePositif(self.activite.ects),
+        ]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -120,7 +133,7 @@ class SejourValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldSejourEtreComplet(self.sejour, self.activite)]
+        return [ShouldSejourEtreComplet(self.sejour, self.activite), ShouldEctsEtrePositif(self.activite.ects)]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -132,7 +145,10 @@ class SejourCommunicationValidatorList(TwoStepsMultipleBusinessExceptionListVali
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldCommunicationSejourEtreComplete(self.communication, self.activite)]
+        return [
+            ShouldCommunicationSejourEtreComplete(self.communication, self.activite),
+            ShouldEctsEtrePositif(self.activite.ects),
+        ]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -144,7 +160,7 @@ class SeminaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldSeminaireEtreComplet(self.seminaire, self.activite)]
+        return [ShouldSeminaireEtreComplet(self.seminaire, self.activite), ShouldEctsEtrePositif(self.activite.ects)]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -156,7 +172,10 @@ class SeminaireCommunicationValidatorList(TwoStepsMultipleBusinessExceptionListV
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldCommunicationSeminaireEtreComplete(self.communication, self.activite)]
+        return [
+            ShouldCommunicationSeminaireEtreComplete(self.communication, self.activite),
+            ShouldEctsEtrePositif(self.activite.ects),
+        ]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -168,7 +187,7 @@ class ServiceValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldServiceEtreComplet(self.service, self.activite)]
+        return [ShouldServiceEtreComplet(self.service, self.activite), ShouldEctsEtrePositif(self.activite.ects)]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -180,7 +199,10 @@ class ValorisationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldValorisationEtreComplete(self.valorisation, self.activite)]
+        return [
+            ShouldValorisationEtreComplete(self.valorisation, self.activite),
+            ShouldEctsEtrePositif(self.activite.ects),
+        ]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -192,7 +214,7 @@ class CoursValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldCoursEtreComplet(self.cours, self.activite)]
+        return [ShouldCoursEtreComplet(self.cours, self.activite), ShouldEctsEtrePositif(self.activite.ects)]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -204,7 +226,7 @@ class EpreuveValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [ShouldEpreuveEtreComplete(self.epreuve, self.activite)]
+        return [ShouldEpreuveEtreComplete(self.epreuve, self.activite), ShouldEctsEtrePositif(self.activite.ects)]
 
 
 @attr.dataclass(frozen=True, slots=True)
