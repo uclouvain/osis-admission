@@ -1,0 +1,79 @@
+{% load i18n enums %}
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+<div>
+<strong>{% if membre.justification_non_docteur %}<a tabindex="0" class="fa fa-exclamation-triangle popover-buttons" data-content="{{ membre.justification_non_docteur|linebreaksbr }}" role="button" data-original-title="" title=""></a> {% endif %}{% if membre.titre and membre.titre != 'NON_DOCTEUR' %}{{ membre.titre | enum_display:'TitreMembre' }} {% endif %}{{ membre.prenom }} {{ membre.nom }}</strong>
+(<a href="mailto:{{ membre.email }}">{{ membre.email }}</a>) - {{ membre.institution }}{% if membre.autre_institution %}, {{ membre.autre_institution }}{% endif %}
+{% if membre.est_promoteur %} - <strong>{% trans "Promoter" %}</strong>{% endif %}
+</div>
+{% if form %}
+<div class="btn-group">
+  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <i class="fa fa-cog"></i> {% trans "Actions" %}
+  </button>
+  <form class="membre-role-form" class="no-prevent-quitting" action="{% url 'admission:doctorate:update:jury-member:change-role' uuid=jury.uuid member_uuid=membre.uuid %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="role">
+  </form>
+  <ul class="dropdown-menu dropdown-menu-right">
+    {% if not membre.est_promoteur and not membre.role == 'PRESIDENT' %}<li><a class="membre-role-submit" href="#" data-role="PRESIDENT">{% trans "Set as president" %}</a></li>{% endif %}
+    {% if not membre.role == 'SECRETAIRE' %}<li><a class="membre-role-submit" href="#" data-role="SECRETAIRE">{% trans "Set as secretary" %}</a></li>{% endif %}
+    {% if not membre.role == 'MEMBRE' %}<li><a class="membre-role-submit" href="#" data-role="MEMBRE">{% trans "Set as member" %}</a></li>{% endif %}
+    {% if not membre.est_promoteur %}
+    <li><a href="{% url 'admission:doctorate:update:jury-member:update' uuid=jury.uuid member_uuid=membre.uuid %}">{% trans "Update" %}</a></li>
+    <li><a href="#deleteModal-{{ membre.uuid }}" data-toggle="modal" data-target="#deleteModal-{{ membre.uuid }}">{% trans "Remove" context "jury member" %}</a></li>
+    {% endif %}
+  </ul>
+</div>
+
+{% if not membre.est_promoteur %}
+<!-- delete modal -->
+<div class="modal fade" id="deleteModal-{{ membre.uuid }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ membre.uuid }}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="{% url 'admission:doctorate:update:jury-member:remove' uuid=jury.uuid member_uuid=membre.uuid %}" method="post">
+        {% csrf_token %}
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="deleteModalLabel-{{ membre.uuid }}">{% trans "Remove?" context "jury member" %}</h4>
+        </div>
+        <div class="modal-body">
+          <p>
+            {% blocktrans with prenom=membre.prenom nom=membre.nom trimmed %}
+              Are you sure you want to remove "{{ prenom }} {{ nom }}" from the jury?
+            {% endblocktrans %}
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+          <input type="submit" class="btn btn-danger" value="{% trans 'Confirm' %}">
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endif %}

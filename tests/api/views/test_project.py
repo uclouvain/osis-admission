@@ -208,7 +208,12 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'submit_proposition',
                 'destroy_proposition',
             ],
-            forbidden_actions=[],
+            forbidden_actions=[
+                'retrieve_documents',
+                'update_documents',
+                'pay_after_submission',
+                'pay_after_request',
+            ],
         )
 
     def test_list_propositions_candidate_for_continuing_education(self):
@@ -316,6 +321,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'retrieve_doctoral_training',
             'retrieve_complementary_training',
             'retrieve_course_enrollment',
+            'retrieve_jury_preparation',
         ]
 
         self.assertActionLinks(proposition['links'], allowed_actions, forbidden_actions)
@@ -540,6 +546,8 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             'retrieve_doctoral_training',
             'retrieve_complementary_training',
             'retrieve_course_enrollment',
+            'retrieve_jury_preparation',
+            'list_jury_members',
         ]
         self.assertActionLinks(response.data['links'], allowed_actions, forbidden_actions)
 

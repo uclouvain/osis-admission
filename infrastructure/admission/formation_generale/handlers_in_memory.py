@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,6 +27,20 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
+from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
+    modifier_checklist_choix_formation,
+)
+from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
+from admission.ddd.admission.use_case.write import (
+    initialiser_emplacement_document_libre_non_reclamable,
+    initialiser_emplacement_document_a_reclamer,
+    annuler_reclamation_emplacement_document,
+    modifier_reclamation_emplacement_document,
+    supprimer_emplacement_document,
+    remplacer_emplacement_document,
+    remplir_emplacement_document_par_gestionnaire,
+    initialiser_emplacement_document_libre_a_reclamer,
+)
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
@@ -37,11 +51,22 @@ from admission.infrastructure.admission.domain.service.in_memory.calendrier_insc
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.historique import HistoriqueInMemory
+from admission.infrastructure.admission.domain.service.in_memory.historique import (
+    HistoriqueInMemory as HistoriqueGlobalInMemory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.historique import (
+    HistoriqueInMemory as HistoriqueFormationGeneraleInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
+    PaiementFraisDossierInMemory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
+    EmplacementsDocumentsPropositionInMemoryTranslator,
+)
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
     ComptabiliteInMemoryTranslator,
@@ -61,7 +86,13 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+    emplacement_document_in_memory_repository,
+)
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -73,7 +104,13 @@ _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _academic_year_repository = AcademicYearInMemoryRepository()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
-_historique = HistoriqueInMemory()
+_historique_global = HistoriqueGlobalInMemory()
+_historique_formation_generale = HistoriqueFormationGeneraleInMemory()
+_emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
+_emplacement_document_repository = emplacement_document_in_memory_repository
+_personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
+_paiement_frais_dossier = PaiementFraisDossierInMemory()
+_notification = NotificationInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -88,7 +125,7 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_generale_translator,
         bourse_translator=_bourse_translator,
         maximum_propositions_service=_maximum_propositions_autorisees,
-        historique=_historique,
+        historique=_historique_global,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -104,10 +141,15 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_generale_translator,
         bourse_translator=_bourse_translator,
     ),
+    ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
+        cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_generale_translator,
+    ),
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
         proposition_repository=_proposition_repository,
-        historique=_historique,
+        historique=_historique_global,
     ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
@@ -130,10 +172,11 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         questions_specifiques_translator=_question_specific_translator,
         element_confirmation=ElementsConfirmationInMemory(),
-        notification=NotificationInMemory(),
+        notification=_notification,
         maximum_propositions_service=_maximum_propositions_autorisees,
         inscription_tardive_service=InscriptionTardiveInMemory(),
-        historique=_historique,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
+        historique=_historique_global,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -179,5 +222,149 @@ COMMAND_HANDLERS = {
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        comptabilite_translator=_comptabilite_translator,
+        question_specifique_translator=_question_specific_translator,
+        emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        academic_year_repository=_academic_year_repository,
+        personne_connue_translator=_personne_connue_ucl_translator,
+    ),
+    RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
+        cmd,
+        question_specifique_translator=_question_specific_translator,
+    ),
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand: (
+        lambda msg_bus, cmd: recalculer_emplacements_documents_non_libres_proposition(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            question_specifique_translator=_question_specific_translator,
+            academic_year_repository=_academic_year_repository,
+            emplacement_document_repository=_emplacement_document_repository,
+        )
+    ),
+    ReclamerDocumentsAuCandidatParSICCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_sic(
+        cmd,
+        proposition_repository=_proposition_repository,
+        emplacement_document_repository=_emplacement_document_repository,
+        notification=_notification,
+        historique=_historique_global,
+    ),
+    ReclamerDocumentsAuCandidatParFACCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_fac(
+        cmd,
+        proposition_repository=_proposition_repository,
+        emplacement_document_repository=_emplacement_document_repository,
+        notification=_notification,
+        historique=_historique_global,
+    ),
+    RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        comptabilite_translator=_comptabilite_translator,
+        question_specifique_translator=_question_specific_translator,
+        emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        academic_year_repository=_academic_year_repository,
+        personne_connue_translator=_personne_connue_ucl_translator,
+    ),
+    CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
+        completer_emplacements_documents_par_candidat(
+            cmd,
+            proposition_repository=_proposition_repository,
+            emplacement_document_repository=_emplacement_document_repository,
+            historique=_historique_global,
+        )
+    ),
+    InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
+        initialiser_emplacement_document_libre_non_reclamable(
+            cmd,
+            emplacement_document_repository=_emplacement_document_repository,
+        )
+    ),
+    InitialiserEmplacementDocumentLibreAReclamerCommand: (
+        lambda msg_bus, cmd: initialiser_emplacement_document_libre_a_reclamer(
+            cmd,
+            emplacement_document_repository=_emplacement_document_repository,
+        )
+    ),
+    InitialiserEmplacementDocumentAReclamerCommand: lambda msg_bus, cmd: initialiser_emplacement_document_a_reclamer(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    AnnulerReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: annuler_reclamation_emplacement_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    ModifierReclamationEmplacementDocumentCommand: lambda msg_bus, cmd: modifier_reclamation_emplacement_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    SupprimerEmplacementDocumentCommand: lambda msg_bus, cmd: supprimer_emplacement_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    RemplacerEmplacementDocumentCommand: lambda msg_bus, cmd: remplacer_emplacement_document(
+        cmd,
+        emplacement_document_repository=_emplacement_document_repository,
+    ),
+    RemplirEmplacementDocumentParGestionnaireCommand: lambda msg_bus, cmd: (
+        remplir_emplacement_document_par_gestionnaire(
+            cmd,
+            emplacement_document_repository=_emplacement_document_repository,
+        )
+    ),
+    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery: (
+        lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_non_libres_proposition(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
+            question_specifique_translator=_question_specific_translator,
+        )
+    ),
+    SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+        notification=_notification,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
+        historique=_historique_formation_generale,
+    ),
+    EnvoyerRappelPaiementCommand: lambda msg_bus, cmd: envoyer_rappel_paiement(
+        cmd,
+        proposition_repository=_proposition_repository,
+        notification=_notification,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
+        historique=_historique_formation_generale,
+    ),
+    SpecifierPaiementPlusNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_plus_necessaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
+        historique=_historique_formation_generale,
+    ),
+    PayerFraisDossierPropositionSuiteSoumissionCommand: (
+        lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_soumission(
+            cmd,
+            proposition_repository=_proposition_repository,
+            notification=_notification,
+            paiement_frais_dossier_service=_paiement_frais_dossier,
+            historique=_historique_formation_generale,
+        )
+    ),
+    PayerFraisDossierPropositionSuiteDemandeCommand: (
+        lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_demande(
+            cmd,
+            proposition_repository=_proposition_repository,
+            paiement_frais_dossier_service=_paiement_frais_dossier,
+            historique=_historique_formation_generale,
+        )
     ),
 }

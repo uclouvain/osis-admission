@@ -39,6 +39,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 class SoumettreActivitesTestCase(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
+        self.addCleanup(ActiviteInMemoryRepository.reset)
 
     def tearDown(self) -> None:
         ActiviteInMemoryRepository.reset()

@@ -98,8 +98,13 @@
     <br>
     {% url 'admission:access-conditions-url' admission.formation.type admission.formation.sigle|urlencode:'' admission.formation.code as access_conditions_url %}
     <span>
-      <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}</a> -
-      {{ admission.formation.intitule }} ({{ admission.formation.campus }})
+      {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
+        <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}-1</a> -
+        {% trans "First year of" %} {{ admission.formation.intitule|lower }} ({{ admission.formation.campus }})
+      {% else %}
+        <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}</a> -
+        {{ admission.formation.intitule }} ({{ admission.formation.campus }})
+      {% endif %}
       <span class="label label-default">{{ admission.formation.annee|display_as_academic_year }}</span>
     </span>
     <br>
@@ -112,10 +117,7 @@
     </span>
   </div>
   <div class="min-width">
-    <span>
-      {% translate 'Status:' %} <span class="label label-admission-primary">{{ admission.statut|enum_display:'ChoixStatutPropositionGenerale' }}</span>
-      {{ admission.date_changement_statut|date:'d/m/Y' }}
-    </span>
+    {% include 'admission/includes/admission_status.html' with display_on_load=True %}
     {% if admission.soumise_le %}
       <br>
       <span>
@@ -239,6 +241,10 @@
 
       #admission-panel-header > div:not(:first-child) {
         margin-right: initial;
+      }
+
+      #admission-panel-header > div.min-width {
+        width: 100%;
       }
     }
   </style>

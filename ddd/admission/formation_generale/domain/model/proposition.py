@@ -28,6 +28,7 @@ from typing import Dict, Optional, List
 
 import attr
 from django.utils.timezone import now
+from django.utils.translation import gettext_noop as __
 
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.formation import FormationIdentity
@@ -45,7 +46,15 @@ from admission.ddd.admission.enums import (
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import comptabilite_non_remplie, Comptabilite
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
+    PoursuiteDeCycle,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutsChecklistGenerale,
+    StatutChecklist,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -92,8 +101,15 @@ class Proposition(interface.RootEntity):
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
 
     est_inscription_tardive: bool = False
+    checklist_initiale: Optional[StatutsChecklistGenerale] = None
+    checklist_actuelle: Optional[StatutsChecklistGenerale] = None
 
     profil_soumis_candidat: ProfilCandidat = None
+
+    documents_demandes: Dict = attr.Factory(dict)
+
+    poursuite_de_cycle_a_specifier: bool = False
+    poursuite_de_cycle: PoursuiteDeCycle = PoursuiteDeCycle.TO_BE_DETERMINED
 
     def modifier_choix_formation(
         self,
@@ -110,6 +126,17 @@ class Proposition(interface.RootEntity):
         self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
 
+    def modifier_checklist_choix_formation(
+        self,
+        type_demande: 'TypeDemande',
+        formation_id: FormationIdentity,
+        poursuite_de_cycle: 'PoursuiteDeCycle',
+    ):
+        self.type_demande = type_demande
+        self.formation_id = formation_id
+        self.annee_calculee = formation_id.annee
+        self.poursuite_de_cycle = poursuite_de_cycle
+
     def supprimer(self):
         self.statut = ChoixStatutPropositionGenerale.ANNULEE
 
@@ -121,8 +148,12 @@ class Proposition(interface.RootEntity):
         type_demande: TypeDemande,
         est_inscription_tardive: bool,
         profil_candidat_soumis: ProfilCandidat,
+        doit_payer_frais_dossier: bool,
     ):
-        self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
+        if doit_payer_frais_dossier:
+            self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
+        else:
+            self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
         self.type_demande = type_demande
         self.annee_calculee = formation_id.annee
         self.formation_id = formation_id
@@ -135,6 +166,46 @@ class Proposition(interface.RootEntity):
             self.formulaire_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
+
+    def payer_frais_dossier(self):
+        self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
+
+        self.checklist_actuelle.frais_dossier = StatutChecklist(
+            libelle=__('Payed'),
+            statut=ChoixStatutChecklist.SYST_REUSSITE,
+        )
+
+    def reclamer_documents_par_sic(self):
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC
+
+    def reclamer_documents_par_fac(self):
+        self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC
+
+    def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self):
+        self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
+        self.checklist_actuelle.frais_dossier = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Must pay'),
+        )
+
+    def specifier_paiement_frais_dossier_plus_necessaire_par_gestionnaire(self, statut_checklist_cible: str):
+        self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
+        self.checklist_actuelle.frais_dossier = {
+            ChoixStatutChecklist.INITIAL_NON_CONCERNE.name: StatutChecklist(
+                statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+                libelle=__('Not concerned'),
+            ),
+            ChoixStatutChecklist.GEST_REUSSITE.name: StatutChecklist(
+                statut=ChoixStatutChecklist.GEST_REUSSITE,
+                libelle=__('Dispensed'),
+            ),
+        }[statut_checklist_cible]
+
+    def completer_documents_par_candidat(self):
+        self.statut = {
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC,
+        }.get(self.statut)
 
     def completer_curriculum(
         self,

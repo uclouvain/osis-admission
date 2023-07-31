@@ -42,27 +42,15 @@
       data-rich-text-config="{{ ckeditor_config|to_json }}"
       data-panel-class="panel panel-primary"
   ></div>
-  <div class="comment-viewer"
+  {% for checklist_tag, checklist_title in checklist_tags %}
+    <div class="comment-viewer"
       data-url="{% url base_namespace|add:':other-comments' view.kwargs.uuid %}"
-      data-tags="{{ COMMENT_TAG_APPLICATION_FEES }}"
-      data-header-title="{% trans "Application fees" %}"
+      data-tags="{{ checklist_tag }}"
+      data-header-title="{{ checklist_title }}"
       data-rich-text-config="{{ ckeditor_config|to_json }}"
       data-panel-class="panel panel-info"
-  ></div>
-  <div class="comment-viewer"
-      data-url="{% url base_namespace|add:':other-comments' view.kwargs.uuid %}"
-      data-tags="{{ COMMENT_TAG_PERSONAL_DATA }}"
-      data-header-title="{% trans "Personal data" %}"
-      data-rich-text-config="{{ ckeditor_config|to_json }}"
-      data-panel-class="panel panel-info"
-  ></div>
-  <div class="comment-viewer"
-      data-url="{% url base_namespace|add:':other-comments' view.kwargs.uuid %}"
-      data-tags="{{ COMMENT_TAG_FAC_PROCESSING }}"
-      data-header-title="{% trans "FAC/CDD processing" %}"
-      data-rich-text-config="{{ ckeditor_config|to_json }}"
-      data-panel-class="panel panel-info"
-  ></div>
+    ></div>
+  {% endfor %}
   {% csrf_token %}
 {% endblock %}
 

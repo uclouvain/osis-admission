@@ -31,6 +31,7 @@ import factory
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
+from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
@@ -76,6 +77,12 @@ class PropositionInMemoryRepository(
     countries = {
         'BE': 'Belgium',
         'FR': 'France',
+    }
+    documents_libres_sic_uclouvain = {
+        'uuid-MASTER-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f142'],
+    }
+    documents_libres_fac_uclouvain = {
+        'uuid-MASTER-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f143'],
     }
 
     @classmethod
@@ -125,6 +132,29 @@ class PropositionInMemoryRepository(
                     '16de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
                     '16de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
                     '16de0c3d-3c06-4c93-8eb4-c8648f04f144': 'My response 4',
+                    '16de0c3d-3c06-4c93-8eb4-c8648f04f145': ['24de0c3d-3c06-4c93-8eb4-c8648f04f144'],
+                },
+                documents_demandes={
+                    'CURRICULUM.CURRICULUM': {
+                        'last_actor': '00321234',
+                        'reason': 'Le document est à mettre à jour.',
+                        'type': TypeEmplacementDocument.NON_LIBRE.name,
+                        'last_action_at': '2023-01-02T00:00:00',
+                        'status': StatutEmplacementDocument.RECLAME.name,
+                        'requested_at': '2023-01-02T00:00:00',
+                        'deadline_at': '2023-01-19',
+                        'automatically_required': False,
+                    },
+                    'LIBRE_CANDIDAT.16de0c3d-3c06-4c93-8eb4-c8648f04f146': {
+                        'last_actor': '00987890',
+                        'reason': 'Ce nouveau document pourrait être intéressant.',
+                        'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                        'last_action_at': '2023-01-03T00:00:00',
+                        'status': StatutEmplacementDocument.RECLAME.name,
+                        'requested_at': '2023-01-03T00:00:00',
+                        'deadline_at': '2023-01-19',
+                        'automatically_required': False,
+                    },
                 },
             ),
             PropositionFactory(
@@ -157,6 +187,13 @@ class PropositionInMemoryRepository(
                 matricule_candidat='0123456789',
                 formation_id=FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
                 bourse_erasmus_mundus_id=BourseInMemoryTranslator.bourse_em_1.entity_id,
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI-CONFIRMED'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
+                curriculum=['file1.pdf'],
+                est_confirmee=True,
             ),
         ]
 
@@ -212,6 +249,9 @@ class PropositionInMemoryRepository(
             est_reorientation_inscription_externe=proposition.est_reorientation_inscription_externe,
             attestation_inscription_reguliere=proposition.attestation_inscription_reguliere,
             pdf_recapitulatif=[],
+            documents_demandes=proposition.documents_demandes,
+            documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
+            documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
         )
 
     @classmethod
@@ -233,6 +273,8 @@ class PropositionInMemoryRepository(
             nationalite_candidat=candidat.pays_nationalite,
             nationalite_ue_candidat=candidat.pays_nationalite_europeen,
             photo_identite_candidat=candidat.photo_identite,
+            poursuite_de_cycle_a_specifier=proposition.poursuite_de_cycle_a_specifier,
+            poursuite_de_cycle=proposition.poursuite_de_cycle if proposition.poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=any(
                 proposition.statut == ChoixStatutPropositionGenerale.EN_BROUILLON for proposition in propositions
             ),

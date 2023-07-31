@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,3 +29,14 @@ from .supprimer_proposition_service import supprimer_proposition
 from .soumettre_proposition_service import soumettre_proposition
 from .completer_curriculum_service import completer_curriculum
 from .completer_comptabilite_proposition_service import completer_comptabilite_proposition
+from .completer_emplacements_documents_par_candidat_service import completer_emplacements_documents_par_candidat
+from .envoyer_rappel_paiement_service import envoyer_rappel_paiement
+from .payer_frais_dossier_proposition_suite_demande_service import payer_frais_dossier_proposition_suite_demande
+from .payer_frais_dossier_proposition_suite_soumission_service import payer_frais_dossier_proposition_suite_soumission
+from .specifier_paiement_necessaire_service import specifier_paiement_necessaire
+from .specifier_paiement_plus_necessaire_service import specifier_paiement_plus_necessaire
+from .recalculer_emplacements_documents_non_libres_proposition_service import (
+    recalculer_emplacements_documents_non_libres_proposition,
+)
+from .reclamer_documents_au_candidat_par_fac_service import reclamer_documents_au_candidat_par_fac
+from .reclamer_documents_au_candidat_par_sic_service import reclamer_documents_au_candidat_par_sic

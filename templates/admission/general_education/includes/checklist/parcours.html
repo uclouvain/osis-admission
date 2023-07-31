@@ -1,0 +1,126 @@
+{% load admission_parcours i18n %}
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation" class="active">
+    <a href="#parcours-complete" aria-controls="parcours-complete" role="tab" data-toggle="tab">{% trans "Whole view" %}</a>
+  </li>
+  <li role="presentation">
+    <a href="#parcours-formations" aria-controls="parcours-formations" role="tab" data-toggle="tab">{% trans "Academics trainings view" %}</a>
+  </li>
+  <li role="presentation">
+    <a href="#parcours-financabilite" aria-controls="parcours-financabilite" role="tab" data-toggle="tab">{% trans "Financeability view" %}</a>
+  </li>
+</ul>
+
+<div id="parcours" class="tab-content">
+  {# Vue complète #}
+  <div role="tabpanel" class="tab-pane active" id="parcours-complete">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Years" %}</th>
+          <th>{# Diplomant #}</th>
+          <th>{% trans "Experiences" %}</th>
+          <th>{% trans "Access title" %}</th>
+          <th>{% trans "Registered credits" %}</th>
+          <th>{% trans "Acquired credits" %}</th>
+          <th>{% trans "Reduction" %}</th>
+          <th>{% trans "Reorientation" %}</th>
+          <th>{% trans "Institute" context "admission" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for year, year_experiences in experiences.items %}
+          {% for experience in year_experiences %}
+            {% include "admission/general_education/includes/checklist/parcours_row.html" with avec_titre_acces=True %}
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Vue formations académiques #}
+  <div role="tabpanel" class="tab-pane" id="parcours-formations">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Years" %}</th>
+          <th>{# Diplomant #}</th>
+          <th>{% trans "Experiences" %}</th>
+          <th>{% trans "Access title" %}</th>
+          <th>{% trans "Registered credits" %}</th>
+          <th>{% trans "Acquired credits" %}</th>
+          <th>{% trans "Reduction" %}</th>
+          <th>{% trans "Reorientation" %}</th>
+          <th>{% trans "Institute" context "admission" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% with experiences_formations=experiences|filter_experiences_trainings %}
+          {% for year, year_experiences in experiences_formations.items %}
+            {% for experience in year_experiences %}
+              {% include "admission/general_education/includes/checklist/parcours_row.html" with avec_titre_acces=True %}
+            {% empty %}
+              {% ifchanged %}
+              <tr class="bg-primary">
+                <td colspan="9"></td>
+              </tr>
+              {% endifchanged %}
+            {% endfor %}
+          {% endfor %}
+        {% endwith %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Vue finançabilité #}
+  <div role="tabpanel" class="tab-pane" id="parcours-financabilite">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Years" %}</th>
+          <th>{# Diplomant #}</th>
+          <th>{% trans "Experiences" %}</th>
+          <th>{% trans "Registered credits" %}</th>
+          <th>{% trans "Acquired credits" %}</th>
+          <th>{% trans "Reduction" %}</th>
+          <th>{% trans "Reorientation" %}</th>
+          <th>{% trans "Institute" context "admission" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% with experiences_financabilite=experiences|filter_experiences_financability %}
+          {% for year, year_experiences in experiences_financabilite.items %}
+            {% for experience in year_experiences %}
+              {% include "admission/general_education/includes/checklist/parcours_row.html" with avec_titre_acces=False %}
+            {% endfor %}
+          {% endfor %}
+        {% endwith %}
+      </tbody>
+    </table>
+  </div>
+
+</div>

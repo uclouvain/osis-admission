@@ -39,3 +39,6 @@ class FormationDTO(interface.DTO):
     code_domaine: str
     campus_inscription: str
     sigle_entite_gestion: str
+
+    def __str__(self):
+        return f'{self.sigle} - {self.intitule} ({self.campus})'

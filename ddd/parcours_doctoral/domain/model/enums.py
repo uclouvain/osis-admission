@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -39,6 +39,13 @@ class ChoixStatutDoctorat(ChoiceEnum):
     PASSED_CONFIRMATION = _('PASSED_CONFIRMATION')
     NOT_ALLOWED_TO_CONTINUE = _('NOT_ALLOWED_TO_CONTINUE')
     CONFIRMATION_TO_BE_REPEATED = _('CONFIRMATION_TO_BE_REPEATED')
+    # Jury
+    JURY_SOUMIS = _('JURY_SOUMIS')
+    JURY_APPROUVE_CA = _('JURY_APPROUVE_CA')
+    JURY_APPROUVE_CDD = _('JURY_APPROUVE_CDD')
+    JURY_REFUSE_CDD = _('JURY_REFUSE_CDD')
+    JURY_APPROUVE_ADRE = _('JURY_APPROUVE_ADRE')
+    JURY_REFUSE_ADRE = _('JURY_REFUSE_ADRE')
 
 
 STATUTS_DOCTORAT_EPREUVE_CONFIRMATION_EN_COURS = {

@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 import logging
+from _decimal import Decimal
 
 from django.conf import settings
 
@@ -36,7 +37,7 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
 class PaiementEnLigneService:
-    MONTANT_FRAIS_DE_DOSSIER: str = "200.00"
+    MONTANT_FRAIS_DE_DOSSIER: Decimal = Decimal(200)
     paiement_service = MollieService
 
     @classmethod
@@ -66,7 +67,7 @@ class PaiementEnLigneService:
         if paiements_ouverts:
             return paiements_ouverts.first()
         paiement_mollie = cls.paiement_service.creer_paiement(
-            reference=admission.reference,
+            reference=str(admission.reference),
             montant=cls.MONTANT_FRAIS_DE_DOSSIER,
             url_redirection=url_redirection
         )

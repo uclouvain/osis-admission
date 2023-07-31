@@ -1,0 +1,77 @@
+{% load admission admission_parcours i18n enums static %}
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<tr class="{% if experience|est_experience_academique %}bg-info{% elif experience|est_etudes_secondaires %}bg-warning{% endif %}">
+  {% if forloop.first %}<td rowspan="{{ year_experiences | length }}" class="{{ year_experiences|get_parcours_annee_background }}">{{ year | get_short_academic_year }}</td>{% endif %}
+  {% if experience|est_experience_academique %}
+    <td>
+      {% if experience.a_obtenu_diplome and year == experience|get_experience_last_year %}
+        <i class="fa fa-graduation-cap"></i>
+      {% endif %}
+    </td>
+    <td>{{ experience.nom_formation }}</td>
+    {% if avec_titre_acces %}<td>{# TODO Titre d'accès #}</td>{% endif %}
+    {% with experience_annee=experience|get_experience_year:year %}
+    <td>{{ experience_annee.credits_inscrits|floatformat }}</td>
+    <td>{{ experience_annee.credits_acquis|floatformat }}</td>
+    {% endwith %}
+    <td>{# TODO Allègement #}</td>
+    <td>{# TODO Réorientation #}</td>
+    <td>
+      {% if experience.pays == 'BE' %}<img src="{% static "img/be-square.svg" %}" class="flag-icon">{% else %}<i class="fa fa-earth"></i>{% endif %}
+      {{ experience.nom_institut }}
+    </td>
+  {% elif experience|est_experience_non_academique %}
+    <td></td>
+    <td>{{ experience.type|enum_display:'ActivityType' }} {% blocktrans with start=experience.date_debut end=experience.date_fin %}from {{ start }} to {{ end }}{% endblocktrans %}</td>
+    {% if avec_titre_acces %}<td></td>{% endif %}
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  {% elif experience|est_etudes_secondaires %}
+    <td>{% if experience.diplome_etudes_secondaires == 'YES' %}<i class="fa fa-graduation-cap"></i>{% endif %}</td>
+    <td>
+      {% trans "Secondary studies" %} >
+      {% if experience.diplome_belge %}
+        {{ experience.diplome_belge.communaute|enum_display:'CommunityEnum' }} > {{ experience.diplome_belge.type_enseignement|enum_display:'EducationalType' }}
+      {% elif experience.diplome_etranger %}
+        {{ experience.diplome_etranger.type_diplome|enum_display:'ForeignDiplomaTypes' }}
+      {% endif %}
+    </td>
+    {% if avec_titre_acces %}<td></td>{% endif %}
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+      {% if experience.diplome_belge %}
+        <img src="{% static "img/be-square.svg" %}" class="flag-icon"> {{ experience.diplome_belge.nom_institut }}
+      {% elif experience.diplome_etranger %}
+        <i class="fa fa-earth"></i> <em>{{ experience.diplome_etranger.pays_nom }}</em>
+      {% endif %}
+    </td>
+  {% endif %}
+</tr>

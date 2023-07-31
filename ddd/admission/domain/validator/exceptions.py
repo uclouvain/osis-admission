@@ -170,3 +170,27 @@ class ElementsConfirmationNonConcordants(BusinessException):
 
 class NombrePropositionsSoumisesDepasseException(BusinessException):
     status_code = "ADMISSION-15"
+
+
+class PropositionNonTrouveeException(BusinessException):
+    status_code = "ADMISSION-16"
+
+    def __init__(self, **kwargs):
+        message = _("Proposition not found.")
+        super().__init__(message, **kwargs)
+
+
+class EmplacementDocumentNonTrouveException(BusinessException):
+    status_code = "ADMISSION-17"
+
+    def __init__(self, **kwargs):
+        message = _("Document not found.")
+        super().__init__(message, **kwargs)
+
+
+class DocumentsCompletesDifferentsDesReclamesException(BusinessException):
+    status_code = "ADMISSION-18"
+
+    def __init__(self, **kwargs):
+        message = _("The completed documents are different from the ones that are requested.")
+        super().__init__(message, **kwargs)

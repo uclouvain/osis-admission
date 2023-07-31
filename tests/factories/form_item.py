@@ -31,12 +31,13 @@ from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireFormation,
     CritereItemFormulaireNationaliteCandidat,
     CritereItemFormulaireLangueEtudes,
-    CritereItemFormulaireVIP, Onglets,
+    CritereItemFormulaireVIP,
+    Onglets,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
 
 
-class AdmissionFormItemFactory(factory.DjangoModelFactory):
+class AdmissionFormItemFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AdmissionFormItem
 
@@ -84,12 +85,13 @@ class CheckboxSelectionAdmissionFormItemFactory(SelectionAdmissionFormItemFactor
     }
 
 
-class AdmissionFormItemInstantiationFactory(factory.DjangoModelFactory):
+class AdmissionFormItemInstantiationFactory(factory.django.DjangoModelFactory):
     form_item = factory.SubFactory(AdmissionFormItemFactory)
     academic_year = factory.SubFactory(AcademicYearFactory)
 
     education_group_type = None
     education_group = None
+    admission = None
     required = False
 
     weight = factory.fuzzy.FuzzyInteger(1, 10)

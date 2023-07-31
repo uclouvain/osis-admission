@@ -28,12 +28,25 @@ from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Exists, OuterRef, Subquery, Prefetch, F, Value, Case, When
+from django.db.models import (
+    Exists,
+    OuterRef,
+    Subquery,
+    Prefetch,
+    F,
+    Value,
+    Case,
+    When,
+    ExpressionWrapper,
+    Q,
+    BooleanField,
+)
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
+from admission.ddd import NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
@@ -179,13 +192,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def _get_language_knowledge_dto(cls, candidate: Person, has_default_language: bool) -> List[ConnaissanceLangueDTO]:
+    def _get_language_knowledge_dto(cls, candidate: Person) -> List[ConnaissanceLangueDTO]:
         """Returns the DTO of the language knowledge data of the given candidate."""
         return [
             ConnaissanceLangueDTO(
-                nom_langue=getattr(langue.language, 'name' if has_default_language else 'name_en')
-                if langue.language
-                else '',
+                nom_langue_fr=langue.language.name if langue.language else '',
+                nom_langue_en=langue.language.name_en if langue.language else '',
                 langue=langue.language.code if langue.language else '',
                 comprehension_orale=langue.listening_comprehension or '',
                 capacite_orale=langue.speaking_ability or '',
@@ -553,7 +565,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
         return {
-            'minimal_date': datetime.date(minimal_year, IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE, 1),
+            'minimal_date': datetime.date(
+                minimal_year,
+                IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER,
+                1,
+            ),
             'last_registration_year': last_registration_year,
             'highschool_diploma_year': graduated_from_high_school_year,
         }
@@ -632,7 +648,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             )
             .aggregate(total=models.Sum('nombre_mois'))
         ).get('total')
-        return nombre_mois >= cls.NB_MOIS_MIN_VAE if nombre_mois else False
+        return nombre_mois >= NB_MOIS_MIN_VAE if nombre_mois else False
 
     @classmethod
     def recuperer_toutes_informations_candidat(
@@ -643,22 +659,31 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     ) -> ResumeCandidatDTO:
         has_default_language = cls.has_default_language()
 
-        queryset = Person.objects.prefetch_related(
-            Prefetch(
-                'professionalexperience_set',
-                queryset=ProfessionalExperience.objects.all().order_by('-start_date', '-end_date'),
-            ),
-            Prefetch(
-                'personaddress_set',
-                queryset=PersonAddress.objects.filter(
-                    label__in=[PersonAddressType.RESIDENTIAL.name, PersonAddressType.CONTACT.name],
-                ).select_related('country'),
-            ),
-        ).select_related(
-            'country_of_citizenship',
-            'birth_country',
-            'last_registration_year',
-            'graduated_from_high_school_year',
+        queryset = (
+            Person.objects.prefetch_related(
+                Prefetch(
+                    'professionalexperience_set',
+                    queryset=ProfessionalExperience.objects.all().order_by('-start_date', '-end_date'),
+                ),
+                Prefetch(
+                    'personaddress_set',
+                    queryset=PersonAddress.objects.filter(
+                        label__in=[PersonAddressType.RESIDENTIAL.name, PersonAddressType.CONTACT.name],
+                    ).select_related('country'),
+                ),
+            )
+            .select_related(
+                'country_of_citizenship',
+                'birth_country',
+                'last_registration_year',
+                'graduated_from_high_school_year',
+            )
+            .annotate(
+                secondary_studies_are_valuated=ExpressionWrapper(
+                    Q(baseadmission__isnull=False),
+                    output_field=BooleanField(),
+                )
+            )
         )
 
         is_doctorate = formation in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
@@ -709,6 +734,19 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
         coordonnees_dto = cls._get_coordonnees_dto(candidate=candidate, has_default_language=has_default_language)
 
+        curriculum_dto = CurriculumDTO(
+            annee_derniere_inscription_ucl=last_registration_year,
+            annee_diplome_etudes_secondaires=graduated_from_high_school_year,
+            experiences_academiques=cls._get_academic_experiences_dtos(matricule, has_default_language),
+            experiences_non_academiques=cls._get_non_academic_experiences_dtos(
+                candidate.professionalexperience_set.all(),
+            ),
+            annee_minimum_a_remplir=cls.get_annee_minimale_a_completer_cv(
+                annee_courante=annee_courante,
+                annee_diplome_etudes_secondaires=graduated_from_high_school_year,
+                annee_derniere_inscription_ucl=last_registration_year,
+            ),
+        )
         return ResumeCandidatDTO(
             identification=cls._get_identification_dto(
                 candidate=candidate,
@@ -716,26 +754,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 has_default_language=has_default_language,
             ),
             coordonnees=coordonnees_dto,
-            curriculum=CurriculumDTO(
-                annee_derniere_inscription_ucl=last_registration_year,
-                annee_diplome_etudes_secondaires=graduated_from_high_school_year,
-                experiences_academiques=cls._get_academic_experiences_dtos(matricule, has_default_language),
-                experiences_non_academiques=cls._get_non_academic_experiences_dtos(
-                    candidate.professionalexperience_set.all(),
-                ),
-                annee_minimum_a_remplir=cls.get_annee_minimale_a_completer_cv(
-                    annee_courante=annee_courante,
-                    annee_diplome_etudes_secondaires=graduated_from_high_school_year,
-                    annee_derniere_inscription_ucl=last_registration_year,
-                ),
-            ),
+            curriculum=curriculum_dto,
             etudes_secondaires=cls._get_secondary_studies_dto(
                 candidate=candidate,
                 has_default_language=has_default_language,
-                valuated_secondary_studies=None,
+                valuated_secondary_studies=candidate.secondary_studies_are_valuated,  # From annotation
                 formation=formation,
             ),
-            connaissances_langues=cls._get_language_knowledge_dto(candidate, has_default_language)
-            if is_doctorate
-            else None,
+            connaissances_langues=cls._get_language_knowledge_dto(candidate) if is_doctorate else None,
         )

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -78,7 +78,11 @@ def get_cdd_config(cdd_id) -> CddConfiguration:
 def get_category_labels(cdd_id, lang_code: str = None) -> List[Tuple[str, str]]:
     lang_code = lang_code or get_language()
     original_constants = dict(CategorieActivite.choices()).keys()
-    return list(zip(original_constants, get_cdd_config(cdd_id).category_labels[lang_code]))
+    return [
+        (constant, label)
+        for constant, label in zip(original_constants, get_cdd_config(cdd_id).category_labels[lang_code])
+        if constant != CategorieActivite.UCL_COURSE.name
+    ]
 
 
 class ConfigurableActivityTypeField(SelectOrOtherField):
@@ -203,6 +207,7 @@ class ConferenceForm(ActivityFormMixin, forms.ModelForm):
             'start_date': CustomDatePickerInput(),
             'end_date': CustomDatePickerInput(),
             'country': autocomplete.ListSelect2(url="country-autocomplete"),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
         help_texts = {
             'title': _("Name in the language of the manifestation"),
@@ -245,6 +250,9 @@ class ConferenceCommunicationForm(ActivityFormMixin, forms.ModelForm):
             'participating_proof': _("Attestation of the communication"),
             'committee': _("Selection committee"),
         }
+        widgets = {
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
+        }
 
 
 class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
@@ -280,6 +288,7 @@ class ConferencePublicationForm(ActivityFormMixin, forms.ModelForm):
         }
         widgets = {
             'start_date': CustomDatePickerInput(),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
 
@@ -339,6 +348,7 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
         widgets = {
             'start_date': CustomDatePickerInput(),
             'country': autocomplete.ListSelect2(url="country-autocomplete"),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
 
@@ -371,6 +381,7 @@ class PublicationForm(ActivityFormMixin, forms.ModelForm):
         }
         widgets = {
             'start_date': CustomDatePickerInput(),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
 
@@ -399,6 +410,7 @@ class ResidencyForm(ActivityFormMixin, forms.ModelForm):
             'start_date': CustomDatePickerInput(),
             'end_date': CustomDatePickerInput(),
             'country': autocomplete.ListSelect2(url="country-autocomplete"),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
 
@@ -438,6 +450,7 @@ class ResidencyCommunicationForm(ActivityFormMixin, forms.ModelForm):
         }
         widgets = {
             'start_date': CustomDatePickerInput(),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
 
@@ -467,6 +480,7 @@ class ServiceForm(ActivityFormMixin, forms.ModelForm):
         widgets = {
             'start_date': CustomDatePickerInput(),
             'end_date': CustomDatePickerInput(),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
 
@@ -492,6 +506,7 @@ class SeminarForm(ActivityFormMixin, forms.ModelForm):
         widgets = {
             'start_date': CustomDatePickerInput(),
             'end_date': CustomDatePickerInput(),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
 
@@ -522,6 +537,7 @@ class SeminarCommunicationForm(ActivityFormMixin, forms.ModelForm):
         widgets = {
             'start_date': CustomDatePickerInput(),
             'country': autocomplete.ListSelect2(url="country-autocomplete"),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
 
@@ -543,6 +559,9 @@ class ValorisationForm(ActivityFormMixin, forms.ModelForm):
             'subtitle': _("Description"),
             'summary': _("Detailed curriculum vitae"),
             'participating_proof': _("Proof"),
+        }
+        widgets = {
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
 
@@ -605,6 +624,7 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
         widgets = {
             'start_date': CustomDatePickerInput(),
             'end_date': CustomDatePickerInput(),
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
         labels = {
             'title': _("Name of the activity"),
@@ -634,6 +654,9 @@ class PaperForm(ActivityFormMixin, forms.ModelForm):
             'ects',
             'comment',
         ]
+        widgets = {
+            'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
+        }
 
 
 class UclCourseForm(ActivityFormMixin, forms.ModelForm):

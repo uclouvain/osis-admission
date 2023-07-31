@@ -55,7 +55,7 @@ class OnlinePayment(models.Model):
     admission = models.ForeignKey(
         BaseAdmission,
         on_delete=models.CASCADE,
-        related_name='online_payment',
+        related_name='online_payments',
     )
 
     payment_id = models.CharField(max_length=14)

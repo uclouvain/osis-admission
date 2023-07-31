@@ -26,11 +26,13 @@
 import factory
 
 from admission.contrib.models import GeneralEducationAdmission
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.tests.factories.utils import generate_proposition_reference
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.person import CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
@@ -39,6 +41,7 @@ from admission.tests.factories.scholarship import (
     ErasmusMundusScholarshipFactory,
     InternationalScholarshipFactory,
 )
+from admission.tests.factories.utils import generate_proposition_reference
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.organization_type import MAIN
@@ -62,7 +65,54 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
         EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
 
 
-class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
+def get_checklist():
+    return {
+        'donnees_personnelles': {
+            'libelle': '',
+            'enfants': [],
+            'extra': {},
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'frais_dossier': {
+            'libelle': '',
+            'enfants': [],
+            'extra': {},
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'assimilation': {
+            'libelle': '',
+            'enfants': [],
+            'extra': {},
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'choix_formation': {
+            'libelle': '',
+            'enfants': [],
+            'extra': {},
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'parcours_anterieur': {
+            'libelle': '',
+            'enfants': [],
+            'extra': {},
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'financabilite': {
+            'libelle': '',
+            'enfants': [],
+            'extra': {},
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+        'specificites_formation': {
+            'libelle': '',
+            'enfants': [],
+            'extra': {},
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        },
+    }
+
+
+class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = GeneralEducationAdmission
 
@@ -79,6 +129,7 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
     last_update_author = factory.SubFactory(PersonFactory)
     determined_academic_year = factory.SubFactory(AcademicYearFactory, current=True)
+    checklist = factory.Dict({'default': True})  # This default value is overriden in a post generation method
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):
@@ -115,3 +166,21 @@ class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def create_accounting(self, create, extracted, **kwargs):
         AccountingFactory(admission_id=self.pk)
+
+    @factory.post_generation
+    def initialize_checklist(self, create, extracted, **kwargs):
+        if self.checklist != {'default': True}:
+            return
+
+        self.checklist = (
+            {}
+            if self.status
+            in {
+                ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+                ChoixStatutPropositionGenerale.ANNULEE.name,
+            }
+            else {
+                'initial': get_checklist(),
+                'current': get_checklist(),
+            }
+        )

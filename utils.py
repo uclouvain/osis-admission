@@ -23,14 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import json
 import uuid
 from collections import defaultdict
 from typing import Dict, Union
 
+from django.conf import settings
+from django.contrib import messages
 from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
+from django.shortcuts import resolve_url
 from rest_framework.generics import get_object_or_404
 
 from admission.auth.roles.program_manager import ProgramManager as AdmissionProgramManager
@@ -170,4 +173,36 @@ def get_admission_cdd_managers(education_group_id) -> models.QuerySet[Person]:
 def get_doctoral_cdd_managers(education_group_id) -> QuerySet[Person]:
     return Person.objects.filter(
         id__in=ProgramManager.objects.filter(education_group_id=education_group_id).values('person_id')
+    )
+
+
+def add_messages_into_htmx_response(request, response):
+    msgs = list(messages.get_messages(request))
+
+    if msgs:
+        response['HX-Trigger'] = json.dumps(
+            {
+                'messages': [{'message': str(msg.message), 'tags': msg.tags} for msg in msgs],
+            },
+        )
+
+
+def get_portal_admission_list_url() -> str:
+    """Return the url of the list of the admissions in the portal."""
+    return f'{settings.OSIS_PORTAL_URL}admission/'
+
+
+def get_portal_admission_url(context, admission_uuid) -> str:
+    """Return the url of the admission in the portal."""
+    return settings.ADMISSION_FRONTEND_LINK.format(
+        context=context,
+        uuid=admission_uuid,
+    )
+
+
+def get_backoffice_admission_url(context, admission_uuid) -> str:
+    """Return the url of the admission in the backoffice."""
+    return '{}{}'.format(
+        settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+        resolve_url(f'admission:{context}', uuid=admission_uuid),
     )

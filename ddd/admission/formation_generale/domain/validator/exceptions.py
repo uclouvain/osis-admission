@@ -26,6 +26,7 @@
 
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from osis_common.ddd.interface import BusinessException
 
 
@@ -92,4 +93,43 @@ class EtudesSecondairesNonCompleteesPourAlternativeException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("Some information about the alternative to the secondary studies are missing.")
+        super().__init__(message, **kwargs)
+
+
+class PropositionPourPaiementInvalideException(BusinessException):
+    status_code = "FORMATION-GENERALE-11"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must not be concerned by the payment.")
+        super().__init__(message, **kwargs)
+
+
+class PropositionDoitEtreEnAttenteDePaiementException(BusinessException):
+    status_code = "FORMATION-GENERALE-12"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be concerned by the payment.")
+        super().__init__(message, **kwargs)
+
+
+class StatutPropositionInvalidePourPaiementInscriptionException(BusinessException):
+    status_code = "FORMATION-GENERALE-13"
+
+    def __init__(self, current_status, **kwargs):
+        message = _(
+            'The status of the request is currently "{current_status}". Only the status "{from_status}" allows you '
+            'to move to the "{to_status}" status for the application fees.'
+        ).format(
+            current_status=current_status,
+            from_status=ChoixStatutPropositionGenerale.CONFIRMEE.value,
+            to_status=_("Must pay"),
+        )
+        super().__init__(message, **kwargs)
+
+
+class PaiementNonRealiseException(BusinessException):
+    status_code = "FORMATION-GENERALE-14"
+
+    def __init__(self, **kwargs):
+        message = _("The payment has not been made.")
         super().__init__(message, **kwargs)

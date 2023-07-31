@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from base.models.utils.utils import ChoiceEnum
 
@@ -36,16 +36,16 @@ class StatutActivite(ChoiceEnum):
 
 
 class CategorieActivite(ChoiceEnum):
-    CONFERENCE = _("CONFERENCE")
-    COMMUNICATION = _("COMMUNICATION")
-    SEMINAR = _("SEMINAR")
-    PUBLICATION = _("PUBLICATION")
-    SERVICE = _("SERVICE")
-    RESIDENCY = _("RESIDENCY")
-    VAE = _("VAE")
-    COURSE = _("COURSE")
-    PAPER = _("PAPER")
-    UCL_COURSE = _("UCL_COURSE")
+    CONFERENCE = pgettext_lazy("CategorieActivite", "CONFERENCE")
+    COMMUNICATION = pgettext_lazy("CategorieActivite", "COMMUNICATION")
+    SEMINAR = pgettext_lazy("CategorieActivite", "SEMINAR")
+    PUBLICATION = pgettext_lazy("CategorieActivite", "PUBLICATION")
+    SERVICE = pgettext_lazy("CategorieActivite", "SERVICE")
+    RESIDENCY = pgettext_lazy("CategorieActivite", "RESIDENCY")
+    VAE = pgettext_lazy("CategorieActivite", "VAE")
+    COURSE = pgettext_lazy("CategorieActivite", "COURSE")
+    PAPER = pgettext_lazy("CategorieActivite", "PAPER")
+    UCL_COURSE = pgettext_lazy("CategorieActivite", "UCL_COURSE")
 
 
 class ChoixComiteSelection(ChoiceEnum):

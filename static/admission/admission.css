@@ -68,6 +68,10 @@ textarea {
   gap: 1em;
 }
 
+.align-items-baseline {
+  align-items: baseline;
+}
+
 .border-right {
   border-right: 1px solid #ddd;
 }
@@ -224,4 +228,20 @@ textarea {
 
 .label-admission-primary {
   background-color: #269abc;
+}
+
+.min-width {
+  width: 1%;
+  white-space: nowrap;
+}
+.auto-width {
+  width: auto;
+}
+
+.flag-icon {
+  height: 1em;
+}
+
+#parcours .tab-pane {
+  overflow-x: auto;
 }

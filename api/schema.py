@@ -25,7 +25,6 @@
 # ##############################################################################
 
 from rest_framework import status
-from rest_framework.fields import NullBooleanField
 from rest_framework.schemas.openapi import AutoSchema, SchemaGenerator
 from rest_framework.schemas.utils import is_list_view
 from rest_framework.serializers import Serializer
@@ -33,7 +32,7 @@ from rest_framework.serializers import Serializer
 from admission.api.serializers.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.74"
+ADMISSION_SDK_VERSION = "1.0.79"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
@@ -268,12 +267,6 @@ class BetterChoicesSchema(AuthorizationAwareSchemaMixin, ActionLinksFieldSchemaM
         if field.allow_blank:
             schema['enum'] = [''] + schema['enum']
         return schema
-
-    def map_field(self, field):
-        if isinstance(field, NullBooleanField):
-            return {'type': 'boolean'}
-
-        return super().map_field(field)
 
 
 class ChoicesEnumSchema(BetterChoicesSchema):

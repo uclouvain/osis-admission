@@ -23,20 +23,27 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
+
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
 from osis_mail_template import generate_email
+from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
+from osis_notification.contrib.notification import EmailNotification
 
 from admission.contrib.models import AdmissionTask
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
+from base.models.person import Person
 
 
 class Notification(INotification):
@@ -62,6 +69,10 @@ class Notification(INotification):
 
     @classmethod
     def confirmer_soumission(cls, proposition: Proposition) -> None:
+        # The candidate will be notified only when the proposition is confirmed
+        if proposition.statut != ChoixStatutPropositionGenerale.CONFIRMEE:
+            return
+
         admission = BaseAdmission.objects.select_related('candidate').get(uuid=proposition.entity_id.uuid)
 
         # Create the async task to generate the pdf recap
@@ -76,7 +87,7 @@ class Notification(INotification):
             type=AdmissionTask.TaskType.GENERAL_RECAP.name,
         )
 
-        # Notifier le doctorant via mail
+        # Notifier le candidat via mail
         with translation.override(admission.candidate.language):
             common_tokens = cls.get_common_tokens(proposition, admission.candidate)
         email_message = generate_email(
@@ -86,3 +97,43 @@ class Notification(INotification):
             recipients=[admission.candidate],
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+    @classmethod
+    def demande_complements(cls, proposition: Proposition, objet_message: str, corps_message: str) -> EmailMessage:
+        # Notifier le candidat via mail
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message
+
+    @classmethod
+    def demande_paiement_frais_dossier(cls, proposition: Proposition) -> EmailMessage:
+        admission = (
+            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            .select_related('candidate')
+            .get(uuid=proposition.entity_id.uuid)
+        )
+
+        # Notifier le candidat via mail
+        with translation.override(admission.candidate.language):
+            common_tokens = cls.get_common_tokens(proposition, admission.candidate)
+            common_tokens['admission_reference'] = admission.formatted_reference
+
+        email_message = generate_email(
+            ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
+            admission.candidate.language,
+            common_tokens,
+            recipients=[admission.candidate],
+        )
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+        return email_message

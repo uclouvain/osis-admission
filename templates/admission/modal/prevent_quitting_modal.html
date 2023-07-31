@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,8 @@
     let doCheckForm = true;
     let doBrowserPrevent = true;
     let allForms;
+    // Global which can be used elsewhere to prevent showing the modals / browser prompt
+    window.preventQuitting = true;
 
     /**
      * Save initial data of each form on page load
@@ -93,7 +95,7 @@
       // If the click is an opening anchor refreshing the window
       const isOpeningAnchor = e.target.tagName === 'A' && ['', '_self'].includes(e.target.target);
       // But not continue link (from modal) itself
-      if (isOpeningAnchor && e.target.id !== 'continue-link') {
+      if (window.preventQuitting && isOpeningAnchor && e.target.id !== 'continue-link') {
         allForms.forEach(function (form) {
           // Check the link is not part of the form
           if (!(form.querySelector('.quitting-context-excluded') || form).contains(e.target)) {
@@ -108,7 +110,8 @@
                   bubbles: true,
                   cancelable: true,
                 });
-                form.querySelector('button[type="submit"]').dispatchEvent(event);
+                const submitButton = form.querySelector('button[type="submit"]') ?? document.querySelector(`button[form="${form.id}"`);
+                submitButton.dispatchEvent(event);
               });
               // Do not show browser popup
               doBrowserPrevent = false;
@@ -120,7 +123,7 @@
     });
     window.addEventListener('beforeunload', function (e) {
       allForms.forEach(function (form) {
-        if (doCheckForm && doBrowserPrevent && formHasChanged(form, e)) {
+        if (window.preventQuitting && doCheckForm && doBrowserPrevent && formHasChanged(form, e)) {
           loadingCompleted = true;
           // Cancel the event
           e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown

@@ -26,6 +26,7 @@
 import contextlib
 import datetime
 import logging
+from _decimal import Decimal
 from time import sleep
 from typing import Dict, List
 
@@ -34,6 +35,7 @@ import requests
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _, get_language
+from requests.exceptions import RetryError
 
 from admission.contrib.models.online_payment import StatutPaiement, MethodePaiement
 
@@ -77,13 +79,13 @@ class MollieService:
         return cls._convert_to_dto(result)
 
     @classmethod
-    def creer_paiement(cls, reference: int, montant: str, url_redirection: str) -> PaiementMollie:
+    def creer_paiement(cls, reference: str, montant: Decimal, url_redirection: str) -> PaiementMollie:
         base_url = (
             settings.ADMISSION_BACKEND_LINK_PREFIX if settings.ENVIRONMENT != 'LOCAL'
             else 'https://ac26-2001-6a8-3081-a001-00-8268-f0de.ngrok-free.app'
         )
         data = {
-            "amount[value]": montant,
+            "amount[value]": '{0:.2f}'.format(montant),
             "amount[currency]": "EUR",
             'description': f"{str(_('Payment of application fees'))} - {reference}",
             'redirectUrl': url_redirection,
@@ -136,7 +138,7 @@ class FetchMolliePaymentException(Exception):
 
 
 class CreateMolliePaymentException(Exception):
-    def __init__(self, reference: int, **kwargs):
+    def __init__(self, reference: str, **kwargs):
         self.message = f"[MOLLIE] Impossible de créer le paiement pour l'admission avec reference: {reference}"
         super().__init__(**kwargs)
 
@@ -158,9 +160,14 @@ def request_retry(
             response = request_method(url, **kwargs)
             if response.status_code in success_list:
                 return response
-        sleep_time = backoff_factor * (2 ** (num_retries - 1))
-        logger.warning(
-            f"Try #{try_number + 1}/{num_retries} failed (status_code : {response.status_code}) - "
-            f"Pause of {sleep_time} seconds before next try"
-        )
-        sleep(sleep_time)
+        detail = response.json().get('detail')
+        logger.warning(f"Try #{try_number + 1}/{num_retries} failed (status_code : {response.status_code} - {detail})")
+        if try_number + 1 < num_retries:
+            sleep_time = backoff_factor * (2 ** (num_retries - 1))
+            logger.warning(f"Pause of {sleep_time} seconds before next try")
+            sleep(sleep_time)
+    raise RequestMaxRetryException
+
+
+class RequestMaxRetryException(Exception):
+    pass

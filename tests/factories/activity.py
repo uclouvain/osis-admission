@@ -51,7 +51,7 @@ __all__ = [
 ]
 
 
-class ActivityFactory(factory.DjangoModelFactory):
+class ActivityFactory(factory.django.DjangoModelFactory):
     doctorate = factory.SubFactory(DoctorateAdmissionFactory, admitted=True)
     ects = factory.Faker('random_int', min=1, max=35)
     category = factory.Iterator(CategorieActivite.choices(), getter=lambda c: c[0])

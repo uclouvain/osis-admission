@@ -23,20 +23,19 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+from enum import Enum
 from typing import List, Optional
 
+import attrs
 from django.conf import settings
-from django.db.models import Subquery, OuterRef
+from django.db.models import OuterRef, Subquery
 from django.utils.translation import get_language
-from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import (
-    GeneralEducationAdmissionProxy,
-    Scholarship,
-    Accounting,
-)
+from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
 from admission.contrib.models.general_education import GeneralEducationAdmission
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -48,22 +47,35 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutChecklist,
+    StatutsChecklistGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from admission.infrastructure.utils import dto_to_dict
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.models.student import Student
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from osis_common.ddd.interface import ApplicationService
+from osis_history.models import HistoryEntry
+
+from osis_profile.models.enums.curriculum import Result
 
 
 class PropositionRepository(GlobalPropositionRepository, IPropositionRepository):
@@ -98,6 +110,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             return cls._load(GeneralEducationAdmissionProxy.objects.get(uuid=entity_id.uuid))
         except GeneralEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
+
+    @classmethod
+    def _serialize(cls, inst, field, value):
+        if isinstance(value, StatutChecklist):
+            return attrs.asdict(value, value_serializer=cls._serialize)
+
+        if isinstance(value, Enum):
+            return value.name
+
+        return value
 
     @classmethod
     def save(cls, entity: 'Proposition') -> None:
@@ -155,6 +177,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'confirmation_elements': entity.elements_confirmation,
                 'late_enrollment': entity.est_inscription_tardive,
                 'submitted_profile': entity.profil_soumis_candidat.to_dict() if entity.profil_soumis_candidat else {},
+                'checklist': {
+                    'initial': entity.checklist_initiale
+                    and attrs.asdict(entity.checklist_initiale, value_serializer=cls._serialize)
+                    or {},
+                    'current': entity.checklist_actuelle
+                    and attrs.asdict(entity.checklist_actuelle, value_serializer=cls._serialize)
+                    or {},
+                },
+                'cycle_pursuit': entity.poursuite_de_cycle.name,
             },
         )
 
@@ -248,6 +279,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def _load(cls, admission: 'GeneralEducationAdmission') -> 'Proposition':
+        checklist_initiale = admission.checklist.get('initial')
+        checklist_actuelle = admission.checklist.get('current')
         return Proposition(
             entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
             matricule_candidat=admission.candidate.global_id,
@@ -287,6 +320,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile)
             if admission.submitted_profile
             else None,
+            documents_demandes=admission.requested_documents,
+            checklist_initiale=checklist_initiale and StatutsChecklistGenerale.from_dict(checklist_initiale),
+            checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
         )
 
     @classmethod
@@ -313,7 +349,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
                 campus_inscription=admission.training.enrollment_campus.name,
-                sigle_entite_gestion=admission.sigle_entite_gestion,  # from annotation
+                sigle_entite_gestion=admission.training_management_faculty
+                or admission.sigle_entite_gestion,  # from annotation
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
@@ -338,13 +375,36 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             attestation_inscription_reguliere=admission.regular_registration_proof,
             pdf_recapitulatif=admission.pdf_recap,
+            documents_demandes=admission.requested_documents,
+            documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
+            documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
         )
 
     @classmethod
     def _load_dto_for_gestionnaire(cls, admission: GeneralEducationAdmission) -> 'PropositionGestionnaireDTO':
         is_french_language = get_language() == settings.LANGUAGE_CODE_FR
+        proposition = cls._load_dto(admission)
+        annee_courante = (
+            GetCurrentAcademicYear()
+            .get_starting_academic_year(
+                datetime.date.today(),
+                AcademicYearRepository,
+            )
+            .year
+        )
+        curriculum = ProfilCandidatTranslator.get_curriculum(
+            matricule=proposition.matricule_candidat,
+            annee_courante=annee_courante,
+        )
+        poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name and any(
+            annee.resultat == Result.SUCCESS.name or annee.resultat == Result.SUCCESS_WITH_RESIDUAL_CREDITS.name
+            for experience in curriculum.experiences_academiques
+            for annee in experience.annees
+            if experience.pays == BE_ISO_CODE
+        )
+
         return PropositionGestionnaireDTO(
-            **dto_to_dict(cls._load_dto(admission)),
+            **dto_to_dict(proposition),
             type=admission.type_demande,
             date_changement_statut=admission.status_updated_at,  # from annotation
             genre_candidat=admission.candidate.gender,
@@ -360,6 +420,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else '',
             nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
+            poursuite_de_cycle_a_specifier=poursuite_de_cycle_a_specifier,
+            poursuite_de_cycle=admission.cycle_pursuit if poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
             titre_access='',  # TODO
             candidat_assimile=admission.accounting

@@ -30,33 +30,39 @@ import uuid
 import factory
 from dateutil.relativedelta import relativedelta
 
+from base.tests.factories.academic_year import AcademicYearFactory
 from osis_profile.models import EducationalExperienceYear, ProfessionalExperience, EducationalExperience
 from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result, Grade, ActivityType
 from reference.tests.factories.language import LanguageFactory
 
 
-class EducationalExperienceYearFactory(factory.DjangoModelFactory):
+class EducationalExperienceYearFactory(factory.django.DjangoModelFactory):
     registered_credit_number = 10
     acquired_credit_number = 10
     result = Result.WAITING_RESULT.name
+    transcript = factory.LazyFunction(lambda: [uuid.uuid4()])
+    transcript_translation = factory.LazyFunction(lambda: [uuid.uuid4()])
+    academic_year = factory.SubFactory(AcademicYearFactory, current=True)
 
     class Meta:
         model = EducationalExperienceYear
 
 
-class EducationalExperienceFactory(factory.DjangoModelFactory):
+class EducationalExperienceFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = EducationalExperience
 
     country = factory.SubFactory('reference.tests.factories.country.CountryFactory')
     transcript_type = TranscriptType.ONE_FOR_ALL_YEARS.name
     transcript = factory.LazyFunction(lambda: [uuid.uuid4()])
+    transcript_translation = factory.LazyFunction(lambda: [uuid.uuid4()])
     rank_in_diploma = '10'
     expected_graduation_date = factory.Faker('date')
     dissertation_title = 'Title'
     dissertation_score = '10'
     dissertation_summary = factory.LazyFunction(lambda: [uuid.uuid4()])
     graduate_degree = factory.LazyFunction(lambda: [uuid.uuid4()])
+    graduate_degree_translation = factory.LazyFunction(lambda: [uuid.uuid4()])
     linguistic_regime = factory.SubFactory(LanguageFactory)
     obtained_diploma = factory.Faker('boolean')
     evaluation_type = EvaluationSystem.NO_CREDIT_SYSTEM.name
@@ -64,7 +70,7 @@ class EducationalExperienceFactory(factory.DjangoModelFactory):
     education_name = 'Computer science'
 
 
-class ProfessionalExperienceFactory(factory.DjangoModelFactory):
+class ProfessionalExperienceFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProfessionalExperience
 

@@ -28,6 +28,7 @@ from typing import Optional, List
 import attr
 
 from admission.ddd.interface import SortedQueryRequest
+from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -46,3 +47,77 @@ class ListerToutesDemandesQuery(SortedQueryRequest):
     bourse_erasmus_mundus: Optional[str] = ''
     bourse_double_diplomation: Optional[str] = ''
     demandeur: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererQuestionsSpecifiquesQuery(interface.QueryRequest):
+    uuid_proposition: str
+    type: Optional[str] = None
+    requis: Optional[bool] = None
+    onglets: List[str] = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentLibreNonReclamableCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_document: str
+    type_emplacement: str
+    libelle: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentLibreAReclamerCommand(interface.CommandRequest):
+    uuid_proposition: str
+    type_emplacement: str
+    libelle: str
+    raison: str
+    auteur: str
+    uuid_document: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserEmplacementDocumentAReclamerCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    type_emplacement: str
+    raison: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierReclamationEmplacementDocumentCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    raison: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnnulerReclamationEmplacementDocumentCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerEmplacementDocumentCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplacerEmplacementDocumentCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    uuid_document: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RemplirEmplacementDocumentParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    identifiant_emplacement: str
+    uuid_document: str
+    auteur: str

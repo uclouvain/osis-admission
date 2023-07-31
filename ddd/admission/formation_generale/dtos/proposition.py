@@ -73,6 +73,21 @@ class PropositionDTO(interface.DTO):
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
 
+    documents_demandes: Dict
+    documents_libres_fac_uclouvain: List[str]
+    documents_libres_sic_uclouvain: List[str]
+
+    @property
+    def candidat_vip(self) -> bool:
+        return any(
+            bourse
+            for bourse in [
+                self.bourse_internationale,
+                self.bourse_double_diplome,
+                self.bourse_erasmus_mundus,
+            ]
+        )
+
 
 @attr.dataclass(frozen=True, slots=True)
 class PropositionGestionnaireDTO(PropositionDTO):
@@ -87,6 +102,9 @@ class PropositionGestionnaireDTO(PropositionDTO):
     nationalite_ue_candidat: Optional[bool]
     photo_identite_candidat: List[str]
 
+    poursuite_de_cycle_a_specifier: bool
+    poursuite_de_cycle: str
+
     candidat_a_plusieurs_demandes: bool
 
     titre_access: str
@@ -96,14 +114,3 @@ class PropositionGestionnaireDTO(PropositionDTO):
     est_inscription_tardive: bool
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]
-
-    @property
-    def candidat_vip(self) -> bool:
-        return any(
-            bourse
-            for bourse in [
-                self.bourse_internationale,
-                self.bourse_double_diplome,
-                self.bourse_erasmus_mundus,
-            ]
-        )
