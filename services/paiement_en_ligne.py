@@ -28,23 +28,30 @@ import logging
 from _decimal import Decimal
 
 from django.conf import settings
+from django.db.models import QuerySet
 
 from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.online_payment import OnlinePayment, StatutPaiement
+from admission.contrib.models.online_payment import OnlinePayment, PaymentStatus
 from admission.services.mollie import MollieService, PaiementMollie
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 
 class PaiementEnLigneService:
-    MONTANT_FRAIS_DE_DOSSIER: Decimal = Decimal(200)
     paiement_service = MollieService
 
     @classmethod
-    def get_and_update_payment(cls, paiement_id: str, admission: BaseAdmission = None) -> OnlinePayment:
-        online_payment = OnlinePayment.objects.get_or_create(
+    def update_payment(cls, paiement_id: str) -> OnlinePayment:
+        paiement_mollie = cls.paiement_service.recuperer_paiement(paiement_id)
+        online_payment = OnlinePayment.objects.get(payment_id=paiement_id)
+        cls._update_payment(online_payment, paiement_mollie)
+        return online_payment
+
+    @classmethod
+    def get_and_update_payment(cls, paiement_id: str, admission: BaseAdmission) -> OnlinePayment:
+        online_payment = OnlinePayment.objects.get(
             payment_id=paiement_id,
-            admission_id=admission.pk if admission else None
+            admission_id=admission.pk
         )
         paiement_mollie = cls.paiement_service.recuperer_paiement(paiement_id=paiement_id)
         cls._update_payment(online_payment, paiement_mollie)
@@ -59,16 +66,20 @@ class PaiementEnLigneService:
         online_payment.save()
 
     @classmethod
-    def get_or_create_payment(cls, url_redirection: str, admission: BaseAdmission) -> OnlinePayment:
+    def get_or_create_payment(cls, url_redirection: str, admission: BaseAdmission, montant: Decimal) -> OnlinePayment:
         paiements_ouverts = OnlinePayment.objects.filter(
             admission_id=admission.id,
-            status__in=StatutPaiement.paiements_ouverts,
+            status__in=PaymentStatus.open_payments,
         )
-        if paiements_ouverts:
-            return paiements_ouverts.first()
+        if paiements_ouverts.exists():
+            paiement_ouvert = paiements_ouverts.first()
+            cls.update_payment(paiement_id=paiement_ouvert.payment_id)
+            if paiement_ouvert.status  in PaymentStatus.open_payments:
+                return paiement_ouvert
+
         paiement_mollie = cls.paiement_service.creer_paiement(
-            reference=str(admission.reference),
-            montant=cls.MONTANT_FRAIS_DE_DOSSIER,
+            reference=str(admission),
+            montant=montant,
             url_redirection=url_redirection
         )
         paiement_en_ligne = cls._convert_to_db_object(paiement_mollie, admission)
@@ -88,5 +99,16 @@ class PaiementEnLigneService:
             checkout_url=paiement_mollie.checkout_url,
             payment_url=paiement_mollie.paiement_url,
             dashboard_url=paiement_mollie.dashboard_url,
-            montant=paiement_mollie.montant
+            amount=paiement_mollie.montant
         )
+
+    @classmethod
+    def get_all_payments(cls, admission: BaseAdmission) -> QuerySet[OnlinePayment]:
+        payments = OnlinePayment.objects.filter(
+            admission_id=admission.pk
+        ).order_by('creation_date')
+        open_payments = payments.filter(status__in=PaymentStatus.open_payments)
+        if open_payments.exists():
+            last_open_payment = open_payments.last()
+            cls.get_and_update_payment(paiement_id=last_open_payment.paiement_id, admission=admission)
+        return payments

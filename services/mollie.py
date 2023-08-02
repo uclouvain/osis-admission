@@ -34,10 +34,10 @@ import attr
 import requests
 from django.conf import settings
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _, get_language
+from django.utils.translation import get_language
 from requests.exceptions import RetryError
 
-from admission.contrib.models.online_payment import StatutPaiement, MethodePaiement
+from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
@@ -58,13 +58,28 @@ class PaiementMollie:
 
 
 class MollieService:
+    """
+        Mollie status transition:
+              ┌───────────┬─────►PAID
+              │           │
+              ├───────────┼─────►CANCELED
+        OPEN──┤           │
+              ├───►PENDING├─────►EXPIRED
+              │           │
+              └───────────┴─────►FAILED
+              PENDING --> FAILED only for banktransfer
+        Expiry times per payment method:
+            Bancontact : 1 hour
+            Bank transfer : 12 (+2) days
+            Credit card : 30 minutes
+    """
     MOLLIE_BASE_URL: str = settings.MOLLIE_API_BASE_URL
 
     @classmethod
     def recuperer_paiement(cls, paiement_id: str) -> PaiementMollie:
         logger.info(f"[MOLLIE] Récupération paiement avec mollie_id {paiement_id}")
         try:
-            response = request_retry(
+            response = requests.get(
                 url=f"{cls.MOLLIE_BASE_URL}/{paiement_id}",
                 headers={'Authorization': f'Bearer {settings.MOLLIE_API_TOKEN}'}
             )
@@ -81,25 +96,19 @@ class MollieService:
 
     @classmethod
     def creer_paiement(cls, reference: str, montant: Decimal, url_redirection: str) -> PaiementMollie:
-        base_url = (
-            settings.ADMISSION_BACKEND_LINK_PREFIX if settings.ENVIRONMENT != 'LOCAL'
-            else 'https://ac26-2001-6a8-3081-a001-00-8268-f0de.ngrok-free.app'
-        )
         data = {
             "amount[value]": '{0:.2f}'.format(montant),
             "amount[currency]": "EUR",
-            'description': f"{str(_('Payment of application fees'))} - {reference}",
+            'description': f"Frais de dossier {reference}",
             'redirectUrl': url_redirection,
-            'webhookUrl': f"{base_url}{reverse('admission:mollie-webhook')}",
+            'webhookUrl': f"{settings.ADMISSION_BACKEND_LINK_PREFIX}{reverse('admission:mollie-webhook')}",
             'locale': 'fr_BE' if get_language() == settings.LANGUAGE_CODE else 'en_US'
         }
         logger.info(f"[MOLLIE] Création d'un paiement pour l'admission avec référence {reference} - data : {data}")
 
         try:
-            response = request_retry(
+            response = requests.post(
                 url=cls.MOLLIE_BASE_URL,
-                method='post',
-                success_list=[201],
                 data=data,
                 headers={'Authorization': f'Bearer {settings.MOLLIE_API_TOKEN}'}
             )
@@ -123,8 +132,8 @@ class MollieService:
             paiement_url=result['_links']['self']['href'],
             dashboard_url=result['_links']['dashboard']['href'],
             paiement_id=result['id'],
-            statut=StatutPaiement(result['status']).name,
-            methode=MethodePaiement(result['method']).name if result['method'] else None,
+            statut=PaymentStatus(result['status']).name,
+            methode=PaymentMethod(result['method']).name if result['method'] else None,
             date_d_expiration=datetime.datetime.strptime(date_d_expiration, date_format),
             date_de_creation=datetime.datetime.strptime(result.get('createdAt'), date_format),
             date_de_mise_a_jour=datetime.datetime.now(),
@@ -143,33 +152,3 @@ class CreateMolliePaymentException(Exception):
     def __init__(self, reference: str, **kwargs):
         self.message = f"[MOLLIE] Impossible de créer le paiement pour l'admission avec reference: {reference}"
         super().__init__(**kwargs)
-
-
-def request_retry(
-    url: str,
-    num_retries: int = 1,
-    success_list: List[int] = None,
-    method: str = 'get',
-    backoff_factor: int = 1,
-    **kwargs
-):
-    if not success_list:
-        success_list = [200]
-    for try_number in range(num_retries):
-        logger.info(f"Request to {url} : try #{try_number + 1}/{num_retries}")
-        with contextlib.suppress(requests.exceptions.ConnectionError):
-            request_method = getattr(requests, method)
-            response = request_method(url, **kwargs)
-            if response.status_code in success_list:
-                return response
-        detail = response.json().get('detail')
-        logger.warning(f"Try #{try_number + 1}/{num_retries} failed (status_code : {response.status_code} - {detail})")
-        if try_number + 1 < num_retries:
-            sleep_time = backoff_factor * (2 ** (num_retries - 1))
-            logger.warning(f"Pause of {sleep_time} seconds before next try")
-            sleep(sleep_time)
-    raise RequestMaxRetryException
-
-
-class RequestMaxRetryException(Exception):
-    pass

@@ -29,26 +29,26 @@ from admission.contrib.models.base import BaseAdmission
 from base.models.utils.utils import ChoiceEnum
 
 
-class StatutPaiement(ChoiceEnum):
-    OUVERT = 'open'
-    ANNULE = 'cancelled'
-    EN_ATTENTE = 'pending'
-    EXPIRE = 'expired'
-    ECHOUE = 'failed'
-    PAYE = 'paid'
+class PaymentStatus(ChoiceEnum):
+    OPEN = 'open'
+    CANCELED = 'canceled'
+    PENDING = 'pending'
+    EXPIRED = 'expired'
+    FAILED = 'failed'
+    PAID = 'paid'
 
     @property
-    def paiements_ouverts(self):
+    def open_payments(self):
         return [
-            self.OUVERT.name,
-            self.EN_ATTENTE.name
+            self.OPEN.name,
+            self.PENDING.name
         ]
 
 
-class MethodePaiement(ChoiceEnum):
+class PaymentMethod(ChoiceEnum):
     BANCONTACT = 'bancontact'
-    CARTE_DE_CREDIT = 'creditcard'
-    VIREMENT_BANCAIRE = 'banktransfer'
+    CREDIT_CARD = 'creditcard'
+    BANK_TRANSFER = 'banktransfer'
 
 
 class OnlinePayment(models.Model):
@@ -59,12 +59,12 @@ class OnlinePayment(models.Model):
     )
 
     payment_id = models.CharField(max_length=14)
-    status = models.CharField(choices=StatutPaiement.choices(), max_length=10)
+    status = models.CharField(choices=PaymentStatus.choices(), max_length=10)
     expiration_date = models.DateTimeField(null=True)
-    method = models.CharField(choices=MethodePaiement.choices(), max_length=17, blank=True)
+    method = models.CharField(choices=PaymentMethod.choices(), max_length=17, blank=True)
     creation_date = models.DateTimeField()
     updated_date = models.DateTimeField()
     dashboard_url = models.URLField()
     checkout_url = models.URLField(blank=True)
     payment_url = models.URLField()
-    montant = models.DecimalField(decimal_places=2, max_digits=6)
+    amount = models.DecimalField(decimal_places=2, max_digits=6)

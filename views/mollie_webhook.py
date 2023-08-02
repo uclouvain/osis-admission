@@ -35,9 +35,17 @@ __all__ = [
 
 
 class MollieWebHook(APIView):
+    """
+        Mollie appelle le webhook quand un paiement atteint l'un des statuts suivants :
+            PaymentStatus.PAID
+            PaymentStatus.EXPIRED
+            PaymentStatus.FAILED
+            PaymentStatus.CANCELED
+        DEV étant inaccessible depuis l'extérieur, il faut simuler l'appel au webhook
+    """
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
         paiement_id = request.POST.get('id')
-        PaiementEnLigneService.get_and_update_payment(paiement_id=paiement_id)
+        PaiementEnLigneService.update_payment(paiement_id=paiement_id)
         return HttpResponse()
