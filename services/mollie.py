@@ -51,6 +51,7 @@ class PaiementMollie:
     statut: str
     methode: str
     description: str
+    montant: Decimal
     date_d_expiration: datetime.datetime
     date_de_creation: datetime.datetime
     date_de_mise_a_jour: datetime.datetime
@@ -127,7 +128,8 @@ class MollieService:
             date_d_expiration=datetime.datetime.strptime(date_d_expiration, date_format),
             date_de_creation=datetime.datetime.strptime(result.get('createdAt'), date_format),
             date_de_mise_a_jour=datetime.datetime.now(),
-            description=result['description']
+            description=result['description'],
+            montant=Decimal(result['amount']['value'])
         )
 
 

@@ -67,3 +67,4 @@ class OnlinePayment(models.Model):
     dashboard_url = models.URLField()
     checkout_url = models.URLField(blank=True)
     payment_url = models.URLField()
+    montant = models.DecimalField(decimal_places=2, max_digits=6)

@@ -87,5 +87,6 @@ class PaiementEnLigneService:
             updated_date=datetime.datetime.now(),
             checkout_url=paiement_mollie.checkout_url,
             payment_url=paiement_mollie.paiement_url,
-            dashboard_url=paiement_mollie.dashboard_url
+            dashboard_url=paiement_mollie.dashboard_url,
+            montant=paiement_mollie.montant
         )
