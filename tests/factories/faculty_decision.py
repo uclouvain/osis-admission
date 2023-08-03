@@ -29,7 +29,7 @@ from factory.fuzzy import FuzzyText
 from admission.contrib.models.checklist import RefusalReason, RefusalReasonCategory, AdditionalApprovalCondition
 
 
-class RefusalReasonCategoryFactory(factory.DjangoModelFactory):
+class RefusalReasonCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = RefusalReasonCategory
 
@@ -37,7 +37,7 @@ class RefusalReasonCategoryFactory(factory.DjangoModelFactory):
     name_en = factory.fuzzy.FuzzyText(length=10)
 
 
-class RefusalReasonFactory(factory.DjangoModelFactory):
+class RefusalReasonFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = RefusalReason
 
@@ -46,7 +46,7 @@ class RefusalReasonFactory(factory.DjangoModelFactory):
     category = factory.SubFactory(RefusalReasonCategoryFactory)
 
 
-class AdditionalApprovalConditionFactory(factory.DjangoModelFactory):
+class AdditionalApprovalConditionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AdditionalApprovalCondition
 

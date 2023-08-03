@@ -26,7 +26,7 @@
 import datetime
 
 import freezegun
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity as SuperPropositionIdentity
@@ -50,7 +50,7 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 
 
 @freezegun.freeze_time('2023-10-01')
-class RecalculerEmplacementsDocumentsNonLibresPropositionTestCase(TestCase):
+class RecalculerEmplacementsDocumentsNonLibresPropositionTestCase(SimpleTestCase):
     def setUp(self):
         self.cmd = RecalculerEmplacementsDocumentsNonLibresPropositionCommand(uuid_proposition='uuid-MASTER-SCI')
         self.message_bus = message_bus_in_memory_instance

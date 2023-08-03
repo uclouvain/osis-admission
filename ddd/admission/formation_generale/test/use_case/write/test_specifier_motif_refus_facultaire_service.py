@@ -47,6 +47,7 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestSpecifierMotifRefusFacultaireProposition(TestCase):
@@ -145,8 +146,7 @@ class TestSpecifierMotifRefusFacultaireProposition(TestCase):
 
         for statut in statuts_invalides:
             self.proposition.statut = ChoixStatutPropositionGenerale[statut]
-            with self.assertRaises(
-                SituationPropositionNonFACException,
-                msg=f'The following status must raise an exception: {statut}',
-            ):
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)

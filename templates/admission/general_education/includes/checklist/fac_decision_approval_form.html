@@ -63,13 +63,13 @@
       {% bootstrap_field fac_decision_approval_form.all_additional_approval_conditions %}
     </div>
 
-    {% bootstrap_field fac_decision_approval_form.with_additional_trainings %}
+    {% bootstrap_field fac_decision_approval_form.with_prerequisite_courses %}
     <div
         id="fac-decision-additional-trainings-container"
         class="hidden"
     >
-      {% bootstrap_field fac_decision_approval_form.additional_trainings classes='required_field' %}
-      {% bootstrap_field fac_decision_approval_form.additional_trainings_fac_comment %}
+      {% bootstrap_field fac_decision_approval_form.prerequisite_courses classes='required_field' %}
+      {% bootstrap_field fac_decision_approval_form.prerequisite_courses_fac_comment %}
     </div>
 
     <div class="required_field">
@@ -140,11 +140,11 @@
             {# Show / Hide fields depending on other field values #}
             $('#id_fac-decision-approval-another_training').change();
             $('input[name="fac-decision-approval-with_additional_approval_conditions"]:checked').change();
-            $('input[name="fac-decision-approval-with_additional_trainings"]:checked').change();
+            $('input[name="fac-decision-approval-with_prerequisite_courses"]:checked').change();
 
             {# Initialize rich editors #}
             initializeCKEditor('id_fac-decision-approval-join_program_fac_comment');
-            initializeCKEditor('id_fac-decision-approval-additional_trainings_fac_comment');
+            initializeCKEditor('id_fac-decision-approval-prerequisite_courses_fac_comment');
 
             {% if fac_decision_approval_form.is_valid %}
                 $('#fac-decision-approval-modal').modal('hide');

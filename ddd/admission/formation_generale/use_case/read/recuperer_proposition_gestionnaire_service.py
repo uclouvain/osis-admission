@@ -23,21 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from ddd.logic.learning_unit.repository.i_learning_unit import ILearningUnitRepository
 
 
 def recuperer_proposition_gestionnaire(
     cmd: 'RecupererPropositionGestionnaireQuery',
     proposition_repository: 'IPropositionRepository',
-    learning_unit_repository: 'ILearningUnitRepository',
+    unites_enseignement_translator: 'IUnitesEnseignementTranslator',
 ) -> 'PropositionGestionnaireDTO':
     return proposition_repository.get_dto_for_gestionnaire(
         entity_id=PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition),
-        learning_unit_repository=learning_unit_repository,
+        unites_enseignement_translator=unites_enseignement_translator,
     )

@@ -28,7 +28,7 @@ import uuid
 from typing import Dict
 
 import freezegun
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
@@ -49,7 +49,7 @@ from admission.infrastructure.admission.repository.in_memory.emplacement_documen
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class CompleterEmplacementsDocumentsParCandidatTestCase(TestCase):
+class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
     def setUp(self) -> None:
         self.emplacements_document_repository = emplacement_document_in_memory_repository
         self.proposition_repository = PropositionInMemoryRepository()

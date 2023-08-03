@@ -174,30 +174,30 @@ class GeneralEducationAdmission(BaseAdmission):
         to='base.EducationGroupYear',
         verbose_name=_('Other training accepted by the faculty'),
     )
-    with_additional_trainings = models.BooleanField(
+    with_prerequisite_courses = models.BooleanField(
         blank=True,
         null=True,
-        verbose_name=_('Are there any additional trainings?'),
+        verbose_name=_('Are there any prerequisite courses?'),
     )
-    additional_trainings = models.ManyToManyField(
+    prerequisite_courses = models.ManyToManyField(
         to='base.LearningUnitYear',
         blank=True,
-        through='AdditionalTrainingAdmission',
+        through='AdmissionPrerequisiteCourses',
         through_fields=(
             'admission',
-            'training',
+            'course',
         ),
-        verbose_name=_('Additional trainings'),
+        verbose_name=_('Prerequisite courses'),
     )
-    additional_trainings_fac_comment = models.TextField(
+    prerequisite_courses_fac_comment = models.TextField(
         blank=True,
         default='',
-        verbose_name=_('Other information about additional trainings'),
+        verbose_name=_('Other information about prerequisite courses'),
     )
     program_planned_years_number = models.SmallIntegerField(
         blank=True,
         null=True,
-        verbose_name=_('Number of years required for the full program (including additional training)'),
+        verbose_name=_('Number of years required for the full program (including prerequisite courses)'),
         validators=[MinValueValidator(DUREE_MINIMALE_PROGRAMME), MaxValueValidator(DUREE_MAXIMALE_PROGRAMME)],
     )
     annual_program_contact_person_name = models.CharField(
@@ -262,14 +262,14 @@ class GeneralEducationAdmission(BaseAdmission):
         message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
 
 
-class AdditionalTrainingAdmission(models.Model):
-    """Link between an admission and additional trainings (= learning units)."""
+class AdmissionPrerequisiteCourses(models.Model):
+    """Prerequisite courses of an admission."""
 
     admission = models.ForeignKey(
         GeneralEducationAdmission,
         on_delete=models.CASCADE,
     )
-    training = models.ForeignKey(
+    course = models.ForeignKey(
         'base.LearningUnitYear',
         on_delete=models.PROTECT,
         related_name='+',

@@ -558,11 +558,11 @@
           });
           $('input[name="fac-decision-approval-with_additional_approval_conditions"]:checked').change();
 
-          facultyDecisionContainer.on('change', 'input[name="fac-decision-approval-with_additional_trainings"]', function(event){
+          facultyDecisionContainer.on('change', 'input[name="fac-decision-approval-with_prerequisite_courses"]', function(event){
               const container = $('#fac-decision-additional-trainings-container');
               $(this).val() === 'True' && $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
           });
-          $('input[name="fac-decision-approval-with_additional_trainings"]:checked').change();
+          $('input[name="fac-decision-approval-with_prerequisite_courses"]:checked').change();
 
           facultyDecisionContainer.on('click', 'button[type="submit"]', function(event){
               // To send the updated data from ckeditor instances
@@ -572,7 +572,7 @@
           });
 
           {# Django autocomplete overrides the option value with the option label when the tags are used so we revert this process here. #}
-          facultyDecisionContainer.on('select2:selecting', '#id_fac-decision-approval-additional_trainings', function (event) {
+          facultyDecisionContainer.on('select2:selecting', '#id_fac-decision-approval-prerequisite_courses', function (event) {
               if(event.params.args.data.original_id) {
                   event.params.args.data.id = event.params.args.data.original_id;
               }

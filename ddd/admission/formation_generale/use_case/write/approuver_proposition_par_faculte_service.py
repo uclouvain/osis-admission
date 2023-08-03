@@ -28,7 +28,6 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverPropositionParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
@@ -44,12 +43,14 @@ def approuver_proposition_par_faculte(
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     # WHEN
-    Checklist.verifier_fac_peut_donner_decision_acceptation(proposition=proposition)
-
     proposition.approuver_par_fac()
 
     # THEN
-    pdf_generation.generer_attestation_accord_facultaire(proposition=proposition, gestionnaire=cmd.gestionnaire)
+    pdf_generation.generer_attestation_accord_facultaire(
+        proposition_repository=proposition_repository,
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+    )
 
     proposition_repository.save(entity=proposition)
 

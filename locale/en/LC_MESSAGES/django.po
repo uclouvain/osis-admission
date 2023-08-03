@@ -430,9 +430,6 @@ msgstr ""
 msgid "Additional information"
 msgstr ""
 
-msgid "Additional trainings"
-msgstr ""
-
 msgid "Admission"
 msgstr ""
 
@@ -617,7 +614,7 @@ msgstr ""
 msgid "Are there any additional conditions (subject to ...)?"
 msgstr ""
 
-msgid "Are there any additional trainings?"
+msgid "Are there any prerequisite courses?"
 msgstr ""
 
 msgid "Are you a non-resident (as defined in decree)?"
@@ -3404,7 +3401,8 @@ msgid "Number of values mismatch"
 msgstr ""
 
 msgid ""
-"Number of years required for the full program (including additional training)"
+"Number of years required for the full program (including prerequisite "
+"courses)"
 msgstr ""
 
 msgid "OTHER"
@@ -3478,7 +3476,7 @@ msgstr ""
 msgid "Other first names"
 msgstr ""
 
-msgid "Other information about additional trainings"
+msgid "Other information about prerequisite courses"
 msgstr ""
 
 msgid "Other institute"
@@ -3752,6 +3750,9 @@ msgid "Pre-admission date"
 msgstr ""
 
 msgid "Pre-admission submission date"
+msgstr ""
+
+msgid "Prerequisite courses"
 msgstr ""
 
 msgid "President"

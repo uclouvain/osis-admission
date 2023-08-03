@@ -27,15 +27,20 @@ from django.utils.translation import gettext
 
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.exports.utils import admission_generate_pdf
-from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from admission.utils import WeasyprintStylesheets
 
 
 class PDFGeneration(IPDFGeneration):
     @classmethod
-    def generer_attestation_accord_facultaire(cls, proposition: Proposition, gestionnaire: str) -> None:
-        proposition_dto = PropositionRepository.get_dto(proposition.entity_id)
+    def generer_attestation_accord_facultaire(
+        cls,
+        proposition_repository: IPropositionRepository,
+        proposition: Proposition,
+        gestionnaire: str,
+    ) -> None:
+        proposition_dto = proposition_repository.get_dto(proposition.entity_id)
         token = admission_generate_pdf(
             admission=None,
             template='admission/exports/fac_approval_certificate.html',
@@ -50,8 +55,13 @@ class PDFGeneration(IPDFGeneration):
         proposition.certificat_approbation_fac = [token]
 
     @classmethod
-    def generer_attestation_refus_facultaire(cls, proposition: Proposition, gestionnaire: str) -> None:
-        proposition_dto = PropositionRepository.get_dto(proposition.entity_id)
+    def generer_attestation_refus_facultaire(
+        cls,
+        proposition_repository: IPropositionRepository,
+        proposition: Proposition,
+        gestionnaire: str,
+    ) -> None:
+        proposition_dto = proposition_repository.get_dto(proposition.entity_id)
         token = admission_generate_pdf(
             admission=None,
             template='admission/exports/fac_refusal_certificate.html',

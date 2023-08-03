@@ -27,17 +27,13 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils.translation import override
 
-from admission.auth.roles.program_manager import ProgramManager
-from admission.ddd.admission.formation_generale.commands import RechercherFormationsGereesQuery
+from admission.ddd.admission.shared_kernel.role.commands import RechercherFormationsGereesQuery
 from admission.tests.factories.general_education import GeneralEducationTrainingFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
-from base.models.campus import Campus
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from infrastructure.messages_bus import message_bus_instance
 from program_management.models.education_group_version import EducationGroupVersion
-from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
 
 class SearchManagedTrainingsTestCase(TestCase):

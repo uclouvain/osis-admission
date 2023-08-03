@@ -497,9 +497,6 @@ msgstr "Documents additionnels téléversés par un gestionnaire"
 msgid "Additional information"
 msgstr "Informations complémentaires"
 
-msgid "Additional trainings"
-msgstr "Compléments de formation"
-
 msgid "Admission"
 msgstr "Admission"
 
@@ -697,7 +694,7 @@ msgstr "Fiche archivée lors de l'envoi des signatures"
 msgid "Are there any additional conditions (subject to ...)?"
 msgstr "Y a-t-il des conditions complémentaires (\"sous réserve de ...\") ?"
 
-msgid "Are there any additional trainings?"
+msgid "Are there any prerequisite courses?"
 msgstr "Y a-t-il des compléments de formation ?"
 
 msgid "Are you a non-resident (as defined in decree)?"
@@ -3794,7 +3791,8 @@ msgid "Number of values mismatch"
 msgstr "Le nombre de valeurs ne correspond pas"
 
 msgid ""
-"Number of years required for the full program (including additional training)"
+"Number of years required for the full program (including prerequisite "
+"courses)"
 msgstr ""
 "Nombre d'années à prévoir pour le programme complet (y compris pour les "
 "compléments de formation)"
@@ -3871,7 +3869,7 @@ msgstr "Autre motif de refus facultaire"
 msgid "Other first names"
 msgstr "Autres prénoms"
 
-msgid "Other information about additional trainings"
+msgid "Other information about prerequisite courses"
 msgstr "Autres informations à propos des compléments de formation"
 
 msgid "Other institute"
@@ -4174,6 +4172,9 @@ msgstr "Date de pré-admission"
 
 msgid "Pre-admission submission date"
 msgstr "Date de soumission Pré-admission"
+
+msgid "Prerequisite courses"
+msgstr "Compléments de formation"
 
 msgid "President"
 msgstr "Président"

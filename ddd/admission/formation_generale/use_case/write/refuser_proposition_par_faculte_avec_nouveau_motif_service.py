@@ -46,12 +46,14 @@ def refuser_proposition_par_faculte_avec_nouveau_motif(
     # WHEN
     proposition.specifier_motif_refus_par_fac(uuid_motif=cmd.uuid_motif, autre_motif=cmd.autre_motif)
 
-    Checklist.verifier_fac_peut_donner_decision_refus(proposition=proposition)
-
     proposition.refuser_par_fac()
 
     # THEN
-    pdf_generation.generer_attestation_refus_facultaire(proposition=proposition, gestionnaire=cmd.gestionnaire)
+    pdf_generation.generer_attestation_refus_facultaire(
+        proposition_repository=proposition_repository,
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+    )
 
     proposition_repository.save(entity=proposition)
 

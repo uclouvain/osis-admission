@@ -53,6 +53,7 @@ from admission.tests.factories.general_education import (
 )
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -336,9 +337,10 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
 
         # Invalid request -> We need to specify a reason
-        with self.assertRaises(MotifRefusFacultaireNonSpecifieException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             response = self.client.post(self.url + '?refusal=1', **self.default_headers)
             self.assertEqual(response.status_code, 400)
+            self.assertIsInstance(context.exception.exceptions.pop(), MotifRefusFacultaireNonSpecifieException)
 
         self.general_admission.other_fac_refusal_reason = 'test'
         self.general_admission.save()
@@ -399,7 +401,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
         self.general_admission.with_additional_approval_conditions = None
-        self.general_admission.with_additional_trainings = None
+        self.general_admission.with_prerequisite_courses = None
         self.general_admission.program_planned_years_number = None
         self.general_admission.save()
 
@@ -410,12 +412,16 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
 
         # Invalid request -> We need to specify the
-        with self.assertRaises(InformationsAcceptationFacultaireNonSpecifieesException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             response = self.client.post(self.url + '?approval=1', **self.default_headers)
             self.assertEqual(response.status_code, 400)
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                InformationsAcceptationFacultaireNonSpecifieesException,
+            )
 
         self.general_admission.with_additional_approval_conditions = False
-        self.general_admission.with_additional_trainings = False
+        self.general_admission.with_prerequisite_courses = False
         self.general_admission.program_planned_years_number = 5
         self.general_admission.save()
 
@@ -862,9 +868,9 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.general_admission.additional_approval_conditions.set([])
         self.general_admission.free_additional_approval_conditions = []
         self.general_admission.other_training_accepted_by_fac = None
-        self.general_admission.with_additional_trainings = None
-        self.general_admission.additional_trainings.set([])
-        self.general_admission.additional_trainings_fac_comment = ''
+        self.general_admission.with_prerequisite_courses = None
+        self.general_admission.prerequisite_courses.set([])
+        self.general_admission.prerequisite_courses_fac_comment = ''
         self.general_admission.program_planned_years_number = None
         self.general_admission.annual_program_contact_person_name = ''
         self.general_admission.annual_program_contact_person_email = ''
@@ -879,9 +885,9 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
 
         self.assertEqual(form.initial.get('another_training'), False)
         self.assertEqual(form.initial.get('other_training_accepted_by_fac'), None)
-        self.assertEqual(form.initial.get('with_additional_trainings'), None)
-        self.assertEqual(form.initial.get('additional_trainings'), [])
-        self.assertEqual(form.initial.get('additional_trainings_fac_comment'), '')
+        self.assertEqual(form.initial.get('with_prerequisite_courses'), None)
+        self.assertEqual(form.initial.get('prerequisite_courses'), [])
+        self.assertEqual(form.initial.get('prerequisite_courses_fac_comment'), '')
         self.assertEqual(form.initial.get('program_planned_years_number'), None)
         self.assertEqual(form.initial.get('annual_program_contact_person_name'), '')
         self.assertEqual(form.initial.get('annual_program_contact_person_email'), '')
@@ -892,13 +898,13 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         # Another training
         self.general_admission.other_training_accepted_by_fac = self.training
 
-        # Additional trainings
-        additional_trainings = [
+        # Prerequisite courses
+        prerequisite_courses = [
             LearningUnitYearFactory(academic_year=self.general_admission.determined_academic_year),
             LearningUnitYearFactory(academic_year=self.general_admission.determined_academic_year),
         ]
-        self.general_admission.additional_trainings.set(additional_trainings)
-        self.general_admission.with_additional_trainings = True
+        self.general_admission.prerequisite_courses.set(prerequisite_courses)
+        self.general_admission.with_prerequisite_courses = True
 
         # Additional approval conditions
         approval_conditions = [
@@ -931,25 +937,25 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             self.general_admission.other_training_accepted_by_fac.uuid,
         )
 
-        # Additional trainings
-        self.assertEqual(form.initial.get('with_additional_trainings'), True)
+        # Prerequisite courses
+        self.assertEqual(form.initial.get('with_prerequisite_courses'), True)
         self.assertCountEqual(
-            form.initial.get('additional_trainings'),
+            form.initial.get('prerequisite_courses'),
             [
-                additional_trainings[0].acronym,
-                additional_trainings[1].acronym,
+                prerequisite_courses[0].acronym,
+                prerequisite_courses[1].acronym,
             ],
         )
         self.assertCountEqual(
-            form.fields['additional_trainings'].choices,
+            form.fields['prerequisite_courses'].choices,
             [
                 (
-                    additional_trainings[0].acronym,
-                    f'{additional_trainings[0].acronym} - {additional_trainings[0].complete_title_i18n}',
+                    prerequisite_courses[0].acronym,
+                    f'{prerequisite_courses[0].acronym} - {prerequisite_courses[0].complete_title_i18n}',
                 ),
                 (
-                    additional_trainings[1].acronym,
-                    f'{additional_trainings[1].acronym} - {additional_trainings[1].complete_title_i18n}',
+                    prerequisite_courses[1].acronym,
+                    f'{prerequisite_courses[1].acronym} - {prerequisite_courses[1].complete_title_i18n}',
                 ),
             ],
         )
@@ -990,7 +996,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
     def test_approval_decision_form_submitting_with_invalid_data(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        additional_trainings = [
+        prerequisite_courses = [
             LearningUnitYearFactory(academic_year=self.general_admission.determined_academic_year),
         ]
 
@@ -1001,9 +1007,9 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
-                "fac-decision-approval-additional_trainings": [additional_trainings[0].acronym, "UNKNOWN_ACRONYM"],
+                "fac-decision-approval-prerequisite_courses": [prerequisite_courses[0].acronym, "UNKNOWN_ACRONYM"],
                 'fac-decision-approval-another_training': True,
-                'fac-decision-approval-with_additional_trainings': 'True',
+                'fac-decision-approval-with_prerequisite_courses': 'True',
                 'fac-decision-approval-with_additional_approval_conditions': 'True',
                 'fac-decision-approval-all_additional_approval_conditions': [
                     approval_conditions[0].uuid,
@@ -1022,19 +1028,19 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         # Other training
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_training_accepted_by_fac', []))
 
-        # Additional trainings
+        # Prerequisite courses
         self.assertCountEqual(
-            form.fields['additional_trainings'].choices,
+            form.fields['prerequisite_courses'].choices,
             [
                 (
-                    additional_trainings[0].acronym,
-                    f'{additional_trainings[0].acronym} - {additional_trainings[0].complete_title_i18n}',
+                    prerequisite_courses[0].acronym,
+                    f'{prerequisite_courses[0].acronym} - {prerequisite_courses[0].complete_title_i18n}',
                 ),
             ],
         )
         self.assertIn(
             'Sélectionnez des choix valides. "UNKNOWN_ACRONYM" n’en fait pas partie.',
-            form.errors.get('additional_trainings', []),
+            form.errors.get('prerequisite_courses', []),
         )
 
         # Additional approval conditions
@@ -1049,7 +1055,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
     def test_approval_decision_form_submitting_with_valid_data(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        additional_trainings = [
+        prerequisite_courses = [
             LearningUnitYearFactory(academic_year=self.general_admission.determined_academic_year),
         ]
 
@@ -1060,18 +1066,18 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
-                "fac-decision-approval-additional_trainings": [
-                    additional_trainings[0].acronym,
+                "fac-decision-approval-prerequisite_courses": [
+                    prerequisite_courses[0].acronym,
                 ],
                 'fac-decision-approval-another_training': True,
                 'fac-decision-approval-other_training_accepted_by_fac': self.general_admission.training.uuid,
-                'fac-decision-approval-with_additional_trainings': 'True',
+                'fac-decision-approval-with_prerequisite_courses': 'True',
                 'fac-decision-approval-with_additional_approval_conditions': 'True',
                 'fac-decision-approval-all_additional_approval_conditions': [
                     approval_conditions[0].uuid,
                     'Free condition',
                 ],
-                'fac-decision-approval-additional_trainings_fac_comment': 'Comment about the additional trainings',
+                'fac-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
                 'fac-decision-approval-program_planned_years_number': 5,
                 'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
                 'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
@@ -1102,12 +1108,12 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(approval_conditions[0], approval_conditions[0])
         self.assertEqual(self.general_admission.free_additional_approval_conditions, ['Free condition'])
         self.assertEqual(self.general_admission.other_training_accepted_by_fac, self.general_admission.training)
-        self.assertEqual(self.general_admission.with_additional_trainings, True)
-        additional_trainings = self.general_admission.additional_trainings.all()
-        self.assertEqual(len(additional_trainings), 1)
-        self.assertEqual(additional_trainings[0], additional_trainings[0])
+        self.assertEqual(self.general_admission.with_prerequisite_courses, True)
+        prerequisite_courses = self.general_admission.prerequisite_courses.all()
+        self.assertEqual(len(prerequisite_courses), 1)
+        self.assertEqual(prerequisite_courses[0], prerequisite_courses[0])
         self.assertEqual(
-            self.general_admission.additional_trainings_fac_comment,
+            self.general_admission.prerequisite_courses_fac_comment,
             'Comment about the additional trainings',
         )
         self.assertEqual(self.general_admission.program_planned_years_number, 5)
@@ -1118,7 +1124,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
     def test_approval_decision_form_submitting_with_transfer_to_sic(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        additional_trainings = [
+        prerequisite_courses = [
             LearningUnitYearFactory(academic_year=self.general_admission.determined_academic_year),
         ]
 
@@ -1129,18 +1135,18 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
-                "fac-decision-approval-additional_trainings": [
-                    additional_trainings[0].acronym,
+                "fac-decision-approval-prerequisite_courses": [
+                    prerequisite_courses[0].acronym,
                 ],
                 'fac-decision-approval-another_training': True,
                 'fac-decision-approval-other_training_accepted_by_fac': self.general_admission.training.uuid,
-                'fac-decision-approval-with_additional_trainings': 'True',
+                'fac-decision-approval-with_prerequisite_courses': 'True',
                 'fac-decision-approval-with_additional_approval_conditions': 'True',
                 'fac-decision-approval-all_additional_approval_conditions': [
                     approval_conditions[0].uuid,
                     'Free condition',
                 ],
-                'fac-decision-approval-additional_trainings_fac_comment': 'Comment about the additional trainings',
+                'fac-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
                 'fac-decision-approval-program_planned_years_number': 5,
                 'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
                 'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
@@ -1172,12 +1178,12 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(approval_conditions[0], approval_conditions[0])
         self.assertEqual(self.general_admission.free_additional_approval_conditions, ['Free condition'])
         self.assertEqual(self.general_admission.other_training_accepted_by_fac, self.general_admission.training)
-        self.assertEqual(self.general_admission.with_additional_trainings, True)
-        additional_trainings = self.general_admission.additional_trainings.all()
-        self.assertEqual(len(additional_trainings), 1)
-        self.assertEqual(additional_trainings[0], additional_trainings[0])
+        self.assertEqual(self.general_admission.with_prerequisite_courses, True)
+        prerequisite_courses = self.general_admission.prerequisite_courses.all()
+        self.assertEqual(len(prerequisite_courses), 1)
+        self.assertEqual(prerequisite_courses[0], prerequisite_courses[0])
         self.assertEqual(
-            self.general_admission.additional_trainings_fac_comment,
+            self.general_admission.prerequisite_courses_fac_comment,
             'Comment about the additional trainings',
         )
         self.assertEqual(self.general_admission.program_planned_years_number, 5)

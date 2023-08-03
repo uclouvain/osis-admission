@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,13 +24,13 @@
 #
 # ##############################################################################
 import freezegun
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestRechercherDoctoratService(TestCase):
+class TestRechercherDoctoratService(SimpleTestCase):
     def setUp(self) -> None:
         self.cmd = RechercherDoctoratQuery(sigle_secteur_entite_gestion='SST')
         self.message_bus = message_bus_in_memory_instance

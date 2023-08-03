@@ -47,6 +47,7 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestApprouverPropositionParFaculte(TestCase):
@@ -94,36 +95,49 @@ class TestApprouverPropositionParFaculte(TestCase):
 
         for statut in statuts_invalides:
             self.proposition.statut = ChoixStatutPropositionGenerale[statut]
-            with self.assertRaises(
-                SituationPropositionNonFACException,
-                msg=f'The following status must raise an exception: {statut}',
-            ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
 
     def test_should_lever_exception_si_presence_conditions_complementaires_non_specifiee(self):
         self.proposition.avec_conditions_complementaires = None
-        with self.assertRaises(InformationsAcceptationFacultaireNonSpecifieesException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(
+                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+            )
 
     def test_should_lever_exception_si_conditions_complementaires_non_specifiees(self):
         self.proposition.avec_conditions_complementaires = True
         self.proposition.conditions_complementaires_existantes = []
         self.proposition.conditions_complementaires_libres = []
-        with self.assertRaises(InformationsAcceptationFacultaireNonSpecifieesException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(
+                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+            )
 
     def test_should_lever_exception_si_presence_complements_formation_non_specifiee(self):
         self.proposition.avec_complements_formation = None
-        with self.assertRaises(InformationsAcceptationFacultaireNonSpecifieesException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(
+                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+            )
 
     def test_should_lever_exception_si_complements_formation_non_specifiees(self):
         self.proposition.avec_complements_formation = True
         self.proposition.complements_formation = []
-        with self.assertRaises(InformationsAcceptationFacultaireNonSpecifieesException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(
+                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+            )
 
     def test_should_lever_exception_si_nombre_annees_prevoir_programme_non_specifie(self):
         self.proposition.nombre_annees_prevoir_programme = None
-        with self.assertRaises(InformationsAcceptationFacultaireNonSpecifieesException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(
+                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
+            )

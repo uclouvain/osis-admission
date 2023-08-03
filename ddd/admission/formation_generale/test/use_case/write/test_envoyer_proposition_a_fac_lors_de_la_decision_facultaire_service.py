@@ -25,35 +25,21 @@
 # ##############################################################################
 from unittest import TestCase
 
-import factory
-
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
-)
-from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    SpecifierInformationsAcceptationFacultairePropositionCommand,
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    SituationPropositionNonFACException,
     SituationPropositionNonSICException,
 )
-from admission.ddd.admission.formation_generale.test.factory.proposition import (
-    PropositionFactory,
-    _PropositionIdentityFactory,
-)
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestEnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(TestCase):
@@ -98,8 +84,6 @@ class TestEnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(TestCase):
 
         for statut in statuts_invalides:
             self.proposition.statut = ChoixStatutPropositionGenerale[statut]
-            with self.assertRaises(
-                SituationPropositionNonSICException,
-                msg=f'The following status must raise an exception: {statut}',
-            ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonSICException)

@@ -31,19 +31,21 @@ import attrs
 from django.conf import settings
 from django.db.models import OuterRef, Subquery
 from django.utils.translation import get_language, gettext
+from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
@@ -74,17 +76,13 @@ from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from base.models.learning_unit_year import LearningUnitYear
 from base.models.person import Person
 from base.models.student import Student
 from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO, PartimSearchDTO
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
-from ddd.logic.learning_unit.repository.i_learning_unit import ILearningUnitRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from osis_common.ddd.interface import ApplicationService
-from osis_history.models import HistoryEntry
-
 from osis_profile.models.enums.curriculum import Result
 
 
@@ -120,7 +118,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             return cls._load(
                 GeneralEducationAdmissionProxy.objects.prefetch_related(
                     'additional_approval_conditions',
-                    'additional_trainings',
+                    'prerequisite_courses',
                 )
                 .select_related(
                     'other_training_accepted_by_fac__academic_year',
@@ -222,8 +220,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'other_training_accepted_by_fac': other_training,
                 'with_additional_approval_conditions': entity.avec_conditions_complementaires,
                 'free_additional_approval_conditions': entity.conditions_complementaires_libres,
-                'with_additional_trainings': entity.avec_complements_formation,
-                'additional_trainings_fac_comment': entity.commentaire_complements_formation,
+                'with_prerequisite_courses': entity.avec_complements_formation,
+                'prerequisite_courses_fac_comment': entity.commentaire_complements_formation,
                 'program_planned_years_number': entity.nombre_annees_prevoir_programme,
                 'annual_program_contact_person_name': entity.nom_personne_contact_programme_annuel_annuel,
                 'annual_program_contact_person_email': entity.email_personne_contact_programme_annuel_annuel,
@@ -235,7 +233,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         cls._sauvegarder_comptabilite(admission, entity)
 
         admission.additional_approval_conditions.set([c.uuid for c in entity.conditions_complementaires_existantes])
-        admission.additional_trainings.set([training.uuid for training in entity.complements_formation])
+        admission.prerequisite_courses.set([training.uuid for training in entity.complements_formation])
 
     @classmethod
     def _sauvegarder_comptabilite(cls, admission, entity):
@@ -386,12 +384,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 for condition in admission.additional_approval_conditions.all()
             ],
             conditions_complementaires_libres=admission.free_additional_approval_conditions,
-            avec_complements_formation=admission.with_additional_trainings,
+            avec_complements_formation=admission.with_prerequisite_courses,
             complements_formation=[
                 ComplementFormationIdentity(uuid=admission_training.uuid)
-                for admission_training in admission.additional_trainings.all()
+                for admission_training in admission.prerequisite_courses.all()
             ],
-            commentaire_complements_formation=admission.additional_trainings_fac_comment,
+            commentaire_complements_formation=admission.prerequisite_courses_fac_comment,
             nombre_annees_prevoir_programme=admission.program_planned_years_number,
             nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
@@ -459,7 +457,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     def _load_dto_for_gestionnaire(
         cls,
         admission: GeneralEducationAdmission,
-        additional_trainings: List[Union['PartimSearchDTO', 'LearningUnitSearchDTO']],
+        prerequisite_courses: List[Union['PartimSearchDTO', 'LearningUnitSearchDTO']],
     ) -> 'PropositionGestionnaireDTO':
         is_french_language = get_language() == settings.LANGUAGE_CODE_FR
         proposition = cls._load_dto(admission)
@@ -554,15 +552,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 for condition in admission.additional_approval_conditions.all()
             ]
             + admission.free_additional_approval_conditions,
-            avec_complements_formation=admission.with_additional_trainings,
+            avec_complements_formation=admission.with_prerequisite_courses,
             complements_formation=[
                 LearningUnitPartimDTO(
                     code=learning_unit_partim.code,
                     full_title=getattr(learning_unit_partim, additional_training_title_field),
                 )
-                for learning_unit_partim in additional_trainings
+                for learning_unit_partim in prerequisite_courses
             ],
-            commentaire_complements_formation=admission.additional_trainings_fac_comment,
+            commentaire_complements_formation=admission.prerequisite_courses_fac_comment,
             nombre_annees_prevoir_programme=admission.program_planned_years_number,
             nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
@@ -573,7 +571,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     def get_dto_for_gestionnaire(
         cls,
         entity_id: 'PropositionIdentity',
-        learning_unit_repository: 'ILearningUnitRepository',
+        unites_enseignement_translator: 'IUnitesEnseignementTranslator',
     ) -> 'PropositionGestionnaireDTO':
         try:
             admission = (
@@ -599,18 +597,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     'fac_refusal_reason',
                 )
                 .prefetch_related(
-                    'additional_trainings__academic_year',
+                    'prerequisite_courses__academic_year',
                     'additional_approval_conditions',
                 )
                 .get(uuid=entity_id.uuid)
             )
 
-            additional_trainings = learning_unit_repository.search_learning_units_and_partims_dto(
-                code_annee_values=set(
-                    admission.additional_trainings.all().values_list('acronym', 'academic_year__year'),
-                )
+            prerequisite_courses = unites_enseignement_translator.search(
+                code_annee_valeurs=admission.prerequisite_courses.all().values_list('acronym', 'academic_year__year'),
             )
 
-            return cls._load_dto_for_gestionnaire(admission, additional_trainings)
+            return cls._load_dto_for_gestionnaire(admission, prerequisite_courses)
         except GeneralEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException

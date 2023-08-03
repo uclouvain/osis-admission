@@ -26,6 +26,7 @@
 import abc
 from typing import List, Optional
 
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
     PropositionIdentity,
@@ -33,7 +34,6 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
-from ddd.logic.learning_unit.repository.i_learning_unit import ILearningUnitRepository
 from osis_common.ddd.interface import ApplicationService
 
 
@@ -81,6 +81,6 @@ class IPropositionRepository(IGlobalPropositionRepository):
     def get_dto_for_gestionnaire(
         cls,
         entity_id: 'PropositionIdentity',
-        learning_unit_repository: 'ILearningUnitRepository',
+        unites_enseignement_translator: 'IUnitesEnseignementTranslator',
     ) -> 'PropositionGestionnaireDTO':
         raise NotImplementedError

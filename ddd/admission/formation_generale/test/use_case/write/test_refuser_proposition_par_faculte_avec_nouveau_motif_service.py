@@ -48,6 +48,7 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestRefuserPropositionParFaculteAvecNouveauMotif(TestCase):
@@ -130,14 +131,14 @@ class TestRefuserPropositionParFaculteAvecNouveauMotif(TestCase):
 
         for statut in statuts_invalides:
             self.proposition.statut = ChoixStatutPropositionGenerale[statut]
-            with self.assertRaises(
-                SituationPropositionNonFACException,
-                msg=f'The following status must raise an exception: {statut}',
-            ):
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
 
     def test_should_lever_exception_si_aucun_motif_specifie(self):
         self.parametres_commande_par_defaut['uuid_motif'] = ''
         self.parametres_commande_par_defaut['autre_motif'] = ''
-        with self.assertRaises(MotifRefusFacultaireNonSpecifieException):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(context.exception.exceptions.pop(), MotifRefusFacultaireNonSpecifieException)

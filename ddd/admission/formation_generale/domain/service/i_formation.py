@@ -28,7 +28,6 @@ from typing import List, Optional
 
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 
 
@@ -54,14 +53,4 @@ class IFormationGeneraleTranslator(IFormationTranslator):
         terme_de_recherche: Optional[str],
         campus: Optional[str],
     ) -> List['FormationDTO']:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def rechercher_formations_gerees(
-        cls,
-        matriculaire_gestionnaire: str,
-        annee: int,
-        terme_recherche: str,
-    ) -> List['BaseFormationDTO']:
         raise NotImplementedError

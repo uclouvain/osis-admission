@@ -23,40 +23,86 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional, List
+
 import attr
 
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+    ConditionComplementaireApprobationIdentity,
+)
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     MotifRefusFacultaireNonSpecifieException,
     InformationsAcceptationFacultaireNonSpecifieesException,
+    SituationPropositionNonSICException,
+    SituationPropositionNonFACException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldSpecifierMotifRefusFacultaire(BusinessValidator):
-    proposition: Proposition
+    motif_refus_fac: Optional[MotifRefusIdentity]
+    autre_motif_refus_fac: str
 
     def validate(self, *args, **kwargs):
-        if not self.proposition.motif_refus_fac and not self.proposition.autre_motif_refus_fac:
+        if not self.motif_refus_fac and not self.autre_motif_refus_fac:
             raise MotifRefusFacultaireNonSpecifieException
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldSpecifierInformationsAcceptationFacultaire(BusinessValidator):
-    proposition: Proposition
+    avec_conditions_complementaires: Optional[bool]
+    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
+    conditions_complementaires_libres: List[str]
+
+    avec_complements_formation: Optional[bool]
+    complements_formation: Optional[List[ComplementFormationIdentity]]
+
+    nombre_annees_prevoir_programme: Optional[int]
 
     def validate(self, *args, **kwargs):
         if (
-            self.proposition.avec_conditions_complementaires is None
-            or self.proposition.avec_conditions_complementaires
-            and not (
-                self.proposition.conditions_complementaires_libres
-                or self.proposition.conditions_complementaires_existantes
-            )
-            or self.proposition.avec_complements_formation is None
-            or self.proposition.avec_complements_formation
-            and not self.proposition.complements_formation
-            or not self.proposition.nombre_annees_prevoir_programme
+            self.avec_conditions_complementaires is None
+            or self.avec_conditions_complementaires
+            and not (self.conditions_complementaires_libres or self.conditions_complementaires_existantes)
+            or self.avec_complements_formation is None
+            or self.avec_complements_formation
+            and not self.complements_formation
+            or not self.nombre_annees_prevoir_programme
         ):
             raise InformationsAcceptationFacultaireNonSpecifieesException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire(BusinessValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def validate(self, *args, **kwargs):
+        if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC:
+            raise SituationPropositionNonSICException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldFacPeutDonnerDecision(BusinessValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def validate(self, *args, **kwargs):
+        if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC:
+            raise SituationPropositionNonFACException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldPeutSpecifierInformationsDecisionFacultaire(BusinessValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def validate(self, *args, **kwargs):
+        if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS:
+            raise SituationPropositionNonFACException

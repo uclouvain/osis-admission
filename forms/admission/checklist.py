@@ -253,10 +253,10 @@ class FacDecisionApprovalForm(forms.ModelForm):
         queryset=EducationGroupYear.objects.none(),
         to_field_name='uuid',
         required=False,
-        widget=autocomplete_widgets.ListSelect2(url="admission:autocomplete:managed-general-education-trainings"),
+        widget=autocomplete_widgets.ListSelect2(url="admission:autocomplete:managed-education-trainings"),
     )
 
-    additional_trainings = MultipleChoiceFieldWithBetterError(
+    prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
         widget=autocomplete.Select2Multiple(
             url='admission:autocomplete:learning-unit-years',
@@ -285,14 +285,14 @@ class FacDecisionApprovalForm(forms.ModelForm):
         model = GeneralEducationAdmission
         fields = [
             'other_training_accepted_by_fac',
-            'additional_trainings',
-            'additional_trainings_fac_comment',
+            'prerequisite_courses',
+            'prerequisite_courses_fac_comment',
             'program_planned_years_number',
             'annual_program_contact_person_name',
             'annual_program_contact_person_email',
             'join_program_fac_comment',
             'with_additional_approval_conditions',
-            'with_additional_trainings',
+            'with_prerequisite_courses',
         ]
         labels = {
             'annual_program_contact_person_name': _('First name and last name'),
@@ -300,9 +300,9 @@ class FacDecisionApprovalForm(forms.ModelForm):
             'other_training_accepted_by_fac': _('Other training'),
         }
         widgets = {
-            'additional_trainings_fac_comment': CKEditorWidget(config_name='link_only'),
+            'prerequisite_courses_fac_comment': CKEditorWidget(config_name='link_only'),
             'join_program_fac_comment': CKEditorWidget(config_name='link_only'),
-            'with_additional_trainings': forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
+            'with_prerequisite_courses': forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
             'with_additional_approval_conditions': forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
         }
 
@@ -373,19 +373,19 @@ class FacDecisionApprovalForm(forms.ModelForm):
         self.fields['other_training_accepted_by_fac'].widget.forward = [
             forward.Const(academic_year, 'annee_academique')
         ]
-        self.fields['additional_trainings'].widget.forward = [forward.Const(academic_year, 'year')]
+        self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
 
         # Initialize additional trainings fields
         lue_acronyms = {}
 
         if self.is_bound:
             lue_acronyms = {
-                (acronym, academic_year) for acronym in self.data.getlist(self.add_prefix('additional_trainings'))
+                (acronym, academic_year) for acronym in self.data.getlist(self.add_prefix('prerequisite_courses'))
             }
 
         elif self.instance:
-            lue_acronyms = set(self.instance.additional_trainings.all().values_list('acronym', 'academic_year__year'))
-            self.initial['additional_trainings'] = [acronym[0] for acronym in lue_acronyms]
+            lue_acronyms = set(self.instance.prerequisite_courses.all().values_list('acronym', 'academic_year__year'))
+            self.initial['prerequisite_courses'] = [acronym[0] for acronym in lue_acronyms]
 
         learning_units = (
             message_bus_instance.invoke(LearningUnitAndPartimSearchCommand(code_annee_values=lue_acronyms))
@@ -393,7 +393,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
             else []
         )
 
-        self.fields['additional_trainings'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
+        self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
 
     def clean_all_additional_approval_conditions(self):
         # This field can contain uuids of existing conditions or free condition as strings
@@ -422,15 +422,15 @@ class FacDecisionApprovalForm(forms.ModelForm):
             cleaned_data['additional_approval_conditions'] = []
             cleaned_data['free_additional_approval_conditions'] = []
 
-        if cleaned_data.get('with_additional_trainings'):
-            if cleaned_data.get('additional_trainings'):
-                cleaned_data['additional_trainings'] = LearningUnitYear.objects.filter(
-                    acronym__in=cleaned_data.get('additional_trainings', []),
+        if cleaned_data.get('with_prerequisite_courses'):
+            if cleaned_data.get('prerequisite_courses'):
+                cleaned_data['prerequisite_courses'] = LearningUnitYear.objects.filter(
+                    acronym__in=cleaned_data.get('prerequisite_courses', []),
                     academic_year__year=self.academic_year,
                 ).values_list('uuid', flat=True)
 
         else:
-            cleaned_data['additional_trainings'] = []
-            cleaned_data['additional_trainings_fac_comment'] = ''
+            cleaned_data['prerequisite_courses'] = []
+            cleaned_data['prerequisite_courses_fac_comment'] = ''
 
         return cleaned_data
