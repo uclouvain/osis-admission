@@ -26,7 +26,7 @@
 import datetime
 
 import freezegun
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import RecupererResumePropositionQuery
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
@@ -36,9 +36,10 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 
 
 @freezegun.freeze_time('2020-01-01')
-class RecupererResumePropositionServiceTestCase(TestCase):
+class RecupererResumePropositionServiceTestCase(SimpleTestCase):
     @classmethod
-    def setUpTestData(cls):
+    def setUpClass(cls):
+        super().setUpClass()
         cls.cmd = RecupererResumePropositionQuery(uuid_proposition='uuid-SC3DP-promoteur-membre')
         cls.message_bus = message_bus_in_memory_instance
         cls.academic_year_repository = AcademicYearInMemoryRepository()

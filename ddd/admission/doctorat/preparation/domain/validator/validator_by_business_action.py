@@ -23,8 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import List, Optional, Tuple, Union, Dict
+from typing import List, Optional, Union, Dict
 
 import attr
 

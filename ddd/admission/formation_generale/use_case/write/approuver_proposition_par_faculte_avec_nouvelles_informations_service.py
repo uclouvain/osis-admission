@@ -58,12 +58,14 @@ def approuver_proposition_par_faculte_avec_nouvelles_informations(
         commentaire_programme_conjoint=cmd.commentaire_programme_conjoint,
     )
 
-    Checklist.verifier_fac_peut_donner_decision_acceptation(proposition=proposition)
-
     proposition.approuver_par_fac()
 
     # THEN
-    pdf_generation.generer_attestation_accord_facultaire(proposition=proposition, gestionnaire=cmd.gestionnaire)
+    pdf_generation.generer_attestation_accord_facultaire(
+        proposition_repository=proposition_repository,
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+    )
 
     proposition_repository.save(entity=proposition)
 

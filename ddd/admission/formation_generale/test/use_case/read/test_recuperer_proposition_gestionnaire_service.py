@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.test import TestCase
+from unittest import TestCase
 
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery

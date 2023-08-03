@@ -60,6 +60,12 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     StatutsChecklistGenerale,
     StatutChecklist,
 )
+from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
+    SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
+    RefuserParFacValidatorList,
+    ApprouverParFacValidatorList,
+    SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -221,6 +227,9 @@ class Proposition(interface.RootEntity):
         )
 
     def specifier_motif_refus_par_fac(self, uuid_motif: str, autre_motif: str):
+        SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
+            statut=self.statut,
+        ).validate()
         self.specifier_refus_par_fac()
         self.motif_refus_fac = MotifRefusIdentity(uuid=uuid_motif) if uuid_motif else None
         self.autre_motif_refus_fac = autre_motif
@@ -239,6 +248,9 @@ class Proposition(interface.RootEntity):
         email_personne_contact_programme_annuel: str,
         commentaire_programme_conjoint: str,
     ):
+        SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
+            statut=self.statut,
+        ).validate()
         self.specifier_acceptation_par_fac()
         self.autre_formation_choisie_fac_id = (
             FormationIdentity(
@@ -276,16 +288,35 @@ class Proposition(interface.RootEntity):
         self.commentaire_programme_conjoint = commentaire_programme_conjoint
 
     def refuser_par_fac(self):
+        RefuserParFacValidatorList(
+            statut=self.statut,
+            motif_refus_fac=self.motif_refus_fac,
+            autre_motif_refus_fac=self.autre_motif_refus_fac,
+        ).validate()
+
         self.specifier_refus_par_fac()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
         self.certificat_approbation_fac = []
 
     def approuver_par_fac(self):
+        ApprouverParFacValidatorList(
+            statut=self.statut,
+            avec_conditions_complementaires=self.avec_conditions_complementaires,
+            conditions_complementaires_existantes=self.conditions_complementaires_existantes,
+            conditions_complementaires_libres=self.conditions_complementaires_libres,
+            avec_complements_formation=self.avec_complements_formation,
+            complements_formation=self.complements_formation,
+            nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+        ).validate()
+
         self.specifier_acceptation_par_fac()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
         self.certificat_refus_fac = []
 
     def soumettre_a_fac_lors_de_la_decision_facultaire(self):
+        SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(
+            statut=self.statut,
+        ).validate()
         self.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
 
     def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self):

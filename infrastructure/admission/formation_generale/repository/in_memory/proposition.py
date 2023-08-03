@@ -29,6 +29,7 @@ from typing import List, Optional
 import factory
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
@@ -57,7 +58,6 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
 from admission.infrastructure.utils import dto_to_dict
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
-from ddd.logic.learning_unit.repository.i_learning_unit import ILearningUnitRepository
 
 
 @dataclass
@@ -263,7 +263,7 @@ class PropositionInMemoryRepository(
     def get_dto_for_gestionnaire(
         cls,
         entity_id: 'PropositionIdentity',
-        learning_unit_repository: 'ILearningUnitRepository',
+        unites_enseignement_translator: 'IUnitesEnseignementTranslator',
     ) -> 'PropositionGestionnaireDTO':
         proposition = cls.get(entity_id=entity_id)
         propositions = cls.search_dto(matricule_candidat=proposition.matricule_candidat)

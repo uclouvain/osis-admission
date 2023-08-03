@@ -63,6 +63,9 @@ from admission.infrastructure.admission.domain.service.in_memory.recuperer_docum
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
+from admission.infrastructure.admission.domain.service.in_memory.unites_enseignement_translator import (
+    UnitesEnseignementInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
     ComptabiliteInMemoryTranslator,
 )
@@ -93,7 +96,6 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from infrastructure.learning_unit.repository.in_memory.learning_unit import LearningUnitRepository
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -117,6 +119,7 @@ _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
 _paiement_frais_dossier = PaiementFraisDossierInMemory()
 _notification = NotificationInMemory()
 _pdf_generation = PDFGenerationInMemory()
+_unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -228,7 +231,7 @@ COMMAND_HANDLERS = {
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
         proposition_repository=_proposition_repository,
-        learning_unit_repository=LearningUnitRepository(),
+        unites_enseignement_translator=_unites_enseignement_translator,
     ),
     RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
         cmd,
@@ -399,10 +402,6 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
             pdf_generation=_pdf_generation,
         )
-    ),
-    RechercherFormationsGereesQuery: lambda msg_bus, cmd: rechercher_formations_gerees(
-        cmd,
-        formation_translator=_formation_generale_translator,
     ),
     SpecifierInformationsAcceptationFacultairePropositionCommand: (
         lambda msg_bus, cmd: specifier_informations_acceptation_facultaire(

@@ -26,7 +26,6 @@
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
@@ -38,13 +37,8 @@ def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
     notification: 'INotification',
     historique: 'IHistorique',
 ) -> PropositionIdentity:
-    # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    # WHEN
-    Checklist.verifier_sic_peut_soumettre_a_fac_lors_de_la_decision_facultaire(proposition=proposition)
-
-    # THEN
     proposition.soumettre_a_fac_lors_de_la_decision_facultaire()
 
     proposition_repository.save(entity=proposition)

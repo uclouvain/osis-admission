@@ -409,10 +409,3 @@ class ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(interface.C
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
     commentaire_programme_conjoint: str = ''
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RechercherFormationsGereesQuery(interface.QueryRequest):
-    matricule_gestionnaire: str
-    annee: Optional[int] = None
-    terme_recherche: str = ''

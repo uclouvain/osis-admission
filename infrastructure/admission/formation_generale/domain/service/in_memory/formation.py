@@ -29,7 +29,6 @@ from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.domain.enums import TYPES_FORMATION_GENERALE
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.test.factory.formation import FormationFactory
@@ -247,23 +246,3 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             and training.entity_id.annee == annee
             and training.type_formation.name in TYPES_FORMATION_GENERALE
         )
-
-    @classmethod
-    def rechercher_formations_gerees(
-        cls,
-        matriculaire_gestionnaire: str,
-        annee: int,
-        terme_recherche: str,
-    ) -> List['BaseFormationDTO']:
-        return [
-            BaseFormationDTO(
-                sigle=training.entity_id.sigle,
-                intitule=training.intitule,
-                lieu_enseignement=training.campus,
-                uuid='',
-                annee=training.entity_id.annee,
-            )
-            for training in cls.trainings
-            if terme_recherche in f'{training.intitule} {training.entity_id.sigle}'
-            and training.entity_id.annee == annee
-        ]

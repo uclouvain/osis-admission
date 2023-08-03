@@ -52,6 +52,9 @@ from admission.infrastructure.admission.domain.service.historique import Histori
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
+from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
+    UnitesEnseignementTranslator,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.historique import (
@@ -70,7 +73,6 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
     EmplacementDocumentRepository,
 )
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
-from infrastructure.learning_unit.repository.learning_unit import LearningUnitRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
@@ -183,7 +185,7 @@ COMMAND_HANDLERS = {
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
         proposition_repository=PropositionRepository(),
-        learning_unit_repository=LearningUnitRepository(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
     ),
     RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
         cmd,
@@ -354,10 +356,6 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
             pdf_generation=PDFGeneration(),
         )
-    ),
-    RechercherFormationsGereesQuery: lambda msg_bus, cmd: rechercher_formations_gerees(
-        cmd,
-        formation_translator=FormationGeneraleTranslator(),
     ),
     SpecifierInformationsAcceptationFacultairePropositionCommand: (
         lambda msg_bus, cmd: specifier_informations_acceptation_facultaire(

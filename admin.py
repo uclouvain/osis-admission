@@ -183,7 +183,7 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'erasmus_mundus_scholarship',
         'additional_approval_conditions',
         'other_training_accepted_by_fac',
-        'additional_trainings',
+        'prerequisite_courses',
     ]
 
     @staticmethod

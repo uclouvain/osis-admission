@@ -23,13 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.test import TestCase
+from unittest import TestCase
 
-from admission.ddd.admission.formation_generale.commands import RechercherFormationsGereesQuery
+from admission.ddd.admission.shared_kernel.role.commands import RechercherFormationsGereesQuery
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestRechercherFormationService(TestCase):
+class TestRechercherFormationGereesService(TestCase):
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
 

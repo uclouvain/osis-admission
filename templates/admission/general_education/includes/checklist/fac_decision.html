@@ -175,11 +175,11 @@
               {% endif %}
             {% endif %}
 
-            {% field_data _('Are there any additional trainings?') admission.avec_complements_formation %}
+            {% field_data _('Are there any prerequisite courses?') admission.avec_complements_formation %}
             {% if admission.avec_complements_formation %}
               {% if admission.complements_formation %}
                 <dl>
-                  <dt>{% translate _('Additional trainings') %}</dt>
+                  <dt>{% translate _('Prerequisite courses') %}</dt>
                   <dd>
                     <ul>
                       {% for formation in admission.complements_formation %}
@@ -189,12 +189,12 @@
                   </dd>
                 </dl>
               {% else %}
-                {% field_data _('Additional trainings') '' %}
+                {% field_data _('Prerequisite courses') '' %}
               {% endif %}
-              {% field_data _('Other information about additional trainings') admission.commentaire_complements_formation|safe %}
+              {% field_data _('Other information about prerequisite courses') admission.commentaire_complements_formation|safe %}
             {% endif %}
 
-            {% field_data _('Number of years required for the full program (including additional training)') admission.nombre_annees_prevoir_programme %}
+            {% field_data _('Number of years required for the full program (including prerequisite courses)') admission.nombre_annees_prevoir_programme %}
 
             {% display admission.nom_personne_contact_programme_annuel_annuel '-' admission.email_personne_contact_programme_annuel_annuel as contact_person %}
             {% field_data _('Contact person for the design of the annual program')  contact_person %}

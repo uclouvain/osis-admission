@@ -26,16 +26,27 @@
 from abc import abstractmethod
 
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from osis_common.ddd.interface import DomainService
 
 
 class IPDFGeneration(DomainService):
     @classmethod
     @abstractmethod
-    def generer_attestation_accord_facultaire(cls, proposition: Proposition, gestionnaire: str) -> None:
+    def generer_attestation_accord_facultaire(
+        cls,
+        proposition_repository: IPropositionRepository,
+        proposition: Proposition,
+        gestionnaire: str,
+    ) -> None:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def generer_attestation_refus_facultaire(cls, proposition: Proposition, gestionnaire: str) -> None:
+    def generer_attestation_refus_facultaire(
+        cls,
+        proposition_repository: IPropositionRepository,
+        proposition: Proposition,
+        gestionnaire: str,
+    ) -> None:
         raise NotImplementedError

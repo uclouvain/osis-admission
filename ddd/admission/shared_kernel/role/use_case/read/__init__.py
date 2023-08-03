@@ -24,19 +24,4 @@
 #
 # ##############################################################################
 
-from typing import List
-
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
-from admission.ddd.admission.formation_generale.commands import RechercherFormationsGereesQuery
-from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
-
-
-def rechercher_formations_gerees(
-    cmd: 'RechercherFormationsGereesQuery',
-    formation_translator: 'IFormationGeneraleTranslator',
-) -> List[BaseFormationDTO]:
-    return formation_translator.rechercher_formations_gerees(
-        matriculaire_gestionnaire=cmd.matricule_gestionnaire,
-        annee=cmd.annee,
-        terme_recherche=cmd.terme_recherche,
-    )
+from .rechercher_formations_gerees_service import rechercher_formations_gerees

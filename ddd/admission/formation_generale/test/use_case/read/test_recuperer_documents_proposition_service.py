@@ -28,7 +28,7 @@ from typing import Optional
 from unittest.mock import ANY
 
 import freezegun
-from django.test import TestCase
+from unittest import TestCase
 
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO

@@ -28,7 +28,6 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierMotifRefusFacultairePropositionCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
@@ -36,13 +35,8 @@ def specifier_motif_refus_facultaire(
     cmd: SpecifierMotifRefusFacultairePropositionCommand,
     proposition_repository: 'IPropositionRepository',
 ) -> PropositionIdentity:
-    # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    # WHEN
-    Checklist.verifier_fac_peut_modifier_informations_decision_facultaire(proposition=proposition)
-
-    # THEN
     proposition.specifier_motif_refus_par_fac(
         uuid_motif=cmd.uuid_motif,
         autre_motif=cmd.autre_motif,

@@ -24,29 +24,21 @@
 #
 ##############################################################################
 import unicodedata
-from typing import List, Optional, Dict
+from typing import List, Optional
 
 from django.conf import settings
-from django.contrib.postgres.aggregates import StringAgg
-from django.db.models import OuterRef, Subquery, Q, F
-from django.db.models.functions import JSONObject
 from django.utils.translation import get_language
 
-from admission.auth.roles.program_manager import ProgramManager
-from admission.contrib.models.base import training_campus_subquery
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
-from program_management.models.education_group_version import EducationGroupVersion
 
 
 class FormationGeneraleTranslator(IFormationGeneraleTranslator):
@@ -149,44 +141,3 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             )
         )
         return bool(dtos)
-
-    @classmethod
-    def rechercher_formations_gerees(
-        cls,
-        matriculaire_gestionnaire: str,
-        annee: int,
-        terme_recherche: Optional[str],
-    ) -> List['BaseFormationDTO']:
-
-        current_language = get_language()
-
-        translated_title = 'title' if current_language == settings.LANGUAGE_CODE_FR else 'title_english'
-
-        sub_qs = EducationGroupYear.objects.filter(
-            education_group_id=OuterRef('education_group_id'),
-            academic_year__year=annee,
-        ).annotate(
-            lieu_enseignement=training_campus_subquery(training_field='pk'),
-            json_training=JSONObject(
-                uuid=F('uuid'),
-                sigle=F('acronym'),
-                intitule=F(translated_title),
-                lieu_enseignement=F('lieu_enseignement'),
-                annee=F('academic_year__year'),
-            ),
-        )
-
-        if terme_recherche:
-            sub_qs = sub_qs.filter(
-                Q(**{f'{translated_title}__icontains': terme_recherche}) | Q(acronym__icontains=terme_recherche)
-            )
-
-        qs: List[Dict] = (
-            ProgramManager.objects.filter(person__global_id=matriculaire_gestionnaire)
-            .annotate(
-                training=Subquery(sub_qs.values('json_training')[:1]),
-            )
-            .values_list('training', flat=True)
-        )
-
-        return [BaseFormationDTO(**training) for training in qs if training]

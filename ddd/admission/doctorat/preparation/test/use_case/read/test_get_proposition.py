@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,8 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
@@ -36,7 +35,7 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class GetPropositionTestCase(TestCase):
+class GetPropositionTestCase(SimpleTestCase):
     def setUp(self):
         PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
             PersonneConnueUclDTOFactory(matricule='0123456789'),

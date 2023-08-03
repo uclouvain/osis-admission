@@ -26,7 +26,6 @@
 import uuid
 from unittest.mock import ANY, patch
 
-import factory
 import freezegun
 from django.test import TestCase, override_settings
 from django.utils.translation import gettext
@@ -270,14 +269,14 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             enrollment_campus__organization__type=MAIN,
         )
 
-        self.admission.with_additional_trainings = True
-        self.admission.additional_trainings.set(
+        self.admission.with_prerequisite_courses = True
+        self.admission.prerequisite_courses.set(
             [
                 LearningUnitYearFactory(),
                 LearningUnitYearFactory(),
             ]
         )
-        self.admission.additional_trainings_fac_comment = 'My comment about the additional trainings'
+        self.admission.prerequisite_courses_fac_comment = 'My comment about the additional trainings'
         self.admission.program_planned_years_number = 3
         self.admission.annual_program_contact_person_name = 'John Doe'
         self.admission.annual_program_contact_person_email = 'john.doe@example.com'
@@ -312,22 +311,22 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             + [condition.name_fr for condition in self.admission.additional_approval_conditions.all()],
         )
 
-        additional_trainings = self.admission.additional_trainings.all()
-        self.assertEqual(result.avec_complements_formation, self.admission.with_additional_trainings)
+        prerequisite_courses = self.admission.prerequisite_courses.all()
+        self.assertEqual(result.avec_complements_formation, self.admission.with_prerequisite_courses)
         self.assertCountEqual(
             result.complements_formation,
             [
                 LearningUnitPartimDTO(
-                    code=additional_trainings[0].acronym,
-                    full_title=additional_trainings[0].complete_title_i18n,
+                    code=prerequisite_courses[0].acronym,
+                    full_title=prerequisite_courses[0].complete_title_i18n,
                 ),
                 LearningUnitPartimDTO(
-                    code=additional_trainings[1].acronym,
-                    full_title=additional_trainings[1].complete_title_i18n,
+                    code=prerequisite_courses[1].acronym,
+                    full_title=prerequisite_courses[1].complete_title_i18n,
                 ),
             ],
         )
-        self.assertEqual(result.commentaire_complements_formation, self.admission.additional_trainings_fac_comment)
+        self.assertEqual(result.commentaire_complements_formation, self.admission.prerequisite_courses_fac_comment)
         self.assertEqual(result.nombre_annees_prevoir_programme, self.admission.program_planned_years_number)
         self.assertEqual(
             result.nom_personne_contact_programme_annuel_annuel,
