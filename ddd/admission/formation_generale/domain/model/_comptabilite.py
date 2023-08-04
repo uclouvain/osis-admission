@@ -66,9 +66,11 @@ class Comptabilite(interface.ValueObject):
     carte_a_b_refugie: List[str] = attr.Factory(list)
     annexe_25_26_refugies_apatrides: List[str] = attr.Factory(list)
     attestation_immatriculation: List[str] = attr.Factory(list)
+    preuve_statut_apatride: List[str] = attr.Factory(list)
     carte_a_b: List[str] = attr.Factory(list)
     decision_protection_subsidiaire: List[str] = attr.Factory(list)
     decision_protection_temporaire: List[str] = attr.Factory(list)
+    carte_a: List[str] = attr.Factory(list)
 
     # Assimilation 3
     sous_type_situation_assimilation_3: Optional[ChoixAssimilation3] = None

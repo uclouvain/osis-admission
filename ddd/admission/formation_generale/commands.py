@@ -161,9 +161,11 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     carte_a_b_refugie: List[str]
     annexe_25_26_refugies_apatrides: List[str]
     attestation_immatriculation: List[str]
+    preuve_statut_apatride: List[str]
     carte_a_b: List[str]
     decision_protection_subsidiaire: List[str]
     decision_protection_temporaire: List[str]
+    carte_a: List[str]
 
     # Assimilation 3
     sous_type_situation_assimilation_3: Optional[str]
@@ -210,6 +212,14 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     code_bic_swift_banque: Optional[str]
     prenom_titulaire_compte: Optional[str]
     nom_titulaire_compte: Optional[str]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+    documents_additionnels: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)

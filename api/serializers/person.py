@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -67,7 +67,6 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
             'first_name',
             'middle_name',
             'last_name',
-            'first_name_in_use',
             'birth_date',
             'birth_year',
             'birth_country',
@@ -85,6 +84,8 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
             'national_number',
             'id_card_number',
             'passport_number',
+            'id_card_expiry_date',
+            'passport_expiry_date',
             # Inscrit ?
             'last_registration_year',
             'last_registration_id',

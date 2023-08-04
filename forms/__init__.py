@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from functools import partial
 from typing import List, Optional
 
@@ -42,6 +43,10 @@ NONE_CHOICE = ((None, ' - '),)
 ALL_EMPTY_CHOICE = (('', _('All')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
+
+DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
+    'data-minimum-input-length': 3,
+}
 
 
 class SelectOrOtherWidget(forms.MultiWidget):
@@ -137,6 +142,19 @@ def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM
     return [(academic_year.year, format_to_academic_year(academic_year.year)) for academic_year in academic_years]
 
 
+def get_year_choices(min_year=1920, max_year=None):
+    """Return the choices of a year choice field. If no max year is specified, the current year is used."""
+    if max_year is None:
+        max_year = datetime.datetime.now().year
+    return [EMPTY_CHOICE[0]] + [
+        (
+            year,
+            year,
+        )
+        for year in range(max_year, min_year - 1, -1)
+    ]
+
+
 def get_example_text(example: str):
     return _("e.g.: %(example)s") % {'example': example}
 
@@ -158,7 +176,13 @@ RadioBooleanField = partial(
 
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('widget', autocomplete.ListSelect2(url="country-autocomplete"))
+        kwargs.setdefault(
+            'widget',
+            autocomplete.ListSelect2(
+                url="country-autocomplete",
+                attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+            ),
+        )
         kwargs.setdefault('queryset', Country.objects.none())
         super().__init__(*args, **kwargs)
 

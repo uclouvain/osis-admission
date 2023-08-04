@@ -24,8 +24,8 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if is_continuing %}
-  {% panel _('Specific aspects') %}
+{% panel _('Specific aspects') %}
+  {% if is_continuing %}
     {% if proposition.pays_nationalite_ue_candidat == False %}
       {% field_data _('Copy of residence permit covering entire course, including assessment test (except for online courses).') proposition.copie_titre_sejour %}
     {% endif %}
@@ -44,8 +44,6 @@
             {% trans "Number" context "address" as address_number_label %}
             {% field_data address_number_label proposition.adresse_facturation.numero_rue css_class="col-md-2" %}
             {% field_data _("Box") proposition.adresse_facturation.boite_postale css_class="col-md-2" hide_empty=True %}
-            {% trans "Place" context "address" as address_place_label %}
-            {% field_data address_place_label proposition.adresse_facturation.lieu_dit css_class="col-md-4" hide_empty=True %}
           </div>
           <div class="row">
             {% field_data _("Country") proposition.adresse_facturation.nom_pays css_class="col-md-4" %}
@@ -57,11 +55,10 @@
         {% field_data _('Billing address') proposition.type_adresse_facturation|enum_display:'ChoixTypeAdresseFacturation' %}
       {% endif %}
     {% endif %}
-    {% multiple_field_data specific_questions title='' %}
-  {% endpanel %}
-{% else %}
-  {% multiple_field_data specific_questions %}
-{% endif %}
+  {% endif %}
+  {% multiple_field_data specific_questions title='' %}
+  {% field_data _("You can add any document you feel is relevant to your application (supporting documents, proof of language level, etc.)") proposition.documents_additionnels %}
+{% endpanel %}
 
 {% if enrolled_for_contingent_training %}
   {% panel _("Enrolment in limited enrolment bachelor's course") %}

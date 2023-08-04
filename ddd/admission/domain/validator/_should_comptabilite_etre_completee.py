@@ -157,12 +157,16 @@ DEPENDANCES_CHAMPS_ASSIMILATION: Dict[str, Dict[str, List[str]]] = {
             'annexe_25_26_refugies_apatrides',
             'attestation_immatriculation',
         ],
+        ChoixAssimilation2.APATRIDE.name: [
+            'preuve_statut_apatride',
+        ],
         ChoixAssimilation2.PROTECTION_SUBSIDIAIRE.name: [
             'carte_a_b',
             'decision_protection_subsidiaire',
         ],
         ChoixAssimilation2.PROTECTION_TEMPORAIRE.name: [
             'decision_protection_temporaire',
+            'carte_a',
         ],
     },
     'sous_type_situation_assimilation_3': {

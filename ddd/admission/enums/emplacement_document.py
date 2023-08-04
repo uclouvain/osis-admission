@@ -186,6 +186,10 @@ DocumentsQuestionsSpecifiques = {
     ),
     'ATTESTATION_INSCRIPTION_REGULIERE': _('Certificate of regular enrolment'),
     'FORMULAIRE_MODIFICATION_INSCRIPTION': _('Change of enrolment form'),
+    'ADDITIONAL_DOCUMENTS': _(
+        'You can add any document you feel is relevant to your application '
+        '(supporting documents, proof of language level, etc.)'
+    ),
 }
 
 
@@ -208,10 +212,13 @@ DocumentsAssimilation = {
     'ANNEXE_25_26_REFUGIES_APATRIDES': _(
         'Copy of Annex 25 or 26 completed by the Office of the Commissioner General for Refugees and Stateless Persons'
     ),
-    'ATTESTATION_IMMATRICULATION': _('Copy of "orange card" enrolment certificate'),
+    'PREUVE_STATUT_APATRIDE': _(
+        'Copy of official document from the local authority or Foreign Nationals Office proving stateless status'
+    ),
     'CARTE_A_B': _('Copy of both sides of A or B Card'),
     'DECISION_PROTECTION_SUBSIDIAIRE': _('Copy of Foreign Nationals Office decision granting subsidiary protection'),
     'DECISION_PROTECTION_TEMPORAIRE': _('Copy of Foreign Nationals Office decision granting temporary protection'),
+    'CARTE_A': _('Copy of both sides of A Card'),
     'TITRE_SEJOUR_3_MOIS_PROFESSIONEL': _('Copy of both sides of residence permit valid for more than 3 months'),
     'FICHES_REMUNERATION': _('Copy of 6 payslips issued in the 12 months preceding application'),
     'TITRE_SEJOUR_3_MOIS_REMPLACEMENT': _('Copy of both sides of residence permit valid for more than 3 months'),

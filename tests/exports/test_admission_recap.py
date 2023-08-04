@@ -711,7 +711,6 @@ class SectionsAttachmentsTestCase(TestCase):
             matricule='MAT1',
             nom='Doe',
             prenom='John',
-            prenom_d_usage='Jim',
             autres_prenoms='Jack',
             date_naissance=datetime.date(1990, 1, 1),
             annee_naissance=None,
@@ -736,6 +735,8 @@ class SectionsAttachmentsTestCase(TestCase):
             email='johndoe@example.com',
             annee_derniere_inscription_ucl=2020,
             noma_derniere_inscription_ucl='0123456789',
+            date_expiration_carte_identite=datetime.date(2023, 1, 1),
+            date_expiration_passeport=datetime.date(2023, 1, 1),
         )
         coordinates_dto = _CoordonneesDTO(
             domicile_legal=_AdressePersonnelleDTO(
@@ -744,13 +745,13 @@ class SectionsAttachmentsTestCase(TestCase):
                 ville='Louvain-La-Neuve',
                 pays='BE',
                 nom_pays='Belgique',
-                lieu_dit='Depice',
                 numero_rue='1',
                 boite_postale='BB8',
             ),
             adresse_correspondance=None,
             numero_mobile='0123456789',
             adresse_email_privee='johndoe@example.com',
+            numero_contact_urgence='0123456789',
         )
         cls.belgian_academic_curriculum_experience = _ExperienceAcademiqueDTO(
             uuid='uuid-1',
@@ -855,14 +856,12 @@ class SectionsAttachmentsTestCase(TestCase):
         )
         bachelor_secondary_studies_dto = _EtudesSecondairesDTO(
             diplome_belge=_DiplomeBelgeEtudesSecondairesDTO(
-                resultat=DiplomaResults.GT_75_RESULT.name,
                 certificat_inscription=['uuid-certificat-inscription'],
                 diplome=['uuid-diplome'],
                 type_enseignement=EducationalType.PROFESSIONAL_EDUCATION.name,
                 autre_type_enseignement='Other type',
                 nom_institut='UCL',
                 adresse_institut='Louvain-La-Neuve',
-                grille_horaire=None,
                 communaute=BelgianCommunitiesOfEducation.FRENCH_SPEAKING.name,
             ),
             diplome_etranger=_DiplomeEtrangerEtudesSecondairesDTO(
@@ -1059,7 +1058,6 @@ class SectionsAttachmentsTestCase(TestCase):
             curriculum=['uuid-curriculum'],
             elements_confirmation={},
             pdf_recapitulatif=['uuid-pdf-recapitulatif'],
-            bourse_erasmus_mundus=None,
             autre_bourse_recherche='',
             bourse_date_debut=None,
             bourse_date_fin=None,

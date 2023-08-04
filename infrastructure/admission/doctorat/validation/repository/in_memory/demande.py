@@ -115,7 +115,6 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
                 nom_pays=cls.countries.get(demande.profil_soumis_candidat.pays, ''),
                 code_postal=demande.profil_soumis_candidat.code_postal,
                 ville=demande.profil_soumis_candidat.ville,
-                lieu_dit=demande.profil_soumis_candidat.lieu_dit,
                 rue=demande.profil_soumis_candidat.rue,
                 numero_rue=demande.profil_soumis_candidat.numero_rue,
                 boite_postale=demande.profil_soumis_candidat.boite_postale,

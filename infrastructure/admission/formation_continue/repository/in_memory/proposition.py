@@ -181,7 +181,6 @@ class PropositionInMemoryRepository(
                 pays=proposition.adresse_facturation.pays,
                 destinataire=proposition.adresse_facturation.destinataire,
                 boite_postale=proposition.adresse_facturation.boite_postale,
-                lieu_dit=proposition.adresse_facturation.lieu_dit,
                 nom_pays='',
             ),
             elements_confirmation=proposition.elements_confirmation,

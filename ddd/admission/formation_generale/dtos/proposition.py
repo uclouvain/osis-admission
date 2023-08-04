@@ -63,6 +63,7 @@ class PropositionDTO(interface.DTO):
 
     curriculum: List[str]
     equivalence_diplome: List[str]
+    documents_additionnels: List[str]
 
     est_bachelier_belge: Optional[bool]
     est_reorientation_inscription_externe: Optional[bool]

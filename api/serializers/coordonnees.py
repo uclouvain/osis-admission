@@ -10,6 +10,7 @@ class CoordonneesSerializer(serializers.Serializer):
     residential = PersonAddressSerializer(allow_null=True)
     private_email = serializers.EmailField(allow_blank=True)
     phone_mobile = serializers.CharField(allow_blank=True)
+    emergency_contact_phone = serializers.CharField(allow_blank=True)
 
     def load_addresses(self, instance):
         instance.contact = PersonAddress.objects.filter(
@@ -47,7 +48,7 @@ class CoordonneesSerializer(serializers.Serializer):
                 label=PersonAddressType.CONTACT.name,
             ).delete()
 
-        person_fields = ["phone_mobile", "private_email"]
+        person_fields = ["phone_mobile", "private_email", "emergency_contact_phone"]
         for field in person_fields:
             setattr(person, field, validated_data[field])
         person.save(update_fields=person_fields)

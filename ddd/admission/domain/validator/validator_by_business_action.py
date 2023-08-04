@@ -48,8 +48,10 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     numero_registre_national_belge: Optional[str]
     numero_carte_identite: Optional[str]
     carte_identite: List[str]
+    date_expiration_carte_identite: Optional[datetime.date]
     numero_passeport: Optional[str]
     passeport: List[str]
+    date_expiration_passeport: Optional[datetime.date]
 
     noma_derniere_inscription_ucl: Optional[str]
     annee_derniere_inscription_ucl: Optional[int]
@@ -83,15 +85,13 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldCandidatAuthentiquerPasseport(
                 numero_passeport=self.numero_passeport,
                 passeport=self.passeport,
+                date_expiration_passeport=self.date_expiration_passeport
             ),
             ShouldCandidatAuthentiquerIdentite(
                 numero_registre_national_belge=self.numero_registre_national_belge,
                 numero_carte_identite=self.numero_carte_identite,
                 carte_identite=self.carte_identite,
-            ),
-            ShouldCandidatSpecifierNOMASiDejaInscrit(
-                noma_derniere_inscription_ucl=self.noma_derniere_inscription_ucl,
-                annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
+                date_expiration_carte_identite=self.date_expiration_carte_identite
             ),
         ]
 

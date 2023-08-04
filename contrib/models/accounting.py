@@ -118,6 +118,12 @@ class Accounting(models.Model):
         max_length=64,
         verbose_name=_('Assimilation 2 situation types'),
     )
+    stateless_person_proof = FileField(
+        upload_to=admission_accounting_directory_path,
+        verbose_name=_(
+            'Copy of official document from the local authority or Foreign Nationals Office proving stateless status',
+        ),
+    )
     refugee_a_b_card = FileField(
         upload_to=admission_accounting_directory_path,
         verbose_name=_('A or B card with refugee mention'),
@@ -137,6 +143,10 @@ class Accounting(models.Model):
     subsidiary_protection_decision = FileField(
         upload_to=admission_accounting_directory_path,
         verbose_name=_('Decision confirming the granting of subsidiary protection'),
+    )
+    a_card = FileField(
+        upload_to=admission_accounting_directory_path,
+        verbose_name=_('A card'),
     )
     temporary_protection_decision = FileField(
         upload_to=admission_accounting_directory_path,

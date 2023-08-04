@@ -36,7 +36,6 @@ from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
@@ -311,7 +310,6 @@ class PropositionInMemoryRepository(
                 nom_pays=cls.countries.get(proposition.profil_soumis_candidat.pays, ''),
                 code_postal=proposition.profil_soumis_candidat.code_postal,
                 ville=proposition.profil_soumis_candidat.ville,
-                lieu_dit=proposition.profil_soumis_candidat.lieu_dit,
                 rue=proposition.profil_soumis_candidat.rue,
                 numero_rue=proposition.profil_soumis_candidat.numero_rue,
                 boite_postale=proposition.profil_soumis_candidat.boite_postale,

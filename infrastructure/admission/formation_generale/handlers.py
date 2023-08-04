@@ -377,4 +377,8 @@ COMMAND_HANDLERS = {
         historique=HistoriqueFormationGenerale(),
         pdf_generation=PDFGeneration(),
     ),
+    CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
 }

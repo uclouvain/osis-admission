@@ -112,7 +112,12 @@ RelatedDiplomaField = partial(
 RelatedInstitute = partial(
     serializers.SlugRelatedField,
     slug_field='uuid',
-    queryset=Organization.objects.filter(establishment_type=EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name),
+    queryset=Organization.objects.filter(
+        establishment_type__in=[
+            EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
+            EstablishmentTypeEnum.UNIVERSITY.name,
+        ],
+    ),
     allow_null=True,
 )
 

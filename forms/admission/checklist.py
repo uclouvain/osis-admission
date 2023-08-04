@@ -44,7 +44,7 @@ from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
-from admission.forms import RadioBooleanField
+from admission.forms import RadioBooleanField, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from admission.forms import get_academic_year_choices
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
@@ -132,7 +132,9 @@ class ChoixFormationForm(forms.Form):
     formation = forms.CharField(
         label=_("Course"),
         widget=autocomplete.ListSelect2(
-            forward=['annee_academique'], url="admission:autocomplete:general-education-trainings"
+            forward=['annee_academique'],
+            url="admission:autocomplete:general-education-trainings",
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
     poursuite_cycle = forms.ChoiceField(
@@ -167,6 +169,7 @@ class FacDecisionRefusalForm(forms.Form):
         widget=autocomplete.ModelSelect2(
             url='admission:autocomplete:checklist:refusal-reason',
             forward=['category'],
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
 
@@ -253,7 +256,10 @@ class FacDecisionApprovalForm(forms.ModelForm):
         queryset=EducationGroupYear.objects.none(),
         to_field_name='uuid',
         required=False,
-        widget=autocomplete_widgets.ListSelect2(url="admission:autocomplete:managed-education-trainings"),
+        widget=autocomplete_widgets.ListSelect2(
+            url="admission:autocomplete:managed-education-trainings",
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+        ),
     )
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
@@ -263,6 +269,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
             attrs={
                 'data-token-separators': [SEPARATOR],
                 'data-tags': 'true',
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
             },
         ),
         required=False,
@@ -278,6 +285,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
         required=False,
         widget=autocomplete_widgets.Select2Multiple(
             url='admission:autocomplete:checklist:additional-approval-condition',
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
 

@@ -62,7 +62,6 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
-    GrilleHoraireDTO,
 )
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -136,7 +135,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             genre=candidate.gender,
             photo_identite=candidate.id_photo,
             carte_identite=candidate.id_card,
+            date_expiration_carte_identite=candidate.id_card_expiry_date,
             passeport=candidate.passport,
+            date_expiration_passeport=candidate.passport_expiry_date,
             numero_registre_national_belge=candidate.national_number,
             numero_carte_identite=candidate.id_card_number,
             numero_passeport=candidate.passport_number,
@@ -146,7 +147,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             annee_derniere_inscription_ucl=candidate.last_registration_year and candidate.last_registration_year.year,
             noma_derniere_inscription_ucl=candidate.last_registration_id,
             pays_residence=residential_country,
-            prenom_d_usage=candidate.first_name_in_use,
             autres_prenoms=candidate.middle_name,
             **country_of_citizenship,
             **birth_country,
@@ -170,7 +170,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 else '',
                 boite_postale=address.postal_box,
                 numero_rue=address.street_number,
-                lieu_dit=address.place,
             )
             if address
             else None
@@ -189,6 +188,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             adresse_email_privee=candidate.private_email,
             domicile_legal=cls._get_address_dto(residential_address, has_default_language),
             adresse_correspondance=cls._get_address_dto(contact_address, has_default_language),
+            numero_contact_urgence=candidate.emergency_contact_phone,
         )
 
     @classmethod
@@ -233,7 +233,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
                 diplome=belgian_high_school_diploma.high_school_diploma,
                 certificat_inscription=belgian_high_school_diploma.enrolment_certificate,
-                resultat=belgian_high_school_diploma.result or '',
                 type_enseignement=belgian_high_school_diploma.educational_type,
                 autre_type_enseignement=belgian_high_school_diploma.educational_other,
                 nom_institut=belgian_high_school_diploma.institute.name
@@ -243,28 +242,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 if belgian_high_school_diploma.institute_id
                 else belgian_high_school_diploma.other_institute_address,
                 communaute=belgian_high_school_diploma.community or '',
-                grille_horaire=GrilleHoraireDTO(
-                    latin=belgian_high_school_diploma.schedule.latin,
-                    grec=belgian_high_school_diploma.schedule.greek,
-                    chimie=belgian_high_school_diploma.schedule.chemistry,
-                    physique=belgian_high_school_diploma.schedule.physic,
-                    biologie=belgian_high_school_diploma.schedule.biology,
-                    allemand=belgian_high_school_diploma.schedule.german,
-                    francais=belgian_high_school_diploma.schedule.french,
-                    espagnol=belgian_high_school_diploma.schedule.spanish,
-                    neerlandais=belgian_high_school_diploma.schedule.dutch,
-                    anglais=belgian_high_school_diploma.schedule.english,
-                    mathematique=belgian_high_school_diploma.schedule.mathematics,
-                    informatique=belgian_high_school_diploma.schedule.it,
-                    sciences_sociales=belgian_high_school_diploma.schedule.social_sciences,
-                    sciences_economiques=belgian_high_school_diploma.schedule.economic_sciences,
-                    autre_langue_moderne_label=belgian_high_school_diploma.schedule.modern_languages_other_label,
-                    autre_label=belgian_high_school_diploma.schedule.other_label,
-                    autre_langue_moderne_duree=belgian_high_school_diploma.schedule.modern_languages_other_hours,
-                    autre_duree=belgian_high_school_diploma.schedule.other_hours,
-                )
-                if belgian_high_school_diploma.schedule_id
-                else None,
             )
             if belgian_high_school_diploma
             else None,
@@ -455,7 +432,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     ).select_related("country"),
                 )
             )
-            .only('private_email', 'phone_mobile')
+            .only('private_email', 'phone_mobile', 'emergency_contact_phone')
             .get(global_id=matricule)
         )
 
@@ -482,7 +459,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         if type_formation == TrainingType.BACHELOR:
             queryset = queryset.select_related(
                 'highschooldiplomaalternative',
-                'belgianhighschooldiploma__schedule',
                 'belgianhighschooldiploma__institute',
                 'foreignhighschooldiploma__country',
                 'foreignhighschooldiploma__linguistic_regime',
@@ -710,7 +686,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             be_institute_address = 'belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress'
             queryset = queryset.select_related(
                 'highschooldiplomaalternative',
-                'belgianhighschooldiploma__schedule',
                 'belgianhighschooldiploma__institute',
                 'foreignhighschooldiploma__country',
                 'foreignhighschooldiploma__linguistic_regime',

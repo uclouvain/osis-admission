@@ -47,7 +47,6 @@ class ProfilSoumisCandidatTranslator(interface.DomainService):
             code_postal=adresse.code_postal,
             ville=adresse.ville,
             pays=adresse.pays,
-            lieu_dit=adresse.lieu_dit,
             numero_rue=adresse.numero_rue,
             boite_postale=adresse.boite_postale,
         )

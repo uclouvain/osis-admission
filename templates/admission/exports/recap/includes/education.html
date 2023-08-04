@@ -38,56 +38,15 @@
         {% endif %}
       {% endif %}
 
-      {% field_data _('What result did you achieve?') etudes_secondaires.diplome_belge.resultat|enum_display:'DiplomaResults' %}
-
       {% display etudes_secondaires.diplome_belge.nom_institut ' ' '(' etudes_secondaires.diplome_belge.adresse_institut ')' as belgian_institute %}
       {% translate 'Institute' context 'admission' as institute_label %}
       {% field_data institute_label belgian_institute %}
-
-      {% if etudes_secondaires.diplome_belge.grille_horaire %}
-        <dl>
-          <dt>{% translate 'Timetable' %}</dt>
-          <dd>
-            <div class='row' style='margin-top: 0.5em; display: flex;'>
-              <div class='col-md-4'>
-                {% panel _('Ancient languages') %}
-                  {% field_data _('Latin')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.latin inline=True %}
-                  {% field_data _('Greek')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.grec inline=True %}
-                {% endpanel %}
-                {% panel _('Sciences') %}
-                  {% field_data _('Chemistry')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.chimie inline=True %}
-                  {% field_data _('Physic')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.physique inline=True %}
-                  {% field_data _('Biology')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.biologie inline=True %}
-                {% endpanel %}
-              </div>
-              <div class='col-md-4'>
-                {% panel _('Modern languages') %}
-                  {% field_data _('French')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.francais inline=True %}
-                  {% field_data _('English')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.anglais inline=True %}
-                  {% field_data _('Dutch')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.neerlandais inline=True %}
-                  {% field_data _('Spanish')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.espagnol inline=True %}
-                  {% field_data _('German')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.allemand inline=True %}
-                  {% field_data etudes_secondaires.diplome_belge.grille_horaire.autre_langue_moderne_label|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.autre_langue_moderne_duree hide_empty=True inline=True %}
-                {% endpanel %}
-              </div>
-              <div class='col-md-4'>
-                {% panel _('Others') %}
-                  {% field_data _('Mathematics')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.mathematique inline=True %}
-                  {% field_data _('IT')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.informatique inline=True %}
-                  {% field_data _('Social sciences')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.sciences_sociales inline=True %}
-                  {% field_data _('Economics')|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.sciences_economiques inline=True %}
-                  {% field_data etudes_secondaires.diplome_belge.grille_horaire.autre_label|add:_(' (h/w)') etudes_secondaires.diplome_belge.grille_horaire.autre_duree hide_empty=True inline=True %}
-                {% endpanel %}
-              </div>
-            </div>
-          </dd>
-        </dl>
-      {% endif %}
     {% endpanel %}
 
     {% panel _('Attachments') %}
-      {% field_data _('Secondary school diploma') etudes_secondaires.diplome_belge.diplome %}
-      {% if etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
+      {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' %}
+        {% field_data _('Secondary school diploma') etudes_secondaires.diplome_belge.diplome %}
+      {% elif etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
         {% field_data _('Certificate of enrolment or school attendance') etudes_secondaires.diplome_belge.certificat_inscription %}
       {% endif %}
     {% endpanel %}

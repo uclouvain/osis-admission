@@ -85,6 +85,8 @@ class ProfilCandidat(interface.DomainService):
             numero_carte_identite=identification.numero_carte_identite,
             carte_identite=identification.carte_identite,
             numero_passeport=identification.numero_passeport,
+            date_expiration_passeport=identification.date_expiration_passeport,
+            date_expiration_carte_identite=identification.date_expiration_carte_identite,
             passeport=identification.passeport,
             noma_derniere_inscription_ucl=identification.noma_derniere_inscription_ucl,
             annee_derniere_inscription_ucl=identification.annee_derniere_inscription_ucl,

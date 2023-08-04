@@ -213,16 +213,6 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), NomEtPrenomNonSpecifiesException)
 
-    def test_should_retourner_erreur_si_noma_non_renseigne_si_precedente_inscription(self):
-        with mock.patch.multiple(
-            self.candidat,
-            annee_derniere_inscription_ucl=2020,
-            noma_derniere_inscription_ucl='',
-        ):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.cmd)
-            self.assertIsInstance(context.exception.exceptions.pop(), SpecifierNOMASiDejaInscritException)
-
     def test_should_retourner_erreur_si_date_annee_naissance_non_renseignees(self):
         with mock.patch.multiple(
             self.candidat,
@@ -242,10 +232,28 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), DetailsPasseportNonSpecifiesException)
 
+    def test_should_retourner_erreur_si_date_expiration_passeport_non_renseignee(self):
+        with mock.patch.multiple(
+            self.candidat,
+            date_expiration_passeport=None,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), DetailsPasseportNonSpecifiesException)
+
     def test_should_retourner_erreur_si_carte_identite_non_renseignee(self):
         with mock.patch.multiple(
             self.candidat,
             carte_identite=[],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CarteIdentiteeNonSpecifieeException)
+
+    def test_should_retourner_erreur_si_date_expiration_carte_identite_non_renseignee(self):
+        with mock.patch.multiple(
+            self.candidat,
+            date_expiration_carte_identite=None,
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)

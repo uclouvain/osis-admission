@@ -54,7 +54,6 @@ from base.utils.cte import CTESubquery
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
-from reference.models.country import Country
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 
 __all__ = [
@@ -289,14 +288,6 @@ class DoctorateAdmission(BaseAdmission):
 
     supervision_group = SignatureProcessField()
 
-    erasmus_mundus_scholarship = models.ForeignKey(
-        to="admission.Scholarship",
-        verbose_name=_("Erasmus Mundus scholarship"),
-        related_name="+",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-    )
     other_international_scholarship = models.CharField(
         max_length=255,
         verbose_name=_("Other international scholarship"),
@@ -492,7 +483,6 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "determined_academic_year",
                 "thesis_institute",
                 "accounting",
-                "erasmus_mundus_scholarship",
                 "international_scholarship",
             )
             .annotate(

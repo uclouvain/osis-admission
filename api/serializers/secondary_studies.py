@@ -39,16 +39,8 @@ from osis_profile.models import (
     ForeignHighSchoolDiploma,
     HighSchoolDiplomaAlternative,
 )
-from osis_profile.models.education import Schedule
-from osis_profile.models.enums.education import EducationalType
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
-
-
-class ScheduleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Schedule
-        fields = '__all__'
 
 
 RelatedHighSchoolField = partial(
@@ -60,7 +52,6 @@ RelatedHighSchoolField = partial(
 
 class BelgianHighSchoolDiplomaSerializer(serializers.ModelSerializer):
     academic_graduation_year = RelatedAcademicYearField()
-    schedule = ScheduleSerializer(required=False, allow_null=True)
     institute = RelatedHighSchoolField(required=False, allow_null=True)
 
     class Meta:
@@ -69,14 +60,12 @@ class BelgianHighSchoolDiplomaSerializer(serializers.ModelSerializer):
             "academic_graduation_year",
             "high_school_diploma",
             "enrolment_certificate",
-            "result",
             "community",
             "educational_type",
             "educational_other",
             "institute",
             "other_institute_name",
             "other_institute_address",
-            "schedule",
         )
 
 
@@ -146,22 +135,7 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
 
     @staticmethod
     def update_belgian_diploma(instance, belgian_diploma_data):
-        schedule_data = belgian_diploma_data.pop("schedule", None)
-        educational_types_that_require_schedule = [
-            EducationalType.TEACHING_OF_GENERAL_EDUCATION.name,
-            EducationalType.TRANSITION_METHOD.name,
-            EducationalType.ARTISTIC_TRANSITION.name,
-        ]
-        educational_type_data = belgian_diploma_data.get("educational_type")
-        if schedule_data and educational_type_data in educational_types_that_require_schedule:
-            pk = instance.belgian_diploma and instance.belgian_diploma.schedule_id
-            schedule, _ = Schedule.objects.update_or_create(pk=pk, defaults=schedule_data)
-            belgian_diploma_data["schedule"] = schedule
-        elif instance.belgian_diploma and instance.belgian_diploma.schedule:
-            instance.belgian_diploma.schedule.delete()  # schedule is not needed anymore
-
         BelgianHighSchoolDiploma.objects.update_or_create(person=instance, defaults=belgian_diploma_data)
-
         HighSchoolDiplomaSerializer.clean_foreign_diploma(instance)
         HighSchoolDiplomaSerializer.clean_high_school_diploma_alternative(instance)
 
@@ -189,8 +163,6 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
     def clean_belgian_diploma(instance):
         if instance.belgian_diploma:
             instance.belgian_diploma.delete()
-            if instance.belgian_diploma.schedule:
-                instance.belgian_diploma.schedule.delete()
 
     @staticmethod
     def clean_high_school_diploma_alternative(instance):

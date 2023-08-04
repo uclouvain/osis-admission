@@ -162,32 +162,23 @@ def get_secondary_studies_attachments(
     got_diploma = context.etudes_secondaires.diplome_etudes_secondaires
     if context.proposition.formation.type == TrainingType.BACHELOR.name:
         if context.etudes_secondaires.diplome_belge:
-            attachments.append(
-                Attachment(
-                    identifier='DIPLOME_BELGE_DIPLOME',
-                    label=DocumentsEtudesSecondaires['DIPLOME_BELGE_DIPLOME'],
-                    uuids=context.etudes_secondaires.diplome_belge.diplome,
-                    required=got_diploma == GotDiploma.YES.name
-                    or bool(
-                        # Required if it is specified but not the alternative field
-                        got_diploma == GotDiploma.THIS_YEAR.name
-                        and context.etudes_secondaires.diplome_belge.diplome
-                        and not context.etudes_secondaires.diplome_belge.certificat_inscription
-                    ),
-                    candidate_language=context.identification.langue_contact,
+            if context.etudes_secondaires.diplome_etudes_secondaires == GotDiploma.YES.name:
+                attachments.append(
+                    Attachment(
+                        identifier='DIPLOME_BELGE_DIPLOME',
+                        label=DocumentsEtudesSecondaires['DIPLOME_BELGE_DIPLOME'],
+                        uuids=context.etudes_secondaires.diplome_belge.diplome,
+                        required=True,
+                        candidate_language=context.identification.langue_contact,
+                    )
                 )
-            )
-            if context.etudes_secondaires.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name:
+            elif context.etudes_secondaires.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name:
                 attachments.append(
                     Attachment(
                         identifier='DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
                         label=DocumentsEtudesSecondaires['DIPLOME_BELGE_CERTIFICAT_INSCRIPTION'],
                         uuids=context.etudes_secondaires.diplome_belge.certificat_inscription,
-                        required=bool(
-                            # Required if it is specified but not the alternative field
-                            context.etudes_secondaires.diplome_belge.certificat_inscription
-                            and not context.etudes_secondaires.diplome_belge.diplome
-                        ),
+                        required=True,
                         candidate_language=context.identification.langue_contact,
                     )
                 )
@@ -520,6 +511,15 @@ def get_specific_questions_attachments(
                 candidate_language=context.identification.langue_contact,
             )
         )
+    attachments.append(
+        Attachment(
+            identifier='ADDITIONAL_DOCUMENTS',
+            label=DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'],
+            uuids=context.proposition.documents_additionnels,
+            required=False,
+            candidate_language=context.identification.langue_contact,
+        )
+    )
     attachments.extend(get_dynamic_questions_attachments(specific_questions))
     return attachments
 

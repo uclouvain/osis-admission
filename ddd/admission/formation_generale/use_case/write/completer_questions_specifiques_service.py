@@ -23,12 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_continue.commands import CompleterQuestionsSpecifiquesCommand
-from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
+from admission.ddd.admission.formation_generale.commands import CompleterQuestionsSpecifiquesCommand
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
 def completer_questions_specifiques(
@@ -41,21 +41,7 @@ def completer_questions_specifiques(
 
     # WHEN
     proposition_candidat.completer_informations_complementaires(
-        inscription_a_titre=cmd.inscription_a_titre,
-        nom_siege_social=cmd.nom_siege_social,
-        numero_unique_entreprise=cmd.numero_unique_entreprise,
-        numero_tva_entreprise=cmd.numero_tva_entreprise,
-        adresse_mail_professionnelle=cmd.adresse_mail_professionnelle,
-        type_adresse_facturation=cmd.type_adresse_facturation,
-        adresse_facturation_rue=cmd.adresse_facturation_rue,
-        adresse_facturation_numero_rue=cmd.adresse_facturation_numero_rue,
-        adresse_facturation_code_postal=cmd.adresse_facturation_code_postal,
-        adresse_facturation_ville=cmd.adresse_facturation_ville,
-        adresse_facturation_pays=cmd.adresse_facturation_pays,
-        adresse_facturation_destinataire=cmd.adresse_facturation_destinataire,
-        adresse_facturation_boite_postale=cmd.adresse_facturation_boite_postale,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
-        copie_titre_sejour=cmd.copie_titre_sejour,
         documents_additionnels=cmd.documents_additionnels,
     )
 

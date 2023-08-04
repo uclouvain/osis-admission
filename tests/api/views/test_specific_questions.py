@@ -58,7 +58,7 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory
+from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory, InternationalScholarshipFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType
@@ -562,7 +562,7 @@ class DoctorateSpecificQuestionListWithItemsRelatedToVIPCandidateApiTestCase(
         self.assertEqual(len(response.json()), 0)
 
     def test_retrieve_items_with_erasmus_scholarship(self):
-        self.admission.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
+        self.admission.international_scholarship = InternationalScholarshipFactory()
         self.admission.save()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -591,7 +591,7 @@ class DoctorateSpecificQuestionListWithItemsRelatedToNonVIPCandidateApiTestCase(
         self.assertEqual(len(response.json()), 1)
 
     def test_retrieve_items_with_erasmus_scholarship(self):
-        self.admission.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
+        self.admission.international_scholarship = InternationalScholarshipFactory()
         self.admission.save()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -920,7 +920,6 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             'adresse_facturation_pays': 'BE',
             'adresse_facturation_destinataire': 'John Doe',
             'adresse_facturation_boite_postale': 'B1',
-            'adresse_facturation_lieu_dit': 'Avant',
         }
 
         # Users
@@ -1093,8 +1092,4 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         self.assertEqual(
             admission.billing_address_country.iso_code,
             self.update_data_with_custom_address['adresse_facturation_pays'],
-        )
-        self.assertEqual(
-            admission.billing_address_place,
-            self.update_data_with_custom_address['adresse_facturation_lieu_dit'],
         )

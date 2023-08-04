@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ class IdentificationDTO(interface.DTO):
 
     nom: str
     prenom: str
-    prenom_d_usage: str
     autres_prenoms: str
     date_naissance: Optional[datetime.date]
     annee_naissance: Optional[int]
@@ -58,6 +57,8 @@ class IdentificationDTO(interface.DTO):
     numero_registre_national_belge: str
     numero_carte_identite: str
     numero_passeport: str
+    date_expiration_carte_identite: Optional[datetime.date]
+    date_expiration_passeport: Optional[datetime.date]
 
     langue_contact: str
     nom_langue_contact: str

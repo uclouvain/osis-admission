@@ -108,7 +108,6 @@ class Proposition(interface.RootEntity):
 
     fiche_archive_signatures_envoyees: List[str] = attr.Factory(list)
     comptabilite: 'Comptabilite' = comptabilite_non_remplie
-    bourse_erasmus_mundus_id: Optional[BourseIdentity] = None
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     curriculum: List[str] = attr.Factory(list)
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
@@ -321,9 +320,11 @@ class Proposition(interface.RootEntity):
         carte_a_b_refugie: List[str],
         annexe_25_26_refugies_apatrides: List[str],
         attestation_immatriculation: List[str],
+        preuve_statut_apatride: List[str],
         carte_a_b: List[str],
         decision_protection_subsidiaire: List[str],
         decision_protection_temporaire: List[str],
+        carte_a: List[str],
         sous_type_situation_assimilation_3: Optional[str],
         titre_sejour_3_mois_professionel: List[str],
         fiches_remuneration: List[str],
@@ -374,9 +375,11 @@ class Proposition(interface.RootEntity):
             carte_a_b_refugie=carte_a_b_refugie,
             annexe_25_26_refugies_apatrides=annexe_25_26_refugies_apatrides,
             attestation_immatriculation=attestation_immatriculation,
+            preuve_statut_apatride=preuve_statut_apatride,
             carte_a_b=carte_a_b,
             decision_protection_subsidiaire=decision_protection_subsidiaire,
             decision_protection_temporaire=decision_protection_temporaire,
+            carte_a=carte_a,
             sous_type_situation_assimilation_3=ChoixAssimilation3[sous_type_situation_assimilation_3]
             if sous_type_situation_assimilation_3
             else None,
@@ -459,7 +462,6 @@ class Proposition(interface.RootEntity):
         formation_id: FormationIdentity,
         type_admission: str,
         justification: Optional[str],
-        bourse_erasmus_mundus: Optional[BourseIdentity],
         reponses_questions_specifiques: Dict,
         commission_proximite: Optional[str],
     ):
@@ -471,5 +473,4 @@ class Proposition(interface.RootEntity):
         self.formation_id = formation_id
         self.type_admission = ChoixTypeAdmission[type_admission]
         self.justification = justification or ''
-        self.bourse_erasmus_mundus_id = bourse_erasmus_mundus
         self.reponses_questions_specifiques = reponses_questions_specifiques

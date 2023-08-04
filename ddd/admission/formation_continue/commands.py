@@ -142,10 +142,10 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
     adresse_facturation_pays: Optional[str] = ''
     adresse_facturation_destinataire: Optional[str] = ''
     adresse_facturation_boite_postale: Optional[str] = ''
-    adresse_facturation_lieu_dit: Optional[str] = ''
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     copie_titre_sejour: List[str] = attr.Factory(list)
+    documents_additionnels: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)

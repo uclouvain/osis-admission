@@ -30,7 +30,6 @@ from admission.ddd.admission.doctorat.preparation.domain.service.commission_prox
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 
 
@@ -38,7 +37,6 @@ def initier_proposition(
     cmd: 'InitierPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     doctorat_translator: 'IDoctoratTranslator',
-    bourse_translator: 'IBourseTranslator',
     historique: 'IHistorique',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
 ) -> 'PropositionIdentity':
@@ -52,7 +50,6 @@ def initier_proposition(
         cmd,
         doctorat.entity_id,
         proposition_repository,
-        bourse_translator,
     )
 
     # THEN

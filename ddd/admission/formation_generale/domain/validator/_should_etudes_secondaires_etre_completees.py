@@ -93,7 +93,6 @@ class ShouldDiplomeBelgesEtudesSecondairesEtreComplete(BusinessValidator):
 
         if (
             self.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name
-            and not self.diplome_belge.diplome
             and not self.diplome_belge.certificat_inscription
         ) or (self.diplome_etudes_secondaires == GotDiploma.YES.name and not self.diplome_belge.diplome):
             raise EtudesSecondairesNonCompleteesPourDiplomeBelgeException

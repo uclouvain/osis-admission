@@ -37,7 +37,6 @@ class AdressePersonnelleDTO(interface.DTO):
     ville: str
     pays: str
     nom_pays: str
-    lieu_dit: str
     numero_rue: str
     boite_postale: str
     destinataire: str = ''
@@ -49,3 +48,4 @@ class CoordonneesDTO(interface.DTO):
     adresse_correspondance: Optional[AdressePersonnelleDTO]
     numero_mobile: str
     adresse_email_privee: str
+    numero_contact_urgence: str

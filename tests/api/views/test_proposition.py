@@ -213,7 +213,6 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             billing_address_postal_code='1348',
             billing_address_city='Louvain-La-Neuve',
             billing_address_country=CountryFactory(iso_code=BE_ISO_CODE),
-            billing_address_place='Avant',
             training__management_entity=cls.commission.entity,
         )
         cls.teaching_campus_name = (
@@ -351,10 +350,6 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         self.assertEqual(
             adresse_facturation.get('pays'),
             self.admission_with_billing_address.billing_address_country.iso_code,
-        )
-        self.assertEqual(
-            adresse_facturation.get('lieu_dit'),
-            self.admission_with_billing_address.billing_address_place,
         )
         self.assertEqual(
             adresse_facturation.get('numero_rue'),

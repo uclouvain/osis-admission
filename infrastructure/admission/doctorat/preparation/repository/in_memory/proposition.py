@@ -215,11 +215,6 @@ class PropositionInMemoryRepository(
             if proposition.projet.institut_these
             else None
         )
-        bourse_erasmus_dto = (
-            BourseInMemoryTranslator.get_dto(uuid=str(proposition.bourse_erasmus_mundus_id.uuid))
-            if proposition.bourse_erasmus_mundus_id
-            else None
-        )
         bourse_recherche_dto = (
             BourseInMemoryTranslator.get_dto(uuid=str(proposition.financement.bourse_recherche.uuid))
             if proposition.financement.bourse_recherche
@@ -287,7 +282,6 @@ class PropositionInMemoryRepository(
             modifiee_le=proposition.modifiee_le,
             erreurs=[],
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
-            bourse_erasmus_mundus=bourse_erasmus_dto,
             curriculum=proposition.curriculum,
             elements_confirmation=proposition.elements_confirmation,
             pdf_recapitulatif=[],

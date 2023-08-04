@@ -17,9 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid " (h/w)"
-msgstr " (h/s)"
-
 #, python-brace-format
 msgid " (last update by {author} on {date} at {time}):"
 msgstr " (dernière modification par {author} le {date} à {time}) :"
@@ -203,9 +200,11 @@ msgid ""
 "to the data in my file</li></ul>"
 msgstr ""
 "<ul><li>les renseignements que j'ai fournis dans ce cadre sont exacts et "
-"complets</li><li>j'ai téléversé tous les documents utiles confirmant les "
-"renseignements fournis</li><li>je m'engage à transmettre %(to_service)s "
-"toutes les modifications de données reprises dans mon dossier</li></ul>"
+"complets. L’UCLouvain se réserve le droit d’assurer toute vérification des "
+"éléments constitutifs du dossier avec des tiers.</li><li>j'ai téléversé tous "
+"les documents utiles confirmant les renseignements fournis</li><li>je "
+"m'engage à transmettre au Service des inscriptions de l'UCLouvain toutes les "
+"modifications de données reprises dans mon dossier</li></ul>"
 
 msgid ""
 "A candidate is considered as VIP if he/she is in double degree or if he/she "
@@ -213,6 +212,9 @@ msgid ""
 msgstr ""
 "Un candidat est considéré VIP s'il est en double diplomation ou s'il "
 "bénéficie d'une bourse internationale ou s'il est Erasmus Mundus."
+
+msgid "A card"
+msgstr "Carte A"
 
 msgid "A comment is required."
 msgstr "Un commentaire est requis."
@@ -474,6 +476,9 @@ msgstr "Conditions complémentaires d'acceptation"
 msgid "Additional conditions"
 msgstr "Conditions complémentaires"
 
+msgid "Additional documents"
+msgstr "Documents complémentaires"
+
 msgid "Additional documents that can be requested from the candidate"
 msgstr "Documents additionnels réclamables au candidat"
 
@@ -593,9 +598,6 @@ msgstr ""
 
 msgid "Analysis folder"
 msgstr "Dossier d'analyse"
-
-msgid "Ancient languages"
-msgstr "Langues anciennes"
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
@@ -843,9 +845,6 @@ msgstr "La ville de l'adresse de facturation"
 msgid "Billing address country"
 msgstr "Le pays de l'adresse de facturation"
 
-msgid "Billing address place"
-msgstr "Le lieu-dit de l'adresse de facturation"
-
 msgid "Billing address postal box"
 msgstr "La boîte postale de l'adresse de facturation"
 
@@ -863,9 +862,6 @@ msgstr "Le numéro de rue de l'adresse de facturation"
 
 msgid "Billing address type"
 msgstr "Le type de l'adresse de facturation"
-
-msgid "Biology"
-msgstr "Biologie"
 
 msgid "Body"
 msgstr "Corps"
@@ -1238,9 +1234,6 @@ msgstr "Modifier la publication de cette conférence"
 msgid "Checklist"
 msgstr "Checklist"
 
-msgid "Chemistry"
-msgstr "Chimie"
-
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr "Enfant d'un membre du personnel de l'UCLouvain ou de l'entité Martin V"
 
@@ -1479,6 +1472,9 @@ msgstr ""
 "Copie de la décision de l’Office des étrangers attestant de l’octroi de la "
 "protection temporaire"
 
+msgid "Copy of both sides of A Card"
+msgstr "Copie recto-verso de la Carte A"
+
 msgid "Copy of both sides of A or B Card"
 msgstr "Copie recto-verso de la Carte A ou B"
 
@@ -1591,6 +1587,13 @@ msgid ""
 msgstr ""
 "Copie de l’attestation de boursier délivrée par l'administration générale de "
 "la Coopération au Développement"
+
+msgid ""
+"Copy of official document from the local authority or Foreign Nationals "
+"Office proving stateless status"
+msgstr ""
+"Copie du document officiel de la commune ou de l’Office des étrangers "
+"prouvant le statut d’apatride"
 
 msgid ""
 "Copy of residence permit covering entire course, including assessment test "
@@ -1972,9 +1975,6 @@ msgstr "Bourse double diplomation"
 msgid "Dual or triple degree"
 msgstr "Double ou triple diplomation"
 
-msgid "Dutch"
-msgstr "Néerlandais"
-
 msgid "Dynamic questions about \"Specific aspects\" sub-tab"
 msgstr "Questions dynamiques du sous-onglet \"Spécificités\""
 
@@ -2005,9 +2005,6 @@ msgstr "EFT"
 
 msgid "EU,NEU"
 msgstr "UE,HUE"
-
-msgid "Economics"
-msgstr "Sciences économiques"
 
 msgid "Edit"
 msgstr "Modifier"
@@ -2050,6 +2047,9 @@ msgid ""
 msgstr ""
 "E-mail envoyé à la faculté quand le SIC envoie le dossier lors du processus "
 "de décision facultaire."
+
+msgid "Emergency contact (telephone number)"
+msgstr "Contact en cas d'urgence (numéro de téléphone)"
 
 msgid "Employer"
 msgstr "Employeur"
@@ -2456,9 +2456,6 @@ msgstr ""
 "E-mail générique qui peut être envoyé manuellement une fois que le candidat "
 "est admis"
 
-msgid "German"
-msgstr "Allemand"
-
 msgid "Global FAC/CDD comments"
 msgstr "Commentaires globaux FAC/CDD"
 
@@ -2467,9 +2464,6 @@ msgstr "Commentaires globaux SIC"
 
 msgid "Grade"
 msgstr "Mention obtenue"
-
-msgid "Greek"
-msgstr "Grec"
 
 msgid "Grounds for denied"
 msgstr "Motif de refus"
@@ -2538,6 +2532,9 @@ msgstr ""
 "Je suis réfugié·e, apatride, ou je bénéficie d’une protection subsidiaire/"
 "temporaire (assimilation 2)"
 
+msgid "I am a stateless person"
+msgstr "Je suis apatride"
+
 msgid "I am an asylum seeker"
 msgstr "Je suis demandeur d’asile"
 
@@ -2595,16 +2592,16 @@ msgid ""
 "technical and organisational measures are put in place to ensure an adequate "
 "level of protection of this data."
 msgstr ""
-"J'autorise la faculté de médecine et médecine dentaire de l'UCLouvain à "
-"fournir mes coordonnées personnelles (nom(s), prénom(s), NOMA, date de "
-"naissance, lieu de naissance, adresse) aux Hôpitaux d'Accueil en vue "
-"d'établir les différents accès qui me seront nécessaires dans le cadre de "
-"mes stages, et ce, dans le respect du Règlement général sur la Protection "
-"des Données (RGDP) et la loi du 30 juillet 2018 relative à la protection des "
-"personnes physiques à l'égard des traitements de données à caractère "
-"personnel. Mes données sont conservées pour la durée nécessaire à la bonne "
-"exécution du stage et ne sont jamais transmises à d'autres parties que "
-"celles susmentionnées. Des mesures techniques et organisationnelles "
+"J’ai pris connaissance du fait que la faculté de médecine et médecine "
+"dentaire de l'UCLouvain à fourni certaines coordonnées personnelles (nom(s), "
+"prénom(s), NOMA, date de naissance, lieu de naissance, adresse) aux Hôpitaux "
+"d'Accueil en vue d'établir les différents accès qui me seront nécessaires "
+"dans le cadre de mes stages, et ce, dans le respect du Règlement général sur "
+"la Protection des Données (RGPD) et la loi du 30 juillet 2018 relative à la "
+"protection des personnes physiques à l'égard des traitements de données à "
+"caractère personnel. Mes données sont conservées pour la durée nécessaire à "
+"la bonne exécution du stage et ne sont jamais transmises à d'autres parties "
+"que celles susmentionnées. Des mesures techniques et organisationnelles "
 "appropriées sont mises en place afin d'assurer un niveau de protection "
 "adéquat de ces données."
 
@@ -2706,8 +2703,10 @@ msgid ""
 "and accept that my application will be closed."
 msgstr ""
 "Je m'engage à faire parvenir <strong>impérativement dans les 15 jours "
-"calendrier</strong> tout justificatif demandé %(by_service)s. A défaut, je "
-"prends bonne note et accepte que ma demande sera clôturée."
+"calendrier</strong> tout justificatif demandé par le Service des "
+"inscriptions. A défaut, je prends bonne note et accepte que ma demande sera "
+"considérée comme irrecevable conformément à l’article 9 du RGEE et dès lors "
+"clôturée."
 
 msgid ""
 "I would like to receive my mail at an address other than my legal address"
@@ -2735,9 +2734,6 @@ msgstr "Invité"
 msgid "IN_PROGRESS"
 msgstr "En cours"
 
-msgid "IT"
-msgstr "Informatique"
-
 msgid "Identification"
 msgstr "Identification"
 
@@ -2752,6 +2748,9 @@ msgstr "Identifiant"
 
 msgid "Identity card (both sides)"
 msgstr "Carte d'identité (recto/verso)"
+
+msgid "Identity card expiry date"
+msgstr "Date de fin de validité de la carte d'identité"
 
 msgid "Identity card number"
 msgstr "Numéro de carte d'identité"
@@ -3043,9 +3042,6 @@ msgstr "Auteur de la dernière mise à jour"
 
 msgid "Late enrollment"
 msgstr "Inscription tardive"
-
-msgid "Latin"
-msgstr "Latin"
 
 msgid "Lead supervisor"
 msgstr "Promoteur de référence"
@@ -3463,9 +3459,6 @@ msgstr "Des langues obligatoires sont manquantes."
 msgid "Master"
 msgstr "Master"
 
-msgid "Mathematics"
-msgstr "Mathématiques"
-
 msgid "Maximum number of documents"
 msgstr "Nombre maximum de documents"
 
@@ -3521,9 +3514,6 @@ msgstr ""
 
 msgid "Missing"
 msgstr "Manquants"
-
-msgid "Modern languages"
-msgstr "Langues modernes"
 
 msgid "Modification asked by the candidate"
 msgstr "Modification demandée par le candidat"
@@ -3861,9 +3851,6 @@ msgstr "Autres membres du comité d’accompagnement"
 msgid "Other reason"
 msgstr "Autre raison"
 
-msgid "Others"
-msgstr "Autres"
-
 msgctxt "CategorieActivite"
 msgid "PAPER"
 msgstr "Épreuve"
@@ -3956,6 +3943,9 @@ msgstr "Institution partenaire"
 msgid "Passport"
 msgstr "Passeport"
 
+msgid "Passport expiry date"
+msgstr "Date de fin de validité du passeport"
+
 msgid "Passport number"
 msgstr "Numéro de passeport"
 
@@ -3998,16 +3988,6 @@ msgstr "Projet de recherche doctoral"
 
 msgid "PhD training"
 msgstr "Formation doctorale"
-
-msgid "Physic"
-msgstr "Physique"
-
-msgctxt "address"
-msgid "Place"
-msgstr "Lieu-dit"
-
-msgid "Place (optional)"
-msgstr "Lieu-dit (optionnel)"
 
 msgid "Place of birth"
 msgstr "Lieu de naissance"
@@ -4101,11 +4081,16 @@ msgstr ""
 "Merci de fournir une copie de votre décision d'équivalence pour votre/vos "
 "diplôme(s) donnant accès à la formation."
 
-msgid "Please provide a copy of your identity card."
-msgstr "Merci de fournir une copie de votre carte d'identité."
+msgid ""
+"Please provide a copy of your identity card and specify its expiry date."
+msgstr ""
+"Merci de fournir une copie de votre carte d'identité et de spécifier sa date "
+"de fin de validité."
 
-msgid "Please provide a copy of your passport."
-msgstr "Merci de fournir une copie de votre passeport."
+msgid "Please provide a copy of your passport and specify its expiry date."
+msgstr ""
+"Merci de fournir une copie de votre passeport et de spécifier sa date de fin "
+"de validité."
 
 msgid "Please provide one of these two pieces of identification information:"
 msgstr "Veuillez fournir l’une de ces deux informations d’identification :"
@@ -4157,9 +4142,6 @@ msgstr "Date de pré-admission"
 
 msgid "Pre-admission submission date"
 msgstr "Date de soumission Pré-admission"
-
-msgid "Preferred first name"
-msgstr "Prénom d'usage"
 
 msgid "Prerequisite courses"
 msgstr "Compléments de formation"
@@ -4739,9 +4721,6 @@ msgstr "Date de fin de la bourse"
 msgid "Scholarship start date"
 msgstr "Date de démarrage de la bourse"
 
-msgid "Sciences"
-msgstr "Sciences"
-
 msgid "Scientific residencies"
 msgstr "Séjours scientifiques"
 
@@ -4869,9 +4848,6 @@ msgstr "Signatures"
 msgid "Sir"
 msgstr "Monsieur"
 
-msgid "Social sciences"
-msgstr "Sciences sociales"
-
 msgid "Solidarity student"
 msgstr "Étudiant solidaire"
 
@@ -4939,9 +4915,6 @@ msgid ""
 msgstr ""
 "Des informations relatives au diplôme étranger d'études secondaires sont "
 "manquantes."
-
-msgid "Spanish"
-msgstr "Espagnol"
 
 msgid "Speaker"
 msgstr "Orateur ou oratrice"
@@ -5639,9 +5612,6 @@ msgstr "Cases à cocher"
 msgid "Time allocated for thesis (in %)"
 msgstr "Temps consacré à la thèse (en %)"
 
-msgid "Timetable"
-msgstr "Grille horaire"
-
 msgid "Title"
 msgstr "Titre"
 
@@ -6051,6 +6021,13 @@ msgstr ""
 msgid "You are enrolling as"
 msgstr "Vous vous inscrivez à titre"
 
+msgid ""
+"You can add any document you feel is relevant to your application "
+"(supporting documents, proof of language level, etc.)"
+msgstr ""
+"Vous avez la possibilité d'ajouter tout document que vous jugez pertinent "
+"pour votre dossier (justificatifs, preuve de niveau de langue, ...)"
+
 #, python-format
 msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
@@ -6303,9 +6280,6 @@ msgstr "votre mère"
 
 msgid "your partner"
 msgstr "votre conjoint"
-
-msgid "yyyy"
-msgstr "aaaa"
 
 #, python-brace-format
 msgid "{items} types out of {total}"

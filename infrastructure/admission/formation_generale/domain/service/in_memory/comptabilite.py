@@ -64,9 +64,11 @@ class ComptabiliteInMemoryTranslator(IComptabiliteTranslator):
             carte_a_b_refugie=comptabilite.carte_a_b_refugie,
             annexe_25_26_refugies_apatrides=comptabilite.annexe_25_26_refugies_apatrides,
             attestation_immatriculation=comptabilite.attestation_immatriculation,
+            preuve_statut_apatride=comptabilite.preuve_statut_apatride,
             carte_a_b=comptabilite.carte_a_b,
             decision_protection_subsidiaire=comptabilite.decision_protection_subsidiaire,
             decision_protection_temporaire=comptabilite.decision_protection_temporaire,
+            carte_a=comptabilite.carte_a,
             sous_type_situation_assimilation_3=comptabilite.sous_type_situation_assimilation_3.name
             if comptabilite.sous_type_situation_assimilation_3
             else '',

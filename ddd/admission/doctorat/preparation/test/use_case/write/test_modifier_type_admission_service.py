@@ -59,7 +59,6 @@ class TestModifierTypeAdmissionPropositionService(SimpleTestCase):
             commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
             type_admission=ChoixTypeAdmission.PRE_ADMISSION.name,
             justification='Ma justification',
-            bourse_erasmus_mundus=BourseInMemoryTranslator.bourse_em_1.entity_id.uuid,
             uuid_proposition='uuid-ECGE3DP',
         )
 
@@ -67,18 +66,12 @@ class TestModifierTypeAdmissionPropositionService(SimpleTestCase):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(proposition.bourse_erasmus_mundus_id.uuid, self.cmd.bourse_erasmus_mundus)
         self.assertEqual(proposition.type_admission, ChoixTypeAdmission[self.cmd.type_admission])
         self.assertEqual(proposition.justification, self.cmd.justification)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='INCONNUE')
         with self.assertRaises(PropositionNonTrouveeException):
-            self.message_bus.invoke(cmd)
-
-    def test_should_empecher_si_bourse_erasmus_invalide(self):
-        cmd = attr.evolve(self.cmd, bourse_erasmus_mundus=str(uuid.uuid4()))
-        with self.assertRaises(BourseNonTrouveeException):
             self.message_bus.invoke(cmd)
 
     def test_should_empecher_si_justification_non_precisee(self):

@@ -31,7 +31,6 @@
       {% trans "The dossier has been confirmed with the following address:" %}
       {{ profil_candidat.numero_rue }} {{ profil_candidat.rue }},
       {% if profil_candidat.boite_postale %}{% trans "Postal box" %} {{ profil_candidat.boite_postale }}, {% endif %}
-      {% if profil_candidat.lieu_dit %}{% trans "Place" context 'address' %} {{ profil_candidat.lieu_dit }}, {% endif %}
       {{ profil_candidat.code_postal }} {{ profil_candidat.ville }},
       {{ profil_candidat.nom_pays }}
     </p>

@@ -84,7 +84,6 @@ class PropositionDTO(interface.DTO):
     modifiee_le: datetime.datetime
     soumise_le: Optional[datetime.datetime]
     erreurs: List[Dict[str, str]]
-    bourse_erasmus_mundus: Optional[BourseDTO]
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
     curriculum: List[str]
     elements_confirmation: Dict[str, str]

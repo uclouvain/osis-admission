@@ -41,9 +41,6 @@
     </div>
     <div class="row">
       <div class="col-md-4">
-        {% bootstrap_field_with_tooltip form.first_name_in_use classes='formatted-field' %}
-      </div>
-      <div class="col-md-4">
         {% bootstrap_field form.sex form_group_class="form-group required_field" %}
       </div>
       <div class="col-md-4">
@@ -88,11 +85,11 @@
 
   {% panel _("Identity document") %}
     <div id="has_national_number_container" class="required_field">
-      {% bootstrap_field form.has_national_number %}
+      {% bootstrap_field_with_tooltip form.has_national_number %}
     </div>
 
     <div id="national_number_container" class="required_field">
-      {% bootstrap_field_with_tooltip form.national_number %}
+      {% bootstrap_field form.national_number %}
     </div>
 
     <div id="identification_type_container">

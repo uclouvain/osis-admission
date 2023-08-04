@@ -62,7 +62,6 @@ class PropositionBuilder(interface.RootEntityBuilder):
         cmd: 'InitierPropositionCommand',
         doctorat_id: 'FormationIdentity',
         proposition_repository: 'IPropositionRepository',
-        bourse_translator: 'IBourseTranslator',
     ) -> 'Proposition':
         InitierPropositionValidatorList(
             type_admission=cmd.type_admission,
@@ -78,7 +77,6 @@ class PropositionBuilder(interface.RootEntityBuilder):
         elif cmd.commission_proximite and cmd.commission_proximite in ChoixSousDomaineSciences.get_names():
             commission_proximite = ChoixSousDomaineSciences[cmd.commission_proximite]
         reference = proposition_repository.recuperer_reference_suivante()
-        bourse_erasmus = bourse_translator.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
             reference=reference,
@@ -89,5 +87,4 @@ class PropositionBuilder(interface.RootEntityBuilder):
             matricule_candidat=cmd.matricule_candidat,
             commission_proximite=commission_proximite,
             projet=projet_non_rempli,
-            bourse_erasmus_mundus_id=bourse_erasmus,
         )

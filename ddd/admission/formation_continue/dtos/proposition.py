@@ -58,6 +58,7 @@ class PropositionDTO(interface.DTO):
     curriculum: List[str]
     equivalence_diplome: List[str]
     copie_titre_sejour: List[str]
+    documents_additionnels: List[str]
 
     inscription_a_titre: Optional[str]
     nom_siege_social: Optional[str]

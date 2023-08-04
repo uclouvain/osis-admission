@@ -42,7 +42,7 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     ChoixTypeEpreuve,
     ContexteFormation,
 )
-from admission.forms import SelectOrOtherField
+from admission.forms import SelectOrOtherField, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from base.forms.utils.datefield import DatePickerInput
 from base.models.academic_year import AcademicYear
 from base.models.learning_unit_year import LearningUnitYear
@@ -206,7 +206,7 @@ class ConferenceForm(ActivityFormMixin, forms.ModelForm):
         widgets = {
             'start_date': CustomDatePickerInput(),
             'end_date': CustomDatePickerInput(),
-            'country': autocomplete.ListSelect2(url="country-autocomplete"),
+            'country': autocomplete.ListSelect2(url="country-autocomplete", attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS),
             'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
         help_texts = {
@@ -347,7 +347,7 @@ class CommunicationForm(ActivityFormMixin, forms.ModelForm):
         }
         widgets = {
             'start_date': CustomDatePickerInput(),
-            'country': autocomplete.ListSelect2(url="country-autocomplete"),
+            'country': autocomplete.ListSelect2(url="country-autocomplete", attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS),
             'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
@@ -409,7 +409,7 @@ class ResidencyForm(ActivityFormMixin, forms.ModelForm):
         widgets = {
             'start_date': CustomDatePickerInput(),
             'end_date': CustomDatePickerInput(),
-            'country': autocomplete.ListSelect2(url="country-autocomplete"),
+            'country': autocomplete.ListSelect2(url="country-autocomplete", attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS),
             'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
@@ -536,7 +536,7 @@ class SeminarCommunicationForm(ActivityFormMixin, forms.ModelForm):
         }
         widgets = {
             'start_date': CustomDatePickerInput(),
-            'country': autocomplete.ListSelect2(url="country-autocomplete"),
+            'country': autocomplete.ListSelect2(url="country-autocomplete", attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS),
             'ects': forms.NumberInput(attrs={'min': '0', 'step': '0.5'}),
         }
 
@@ -668,8 +668,8 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
             url='admission:autocomplete:learning-unit-years-and-classes',
             attrs={
                 'data-html': True,
-                'data-minimum-input-length': 2,
                 'data-placeholder': _('Search for an EU code (outside the EU of the form)'),
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
             },
             forward=[dal.forward.Field("academic_year", "annee")],
         ),

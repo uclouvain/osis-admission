@@ -555,7 +555,6 @@ class PersonFormTestCase(TestCase):
                 'first_name': 'JOHN',
                 'last_name': 'DOE',
                 'middle_name': 'JIM',
-                'first_name_in_use': 'JOE',
                 'birth_place': 'LOUVAIN-LA-NEUVE',
             },
         )
@@ -563,7 +562,6 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(form.cleaned_data.get('first_name'), 'John')
         self.assertEqual(form.cleaned_data.get('last_name'), 'Doe')
         self.assertEqual(form.cleaned_data.get('middle_name'), 'Jim')
-        self.assertEqual(form.cleaned_data.get('first_name_in_use'), 'Joe')
         self.assertEqual(form.cleaned_data.get('birth_place'), 'Louvain-La-Neuve')
 
     def test_general_person_form_on_get_sic_manager(self):

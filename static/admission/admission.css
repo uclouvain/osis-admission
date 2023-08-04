@@ -161,7 +161,6 @@ fieldset.custom-fieldset > legend {
 }
 
 .popover-buttons {
-  color: initial !important;
   text-decoration: none !important;
   margin-left: 5px;
 }

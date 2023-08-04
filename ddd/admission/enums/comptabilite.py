@@ -70,6 +70,7 @@ class ChoixAssimilation1(ChoiceEnum):
 class ChoixAssimilation2(ChoiceEnum):
     REFUGIE = _('I am a refugee')
     DEMANDEUR_ASILE = _('I am an asylum seeker')
+    APATRIDE = _('I am a stateless person')
     PROTECTION_SUBSIDIAIRE = _('I have been granted subsidiary protection')
     PROTECTION_TEMPORAIRE = _('I have been granted temporary protection')
 

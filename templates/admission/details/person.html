@@ -31,7 +31,8 @@
             {% field_data _("Surname") person.last_name "col-md-4" %}
             {% field_data _("First name") person.first_name "col-md-4" %}
             {% field_data _("Other given names") person.middle_name "col-md-4" hide_empty=True %}
-            {% field_data _("Preferred first name") person.first_name_in_use "col-md-4" hide_empty=True %}
+        </div>
+        <div class="row">
             {% field_data _("Sex") person.sex|enum_display:'ChoixSexe' "col-md-4" %}
             {% field_data _("Gender") person.gender|enum_display:'ChoixGenre' "col-md-4" %}
         </div>
@@ -59,9 +60,15 @@
             {% field_data _("Belgian national registry number (NISS)") person.national_number hide_empty=True %}
             {% field_data _("Identity card number") person.id_card_number hide_empty=True %}
             {% field_data _("Identity card (both sides)") person.id_card %}
+            <div class="row">
+              {% field_data _('Identity card expiry date') person.id_card_expiry_date "col-md-6" %}
+            </div>
         {% elif person.passport_number %}
             {% field_data _("Passport number") person.passport_number %}
             {% field_data _("Passport") person.passport %}
+            <div class="row">
+              {% field_data _('Passport expiry date') person.passport_expiry_date "col-md-6" %}
+            </div>
         {% else %}
             {% translate 'Not specified' %}
         {% endif %}

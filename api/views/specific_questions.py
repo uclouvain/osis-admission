@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import generics, mixins, status
+from rest_framework import generics, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
@@ -31,7 +31,8 @@ from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import SpecificQuestionSerializer
 from admission.contrib.models import AdmissionFormItemInstantiation
-from admission.ddd.admission.formation_continue.commands import CompleterQuestionsSpecifiquesCommand
+from admission.ddd.admission.formation_generale.commands import CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationGeneraleCommand
+from admission.ddd.admission.formation_continue.commands import CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationContinueCommand
 from admission.utils import (
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
@@ -124,29 +125,31 @@ class ContinuingSpecificQuestionSchema(ResponseSpecificSchema):
     }
 
 
-class GeneralSpecificQuestionAPIView(APIPermissionRequiredMixin, mixins.UpdateModelMixin, GenericAPIView):
+class GeneralSpecificQuestionAPIView(APIPermissionRequiredMixin, GenericAPIView):
     name = 'general_specific_question'
     schema = GeneralSpecificQuestionSchema()
     permission_mapping = {
         'GET': 'admission.view_generaleducationadmission_specific_question',
         'PUT': 'admission.change_generaleducationadmission_specific_question',
     }
-    serializer_class = serializers.ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer
     filter_backends = []
     pagination_class = None
 
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
-    def get_object(self):
-        return self.get_permission_object()
-
     def put(self, request, *args, **kwargs):
-        response = self.update(request, *args, **kwargs)
-        admission = self.get_permission_object()
-        admission.update_detailed_status(request.user.person)
-        response.data = serializers.PropositionIdentityDTOSerializer(instance=admission).data
-        return response
+        serializer = serializers.ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = message_bus_instance.invoke(
+            CompleterQuestionsSpecifiquesFormationGeneraleCommand(
+                uuid_proposition=self.kwargs['uuid'],
+                **serializer.data,
+            )
+        )
+        self.get_permission_object().update_detailed_status(request.user.person)
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ContinuingSpecificQuestionAPIView(APIPermissionRequiredMixin, GenericAPIView):
@@ -166,7 +169,7 @@ class ContinuingSpecificQuestionAPIView(APIPermissionRequiredMixin, GenericAPIVi
         serializer = serializers.ModifierQuestionsSpecifiquesFormationContinueCommandSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(
-            CompleterQuestionsSpecifiquesCommand(
+            CompleterQuestionsSpecifiquesFormationContinueCommand(
                 uuid_proposition=self.kwargs['uuid'],
                 **serializer.data,
             )

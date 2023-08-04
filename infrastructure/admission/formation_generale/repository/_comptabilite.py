@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.contrib.models import GeneralEducationAdmission
+from admission.contrib.models import GeneralEducationAdmission, Accounting
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
     Comptabilite,
     comptabilite_non_remplie,
@@ -42,7 +42,7 @@ from admission.ddd.admission.enums import (
 
 
 def get_accounting_from_admission(admission: GeneralEducationAdmission) -> Comptabilite:
-    accounting = getattr(admission, 'accounting', None)
+    accounting: Accounting = getattr(admission, 'accounting', None)
 
     if not accounting:
         return comptabilite_non_remplie
@@ -73,9 +73,11 @@ def get_accounting_from_admission(admission: GeneralEducationAdmission) -> Compt
         carte_a_b_refugie=accounting.refugee_a_b_card,
         annexe_25_26_refugies_apatrides=accounting.refugees_stateless_annex_25_26,
         attestation_immatriculation=accounting.registration_certificate,
+        preuve_statut_apatride=accounting.stateless_person_proof,
         carte_a_b=accounting.a_b_card,
         decision_protection_subsidiaire=accounting.subsidiary_protection_decision,
         decision_protection_temporaire=accounting.temporary_protection_decision,
+        carte_a=accounting.a_card,
         sous_type_situation_assimilation_3=getattr(
             ChoixAssimilation3,
             accounting.assimilation_3_situation_type,

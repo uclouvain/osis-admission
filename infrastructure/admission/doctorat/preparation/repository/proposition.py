@@ -118,9 +118,6 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         ),
         justification=admission.comment,
         statut=ChoixStatutPropositionDoctorale[admission.status],
-        bourse_erasmus_mundus_id=BourseIdentity(uuid=admission.erasmus_mundus_scholarship.uuid)
-        if admission.erasmus_mundus_scholarship_id
-        else None,
         financement=Financement(
             type=ChoixTypeFinancement[admission.financing_type] if admission.financing_type else None,
             type_contrat_travail=admission.financing_work_contract,
@@ -239,8 +236,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
                 'archived_record_signatures_sent': entity.fiche_archive_signatures_envoyees,
-                'erasmus_mundus_scholarship_id': entity.bourse_erasmus_mundus_id
-                and entity.bourse_erasmus_mundus_id.uuid,
                 'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
                 'confirmation_elements': entity.elements_confirmation,
@@ -274,9 +269,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'refugee_a_b_card': entity.comptabilite.carte_a_b_refugie,
                 'refugees_stateless_annex_25_26': entity.comptabilite.annexe_25_26_refugies_apatrides,
                 'registration_certificate': entity.comptabilite.attestation_immatriculation,
+                'stateless_person_proof': entity.comptabilite.preuve_statut_apatride,
                 'a_b_card': entity.comptabilite.carte_a_b,
                 'subsidiary_protection_decision': entity.comptabilite.decision_protection_subsidiaire,
                 'temporary_protection_decision': entity.comptabilite.decision_protection_temporaire,
+                'a_card': entity.comptabilite.carte_a,
                 'assimilation_3_situation_type': entity.comptabilite.sous_type_situation_assimilation_3.name
                 if entity.comptabilite.sous_type_situation_assimilation_3
                 else '',
@@ -459,9 +456,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             modifiee_le=admission.modified_at,
             fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
             erreurs=admission.detailed_status or [],
-            bourse_erasmus_mundus=BourseTranslator.build_dto(admission.erasmus_mundus_scholarship)
-            if admission.erasmus_mundus_scholarship
-            else None,
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             elements_confirmation=admission.confirmation_elements,

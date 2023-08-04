@@ -28,7 +28,7 @@ from typing import List, Dict
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
-from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem
+from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result
 
 
 class VerifierCurriculum(interface.DomainService):
@@ -80,7 +80,7 @@ class VerifierCurriculum(interface.DomainService):
                     annee.annee >= cls.PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
                     if pays_belge
                     else credits_necessaires_etranger
-                )
+                ) and annee.resultat != Result.WAITING_RESULT.name
                 if (
                     not annee.resultat
                     or releve_annuel_manquant
