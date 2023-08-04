@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='recommendation_letters',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None, verbose_name='Recommendation letters'),
+            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=None, verbose_name='Letters of recommendation'),
         ),
     ]

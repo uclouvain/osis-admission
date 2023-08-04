@@ -34,7 +34,7 @@ class ChoixStatutDoctorat(ChoiceEnum):
     ADMISSION_IN_PROGRESS = _('ADMISSION_IN_PROGRESS')
     # After enrolment
     ADMITTED = _('ADMITTED')
-    # Confirmation paper
+    # Confirmation exam
     SUBMITTED_CONFIRMATION = _('SUBMITTED_CONFIRMATION')
     PASSED_CONFIRMATION = _('PASSED_CONFIRMATION')
     NOT_ALLOWED_TO_CONTINUE = _('NOT_ALLOWED_TO_CONTINUE')

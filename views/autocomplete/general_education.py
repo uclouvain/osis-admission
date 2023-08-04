@@ -23,15 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from dal_select2.views import Select2ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-__namespace__ = False
-
 from django.http import JsonResponse
 
 from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
 from infrastructure.messages_bus import message_bus_instance
+
+__namespace__ = False
+
 
 __all__ = [
     'GeneralEducationTrainingsAutocomplete',

@@ -42,15 +42,27 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
         'continuing-education': 'continuing-education/<uuid:uuid>/',
     }
 
+    # To change after the implementation of the tabs for the specified context
+    available_checklist_by_context = {
+        'doctorate': False,
+        'general-education': True,
+        'continuing-education': False,
+    }
+    available_documents_by_context = {
+        'doctorate': False,
+        'general-education': True,
+        'continuing-education': False,
+    }
+
     @cached_property
     def can_access_checklist(self):
         self.permission_required = ChecklistView.permission_required
-        return super().has_permission()
+        return self.available_checklist_by_context[self.current_context] and super().has_permission()
 
     @cached_property
     def can_access_documents_management(self):
         self.permission_required = DocumentView.permission_required
-        return super().has_permission()
+        return self.available_documents_by_context[self.current_context] and super().has_permission()
 
     @cached_property
     def can_access_person_tab(self):

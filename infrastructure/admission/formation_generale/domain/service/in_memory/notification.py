@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,4 +40,8 @@ class NotificationInMemory(INotification):
 
     @classmethod
     def demande_paiement_frais_dossier(cls, proposition: Proposition):
+        pass
+
+    @classmethod
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
         pass

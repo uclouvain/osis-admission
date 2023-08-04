@@ -1,0 +1,219 @@
+{% load i18n static enums admission bootstrap3 %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire %}
+  <div
+      id="fac-decision-container"
+      hx-target="this"
+      hx-swap-oob="true"
+  >
+    {% has_perm 'admission.checklist_faculty_decision_transfer_to_fac' as can_transfer_to_fac %}
+    {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic' as can_transfer_to_sic %}
+    {% has_perm 'admission.checklist_change_faculty_decision' as can_change_faculty_decision %}
+    {% not_bool can_change_faculty_decision as cannot_change_faculty_decision %}
+
+    {% if in_sic_statuses %}
+      {% field_data _('Dossier') _('The dossier is currently in SIC') %}
+    {% elif in_fac_statuses %}
+      {% field_data _('Dossier') _('The dossier is currently in faculty') %}
+      <p class="alert-success">{{ fac_decision_send_to_fac_history_entry|history_entry_message }}</p>
+    {% endif %}
+
+    {% if is_sic %}
+      {% if original_admission.status == 'A_COMPLETER_POUR_SIC' %}
+        {% translate "Documents requested by the SIC are still expected from the candidate. The application could be sent to the faculty once they have been received." as cannot_transfer_message %}
+      {% elif not can_transfer_to_fac %}
+        {% blocktranslate with statuses=sic_statuses_for_transfer asvar cannot_transfer_message trimmed %}
+          The global status of the application must be one of the following in order to submit the dossier to the faculty: {{ statuses }}.
+        {% endblocktranslate %}
+      {% endif %}
+
+      <button
+          class="btn btn-primary"
+          {% if can_transfer_to_fac %}
+          data-toggle="modal"
+          data-target="#fac-decision-send-to-fac-modal"
+          {% else %}
+          disabled
+          data-toggle="tooltip"
+          title="{{ cannot_transfer_message }}"
+          {% endif %}
+      >
+        {% translate 'Send to faculty' %}
+      </button>
+      {% include 'admission/general_education/includes/checklist/fac_decision_send_to_fac_modal.html' %}
+    {% endif %}
+
+    {% if is_fac %}
+
+      {% if original_admission.status == 'A_COMPLETER_POUR_FAC' %}
+        {% translate "Documents requested by the faculty are still expected from the candidate. The application could be sent to the SIC once they have been received." as cannot_transfer_message %}
+      {% elif not can_transfer_to_sic %}
+        {% blocktranslate with statuses=fac_statuses_for_transfer asvar cannot_transfer_message trimmed %}
+          The global status of the application must be one of the following in order to submit the dossier to the SIC: {{ statuses }}.
+        {% endblocktranslate %}
+      {% endif %}
+
+      <button
+          class="btn btn-primary"
+          {% if can_transfer_to_sic %}
+          data-toggle="modal"
+          data-target="#fac-decision-send-to-sic-modal"
+          {% else %}
+          disabled
+          data-toggle="tooltip"
+          title="{{ cannot_transfer_message }}"
+          {% endif %}
+      >
+        {% translate 'Send to SIC' %}
+      </button>
+      {% include 'admission/general_education/includes/checklist/fac_decision_send_to_sic_modal.html' %}
+    {% endif %}
+
+    <div class="mt-1" style="margin-bottom: 5px;"><strong>{% translate 'Faculty process' %}</strong></div>
+    <div class="form-group btn-group status-group" role="group">
+      {% if can_change_faculty_decision %}
+        {% if current.statut == 'GEST_REUSSITE' or current.statut == 'GEST_BLOCAGE' and current.extra.decision == '1' %}
+          {% concat '#fac-decision-confirm-modal-INITIAL_CANDIDAT' as fac_initial_confirm_modal %}
+          {% concat '#fac-decision-confirm-modal-GEST_EN_COURS' as fac_in_progress_confirm_modal %}
+          {% concat '#fac-decision-confirm-modal-GEST_BLOCAGE' as fac_to_be_completed_confirm_modal %}
+        {% endif %}
+
+        {% concat '#fac-decision-refusal-modal' as fac_to_be_completed_refusal_modal %}
+        {% concat '#fac-decision-approval-modal' as fac_in_progress_approval_modal %}
+
+        {% url view.base_namespace|add:':fac-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url_initial %}
+        {% url view.base_namespace|add:':fac-decision-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS' as change_status_url_in_progress %}
+        {% url view.base_namespace|add:':fac-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE' as base_change_status_url_to_be_completed_sic %}
+        {% concat base_change_status_url_to_be_completed_sic '?decision=0' as change_status_url_to_be_completed_sic %}
+      {% endif %}
+
+      {% checklist_state_button tab='decision_facultaire' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=cannot_change_faculty_decision htmx_post=change_status_url_initial open_modal=fac_initial_confirm_modal %}
+      {% checklist_state_button tab='decision_facultaire' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' class='warning' disabled=cannot_change_faculty_decision htmx_post=change_status_url_in_progress open_modal=fac_in_progress_confirm_modal %}
+      {% checklist_state_button tab='decision_facultaire' label=_("To be completed by SIC") icon='circle-stop' state='GEST_BLOCAGE' decision='0' class='danger' htmx_post=change_status_url_to_be_completed_sic disabled=cannot_change_faculty_decision open_modal=fac_to_be_completed_confirm_modal %}
+      {% checklist_state_button tab='decision_facultaire' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' decision='1' class='danger' disabled=cannot_change_faculty_decision open_modal=fac_to_be_completed_refusal_modal %}
+      {% checklist_state_button tab='decision_facultaire' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' disabled=cannot_change_faculty_decision open_modal=fac_in_progress_approval_modal %}
+    </div>
+
+    {% if current.statut == 'GEST_BLOCAGE' and current.extra.decision == '1' %}
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active panel panel-default" id="fac-decision-refusal-details">
+          <div class="panel-heading flex-content align-items-baseline">
+            {% translate 'Reason for refusal' %}
+            {% if can_change_faculty_decision %}
+              <button
+                  class="btn btn-primary"
+                  data-toggle="modal"
+                  data-target="#fac-decision-refusal-modal"
+              >
+                <i class="fa fa-pen"></i>
+              </button>
+            {% endif %}
+          </div>
+          <div class="panel-body">
+            {% field_data _('Category') admission.motif_refus_fac.categorie %}
+            {% field_data _('Reason') admission.motif_refus_fac.motif %}
+          </div>
+        </div>
+      </div>
+    {% elif current.statut == 'GEST_REUSSITE' %}
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active panel panel-default" id="fac-decision-approval-details">
+          <div class="panel-heading flex-content align-items-baseline">
+            {% translate 'Approval' %}
+            {% if can_change_faculty_decision %}
+              <button
+                  class="btn btn-primary"
+                  data-toggle="modal"
+                  data-target="#fac-decision-approval-modal"
+              >
+                <i class="fa fa-pen"></i>
+              </button>
+            {% endif %}
+          </div>
+          <div class="panel-body">
+            {% field_data _('Approval for another training') admission.autre_formation_choisie_fac %}
+
+            {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
+            {% if admission.avec_conditions_complementaires %}
+              {% if admission.conditions_complementaires %}
+                <dl>
+                  <dt>{% translate _('Additional conditions') %}</dt>
+                  <dd>
+                    <ul>
+                      {% for condition in admission.conditions_complementaires %}
+                        <li>{{ condition }}</li>
+                      {% endfor %}
+                    </ul>
+                  </dd>
+                </dl>
+              {% else %}
+                {% field_data _('Additional conditions') '' %}
+              {% endif %}
+            {% endif %}
+
+            {% field_data _('Are there any prerequisite courses?') admission.avec_complements_formation %}
+            {% if admission.avec_complements_formation %}
+              {% if admission.complements_formation %}
+                <dl>
+                  <dt>{% translate _('Prerequisite courses') %}</dt>
+                  <dd>
+                    <ul>
+                      {% for formation in admission.complements_formation %}
+                        <li>{{ formation.code }} - {{ formation.full_title }}</li>
+                      {% endfor %}
+                    </ul>
+                  </dd>
+                </dl>
+              {% else %}
+                {% field_data _('Prerequisite courses') '' %}
+              {% endif %}
+              {% field_data _('Other information about prerequisite courses') admission.commentaire_complements_formation|safe %}
+            {% endif %}
+
+            {% field_data _('Number of years required for the full program (including prerequisite courses)') admission.nombre_annees_prevoir_programme %}
+
+            {% display admission.nom_personne_contact_programme_annuel_annuel '-' admission.email_personne_contact_programme_annuel_annuel as contact_person %}
+            {% field_data _('Contact person for the design of the annual program')  contact_person %}
+
+            {% field_data _('Faculty comment about the collaborative program') admission.commentaire_programme_conjoint|safe %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if fac_initial_confirm_modal %}
+      {% include 'admission/general_education/includes/checklist/fac_decision_confirm_modal.html' with target_status="INITIAL_CANDIDAT" target_url=change_status_url_initial %}
+      {% include 'admission/general_education/includes/checklist/fac_decision_confirm_modal.html' with target_status="GEST_EN_COURS" target_url=change_status_url_in_progress %}
+      {% include 'admission/general_education/includes/checklist/fac_decision_confirm_modal.html' with target_status="GEST_BLOCAGE" target_url=change_status_url_to_be_completed_sic %}
+    {% endif %}
+  </div>
+{% endwith %}
+
+{% if request.htmx %}
+  {# Update the checklist menu  #}
+  {% include "admission/general_education/checklist_menu.html" with current_item='decision_facultaire' %}
+{% endif %}

@@ -28,7 +28,7 @@ from typing import Optional
 from unittest.mock import ANY
 
 import freezegun
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
@@ -54,7 +54,7 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 
 
 @freezegun.freeze_time('2023-10-01')
-class RecupererDocumentsReclamesPropositionTestCase(TestCase):
+class RecupererDocumentsReclamesPropositionTestCase(SimpleTestCase):
     def setUp(self):
         self.cmd = RecupererDocumentsReclamesPropositionQuery(uuid_proposition='uuid-MASTER-SCI')
         self.message_bus = message_bus_in_memory_instance

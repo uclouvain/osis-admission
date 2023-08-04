@@ -57,7 +57,7 @@ class ChoixComiteSelection(ChoiceEnum):
 class ChoixStatutPublication(ChoiceEnum):
     UNSUBMITTED = _("Unsubmitted for publication")
     SUBMITTED = _("Submitted for publication")
-    IN_REVIEW = _("In review")
+    IN_REVIEW = _("Awaiting approval")
     ACCEPTED = _("Accepted")
     PUBLISHED = _("Published")
 

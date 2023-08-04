@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.tests.factories.utils import generate_proposition_reference
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.person import CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
@@ -42,6 +41,7 @@ from admission.tests.factories.scholarship import (
     ErasmusMundusScholarshipFactory,
     InternationalScholarshipFactory,
 )
+from admission.tests.factories.utils import generate_proposition_reference
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.organization_type import MAIN
@@ -66,53 +66,25 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
 
 
 def get_checklist():
+    default_content = {
+        'libelle': '',
+        'enfants': [],
+        'extra': {},
+        'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+    }
     return {
-        'donnees_personnelles': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'frais_dossier': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'assimilation': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'choix_formation': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'parcours_anterieur': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'financabilite': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
-        'specificites_formation': {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        },
+        'donnees_personnelles': default_content,
+        'frais_dossier': default_content,
+        'assimilation': default_content,
+        'choix_formation': default_content,
+        'parcours_anterieur': default_content,
+        'financabilite': default_content,
+        'specificites_formation': default_content,
+        'decision_facultaire': default_content,
     }
 
 
-class GeneralEducationAdmissionFactory(factory.DjangoModelFactory):
+class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = GeneralEducationAdmission
 

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,12 @@ import uuid
 import factory
 from factory.fuzzy import FuzzyText
 
+from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+    ConditionComplementaireApprobationIdentity,
+)
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
     ChoixAffiliationSport,
@@ -78,6 +84,7 @@ class StatutsChecklistGeneraleFactory(factory.Factory):
     parcours_anterieur = factory.SubFactory(StatutChecklistFactory)
     financabilite = factory.SubFactory(StatutChecklistFactory)
     specificites_formation = factory.SubFactory(StatutChecklistFactory)
+    decision_facultaire = factory.SubFactory(StatutChecklistFactory)
 
 
 class _ComptabiliteFactory(factory.Factory):
@@ -146,6 +153,30 @@ class _ComptabiliteFactory(factory.Factory):
     nom_titulaire_compte = 'Doe'
 
 
+class MotifRefusIdentityFactory(factory.Factory):
+    class Meta:
+        model = MotifRefusIdentity
+        abstract = False
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
+class ConditionComplementaireApprobationIdentityFactory(factory.Factory):
+    class Meta:
+        model = ConditionComplementaireApprobationIdentity
+        abstract = False
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
+class ComplementFormationIdentityFactory(factory.Factory):
+    class Meta:
+        model = ComplementFormationIdentity
+        abstract = False
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
 class _PropositionIdentityFactory(factory.Factory):
     class Meta:
         model = PropositionIdentity
@@ -191,4 +222,44 @@ class PropositionFactory(factory.Factory):
             statut=ChoixStatutPropositionGenerale.CONFIRMEE,
             checklist_initiale=factory.SubFactory(StatutsChecklistGeneraleFactory),
             checklist_actuelle=factory.SubFactory(StatutsChecklistGeneraleFactory),
+        )
+        est_refusee_par_fac_raison_libre = factory.Trait(
+            autre_motif_refus_fac='Ma raison',
+            certificat_refus_fac=['uuid-certificat_refus_fac'],
+        )
+        est_refusee_par_fac_raison_connue = factory.Trait(
+            motif_refus_fac=factory.SubFactory(MotifRefusIdentityFactory),
+            certificat_refus_fac=['uuid-certificat_refus_fac'],
+        )
+        est_approuvee_par_fac = factory.Trait(
+            certificat_approbation_fac=['uuid-certificat_approbation_fac'],
+            autre_formation_choisie_fac_id=factory.SubFactory(FormationIdentityFactory),
+            avec_conditions_complementaires=True,
+            conditions_complementaires_existantes=factory.List(
+                params=[
+                    ConditionComplementaireApprobationIdentityFactory(),
+                    ConditionComplementaireApprobationIdentityFactory(),
+                ]
+            ),
+            conditions_complementaires_libres=factory.List(
+                params=[
+                    factory.fuzzy.FuzzyText(),
+                    factory.fuzzy.FuzzyText(),
+                ]
+            ),
+            complements_formation=factory.List(
+                params=[
+                    ComplementFormationIdentityFactory(),
+                    ComplementFormationIdentityFactory(),
+                ]
+            ),
+            avec_complements_formation=True,
+            commentaire_complements_formation=factory.fuzzy.FuzzyText(),
+            nombre_annees_prevoir_programme=factory.fuzzy.FuzzyInteger(
+                low=DUREE_MINIMALE_PROGRAMME,
+                high=DUREE_MAXIMALE_PROGRAMME,
+            ),
+            nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
+            email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
+            commentaire_programme_conjoint=factory.fuzzy.FuzzyText(),
         )

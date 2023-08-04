@@ -24,11 +24,12 @@
 #
 # ##############################################################################
 from infrastructure.utils import AbstractMessageBusCommands, MessageBus
+from .admission import handlers_in_memory as admission_handlers
 from .admission.doctorat.preparation import handlers_in_memory as preparation_handlers
 from .admission.doctorat.validation import handlers_in_memory as validation_handlers
 from .admission.formation_continue import handlers_in_memory as formation_continue_handlers
 from .admission.formation_generale import handlers_in_memory as formation_generale_handlers
-from .admission import handlers_in_memory as admission_handlers
+from .admission.shared_kernel.role import handlers_in_memory as role_handlers
 from .parcours_doctoral import handlers_in_memory as doctorat_handlers
 from .parcours_doctoral.epreuve_confirmation import handlers_in_memory as epreuve_confirmation_handlers
 from .parcours_doctoral.formation import handlers_in_memory as formation_handlers
@@ -46,6 +47,7 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         **formation_continue_handlers.COMMAND_HANDLERS,
         **formation_generale_handlers.COMMAND_HANDLERS,
         **admission_handlers.COMMAND_HANDLERS,
+        **role_handlers.COMMAND_HANDLERS,
     }
 
 

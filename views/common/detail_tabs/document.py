@@ -27,7 +27,7 @@
 from django.contrib import messages
 from django.http import HttpResponse, Http404
 from django.utils.functional import cached_property
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, get_language
 from django.views.generic import TemplateView, FormView
 from rest_framework.status import HTTP_204_NO_CONTENT
 
@@ -43,6 +43,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.forms.admission.document import (
     UploadFreeDocumentForm,
     RequestFreeDocumentForm,
@@ -62,6 +63,7 @@ from osis_common.utils.htmx import HtmxMixin
 __namespace__ = 'document'
 
 __all__ = [
+    'AnalysisFolderGenerationView',
     'DeleteDocumentView',
     'DocumentDetailView',
     'RequestCandidateDocumentView',
@@ -105,6 +107,20 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
         return super().form_valid(self.form_class())
+
+
+class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
+    name = 'analysis-folder-generation'
+    urlpatterns = 'analysis-folder-generation'
+    message_on_success = _('A new version of the analysis folder has been generated.')
+
+    def get_form_kwargs(self):
+        return {
+            'data': {
+                'file_name': _('Analysis folder'),
+                'file_0': admission_pdf_recap(self.admission, get_language()),
+            }
+        }
 
 
 def can_edit_document(person: Person, document: AdmissionDocument) -> bool:

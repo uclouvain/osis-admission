@@ -29,7 +29,7 @@
     {% trans "Add a publication" %}
   {% else %}
     {% blocktrans with category=view.activity.get_category_display trimmed %}
-      Edit activity of type <em>{{ category }}</em>
+      Edit <em>{{ category }}</em> activity.
     {% endblocktrans %}
   {% endif %}
 </h2>

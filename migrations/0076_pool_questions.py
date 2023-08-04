@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='generaleducationadmission',
             name='registration_change_form',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=1, verbose_name='Registration change form', blank=True),
+            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, size=1, verbose_name='Change of enrolment form', blank=True),
         ),
         migrations.AddField(
             model_name='generaleducationadmission',

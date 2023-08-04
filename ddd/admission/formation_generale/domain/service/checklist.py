@@ -52,13 +52,11 @@ class Checklist(interface.DomainService):
         proposition: Proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
-        a_paye_frais_dossier: bool,
     ):
         checklist_initiale = cls.recuperer_checklist_initiale(
             proposition=proposition,
             profil_candidat_translator=profil_candidat_translator,
             questions_specifiques_translator=questions_specifiques_translator,
-            a_paye_frais_dossier=a_paye_frais_dossier,
         )
         proposition.checklist_initiale = checklist_initiale
         proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
@@ -69,11 +67,7 @@ class Checklist(interface.DomainService):
         proposition: Proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
-        a_paye_frais_dossier: bool,
     ) -> Optional[StatutsChecklistGenerale]:
-        if proposition.statut != ChoixStatutPropositionGenerale.CONFIRMEE:
-            return
-
         pays_nationalite_europeen = profil_candidat_translator.get_identification(
             proposition.matricule_candidat
         ).pays_nationalite_europeen
@@ -129,14 +123,18 @@ class Checklist(interface.DomainService):
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
-            # L'initialisation de la checklist nécessite le paiement des frais de dossier s'ils sont requis
             frais_dossier=StatutChecklist(
-                libelle=_('Payed'),
-                statut=ChoixStatutChecklist.SYST_REUSSITE,
+                libelle=_('Must pay'),
+                statut=ChoixStatutChecklist.GEST_BLOCAGE,
+                extra={'initial': '1'},
             )
-            if a_paye_frais_dossier
+            if proposition.statut == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
             else StatutChecklist(
                 libelle=_('Not concerned'),
                 statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+            ),
+            decision_facultaire=StatutChecklist(
+                libelle=_('To be processed'),
+                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
         )

@@ -29,14 +29,14 @@ import uuid
 import factory
 
 from admission.contrib.models import DoctorateAdmission
-from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     ChoixTypeFinancement,
 )
-from admission.tests.factories.utils import generate_proposition_reference
+from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.roles import CandidateFactory
+from admission.tests.factories.utils import generate_proposition_reference
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -73,7 +73,7 @@ def generate_token():
     return WriteTokenFactory().token
 
 
-class DoctorateAdmissionFactory(factory.DjangoModelFactory):
+class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = DoctorateAdmission
 

@@ -48,7 +48,7 @@
             >
               <td class="auto-width">
                 <i class="fa-solid fa-school"></i>
-                {% if document.type in EMPLACEMENTS_FAC %}
+                {% if document.type in EMPLACEMENTS_FAC or document.est_emplacement_systeme_fac %}
                   <i class="fa-solid fa-building-columns"></i>
                 {% endif %}
                 {{ document.libelle }}
@@ -95,6 +95,16 @@
         <i class="fa-solid fa-envelope"></i>
         {% translate 'Request the documents from the candidate' %}
       </button>
+      <button
+          class="btn btn-default htmx-button mt-1"
+          hx-post="{% url request.resolver_match.namespace|add:':document:analysis-folder-generation' uuid=view.kwargs.uuid %}"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          hx-swap="none"
+      >
+        <i class="fa-solid fa-arrows-rotate"></i>
+        {% translate 'Generate an analysis folder' %}
+      </button>
+
     </div>
   </div>
 

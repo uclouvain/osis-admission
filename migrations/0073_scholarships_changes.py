@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name='+',
                 to='admission.scholarship',
-                verbose_name='Double degree scholarship',
+                verbose_name='Dual degree scholarship',
             ),
         ),
         migrations.AlterField(

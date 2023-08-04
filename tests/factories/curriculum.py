@@ -36,7 +36,7 @@ from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSyste
 from reference.tests.factories.language import LanguageFactory
 
 
-class EducationalExperienceYearFactory(factory.DjangoModelFactory):
+class EducationalExperienceYearFactory(factory.django.DjangoModelFactory):
     registered_credit_number = 10
     acquired_credit_number = 10
     result = Result.WAITING_RESULT.name
@@ -48,7 +48,7 @@ class EducationalExperienceYearFactory(factory.DjangoModelFactory):
         model = EducationalExperienceYear
 
 
-class EducationalExperienceFactory(factory.DjangoModelFactory):
+class EducationalExperienceFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = EducationalExperience
 
@@ -70,7 +70,7 @@ class EducationalExperienceFactory(factory.DjangoModelFactory):
     education_name = 'Computer science'
 
 
-class ProfessionalExperienceFactory(factory.DjangoModelFactory):
+class ProfessionalExperienceFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProfessionalExperience
 

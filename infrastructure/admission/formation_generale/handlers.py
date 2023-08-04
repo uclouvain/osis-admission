@@ -26,10 +26,9 @@
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
-from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
-    modifier_checklist_choix_formation,
+from admission.ddd.admission.use_case.read import (
+    recuperer_questions_specifiques_proposition,
 )
-from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -50,19 +49,23 @@ from admission.infrastructure.admission.domain.service.emplacements_documents_pr
     EmplacementsDocumentsPropositionTranslator,
 )
 from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
+from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
+from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
+    UnitesEnseignementTranslator,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.historique import (
     Historique as HistoriqueFormationGenerale,
 )
-from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
+from admission.infrastructure.admission.formation_generale.domain.service.inscription_tardive import InscriptionTardive
+from admission.infrastructure.admission.formation_generale.domain.service.notification import Notification
 from admission.infrastructure.admission.formation_generale.domain.service.paiement_frais_dossier import (
     PaiementFraisDossier,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
-from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.inscription_tardive import InscriptionTardive
-from admission.infrastructure.admission.formation_generale.domain.service.notification import Notification
+from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import PDFGeneration
 from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
@@ -182,6 +185,7 @@ COMMAND_HANDLERS = {
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
         proposition_repository=PropositionRepository(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
     ),
     RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
         cmd,
@@ -317,8 +321,6 @@ COMMAND_HANDLERS = {
             notification=Notification(),
             paiement_frais_dossier_service=PaiementFraisDossier(),
             historique=HistoriqueFormationGenerale(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
-            questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         )
     ),
     PayerFraisDossierPropositionSuiteDemandeCommand: (
@@ -328,5 +330,51 @@ COMMAND_HANDLERS = {
             paiement_frais_dossier_service=PaiementFraisDossier(),
             historique=HistoriqueFormationGenerale(),
         )
+    ),
+    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
+        )
+    ),
+    SpecifierMotifRefusFacultairePropositionCommand: lambda msg_bus, cmd: specifier_motif_refus_facultaire(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    RefuserPropositionParFaculteCommand: lambda msg_bus, cmd: refuser_proposition_par_faculte(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=HistoriqueFormationGenerale(),
+        pdf_generation=PDFGeneration(),
+    ),
+    RefuserPropositionParFaculteAvecNouveauMotifCommand: (
+        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveau_motif(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
+            pdf_generation=PDFGeneration(),
+        )
+    ),
+    SpecifierInformationsAcceptationFacultairePropositionCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_facultaire(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand: (
+        lambda msg_bus, cmd: approuver_proposition_par_faculte_avec_nouvelles_informations(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
+            pdf_generation=PDFGeneration(),
+        )
+    ),
+    ApprouverPropositionParFaculteCommand: lambda msg_bus, cmd: approuver_proposition_par_faculte(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=HistoriqueFormationGenerale(),
+        pdf_generation=PDFGeneration(),
     ),
 }

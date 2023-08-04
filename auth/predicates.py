@@ -41,6 +41,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
 from admission.ddd.parcours_doctoral.domain.model.enums import (
     ChoixStatutDoctorat,
@@ -178,25 +183,73 @@ def is_invited_to_complete(self, user: User, obj: GeneralEducationAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be invited to pay the application fees by the system."))
 def is_invited_to_pay_after_submission(self, user: User, obj: GeneralEducationAdmission):
-    return obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name and not obj.checklist.get(
-        'current'
+    checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
+    return (
+        obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
+        and checklist_info.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and bool(checklist_info.get('extra', {}).get('initial'))
     )
 
 
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be invited to pay the application fees by a manager."))
 def is_invited_to_pay_after_request(self, user: User, obj: GeneralEducationAdmission):
+    checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
     return (
         obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
-        and obj.checklist.get('current', {}).get('frais_dossier', {}).get('statut')
-        == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and checklist_info.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and not bool(checklist_info.get('extra', {}).get('initial'))
     )
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("The checklist must be initialized."))
-def checklist_is_initialized(self, user: User, obj: GeneralEducationAdmission):
-    return bool(obj.checklist.get('initial'))
+@predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
+def is_submitted(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("The global status of the application must be one of the following to realize this action: %(statuses)s.")
+    % {
+        'statuses': STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
+    }
+)
+def in_fac_status(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("The global status of the application must be one of the following to realize this action: %(statuses)s.")
+    % {
+        'statuses': STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
+    }
+)
+def in_fac_status_extended(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("The global status of the application must be one of the following to realize this action: %(statuses)s.")
+    % {
+        'statuses': STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
+    }
+)
+def in_sic_status(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("The global status of the application must be one of the following to realize this action: %(statuses)s.")
+    % {
+        'statuses': STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
+    }
+)
+def in_sic_status_extended(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS
 
 
 @predicate

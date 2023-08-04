@@ -27,7 +27,7 @@ import factory
 from osis_history.models import HistoryEntry
 
 
-class HistoryEntryFactory(factory.DjangoModelFactory):
+class HistoryEntryFactory(factory.django.DjangoModelFactory):
     message_fr = factory.Faker('text')
     message_en = factory.Faker('text')
 

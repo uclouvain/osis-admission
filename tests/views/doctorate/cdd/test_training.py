@@ -329,7 +329,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     def test_accept_activities(self):
         communication = CommunicationFactory(doctorate=self.doctorate, status=StatutActivite.SOUMISE.name)
         response = self.client.post(self.url, {'activity_ids': [communication.uuid], '_accept': True}, follow=True)
-        self.assertContains(response, _('ACCEPTEE'))
+        self.assertContains(response, _('Accepted'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(WebNotification.objects.count(), 1)
 

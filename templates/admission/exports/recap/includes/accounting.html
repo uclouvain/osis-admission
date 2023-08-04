@@ -24,9 +24,9 @@
 {% endcomment %}
 {% if last_fr_institutes %}
     {% blocktranslate trimmed with academic_year=last_fr_institutes.annee|get_academic_year names=last_fr_institutes.noms|join:', ' count counter=last_fr_institutes.noms|length asvar absence_of_debt_label %}
-      Certificate stating the absence of debts towards the institution attended during the academic year {{ academic_year}}: {{ names }}
+      Certificate stating no debts to the institution attended during the academic year {{ academic_year}}: {{ names }}
       {% plural %}
-      Certificates stating the absence of debts towards the institutions attended during the academic year {{ academic_year}}: {{ names }}
+      Certificates stating no debts to the institutions attended during the academic year {{ academic_year}}: {{ names }}
     {% endblocktranslate %}
   {% panel _('Absence of debt') %}
     {% field_data absence_of_debt_label comptabilite.attestation_absence_dette_etablissement inline=True %}
@@ -34,18 +34,17 @@
 {% endif %}
 
 {% if is_general %}
-  {% panel _('Reduced registration fees') %}
-    {% field_data _('Have you applied for a study allowance from the French Community of Belgium?') comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique %}
-    {% field_data _('Are you the child of a member of the staff of the UCLouvain or the Martin V entity?') comptabilite.enfant_personnel %}
+  {% panel _('Reduced tuition fee') %}
+    {% field_data _('Have you applied for a student grant from the French Community of Belgium?') comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique %}
+    {% field_data _('Are you the child of a UCLouvain or Martin V Lycee staff member?') comptabilite.enfant_personnel %}
     {% if comptabilite.enfant_personnel %}
       <div>
-        {% field_data _('Staff child certificate') comptabilite.attestation_enfant_personnel %}
+        {% field_data _('Certificate for children of staff') comptabilite.attestation_enfant_personnel %}
         <p>
           {% blocktranslate trimmed %}
-            The child of a member of staff may, under some conditions, benefit from a reduction of the registration fee for
-            any registration for a bachelor's or master's degree. This parent should contact the Human Resources
-            Administration of his or her employer to check whether he or she meets these conditions and, if so,
-            request the certificate confirming this.
+            To enrol in a bachelor's or master's course, the child of a staff member may, under certain conditions,
+            benefit from a reduced tuition fee. Parents contact their employer's Human Resources Administration to
+            check whether they meet the requirements, and if so, request the certificate that confirms this.
           {% endblocktranslate %}
         </p>
       </div>
@@ -54,61 +53,61 @@
 {% endif %}
 
 {% if with_assimilation %}
-  {% panel _('Assimilation') %}
+  {% panel _('Belgian student status') %}
     {% if comptabilite.type_situation_assimilation == 'AUCUNE_ASSIMILATION' %}
-      {% translate 'You specified that no assimilation proposals applies to you.' %}
+      {% translate 'You specified that no Belgian student status situation applies to you.' %}
 
     {% elif comptabilite.type_situation_assimilation == 'AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE' %}
-      {% field_data _('Chosen assimilation') comptabilite.sous_type_situation_assimilation_1|enum_display:'ChoixAssimilation1' %}
+      {% field_data _('Chosen Belgian student status') comptabilite.sous_type_situation_assimilation_1|enum_display:'ChoixAssimilation1' %}
 
       {% if comptabilite.sous_type_situation_assimilation_1 == 'TITULAIRE_CARTE_RESIDENT_LONGUE_DUREE' %}
-        {% field_data _('Copy of both sides of the EC long-term resident card (D or L card)') comptabilite.carte_resident_longue_duree %}
+        {% field_data _('Copy of both sides of EC long-term resident card (D or L Card)') comptabilite.carte_resident_longue_duree %}
       {% elif comptabilite.sous_type_situation_assimilation_1 == 'TITULAIRE_CARTE_ETRANGER' %}
-        {% field_data _("Copy of both sides of the Certificate of Registration in the Register of Foreigners CIRE - unlimited stay (B card) or copy of the foreigner's card - unlimited stay (C or K card)") comptabilite.carte_cire_sejour_illimite_etranger %}
+        {% field_data _("Copy of both sides of Certificate of Registration in the Foreigners Registry (CIRE), unlimited stay (B Card), or of Foreign National's Card, unlimited stay (C or K Card)") comptabilite.carte_cire_sejour_illimite_etranger %}
       {% elif comptabilite.sous_type_situation_assimilation_1 == 'TITULAIRE_CARTE_SEJOUR_MEMBRE_UE' %}
-        {% field_data _('Copy of both sides of the residence card of a family member of a European Union citizen (F card)') comptabilite.carte_sejour_membre_ue %}
+        {% field_data _('Copy of both sides of residence permit for a family member of a European Union citizen (F Card)') comptabilite.carte_sejour_membre_ue %}
       {% elif comptabilite.sous_type_situation_assimilation_1 == 'TITULAIRE_CARTE_SEJOUR_PERMANENT_MEMBRE_UE' %}
-        {% field_data _('Copy of both sides of the permanent residence card of a family member of a European Union citizen (F+ card)') comptabilite.carte_sejour_permanent_membre_ue %}
+        {% field_data _('Copy of both sides of permanent residence card of a family member of a European Union citizen (F+ Card)') comptabilite.carte_sejour_permanent_membre_ue %}
       {% endif %}
 
     {% elif comptabilite.type_situation_assimilation == 'REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE' %}
-      {% field_data _('Chosen assimilation') comptabilite.sous_type_situation_assimilation_2|enum_display:'ChoixAssimilation2' %}
+      {% field_data _('Chosen Belgian student status') comptabilite.sous_type_situation_assimilation_2|enum_display:'ChoixAssimilation2' %}
 
       {% if comptabilite.sous_type_situation_assimilation_2 == 'REFUGIE' %}
-        {% field_data _('Copy of both sides of the A or B card (with "refugee" written on the back of the card)') comptabilite.carte_a_b_refugie %}
+        {% field_data _('Copy of both sides of A or B Card (with "refugee" on card back)') comptabilite.carte_a_b_refugie %}
       {% elif comptabilite.sous_type_situation_assimilation_2 == 'DEMANDEUR_ASILE' %}
-        {% field_data _('Copy of the Annex 25 or 26 completed by the Office of the Commissioner General for Refugees and Stateless Persons') comptabilite.annexe_25_26_refugies_apatrides %}
-        {% field_data _('Copy of the registration certificate "orange card"') comptabilite.attestation_immatriculation %}
+        {% field_data _('Copy of Annex 25 or 26 completed by the Office of the Commissioner General for Refugees and Stateless Persons') comptabilite.annexe_25_26_refugies_apatrides %}
+        {% field_data _('Copy of "orange card" enrolment certificate') comptabilite.attestation_immatriculation %}
       {% elif comptabilite.sous_type_situation_assimilation_2 == 'PROTECTION_SUBSIDIAIRE' %}
-        {% field_data _('Copy of both sides of the A or B Card') comptabilite.carte_a_b %}
-        {% field_data _("Copy of the decision of the Foreigners' Office confirming the granting of subsidiary protection") comptabilite.decision_protection_subsidiaire %}
+        {% field_data _('Copy of both sides of A or B Card') comptabilite.carte_a_b %}
+        {% field_data _('Copy of Foreign Nationals Office decision granting subsidiary protection') comptabilite.decision_protection_subsidiaire %}
       {% elif comptabilite.sous_type_situation_assimilation_2 == 'PROTECTION_TEMPORAIRE' %}
-        {% field_data _("Copy of the decision of the Foreigners' Office confirming the granting of temporary protection") comptabilite.decision_protection_temporaire %}
+        {% field_data _('Copy of Foreign Nationals Office decision granting temporary protection') comptabilite.decision_protection_temporaire %}
       {% endif %}
 
     {% elif comptabilite.type_situation_assimilation == 'AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT' %}
-      {% field_data _('Chosen assimilation') comptabilite.sous_type_situation_assimilation_3|enum_display:'ChoixAssimilation3' %}
+      {% field_data _('Chosen Belgian student status') comptabilite.sous_type_situation_assimilation_3|enum_display:'ChoixAssimilation3' %}
 
       {% if comptabilite.sous_type_situation_assimilation_3 == 'AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS' %}
-        {% field_data _('Copy of both sides of the residence permit valid for more than 3 months') comptabilite.titre_sejour_3_mois_professionel %}
-        {% field_data _('Copy of 6 salary slips issued in the 12 months preceding the application') comptabilite.fiches_remuneration %}
+        {% field_data _('Copy of both sides of residence permit valid for more than 3 months') comptabilite.titre_sejour_3_mois_professionel %}
+        {% field_data _('Copy of 6 payslips issued in the 12 months preceding application') comptabilite.fiches_remuneration %}
       {% elif comptabilite.sous_type_situation_assimilation_3 == 'AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT' %}
-        {% field_data _('Copy of both sides of the residence permit valid for more than 3 months') comptabilite.titre_sejour_3_mois_remplacement %}
+        {% field_data _('Copy of both sides of residence permit valid for more than 3 months') comptabilite.titre_sejour_3_mois_remplacement %}
         {% field_data _('Proof of receipt of unemployment benefit, pension or compensation from the mutual insurance company') comptabilite.preuve_allocations_chomage_pension_indemnite %}
       {% endif %}
 
     {% elif comptabilite.type_situation_assimilation == 'PRIS_EN_CHARGE_OU_DESIGNE_CPAS' %}
-      {% field_data _('Chosen assimilation') comptabilite.type_situation_assimilation|enum_display:'TypeSituationAssimilation' %}
+      {% field_data _('Chosen Belgian student status') comptabilite.type_situation_assimilation|enum_display:'TypeSituationAssimilation' %}
 
-      {% field_data _('Recent certificate of support from the CPAS') comptabilite.attestation_cpas %}
+      {% field_data _('Recent CPAS certificate of coverage') comptabilite.attestation_cpas %}
 
     {% elif comptabilite.type_situation_assimilation == 'PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4' %}
       {% interpolate comptabilite.sous_type_situation_assimilation_5|enum_display:'ChoixAssimilation5' person_concerned=comptabilite.relation_parente|enum_display:'LienParente' as chosen_assimilation_5 %}
-      {% field_data _('Chosen assimilation') chosen_assimilation_5 %}
+      {% field_data _('Chosen Belgian student status') chosen_assimilation_5 %}
       {% if comptabilite.relation_parente == 'PERE' or comptabilite.relation_parente == 'MERE' %}
-        {% field_data _('Household composition, or a copy of your birth certificate') comptabilite.composition_menage_acte_naissance %}
+        {% field_data _('Household composition, or copy of your birth certificate') comptabilite.composition_menage_acte_naissance %}
       {% elif comptabilite.relation_parente == 'TUTEUR_LEGAL' %}
-        {% field_data _('Copy of the tutorship act authenticated by the Belgian authorities') comptabilite.acte_tutelle %}
+        {% field_data _('Copy of guardianship appointment legalised by Belgian authorities') comptabilite.acte_tutelle %}
       {% elif comptabilite.relation_parente == 'CONJOINT' %}
         {% field_data _('Household composition or marriage certificate authenticated by the Belgian authorities') comptabilite.composition_menage_acte_mariage %}
       {% elif comptabilite.relation_parente == 'COHABITANT_LEGAL' %}
@@ -117,80 +116,76 @@
 
       {% if comptabilite.sous_type_situation_assimilation_5 == 'A_NATIONALITE_UE' %}
         {% blocktranslate with person_concerned=formatted_relationship trimmed asvar carte_identite_parent_label %}
-          Copy of both sides of the identity card of {{ person_concerned }}
+          Copy of both sides of identity card of {{ person_concerned }}
         {% endblocktranslate %}
         {% field_data carte_identite_parent_label comptabilite.carte_identite_parent %}
       {% elif comptabilite.sous_type_situation_assimilation_5 == 'TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE' %}
         {% blocktranslate with person_concerned=formatted_relationship trimmed asvar titre_sejour_longue_duree_parent_label %}
-          Copy of both sides of the long-term residence permit in Belgium of {{ person_concerned }} (B, C, D, F, F+, K, L or M cards)
+          Copy of both sides of long-term residence permit in Belgium of {{ person_concerned }} (B, C, D, F, F+, K, L or M Card)
         {% endblocktranslate %}
         {% field_data titre_sejour_longue_duree_parent_label comptabilite.titre_sejour_longue_duree_parent %}
       {% elif comptabilite.sous_type_situation_assimilation_5 == 'CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE' %}
         {% blocktranslate with person_concerned=formatted_relationship trimmed asvar annexe_25_26_refugies_apatrides_decision_protection_parent_label %}
-          Copy of the Annex 25 or 26 or the A/B card mentioning the refugee status or copy of the decision of the
-          Foreigners' Office confirming the temporary/subsidiary protection of {{ person_concerned }}
-          or copy of the official document from the municipality or the Foreigners' Office proving the stateless
-          status of {{ person_concerned }}
+          Copy of Annex 25 or 26 or A/B Card indicating refugee status or copy of Foreign Nationals Office decision confirming temporary/subsidiary protection of {{ person_concerned }} or copy of official Foreign Nationals Office or municipality document proving the stateless status of {{ person_concerned }}
         {% endblocktranslate %}
         {% field_data annexe_25_26_refugies_apatrides_decision_protection_parent_label comptabilite.annexe_25_26_refugies_apatrides_decision_protection_parent %}
       {% elif comptabilite.sous_type_situation_assimilation_5 == 'AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT' %}
         {% blocktranslate with person_concerned=formatted_relationship trimmed asvar titre_sejour_3_mois_parent_label %}
-          Copy of both sides of the residence permit valid for more than 3 months of {{ person_concerned }}
+          Copy of both sides of residence permit valid for more than 3 months of {{ person_concerned }}
         {% endblocktranslate %}
         {% field_data titre_sejour_3_mois_parent_label comptabilite.titre_sejour_3_mois_parent %}
         {% blocktranslate with person_concerned=formatted_relationship trimmed asvar fiches_remuneration_parent_label %}
-          Copy of the 6 salary slips issued in the 12 months preceding the application for registration or proof of
-          receipt of unemployment benefit, pension or an indemnity from the mutual insurance company of
-          {{ person_concerned }}
+          Copy of 6 payslips issued in the 12 months preceding application or proof of receipt of unemployment benefit,
+          pension or allowance from a mutual insurance company of {{ person_concerned }}
         {% endblocktranslate %}
         {% field_data fiches_remuneration_parent_label comptabilite.fiches_remuneration_parent %}
       {% elif comptabilite.sous_type_situation_assimilation_5 == 'PRIS_EN_CHARGE_OU_DESIGNE_CPAS' %}
         {% blocktranslate with person_concerned=formatted_relationship trimmed asvar attestation_cpas_parent_label %}
-          Recent certificate of support from the CPAS of {{ person_concerned }}
+          Recent CPAS certificate of coverage for {{ person_concerned }}
         {% endblocktranslate %}
         {% field_data attestation_cpas_parent_label comptabilite.attestation_cpas_parent %}
       {% endif %}
 
     {% elif comptabilite.type_situation_assimilation == 'A_BOURSE_ARTICLE_105_PARAGRAPH_2' %}
-      {% field_data _('Chosen assimilation') comptabilite.sous_type_situation_assimilation_6|enum_display:'ChoixAssimilation6' %}
+      {% field_data _('Chosen Belgian student status') comptabilite.sous_type_situation_assimilation_6|enum_display:'ChoixAssimilation6' %}
 
       {% if comptabilite.sous_type_situation_assimilation_6 == 'A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE' %}
-        {% field_data _('Copy of the decision to grant the scholarship from the CFWB') comptabilite.decision_bourse_cfwb %}
+        {% field_data _('Copy of decision to grant CFWB scholarship') comptabilite.decision_bourse_cfwb %}
       {% elif comptabilite.sous_type_situation_assimilation_6 == 'A_BOURSE_COOPERATION_DEVELOPPEMENT' %}
-        {% field_data _('Copy of the certificate of scholarship holder issued by the General Administration for Development Cooperation') comptabilite.attestation_boursier %}
+        {% field_data _("Copy of holder's certificate of scholarship issued by the General Administration for Development Cooperation") comptabilite.attestation_boursier %}
       {% endif %}
 
     {% elif comptabilite.type_situation_assimilation == 'RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE' %}
-      {% field_data _('Chosen assimilation') comptabilite.type_situation_assimilation|enum_display:'TypeSituationAssimilation' %}
+      {% field_data _('Chosen Belgian student status') comptabilite.type_situation_assimilation|enum_display:'TypeSituationAssimilation' %}
 
-      {% field_data _('Copy of both sides of the identity document proving the long-term stay in a member state of the European Union') comptabilite.titre_identite_sejour_longue_duree_ue %}
-      {% field_data _('Copy of both sides of the residence permit in Belgium') comptabilite.titre_sejour_belgique %}
+      {% field_data _('Copy of both sides of identity document proving long-term residence in a European Union member state') comptabilite.titre_identite_sejour_longue_duree_ue %}
+      {% field_data _('Copy of both sides of residence permit in Belgium') comptabilite.titre_sejour_belgique %}
     {% else %}
-      {% field_data _('Assimilation situation that applies to you') comptabilite.type_situation_assimilation|enum_display:'TypeSituationAssimilation' %}
+      {% field_data _('Your Belgian student status') comptabilite.type_situation_assimilation|enum_display:'TypeSituationAssimilation' %}
     {% endif %}
 
   {% endpanel %}
 {% endif %}
 
-{% panel _('Affiliations') %}
+{% panel _('Memberships') %}
   {% if is_general %}
-    {% field_data _('Do you wish to join the sports activities? If so, the cost of this membership will be added to your registration fee.') comptabilite.affiliation_sport|enum_display:'ChoixAffiliationSport' %}
+    {% field_data _('Would you like to pursue fitness or sport activities? If so, the cost of membership will be added to your tuition fee.') comptabilite.affiliation_sport|enum_display:'ChoixAffiliationSport' %}
   {% endif %}
-  {% field_data _('Would you like to be a solidarity student, a program proposed by Louvain Cooperation, the NGO of UCLouvain? This affiliation will give you access to a fund for your solidarity projects. If so, the cost of this affiliation, which is 12 EUR, will be added to your registration fees.') comptabilite.etudiant_solidaire %}
+  {% field_data _("Would you like to become a Solidarity Student, that is, a member of a programme proposed by UCLouvain's NGO, Louvain Cooperation? This membership will give you access to a fund for your solidarity projects. If so, the membership cost, which is E12, will be added to your tuition fee.") comptabilite.etudiant_solidaire %}
 {% endpanel %}
 
 {% panel _('Bank account') %}
-  {% field_data _('Would you like to enter an account number so that we can process a refund if necessary?') comptabilite.type_numero_compte|enum_display:'ChoixTypeCompteBancaire' %}
+  {% field_data _('Would you like to enter an account number so that we can issue a refund?') comptabilite.type_numero_compte|enum_display:'ChoixTypeCompteBancaire' %}
   {% if comptabilite.type_numero_compte == 'IBAN' %}
     {% field_data _('IBAN account number') comptabilite.numero_compte_iban %}
   {% elif comptabilite.type_numero_compte == 'AUTRE_FORMAT' %}
     {% field_data _('Account number') comptabilite.numero_compte_autre_format %}
-    {% field_data _('BIC/SWIFT code identifying the bank from which the account was opened') comptabilite.code_bic_swift_banque %}
+    {% field_data _('BIC/SWIFT code identifying the bank from which the account originates') comptabilite.code_bic_swift_banque %}
   {% endif %}
   {% if comptabilite.type_numero_compte == 'IBAN' or comptabilite.type_numero_compte == 'AUTRE_FORMAT' %}
     <div class="row">
-      {% field_data _('First name of the account holder') comptabilite.prenom_titulaire_compte css_class="col-md-6" %}
-      {% field_data _('Last name of the account holder') comptabilite.nom_titulaire_compte css_class="col-md-6"  %}
+      {% field_data _('Account holder first name') comptabilite.prenom_titulaire_compte css_class="col-md-6" %}
+      {% field_data _('Account holder surname') comptabilite.nom_titulaire_compte css_class="col-md-6"  %}
     </div>
   {% endif %}
 {% endpanel %}

@@ -315,7 +315,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             # Project
             'retrieve_proposition': DOCTORATE_ACTION_LINKS['retrieve_proposition'],
             'update_proposition': DOCTORATE_ACTION_LINKS['update_proposition'],
-            # Training choice
+            # Course choice
             'retrieve_training_choice': DOCTORATE_ACTION_LINKS['retrieve_doctorate_training_choice'],
             'update_training_choice': DOCTORATE_ACTION_LINKS['update_doctorate_training_choice'],
             # Cotutelle

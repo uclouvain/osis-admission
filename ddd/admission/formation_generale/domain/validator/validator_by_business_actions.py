@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,8 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional, Dict
 
 import attr
 
@@ -32,6 +31,12 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
+from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+    ConditionComplementaireApprobationIdentity,
+)
+from admission.ddd.admission.domain.model.formation import Formation
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldAbsenceDeDetteEtreCompletee,
@@ -41,13 +46,13 @@ from admission.ddd.admission.domain.validator import (
     ShouldTypeCompteBancaireRemboursementEtreComplete,
     ShouldAssimilationEtreCompletee,
 )
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
-from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
 )
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
@@ -58,6 +63,11 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldDiplomeBelgesEtudesSecondairesEtreComplete,
     ShouldDiplomeEtrangerEtudesSecondairesEtreComplete,
     ShouldAlternativeSecondairesEtreCompletee,
+    ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire,
+    ShouldSpecifierMotifRefusFacultaire,
+    ShouldFacPeutDonnerDecision,
+    ShouldSpecifierInformationsAcceptationFacultaire,
+    ShouldPeutSpecifierInformationsDecisionFacultaire,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
@@ -206,5 +216,88 @@ class BachelierEtudesSecondairesValidatorList(TwoStepsMultipleBusinessExceptionL
                 diplome_etudes_secondaires=self.diplome_etudes_secondaires,
                 alternative_secondaires=self.alternative_secondaires,
                 est_potentiel_vae=self.est_potentiel_vae,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+    motif_refus_fac: Optional[MotifRefusIdentity]
+    autre_motif_refus_fac: str
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldFacPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldSpecifierMotifRefusFacultaire(
+                motif_refus_fac=self.motif_refus_fac,
+                autre_motif_refus_fac=self.autre_motif_refus_fac,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    avec_conditions_complementaires: Optional[bool]
+    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
+    conditions_complementaires_libres: List[str]
+
+    avec_complements_formation: Optional[bool]
+    complements_formation: Optional[List[ComplementFormationIdentity]]
+
+    nombre_annees_prevoir_programme: Optional[int]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldFacPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldSpecifierInformationsAcceptationFacultaire(
+                avec_conditions_complementaires=self.avec_conditions_complementaires,
+                conditions_complementaires_existantes=self.conditions_complementaires_existantes,
+                conditions_complementaires_libres=self.conditions_complementaires_libres,
+                avec_complements_formation=self.avec_complements_formation,
+                complements_formation=self.complements_formation,
+                nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierNouvellesInformationsDecisionFacultaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPeutSpecifierInformationsDecisionFacultaire(
+                statut=self.statut,
             ),
         ]

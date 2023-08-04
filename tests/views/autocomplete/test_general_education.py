@@ -27,7 +27,8 @@ import json
 
 import freezegun
 from django.contrib.auth.models import User
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory
+from django.test import TestCase
 from django.urls import reverse
 
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory

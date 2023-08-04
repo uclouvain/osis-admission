@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 choices=[
                     ('ETUDES_SECONDAIRES', 'Secondary studies'),
                     ('CURRICULUM', 'Curriculum'),
-                    ('CHOIX_FORMATION', 'Training choice'),
+                    ('CHOIX_FORMATION', 'Course choice'),
                     ('INFORMATIONS_ADDITIONNELLES', 'Additional information'),
                     ('DOCUMENTS', 'Documents'),
                 ],

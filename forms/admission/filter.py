@@ -87,7 +87,7 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     matricule_candidat = forms.CharField(
-        label=_('Last name / First name / E-mail'),
+        label=_('Last name / First name / Email'),
         required=False,
         widget=autocomplete.ListSelect2(
             url="admission:autocomplete:candidates",
@@ -134,7 +134,7 @@ class AllAdmissionsFilterForm(forms.Form):
             (key, TrainingType.get_value(key))
             for key in AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE
         ],
-        label=_('Training type'),
+        label=_('Course type'),
         required=False,
         widget=Select2MultipleCheckboxesWidget(
             attrs={
@@ -145,7 +145,7 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     formation = forms.CharField(
-        label=_('Training'),
+        label=_('Course'),
         required=False,
     )
 
@@ -162,7 +162,7 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     bourse_double_diplomation = forms.TypedChoiceField(
-        label=_('Double degree scholarship'),
+        label=_('Dual degree scholarship'),
         empty_value=None,
         required=False,
     )

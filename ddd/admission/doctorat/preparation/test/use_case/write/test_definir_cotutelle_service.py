@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import DefinirCotutelleCommand
@@ -33,7 +33,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class DefinirCotutelleTestCase(TestCase):
+class DefinirCotutelleTestCase(SimpleTestCase):
     def setUp(self) -> None:
         self.uuid_proposition = 'uuid-SC3DP'
 

@@ -27,12 +27,13 @@
 <div class="btn-group" role="group">
   {% is_current_checklist_status current state extra as is_current_status %}
   <button
+      id="{{ tab }}-{{ state }}{% if sub_id %}-{{ sub_id }}{% endif %}"
       type="button"
       class="checklist-state-button btn btn-default {% if is_current_status %}btn-{{ class }} active{% endif %}"
       data-status="{{ state }}"
       data-class="btn-{{ class }}"
       data-icon="{{ icon }}"
-      {% if disabled or is_current_status %}disabled{% endif %}
+      {% if disabled or is_current_status %}disabled="disabled"{% endif %}
       {% if extra %}hx-vals="{{ extra|to_json }}"{% endif %}
       {% if open_modal %}
       data-toggle="modal"

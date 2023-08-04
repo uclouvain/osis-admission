@@ -28,7 +28,7 @@ from unittest.mock import patch
 
 from django.test import override_settings
 
-from admission.constants import JPEG_MIME_TYPE, SUPPORTED_MIME_TYPES
+from admission.constants import JPEG_MIME_TYPE, SUPPORTED_MIME_TYPES, PDF_MIME_TYPE
 from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import (
@@ -321,6 +321,34 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.mimetypes, list(SUPPORTED_MIME_TYPES))
         self.assertEqual(document.label, '')
         self.assertEqual(document.document_submitted_by, '0123456')
+
+        # Faculty approval decision document
+        file_uuid = uuid.uuid4()
+        self.general_admission.fac_approval_certificate = [file_uuid]
+        self.general_admission.save()
+        document = get_document_from_identifier(
+            self.general_admission,
+            f'{base_identifier}.ATTESTATION_ACCORD_FACULTAIRE',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, self.general_admission)
+        self.assertEqual(document.field, 'fac_approval_certificate')
+        self.assertEqual(document.mimetypes, [PDF_MIME_TYPE])
+
+        # Faculty refusal decision document
+        file_uuid = uuid.uuid4()
+        self.general_admission.fac_refusal_certificate = [file_uuid]
+        self.general_admission.save()
+        document = get_document_from_identifier(
+            self.general_admission,
+            f'{base_identifier}.ATTESTATION_REFUS_FACULTAIRE',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, self.general_admission)
+        self.assertEqual(document.field, 'fac_refusal_certificate')
+        self.assertEqual(document.mimetypes, [PDF_MIME_TYPE])
 
     def test_get_non_free_identification_document(self):
         base_identifier = OngletsDemande.IDENTIFICATION.name

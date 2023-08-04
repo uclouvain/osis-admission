@@ -52,7 +52,7 @@
       </p>
       <p class="bg-success">
         {% blocktranslate trimmed with date=last_request.created|date:'DATETIME_FORMAT' author=last_request.author %}
-          E-mail requesting the application fees sent to the candidate on {{ date }} by {{ author }}.
+          Email requesting the application fees sent to the candidate on {{ date }} by {{ author }}.
         {% endblocktranslate %}
       </p>
 
@@ -68,8 +68,8 @@
           </button>
           <button
               class="btn btn-primary"
-              hx-post="{% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status='GEST_BLOCAGE' %}?remind=1"
-              data-checklist-button="#frais_dossier-GEST_BLOCAGE"
+              data-toggle="modal"
+              data-target="#remind-request-application-fees-modal"
           >
             <i class="fa-solid fa-envelope"></i>
             {% translate 'Remind the applicant' %}
@@ -79,6 +79,7 @@
     {% endif %}
 
     {% include 'admission/general_education/includes/checklist/application_fees_request_modal.html' %}
+    {% include 'admission/general_education/includes/checklist/application_fees_request_modal.html' with remind='1' %}
     {% include 'admission/general_education/includes/checklist/application_fees_request_email_modal.html' %}
     {% include 'admission/general_education/includes/checklist/application_fees_request_cancel_modal.html' with target_status='INITIAL_NON_CONCERNE' %}
     {% include 'admission/general_education/includes/checklist/application_fees_request_cancel_modal.html' with target_status='GEST_REUSSITE' %}

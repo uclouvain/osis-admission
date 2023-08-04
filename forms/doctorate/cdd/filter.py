@@ -85,13 +85,13 @@ class DoctorateListFilterForm(forms.Form):
         required=False,
     )
     matricule_candidat = forms.CharField(
-        label=_('Last name / First name / E-mail / NOMA'),
+        label=_('Last name / First name / Email / NOMA'),
         required=False,
         widget=autocomplete.ListSelect2(
             url="admission:autocomplete:candidates",
             attrs={
                 'data-minimum-input-length': 3,
-                'data-placeholder': _('Last name / First name / E-mail / NOMA'),
+                'data-placeholder': _('Last name / First name / Email / NOMA'),
             },
         ),
     )
@@ -159,7 +159,7 @@ class DoctorateListFilterForm(forms.Form):
         widget=autocomplete.Select2Multiple(),
     )
     matricule_promoteur = forms.CharField(
-        label=_('Promoter'),
+        label=_('Supervisor'),
         required=False,
         widget=autocomplete.ListSelect2(
             url="admission:autocomplete:promoters",
@@ -170,7 +170,7 @@ class DoctorateListFilterForm(forms.Form):
         ),
     )
     sigles_formations = forms.MultipleChoiceField(
-        label=_('Training'),
+        label=_('Course'),
         required=False,
         widget=autocomplete.Select2Multiple(
             attrs={
@@ -180,7 +180,7 @@ class DoctorateListFilterForm(forms.Form):
     )
     type_financement = forms.ChoiceField(
         choices=EMPTY_CHOICE + ChoixTypeFinancement.choices(),
-        label=_('Financing type'),
+        label=_('Funding type'),
         required=False,
     )
     type_contrat_travail = forms.ChoiceField(
@@ -189,7 +189,7 @@ class DoctorateListFilterForm(forms.Form):
         required=False,
     )
     bourse_recherche = forms.ChoiceField(
-        label=_("Scholarship grant"),
+        label=_("Research scholarship"),
         required=False,
     )
     taille_page = forms.ChoiceField(

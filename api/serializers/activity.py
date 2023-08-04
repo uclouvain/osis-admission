@@ -108,7 +108,7 @@ class ActivitySerializerBase(serializers.Serializer):
         write_only=True,
         required=False,
     )
-    reference_promoter_assent = serializers.NullBooleanField(read_only=True)
+    reference_promoter_assent = serializers.BooleanField(read_only=True, allow_null=True)
     reference_promoter_comment = serializers.CharField(read_only=True)
     cdd_comment = serializers.CharField(read_only=True)
     can_be_submitted = serializers.BooleanField(read_only=True)

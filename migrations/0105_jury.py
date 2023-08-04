@@ -168,7 +168,7 @@ class Migration(migrations.Migration):
                     models.CharField(blank=True, default='', max_length=255, verbose_name='Other institute'),
                 ),
                 ('institute', models.CharField(blank=True, default='', max_length=255, verbose_name='Institute')),
-                ('last_name', models.CharField(blank=True, default='', max_length=255, verbose_name='Last name')),
+                ('last_name', models.CharField(blank=True, default='', max_length=255, verbose_name='Surname')),
                 ('first_name', models.CharField(blank=True, default='', max_length=255, verbose_name='First name')),
                 (
                     'title',
@@ -215,7 +215,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name='jury_members',
                         to='admission.doctorateadmission',
-                        verbose_name='Doctorate',
+                        verbose_name='PhD',
                     ),
                 ),
                 (
@@ -236,7 +236,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
                         to='admission.supervisionactor',
-                        verbose_name='Promoter',
+                        verbose_name='Supervisor',
                     ),
                 ),
             ],

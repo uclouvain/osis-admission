@@ -31,12 +31,12 @@ from admission.contrib.models import Scholarship
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 
 
-class ScholarshipFactory(factory.DjangoModelFactory):
+class ScholarshipFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Scholarship
 
 
-class DoubleDegreeScholarshipFactory(factory.DjangoModelFactory):
+class DoubleDegreeScholarshipFactory(factory.django.DjangoModelFactory):
     type = TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name
     short_name = FuzzyText(length=20)
     long_name = FuzzyText(length=40)
@@ -45,7 +45,7 @@ class DoubleDegreeScholarshipFactory(factory.DjangoModelFactory):
         model = Scholarship
 
 
-class InternationalScholarshipFactory(factory.DjangoModelFactory):
+class InternationalScholarshipFactory(factory.django.DjangoModelFactory):
     type = TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name
     short_name = FuzzyText(length=20)
     long_name = FuzzyText(length=40)
@@ -54,7 +54,7 @@ class InternationalScholarshipFactory(factory.DjangoModelFactory):
         model = Scholarship
 
 
-class DoctorateScholarshipFactory(factory.DjangoModelFactory):
+class DoctorateScholarshipFactory(factory.django.DjangoModelFactory):
     type = TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name
     short_name = FuzzyText(length=20)
     long_name = FuzzyText(length=40)
@@ -63,7 +63,7 @@ class DoctorateScholarshipFactory(factory.DjangoModelFactory):
         model = Scholarship
 
 
-class ErasmusMundusScholarshipFactory(factory.DjangoModelFactory):
+class ErasmusMundusScholarshipFactory(factory.django.DjangoModelFactory):
     type = TypeBourse.ERASMUS_MUNDUS.name
     short_name = FuzzyText(length=20)
     long_name = FuzzyText(length=40)

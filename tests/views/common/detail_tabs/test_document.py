@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 import uuid
+from unittest import mock
 from unittest.mock import patch
 
 import freezegun
@@ -32,6 +33,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
+from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
@@ -370,6 +372,69 @@ class DocumentViewTestCase(TestCase):
             metadata={
                 'author': self.fac_manager_user.person.global_id,
                 'explicit_name': 'My file name',
+            },
+        )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_sic_manager_generates_new_analysis_folder(self):
+        save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
+        patched = save_raw_content_remotely_patcher.start()
+        patched.return_value = 'a-token'
+        self.addCleanup(save_raw_content_remotely_patcher.stop)
+
+        # Mock weasyprint
+        patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
+        patcher.start()
+
+        # Mock pikepdf
+        patcher = mock.patch('admission.exports.admission_recap.admission_recap.Pdf')
+        patched = patcher.start()
+        patched.new.return_value = mock.MagicMock(pdf_version=1)
+        self.outline_root = (
+            patched.new.return_value.open_outline.return_value.__enter__.return_value.root
+        ) = mock.MagicMock()
+        patched.open.return_value.__enter__.return_value = mock.Mock(pdf_version=1, pages=[None])
+
+        patcher = mock.patch('admission.exports.admission_recap.attachments.get_raw_content_remotely')
+        self.get_raw_content_mock = patcher.start()
+        self.get_raw_content_mock.return_value = b'some content'
+
+        patcher = mock.patch('admission.exports.admission_recap.admission_recap.save_raw_content_remotely')
+        self.save_raw_content_mock = patcher.start()
+        self.save_raw_content_mock.return_value = 'pdf-token'
+
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:analysis-folder-generation',
+            uuid=self.general_admission.uuid,
+        )
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            **self.default_headers,
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['form'].data, {})
+
+        # Save the file into the admission
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(self.general_admission.uclouvain_sic_documents, [])
+        self.assertEqual(self.general_admission.uclouvain_fac_documents, [])
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+        # Save the author and the explicit name into the file
+        self.change_remote_metadata_patcher.assert_called_once_with(
+            token='pdf-token',
+            metadata={
+                'author': self.sic_manager_user.person.global_id,
+                'explicit_name': gettext('Analysis folder'),
             },
         )
 

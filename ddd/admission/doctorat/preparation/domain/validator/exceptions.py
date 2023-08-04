@@ -74,7 +74,7 @@ class ContratTravailInconsistantException(BusinessException):
     status_code = "PROPOSITION-6"
 
     def __init__(self, **kwargs):
-        message = _("Work contract should be set when financing type is set to work contract")
+        message = _("Work contract should be set when funding type is set to work contract")
         super().__init__(message, **kwargs)
 
 
@@ -90,7 +90,7 @@ class DomaineTheseInconsistantException(BusinessException):
     status_code = "PROPOSITION-8"
 
     def __init__(self, **kwargs):
-        message = _("Thesis domain should be set when PhD has been set to yes or partial")
+        message = _("Thesis field should be set when PhD has been set to yes or partial")
         super().__init__(message, **kwargs)
 
 
@@ -98,7 +98,7 @@ class PromoteurNonTrouveException(BusinessException):
     status_code = "PROPOSITION-9"
 
     def __init__(self, **kwargs):
-        message = _("Promoter not found.")
+        message = _("Supervisor not found.")
         super().__init__(message, **kwargs)
 
 
@@ -178,7 +178,7 @@ class PromoteurManquantException(BusinessException):
     status_code = "PROPOSITION-19"
 
     def __init__(self, **kwargs):
-        message = _("You must add at least one UCLouvain promoter in order to request signatures.")
+        message = _("You must add at least one UCLouvain supervisor in order to request signatures.")
         super().__init__(message, **kwargs)
 
 
@@ -194,7 +194,7 @@ class CotutelleDoitAvoirAuMoinsUnPromoteurExterneException(BusinessException):
     status_code = "PROPOSITION-21"
 
     def __init__(self, **kwargs):
-        message = _("You must add at least one external promoter in order to request signatures.")
+        message = _("You must add at least one external supervisor in order to request signatures.")
         super().__init__(message, **kwargs)
 
 
@@ -291,7 +291,7 @@ class LanguesConnuesNonSpecifieesException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "Please fill in all the required information in the 'Previous experience > Languages knowledge' tab.",
+            "Please fill in all the required information in the 'Previous experience > Knowledge of languages' tab.",
         )
         super().__init__(message, **kwargs)
 
@@ -333,7 +333,7 @@ class PropositionNonApprouveeParPromoteurException(BusinessException):
     status_code = "PROPOSITION-37"
 
     def __init__(self, **kwargs):
-        message = _("All promoters must have approved the proposition.")
+        message = _("All supervisors must have approved the proposition.")
         super().__init__(message, **kwargs)
 
 
@@ -365,7 +365,7 @@ class SpecifierNOMASiDejaInscritException(BusinessException):
     status_code = "PROPOSITION-41"
 
     def __init__(self, **kwargs):
-        message = _("Please specify your old NOMA (registration id).")
+        message = _("Please specify your old NOMA (matriculation number).")
         super().__init__(message, **kwargs)
 
 
@@ -373,7 +373,7 @@ class PromoteurDeReferenceManquantException(BusinessException):
     status_code = "PROPOSITION-42"
 
     def __init__(self, **kwargs):
-        message = _("You must set a reference promoter.")
+        message = _("You must set a lead supervisor.")
         super().__init__(message, **kwargs)
 
 
@@ -392,7 +392,7 @@ class ReductionDesDroitsInscriptionNonCompleteeException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "Some fields are missing in the 'Reduced registration fees' block in the 'Additional information > "
+            "Some fields are missing in the 'Reduced tuition fee' block in the 'Additional information > "
             "Accounting' tab."
         )
         super().__init__(message, **kwargs)
@@ -403,7 +403,8 @@ class AssimilationNonCompleteeException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "Some fields are missing in the 'Assimilation' block in the 'Additional information > Accounting' tab.",
+            "Some fields are missing in the 'Belgian student status' block in the 'Additional information > Accounting'"
+            " tab.",
         )
         super().__init__(message, **kwargs)
 
@@ -413,7 +414,7 @@ class AffiliationsNonCompleteesException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "Some fields are missing in the 'Affiliations' block in the 'Additional information > Accounting' tab."
+            "Some fields are missing in the 'Memberships' block in the 'Additional information > Accounting' tab."
         )
         super().__init__(message, **kwargs)
 

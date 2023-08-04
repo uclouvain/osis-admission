@@ -25,7 +25,6 @@
 # ##############################################################################
 
 from rest_framework import status
-from rest_framework.fields import NullBooleanField
 from rest_framework.schemas.openapi import AutoSchema, SchemaGenerator
 from rest_framework.schemas.utils import is_list_view
 from rest_framework.serializers import Serializer
@@ -268,12 +267,6 @@ class BetterChoicesSchema(AuthorizationAwareSchemaMixin, ActionLinksFieldSchemaM
         if field.allow_blank:
             schema['enum'] = [''] + schema['enum']
         return schema
-
-    def map_field(self, field):
-        if isinstance(field, NullBooleanField):
-            return {'type': 'boolean'}
-
-        return super().map_field(field)
 
 
 class ChoicesEnumSchema(BetterChoicesSchema):

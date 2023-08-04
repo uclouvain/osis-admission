@@ -37,7 +37,7 @@
     </div>
     {% if cotutelle.cotutelle %}
     <div class="col-md-4">
-      {% field_data _("Cotutelle institution") cotutelle.institution %}
+      {% field_data _("Partner institution") cotutelle.institution %}
     </div>
     {% endif %}
   </div>
@@ -45,7 +45,7 @@
   {% field_data _("Defense indicative date") jury.date_indicative %}
   <div class="row">
     <div class="col-md-4">
-      {% field_data _("Thesis redacting language") jury.langue_redaction|enum_display:'ChoixLangueRedactionThese' %}
+      {% field_data _("Thesis language") jury.langue_redaction|enum_display:'ChoixLangueRedactionThese' %}
     </div>
     <div class="col-md-4">
       {% field_data _("Defense language") jury.langue_soutenance|enum_display:'ChoixLangueRedactionThese' %}

@@ -39,7 +39,7 @@
 {% block modal_footer %}
   <button
       class="btn btn-danger"
-      hx-post="{% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status=target_status %}"
+      hx-post="{% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status=target_status %}?confirm=1"
       data-dismiss="modal"
       data-checklist-button="#frais_dossier-{{ target_status }}"
   >

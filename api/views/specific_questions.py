@@ -32,7 +32,6 @@ from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import SpecificQuestionSerializer
 from admission.contrib.models import AdmissionFormItemInstantiation
 from admission.ddd.admission.formation_continue.commands import CompleterQuestionsSpecifiquesCommand
-
 from admission.utils import (
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
@@ -165,7 +164,7 @@ class ContinuingSpecificQuestionAPIView(APIPermissionRequiredMixin, GenericAPIVi
 
     def put(self, request, *args, **kwargs):
         serializer = serializers.ModifierQuestionsSpecifiquesFormationContinueCommandSerializer(data=request.data)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(
             CompleterQuestionsSpecifiquesCommand(
                 uuid_proposition=self.kwargs['uuid'],

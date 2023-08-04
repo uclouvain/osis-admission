@@ -51,7 +51,7 @@ class QuestionsSpecifiquesChoixFormationNonCompleteesException(BusinessException
     status_code = "ADMISSION-3"
 
     def __init__(self, **kwargs):
-        message = _("Mandatory fields are missing in the specific questions of the 'Training choice' tab")
+        message = _("Mandatory fields are missing in the specific questions of the 'Course choice' tab")
         super().__init__(message, **kwargs)
 
 

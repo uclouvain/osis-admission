@@ -26,7 +26,7 @@
   <div style="flex: 1;">
     <div>
       <strong>
-        {% if member.est_docteur %}{% trans "Dr." %} {% endif %}
+        {% if member.est_docteur %}{% trans "Dr" %} {% endif %}
         {{ member.prenom }} {{ member.nom }}
       </strong>
       ({{ member.email }})
@@ -43,13 +43,13 @@
         {{ signature.statut|enum_display:'ChoixEtatSignature' }}
       {% endif %}
       {% if member.uuid == supervision.promoteur_reference %}
-        - {% trans "Reference promoter" %}
+        - {% trans "Lead supervisor" %}
       {% endif %}
     </em>
   </div>
 
   {% if signature.motif_refus and signature.statut == 'DECLINED' %}
-    <blockquote><strong>{% trans "Rejection reason" %}</strong>
+    <blockquote><strong>{% trans "Grounds for denied" %}</strong>
       {{ signature.motif_refus|linebreaks }}</blockquote>
   {% endif %}
 

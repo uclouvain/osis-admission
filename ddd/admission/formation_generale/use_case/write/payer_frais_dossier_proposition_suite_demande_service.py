@@ -50,7 +50,7 @@ def payer_frais_dossier_proposition_suite_demande(
     )
 
     # THEN
-    proposition.payer_frais_dossier_suite_demande()
+    proposition.payer_frais_dossier()
     proposition_repository.save(proposition)
     historique.historiser_paiement_frais_dossier_suite_demande_gestionnaire(proposition)
 

@@ -269,7 +269,7 @@ class TrainingAssentView(APIPermissionRequiredMixin, GenericAPIView):
     def post(self, request, *args, **kwargs):
         """Assent on a doctoral training activity."""
         serializer = DoctoralTrainingAssentSerializer(data=request.data)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
         cmd = DonnerAvisSurActiviteCommand(
             doctorat_uuid=self.kwargs['uuid'],
             activite_uuid=self.request.GET['activity_id'],

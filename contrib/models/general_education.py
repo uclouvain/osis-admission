@@ -25,11 +25,15 @@
 # ##############################################################################
 from contextlib import suppress
 
+from django.contrib.postgres.fields import ArrayField
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rest_framework.settings import api_settings
 
+from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
+from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -50,7 +54,7 @@ class GeneralEducationAdmission(BaseAdmission):
 
     double_degree_scholarship = models.ForeignKey(
         to="admission.Scholarship",
-        verbose_name=_("Double degree scholarship"),
+        verbose_name=_("Dual degree scholarship"),
         related_name="+",
         on_delete=models.PROTECT,
         null=True,
@@ -83,7 +87,7 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
     )
     registration_change_form = FileField(
-        verbose_name=_("Registration change form"),
+        verbose_name=_("Change of enrolment form"),
         max_files=1,
         upload_to=admission_directory_path,
         blank=True,
@@ -117,6 +121,100 @@ class GeneralEducationAdmission(BaseAdmission):
         choices=PoursuiteDeCycle.choices(),
         max_length=30,
         default=PoursuiteDeCycle.TO_BE_DETERMINED.name,
+    )
+
+    # Fac approval
+    fac_approval_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Approval certificate of faculty'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    fac_refusal_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Refusal certificate of faculty'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    fac_refusal_reason = models.ForeignKey(
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        to='admission.RefusalReason',
+        verbose_name=_('Faculty refusal reason'),
+    )
+    other_fac_refusal_reason = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Other faculty refusal reason'),
+    )
+    with_additional_approval_conditions = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Are there any additional conditions (subject to ...)?'),
+    )
+    additional_approval_conditions = models.ManyToManyField(
+        blank=True,
+        related_name='+',
+        to='admission.AdditionalApprovalCondition',
+        verbose_name=_('Additional approval conditions'),
+    )
+    free_additional_approval_conditions = ArrayField(
+        base_field=models.CharField(max_length=255),
+        blank=True,
+        default=list,
+        verbose_name=_('Free additional approval conditions'),
+    )
+    other_training_accepted_by_fac = models.ForeignKey(
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        related_name='+',
+        to='base.EducationGroupYear',
+        verbose_name=_('Other course accepted by the faculty'),
+    )
+    with_prerequisite_courses = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Are there any prerequisite courses?'),
+    )
+    prerequisite_courses = models.ManyToManyField(
+        to='base.LearningUnitYear',
+        blank=True,
+        through='AdmissionPrerequisiteCourses',
+        through_fields=(
+            'admission',
+            'course',
+        ),
+        verbose_name=_('Prerequisite courses'),
+    )
+    prerequisite_courses_fac_comment = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Other information about prerequisite courses'),
+    )
+    program_planned_years_number = models.SmallIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('Number of years required for the full program (including prerequisite courses)'),
+        validators=[MinValueValidator(DUREE_MINIMALE_PROGRAMME), MaxValueValidator(DUREE_MAXIMALE_PROGRAMME)],
+    )
+    annual_program_contact_person_name = models.CharField(
+        blank=True,
+        default='',
+        max_length=255,
+        verbose_name=_('Name of the contact person for the design of the annual program'),
+    )
+    annual_program_contact_person_email = models.EmailField(
+        blank=True,
+        default='',
+        verbose_name=_('Email of the contact person for the design of the annual program'),
+    )
+    join_program_fac_comment = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Faculty comment about the collaborative program'),
     )
 
     class Meta:
@@ -164,6 +262,21 @@ class GeneralEducationAdmission(BaseAdmission):
         message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
 
 
+class AdmissionPrerequisiteCourses(models.Model):
+    """Prerequisite courses of an admission."""
+
+    admission = models.ForeignKey(
+        GeneralEducationAdmission,
+        on_delete=models.CASCADE,
+    )
+    course = models.ForeignKey(
+        'base.LearningUnitYear',
+        on_delete=models.PROTECT,
+        related_name='+',
+        to_field='uuid',
+    )
+
+
 class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
     def get_queryset(self):
         return (
@@ -177,6 +290,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
                 "double_degree_scholarship",
                 "international_scholarship",
                 "erasmus_mundus_scholarship",
+                "fac_refusal_reason",
             )
             .annotate_pool_end_date()
         )
@@ -192,6 +306,12 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
             .annotate_training_management_entity()
             .annotate_training_management_faculty()
             .annotate_with_reference()
+        )
+
+    def for_manager_dto(self):
+        return self.for_dto().annotate_campus(
+            training_field='other_training_accepted_by_fac',
+            annotation_name='other_training_accepted_by_fac_teaching_campus',
         )
 
 

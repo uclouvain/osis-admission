@@ -24,17 +24,23 @@
 #
 # ##############################################################################
 import json
+import os
 import uuid
 from collections import defaultdict
 from typing import Dict, Union
 
+import weasyprint
+from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
+from django.shortcuts import resolve_url
 from rest_framework.generics import get_object_or_404
 
+from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager as AdmissionProgramManager
+from admission.auth.roles.sic_management import SicManagement
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
@@ -183,3 +189,54 @@ def add_messages_into_htmx_response(request, response):
                 'messages': [{'message': str(msg.message), 'tags': msg.tags} for msg in msgs],
             },
         )
+
+
+def get_portal_admission_list_url() -> str:
+    """Return the url of the list of the admissions in the portal."""
+    return f'{settings.OSIS_PORTAL_URL}admission/'
+
+
+def get_portal_admission_url(context, admission_uuid) -> str:
+    """Return the url of the admission in the portal."""
+    return settings.ADMISSION_FRONTEND_LINK.format(
+        context=context,
+        uuid=admission_uuid,
+    )
+
+
+def get_backoffice_admission_url(context, admission_uuid, sub_namespace='', url_suffix='') -> str:
+    """Return the url of the admission in the backoffice."""
+    return '{}{}{}'.format(
+        settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+        resolve_url(f'admission:{context}{sub_namespace}', uuid=admission_uuid),
+        url_suffix,
+    )
+
+
+def person_is_sic(person: Person):
+    return SicManagement.belong_to(person) or CentralManager.belong_to(person)
+
+
+def person_is_fac_cdd(person: Person):
+    return AdmissionProgramManager.belong_to(person)
+
+
+class WeasyprintStylesheets:
+    @classmethod
+    def get_stylesheets(cls):
+        """Get the stylesheets needed to generate the pdf"""
+        # Load the stylesheets once and cache them
+        if not hasattr(cls, '_stylesheet'):
+            setattr(
+                cls,
+                '_stylesheet',
+                [
+                    weasyprint.CSS(filename=os.path.join(settings.BASE_DIR, file_path))
+                    for file_path in [
+                        'base/static/css/bootstrap.min.css',
+                        'admission/static/admission/admission.css',
+                        'admission/static/admission/base_pdf.css',
+                    ]
+                ],
+            )
+        return getattr(cls, '_stylesheet')

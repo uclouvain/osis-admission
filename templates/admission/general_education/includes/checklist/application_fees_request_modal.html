@@ -26,7 +26,7 @@
 {% endcomment %}
 
 
-{% block modal_id %}request-application-fees-modal{% endblock %}
+{% block modal_id %}{% if remind %}remind-{% endif %}request-application-fees-modal{% endblock %}
 
 {% block modal_title %}{% translate "Application fees" %}{% endblock %}
 
@@ -51,7 +51,7 @@
 
   <button
       class="btn btn-primary"
-      hx-post="{% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status='GEST_BLOCAGE' %}"
+      hx-post="{% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status='GEST_BLOCAGE' %}{% if remind %}?remind=1{% endif %}"
       data-dismiss="modal"
       data-checklist-button="#frais_dossier-GEST_BLOCAGE"
   >

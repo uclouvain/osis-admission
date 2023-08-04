@@ -28,8 +28,8 @@ class Migration(migrations.Migration):
 
                 <p>
                     After an initial analysis of your file, we note that you are not exempt from the application fee.
-                    We invite you to pay these by going to the following page: <a href="{admission_link_front}">
-                    {admission_link_front}</a>.
+                    We invite you to pay these by going to the following page: <a href="{admissions_link_front}">
+                    {admissions_link_front}</a>.
                 </p>
 
                 <p>
@@ -49,8 +49,8 @@ class Migration(migrations.Migration):
                 </p>
                 
                 <p>
-                    A copy of your application can be downloaded from the following page: <a href="{admission_link_front}">
-                    {admission_link_front}</a>.
+                    A copy of your application can be downloaded from the following page: <a href="{admissions_link_front}">
+                    {admissions_link_front}</a>.
                 </p>
 
                 <p>
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
         <p>
             Après une première analyse de votre dossier, nous constatons que vous n'êtes pas exonéré·e des frais de 
             dossier. Nous vous invitons à réaliser le payement de ceux-ci en vous rendant sur la page suivante : 
-            <a href="{admission_link_front}">{admission_link_front}</a>.
+            <a href="{admissions_link_front}">{admissions_link_front}</a>.
         </p>
 
         <p>
@@ -91,7 +91,7 @@ class Migration(migrations.Migration):
         
         <p>
             Sachez qu'une copie de votre dossier est téléchargeable à la page suivante : 
-            <a href="{admission_link_front}">{admission_link_front}</a>.
+            <a href="{admissions_link_front}">{admissions_link_front}</a>.
         </p>
 
         <p>
