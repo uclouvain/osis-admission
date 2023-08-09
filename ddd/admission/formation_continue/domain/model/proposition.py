@@ -126,7 +126,7 @@ class Proposition(interface.RootEntity):
         adresse_facturation_boite_postale: Optional[str],
         reponses_questions_specifiques: Dict,
         copie_titre_sejour: List[str],
-        documents_additionels: List[str],
+        documents_additionnels: List[str],
     ):
         self.inscription_a_titre = ChoixInscriptionATitre[inscription_a_titre] if inscription_a_titre else None
         self.nom_siege_social = nom_siege_social or ''
@@ -151,7 +151,7 @@ class Proposition(interface.RootEntity):
         )
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.copie_titre_sejour = copie_titre_sejour
-        self.documents_additionnels = documents_additionels
+        self.documents_additionnels = documents_additionnels
 
     def verifier_informations_complementaires(self):
         """Vérification de la validité des informations complémentaires."""

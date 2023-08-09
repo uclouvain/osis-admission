@@ -27,7 +27,7 @@ import re
 
 from dal import autocomplete
 from django import forms
-from django.utils.translation import gettext_lazy as _, ngettext
+from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.contrib.models import Scholarship
@@ -143,7 +143,7 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     formation = forms.CharField(
-        label=_('Course'),
+        label=pgettext_lazy('admission', 'Course'),
         required=False,
     )
 

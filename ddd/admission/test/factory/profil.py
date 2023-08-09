@@ -72,6 +72,8 @@ class IdentificationDTOFactory(factory.Factory):
     nom_pays_nationalite = factory.Faker('country')
     nom_pays_naissance = factory.Faker('country')
     nom_langue_contact = 'Français'
+    date_expiration_passeport = factory.Faker('date')
+    date_expiration_carte_identite = factory.Faker('date')
 
 
 class AdressePersonnelleDTOFactory(factory.Factory):
@@ -93,6 +95,7 @@ class CoordonneesDTOFactory(factory.Factory):
     adresse_correspondance = factory.SubFactory(AdressePersonnelleDTOFactory)
     numero_mobile = factory.Faker('phone_number')
     adresse_email_privee = factory.Faker('email')
+    numero_contact_urgence = factory.Faker('phone_number')
 
     class Meta:
         model = CoordonneesDTO

@@ -162,7 +162,6 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
             belgian_diploma.academic_graduation_year.year,
             self.diploma_data["belgian_diploma"]["academic_graduation_year"],
         )
-        self.assertIsNone(belgian_diploma.result)
         self.assertIsNone(belgian_diploma.community)
         self.assertEqual(belgian_diploma.educational_type, self.diploma_data["belgian_diploma"]["educational_type"])
         self.assertEqual(belgian_diploma.educational_other, "")

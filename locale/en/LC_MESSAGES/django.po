@@ -1470,6 +1470,7 @@ msgstr ""
 msgid "Country of citizenship"
 msgstr ""
 
+msgctxt "admission"
 msgid "Course"
 msgstr ""
 
@@ -2325,8 +2326,8 @@ msgid "I am a refugee"
 msgstr ""
 
 msgid ""
-"I am a refugee or stateless person or have subsidiary/temporary protection "
-"(Belgian student status category 2)"
+"I am a refugee, an asylum seeker, or a stateless person or have subsidiary/"
+"temporary protection (Belgian student status category 2)"
 msgstr ""
 
 msgid "I am a stateless person"
@@ -2633,6 +2634,9 @@ msgid "Internship framework agreement"
 msgstr ""
 
 msgid "Invalid date"
+msgstr ""
+
+msgid "Invalid phone number"
 msgstr ""
 
 #, python-format

@@ -35,7 +35,7 @@ from django.conf import settings
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import ValidationError
 from django.db.models import Subquery, OuterRef, F
-from django.utils.translation import gettext_lazy as _, get_language, ngettext, ngettext_lazy
+from django.utils.translation import gettext_lazy as _, get_language, ngettext, ngettext_lazy, pgettext, pgettext_lazy
 from django_filters.fields import ModelChoiceField
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
@@ -130,7 +130,7 @@ class ChoixFormationForm(forms.Form):
         label=_("Academic year"),
     )
     formation = forms.CharField(
-        label=_("Course"),
+        label=pgettext_lazy("admission", "Course"),
         widget=autocomplete.ListSelect2(
             forward=['annee_academique'],
             url="admission:autocomplete:general-education-trainings",
@@ -252,7 +252,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
     )
 
     other_training_accepted_by_fac = TrainingModelChoiceField(
-        label=_('Course'),
+        label=pgettext_lazy('admission', 'Course'),
         queryset=EducationGroupYear.objects.none(),
         to_field_name='uuid',
         required=False,

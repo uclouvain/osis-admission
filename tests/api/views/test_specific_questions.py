@@ -32,8 +32,7 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import ContinuingEducationAdmission
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE, EN_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireFormation,
@@ -802,6 +801,24 @@ class ContinuingEducationSpecificQuestionListApiTestCase(APITestCase):
 
 
 class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
+    def setUp(self):
+        # Mock osis-document
+        self.confirm_remote_upload_patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        patched = self.confirm_remote_upload_patcher.start()
+        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+
+        self.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
+        patched = self.get_remote_metadata_patcher.start()
+        patched.return_value = {"name": "test.pdf"}
+
+        self.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
+        patched = self.get_remote_token_patcher.start()
+        patched.return_value = 'b-token'
+
+        self.save_raw_content_remotely_patcher = patch('osis_document.utils.save_raw_content_remotely')
+        patched = self.save_raw_content_remotely_patcher.start()
+        patched.return_value = 'a-token'
+
     @classmethod
     def setUpTestData(cls):
         # Data
@@ -818,9 +835,10 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         )
 
         cls.update_data = {
-            'specific_question_answers': {
+            'reponses_questions_specifiques': {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
+            'documents_additionnels': ['uuid'],
         }
 
         # Users
@@ -865,12 +883,16 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             },
         )
 
-        admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
+        admission = GeneralEducationAdmission.objects.get(uuid=self.admission.uuid)
         self.assertEqual(
             admission.specific_question_answers,
             {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
+        )
+        self.assertEqual(
+            str(admission.additional_documents[0]),
+            '4bdffb42-552d-415d-9e4c-725f10dce228',
         )
 
 
@@ -898,6 +920,7 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
             'copie_titre_sejour': ['uuid'],
+            'documents_additionnels': ['uuid'],
         }
 
         cls.update_data_without_custom_address = {
@@ -991,6 +1014,10 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         )
         self.assertEqual(
             str(admission.residence_permit[0]),
+            '4bdffb42-552d-415d-9e4c-725f10dce228',
+        )
+        self.assertEqual(
+            str(admission.additional_documents[0]),
             '4bdffb42-552d-415d-9e4c-725f10dce228',
         )
 

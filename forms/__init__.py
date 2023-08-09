@@ -27,8 +27,10 @@ import datetime
 from functools import partial
 from typing import List, Optional
 
+import phonenumbers
 from dal import autocomplete
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import SUPPORTED_MIME_TYPES
@@ -131,6 +133,19 @@ class CustomDateInput(forms.DateInput):
 
     class Media:
         js = ('js/jquery.mask.min.js',)
+
+
+class PhoneField(forms.CharField):
+    def clean(self, value):
+        if not value:
+            return ''
+        try:
+            phone_number_obj = phonenumbers.parse(value)
+            if phonenumbers.is_valid_number(phone_number_obj):
+                return value
+        except phonenumbers.NumberParseException:
+            pass
+        raise ValidationError(_('Invalid phone number'))
 
 
 def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM_SELECTABLE_YEAR):

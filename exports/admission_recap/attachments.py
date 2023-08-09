@@ -91,7 +91,7 @@ class Attachment:
 
     @staticmethod
     def _get_label(base_label: str, sub_label: str, label_interpolation: Optional[dict]):
-        label = (f'{base_label} - {sub_label}' if sub_label else base_label)
+        label = f'{base_label} - {sub_label}' if sub_label else base_label
         if label_interpolation:
             return label % label_interpolation
         return label
@@ -511,6 +511,7 @@ def get_specific_questions_attachments(
                 candidate_language=context.identification.langue_contact,
             )
         )
+    attachments.extend(get_dynamic_questions_attachments(specific_questions))
     attachments.append(
         Attachment(
             identifier='ADDITIONAL_DOCUMENTS',
@@ -520,7 +521,6 @@ def get_specific_questions_attachments(
             candidate_language=context.identification.langue_contact,
         )
     )
-    attachments.extend(get_dynamic_questions_attachments(specific_questions))
     return attachments
 
 

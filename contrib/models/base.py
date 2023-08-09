@@ -37,7 +37,7 @@ from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, Repl
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _, get_language
+from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -303,7 +303,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
 
     training = models.ForeignKey(
         to="base.EducationGroupYear",
-        verbose_name=_("Course"),
+        verbose_name=pgettext_lazy("admission", "Course"),
         related_name="+",
         on_delete=models.CASCADE,
     )

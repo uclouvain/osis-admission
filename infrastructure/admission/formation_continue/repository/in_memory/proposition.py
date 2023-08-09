@@ -185,4 +185,5 @@ class PropositionInMemoryRepository(
             ),
             elements_confirmation=proposition.elements_confirmation,
             pdf_recapitulatif=[],
+            documents_additionnels=[],
         )

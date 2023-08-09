@@ -30,7 +30,12 @@ from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pge
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd import BE_ISO_CODE
-from admission.forms import get_example_text, AdmissionModelCountryChoiceField, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
+from admission.forms import (
+    get_example_text,
+    AdmissionModelCountryChoiceField,
+    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+    PhoneField,
+)
 from admission.utils import force_title
 from base.models.person import Person
 from reference.models.country import Country
@@ -49,7 +54,7 @@ class AdmissionCoordonneesForm(forms.ModelForm):
         required=False,
     )
 
-    phone_mobile = forms.CharField(
+    phone_mobile = PhoneField(
         required=False,
         label=__('admission', 'Telephone (mobile)'),
         widget=forms.TextInput(
@@ -59,7 +64,7 @@ class AdmissionCoordonneesForm(forms.ModelForm):
         ),
     )
 
-    emergency_contact_phone = forms.CharField(
+    emergency_contact_phone = PhoneField(
         required=False,
         label=_("Emergency contact (telephone number)"),
         widget=forms.TextInput(

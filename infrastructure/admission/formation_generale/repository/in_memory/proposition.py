@@ -256,6 +256,7 @@ class PropositionInMemoryRepository(
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
             certificat_refus_fac=proposition.certificat_refus_fac,
             certificat_approbation_fac=proposition.certificat_approbation_fac,
+            documents_additionnels=proposition.documents_additionnels,
         )
 
     @classmethod

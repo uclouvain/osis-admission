@@ -373,18 +373,6 @@ class PersonFormTestCase(TestCase):
             data={
                 **self.form_data,
                 'already_registered': True,
-                'last_registration_year': self.academic_year.pk,
-                'last_registration_id': '',
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('last_registration_id', []))
-
-        form = AdmissionPersonForm(
-            resides_in_belgium=False,
-            data={
-                **self.form_data,
-                'already_registered': True,
                 'last_registration_year': None,
                 'last_registration_id': '1234567',
             },

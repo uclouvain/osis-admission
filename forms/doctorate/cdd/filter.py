@@ -30,7 +30,7 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.db.models import Q
-from django.utils.translation import get_language, gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
 from admission.contrib.models import EntityProxy, Scholarship
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
@@ -171,7 +171,7 @@ class DoctorateListFilterForm(forms.Form):
         ),
     )
     sigles_formations = forms.MultipleChoiceField(
-        label=_('Course'),
+        label=pgettext_lazy('admission', 'Course'),
         required=False,
         widget=autocomplete.Select2Multiple(
             attrs={

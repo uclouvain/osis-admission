@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ class CalendrierInscription(ICalendrierInscription):
     @classmethod
     def get_annees_academiques_pour_calcul(cls) -> List[int]:
         current = AcademicYear.objects.current()
-        return [current.year, current.year - 2, current.year + 2]
+        return [current.year, current.year - 1, current.year + 1]
 
     @classmethod
     def get_pool_ouverts(cls) -> List[Tuple[str, int]]:

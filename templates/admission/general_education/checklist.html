@@ -121,7 +121,8 @@
             {% include 'admission/general_education/includes/checklist/assimilation.html' %}
 
             {% firstof training_choice_url|add:next_url as contextual_training_choice %}
-            {% display _("Course") ''|edit_button:contextual_training_choice as button %}
+            {% translate "Course" context 'admission' as course_label %}
+            {% display course_label ''|edit_button:contextual_training_choice as button %}
             {% field_data button resume_proposition.proposition.formation %}
 
             {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}

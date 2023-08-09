@@ -67,7 +67,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ProcedureDemandeSignatureNonLanceeException,
     PropositionNonApprouveeParMembresCAException,
     PropositionNonApprouveeParPromoteurException,
-    SpecifierNOMASiDejaInscritException,
     ExperiencesAcademiquesNonCompleteesException,
     TypeCompteBancaireRemboursementNonCompleteException,
     AssimilationNonCompleteeException,
@@ -1022,10 +1021,10 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2016 à Janvier 2017',
-                'De Septembre 2017 à Janvier 2018',
-                'De Septembre 2018 à Janvier 2019',
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2016 à Février 2017',
+                'De Septembre 2017 à Février 2018',
+                'De Septembre 2018 à Février 2019',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1039,7 +1038,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1053,8 +1052,8 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2018 à Janvier 2019',
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2018 à Février 2019',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1084,7 +1083,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1253,7 +1252,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1358,10 +1357,10 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             context.exception.exceptions,
             [
                 "L'expérience académique 'Formation AA' est incomplète.",
-                'De Septembre 2016 à Janvier 2017',
-                'De Septembre 2017 à Janvier 2018',
-                'De Septembre 2018 à Janvier 2019',
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2016 à Février 2017',
+                'De Septembre 2017 à Février 2018',
+                'De Septembre 2018 à Février 2019',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )

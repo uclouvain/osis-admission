@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -85,13 +85,13 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldCandidatAuthentiquerPasseport(
                 numero_passeport=self.numero_passeport,
                 passeport=self.passeport,
-                date_expiration_passeport=self.date_expiration_passeport
+                date_expiration_passeport=self.date_expiration_passeport,
             ),
             ShouldCandidatAuthentiquerIdentite(
                 numero_registre_national_belge=self.numero_registre_national_belge,
                 numero_carte_identite=self.numero_carte_identite,
                 carte_identite=self.carte_identite,
-                date_expiration_carte_identite=self.date_expiration_carte_identite
+                date_expiration_carte_identite=self.date_expiration_carte_identite,
             ),
         ]
 

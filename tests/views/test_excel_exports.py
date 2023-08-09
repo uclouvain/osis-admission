@@ -33,7 +33,7 @@ import mock
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, pgettext
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from osis_async.models import AsyncTask
@@ -371,7 +371,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(names[9], _('Enrolment campus'))
         self.assertEqual(names[10], _('Entities'))
         self.assertEqual(names[11], _('Course type'))
-        self.assertEqual(names[12], _('Course'))
+        self.assertEqual(names[12], pgettext('admission', 'Course'))
         self.assertEqual(names[13], _('International scholarship'))
         self.assertEqual(names[14], _('Erasmus Mundus'))
         self.assertEqual(names[15], _('Dual degree scholarship'))
