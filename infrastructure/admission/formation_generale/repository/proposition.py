@@ -478,11 +478,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule=proposition.matricule_candidat,
             annee_courante=annee_courante,
         )
-        poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name and any(
+        candidat_a_reussi_experience_academique_belge = any(
             annee.resultat == Result.SUCCESS.name or annee.resultat == Result.SUCCESS_WITH_RESIDUAL_CREDITS.name
             for experience in curriculum.experiences_academiques
             for annee in experience.annees
             if experience.pays == BE_ISO_CODE
+        )
+        poursuite_de_cycle_a_specifier = (
+            proposition.formation.type == TrainingType.BACHELOR.name and candidat_a_reussi_experience_academique_belge
         )
         additional_condition_title_field = 'name_fr' if is_french_language else 'name_en'
         additional_training_title_field = 'full_title' if is_french_language else 'full_title_en'
@@ -570,6 +573,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,
+            candidat_a_reussi_experience_academique_belge=candidat_a_reussi_experience_academique_belge,
         )
 
     @classmethod

@@ -84,8 +84,8 @@ class GeneralEducationAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'ABCD', 'text': 'ABCD - Test title search'},
-                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg'},
+                    {'id': 'ABCD', 'text': 'ABCD - Test title search', 'type': TrainingType.BACHELOR.name},
+                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg', 'type': TrainingType.BACHELOR.name},
                 ],
             },
         )
@@ -107,7 +107,7 @@ class GeneralEducationAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg'},
+                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg', 'type': TrainingType.BACHELOR.name},
                 ],
             },
         )
@@ -129,7 +129,7 @@ class GeneralEducationAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'ABCD', 'text': 'ABCD - Test title search'},
+                    {'id': 'ABCD', 'text': 'ABCD - Test title search', 'type': TrainingType.BACHELOR.name},
                 ],
             },
         )
@@ -151,7 +151,7 @@ class GeneralEducationAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg'},
+                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg', 'type': TrainingType.BACHELOR.name},
                 ],
             },
         )
@@ -162,7 +162,7 @@ class GeneralEducationAutocompleteTestCase(TestCase):
         response = self.client.get(
             self.url,
             {
-                'forward': json.dumps({'annee_academique': '2024'}),
+                'forward': json.dumps({'annee_academique': '2024', 'type': TrainingType.BACHELOR.name}),
                 'q': 'bar',
             },
         )
@@ -174,7 +174,7 @@ class GeneralEducationAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg'},
+                    {'id': 'FOOBAR', 'text': 'FOOBAR - wegweij wegioj egewgeg', 'type': TrainingType.BACHELOR.name},
                 ],
             },
         )

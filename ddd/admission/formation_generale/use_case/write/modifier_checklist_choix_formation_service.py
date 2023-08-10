@@ -24,10 +24,8 @@
 #
 ##############################################################################
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
-from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
-    ModifierChoixFormationCommand,
     ModifierChecklistChoixFormationCommand,
 )
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
