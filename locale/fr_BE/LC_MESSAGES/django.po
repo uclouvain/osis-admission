@@ -2474,6 +2474,9 @@ msgctxt "admission"
 msgid "Grade"
 msgstr "Mention obtenue"
 
+msgid "Groomed"
+msgstr "Toiletté"
+
 msgid "Grounds for denied"
 msgstr "Motif de refus"
 

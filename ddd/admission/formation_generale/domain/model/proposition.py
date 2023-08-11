@@ -328,6 +328,9 @@ class Proposition(interface.RootEntity):
             libelle=__('Must pay'),
         )
 
+    def specifier_statut_checklist_parcours_anterieur(self, statut_checklist_cible: str):
+        self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
+
     def specifier_paiement_frais_dossier_plus_necessaire_par_gestionnaire(self, statut_checklist_cible: str):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
         self.checklist_actuelle.frais_dossier = {

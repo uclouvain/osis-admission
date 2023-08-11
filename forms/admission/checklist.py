@@ -41,7 +41,7 @@ from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
+from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle, ChoixStatutChecklist
 from admission.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from admission.forms import get_academic_year_choices
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
@@ -95,6 +95,13 @@ class CommentForm(forms.Form):
             )
         if form_for_sic and not user_is_sic or form_for_fac and not user_is_fac:
             self.fields['comment'].disabled = True
+
+
+class StatusForm(forms.Form):
+    status = forms.ChoiceField(
+        choices=ChoixStatutChecklist.choices(),
+        required=True,
+    )
 
 
 class DateInput(forms.DateInput):

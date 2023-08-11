@@ -419,3 +419,9 @@ class ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(interface.C
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
     commentaire_programme_conjoint: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    statut: str

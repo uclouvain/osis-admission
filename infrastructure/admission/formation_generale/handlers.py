@@ -381,4 +381,8 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
+    ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
 }

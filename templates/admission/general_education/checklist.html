@@ -178,18 +178,23 @@
             {% endif %}
 
             {% panel _("Parcours") %}
-            {% include "admission/general_education/includes/checklist/parcours.html" %}
+              {% include "admission/general_education/includes/checklist/parcours.html" %}
             {% endpanel %}
           </div>
         </div>
       {% endwith %}
+
       {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur %}
         <div role="tabpanel" class="tab-pane" id="parcours_anterieur">
-          <p>{% trans "This page is currently under construction." %}</p>
+          {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
+
+          {% bootstrap_form comment_forms.parcours_anterieur %}
+
           <div class="info-part">
           </div>
         </div>
       {% endwith %}
+
       {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
           <div class="form-group btn-group status-group" role="group">

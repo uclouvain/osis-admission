@@ -55,3 +55,4 @@ from .approuver_proposition_par_faculte_avec_nouvelles_informations_service impo
     approuver_proposition_par_faculte_avec_nouvelles_informations,
 )
 from .modifier_checklist_choix_formation_service import modifier_checklist_choix_formation
+from .modifier_statut_checklist_parcours_anterieur_service import modifier_statut_checklist_parcours_anterieur

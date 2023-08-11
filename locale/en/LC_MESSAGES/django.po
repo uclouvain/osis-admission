@@ -2281,6 +2281,9 @@ msgctxt "admission"
 msgid "Grade"
 msgstr ""
 
+msgid "Groomed"
+msgstr ""
+
 msgid "Grounds for denied"
 msgstr ""
 

@@ -63,6 +63,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverPropositionParFaculteCommand,
     RefuserPropositionParFaculteCommand,
     ApprouverPropositionParFaculteAvecNouvellesInformationsCommand,
+    ModifierStatutChecklistParcoursAnterieurCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -72,7 +73,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
 )
-from admission.forms.admission.checklist import ChoixFormationForm
+from admission.forms.admission.checklist import ChoixFormationForm, StatusForm
 from admission.forms.admission.checklist import (
     CommentForm,
     AssimilationForm,
@@ -106,6 +107,7 @@ __all__ = [
     'FacultyRefusalDecisionView',
     'FacultyApprovalDecisionView',
     'FacultyDecisionSendToSicView',
+    'PastExperiencesStatusView',
 ]
 
 
@@ -645,6 +647,42 @@ class ApplicationFeesView(
 
         try:
             message_bus_instance.invoke(cmd)
+        except BusinessException as exception:
+            self.message_on_failure = exception.message
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class PastExperiencesStatusView(
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'past-experiences-status'
+    urlpatterns = {'past-experiences-change-status': 'past-experiences-change-status/<str:status>'}
+    permission_required = 'admission.view_checklist'
+    template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
+    form_class = StatusForm
+
+    def get_initial(self):
+        return self.admission.checklist['current']['parcours_anterieur']['statut']
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['data'] = self.kwargs
+        return kwargs
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                ModifierStatutChecklistParcoursAnterieurCommand(
+                    uuid_proposition=self.admission_uuid,
+                    statut=form.cleaned_data['status'],
+                )
+            )
         except BusinessException as exception:
             self.message_on_failure = exception.message
             return super().form_invalid(form)

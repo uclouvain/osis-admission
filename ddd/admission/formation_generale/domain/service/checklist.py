@@ -100,13 +100,14 @@ class Checklist(interface.DomainService):
                 else ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
             parcours_anterieur=StatutChecklist(
-                libelle=_("Previous experience"),
+                libelle=_("To be processed"),
+                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
                 enfants=[
-                    StatutChecklist(
-                        libelle=cls._format_exeperience(exp),
-                        statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-                    )
-                    for exp in []  # TODO profil_candidat_translator.get_curriculum() ?
+                    # StatutChecklist(
+                    #     libelle=cls._format_exeperience(exp),
+                    #     statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+                    # )
+                    # for exp in []  # TODO profil_candidat_translator.get_curriculum() ?
                 ],
             ),
             financabilite=StatutChecklist(
