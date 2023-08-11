@@ -400,7 +400,6 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'links',
             'erreurs',
             'comptabilite',
-            'bourse_erasmus_mundus',
             'reponses_questions_specifiques',
             'curriculum',
             'pdf_recapitulatif',
@@ -472,6 +471,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             'curriculum',
             'equivalence_diplome',
             'pdf_recapitulatif',
+            'documents_additionnels',
         ]
 
 
@@ -538,6 +538,7 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'pays_nationalite_ue_candidat',
             'copie_titre_sejour',
             'pdf_recapitulatif',
+            'documents_additionnels',
         ]
 
 

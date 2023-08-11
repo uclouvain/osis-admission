@@ -36,7 +36,6 @@ from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
@@ -257,6 +256,7 @@ class PropositionInMemoryRepository(
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
             certificat_refus_fac=proposition.certificat_refus_fac,
             certificat_approbation_fac=proposition.certificat_approbation_fac,
+            documents_additionnels=proposition.documents_additionnels,
         )
 
     @classmethod
@@ -291,6 +291,7 @@ class PropositionInMemoryRepository(
             nationalite_ue_candidat=candidat.pays_nationalite_europeen,
             photo_identite_candidat=candidat.photo_identite,
             poursuite_de_cycle_a_specifier=proposition.poursuite_de_cycle_a_specifier,
+            candidat_a_reussi_experience_academique_belge=proposition.poursuite_de_cycle_a_specifier,
             poursuite_de_cycle=proposition.poursuite_de_cycle if proposition.poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=any(
                 proposition.statut == ChoixStatutPropositionGenerale.EN_BROUILLON for proposition in propositions
@@ -311,7 +312,6 @@ class PropositionInMemoryRepository(
                 nom_pays=cls.countries.get(proposition.profil_soumis_candidat.pays, ''),
                 code_postal=proposition.profil_soumis_candidat.code_postal,
                 ville=proposition.profil_soumis_candidat.ville,
-                lieu_dit=proposition.profil_soumis_candidat.lieu_dit,
                 rue=proposition.profil_soumis_candidat.rue,
                 numero_rue=proposition.profil_soumis_candidat.numero_rue,
                 boite_postale=proposition.profil_soumis_candidat.boite_postale,

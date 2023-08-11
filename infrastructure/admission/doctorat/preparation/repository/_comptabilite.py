@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.contrib.models import DoctorateAdmission
+from admission.contrib.models import DoctorateAdmission, Accounting
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
     Comptabilite,
     comptabilite_non_remplie,
@@ -41,7 +41,7 @@ from admission.ddd.admission.enums import (
 
 
 def get_accounting_from_admission(admission: DoctorateAdmission) -> Comptabilite:
-    accounting = getattr(admission, 'accounting', None)
+    accounting: Accounting = getattr(admission, 'accounting', None)
 
     if not accounting:
         return comptabilite_non_remplie
@@ -68,9 +68,11 @@ def get_accounting_from_admission(admission: DoctorateAdmission) -> Comptabilite
         carte_a_b_refugie=accounting.refugee_a_b_card,
         annexe_25_26_refugies_apatrides=accounting.refugees_stateless_annex_25_26,
         attestation_immatriculation=accounting.registration_certificate,
+        preuve_statut_apatride=accounting.stateless_person_proof,
         carte_a_b=accounting.a_b_card,
         decision_protection_subsidiaire=accounting.subsidiary_protection_decision,
         decision_protection_temporaire=accounting.temporary_protection_decision,
+        carte_a=accounting.a_card,
         sous_type_situation_assimilation_3=getattr(
             ChoixAssimilation3,
             accounting.assimilation_3_situation_type,

@@ -54,6 +54,7 @@ class GeneralEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView)
             {
                 'id': formation.sigle,
                 'text': f'{formation.sigle} - {formation.intitule}',
+                'type': formation.type,
             }
             for formation in education_list
         ]

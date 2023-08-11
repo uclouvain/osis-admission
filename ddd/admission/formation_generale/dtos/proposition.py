@@ -63,6 +63,7 @@ class PropositionDTO(interface.DTO):
 
     curriculum: List[str]
     equivalence_diplome: List[str]
+    documents_additionnels: List[str]
 
     est_bachelier_belge: Optional[bool]
     est_reorientation_inscription_externe: Optional[bool]
@@ -109,6 +110,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
     photo_identite_candidat: List[str]
 
     poursuite_de_cycle_a_specifier: bool
+    candidat_a_reussi_experience_academique_belge: bool
     poursuite_de_cycle: str
 
     candidat_a_plusieurs_demandes: bool

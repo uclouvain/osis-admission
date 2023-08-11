@@ -73,11 +73,14 @@ class Checklist(interface.DomainService):
         ).pays_nationalite_europeen
 
         # TODO Also count non dynamic questions
-        nombre_questions = len(
-            questions_specifiques_translator.search_dto_by_proposition(
-                proposition_uuid=proposition.entity_id.uuid,
-                onglets=[Onglets.INFORMATIONS_ADDITIONNELLES.name],
+        nombre_questions = (
+            len(
+                questions_specifiques_translator.search_dto_by_proposition(
+                    proposition_uuid=proposition.entity_id.uuid,
+                    onglets=[Onglets.INFORMATIONS_ADDITIONNELLES.name],
+                )
             )
+            + 1  # Additional documents
         )
 
         return StatutsChecklistGenerale(

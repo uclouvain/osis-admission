@@ -108,6 +108,8 @@ class _ComptabiliteFactory(factory.Factory):
     relation_parente = LienParente.MERE
     sous_type_situation_assimilation_5 = ChoixAssimilation5.PRIS_EN_CHARGE_OU_DESIGNE_CPAS
     sous_type_situation_assimilation_6 = ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT
+    carte_a = ['file_token.pdf']
+    preuve_statut_apatride = ['file_token.pdf']
 
     carte_resident_longue_duree = ['file_token.pdf']
     carte_cire_sejour_illimite_etranger = ['file_token.pdf']

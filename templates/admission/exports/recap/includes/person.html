@@ -27,7 +27,8 @@
     {% field_data _("Surname") identification.nom "col-md-4" %}
     {% field_data _("First name") identification.prenom "col-md-4" %}
     {% field_data _("Other given names") identification.autres_prenoms "col-md-4" hide_empty=inline %}
-    {% field_data _("Preferred first name") identification.prenom_d_usage "col-md-4" hide_empty=inline %}
+  </div>
+  <div class="row">
     {% field_data _("Sex") identification.sexe|enum_display:'ChoixSexe' "col-md-4" %}
     {% field_data _("Gender") identification.genre|enum_display:'ChoixGenre' "col-md-4" %}
   </div>
@@ -52,12 +53,21 @@
   {% if identification.numero_registre_national_belge %}
     {% field_data _("Belgian national registry number (NISS)") identification.numero_registre_national_belge %}
     {% field_data _("Identity card (both sides)") identification.carte_identite %}
+    <div class="row">
+      {% field_data _('Identity card expiry date') identification.date_expiration_carte_identite "col-md-6" %}
+    </div>
   {% elif identification.numero_carte_identite %}
     {% field_data _("Identity card number") identification.numero_carte_identite %}
     {% field_data _("Identity card (both sides)") identification.carte_identite %}
+    <div class="row">
+      {% field_data _('Identity card expiry date') identification.date_expiration_carte_identite "col-md-6" %}
+    </div>
   {% elif identification.numero_passeport %}
     {% field_data _("Passport number") identification.numero_passeport %}
     {% field_data _("Passport") identification.passeport %}
+    <div class="row">
+      {% field_data _('Passport expiry date') identification.date_expiration_passeport "col-md-6" %}
+    </div>
   {% else %}
     {% translate 'Not specified' %}
   {% endif %}

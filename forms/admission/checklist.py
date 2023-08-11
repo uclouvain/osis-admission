@@ -29,13 +29,11 @@ from typing import Optional
 from ckeditor.widgets import CKEditorWidget
 from dal import forward, autocomplete
 from dal_select2 import widgets as autocomplete_widgets
-from dal_select2.widgets import I18N_PATH
 from django import forms
 from django.conf import settings
-from django.contrib.postgres.aggregates import StringAgg
 from django.core.exceptions import ValidationError
-from django.db.models import Subquery, OuterRef, F
-from django.utils.translation import gettext_lazy as _, get_language, ngettext, ngettext_lazy
+from django.db.models import F
+from django.utils.translation import gettext_lazy as _, get_language, ngettext_lazy, pgettext_lazy
 from django_filters.fields import ModelChoiceField
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
@@ -44,17 +42,17 @@ from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
-from admission.forms import RadioBooleanField
+from admission.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from admission.forms import get_academic_year_choices
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
+from base.models.enums.education_group_types import TrainingType
 from base.models.learning_unit_year import LearningUnitYear
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
 from osis_document.utils import is_uuid
-from program_management.models.education_group_version import EducationGroupVersion
 
 
 class CommentForm(forms.Form):
@@ -130,18 +128,22 @@ class ChoixFormationForm(forms.Form):
         label=_("Academic year"),
     )
     formation = forms.CharField(
-        label=_("Course"),
+        label=pgettext_lazy("admission", "Course"),
         widget=autocomplete.ListSelect2(
-            forward=['annee_academique'], url="admission:autocomplete:general-education-trainings"
+            forward=['annee_academique'],
+            url="admission:autocomplete:general-education-trainings",
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
     poursuite_cycle = forms.ChoiceField(
         label=_("Cycle pursuit"),
         choices=PoursuiteDeCycle.choices(),
+        required=False,
     )
 
     def __init__(self, *args, **kwargs):
         formation = kwargs.pop('formation')
+        self.has_success_be_experience = kwargs.pop('has_success_be_experience')
         super().__init__(*args, **kwargs)
         today = datetime.date.today()
         try:
@@ -149,7 +151,39 @@ class ChoixFormationForm(forms.Form):
         except AcademicYear.DoesNotExist:
             current_year = today.year
         self.fields['annee_academique'].choices = get_academic_year_choices(current_year - 2, current_year + 2)
-        self.fields['formation'].widget.choices = [(formation.sigle, f'{formation.sigle} - {formation.intitule}')]
+
+        if self.data.get(self.add_prefix('formation')):
+            training = (
+                EducationGroupYear.objects.select_related('education_group_type')
+                .filter(
+                    acronym=self.data.get('formation'),
+                )
+                .first()
+            )
+            training_title = training.title if get_language() == settings.LANGUAGE_CODE_FR else training.title_english
+            self.fields['formation'].widget.choices = [
+                (training.acronym, f'{training.acronym} - {training_title}'),
+            ]
+            self.initial_training_type = training.education_group_type.name
+        else:
+            self.fields['formation'].widget.choices = [(formation.sigle, f'{formation.sigle} - {formation.intitule}')]
+            self.initial_training_type = formation.type
+
+    def clean(self):
+        cleaned_data = super().clean()
+        formation = cleaned_data.get('formation')
+
+        if formation and self.has_success_be_experience:
+            # The bachelor cycle continuation field is shown and required if the training is a bachelor and the user has
+            # successfully completed a belgian academic experience
+            if self.initial_training_type == TrainingType.BACHELOR.name:
+                if not cleaned_data.get('poursuite_cycle'):
+                    self.add_error('poursuite_cycle', FIELD_REQUIRED_MESSAGE)
+            else:
+                cleaned_data['poursuite_cycle'] = PoursuiteDeCycle.TO_BE_DETERMINED.name
+        else:
+            cleaned_data['poursuite_cycle'] = PoursuiteDeCycle.TO_BE_DETERMINED.name
+        return cleaned_data
 
 
 class FacDecisionRefusalForm(forms.Form):
@@ -167,6 +201,7 @@ class FacDecisionRefusalForm(forms.Form):
         widget=autocomplete.ModelSelect2(
             url='admission:autocomplete:checklist:refusal-reason',
             forward=['category'],
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
 
@@ -249,11 +284,14 @@ class FacDecisionApprovalForm(forms.ModelForm):
     )
 
     other_training_accepted_by_fac = TrainingModelChoiceField(
-        label=_('Course'),
+        label=pgettext_lazy('admission', 'Course'),
         queryset=EducationGroupYear.objects.none(),
         to_field_name='uuid',
         required=False,
-        widget=autocomplete_widgets.ListSelect2(url="admission:autocomplete:managed-education-trainings"),
+        widget=autocomplete_widgets.ListSelect2(
+            url="admission:autocomplete:managed-education-trainings",
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+        ),
     )
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
@@ -263,6 +301,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
             attrs={
                 'data-token-separators': [SEPARATOR],
                 'data-tags': 'true',
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
             },
         ),
         required=False,
@@ -278,6 +317,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
         required=False,
         widget=autocomplete_widgets.Select2Multiple(
             url='admission:autocomplete:checklist:additional-approval-condition',
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
 

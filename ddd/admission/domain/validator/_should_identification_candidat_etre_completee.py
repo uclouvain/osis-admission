@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -108,9 +108,10 @@ class ShouldCandidatSpecifierDateOuAnneeNaissance(BusinessValidator):
 class ShouldCandidatAuthentiquerPasseport(BusinessValidator):
     numero_passeport: Optional[str]
     passeport: List[str]
+    date_expiration_passeport: Optional[datetime.date]
 
     def validate(self, *args, **kwargs):
-        if self.numero_passeport and not self.passeport:
+        if self.numero_passeport and not (self.passeport and self.date_expiration_passeport):
             raise DetailsPasseportNonSpecifiesException
 
 
@@ -119,9 +120,12 @@ class ShouldCandidatAuthentiquerIdentite(BusinessValidator):
     numero_registre_national_belge: Optional[str]
     numero_carte_identite: Optional[str]
     carte_identite: List[str]
+    date_expiration_carte_identite: Optional[datetime.date]
 
     def validate(self, *args, **kwargs):
-        if (self.numero_registre_national_belge or self.numero_carte_identite) and not self.carte_identite:
+        if (self.numero_registre_national_belge or self.numero_carte_identite) and not (
+            self.carte_identite and self.date_expiration_carte_identite
+        ):
             raise CarteIdentiteeNonSpecifieeException
 
 

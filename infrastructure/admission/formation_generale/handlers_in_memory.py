@@ -423,4 +423,8 @@ COMMAND_HANDLERS = {
         historique=_historique_formation_generale,
         pdf_generation=_pdf_generation,
     ),
+    CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
 }

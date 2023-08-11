@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -77,6 +77,8 @@ class TestCompleterComptabilitePropositionService(TestCase):
             carte_a_b=['carte_a_b.pdf'],
             decision_protection_subsidiaire=['decision_protection_subsidiaire.pdf'],
             decision_protection_temporaire=['decision_protection_temporaire.pdf'],
+            preuve_statut_apatride=['preuve_statut_apatride.pdf'],
+            carte_a=['carte_a.pdf'],
             # Assimilation 3
             sous_type_situation_assimilation_3=ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT.name,
             titre_sejour_3_mois_professionel=['titre_sejour_3_mois_professionel.pdf'],
@@ -232,7 +234,7 @@ class TestCompleterComptabilitePropositionService(TestCase):
         self.assertEqual(proposition.comptabilite.etudiant_solidaire, self.cmd.etudiant_solidaire)
         self.assertEqual(
             proposition.comptabilite.type_numero_compte,
-            ChoixTypeCompteBancaire[self.cmd.type_numero_compte]
+            ChoixTypeCompteBancaire[self.cmd.type_numero_compte],
         )
         self.assertEqual(proposition.comptabilite.numero_compte_iban, self.cmd.numero_compte_iban)
         self.assertEqual(proposition.comptabilite.iban_valide, self.cmd.iban_valide)

@@ -117,6 +117,8 @@ class Proposition(interface.RootEntity):
 
     profil_soumis_candidat: ProfilCandidat = None
 
+    documents_additionnels: List[str] = attr.Factory(list)
+
     documents_demandes: Dict = attr.Factory(dict)
 
     poursuite_de_cycle_a_specifier: bool = False
@@ -371,9 +373,11 @@ class Proposition(interface.RootEntity):
         carte_a_b_refugie: List[str],
         annexe_25_26_refugies_apatrides: List[str],
         attestation_immatriculation: List[str],
+        preuve_statut_apatride: List[str],
         carte_a_b: List[str],
         decision_protection_subsidiaire: List[str],
         decision_protection_temporaire: List[str],
+        carte_a: List[str],
         sous_type_situation_assimilation_3: Optional[str],
         titre_sejour_3_mois_professionel: List[str],
         fiches_remuneration: List[str],
@@ -412,6 +416,7 @@ class Proposition(interface.RootEntity):
             demande_allocation_d_etudes_communaute_francaise_belgique=demande_allocation_etudes_fr_be,
             enfant_personnel=enfant_personnel,
             attestation_enfant_personnel=attestation_enfant_personnel,
+            preuve_statut_apatride=preuve_statut_apatride,
             type_situation_assimilation=TypeSituationAssimilation[type_situation_assimilation]
             if type_situation_assimilation
             else None,
@@ -431,6 +436,7 @@ class Proposition(interface.RootEntity):
             carte_a_b=carte_a_b,
             decision_protection_subsidiaire=decision_protection_subsidiaire,
             decision_protection_temporaire=decision_protection_temporaire,
+            carte_a=carte_a,
             sous_type_situation_assimilation_3=ChoixAssimilation3[sous_type_situation_assimilation_3]
             if sous_type_situation_assimilation_3
             else None,
@@ -470,3 +476,11 @@ class Proposition(interface.RootEntity):
             prenom_titulaire_compte=prenom_titulaire_compte,
             nom_titulaire_compte=nom_titulaire_compte,
         )
+
+    def completer_informations_complementaires(
+        self,
+        reponses_questions_specifiques: Dict,
+        documents_additionnels: List[str],
+    ):
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.documents_additionnels = documents_additionnels

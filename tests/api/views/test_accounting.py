@@ -96,6 +96,8 @@ doctorate_file_fields = [
     ['scholarship_certificate', 'attestation_boursier'],
     ['ue_long_term_stay_identity_document', 'titre_identite_sejour_longue_duree_ue'],
     ['belgium_residence_permit', 'titre_sejour_belgique'],
+    ['stateless_person_proof', 'preuve_statut_apatride'],
+    ['a_card', 'carte_a'],
 ]
 
 general_file_fields = doctorate_file_fields + [
@@ -163,7 +165,7 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
             cls.doctorate_new_file_uuids[field[1]] = [str(uuid.uuid4())]
 
         cls.default_api_data = {
-            '' 'uuid_proposition': cls.admission.uuid,
+            'uuid_proposition': cls.admission.uuid,
             'etudiant_solidaire': False,
             'type_numero_compte': ChoixTypeCompteBancaire.AUTRE_FORMAT.name,
             'numero_compte_iban': 'GB87BARC20658244971655',

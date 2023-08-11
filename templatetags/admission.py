@@ -286,7 +286,7 @@ TAB_TREES = {
             Tab('confirmation', _('Confirmation exam')),
             Tab('extension-request', _('New deadline')),
         ],
-        Tab('training', _('Course'), 'book-open-reader'): [
+        Tab('training', pgettext('admission', 'Course'), 'book-open-reader'): [
             Tab('doctoral-training', _('PhD training')),
             Tab('complementary-training', _('Complementary training')),
             Tab('course-enrollment', _('Course unit enrolment')),

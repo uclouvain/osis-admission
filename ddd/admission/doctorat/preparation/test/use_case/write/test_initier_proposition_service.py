@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -83,7 +83,6 @@ class TestInitierPropositionService(TestCase):
             annee_formation=2020,
             matricule_candidat='01234567',
             commission_proximite=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
-            bourse_erasmus_mundus=self._get_une_bourse_par_type(type_bourse=TypeBourse.ERASMUS_MUNDUS),
         )
 
         self.doctorat_non_CDE = self.doctorat_non_CDSS = 'AGRO3DP'
@@ -100,7 +99,6 @@ class TestInitierPropositionService(TestCase):
         self.assertEqual(self.cmd.annee_formation, proposition.formation_id.annee)
         self.assertEqual(self.cmd.matricule_candidat, proposition.matricule_candidat)
         self.assertEqual(ChoixStatutPropositionDoctorale.EN_BROUILLON, proposition.statut)
-        self.assertEqual(self.cmd.bourse_erasmus_mundus, proposition.bourse_erasmus_mundus_id.uuid)
 
     def test_should_initier_financement(self):
         proposition_id = self.message_bus.invoke(self.cmd)
@@ -226,11 +224,6 @@ class TestInitierPropositionService(TestCase):
         with self.assertRaises(MultipleBusinessExceptions) as e:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(e.exception.exceptions.pop(), JustificationRequiseException)
-
-    def test_should_empecher_si_bourse_inconnue(self):
-        cmd = attr.evolve(self.cmd, bourse_erasmus_mundus=str(uuid.uuid4()))
-        with self.assertRaises(BourseNonTrouveeException):
-            self.message_bus.invoke(cmd)
 
     def test_should_empecher_si_trop_demandes_en_parallele(self):
         for proposition_index in range(MAXIMUM_PROPOSITIONS_EN_COURS):

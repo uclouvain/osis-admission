@@ -226,6 +226,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'annual_program_contact_person_name': entity.nom_personne_contact_programme_annuel_annuel,
                 'annual_program_contact_person_email': entity.email_personne_contact_programme_annuel_annuel,
                 'join_program_fac_comment': entity.commentaire_programme_conjoint,
+                'additional_documents': entity.documents_additionnels,
             },
         )
 
@@ -263,9 +264,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'refugee_a_b_card': entity.comptabilite.carte_a_b_refugie,
                 'refugees_stateless_annex_25_26': entity.comptabilite.annexe_25_26_refugies_apatrides,
                 'registration_certificate': entity.comptabilite.attestation_immatriculation,
+                'stateless_person_proof': entity.comptabilite.preuve_statut_apatride,
                 'a_b_card': entity.comptabilite.carte_a_b,
                 'subsidiary_protection_decision': entity.comptabilite.decision_protection_subsidiaire,
                 'temporary_protection_decision': entity.comptabilite.decision_protection_temporaire,
+                'a_card': entity.comptabilite.carte_a,
                 'assimilation_3_situation_type': entity.comptabilite.sous_type_situation_assimilation_3.name
                 if entity.comptabilite.sous_type_situation_assimilation_3
                 else '',
@@ -394,6 +397,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,
+            documents_additionnels=admission.additional_documents,
         )
 
     @classmethod
@@ -451,6 +455,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
+            documents_additionnels=admission.additional_documents,
         )
 
     @classmethod
@@ -473,11 +478,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule=proposition.matricule_candidat,
             annee_courante=annee_courante,
         )
-        poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name and any(
+        candidat_a_reussi_experience_academique_belge = any(
             annee.resultat == Result.SUCCESS.name or annee.resultat == Result.SUCCESS_WITH_RESIDUAL_CREDITS.name
             for experience in curriculum.experiences_academiques
             for annee in experience.annees
             if experience.pays == BE_ISO_CODE
+        )
+        poursuite_de_cycle_a_specifier = (
+            proposition.formation.type == TrainingType.BACHELOR.name and candidat_a_reussi_experience_academique_belge
         )
         additional_condition_title_field = 'name_fr' if is_french_language else 'name_en'
         additional_training_title_field = 'full_title' if is_french_language else 'full_title_en'
@@ -565,6 +573,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,
+            candidat_a_reussi_experience_academique_belge=candidat_a_reussi_experience_academique_belge,
         )
 
     @classmethod

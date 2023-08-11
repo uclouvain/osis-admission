@@ -103,5 +103,7 @@ class GetComptabiliteTestCase(SimpleTestCase):
                 code_bic_swift_banque='GKCCBEBB',
                 prenom_titulaire_compte='John',
                 nom_titulaire_compte='Doe',
+                preuve_statut_apatride=['file_token.pdf'],
+                carte_a=['file_token.pdf'],
             ),
         )

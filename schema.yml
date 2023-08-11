@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.79
+  version: 1.0.80
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -6060,9 +6060,6 @@ components:
         last_name:
           type: string
           maxLength: 50
-        first_name_in_use:
-          type: string
-          maxLength: 50
         birth_date:
           type: string
           format: date
@@ -6124,6 +6121,14 @@ components:
         passport_number:
           type: string
           maxLength: 255
+        id_card_expiry_date:
+          type: string
+          format: date
+          nullable: true
+        passport_expiry_date:
+          type: string
+          format: date
+          nullable: true
         last_registration_year:
           type: integer
           nullable: true
@@ -6181,10 +6186,6 @@ components:
         contact:
           type: object
           properties:
-            location:
-              type: string
-              nullable: true
-              maxLength: 255
             postal_code:
               type: string
               nullable: true
@@ -6205,17 +6206,10 @@ components:
             postal_box:
               type: string
               maxLength: 20
-            place:
-              type: string
-              maxLength: 255
           nullable: true
         residential:
           type: object
           properties:
-            location:
-              type: string
-              nullable: true
-              maxLength: 255
             postal_code:
               type: string
               nullable: true
@@ -6236,20 +6230,20 @@ components:
             postal_box:
               type: string
               maxLength: 20
-            place:
-              type: string
-              maxLength: 255
           nullable: true
         private_email:
           type: string
           format: email
         phone_mobile:
           type: string
+        emergency_contact_phone:
+          type: string
       required:
       - contact
       - residential
       - private_email
       - phone_mobile
+      - emergency_contact_phone
     HighSchoolDiploma:
       type: object
       properties:
@@ -6274,9 +6268,6 @@ components:
               items:
                 type: string
               maxItems: 1
-            result:
-              $ref: '#/components/schemas/DiplomaResults'
-              nullable: true
             community:
               $ref: '#/components/schemas/BelgianCommunitiesOfEducation'
               nullable: true
@@ -6297,87 +6288,6 @@ components:
             other_institute_address:
               type: string
               maxLength: 500
-            schedule:
-              type: object
-              properties:
-                id:
-                  type: integer
-                  readOnly: true
-                latin:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                greek:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                chemistry:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                physic:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                biology:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                german:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                dutch:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                english:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                french:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                spanish:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                modern_languages_other_label:
-                  type: string
-                  description: "Si autre langue, pr\xE9cisez"
-                  maxLength: 25
-                modern_languages_other_hours:
-                  type: integer
-                  maximum: 2147483647
-                  nullable: true
-                  minimum: 0
-                mathematics:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                it:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                social_sciences:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                economic_sciences:
-                  type: integer
-                  maximum: 2147483647
-                  minimum: 0
-                other_label:
-                  type: string
-                  description: "Si autres mati\xE8res optionnelles, pr\xE9cisez"
-                  maxLength: 25
-                other_hours:
-                  type: integer
-                  maximum: 2147483647
-                  nullable: true
-                  minimum: 0
-              nullable: true
           required:
           - academic_graduation_year
           nullable: true
@@ -6479,13 +6389,6 @@ components:
       - THIS_YEAR
       - 'NO'
       type: string
-    DiplomaResults:
-      enum:
-      - NOT_KNOWN_YET_RESULT
-      - LT_65_RESULT
-      - BTW_65_AND_75_RESULT
-      - GT_75_RESULT
-      type: string
     BelgianCommunitiesOfEducation:
       enum:
       - ''
@@ -6503,6 +6406,13 @@ components:
       - ARTISTIC_QUALIFICATION
       - PROFESSIONAL_EDUCATION
       - PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM
+      type: string
+    DiplomaResults:
+      enum:
+      - NOT_KNOWN_YET_RESULT
+      - LT_65_RESULT
+      - BTW_65_AND_75_RESULT
+      - GT_75_RESULT
       type: string
     ForeignDiplomaTypes:
       enum:
@@ -7073,23 +6983,6 @@ components:
                 type: string
               detail:
                 type: string
-        bourse_erasmus_mundus:
-          type: object
-          properties:
-            uuid:
-              type: string
-            nom_court:
-              type: string
-            nom_long:
-              type: string
-            type:
-              type: string
-          required:
-          - uuid
-          - nom_court
-          - nom_long
-          - type
-          nullable: true
         reponses_questions_specifiques:
           type: object
         curriculum:
@@ -7246,6 +7139,10 @@ components:
           type: array
           items:
             type: string
+        preuve_statut_apatride:
+          type: array
+          items:
+            type: string
         carte_a_b:
           type: array
           items:
@@ -7255,6 +7152,10 @@ components:
           items:
             type: string
         decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        carte_a:
           type: array
           items:
             type: string
@@ -7387,9 +7288,11 @@ components:
       - carte_a_b_refugie
       - annexe_25_26_refugies_apatrides
       - attestation_immatriculation
+      - preuve_statut_apatride
       - carte_a_b
       - decision_protection_subsidiaire
       - decision_protection_temporaire
+      - carte_a
       - sous_type_situation_assimilation_3
       - titre_sejour_3_mois_professionel
       - fiches_remuneration
@@ -9407,6 +9310,10 @@ components:
           type: array
           items:
             type: string
+        documents_additionnels:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - reference
@@ -9420,6 +9327,7 @@ components:
       - curriculum
       - equivalence_diplome
       - pdf_recapitulatif
+      - documents_additionnels
     PoolQuestions:
       type: object
       properties:
@@ -9506,6 +9414,10 @@ components:
           type: array
           items:
             type: string
+        preuve_statut_apatride:
+          type: array
+          items:
+            type: string
         carte_a_b:
           type: array
           items:
@@ -9515,6 +9427,10 @@ components:
           items:
             type: string
         decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        carte_a:
           type: array
           items:
             type: string
@@ -9647,9 +9563,11 @@ components:
       - carte_a_b_refugie
       - annexe_25_26_refugies_apatrides
       - attestation_immatriculation
+      - preuve_statut_apatride
       - carte_a_b
       - decision_protection_subsidiaire
       - decision_protection_temporaire
+      - carte_a
       - titre_sejour_3_mois_professionel
       - fiches_remuneration
       - titre_sejour_3_mois_remplacement
@@ -9840,8 +9758,6 @@ components:
               type: string
             nom_pays:
               type: string
-            lieu_dit:
-              type: string
             numero_rue:
               type: string
             boite_postale:
@@ -9854,7 +9770,6 @@ components:
           - ville
           - pays
           - nom_pays
-          - lieu_dit
           - numero_rue
           - boite_postale
           - destinataire
@@ -9869,6 +9784,10 @@ components:
           items:
             type: string
         pdf_recapitulatif:
+          type: array
+          items:
+            type: string
+        documents_additionnels:
           type: array
           items:
             type: string
@@ -9887,6 +9806,7 @@ components:
       - pays_nationalite_candidat
       - copie_titre_sejour
       - pdf_recapitulatif
+      - documents_additionnels
     SectorDTO:
       type: object
       properties:
@@ -10076,8 +9996,6 @@ components:
           - STATISTICS
           - BIOLOGY
           - GEOGRAPHY
-          type: string
-        bourse_erasmus_mundus:
           type: string
       required:
       - type_admission
@@ -10545,6 +10463,10 @@ components:
           type: array
           items:
             type: string
+        preuve_statut_apatride:
+          type: array
+          items:
+            type: string
         carte_a_b:
           type: array
           items:
@@ -10554,6 +10476,10 @@ components:
           items:
             type: string
         decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        carte_a:
           type: array
           items:
             type: string
@@ -10669,9 +10595,11 @@ components:
       - carte_a_b_refugie
       - annexe_25_26_refugies_apatrides
       - attestation_immatriculation
+      - preuve_statut_apatride
       - carte_a_b
       - decision_protection_subsidiaire
       - decision_protection_temporaire
+      - carte_a
       - titre_sejour_3_mois_professionel
       - fiches_remuneration
       - titre_sejour_3_mois_remplacement
@@ -10705,8 +10633,6 @@ components:
         commission_proximite:
           type: string
         justification:
-          type: string
-        bourse_erasmus_mundus:
           type: string
         reponses_questions_specifiques:
           type: object
@@ -10856,8 +10782,14 @@ components:
     ModifierQuestionsSpecifiquesFormationGeneraleCommand:
       type: object
       properties:
-        specific_question_answers:
+        reponses_questions_specifiques:
           type: object
+        documents_additionnels:
+          type: array
+          items:
+            type: string
+      required:
+      - documents_additionnels
     GeneralEducationCompleterCurriculumCommand:
       type: object
       properties:
@@ -10930,6 +10862,10 @@ components:
           type: array
           items:
             type: string
+        preuve_statut_apatride:
+          type: array
+          items:
+            type: string
         carte_a_b:
           type: array
           items:
@@ -10939,6 +10875,10 @@ components:
           items:
             type: string
         decision_protection_temporaire:
+          type: array
+          items:
+            type: string
+        carte_a:
           type: array
           items:
             type: string
@@ -11057,9 +10997,11 @@ components:
       - carte_a_b_refugie
       - annexe_25_26_refugies_apatrides
       - attestation_immatriculation
+      - preuve_statut_apatride
       - carte_a_b
       - decision_protection_subsidiaire
       - decision_protection_temporaire
+      - carte_a
       - titre_sejour_3_mois_professionel
       - fiches_remuneration
       - titre_sejour_3_mois_remplacement
@@ -11142,16 +11084,19 @@ components:
           type: string
         adresse_facturation_boite_postale:
           type: string
-        adresse_facturation_lieu_dit:
-          type: string
         reponses_questions_specifiques:
           type: object
         copie_titre_sejour:
           type: array
           items:
             type: string
+        documents_additionnels:
+          type: array
+          items:
+            type: string
       required:
       - copie_titre_sejour
+      - documents_additionnels
     ModifierMembreSupervisionExterne:
       type: object
       properties:

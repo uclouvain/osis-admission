@@ -150,7 +150,6 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'training',
         'thesis_institute',
         'international_scholarship',
-        'erasmus_mundus_scholarship',
     ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status', 'view_on_portal']
     list_filter = ['status', 'type']

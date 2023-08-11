@@ -45,7 +45,6 @@ class ProfilCandidatDTO(interface.DTO):
     nom_pays: Optional[str] = ''
     code_postal: Optional[str] = ''
     ville: Optional[str] = ''
-    lieu_dit: Optional[str] = ''
     rue: Optional[str] = ''
     numero_rue: Optional[str] = ''
     boite_postale: Optional[str] = ''
@@ -64,7 +63,6 @@ class ProfilCandidatDTO(interface.DTO):
             nom_pays=nom_pays_adresse,
             code_postal=coordinates.get('postal_code'),
             ville=coordinates.get('city'),
-            lieu_dit=coordinates.get('place'),
             rue=coordinates.get('street'),
             numero_rue=coordinates.get('street_number'),
             boite_postale=coordinates.get('postal_box'),

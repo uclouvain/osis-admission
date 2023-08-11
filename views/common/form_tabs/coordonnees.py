@@ -95,7 +95,6 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
                 'country': address.get('country').iso_code,
                 'postal_code': address.get('postal_code'),
                 'city': address.get('city'),
-                'place': address.get('place'),
                 'street': address.get('street'),
                 'street_number': address.get('street_number'),
                 'postal_box': address.get('postal_box'),

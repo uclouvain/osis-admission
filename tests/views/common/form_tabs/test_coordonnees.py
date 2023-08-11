@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -32,13 +31,11 @@ from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre, ChoixSexe
 from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
-from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
@@ -178,7 +175,6 @@ class CoordonneesFormTestCase(TestCase):
                 'be_postal_code': '',
                 'city': '',
                 'country': None,
-                'place': '',
                 'postal_box': '',
                 'postal_code': '',
                 'street': '',
@@ -190,7 +186,6 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'city': '',
                 'country': None,
-                'place': '',
                 'postal_box': '',
                 'postal_code': '',
                 'street': '',
@@ -232,7 +227,6 @@ class CoordonneesFormTestCase(TestCase):
                 'street_number': '123',
                 'city': 'PARIS',
                 'postal_code': '92000',
-                'place': 'MUSIC PLACE',
                 'be_city': 'Louvain-La-Neuve',
                 'be_postal_code': '1348',
             },
@@ -245,7 +239,6 @@ class CoordonneesFormTestCase(TestCase):
                 'country': self.france_country,
                 'city': 'Paris',
                 'postal_code': '92000',
-                'place': 'Music Place',
                 'street': 'Art Street',
                 'postal_box': '',
                 'be_city': 'Louvain-La-Neuve',
@@ -259,7 +252,6 @@ class CoordonneesFormTestCase(TestCase):
                 'country': self.france_country,
                 'city': 'Paris',
                 'postal_code': '92000',
-                'place': 'Music Place',
                 'street': 'Art Street',
                 'postal_box': '',
                 'street_number': '123',
@@ -288,7 +280,6 @@ class CoordonneesFormTestCase(TestCase):
                 'street_number': '123',
                 'city': 'PARIS',
                 'postal_code': '92000',
-                'place': 'MUSIC PLACE',
                 'be_city': 'Louvain-La-Neuve',
                 'be_postal_code': '1348',
             },
@@ -301,7 +292,6 @@ class CoordonneesFormTestCase(TestCase):
                 'country': self.belgium_country,
                 'city': 'Paris',
                 'postal_code': '92000',
-                'place': 'Music Place',
                 'street': 'Art Street',
                 'postal_box': '',
                 'be_city': 'Louvain-La-Neuve',
@@ -315,7 +305,6 @@ class CoordonneesFormTestCase(TestCase):
                 'country': self.belgium_country,
                 'city': 'Louvain-La-Neuve',
                 'postal_code': '1348',
-                'place': 'Music Place',
                 'street': 'Art Street',
                 'postal_box': '',
                 'street_number': '123',
@@ -347,7 +336,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.post(
             self.general_url,
             {
-                'phone_mobile': '0123456789',
+                'phone_mobile': '+3223742211',
                 'private_email': 'john.doe@example.com',
                 'residential-country': self.france_country.pk,
                 'residential-postal_code': '92000',
@@ -360,7 +349,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertRedirects(response, self.general_redirect_url)
 
         candidate = Person.objects.get(pk=self.general_admission.candidate.pk)
-        self.assertEqual(candidate.phone_mobile, '0123456789')
+        self.assertEqual(candidate.phone_mobile, '+3223742211')
         self.assertEqual(candidate.private_email, 'joe.foe@example.com')  # Not updated (disabled field)
 
     def test_general_coordinates_form_post_residential_address(self):
@@ -532,7 +521,6 @@ class CoordonneesFormTestCase(TestCase):
                 'country': 'BE',
                 'postal_code': '1348',
                 'city': 'Louvain-La-Neuve',
-                'place': 'P1',
                 'street': 'University street',
                 'street_number': '1',
                 'postal_box': 'PB1',
@@ -549,7 +537,6 @@ class CoordonneesFormTestCase(TestCase):
                 'residential-street': 'Peace street',
                 'residential-street_number': '10',
                 'residential-postal_box': 'PB2',
-                'residential-place': 'P2',
             },
         )
 
@@ -571,7 +558,6 @@ class CoordonneesFormTestCase(TestCase):
                 'residential-street': 'Peace street',
                 'residential-street_number': '10',
                 'residential-postal_box': 'PB2',
-                'residential-place': 'P2',
             },
         )
 
@@ -586,7 +572,6 @@ class CoordonneesFormTestCase(TestCase):
                     'country': 'FR',
                     'postal_code': '92000',
                     'city': 'Paris',
-                    'place': 'P2',
                     'street': 'Peace street',
                     'street_number': '10',
                     'postal_box': 'PB2',
@@ -608,14 +593,12 @@ class CoordonneesFormTestCase(TestCase):
                 'residential-street': 'Peace street',
                 'residential-street_number': '10',
                 'residential-postal_box': 'PB2',
-                'residential-place': 'P2',
                 'contact-country': self.belgium_country.pk,
                 'contact-be_postal_code': '1000',
                 'contact-be_city': 'Bruxelles',
                 'contact-street': 'Main street',
                 'contact-street_number': '15',
                 'contact-postal_box': 'PB3',
-                'contact-place': 'P3',
             },
         )
 
@@ -633,7 +616,6 @@ class CoordonneesFormTestCase(TestCase):
                     'street': 'Main street',
                     'street_number': '15',
                     'postal_box': 'PB3',
-                    'place': 'P3',
                 },
             },
         )
@@ -673,7 +655,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.post(
             self.continuing_url,
             {
-                'phone_mobile': '0123456789',
+                'phone_mobile': '+3223742211',
                 'private_email': 'john.doe@example.com',
                 'residential-country': self.france_country.pk,
                 'residential-postal_code': '92000',
@@ -686,7 +668,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertRedirects(response, redirect_url)
 
         candidate = Person.objects.get(pk=self.continuing_admission.candidate.pk)
-        self.assertEqual(candidate.phone_mobile, '0123456789')
+        self.assertEqual(candidate.phone_mobile, '+3223742211')
 
     def test_continuing_coordinates_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -729,7 +711,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.post(
             self.doctorate_url,
             {
-                'phone_mobile': '0123456789',
+                'phone_mobile': '+3223742211',
                 'private_email': 'john.doe@example.com',
                 'residential-country': self.france_country.pk,
                 'residential-postal_code': '92000',
@@ -743,7 +725,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertRedirects(response, redirect_url)
 
         candidate = Person.objects.get(pk=self.doctorate_admission.candidate.pk)
-        self.assertEqual(candidate.phone_mobile, '0123456789')
+        self.assertEqual(candidate.phone_mobile, '+3223742211')
 
     def test_doctoral_coordinates_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
