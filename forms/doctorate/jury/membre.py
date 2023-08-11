@@ -86,7 +86,7 @@ class JuryMembreForm(forms.Form):
     )
 
     titre = forms.ChoiceField(
-        label=pgettext_lazy("jury", "Title"),
+        label=pgettext_lazy("admission", "Title"),
         choices=TitreMembre.choices(),
         required=False,
     )
@@ -104,7 +104,7 @@ class JuryMembreForm(forms.Form):
     )
 
     email = forms.EmailField(
-        label=_("Email"),
+        label=pgettext_lazy("admission", "Email"),
         required=False,
     )
 

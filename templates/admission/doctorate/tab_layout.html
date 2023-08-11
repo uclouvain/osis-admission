@@ -135,7 +135,7 @@
                   {% detail_tab_path_from_update view.kwargs.uuid as read_url %}
                   <li>
                     <button class="btn btn-primary" type="submit" form="admission-form" style="width: 100%">
-                      {% translate 'Save' %}
+                      {% translate 'Save' context 'admission' %}
                     </button>
                   </li>
                   {% if next_url or can_read_tab and read_url %}
@@ -155,7 +155,7 @@
                   {% if can_update_tab and update_url %}
                     <li>
                       <a href="{{ update_url }}">
-                        {% translate "Update" %}
+                        {% translate "Update" context 'verb' %}
                       </a>
                     </li>
                   {% endif %}
@@ -196,7 +196,7 @@
             </a>
             <button class="btn btn-primary" type="submit" form="admission-form">
               <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
-              {% translate 'Save' %}
+              {% translate 'Save' context 'admission' %}
             </button>
           </div>
         {% else %}

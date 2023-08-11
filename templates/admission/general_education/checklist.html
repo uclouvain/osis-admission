@@ -194,7 +194,8 @@
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
           <div class="form-group btn-group status-group" role="group">
             {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
-              {% checklist_state_button tab='specificites_formation' label=_("Not concerned") icon='xmark' state='INITIAL_NON_CONCERNE' class='muted' %}
+              {% translate 'Not concerned' context 'checklist' as not_concerned_label %}
+              {% checklist_state_button tab='specificites_formation' label=not_concerned_label icon='xmark' state='INITIAL_NON_CONCERNE' class='muted' %}
             {% else %}
               {% checklist_state_button tab='specificites_formation' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='muted' %}
             {% endif %}

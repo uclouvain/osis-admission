@@ -31,7 +31,8 @@
 {% block tab_content %}
   <h3>{% trans "Jury composition" %}</h3>
 
-  {% panel _("President") %}
+  {% translate 'President' context 'jury' as president_label %}
+  {% panel president_label %}
     <div class="list-group">
     {% for membre in membre_president %}
       <div class="list-group-item membre-container">{% include "admission/doctorate/forms/jury/includes/member.html" %}</div>

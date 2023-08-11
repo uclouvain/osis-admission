@@ -555,7 +555,7 @@ class ValorisationForm(ActivityFormMixin, forms.ModelForm):
             'comment',
         ]
         labels = {
-            'title': _("Title"),
+            'title': pgettext_lazy("admission", "Title"),
             'subtitle': _("Description"),
             'summary': _("Detailed curriculum vitae"),
             'participating_proof': _("Proof"),
@@ -663,7 +663,7 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/ucl_course.html"
     academic_year = AcademicYearField(to_field_name='year', widget=autocomplete.ListSelect2(), future_only=True)
     learning_unit_year = forms.CharField(
-        label=_("Learning unit"),
+        label=pgettext_lazy("admission", "Learning unit"),
         widget=autocomplete.ListSelect2(
             url='admission:autocomplete:learning-unit-years-and-classes',
             attrs={

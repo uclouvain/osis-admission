@@ -41,7 +41,8 @@
       >
         {% bootstrap_field form.poursuite_cycle %}
       </div>
-      {% bootstrap_button _("Save") button_type="submit" button_class='btn-primary pull-right' %}
+      {% translate 'Save' context 'admission' as save_label %}
+      {% bootstrap_button save_label button_type="submit" button_class='btn-primary pull-right' %}
       <a class="btn btn-secondary pull-right" hx-swap="outerHTML" hx-target="#choix-formation-form" hx-push-url="false" hx-get="{% url 'admission:general-education:choix-formation-detail' uuid=view.kwargs.uuid %}">{% trans "Cancel" %}</a>
     </form>
   {% endpanel %}

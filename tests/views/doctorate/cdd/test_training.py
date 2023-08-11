@@ -33,7 +33,7 @@ from django.forms import Field
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.utils import translation
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext
 from rest_framework import status
 
 from admission.contrib.models.cdd_config import CddConfiguration
@@ -329,7 +329,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     def test_accept_activities(self):
         communication = CommunicationFactory(doctorate=self.doctorate, status=StatutActivite.SOUMISE.name)
         response = self.client.post(self.url, {'activity_ids': [communication.uuid], '_accept': True}, follow=True)
-        self.assertContains(response, _('Accepted'))
+        self.assertContains(response, pgettext('publication-status', 'Accepted'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(WebNotification.objects.count(), 1)
 

@@ -35,7 +35,8 @@
   {% endif %}
 {% endpanel %}
 
-{% panel _("Funding") %}
+{% translate 'Funding' context "admission" as funding_title %}
+{% panel funding_title %}
   {% if proposition.type_financement %}
     {% field_data _("Funding type") proposition.type_financement|enum_display:'ChoixTypeFinancement' %}
     {% if proposition.type_financement == "WORK_CONTRACT" %}

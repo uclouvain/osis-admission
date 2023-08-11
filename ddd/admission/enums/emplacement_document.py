@@ -73,7 +73,7 @@ EMPLACEMENTS_SIC = {
 
 class StatutEmplacementDocument(ChoiceEnum):
     A_RECLAMER = _('To be requested')
-    RECLAME = _('Requested')
+    RECLAME = pgettext_lazy('document', 'Requested')
     NON_ANALYSE = _('Not analyzed')
     VALIDE = _('Validated')
     COMPLETE_APRES_RECLAMATION = _('Completed after the request')
