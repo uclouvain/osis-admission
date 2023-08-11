@@ -35,7 +35,7 @@
     {% field_data _("Proposition type") admission.type|enum_display:'TypeDemande' %}
     {% field_data _("Academic year") admission.annee_calculee|get_short_academic_year %}
     <dl>
-        <dt>{% trans "Course" %}</dt>
+        <dt>{% trans "Course" context 'admission' %}</dt>
         <dd>
           {% with formation=admission.formation %}
             {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}

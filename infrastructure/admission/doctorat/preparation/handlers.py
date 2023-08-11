@@ -54,7 +54,6 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         doctorat_translator=DoctoratTranslator(),
-        bourse_translator=BourseTranslator(),
         historique=Historique(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
     ),
@@ -223,7 +222,6 @@ COMMAND_HANDLERS = {
     ModifierTypeAdmissionCommand: lambda msg_bus, cmd: modifier_type_admission(
         cmd,
         proposition_repository=PropositionRepository(),
-        bourse_translator=BourseTranslator(),
         doctorat_translator=DoctoratTranslator(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(

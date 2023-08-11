@@ -859,6 +859,21 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.field, 'registration_change_form')
         self.assertEqual(document.uuids, [file_uuid])
 
+        # additional documents
+        file_uuid = uuid.uuid4()
+        self.general_admission.additional_documents = [file_uuid]
+        self.general_admission.save()
+
+        document = get_document_from_identifier(
+            self.general_admission,
+            f'{base_identifier}.ADDITIONAL_DOCUMENTS',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, self.general_admission)
+        self.assertEqual(document.field, 'additional_documents')
+        self.assertEqual(document.uuids, [file_uuid])
+
     def test_get_non_free_additional_accounting_document(self):
         base_identifier = OngletsDemande.COMPTABILITE.name
 

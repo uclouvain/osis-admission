@@ -258,7 +258,7 @@ class DetailsPasseportNonSpecifiesException(BusinessException):
     status_code = "PROPOSITION-29"
 
     def __init__(self, **kwargs):
-        message = _("Please provide a copy of your passport.")
+        message = _("Please provide a copy of your passport and specify its expiry date.")
         super().__init__(message, **kwargs)
 
 
@@ -266,7 +266,7 @@ class CarteIdentiteeNonSpecifieeException(BusinessException):
     status_code = "PROPOSITION-30"
 
     def __init__(self, **kwargs):
-        message = _("Please provide a copy of your identity card.")
+        message = _("Please provide a copy of your identity card and specify its expiry date.")
         super().__init__(message, **kwargs)
 
 

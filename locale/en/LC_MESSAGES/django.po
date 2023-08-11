@@ -17,9 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid " (h/w)"
-msgstr ""
-
 #, python-brace-format
 msgid " (last update by {author} on {date} at {time}):"
 msgstr ""
@@ -163,6 +160,9 @@ msgstr ""
 msgid ""
 "A candidate is considered as VIP if he/she is in double degree or if he/she "
 "benefits from an international scholarship or if he/she is Erasmus Mundus."
+msgstr ""
+
+msgid "A card"
 msgstr ""
 
 msgid "A comment is required."
@@ -414,6 +414,9 @@ msgstr ""
 msgid "Additional conditions"
 msgstr ""
 
+msgid "Additional documents"
+msgstr ""
+
 msgid "Additional documents that can be requested from the candidate"
 msgstr ""
 
@@ -524,9 +527,6 @@ msgid ""
 msgstr ""
 
 msgid "Analysis folder"
-msgstr ""
-
-msgid "Ancient languages"
 msgstr ""
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
@@ -768,9 +768,6 @@ msgstr ""
 msgid "Billing address country"
 msgstr ""
 
-msgid "Billing address place"
-msgstr ""
-
 msgid "Billing address postal box"
 msgstr ""
 
@@ -787,9 +784,6 @@ msgid "Billing address street number"
 msgstr ""
 
 msgid "Billing address type"
-msgstr ""
-
-msgid "Biology"
 msgstr ""
 
 msgid "Body"
@@ -1147,9 +1141,6 @@ msgstr ""
 msgid "Checklist"
 msgstr ""
 
-msgid "Chemistry"
-msgstr ""
-
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr ""
 
@@ -1366,6 +1357,9 @@ msgstr ""
 msgid "Copy of Foreign Nationals Office decision granting temporary protection"
 msgstr ""
 
+msgid "Copy of both sides of A Card"
+msgstr ""
+
 msgid "Copy of both sides of A or B Card"
 msgstr ""
 
@@ -1449,6 +1443,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"Copy of official document from the local authority or Foreign Nationals "
+"Office proving stateless status"
+msgstr ""
+
+msgid ""
 "Copy of residence permit covering entire course, including assessment test "
 "(except for online courses)."
 msgstr ""
@@ -1471,6 +1470,7 @@ msgstr ""
 msgid "Country of citizenship"
 msgstr ""
 
+msgctxt "admission"
 msgid "Course"
 msgstr ""
 
@@ -1817,9 +1817,6 @@ msgstr ""
 msgid "Dual or triple degree"
 msgstr ""
 
-msgid "Dutch"
-msgstr ""
-
 msgid "Dynamic questions about \"Specific aspects\" sub-tab"
 msgstr ""
 
@@ -1849,9 +1846,6 @@ msgid "EFT"
 msgstr ""
 
 msgid "EU,NEU"
-msgstr ""
-
-msgid "Economics"
 msgstr ""
 
 msgid "Edit"
@@ -1888,6 +1882,9 @@ msgstr ""
 msgid ""
 "Email sent to the faculty when the SIC submits the application during the "
 "faculty decision process."
+msgstr ""
+
+msgid "Emergency contact (telephone number)"
 msgstr ""
 
 msgid "Employer"
@@ -2267,9 +2264,6 @@ msgstr ""
 msgid "Generic mail that can be manually sent once the candidate is admitted"
 msgstr ""
 
-msgid "German"
-msgstr ""
-
 msgid "Global FAC/CDD comments"
 msgstr ""
 
@@ -2277,9 +2271,6 @@ msgid "Global SIC comments"
 msgstr ""
 
 msgid "Grade"
-msgstr ""
-
-msgid "Greek"
 msgstr ""
 
 msgid "Grounds for denied"
@@ -2335,8 +2326,11 @@ msgid "I am a refugee"
 msgstr ""
 
 msgid ""
-"I am a refugee or stateless person or have subsidiary/temporary protection "
-"(Belgian student status category 2)"
+"I am a refugee, an asylum seeker, or a stateless person or have subsidiary/"
+"temporary protection (Belgian student status category 2)"
+msgstr ""
+
+msgid "I am a stateless person"
 msgstr ""
 
 msgid "I am an asylum seeker"
@@ -2485,9 +2479,6 @@ msgstr "Invited to sign"
 msgid "IN_PROGRESS"
 msgstr "In progress"
 
-msgid "IT"
-msgstr ""
-
 msgid "Identification"
 msgstr ""
 
@@ -2501,6 +2492,9 @@ msgid "Identifier"
 msgstr ""
 
 msgid "Identity card (both sides)"
+msgstr ""
+
+msgid "Identity card expiry date"
 msgstr ""
 
 msgid "Identity card number"
@@ -2642,6 +2636,9 @@ msgstr ""
 msgid "Invalid date"
 msgstr ""
 
+msgid "Invalid phone number"
+msgstr ""
+
 #, python-format
 msgid "Invalid property: %(config_params)s"
 msgid_plural "Invalid properties: %(config_params)s"
@@ -2754,9 +2751,6 @@ msgid "Last update author"
 msgstr ""
 
 msgid "Late enrollment"
-msgstr ""
-
-msgid "Latin"
 msgstr ""
 
 msgid "Lead supervisor"
@@ -3093,9 +3087,6 @@ msgstr ""
 msgid "Master"
 msgstr ""
 
-msgid "Mathematics"
-msgstr ""
-
 msgid "Maximum number of documents"
 msgstr ""
 
@@ -3146,9 +3137,6 @@ msgid ""
 msgstr ""
 
 msgid "Missing"
-msgstr ""
-
-msgid "Modern languages"
 msgstr ""
 
 msgid "Modification asked by the candidate"
@@ -3478,9 +3466,6 @@ msgstr ""
 msgid "Other reason"
 msgstr ""
 
-msgid "Others"
-msgstr ""
-
 msgctxt "CategorieActivite"
 msgid "PAPER"
 msgstr "Examination"
@@ -3573,6 +3558,9 @@ msgstr ""
 msgid "Passport"
 msgstr ""
 
+msgid "Passport expiry date"
+msgstr ""
+
 msgid "Passport number"
 msgstr ""
 
@@ -3612,16 +3600,6 @@ msgid "PhD research project"
 msgstr ""
 
 msgid "PhD training"
-msgstr ""
-
-msgid "Physic"
-msgstr ""
-
-msgctxt "address"
-msgid "Place"
-msgstr ""
-
-msgid "Place (optional)"
 msgstr ""
 
 msgid "Place of birth"
@@ -3694,10 +3672,11 @@ msgid ""
 "giving access to the training."
 msgstr ""
 
-msgid "Please provide a copy of your identity card."
+msgid ""
+"Please provide a copy of your identity card and specify its expiry date."
 msgstr ""
 
-msgid "Please provide a copy of your passport."
+msgid "Please provide a copy of your passport and specify its expiry date."
 msgstr ""
 
 msgid "Please provide one of these two pieces of identification information:"
@@ -3745,9 +3724,6 @@ msgid "Pre-admission date"
 msgstr ""
 
 msgid "Pre-admission submission date"
-msgstr ""
-
-msgid "Preferred first name"
 msgstr ""
 
 msgid "Prerequisite courses"
@@ -4301,9 +4277,6 @@ msgstr ""
 msgid "Scholarship start date"
 msgstr ""
 
-msgid "Sciences"
-msgstr ""
-
 msgid "Scientific residencies"
 msgstr ""
 
@@ -4431,9 +4404,6 @@ msgstr ""
 msgid "Sir"
 msgstr ""
 
-msgid "Social sciences"
-msgstr ""
-
 msgid "Solidarity student"
 msgstr ""
 
@@ -4482,9 +4452,6 @@ msgstr ""
 msgid ""
 "Some information about the foreign diploma of the secondary studies are "
 "missing."
-msgstr ""
-
-msgid "Spanish"
 msgstr ""
 
 msgid "Speaker"
@@ -5112,9 +5079,6 @@ msgstr ""
 msgid "Time allocated for thesis (in %)"
 msgstr ""
 
-msgid "Timetable"
-msgstr ""
-
 msgid "Title"
 msgstr ""
 
@@ -5489,6 +5453,11 @@ msgstr ""
 msgid "You are enrolling as"
 msgstr ""
 
+msgid ""
+"You can add any document you feel is relevant to your application "
+"(supporting documents, proof of language level, etc.)"
+msgstr ""
+
 #, python-format
 msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
@@ -5707,9 +5676,6 @@ msgid "your mother"
 msgstr ""
 
 msgid "your partner"
-msgstr ""
-
-msgid "yyyy"
 msgstr ""
 
 #, python-brace-format

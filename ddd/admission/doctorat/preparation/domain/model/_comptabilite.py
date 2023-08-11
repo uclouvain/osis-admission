@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -61,9 +61,11 @@ class Comptabilite(interface.ValueObject):
     carte_a_b_refugie: List[str] = attr.Factory(list)
     annexe_25_26_refugies_apatrides: List[str] = attr.Factory(list)
     attestation_immatriculation: List[str] = attr.Factory(list)
+    preuve_statut_apatride: List[str] = attr.Factory(list)
     carte_a_b: List[str] = attr.Factory(list)
     decision_protection_subsidiaire: List[str] = attr.Factory(list)
     decision_protection_temporaire: List[str] = attr.Factory(list)
+    carte_a: List[str] = attr.Factory(list)
 
     # Assimilation 3
     sous_type_situation_assimilation_3: Optional[ChoixAssimilation3] = None

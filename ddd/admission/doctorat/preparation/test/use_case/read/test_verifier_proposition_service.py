@@ -67,7 +67,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ProcedureDemandeSignatureNonLanceeException,
     PropositionNonApprouveeParMembresCAException,
     PropositionNonApprouveeParPromoteurException,
-    SpecifierNOMASiDejaInscritException,
     ExperiencesAcademiquesNonCompleteesException,
     TypeCompteBancaireRemboursementNonCompleteException,
     AssimilationNonCompleteeException,
@@ -213,16 +212,6 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), NomEtPrenomNonSpecifiesException)
 
-    def test_should_retourner_erreur_si_noma_non_renseigne_si_precedente_inscription(self):
-        with mock.patch.multiple(
-            self.candidat,
-            annee_derniere_inscription_ucl=2020,
-            noma_derniere_inscription_ucl='',
-        ):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.cmd)
-            self.assertIsInstance(context.exception.exceptions.pop(), SpecifierNOMASiDejaInscritException)
-
     def test_should_retourner_erreur_si_date_annee_naissance_non_renseignees(self):
         with mock.patch.multiple(
             self.candidat,
@@ -242,10 +231,28 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
                 self.message_bus.invoke(self.cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), DetailsPasseportNonSpecifiesException)
 
+    def test_should_retourner_erreur_si_date_expiration_passeport_non_renseignee(self):
+        with mock.patch.multiple(
+            self.candidat,
+            date_expiration_passeport=None,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), DetailsPasseportNonSpecifiesException)
+
     def test_should_retourner_erreur_si_carte_identite_non_renseignee(self):
         with mock.patch.multiple(
             self.candidat,
             carte_identite=[],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertIsInstance(context.exception.exceptions.pop(), CarteIdentiteeNonSpecifieeException)
+
+    def test_should_retourner_erreur_si_date_expiration_carte_identite_non_renseignee(self):
+        with mock.patch.multiple(
+            self.candidat,
+            date_expiration_carte_identite=None,
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
@@ -1014,10 +1021,10 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2016 à Janvier 2017',
-                'De Septembre 2017 à Janvier 2018',
-                'De Septembre 2018 à Janvier 2019',
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2016 à Février 2017',
+                'De Septembre 2017 à Février 2018',
+                'De Septembre 2018 à Février 2019',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1031,7 +1038,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1045,8 +1052,8 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2018 à Janvier 2019',
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2018 à Février 2019',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1076,7 +1083,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1245,7 +1252,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
         self.assertAnneesCurriculum(
             context.exception.exceptions,
             [
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )
@@ -1350,10 +1357,10 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             context.exception.exceptions,
             [
                 "L'expérience académique 'Formation AA' est incomplète.",
-                'De Septembre 2016 à Janvier 2017',
-                'De Septembre 2017 à Janvier 2018',
-                'De Septembre 2018 à Janvier 2019',
-                'De Septembre 2019 à Janvier 2020',
+                'De Septembre 2016 à Février 2017',
+                'De Septembre 2017 à Février 2018',
+                'De Septembre 2018 à Février 2019',
+                'De Septembre 2019 à Février 2020',
                 'De Septembre 2020 à Octobre 2020',
             ],
         )

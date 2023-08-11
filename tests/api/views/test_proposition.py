@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -213,7 +213,6 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             billing_address_postal_code='1348',
             billing_address_city='Louvain-La-Neuve',
             billing_address_country=CountryFactory(iso_code=BE_ISO_CODE),
-            billing_address_place='Avant',
             training__management_entity=cls.commission.entity,
         )
         cls.teaching_campus_name = (
@@ -351,10 +350,6 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         self.assertEqual(
             adresse_facturation.get('pays'),
             self.admission_with_billing_address.billing_address_country.iso_code,
-        )
-        self.assertEqual(
-            adresse_facturation.get('lieu_dit'),
-            self.admission_with_billing_address.billing_address_place,
         )
         self.assertEqual(
             adresse_facturation.get('numero_rue'),

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from typing import List, Dict
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
-from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem
+from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result
 
 
 class VerifierCurriculum(interface.DomainService):
@@ -43,6 +43,7 @@ class VerifierCurriculum(interface.DomainService):
     def recuperer_experiences_academiques_incompletes(
         cls,
         experiences: List[ExperienceAcademiqueDTO],
+        annee_courante: int,
     ) -> Dict[str, str]:
 
         experiences_incompletes = {}
@@ -80,7 +81,7 @@ class VerifierCurriculum(interface.DomainService):
                     annee.annee >= cls.PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
                     if pays_belge
                     else credits_necessaires_etranger
-                )
+                ) and (annee.resultat != Result.WAITING_RESULT.name or annee.annee < annee_courante)
                 if (
                     not annee.resultat
                     or releve_annuel_manquant

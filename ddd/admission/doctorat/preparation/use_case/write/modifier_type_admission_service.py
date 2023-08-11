@@ -26,7 +26,6 @@
 
 from admission.ddd.admission.doctorat.preparation.domain.service.commission_proximite import CommissionProximite
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.admission.domain.service.i_bourse import IBourseTranslator
 from admission.ddd.admission.doctorat.preparation.commands import ModifierTypeAdmissionCommand
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -38,19 +37,16 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 def modifier_type_admission(
     cmd: 'ModifierTypeAdmissionCommand',
     proposition_repository: 'IPropositionRepository',
-    bourse_translator: 'IBourseTranslator',
     doctorat_translator: 'IDoctoratTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
-    bourse_erasmus_mundus = bourse_translator.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None
     doctorat = doctorat_translator.get(cmd.sigle_formation, cmd.annee_formation)
     CommissionProximite().verifier(doctorat, cmd.commission_proximite)
 
     # WHEN
     proposition.modifier_type_admission(
         formation_id=doctorat.entity_id,
-        bourse_erasmus_mundus=bourse_erasmus_mundus,
         type_admission=cmd.type_admission,
         justification=cmd.justification,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,

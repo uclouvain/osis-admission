@@ -43,7 +43,6 @@ class ProfilCandidat(interface.ValueObject):
     pays: Optional[str] = ''
     code_postal: Optional[str] = ''
     ville: Optional[str] = ''
-    lieu_dit: Optional[str] = ''
     rue: Optional[str] = ''
     numero_rue: Optional[str] = ''
     boite_postale: Optional[str] = ''
@@ -60,7 +59,6 @@ class ProfilCandidat(interface.ValueObject):
                 'country': self.pays,
                 'postal_code': self.code_postal,
                 'city': self.ville,
-                'place': self.lieu_dit,
                 'street': self.rue,
                 'street_number': self.numero_rue,
                 'postal_box': self.boite_postale,
@@ -79,7 +77,6 @@ class ProfilCandidat(interface.ValueObject):
             pays=coordinates.get('country'),
             code_postal=coordinates.get('postal_code'),
             ville=coordinates.get('city'),
-            lieu_dit=coordinates.get('place'),
             rue=coordinates.get('street'),
             numero_rue=coordinates.get('street_number'),
             boite_postale=coordinates.get('postal_box'),

@@ -41,6 +41,7 @@ from admission.forms import (
     RadioBooleanField,
     AdmissionModelCountryChoiceField,
     AdmissionModelForm,
+    get_year_choices,
 )
 from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.utils import force_title
@@ -91,17 +92,6 @@ class AdmissionPersonForm(AdmissionModelForm):
         ),
     )
 
-    first_name_in_use = forms.CharField(
-        required=False,
-        label=_('Preferred first name'),
-        help_text=get_example_text('Martin <del>martin MARTIN</del>'),
-        widget=forms.TextInput(
-            attrs={
-                'placeholder': get_example_text('Martin'),
-            },
-        ),
-    )
-
     sex = forms.ChoiceField(
         label=_('Sex'),
         choices=EMPTY_CHOICE + ChoixSexe.choices(),
@@ -123,12 +113,11 @@ class AdmissionPersonForm(AdmissionModelForm):
         widget=CustomDateInput(),
     )
 
-    birth_year = forms.IntegerField(
+    birth_year = forms.TypedChoiceField(
         required=False,
         label=_('Year of birth'),
-        widget=forms.NumberInput(attrs={'placeholder': _('yyyy')}),
-        min_value=1900,
-        max_value=lambda: datetime.date.today().year,
+        coerce=int,
+        widget=forms.Select,
     )
 
     civil_state = forms.ChoiceField(
@@ -174,8 +163,27 @@ class AdmissionPersonForm(AdmissionModelForm):
         max_files=2,
     )
 
+    id_card_expiry_date = forms.DateField(
+        required=False,
+        label=_('Identity card expiry date'),
+        widget=CustomDateInput(),
+    )
+
+    passport_expiry_date = forms.DateField(
+        required=False,
+        label=_('Passport expiry date'),
+        widget=CustomDateInput(),
+    )
+
     has_national_number = RadioBooleanField(
         label=_('Do you have a Belgian National Register Number (NISS)?'),
+        help_text=_(
+            'The Belgian national register number (or NISS, Social Security Identification Number) is a '
+            'number composed of 11 digits, the first 6 of which refer to the date of birth of the concerned '
+            'person. This number is assigned to every person living in Belgium when they register with '
+            'the municipality (or other official body). It can be found on the Belgian identity card or on the '
+            'residence permit.'
+        ),
     )
 
     identification_type = forms.ChoiceField(
@@ -199,13 +207,6 @@ class AdmissionPersonForm(AdmissionModelForm):
                 'data-mask': '00.00.00-000.00',
                 'placeholder': get_example_text('85.07.30-001.33'),
             },
-        ),
-        help_text=_(
-            'The Belgian national register number (or NISS, Social Security Identification Number) is a '
-            'number composed of 11 digits, the first 6 of which refer to the date of birth of the concerned '
-            'person. This number is assigned to every person living in Belgium when they register with '
-            'the municipality (or other official body). It can be found on the Belgian identity card or on the '
-            'residence permit.'
         ),
     )
 
@@ -301,6 +302,8 @@ class AdmissionPersonForm(AdmissionModelForm):
         elif self.initial.get('identification_type'):
             self.initial['has_national_number'] = False
 
+        self.fields['birth_year'].choices = get_year_choices()
+
     def clean(self):
         data = super().clean()
 
@@ -317,8 +320,6 @@ class AdmissionPersonForm(AdmissionModelForm):
         if data.get('already_registered'):
             if not data.get('last_registration_year'):
                 self.add_error('last_registration_year', FIELD_REQUIRED_MESSAGE)
-            if not data.get('last_registration_id'):
-                self.add_error('last_registration_id', FIELD_REQUIRED_MESSAGE)
         else:
             data['last_registration_year'] = None
             data['last_registration_id'] = ''
@@ -333,6 +334,7 @@ class AdmissionPersonForm(AdmissionModelForm):
             data['id_card_number'] = ''
             data['passport_number'] = ''
             data['passport'] = []
+            data['passport_expiry_date'] = None
 
             if not data.get('national_number'):
                 self.add_error('national_number', FIELD_REQUIRED_MESSAGE)
@@ -341,6 +343,7 @@ class AdmissionPersonForm(AdmissionModelForm):
             data['national_number'] = ''
             data['passport_number'] = ''
             data['passport'] = []
+            data['passport_expiry_date'] = None
 
             if not data.get('id_card_number'):
                 self.add_error('id_card_number', FIELD_REQUIRED_MESSAGE)
@@ -349,6 +352,7 @@ class AdmissionPersonForm(AdmissionModelForm):
             data['national_number'] = ''
             data['id_card_number'] = ''
             data['id_card'] = []
+            data['id_card_expiry_date'] = None
 
             if not data.get('passport_number'):
                 self.add_error('passport_number', FIELD_REQUIRED_MESSAGE)
@@ -363,7 +367,7 @@ class AdmissionPersonForm(AdmissionModelForm):
             self.add_error('identification_type', FIELD_REQUIRED_MESSAGE)
 
         # Lowercase the specified names
-        for field in ['first_name', 'last_name', 'middle_name', 'first_name_in_use', 'birth_place']:
+        for field in ['first_name', 'last_name', 'middle_name', 'birth_place']:
             if data.get(field):
                 data[field] = force_title(data[field])
 
@@ -375,7 +379,6 @@ class AdmissionPersonForm(AdmissionModelForm):
             'first_name',
             'middle_name',
             'last_name',
-            'first_name_in_use',
             'birth_date',
             'birth_year',
             'birth_country',
@@ -387,7 +390,9 @@ class AdmissionPersonForm(AdmissionModelForm):
             'civil_state',
             'id_photo',
             'id_card',
+            'id_card_expiry_date',
             'passport',
+            'passport_expiry_date',
             'national_number',
             'id_card_number',
             'passport_number',

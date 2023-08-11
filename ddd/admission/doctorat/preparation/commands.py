@@ -46,7 +46,6 @@ class InitierPropositionCommand(interface.CommandRequest):
     matricule_candidat: str
     justification: Optional[str] = ''
     commission_proximite: Optional[str] = ''
-    bourse_erasmus_mundus: Optional[str] = ''
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -275,9 +274,11 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     carte_a_b_refugie: List[str]
     annexe_25_26_refugies_apatrides: List[str]
     attestation_immatriculation: List[str]
+    preuve_statut_apatride: List[str]
     carte_a_b: List[str]
     decision_protection_subsidiaire: List[str]
     decision_protection_temporaire: List[str]
+    carte_a: List[str]
 
     # Assimilation 3
     sous_type_situation_assimilation_3: Optional[str]
@@ -335,8 +336,6 @@ class ModifierTypeAdmissionCommand(interface.CommandRequest):
     commission_proximite: Optional[str] = ''
 
     justification: Optional[str] = ''
-
-    bourse_erasmus_mundus: Optional[str] = ''
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
 

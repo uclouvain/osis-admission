@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -142,10 +142,10 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
     adresse_facturation_pays: Optional[str] = ''
     adresse_facturation_destinataire: Optional[str] = ''
     adresse_facturation_boite_postale: Optional[str] = ''
-    adresse_facturation_lieu_dit: Optional[str] = ''
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     copie_titre_sejour: List[str] = attr.Factory(list)
+    documents_additionnels: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)

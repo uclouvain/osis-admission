@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -50,9 +50,11 @@ class ComptabiliteDTO(interface.DTO):
     carte_a_b_refugie: List[str]
     annexe_25_26_refugies_apatrides: List[str]
     attestation_immatriculation: List[str]
+    preuve_statut_apatride: List[str]
     carte_a_b: List[str]
     decision_protection_subsidiaire: List[str]
     decision_protection_temporaire: List[str]
+    carte_a: List[str]
 
     # Assimilation 3
     sous_type_situation_assimilation_3: str

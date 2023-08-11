@@ -77,6 +77,8 @@ class Proposition(interface.RootEntity):
     type_adresse_facturation: Optional[ChoixTypeAdresseFacturation] = None
     adresse_facturation: Optional[Adresse] = None
 
+    documents_additionnels: List[str] = attr.Factory(list)
+
     def modifier_choix_formation(self, formation_id: FormationIdentity, reponses_questions_specifiques: Dict):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -122,9 +124,9 @@ class Proposition(interface.RootEntity):
         adresse_facturation_pays: Optional[str],
         adresse_facturation_destinataire: Optional[str],
         adresse_facturation_boite_postale: Optional[str],
-        adresse_facturation_lieu_dit: Optional[str],
         reponses_questions_specifiques: Dict,
         copie_titre_sejour: List[str],
+        documents_additionnels: List[str],
     ):
         self.inscription_a_titre = ChoixInscriptionATitre[inscription_a_titre] if inscription_a_titre else None
         self.nom_siege_social = nom_siege_social or ''
@@ -143,13 +145,13 @@ class Proposition(interface.RootEntity):
                 pays=adresse_facturation_pays or '',
                 destinataire=adresse_facturation_destinataire,
                 boite_postale=adresse_facturation_boite_postale,
-                lieu_dit=adresse_facturation_lieu_dit,
             )
             if self.type_adresse_facturation == ChoixTypeAdresseFacturation.AUTRE
             else None
         )
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.copie_titre_sejour = copie_titre_sejour
+        self.documents_additionnels = documents_additionnels
 
     def verifier_informations_complementaires(self):
         """Vérification de la validité des informations complémentaires."""

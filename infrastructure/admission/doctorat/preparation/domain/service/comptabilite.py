@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -47,9 +47,11 @@ class ComptabiliteTranslator(IComptabiliteTranslator):
             carte_a_b_refugie=accounting.refugee_a_b_card,
             annexe_25_26_refugies_apatrides=accounting.refugees_stateless_annex_25_26,
             attestation_immatriculation=accounting.registration_certificate,
+            preuve_statut_apatride=accounting.stateless_person_proof,
             carte_a_b=accounting.a_b_card,
             decision_protection_subsidiaire=accounting.subsidiary_protection_decision,
             decision_protection_temporaire=accounting.temporary_protection_decision,
+            carte_a=accounting.a_card,
             sous_type_situation_assimilation_3=accounting.assimilation_3_situation_type,
             titre_sejour_3_mois_professionel=accounting.professional_3_month_residence_permit,
             fiches_remuneration=accounting.salary_slips,

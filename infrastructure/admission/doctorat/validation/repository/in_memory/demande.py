@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -115,7 +115,6 @@ class DemandeInMemoryRepository(InMemoryGenericRepository, IDemandeRepository):
                 nom_pays=cls.countries.get(demande.profil_soumis_candidat.pays, ''),
                 code_postal=demande.profil_soumis_candidat.code_postal,
                 ville=demande.profil_soumis_candidat.ville,
-                lieu_dit=demande.profil_soumis_candidat.lieu_dit,
                 rue=demande.profil_soumis_candidat.rue,
                 numero_rue=demande.profil_soumis_candidat.numero_rue,
                 boite_postale=demande.profil_soumis_candidat.boite_postale,

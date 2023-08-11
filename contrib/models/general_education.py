@@ -122,6 +122,11 @@ class GeneralEducationAdmission(BaseAdmission):
         max_length=30,
         default=PoursuiteDeCycle.TO_BE_DETERMINED.name,
     )
+    additional_documents = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Additional documents'),
+    )
 
     # Fac approval
     fac_approval_certificate = FileField(

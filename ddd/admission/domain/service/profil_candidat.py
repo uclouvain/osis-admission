@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -85,6 +85,8 @@ class ProfilCandidat(interface.DomainService):
             numero_carte_identite=identification.numero_carte_identite,
             carte_identite=identification.carte_identite,
             numero_passeport=identification.numero_passeport,
+            date_expiration_passeport=identification.date_expiration_passeport,
+            date_expiration_carte_identite=identification.date_expiration_carte_identite,
             passeport=identification.passeport,
             noma_derniere_inscription_ucl=identification.noma_derniere_inscription_ucl,
             annee_derniere_inscription_ucl=identification.annee_derniere_inscription_ucl,
@@ -170,6 +172,7 @@ class ProfilCandidat(interface.DomainService):
 
         experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,
+            annee_courante=annee_courante,
         )
 
         CurriculumValidatorList(
@@ -196,6 +199,7 @@ class ProfilCandidat(interface.DomainService):
         )
         experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,
+            annee_courante=annee_courante,
         )
 
         FormationGeneraleCurriculumValidatorList(

@@ -118,7 +118,6 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             "annee_formation": cls.doctorate.academic_year.year,
             "matricule_candidat": cls.candidate.global_id,
             "commission_proximite": '',
-            "bourse_erasmus_mundus": cls.scholarship.uuid,
         }
         cls.url = resolve_url("admission_api_v1:doctorate_training_choice")
         cls.list_url = resolve_url("admission_api_v1:propositions")
@@ -139,7 +138,6 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         admission = admissions.get(uuid=response.data["uuid"])
         self.assertEqual(admission.type, self.create_data["type_admission"])
         self.assertEqual(admission.comment, self.create_data["justification"])
-        self.assertEqual(admission.erasmus_mundus_scholarship_id, self.scholarship.pk)
 
         response = self.client.get(self.list_url, format="json")
         self.assertEqual(response.json()['doctorate_propositions'][0]["doctorat"]['sigle'], self.doctorate.acronym)
@@ -155,13 +153,6 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], DoctoratNonTrouveException.status_code)
-
-    def test_admission_doctorate_creation_using_api_with_wrong_scholarship(self):
-        self.client.force_authenticate(user=self.candidate.user)
-        data = {**self.create_data, 'bourse_erasmus_mundus': str(uuid.uuid4())}
-        response = self.client.post(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], BourseNonTrouveeException.status_code)
 
     def test_admission_doctorate_creation_using_api_with_too_much_propositions_in_parallel(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -566,14 +557,12 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
         cls.committee_member_user = committee_member.person.user
         cls.other_committee_member_user = CaMemberFactory().person.user
 
-        cls.erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory()
         cls.update_data = {
             'uuid_proposition': cls.admission.uuid,
             "sigle_formation": cls.admission.training.acronym,
             "annee_formation": cls.admission.training.academic_year.year,
             'type_admission': ChoixTypeAdmission.PRE_ADMISSION.name,
             'justification': 'Justification',
-            'bourse_erasmus_mundus': str(cls.erasmus_mundus_scholarship.uuid),
             'reponses_questions_specifiques': {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
                 'fe254203-17c7-47d6-95e4-3c5c532da552': [cls.file_uuid, 'token:abcdef'],
@@ -634,7 +623,6 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
         self.assertEqual(admission.status, ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
         self.assertEqual(admission.type, ChoixTypeAdmission.PRE_ADMISSION.name)
         self.assertEqual(admission.comment, 'Justification')
-        self.assertEqual(admission.erasmus_mundus_scholarship_id, self.erasmus_mundus_scholarship.pk)
         expected = {
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
@@ -650,13 +638,6 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
             response.json()['non_field_errors'][0]['status_code'],
             doctorate_education_exceptions.PropositionNonTrouveeException.status_code,
         )
-
-    def test_admission_type_update_using_api_candidate_with_wrong_scholarship(self):
-        self.client.force_authenticate(user=self.candidate.user)
-        data = {**self.update_data, 'bourse_erasmus_mundus': str(uuid.uuid4())}
-        response = self.client.put(self.url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], BourseNonTrouveeException.status_code)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

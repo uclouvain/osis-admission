@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -112,7 +112,12 @@ RelatedDiplomaField = partial(
 RelatedInstitute = partial(
     serializers.SlugRelatedField,
     slug_field='uuid',
-    queryset=Organization.objects.filter(establishment_type=EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name),
+    queryset=Organization.objects.filter(
+        establishment_type__in=[
+            EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
+            EstablishmentTypeEnum.UNIVERSITY.name,
+        ],
+    ),
     allow_null=True,
 )
 

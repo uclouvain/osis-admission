@@ -48,14 +48,16 @@ class CoordonneesTestCase(APITestCase):
         cls.updated_data = {
             "residential": {'street': "Rue de la sobriété"},
             "contact": {},
-            "phone_mobile": "",
+            "phone_mobile": "+32 490 00 00 01",
             "private_email": "joe.poe@example.be",
+            "emergency_contact_phone": "+32 490 00 00 02",
         }
         cls.updated_data_with_contact_address = {
             "residential": {'street': "Rue de la sobriété"},
             "contact": {'street': "Rue du pin"},
-            "phone_mobile": "",
+            "phone_mobile": "+32 490 00 00 01",
             "private_email": "joe.poe@example.be",
+            "emergency_contact_phone": "+32 490 00 00 02",
         }
         cls.address = PersonAddressFactory(
             label=PersonAddressType.CONTACT.name,
@@ -128,6 +130,8 @@ class CoordonneesTestCase(APITestCase):
         )
         self.assertEqual(address.street, "Rue de la sobriété")
         self.assertEqual(address.person.private_email, "joe.poe@example.be")
+        self.assertEqual(address.person.phone_mobile, "+32 490 00 00 01")
+        self.assertEqual(address.person.emergency_contact_phone, "+32 490 00 00 02")
 
     def test_coordonnees_update_candidate_with_admission(self):
         self.client.force_authenticate(self.candidate_user)
@@ -139,6 +143,8 @@ class CoordonneesTestCase(APITestCase):
         )
         self.assertEqual(address.street, "Rue de la sobriété")
         self.assertEqual(address.person.private_email, "joe.poe@example.be")
+        self.assertEqual(address.person.phone_mobile, "+32 490 00 00 01")
+        self.assertEqual(address.person.emergency_contact_phone, "+32 490 00 00 02")
 
     def test_coordonnees_update_candidate_with_contact(self):
         self.client.force_authenticate(self.candidate_user)

@@ -23,11 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from functools import partial
 from typing import List, Optional
 
+import phonenumbers
 from dal import autocomplete
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import SUPPORTED_MIME_TYPES
@@ -42,6 +45,10 @@ NONE_CHOICE = ((None, ' - '),)
 ALL_EMPTY_CHOICE = (('', _('All')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
+
+DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
+    'data-minimum-input-length': 3,
+}
 
 
 class SelectOrOtherWidget(forms.MultiWidget):
@@ -128,6 +135,19 @@ class CustomDateInput(forms.DateInput):
         js = ('js/jquery.mask.min.js',)
 
 
+class PhoneField(forms.CharField):
+    def clean(self, value):
+        if not value:
+            return ''
+        try:
+            phone_number_obj = phonenumbers.parse(value)
+            if phonenumbers.is_valid_number(phone_number_obj):
+                return value
+        except phonenumbers.NumberParseException:
+            pass
+        raise ValidationError(_('Invalid phone number'))
+
+
 def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM_SELECTABLE_YEAR):
     """Return the list of choices of academic years between min_year and max_year"""
     academic_years = AcademicYear.objects.min_max_years(
@@ -135,6 +155,19 @@ def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM
         max_year=max_year,
     ).order_by('-year')
     return [(academic_year.year, format_to_academic_year(academic_year.year)) for academic_year in academic_years]
+
+
+def get_year_choices(min_year=1920, max_year=None):
+    """Return the choices of a year choice field. If no max year is specified, the current year is used."""
+    if max_year is None:
+        max_year = datetime.datetime.now().year
+    return [EMPTY_CHOICE[0]] + [
+        (
+            year,
+            year,
+        )
+        for year in range(max_year, min_year - 1, -1)
+    ]
 
 
 def get_example_text(example: str):
@@ -158,7 +191,13 @@ RadioBooleanField = partial(
 
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('widget', autocomplete.ListSelect2(url="country-autocomplete"))
+        kwargs.setdefault(
+            'widget',
+            autocomplete.ListSelect2(
+                url="country-autocomplete",
+                attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+            ),
+        )
         kwargs.setdefault('queryset', Country.objects.none())
         super().__init__(*args, **kwargs)
 
