@@ -49,7 +49,7 @@
       {% if resume_proposition.identification.pays_nationalite_europeen is False %}
         {{ chosen_assimilation }}
       {% else %}
-        {% translate _('Not concerned') %}
+        {% translate 'Not concerned' context 'checklist' %}
       {% endif %}
     {% endpanel %}
   {% else %}

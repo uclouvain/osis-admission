@@ -35,7 +35,7 @@ from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
-from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext_noop
+from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 

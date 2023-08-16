@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -128,7 +128,7 @@ class AdmissionFormItem(models.Model):
     )
     title = TranslatedJSONField(
         blank=True,
-        verbose_name=_('Title'),
+        verbose_name=pgettext_lazy('admission', 'Title'),
         help_text=_('Question label for Document, Selection and Text form elements. Not used for Message elements.'),
     )
     text = TranslatedJSONField(
@@ -424,7 +424,7 @@ class AdmissionFormItemInstantiation(models.Model):
     )
     required = models.BooleanField(
         default=False,
-        verbose_name=_('Required'),
+        verbose_name=pgettext_lazy('masculine', 'Required'),
     )
     display_according_education = models.CharField(
         choices=CritereItemFormulaireFormation.choices(),

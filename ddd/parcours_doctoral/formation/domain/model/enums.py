@@ -58,7 +58,7 @@ class ChoixStatutPublication(ChoiceEnum):
     UNSUBMITTED = _("Unsubmitted for publication")
     SUBMITTED = _("Submitted for publication")
     IN_REVIEW = _("Awaiting approval")
-    ACCEPTED = _("Accepted")
+    ACCEPTED = pgettext_lazy("publication-status", "Accepted")
     PUBLISHED = _("Published")
 
 

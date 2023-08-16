@@ -318,6 +318,7 @@ msgstr "Accepter les activités sélectionnées"
 msgid "Accept selected courses"
 msgstr "Accepter les cours sélectionnées"
 
+msgctxt "publication-status"
 msgid "Accepted"
 msgstr "Acceptée"
 
@@ -698,6 +699,7 @@ msgstr ""
 "haute école ou une université de la Communauté française de Belgique ?"
 
 #, python-format
+msgctxt "admission"
 msgid "Are you sure you want to delete \"%(object)s\"?"
 msgstr "Êtes-vous sûr de vouloir supprimer \"%(object)s\" ?"
 
@@ -1639,9 +1641,6 @@ msgstr "Choix de formation"
 msgid "Course completed"
 msgstr "Cours terminé"
 
-msgid "Course name"
-msgstr "Intitulé de la formation"
-
 msgctxt "admission"
 msgid "Course name"
 msgstr "Intitulé de la formation"
@@ -1664,6 +1663,7 @@ msgstr "Titulaire du cours (le cas échéant)"
 msgid "Course unit with evaluation"
 msgstr "Cours avec évaluation"
 
+msgctxt "admission"
 msgid "Course units"
 msgstr "Cours"
 
@@ -1689,11 +1689,13 @@ msgstr "Créer le récapitulatif de la la proposition"
 msgid "Created"
 msgstr "Créé"
 
+msgctxt "admission"
 msgid "Created at"
 msgstr "Créé le"
 
+msgctxt "masculine"
 msgid "Created by"
-msgstr "Créé le"
+msgstr "Créé par"
 
 msgid "Creation date"
 msgstr "Date de création"
@@ -1805,6 +1807,7 @@ msgstr "Date de l'admission définitive au doctorat"
 msgid "Definitive admission date:"
 msgstr "Date de l'admission définitive :"
 
+msgctxt "admission"
 msgid "Delete"
 msgstr "Supprimer"
 
@@ -2021,6 +2024,7 @@ msgctxt "admission"
 msgid "Education"
 msgstr "Formation"
 
+msgctxt "admission"
 msgid "Email"
 msgstr "Email"
 
@@ -2058,6 +2062,7 @@ msgstr "Employeur"
 msgid "Enable complementary training tab"
 msgstr "Activer l'onglet Formation complémentaire"
 
+msgctxt "admission"
 msgid "End"
 msgstr "Fin"
 
@@ -2097,9 +2102,11 @@ msgstr "Inscriptions"
 msgid "Enter a list of values."
 msgstr "Saisissez une liste de valeurs."
 
+msgctxt "admission"
 msgid "Entities"
 msgstr "Entité(s)"
 
+msgctxt "admission"
 msgid "Entity"
 msgstr "Entité"
 
@@ -2148,6 +2155,7 @@ msgstr "Export excel des demandes d'admission"
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
 
+msgctxt "admission"
 msgid "Expected date of graduation"
 msgstr "Date (prévue) de délivrance du diplôme"
 
@@ -2224,9 +2232,6 @@ msgstr "Échec de l'épreuve"
 msgid "Feedback from Fac"
 msgstr "Retour de FAC"
 
-msgid "Female"
-msgstr "Féminin"
-
 msgctxt "admission gender"
 msgid "Female"
 msgstr "Féminin"
@@ -2238,6 +2243,7 @@ msgstr "Féminin"
 msgid "File"
 msgstr "Fichier"
 
+msgctxt "admission"
 msgid "File name"
 msgstr "Nom du fichier"
 
@@ -2398,6 +2404,7 @@ msgctxt "curriculum"
 msgid "Function"
 msgstr "Fonction"
 
+msgctxt "admission"
 msgid "Funding"
 msgstr "Financement"
 
@@ -2463,6 +2470,7 @@ msgstr "Commentaires globaux FAC/CDD"
 msgid "Global SIC comments"
 msgstr "Commentaires globaux SIC"
 
+msgctxt "admission"
 msgid "Grade"
 msgstr "Mention obtenue"
 
@@ -2868,12 +2876,13 @@ msgstr ""
 "Les informations concernant une éventuelle cotutelle sont à indiquer dans la "
 "partie « Projet doctoral »."
 
-msgid "Institute"
-msgstr "Institution"
-
 msgctxt "admission"
 msgid "Institute"
 msgstr "Établissement"
+
+msgctxt "jury"
+msgid "Institute"
+msgstr "Institution"
 
 msgid "Institute address"
 msgstr "Adresse de l'établissement"
@@ -3004,6 +3013,7 @@ msgstr "Lettre de justification"
 msgid "Keys"
 msgstr "Clés"
 
+msgctxt "admission"
 msgid "Keywords"
 msgstr "Mots-clés"
 
@@ -3058,6 +3068,7 @@ msgstr "Avis du promoteur de référence"
 msgid "Lead supervisor comment"
 msgstr "Commentaire du promoteur de référence"
 
+msgctxt "admission"
 msgid "Learning unit"
 msgstr "Unité d'enseignement"
 
@@ -3390,9 +3401,6 @@ msgstr ""
 msgid "Main institute"
 msgstr "Institution principale"
 
-msgid "Male"
-msgstr "Masculin"
-
 msgctxt "admission gender"
 msgid "Male"
 msgstr "Masculin"
@@ -3459,6 +3467,7 @@ msgstr ""
 msgid "Mandatory languages are missing."
 msgstr "Des langues obligatoires sont manquantes."
 
+msgctxt "course"
 msgid "Master"
 msgstr "Master"
 
@@ -3530,8 +3539,9 @@ msgstr "Date modif."
 msgid "Modification requested"
 msgstr "Modification demandée"
 
+msgctxt "feminine"
 msgid "Modified"
-msgstr "Modifée"
+msgstr "Modifiée"
 
 msgid "Modified at"
 msgstr "Modifié le"
@@ -3731,6 +3741,10 @@ msgstr "Non-assimilé·e"
 msgid "Not concerned"
 msgstr "Non concerné·e"
 
+msgctxt "checklist"
+msgid "Not concerned"
+msgstr "Non concerné·e"
+
 msgid "Not free"
 msgstr "Non libre"
 
@@ -3851,6 +3865,7 @@ msgstr "Autre bourse internationale"
 msgid "Other members of the supervisory panel"
 msgstr "Autres membres du comité d’accompagnement"
 
+msgctxt "admission"
 msgid "Other reason"
 msgstr "Autre raison"
 
@@ -4152,6 +4167,7 @@ msgstr "Compléments de formation"
 msgid "Presentation date"
 msgstr "Date de l'exposé"
 
+msgctxt "jury"
 msgid "President"
 msgstr "Président"
 
@@ -4377,6 +4393,7 @@ msgstr "Boutons radios"
 msgid "Rank in diploma"
 msgstr "Rang dans le diplôme"
 
+msgctxt "admission"
 msgid "Reason"
 msgstr "Raison"
 
@@ -4497,6 +4514,7 @@ msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 msgid "Request the documents from the candidate"
 msgstr "Réclamer les documents au candidat"
 
+msgctxt "document"
 msgid "Requested"
 msgstr "Réclamé"
 
@@ -4513,6 +4531,7 @@ msgstr "Demander des changements"
 msgid "Require changes for \"%(object)s\""
 msgstr "Demander des changements pour \"%(object)s\""
 
+msgctxt "masculine"
 msgid "Required"
 msgstr "Requis"
 
@@ -4574,6 +4593,11 @@ msgstr "Épreuve de confirmation à représenter"
 msgid "Retaking of the test"
 msgstr "Confirmation à représenter"
 
+msgctxt "activity"
+msgid "Role"
+msgstr "Rôle"
+
+msgctxt "jury"
 msgid "Role"
 msgstr "Rôle"
 
@@ -4695,9 +4719,6 @@ msgstr "Système réussite"
 msgid "Salary slips"
 msgstr "Fiches de rémunération"
 
-msgid "Save"
-msgstr "Enregistrer"
-
 msgctxt "admission"
 msgid "Save"
 msgstr "Enregistrer"
@@ -4727,6 +4748,7 @@ msgstr "Date de démarrage de la bourse"
 msgid "Scientific residencies"
 msgstr "Séjours scientifiques"
 
+msgctxt "verb"
 msgid "Search"
 msgstr "Rechercher"
 
@@ -4952,6 +4974,7 @@ msgstr "Début"
 msgid "Start date"
 msgstr "Date de début"
 
+msgctxt "admission"
 msgid "Status"
 msgstr "Statut"
 
@@ -4988,6 +5011,7 @@ msgstr "Soumettre les activités sélectionnées"
 msgid "Submit selected courses"
 msgstr "Soumettre les cours sélectionnées"
 
+msgctxt "admission"
 msgid "Submitted"
 msgstr "Soumis pour publication"
 
@@ -5615,10 +5639,7 @@ msgstr "Cases à cocher"
 msgid "Time allocated for thesis (in %)"
 msgstr "Temps consacré à la thèse (en %)"
 
-msgid "Title"
-msgstr "Titre"
-
-msgctxt "jury"
+msgctxt "admission"
 msgid "Title"
 msgstr "Titre"
 
@@ -5682,12 +5703,14 @@ msgstr ""
 msgid "Token"
 msgstr "Token"
 
+msgctxt "admission"
 msgid "Tokens that can be used for replacement"
 msgstr "Tokens pouvant être utilisés"
 
 msgid "Total hourly volume"
 msgstr "Volume horaire total"
 
+msgctxt "admission"
 msgid "Training acronym"
 msgstr "Sigle formation"
 
@@ -5700,6 +5723,7 @@ msgstr "Activité for formation"
 msgid "Training specificities"
 msgstr "Spécificités de la formation"
 
+msgctxt "admission"
 msgid "Training title"
 msgstr "Intitulé formation"
 
@@ -5775,6 +5799,7 @@ msgstr ""
 msgid "Unique business number"
 msgstr "Numéro unique d'entreprise"
 
+msgctxt "document"
 msgid "Unknown"
 msgstr "Inconnu(e)"
 
@@ -5790,6 +5815,7 @@ msgstr "Noma inconnu"
 msgid "Unsubmitted for publication"
 msgstr "Non soumis pour publication"
 
+msgctxt "verb"
 msgid "Update"
 msgstr "Mettre à jour"
 
@@ -5799,6 +5825,7 @@ msgstr "Mettre à jour admission en doctorat"
 msgid "Update member"
 msgstr "Modifier le membre"
 
+msgctxt "admission"
 msgid "Upload"
 msgstr "Téléverser"
 
@@ -5868,6 +5895,7 @@ msgstr ""
 "Nous vous félicitons pour la réussite de votre épreuve et vous souhaitons un "
 "franc succès dans la poursuite de votre parcours doctoral."
 
+msgctxt "admission"
 msgid "Website"
 msgstr "Site web"
 
@@ -6241,6 +6269,7 @@ msgstr "du %(start)s au %(end)s"
 msgid "items per page"
 msgstr "éléments par page"
 
+msgctxt "feminine"
 msgid "modified"
 msgstr "modifiée"
 

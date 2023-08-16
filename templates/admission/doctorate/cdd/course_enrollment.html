@@ -40,10 +40,10 @@
 
   <p>{% lorem %}</p>
 
-  <h4>{% trans "Course units" %}</h4>
+  <h4>{% trans "Course units" context 'admission' %}</h4>
   {% if activities %}
     <div class="filter-status form-group">
-      <strong>{% trans "Status" %}</strong>
+      <strong>{% trans "Status" context 'admission' %}</strong>
       <div class="btn-group btn-group-sm" role="radiogroup">
         <button type="button" class="btn btn-default active" data-status="all">
           {% trans "All" context "filters" %}

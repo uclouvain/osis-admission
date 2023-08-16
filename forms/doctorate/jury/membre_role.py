@@ -24,14 +24,14 @@
 #
 # ##############################################################################
 from django import forms
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import RoleJury
 
 
 class JuryMembreRoleForm(forms.Form):
     role = forms.ChoiceField(
-        label=_("Role"),
+        label=pgettext_lazy("jury", "Role"),
         choices=RoleJury.choices(),
         required=True,
     )

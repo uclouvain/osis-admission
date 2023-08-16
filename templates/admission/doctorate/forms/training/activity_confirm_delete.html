@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 {% block tab_content %}
   {% url request.resolver_match.namespace uuid=view.kwargs.uuid as back_url %}
   <h3>
-    {% blocktrans trimmed %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}
+    {% blocktrans trimmed context 'admission' %}Are you sure you want to delete "{{ object }}"?{% endblocktrans %}
   </h3>
   <p>{% trans "This activity and its potential subactivities will be discontinued" %}</p>
   <form action="" method="post">

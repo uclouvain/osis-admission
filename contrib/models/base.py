@@ -282,7 +282,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     )
 
     created_at = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
-    modified_at = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
+    modified_at = models.DateTimeField(verbose_name=pgettext_lazy('feminine', 'Modified'), auto_now=True)
 
     professional_valuated_experiences = models.ManyToManyField(
         'osis_profile.ProfessionalExperience',
