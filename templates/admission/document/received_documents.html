@@ -69,7 +69,7 @@
                   {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
                 {% elif document.statut == 'RECLAME' %}
                   {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
-                  <i class="fa-solid fa-envelope" title="{% translate 'Requested' %}"></i>
+                  <i class="fa-solid fa-envelope" title="{% translate 'Requested' context 'document' %}"></i>
                 {% else %}
                   {% if not document.document_soumis_par or document.document_soumis_par.matricule == admission.matricule_candidat %}
                     {% translate 'Candidate' %}
@@ -89,7 +89,7 @@
                 {% elif document.statut == 'A_RECLAMER' %}
                   {{ document.derniere_action_le|date:'DATETIME_FORMAT' }}
                 {% elif not document.document_soumis_le %}
-                  {% translate 'Unknown' %}
+                  {% translate 'Unknown' context 'document' %}
                 {% elif document.document_soumis_le < proposition.soumise_le %}
                   {{ proposition.soumise_le|date:'DATETIME_FORMAT' }}
                 {% else %}

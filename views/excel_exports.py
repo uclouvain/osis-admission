@@ -33,7 +33,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template.defaultfilters import yesno
 from django.urls import reverse
 from django.utils.text import slugify
-from django.utils.translation import gettext as _, gettext_lazy
+from django.utils.translation import gettext as _, gettext_lazy, pgettext
 from django.views import View
 
 from admission.contrib.models import Scholarship
@@ -215,8 +215,8 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('First name'),
             _('Noma'),
             _('Several applications?'),
-            _('Training acronym'),
-            _('Training title'),
+            pgettext('admission', 'Training acronym'),
+            pgettext('admission', 'Training title'),
             _('Nationality'),
             _('DD/scholarship/EM?'),
             _('Application status'),

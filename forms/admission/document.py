@@ -29,7 +29,7 @@ from typing import List
 from django import forms
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, get_language
+from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
@@ -59,7 +59,7 @@ class UploadDocumentForm(UploadDocumentFormMixin):
 
 class UploadFreeDocumentForm(forms.Form):
     file_name = forms.CharField(
-        label=_('File name'),
+        label=pgettext_lazy('admission', 'File name'),
     )
 
     file = AdmissionFileUploadField(
@@ -71,11 +71,11 @@ class UploadFreeDocumentForm(forms.Form):
 
 class RequestFreeDocumentForm(forms.Form):
     file_name = forms.CharField(
-        label=_('File name'),
+        label=pgettext_lazy('admission', 'File name'),
     )
 
     reason = forms.CharField(
-        label=_('Reason'),
+        label=pgettext_lazy('admission', 'Reason'),
         widget=forms.Textarea,
     )
 

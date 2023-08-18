@@ -106,7 +106,7 @@ class Attachment:
             if not raw_content:
                 return default_content
             if metadata.get('mimetype') in IMAGE_MIME_TYPES:
-                raw_content = img2pdf.convert(raw_content)
+                raw_content = img2pdf.convert(raw_content, rotation=img2pdf.Rotation.ifvalid)
             return BytesIO(raw_content)
         return default_content
 

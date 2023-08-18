@@ -30,6 +30,7 @@ from unittest.mock import MagicMock
 
 import attr
 import freezegun
+import img2pdf
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
@@ -379,7 +380,10 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
             default_content=self.bytes_io_default_content,
         )
         self.get_raw_content_mock.assert_called_once_with('token')
-        self.convert_img_mock.assert_called_once_with(self.get_raw_content_mock.return_value)
+        self.convert_img_mock.assert_called_once_with(
+            self.get_raw_content_mock.return_value,
+            rotation=img2pdf.Rotation.ifvalid
+        )
 
     def test_convert_and_get_raw_with_png_attachment(self):
         image_attachment = Attachment(label='PNG', uuids=[''], identifier='CARTE_IDENTITE')
@@ -392,7 +396,10 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
             default_content=self.bytes_io_default_content,
         )
         self.get_raw_content_mock.assert_called_once_with('token')
-        self.convert_img_mock.assert_called_once_with(self.get_raw_content_mock.return_value)
+        self.convert_img_mock.assert_called_once_with(
+            self.get_raw_content_mock.return_value,
+            rotation=img2pdf.Rotation.ifvalid
+        )
 
     def test_get_default_content_if_mimetype_is_not_supported(self):
         unknown_attachment = Attachment(label='Unknown', uuids=[''], identifier='CARTE_IDENTITE')

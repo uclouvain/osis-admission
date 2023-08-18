@@ -360,7 +360,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
-        self.assertEqual(names[1], _('Created by'))
+        self.assertEqual(names[1], pgettext('masculine', 'Created by'))
         self.assertEqual(names[2], _('Description'))
         self.assertEqual(names[3], _('Year'))
         self.assertEqual(names[4], _('Application numero'))
@@ -369,7 +369,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(names[7], _('Application status'))
         self.assertEqual(names[8], _('Application type'))
         self.assertEqual(names[9], _('Enrolment campus'))
-        self.assertEqual(names[10], _('Entities'))
+        self.assertEqual(names[10], pgettext('admission', 'Entities'))
         self.assertEqual(names[11], _('Course type'))
         self.assertEqual(names[12], pgettext('admission', 'Course'))
         self.assertEqual(names[13], _('International scholarship'))

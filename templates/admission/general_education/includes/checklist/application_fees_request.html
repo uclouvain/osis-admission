@@ -31,7 +31,8 @@
   >
     <div class="form-group btn-group status-group" role="group">
       {% if current.statut == 'GEST_BLOCAGE' %}
-        {% checklist_state_button tab='frais_dossier' label=_("Not concerned") icon='xmark' state='INITIAL_NON_CONCERNE' class='info' disabled=fees_already_payed open_modal='#application-fees-request-cancel-modal-INITIAL_NON_CONCERNE' %}
+        {% translate 'Not concerned' context 'checklist' as not_concerned_label %}
+        {% checklist_state_button tab='frais_dossier' label=not_concerned_label icon='xmark' state='INITIAL_NON_CONCERNE' class='info' disabled=fees_already_payed open_modal='#application-fees-request-cancel-modal-INITIAL_NON_CONCERNE' %}
       {% else %}
         {% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status='INITIAL_NON_CONCERNE' as application_fees_url %}
         {% checklist_state_button tab='frais_dossier' label=_("Not concerned") icon='xmark' state='INITIAL_NON_CONCERNE' class='info' disabled=fees_already_payed htmx_post=application_fees_url %}

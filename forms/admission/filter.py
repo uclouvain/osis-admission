@@ -122,7 +122,7 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     entites = forms.CharField(
-        label=_('Entities'),
+        label=pgettext_lazy('admission', 'Entities'),
         required=False,
         widget=autocomplete.TagSelect2(),
     )

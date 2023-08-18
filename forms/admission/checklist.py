@@ -195,7 +195,7 @@ class FacDecisionRefusalForm(forms.Form):
     )
 
     reason = forms.ModelChoiceField(
-        label=_('Reason'),
+        label=pgettext_lazy('admission', 'Reason'),
         queryset=RefusalReason.objects.all(),
         required=False,
         widget=autocomplete.ModelSelect2(
@@ -206,7 +206,7 @@ class FacDecisionRefusalForm(forms.Form):
     )
 
     other_reason = forms.CharField(
-        label=_('Other reason'),
+        label=pgettext_lazy('admission', 'Other reason'),
         required=False,
     )
 
@@ -336,7 +336,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
         ]
         labels = {
             'annual_program_contact_person_name': _('First name and last name'),
-            'annual_program_contact_person_email': _('Email'),
+            'annual_program_contact_person_email': pgettext_lazy('admission', 'Email'),
             'other_training_accepted_by_fac': _('Other course'),
         }
         widgets = {

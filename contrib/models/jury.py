@@ -27,7 +27,7 @@ import uuid
 
 from django.db import models
 from django.db.models import CheckConstraint, Q
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import RoleJury, TitreMembre, GenreMembre
@@ -43,7 +43,7 @@ class JuryMember(models.Model):
         db_index=True,
     )
     role = models.CharField(
-        verbose_name=_('Role'),
+        verbose_name=pgettext_lazy('jury', 'Role'),
         choices=RoleJury.choices(),
         max_length=50,
     )
@@ -82,7 +82,7 @@ class JuryMember(models.Model):
 
     # External member only
     institute = models.CharField(
-        verbose_name=_('Institute'),
+        verbose_name=pgettext_lazy('jury', 'Institute'),
         max_length=255,
         default='',
         blank=True,
@@ -107,7 +107,7 @@ class JuryMember(models.Model):
         blank=True,
     )
     title = models.CharField(
-        verbose_name=_('Title'),
+        verbose_name=pgettext_lazy('admission', 'Title'),
         choices=TitreMembre.choices(),
         max_length=50,
         default='',
@@ -127,7 +127,7 @@ class JuryMember(models.Model):
         blank=True,
     )
     email = models.EmailField(
-        verbose_name=_('Email'),
+        verbose_name=pgettext_lazy('admission', 'Email'),
         max_length=255,
         default='',
         blank=True,
