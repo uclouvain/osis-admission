@@ -114,7 +114,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ).first()
                 if entity.adresse_facturation
                 else None,
-                'billing_address_place': entity.adresse_facturation.lieu_dit,
             }
             if entity.adresse_facturation
             else {
@@ -125,7 +124,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'billing_address_postal_code': '',
                 'billing_address_city': '',
                 'billing_address_country': None,
-                'billing_address_place': '',
             }
         )
 
@@ -146,6 +144,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'diploma_equivalence': entity.equivalence_diplome,
                 'residence_permit': entity.copie_titre_sejour,
                 'confirmation_elements': entity.elements_confirmation,
+                'additional_documents': entity.documents_additionnels,
                 'registration_as': entity.inscription_a_titre.name if entity.inscription_a_titre else '',
                 'head_office_name': entity.nom_siege_social,
                 'unique_business_number': entity.numero_unique_entreprise,
@@ -201,10 +200,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 pays=admission.billing_address_country.iso_code if admission.billing_address_country else '',
                 destinataire=admission.billing_address_recipient,
                 boite_postale=admission.billing_address_postal_box,
-                lieu_dit=admission.billing_address_place,
             )
             if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
             else None,
+            documents_additionnels=admission.additional_documents,
         )
 
     @classmethod
@@ -262,10 +261,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 else '',
                 destinataire=admission.billing_address_recipient,
                 boite_postale=admission.billing_address_postal_box,
-                lieu_dit=admission.billing_address_place,
             )
             if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
             else None,
             elements_confirmation=admission.confirmation_elements,
             pdf_recapitulatif=admission.pdf_recap,
+            documents_additionnels=admission.additional_documents,
         )

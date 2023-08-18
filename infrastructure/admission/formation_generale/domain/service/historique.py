@@ -23,9 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from email.message import EmailMessage
 
 from django.conf import settings
+from django.utils import formats
 from osis_history.utilities import add_history_entry
 
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -98,4 +100,45 @@ class Historique(IHistorique):
             "A manager asked the candidate to not pay any application fees.",
             "{gestionnaire.prenom} {gestionnaire.nom}".format(gestionnaire=gestionnaire),
             tags=["proposition", "application-fees-payment", "status-changed", "cancel-request"],
+        )
+
+    @classmethod
+    def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        message: EmailMessage,
+        gestionnaire: str,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+        recipient = message['To']
+        add_history_entry(
+            proposition.entity_id.uuid,
+            f"Un mail informant de la soumission du dossier en faculté a été envoyé à \"{recipient}\" le {now}.",
+            f"An e-mail notifying that the dossier had been submitted to the faculty was sent to "
+            f"\"{recipient}\" on {now}.",
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "fac-decision", "send-to-fac", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "La faculté a informé le SIC de son refus.",
+            "The faculty informed the SIC of its refusal.",
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "fac-decision", "refusal-send-to-sic", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: str):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "La faculté a informé le SIC de son acceptation.",
+            "The faculty informed the SIC of its approval.",
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "fac-decision", "approval-send-to-sic", "status-changed"],
         )

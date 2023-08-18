@@ -23,14 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
 from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
     modifier_checklist_choix_formation,
 )
-from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
+from admission.ddd.admission.use_case.read import (
+    recuperer_questions_specifiques_proposition,
+)
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
     initialiser_emplacement_document_a_reclamer,
@@ -54,31 +55,37 @@ from admission.infrastructure.admission.domain.service.in_memory.elements_confir
 from admission.infrastructure.admission.domain.service.in_memory.historique import (
     HistoriqueInMemory as HistoriqueGlobalInMemory,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.historique import (
-    HistoriqueInMemory as HistoriqueFormationGeneraleInMemory,
-)
 from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
-)
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
-    PaiementFraisDossierInMemory,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
+from admission.infrastructure.admission.domain.service.in_memory.unites_enseignement_translator import (
+    UnitesEnseignementInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
     ComptabiliteInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.historique import (
+    HistoriqueInMemory as HistoriqueFormationGeneraleInMemory,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.inscription_tardive import (
     InscriptionTardiveInMemory,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.notification import (
     NotificationInMemory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
+    PaiementFraisDossierInMemory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.pdf_generation import (
+    PDFGenerationInMemory,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.question_specifique import (
     QuestionSpecifiqueInMemoryTranslator,
@@ -111,6 +118,8 @@ _emplacement_document_repository = emplacement_document_in_memory_repository
 _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
 _paiement_frais_dossier = PaiementFraisDossierInMemory()
 _notification = NotificationInMemory()
+_pdf_generation = PDFGenerationInMemory()
+_unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -222,6 +231,7 @@ COMMAND_HANDLERS = {
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
         proposition_repository=_proposition_repository,
+        unites_enseignement_translator=_unites_enseignement_translator,
     ),
     RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
         cmd,
@@ -366,5 +376,55 @@ COMMAND_HANDLERS = {
             paiement_frais_dossier_service=_paiement_frais_dossier,
             historique=_historique_formation_generale,
         )
+    ),
+    EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
+            cmd,
+            proposition_repository=_proposition_repository,
+            notification=_notification,
+            historique=_historique_formation_generale,
+        )
+    ),
+    SpecifierMotifRefusFacultairePropositionCommand: lambda msg_bus, cmd: specifier_motif_refus_facultaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    RefuserPropositionParFaculteCommand: lambda msg_bus, cmd: refuser_proposition_par_faculte(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique_formation_generale,
+        pdf_generation=_pdf_generation,
+    ),
+    RefuserPropositionParFaculteAvecNouveauMotifCommand: (
+        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveau_motif(
+            cmd,
+            proposition_repository=_proposition_repository,
+            historique=_historique_formation_generale,
+            pdf_generation=_pdf_generation,
+        )
+    ),
+    SpecifierInformationsAcceptationFacultairePropositionCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_facultaire(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
+    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand: (
+        lambda msg_bus, cmd: approuver_proposition_par_faculte_avec_nouvelles_informations(
+            cmd,
+            proposition_repository=_proposition_repository,
+            historique=_historique_formation_generale,
+            pdf_generation=_pdf_generation,
+        )
+    ),
+    ApprouverPropositionParFaculteCommand: lambda msg_bus, cmd: approuver_proposition_par_faculte(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique_formation_generale,
+        pdf_generation=_pdf_generation,
+    ),
+    CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
 }

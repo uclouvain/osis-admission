@@ -27,14 +27,14 @@ import re
 
 from dal import autocomplete
 from django import forms
-from django.utils.translation import gettext_lazy as _, ngettext
+from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION, CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices
+from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -87,13 +87,11 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     matricule_candidat = forms.CharField(
-        label=_('Last name / First name / E-mail'),
+        label=_('Last name / First name / Email'),
         required=False,
         widget=autocomplete.ListSelect2(
             url="admission:autocomplete:candidates",
-            attrs={
-                'data-minimum-input-length': 3,
-            },
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
 
@@ -124,7 +122,7 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     entites = forms.CharField(
-        label=_('Entities'),
+        label=pgettext_lazy('admission', 'Entities'),
         required=False,
         widget=autocomplete.TagSelect2(),
     )
@@ -134,7 +132,7 @@ class AllAdmissionsFilterForm(forms.Form):
             (key, TrainingType.get_value(key))
             for key in AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE
         ],
-        label=_('Training type'),
+        label=_('Course type'),
         required=False,
         widget=Select2MultipleCheckboxesWidget(
             attrs={
@@ -145,7 +143,7 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     formation = forms.CharField(
-        label=_('Training'),
+        label=pgettext_lazy('admission', 'Course'),
         required=False,
     )
 
@@ -162,7 +160,7 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     bourse_double_diplomation = forms.TypedChoiceField(
-        label=_('Double degree scholarship'),
+        label=_('Dual degree scholarship'),
         empty_value=None,
         required=False,
     )

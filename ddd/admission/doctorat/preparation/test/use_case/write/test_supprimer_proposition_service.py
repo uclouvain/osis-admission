@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import attr
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import SupprimerPropositionCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -39,7 +39,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class SupprimerPropositionTestCase(TestCase):
+class SupprimerPropositionTestCase(SimpleTestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
 

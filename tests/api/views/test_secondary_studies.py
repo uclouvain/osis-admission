@@ -55,7 +55,6 @@ from osis_profile.models import (
     BelgianHighSchoolDiploma,
     ForeignHighSchoolDiploma,
     HighSchoolDiplomaAlternative,
-    Schedule,
 )
 from osis_profile.models.enums.education import EducationalType
 from reference.tests.factories.country import CountryFactory
@@ -91,28 +90,6 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
             "belgian_diploma": {
                 "institute": cls.high_school.uuid,
                 "academic_graduation_year": cls.academic_year.year,
-            },
-        }
-        cls.diploma_data_with_schedule = {
-            "graduated_from_high_school": GotDiploma.YES.name,
-            "belgian_diploma": {
-                "institute": cls.high_school.uuid,
-                "academic_graduation_year": cls.academic_year.year,
-                "educational_type": "TEACHING_OF_GENERAL_EDUCATION",
-                "schedule": {
-                    "latin": 3,
-                },
-            },
-        }
-        cls.diploma_data_educational_does_not_require_schedule = {
-            "graduated_from_high_school": GotDiploma.YES.name,
-            "belgian_diploma": {
-                "institute": cls.high_school.uuid,
-                "academic_graduation_year": cls.academic_year.year,
-                "educational_type": "PROFESSIONAL_EDUCATION",
-                "schedule": {
-                    "latin": 3,
-                },
             },
         }
         doctoral_commission = EntityFactory()
@@ -185,13 +162,11 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
             belgian_diploma.academic_graduation_year.year,
             self.diploma_data["belgian_diploma"]["academic_graduation_year"],
         )
-        self.assertIsNone(belgian_diploma.result)
         self.assertIsNone(belgian_diploma.community)
         self.assertEqual(belgian_diploma.educational_type, self.diploma_data["belgian_diploma"]["educational_type"])
         self.assertEqual(belgian_diploma.educational_other, "")
         self.assertEqual(belgian_diploma.institute.uuid, self.diploma_data["belgian_diploma"]["institute"])
         self.assertEqual(belgian_diploma.other_institute_name, "")
-        self.assertIsNone(belgian_diploma.schedule)
         foreign_diploma = ForeignHighSchoolDiploma.objects.filter(person__user_id=self.candidate_user.pk)
         self.assertEqual(foreign_diploma.count(), 0)
         updated_admission = BaseAdmission.objects.get(uuid=self.doctorate_admission_uuid)
@@ -270,42 +245,8 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertEqual(diploma.institute.uuid, self.diploma_data["belgian_diploma"]["institute"])
 
-    def test_diploma_create_with_schedule(self):
-        response = self.create_belgian_diploma_with_doctorate_admission(self.diploma_data_with_schedule)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
-        self.assertEqual(diploma.institute.uuid, self.diploma_data_with_schedule["belgian_diploma"]["institute"])
-        self.assertIsNotNone(diploma.schedule)
-        self.assertEqual(diploma.schedule.latin, 3)
-
-    def test_diploma_create_with_schedule_without_correct_educational_type(self):
-        response = self.create_belgian_diploma_with_doctorate_admission(
-            self.diploma_data_educational_does_not_require_schedule
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
-        self.assertEqual(
-            diploma.institute.uuid,
-            self.diploma_data_educational_does_not_require_schedule["belgian_diploma"]["institute"],
-        )
-        self.assertIsNone(diploma.schedule)
-
-    def test_diploma_create_without_required_schedule_deletes_it(self):
-        response = self.create_belgian_diploma_with_doctorate_admission(self.diploma_data_with_schedule)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        response = self.create_belgian_diploma_with_doctorate_admission(self.diploma_data)
-        self.assertIsNone(response.json()["belgian_diploma"]["schedule"])
-        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
-        self.assertIsNone(diploma.schedule)
-        self.assertEqual(Schedule.objects.count(), 0)
-
     def test_delete_diploma(self):
         self.create_belgian_diploma_with_doctorate_admission(self.diploma_data)
-        self.create_belgian_diploma_with_doctorate_admission({"graduated_from_high_school": GotDiploma.NO.name})
-        self.assertEqual(BelgianHighSchoolDiploma.objects.filter(person__user_id=self.candidate_user.pk).count(), 0)
-
-    def test_delete_diploma_with_schedule(self):
-        self.create_belgian_diploma_with_doctorate_admission(self.diploma_data_with_schedule)
         self.create_belgian_diploma_with_doctorate_admission({"graduated_from_high_school": GotDiploma.NO.name})
         self.assertEqual(BelgianHighSchoolDiploma.objects.filter(person__user_id=self.candidate_user.pk).count(), 0)
 
@@ -436,15 +377,6 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(diploma.other_linguistic_regime, "Français")
         self.assertEqual(BelgianHighSchoolDiploma.objects.count(), 0)
         self.assertEqual(HighSchoolDiplomaAlternative.objects.count(), 0)
-
-    def test_diploma_without_schedule_update_by_foreign_diploma(self):
-        BelgianHighSchoolDiplomaFactory(person=self.user.person, schedule=None)
-        response = self.create_foreign_diploma(self.foreign_diploma_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
-        self.assertIsNone(response.json()["belgian_diploma"])
-        self.assertIsNotNone(response.json()["foreign_diploma"])
-        diploma = ForeignHighSchoolDiploma.objects.get(person__user_id=self.user.pk)
-        self.assertEqual(diploma.other_linguistic_regime, "Français")
 
     def test_delete_diploma(self):
         self.create_foreign_diploma(self.foreign_diploma_data)

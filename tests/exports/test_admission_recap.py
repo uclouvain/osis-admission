@@ -711,7 +711,6 @@ class SectionsAttachmentsTestCase(TestCase):
             matricule='MAT1',
             nom='Doe',
             prenom='John',
-            prenom_d_usage='Jim',
             autres_prenoms='Jack',
             date_naissance=datetime.date(1990, 1, 1),
             annee_naissance=None,
@@ -736,6 +735,8 @@ class SectionsAttachmentsTestCase(TestCase):
             email='johndoe@example.com',
             annee_derniere_inscription_ucl=2020,
             noma_derniere_inscription_ucl='0123456789',
+            date_expiration_carte_identite=datetime.date(2023, 1, 1),
+            date_expiration_passeport=datetime.date(2023, 1, 1),
         )
         coordinates_dto = _CoordonneesDTO(
             domicile_legal=_AdressePersonnelleDTO(
@@ -744,13 +745,13 @@ class SectionsAttachmentsTestCase(TestCase):
                 ville='Louvain-La-Neuve',
                 pays='BE',
                 nom_pays='Belgique',
-                lieu_dit='Depice',
                 numero_rue='1',
                 boite_postale='BB8',
             ),
             adresse_correspondance=None,
             numero_mobile='0123456789',
             adresse_email_privee='johndoe@example.com',
+            numero_contact_urgence='0123456789',
         )
         cls.belgian_academic_curriculum_experience = _ExperienceAcademiqueDTO(
             uuid='uuid-1',
@@ -855,14 +856,12 @@ class SectionsAttachmentsTestCase(TestCase):
         )
         bachelor_secondary_studies_dto = _EtudesSecondairesDTO(
             diplome_belge=_DiplomeBelgeEtudesSecondairesDTO(
-                resultat=DiplomaResults.GT_75_RESULT.name,
                 certificat_inscription=['uuid-certificat-inscription'],
                 diplome=['uuid-diplome'],
                 type_enseignement=EducationalType.PROFESSIONAL_EDUCATION.name,
                 autre_type_enseignement='Other type',
                 nom_institut='UCL',
                 adresse_institut='Louvain-La-Neuve',
-                grille_horaire=None,
                 communaute=BelgianCommunitiesOfEducation.FRENCH_SPEAKING.name,
             ),
             diplome_etranger=_DiplomeEtrangerEtudesSecondairesDTO(
@@ -944,6 +943,8 @@ class SectionsAttachmentsTestCase(TestCase):
             code_bic_swift_banque='GKCCBEBB',
             prenom_titulaire_compte='John',
             nom_titulaire_compte='Doe',
+            preuve_statut_apatride=['uuid-preuve_statut_apatride'],
+            carte_a=['uuid-carte_a'],
         )
 
         continuing_proposition_dto = _PropositionFormationContinueDTO(
@@ -986,6 +987,7 @@ class SectionsAttachmentsTestCase(TestCase):
             adresse_facturation=None,
             elements_confirmation={},
             pdf_recapitulatif=['uuid-pdf-recapitulatif'],
+            documents_additionnels=[],
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',
@@ -1029,6 +1031,9 @@ class SectionsAttachmentsTestCase(TestCase):
             documents_demandes={},
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_uclouvain=[],
+            certificat_refus_fac=[],
+            certificat_approbation_fac=[],
+            documents_additionnels=[],
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
@@ -1057,7 +1062,6 @@ class SectionsAttachmentsTestCase(TestCase):
             curriculum=['uuid-curriculum'],
             elements_confirmation={},
             pdf_recapitulatif=['uuid-pdf-recapitulatif'],
-            bourse_erasmus_mundus=None,
             autre_bourse_recherche='',
             bourse_date_debut=None,
             bourse_date_fin=None,
@@ -1338,7 +1342,7 @@ class SectionsAttachmentsTestCase(TestCase):
             alternative_secondaires=None,
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
         ):
-            # Both attachments are specified -> we consider them as facultative
+            # The document is specified
             section = get_secondary_studies_section(
                 self.general_bachelor_context,
                 self.empty_questions,
@@ -1346,25 +1350,17 @@ class SectionsAttachmentsTestCase(TestCase):
             )
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 2)
+            self.assertEqual(len(attachments), 1)
 
-            self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_BELGE_DIPLOME'])
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_BELGE_CERTIFICAT_INSCRIPTION'])
             self.assertEqual(
                 attachments[0].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
-            )
-            self.assertFalse(attachments[0].required)
-
-            self.assertEqual(attachments[1].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
-            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_BELGE_CERTIFICAT_INSCRIPTION'])
-            self.assertEqual(
-                attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_belge.certificat_inscription,
             )
-            self.assertFalse(attachments[1].required)
+            self.assertTrue(attachments[0].required)
 
-            # Both diploma and enrolment certificate are missing -> we consider them as facultative
+            # The document is are missing
             with mock.patch.multiple(
                 self.general_bachelor_context.etudes_secondaires.diplome_belge,
                 diplome=[],
@@ -1377,50 +1373,10 @@ class SectionsAttachmentsTestCase(TestCase):
                 )
                 attachments = section.attachments
 
-                self.assertEqual(len(attachments), 2)
+                self.assertEqual(len(attachments), 1)
 
-                self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
-                self.assertEqual(attachments[1].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
-                self.assertFalse(attachments[0].required)
-                self.assertFalse(attachments[1].required)
-
-            # Only the diploma is specified -> we consider it as mandatory
-            with mock.patch.multiple(
-                self.general_bachelor_context.etudes_secondaires.diplome_belge,
-                certificat_inscription=[],
-            ):
-                section = get_secondary_studies_section(
-                    self.general_bachelor_context,
-                    self.empty_questions,
-                    False,
-                )
-                attachments = section.attachments
-
-                self.assertEqual(len(attachments), 2)
-
-                self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
-                self.assertEqual(attachments[1].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
                 self.assertTrue(attachments[0].required)
-                self.assertFalse(attachments[1].required)
-
-            # Only the enrolment certificate is specified -> we consider it as mandatory
-            with mock.patch.multiple(
-                self.general_bachelor_context.etudes_secondaires.diplome_belge,
-                diplome=[],
-            ):
-                section = get_secondary_studies_section(
-                    self.general_bachelor_context,
-                    self.empty_questions,
-                    False,
-                )
-                attachments = section.attachments
-
-                self.assertEqual(len(attachments), 2)
-
-                self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
-                self.assertEqual(attachments[1].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
-                self.assertFalse(attachments[0].required)
-                self.assertTrue(attachments[1].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_alternative(self):
         with mock.patch.multiple(
@@ -2466,7 +2422,7 @@ class SectionsAttachmentsTestCase(TestCase):
             attachments = section.attachments
             document_question = self.specific_questions.get(Onglets.INFORMATIONS_ADDITIONNELLES.name)[1]
 
-            self.assertEqual(len(attachments), 1)
+            self.assertEqual(len(attachments), 2)
 
             self.assertEqual(
                 attachments[0].identifier,
@@ -2475,6 +2431,13 @@ class SectionsAttachmentsTestCase(TestCase):
             self.assertEqual(attachments[0].label, document_question.label)
             self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
             self.assertFalse(attachments[0].required)
+            self.assertEqual(
+                attachments[1].identifier,
+                'ADDITIONAL_DOCUMENTS',
+            )
+            self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
+            self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
+            self.assertFalse(attachments[1].required)
 
     def test_specific_questions_attachments_with_continuing_proposition_non_ue_candidate(self):
         with mock.patch.multiple(
@@ -2489,12 +2452,19 @@ class SectionsAttachmentsTestCase(TestCase):
 
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 1)
+            self.assertEqual(len(attachments), 2)
 
             self.assertEqual(attachments[0].identifier, 'COPIE_TITRE_SEJOUR')
             self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques['COPIE_TITRE_SEJOUR'])
             self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.copie_titre_sejour)
             self.assertFalse(attachments[0].required)
+
+            self.assertEqual(
+                attachments[1].identifier,
+                'ADDITIONAL_DOCUMENTS',
+            )
+            self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
+            self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
 
     def test_specific_questions_attachments_with_general_proposition_and_reorientation(self):
         with mock.patch.multiple(
@@ -2509,7 +2479,7 @@ class SectionsAttachmentsTestCase(TestCase):
             )
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 1)
+            self.assertEqual(len(attachments), 2)
 
             self.assertEqual(attachments[0].identifier, 'ATTESTATION_INSCRIPTION_REGULIERE')
             self.assertEqual(attachments[0].label, DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE'])
@@ -2518,6 +2488,10 @@ class SectionsAttachmentsTestCase(TestCase):
                 self.general_bachelor_context.proposition.attestation_inscription_reguliere,
             )
             self.assertTrue(attachments[0].required)
+
+            self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
+            self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
+            self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
 
             # The pool is not open...
             with freezegun.freeze_time('2023-10-1'):
@@ -2528,7 +2502,8 @@ class SectionsAttachmentsTestCase(TestCase):
                 )
                 attachments = section.attachments
 
-                self.assertEqual(len(attachments), 0)
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
 
                 # ...but we simulate its opening after the submission of the proposition to allow
                 # the managers to manually choose the reorientation
@@ -2543,7 +2518,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     )
                     attachments = section.attachments
 
-                    self.assertEqual(len(attachments), 1)
+                    self.assertEqual(len(attachments), 2)
 
                     self.assertEqual(attachments[0].identifier, 'ATTESTATION_INSCRIPTION_REGULIERE')
                     self.assertEqual(
@@ -2555,6 +2530,7 @@ class SectionsAttachmentsTestCase(TestCase):
                         self.general_bachelor_context.proposition.attestation_inscription_reguliere,
                     )
                     self.assertTrue(attachments[0].required)
+                    self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
 
         with mock.patch.multiple(
             self.general_bachelor_context.proposition,
@@ -2567,7 +2543,8 @@ class SectionsAttachmentsTestCase(TestCase):
                 False,
             )
 
-            self.assertEqual(len(section.attachments), 0)
+            self.assertEqual(len(section.attachments), 1)
+            self.assertEqual(section.attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
 
     def test_specific_questions_attachments_with_general_proposition_and_modification(self):
         with mock.patch.multiple(
@@ -2583,7 +2560,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 1)
+            self.assertEqual(len(attachments), 2)
 
             self.assertEqual(
                 attachments[0].identifier,
@@ -2595,6 +2572,9 @@ class SectionsAttachmentsTestCase(TestCase):
                 self.general_bachelor_context.proposition.formulaire_modification_inscription,
             )
             self.assertTrue(attachments[0].required)
+            self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
+            self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
+            self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
 
             # The pool is not open...
             with freezegun.freeze_time('2023-10-1'):
@@ -2605,7 +2585,8 @@ class SectionsAttachmentsTestCase(TestCase):
                 )
                 attachments = section.attachments
 
-                self.assertEqual(len(attachments), 0)
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
 
                 # ...but we simulate its opening after the submission of the proposition to allow
                 # the managers to manually choose the reorientation
@@ -2620,7 +2601,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     )
                     attachments = section.attachments
 
-                    self.assertEqual(len(attachments), 1)
+                    self.assertEqual(len(attachments), 2)
 
                     self.assertEqual(attachments[0].identifier, 'FORMULAIRE_MODIFICATION_INSCRIPTION')
                     self.assertEqual(
@@ -2632,6 +2613,7 @@ class SectionsAttachmentsTestCase(TestCase):
                         self.general_bachelor_context.proposition.formulaire_modification_inscription,
                     )
                     self.assertTrue(attachments[0].required)
+                    self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
 
         with mock.patch.multiple(
             self.general_bachelor_context.proposition,
@@ -2644,7 +2626,8 @@ class SectionsAttachmentsTestCase(TestCase):
                 False,
             )
 
-            self.assertEqual(len(section.attachments), 0)
+            self.assertEqual(len(section.attachments), 1)
+            self.assertEqual(section.attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
 
     def test_accounting_attachments_with_general_proposition_for_ue_candidate_and_french_frequented_institute(self):
         section = get_accounting_section(self.general_bachelor_context, True)

@@ -33,7 +33,7 @@ import mock
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, pgettext
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from osis_async.models import AsyncTask
@@ -360,21 +360,21 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
-        self.assertEqual(names[1], _('Created by'))
+        self.assertEqual(names[1], pgettext('masculine', 'Created by'))
         self.assertEqual(names[2], _('Description'))
         self.assertEqual(names[3], _('Year'))
         self.assertEqual(names[4], _('Application numero'))
         self.assertEqual(names[5], _('Noma'))
-        self.assertEqual(names[6], _('Last name / First name / E-mail'))
+        self.assertEqual(names[6], _('Last name / First name / Email'))
         self.assertEqual(names[7], _('Application status'))
         self.assertEqual(names[8], _('Application type'))
         self.assertEqual(names[9], _('Enrolment campus'))
-        self.assertEqual(names[10], _('Entities'))
-        self.assertEqual(names[11], _('Training type'))
-        self.assertEqual(names[12], _('Training'))
+        self.assertEqual(names[10], pgettext('admission', 'Entities'))
+        self.assertEqual(names[11], _('Course type'))
+        self.assertEqual(names[12], pgettext('admission', 'Course'))
         self.assertEqual(names[13], _('International scholarship'))
         self.assertEqual(names[14], _('Erasmus Mundus'))
-        self.assertEqual(names[15], _('Double degree scholarship'))
+        self.assertEqual(names[15], _('Dual degree scholarship'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '1 Janvier 2023')

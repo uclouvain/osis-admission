@@ -315,7 +315,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             # Project
             'retrieve_proposition': DOCTORATE_ACTION_LINKS['retrieve_proposition'],
             'update_proposition': DOCTORATE_ACTION_LINKS['update_proposition'],
-            # Training choice
+            # Course choice
             'retrieve_training_choice': DOCTORATE_ACTION_LINKS['retrieve_doctorate_training_choice'],
             'update_training_choice': DOCTORATE_ACTION_LINKS['update_doctorate_training_choice'],
             # Cotutelle
@@ -400,7 +400,6 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'links',
             'erreurs',
             'comptabilite',
-            'bourse_erasmus_mundus',
             'reponses_questions_specifiques',
             'curriculum',
             'pdf_recapitulatif',
@@ -472,6 +471,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             'curriculum',
             'equivalence_diplome',
             'pdf_recapitulatif',
+            'documents_additionnels',
         ]
 
 
@@ -538,6 +538,7 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'pays_nationalite_ue_candidat',
             'copie_titre_sejour',
             'pdf_recapitulatif',
+            'documents_additionnels',
         ]
 
 

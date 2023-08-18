@@ -45,16 +45,16 @@
   {% endif %}
 
   {% if in_panel %}
-    {% panel _("Assimilation") edit_button=contextual_comptabilite_url %}
+    {% panel _("Belgian student status") edit_button=contextual_comptabilite_url %}
       {% if resume_proposition.identification.pays_nationalite_europeen is False %}
         {{ chosen_assimilation }}
       {% else %}
-        {% translate _('Not concerned') %}
+        {% translate 'Not concerned' context 'checklist' %}
       {% endif %}
     {% endpanel %}
   {% else %}
     {% if resume_proposition.identification.pays_nationalite_europeen is False and comptabilite.type_situation_assimilation and comptabilite.type_situation_assimilation != 'AUCUNE_ASSIMILATION' %}
-      {% display _("Assimilation") ''|edit_button:contextual_comptabilite_url as button %}
+      {% display _("Belgian student status") ''|edit_button:contextual_comptabilite_url as button %}
       {% field_data button chosen_assimilation %}
     {% endif %}
   {% endif %}

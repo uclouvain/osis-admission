@@ -68,11 +68,22 @@ class StatutsChecklistGenerale:
     parcours_anterieur: StatutChecklist
     financabilite: StatutChecklist
     specificites_formation: StatutChecklist
+    decision_facultaire: StatutChecklist
 
     @classmethod
     def from_dict(cls, checklist_en_tant_que_dict: Dict[str, Dict[str, any]]):
         checklist_by_tab = {}
-        for key, item in checklist_en_tant_que_dict.items():
+        for key in [
+            'donnees_personnelles',
+            'frais_dossier',
+            'assimilation',
+            'choix_formation',
+            'parcours_anterieur',
+            'financabilite',
+            'specificites_formation',
+            'decision_facultaire',
+        ]:
+            item = checklist_en_tant_que_dict.get(key, {})
             checklist_by_tab[key] = StatutChecklist(
                 libelle=item.get('libelle', ''),
                 statut=ChoixStatutChecklist[item['statut']] if item.get('statut') else None,

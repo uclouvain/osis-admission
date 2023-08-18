@@ -23,11 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import os
 from typing import Optional, List, Dict
 
-import weasyprint
-from django.conf import settings
 from django.utils import formats
 from django.utils.translation import gettext as _, override
 
@@ -69,6 +66,7 @@ from admission.exports.admission_recap.constants import (
     CURRICULUM_ACTIVITY_LABEL,
 )
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
+from admission.utils import WeasyprintStylesheets
 from base.models.enums.education_group_types import TrainingType
 from osis_profile.models.enums.curriculum import ActivityType
 
@@ -105,7 +103,7 @@ class Section:
 
             self.content = get_pdf_from_template(
                 'admission/exports/recap/base_pdf.html',
-                self.get_stylesheets(),
+                WeasyprintStylesheets.get_stylesheets(),
                 {
                     'content_template_name': content_template,
                     'content_title': self.label,
@@ -137,25 +135,6 @@ class Section:
         if sub_dates:
             label += f' ({sub_dates})'
         return label
-
-    @classmethod
-    def get_stylesheets(cls):
-        """Get the stylesheets needed to generate the pdf"""
-        # Load the stylesheets once and cache them
-        if not hasattr(cls, '_stylesheet'):
-            setattr(
-                cls,
-                '_stylesheet',
-                [
-                    weasyprint.CSS(filename=os.path.join(settings.BASE_DIR, file_path))
-                    for file_path in [
-                        'base/static/css/bootstrap.min.css',
-                        'admission/static/admission/admission.css',
-                        'admission/static/admission/base_pdf.css',
-                    ]
-                ],
-            )
-        return getattr(cls, '_stylesheet')
 
 
 def get_identification_section(context: ResumePropositionDTO, load_content: bool) -> Section:
@@ -436,7 +415,7 @@ def get_research_project_section(context, load_content: bool) -> Section:
             # xgettext:no-python-format
             'fte_label': _("Full-time equivalent (as %)"),
             # xgettext:no-python-format
-            'allocated_time_label': _("Allocated time for the thesis (in %)"),
+            'allocated_time_label': _("Time allocated for thesis (in %)"),
         },
         attachments=get_research_project_attachments(context),
         load_content=load_content,

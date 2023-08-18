@@ -46,7 +46,7 @@
 
   {% has_value proposition.elements_confirmation undertake_declaration_fields as has_undertake_declaration_fields %}
   {% if has_undertake_declaration_fields %}
-    {% panel _("Undertake and declaration") %}
+    {% panel _("Commitment and declaration") %}
       {% for field in undertake_declaration_fields %}
         {% get_item_or_default proposition.elements_confirmation field as field_value %}
         {% if field_value %}

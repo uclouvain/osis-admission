@@ -153,11 +153,11 @@ class TestVerifierPropositionService(TestCase):
                 ),
                 AnneeExperienceAcademique(
                     annee=2020,
-                    resultat=Result.SUCCESS.name,
+                    resultat=Result.WAITING_RESULT.name,
                     releve_notes=['releve_notes.pdf'],
                     traduction_releve_notes=['traduction_releve_notes.pdf'],
-                    credits_inscrits=10,
-                    credits_acquis=10,
+                    credits_inscrits=None,
+                    credits_acquis=None,
                 ),
             ],
             traduction_releve_notes=['traduction_releve_notes.pdf'],
@@ -536,6 +536,18 @@ class TestVerifierPropositionService(TestCase):
             exception=AssimilationNonCompleteeException,
         )
 
+    def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_apatride_preuve_statut_apatride(self):
+        situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
+        comptabilite = _ComptabiliteFactory(
+            type_situation_assimilation=situation,
+            sous_type_situation_assimilation_2=ChoixAssimilation2.APATRIDE,
+            preuve_statut_apatride=[],
+        )
+        self._test_should_retourner_erreur_si_assimilation_incomplete(
+            comptabilite=comptabilite,
+            exception=AssimilationNonCompleteeException,
+        )
+
     def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_subsidiaire_carte_a_b(self):
         situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
         comptabilite = _ComptabiliteFactory(
@@ -560,12 +572,24 @@ class TestVerifierPropositionService(TestCase):
             exception=AssimilationNonCompleteeException,
         )
 
-    def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_temporaire(self):
+    def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_temporaire_pour_decision(self):
         situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
         comptabilite = _ComptabiliteFactory(
             type_situation_assimilation=situation,
             sous_type_situation_assimilation_2=ChoixAssimilation2.PROTECTION_TEMPORAIRE,
             decision_protection_temporaire=[],
+        )
+        self._test_should_retourner_erreur_si_assimilation_incomplete(
+            comptabilite=comptabilite,
+            exception=AssimilationNonCompleteeException,
+        )
+
+    def test_should_retourner_erreur_si_assimilation_2_incomplete_pour_protection_temporaire_pour_carte_a(self):
+        situation = TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE
+        comptabilite = _ComptabiliteFactory(
+            type_situation_assimilation=situation,
+            sous_type_situation_assimilation_2=ChoixAssimilation2.PROTECTION_TEMPORAIRE,
+            carte_a=[],
         )
         self._test_should_retourner_erreur_si_assimilation_incomplete(
             comptabilite=comptabilite,

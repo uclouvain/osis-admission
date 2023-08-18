@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -62,7 +62,6 @@ class PropositionBuilder(interface.RootEntityBuilder):
         cmd: 'InitierPropositionCommand',
         doctorat_id: 'FormationIdentity',
         proposition_repository: 'IPropositionRepository',
-        bourse_translator: 'IBourseTranslator',
     ) -> 'Proposition':
         InitierPropositionValidatorList(
             type_admission=cmd.type_admission,
@@ -78,7 +77,6 @@ class PropositionBuilder(interface.RootEntityBuilder):
         elif cmd.commission_proximite and cmd.commission_proximite in ChoixSousDomaineSciences.get_names():
             commission_proximite = ChoixSousDomaineSciences[cmd.commission_proximite]
         reference = proposition_repository.recuperer_reference_suivante()
-        bourse_erasmus = bourse_translator.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
             reference=reference,
@@ -89,5 +87,4 @@ class PropositionBuilder(interface.RootEntityBuilder):
             matricule_candidat=cmd.matricule_candidat,
             commission_proximite=commission_proximite,
             projet=projet_non_rempli,
-            bourse_erasmus_mundus_id=bourse_erasmus,
         )

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,22 +24,22 @@
 #
 # ##############################################################################
 from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
 from admission.contrib.models import AdmissionFormItemInstantiation
-from admission.contrib.models.base import BaseAdmission
-
+from admission.ddd.admission.formation_continue.commands import (
+    CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationContinueCommand,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationGeneraleCommand,
+)
+from base.utils.serializers import DTOSerializer
 
 __all__ = [
     "SpecificQuestionSerializer",
     "ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer",
     "ModifierQuestionsSpecifiquesFormationContinueCommandSerializer",
 ]
-
-from admission.ddd.admission.formation_continue.commands import CompleterQuestionsSpecifiquesCommand
-
-from base.utils.serializers import DTOSerializer
 
 
 class SpecificQuestionSerializer(serializers.ModelSerializer):
@@ -67,14 +67,12 @@ class SpecificQuestionSerializer(serializers.ModelSerializer):
         ]
 
 
-class ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer(ModelSerializer):
-    specific_question_answers = AnswerToSpecificQuestionField()
+class ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer(DTOSerializer):
+    reponses_questions_specifiques = AnswerToSpecificQuestionField()
+    uuid_proposition = None
 
     class Meta:
-        model = BaseAdmission
-        fields = [
-            'specific_question_answers',
-        ]
+        source = CompleterQuestionsSpecifiquesFormationGeneraleCommand
 
 
 class ModifierQuestionsSpecifiquesFormationContinueCommandSerializer(DTOSerializer):
@@ -82,4 +80,4 @@ class ModifierQuestionsSpecifiquesFormationContinueCommandSerializer(DTOSerializ
     uuid_proposition = None
 
     class Meta:
-        source = CompleterQuestionsSpecifiquesCommand
+        source = CompleterQuestionsSpecifiquesFormationContinueCommand

@@ -254,9 +254,9 @@ class IElementsConfirmation(interface.DomainService):
                 )
             )
         by_service = (
-            _("by the University Institute of Continuing Education")
+            _("by the University Institute for Continuing Education (IUFC)")
             if isinstance(proposition, PropositionContinue)
-            else _("by the UCLouvain Registration Service")
+            else _("by the Enrolment Office")
         )
         to_service = (
             _("to the University Institute of Continuing Education")

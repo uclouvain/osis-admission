@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -61,10 +61,10 @@ class Accounting(models.Model):
     # Absence of debt
     institute_absence_debts_certificate = FileField(
         upload_to=admission_accounting_directory_path,
-        verbose_name=_('Certificate stating the absence of debts towards the institute'),
+        verbose_name=_('Certificate stating no debts to the institution'),
     )
 
-    # Reduced registration fees
+    # Reduced tuition fee
     french_community_study_allowance_application = models.BooleanField(
         blank=True,
         null=True,
@@ -77,7 +77,7 @@ class Accounting(models.Model):
     )
     staff_child_certificate = FileField(
         upload_to=admission_accounting_directory_path,
-        verbose_name=_('Staff child certificate'),
+        verbose_name=_('Certificate for children of staff'),
     )
 
     # Assimilation
@@ -86,7 +86,7 @@ class Accounting(models.Model):
         choices=TypeSituationAssimilation.choices(),
         default='',
         max_length=100,
-        verbose_name=_('Assimilation situation'),
+        verbose_name=_('Belgian student status'),
     )
     assimilation_1_situation_type = models.CharField(
         blank=True,
@@ -118,6 +118,12 @@ class Accounting(models.Model):
         max_length=64,
         verbose_name=_('Assimilation 2 situation types'),
     )
+    stateless_person_proof = FileField(
+        upload_to=admission_accounting_directory_path,
+        verbose_name=_(
+            'Copy of official document from the local authority or Foreign Nationals Office proving stateless status',
+        ),
+    )
     refugee_a_b_card = FileField(
         upload_to=admission_accounting_directory_path,
         verbose_name=_('A or B card with refugee mention'),
@@ -137,6 +143,10 @@ class Accounting(models.Model):
     subsidiary_protection_decision = FileField(
         upload_to=admission_accounting_directory_path,
         verbose_name=_('Decision confirming the granting of subsidiary protection'),
+    )
+    a_card = FileField(
+        upload_to=admission_accounting_directory_path,
+        verbose_name=_('A card'),
     )
     temporary_protection_decision = FileField(
         upload_to=admission_accounting_directory_path,
@@ -281,7 +291,7 @@ class Accounting(models.Model):
     valid_iban = models.BooleanField(
         blank=True,
         null=True,
-        verbose_name=_('The IBAN account number is valid')
+        verbose_name=_('The IBAN account number is valid'),
     )
     other_format_account_number = models.CharField(
         blank=True,
@@ -293,17 +303,17 @@ class Accounting(models.Model):
         blank=True,
         default='',
         max_length=32,
-        verbose_name=_('BIC/SWIFT code identifying the bank from which the account was opened'),
+        verbose_name=_('BIC/SWIFT code identifying the bank from which the account originates'),
     )
     account_holder_first_name = models.CharField(
         blank=True,
         default='',
         max_length=128,
-        verbose_name=_('First name of the account holder'),
+        verbose_name=_('Account holder first name'),
     )
     account_holder_last_name = models.CharField(
         blank=True,
         default='',
         max_length=128,
-        verbose_name=_('Last name of the account holder'),
+        verbose_name=_('Account holder surname'),
     )

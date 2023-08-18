@@ -63,7 +63,7 @@ class SupervisionActor(Actor):
         default='',
         max_length=50,
         blank=True,
-        verbose_name=_('Rejection reason'),
+        verbose_name=_('Grounds for denied'),
     )
     pdf_from_candidate = FileField(
         min_files=1,

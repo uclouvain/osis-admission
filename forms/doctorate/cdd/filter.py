@@ -30,7 +30,7 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.db.models import Q
-from django.utils.translation import get_language, gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
 from admission.contrib.models import EntityProxy, Scholarship
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
@@ -50,7 +50,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.enums.type_bourse import TypeBourse
-from admission.forms import CustomDateInput, EMPTY_CHOICE, get_academic_year_choices
+from admission.forms import CustomDateInput, EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
@@ -85,13 +85,13 @@ class DoctorateListFilterForm(forms.Form):
         required=False,
     )
     matricule_candidat = forms.CharField(
-        label=_('Last name / First name / E-mail / NOMA'),
+        label=_('Last name / First name / Email / NOMA'),
         required=False,
         widget=autocomplete.ListSelect2(
             url="admission:autocomplete:candidates",
             attrs={
-                'data-minimum-input-length': 3,
-                'data-placeholder': _('Last name / First name / E-mail / NOMA'),
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+                'data-placeholder': _('Last name / First name / Email / NOMA'),
             },
         ),
     )
@@ -102,6 +102,7 @@ class DoctorateListFilterForm(forms.Form):
             url="admission:autocomplete:countries",
             attrs={
                 'data-placeholder': _('Country'),
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
             },
         ),
     )
@@ -159,18 +160,18 @@ class DoctorateListFilterForm(forms.Form):
         widget=autocomplete.Select2Multiple(),
     )
     matricule_promoteur = forms.CharField(
-        label=_('Promoter'),
+        label=_('Supervisor'),
         required=False,
         widget=autocomplete.ListSelect2(
             url="admission:autocomplete:promoters",
             attrs={
-                'data-minimum-input-length': 3,
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
                 'data-placeholder': _('Last name / First name / Global id'),
             },
         ),
     )
     sigles_formations = forms.MultipleChoiceField(
-        label=_('Training'),
+        label=pgettext_lazy('admission', 'Course'),
         required=False,
         widget=autocomplete.Select2Multiple(
             attrs={
@@ -180,7 +181,7 @@ class DoctorateListFilterForm(forms.Form):
     )
     type_financement = forms.ChoiceField(
         choices=EMPTY_CHOICE + ChoixTypeFinancement.choices(),
-        label=_('Financing type'),
+        label=_('Funding type'),
         required=False,
     )
     type_contrat_travail = forms.ChoiceField(
@@ -189,7 +190,7 @@ class DoctorateListFilterForm(forms.Form):
         required=False,
     )
     bourse_recherche = forms.ChoiceField(
-        label=_("Scholarship grant"),
+        label=_("Research scholarship"),
         required=False,
     )
     taille_page = forms.ChoiceField(

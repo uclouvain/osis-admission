@@ -31,7 +31,12 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_noop as __
 
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+    ConditionComplementaireApprobationIdentity,
+)
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
@@ -54,6 +59,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
     StatutChecklist,
+)
+from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
+    SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
+    RefuserParFacValidatorList,
+    ApprouverParFacValidatorList,
+    SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
@@ -106,10 +117,31 @@ class Proposition(interface.RootEntity):
 
     profil_soumis_candidat: ProfilCandidat = None
 
+    documents_additionnels: List[str] = attr.Factory(list)
+
     documents_demandes: Dict = attr.Factory(dict)
 
     poursuite_de_cycle_a_specifier: bool = False
     poursuite_de_cycle: PoursuiteDeCycle = PoursuiteDeCycle.TO_BE_DETERMINED
+
+    # Décision facultaire
+    certificat_approbation_fac: List[str] = attr.Factory(list)
+    certificat_refus_fac: List[str] = attr.Factory(list)
+
+    motif_refus_fac: Optional[MotifRefusIdentity] = None
+    autre_motif_refus_fac: str = ''
+
+    autre_formation_choisie_fac_id: Optional['FormationIdentity'] = None
+    avec_conditions_complementaires: Optional[bool] = None
+    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity] = attr.Factory(list)
+    conditions_complementaires_libres: List[str] = attr.Factory(list)
+    complements_formation: Optional[List[ComplementFormationIdentity]] = attr.Factory(list)
+    avec_complements_formation: Optional[bool] = None
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel_annuel: str = ''
+    email_personne_contact_programme_annuel_annuel: str = ''
+    commentaire_programme_conjoint: str = ''
 
     def modifier_choix_formation(
         self,
@@ -181,6 +213,114 @@ class Proposition(interface.RootEntity):
     def reclamer_documents_par_fac(self):
         self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC
 
+    def specifier_refus_par_fac(self):
+        self.checklist_actuelle.decision_facultaire = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Refusal'),
+            extra={
+                'decision': '1',
+            },
+        )
+
+    def specifier_acceptation_par_fac(self):
+        self.checklist_actuelle.decision_facultaire = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+            libelle=__('Approval'),
+        )
+
+    def specifier_motif_refus_par_fac(self, uuid_motif: str, autre_motif: str):
+        SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.specifier_refus_par_fac()
+        self.motif_refus_fac = MotifRefusIdentity(uuid=uuid_motif) if uuid_motif else None
+        self.autre_motif_refus_fac = autre_motif
+
+    def specifier_informations_acceptation_par_fac(
+        self,
+        sigle_autre_formation: str,
+        avec_conditions_complementaires: Optional[bool],
+        uuids_conditions_complementaires_existantes: Optional[List[str]],
+        conditions_complementaires_libres: Optional[List[str]],
+        avec_complements_formation: Optional[bool],
+        uuids_complements_formation: Optional[List[str]],
+        commentaire_complements_formation: str,
+        nombre_annees_prevoir_programme: Optional[int],
+        nom_personne_contact_programme_annuel: str,
+        email_personne_contact_programme_annuel: str,
+        commentaire_programme_conjoint: str,
+    ):
+        SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.specifier_acceptation_par_fac()
+        self.autre_formation_choisie_fac_id = (
+            FormationIdentity(
+                sigle=sigle_autre_formation,
+                annee=self.annee_calculee,
+            )
+            if sigle_autre_formation
+            else None
+        )
+
+        self.avec_conditions_complementaires = avec_conditions_complementaires
+        self.conditions_complementaires_existantes = (
+            [
+                ConditionComplementaireApprobationIdentity(uuid=uuid_condition)
+                for uuid_condition in uuids_conditions_complementaires_existantes
+            ]
+            if uuids_conditions_complementaires_existantes
+            else []
+        )
+        self.conditions_complementaires_libres = conditions_complementaires_libres
+
+        self.avec_complements_formation = avec_complements_formation
+        self.complements_formation = (
+            [ComplementFormationIdentity(uuid=uuid_complement) for uuid_complement in uuids_complements_formation]
+            if uuids_complements_formation
+            else []
+        )
+        self.commentaire_complements_formation = commentaire_complements_formation
+
+        self.nombre_annees_prevoir_programme = nombre_annees_prevoir_programme
+
+        self.nom_personne_contact_programme_annuel_annuel = nom_personne_contact_programme_annuel
+        self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
+
+        self.commentaire_programme_conjoint = commentaire_programme_conjoint
+
+    def refuser_par_fac(self):
+        RefuserParFacValidatorList(
+            statut=self.statut,
+            motif_refus_fac=self.motif_refus_fac,
+            autre_motif_refus_fac=self.autre_motif_refus_fac,
+        ).validate()
+
+        self.specifier_refus_par_fac()
+        self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
+        self.certificat_approbation_fac = []
+
+    def approuver_par_fac(self):
+        ApprouverParFacValidatorList(
+            statut=self.statut,
+            avec_conditions_complementaires=self.avec_conditions_complementaires,
+            conditions_complementaires_existantes=self.conditions_complementaires_existantes,
+            conditions_complementaires_libres=self.conditions_complementaires_libres,
+            avec_complements_formation=self.avec_complements_formation,
+            complements_formation=self.complements_formation,
+            nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+        ).validate()
+
+        self.specifier_acceptation_par_fac()
+        self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
+        self.certificat_refus_fac = []
+
+    def soumettre_a_fac_lors_de_la_decision_facultaire(self):
+        SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+
     def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self):
         self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
         self.checklist_actuelle.frais_dossier = StatutChecklist(
@@ -233,9 +373,11 @@ class Proposition(interface.RootEntity):
         carte_a_b_refugie: List[str],
         annexe_25_26_refugies_apatrides: List[str],
         attestation_immatriculation: List[str],
+        preuve_statut_apatride: List[str],
         carte_a_b: List[str],
         decision_protection_subsidiaire: List[str],
         decision_protection_temporaire: List[str],
+        carte_a: List[str],
         sous_type_situation_assimilation_3: Optional[str],
         titre_sejour_3_mois_professionel: List[str],
         fiches_remuneration: List[str],
@@ -274,6 +416,7 @@ class Proposition(interface.RootEntity):
             demande_allocation_d_etudes_communaute_francaise_belgique=demande_allocation_etudes_fr_be,
             enfant_personnel=enfant_personnel,
             attestation_enfant_personnel=attestation_enfant_personnel,
+            preuve_statut_apatride=preuve_statut_apatride,
             type_situation_assimilation=TypeSituationAssimilation[type_situation_assimilation]
             if type_situation_assimilation
             else None,
@@ -293,6 +436,7 @@ class Proposition(interface.RootEntity):
             carte_a_b=carte_a_b,
             decision_protection_subsidiaire=decision_protection_subsidiaire,
             decision_protection_temporaire=decision_protection_temporaire,
+            carte_a=carte_a,
             sous_type_situation_assimilation_3=ChoixAssimilation3[sous_type_situation_assimilation_3]
             if sous_type_situation_assimilation_3
             else None,
@@ -332,3 +476,11 @@ class Proposition(interface.RootEntity):
             prenom_titulaire_compte=prenom_titulaire_compte,
             nom_titulaire_compte=nom_titulaire_compte,
         )
+
+    def completer_informations_complementaires(
+        self,
+        reponses_questions_specifiques: Dict,
+        documents_additionnels: List[str],
+    ):
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.documents_additionnels = documents_additionnels

@@ -74,6 +74,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='supervisionactor',
             name='rejection_reason',
-            field=models.CharField(blank=True, default='', max_length=50, verbose_name='Rejection reason'),
+            field=models.CharField(blank=True, default='', max_length=50, verbose_name='Grounds for denied'),
         ),
     ]

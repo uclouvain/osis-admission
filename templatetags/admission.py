@@ -35,7 +35,8 @@ from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
-from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext_noop
+from django.utils.translation import get_language, gettext_lazy as _, pgettext
+from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
@@ -247,14 +248,14 @@ TAB_TREES = {
         Tab('experience', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Secondary studies')),
             Tab('curriculum', _('Curriculum')),
-            Tab('languages', _('Languages knowledge')),
+            Tab('languages', _('Knowledge of languages')),
         ],
-        Tab('doctorate', _('Doctorate'), 'graduation-cap'): [
-            Tab('project', _('Doctoral project')),
+        Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
+            Tab('project', _('Research project')),
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
         ],
-        # TODO Specificities
+        # TODO Specific aspects
         # TODO Completion
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('history-all', _('All history')),
@@ -276,19 +277,19 @@ TAB_TREES = {
         Tab('education', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Previous experience'), 'list-alt'),
         ],
-        Tab('doctorate', pgettext('tab', 'Doctoral project'), 'graduation-cap'): [
+        Tab('doctorate', pgettext('tab', 'PhD project'), 'graduation-cap'): [
             Tab('project', pgettext('tab', 'Research project')),
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
         ],
         Tab('confirmation', pgettext('tab', 'Confirmation'), 'award'): [
-            Tab('confirmation', _('Confirmation paper')),
+            Tab('confirmation', _('Confirmation exam')),
             Tab('extension-request', _('New deadline')),
         ],
-        Tab('training', _('Training'), 'book-open-reader'): [
-            Tab('doctoral-training', _('Doctoral training')),
+        Tab('training', pgettext('admission', 'Course'), 'book-open-reader'): [
+            Tab('doctoral-training', _('PhD training')),
             Tab('complementary-training', _('Complementary training')),
-            Tab('course-enrollment', _('Course enrollment')),
+            Tab('course-enrollment', _('Course unit enrolment')),
         ],
         Tab('defense', pgettext('doctorate tab', 'Defense'), 'person-chalkboard'): [
             Tab('jury-preparation', pgettext('admission tab', 'Defense method')),
@@ -611,6 +612,11 @@ def has_perm(context, perm, obj=None):
     return rules.has_perm(perm, context['request'].user, obj)
 
 
+@register.simple_tag
+def not_bool(value: bool):
+    return not value
+
+
 @register.simple_tag(takes_context=True)
 def can_read_tab(context, tab_name, obj=None):
     """Return true if the specified tab can be opened in reading mode for this admission, otherwise return False"""
@@ -636,8 +642,8 @@ def training_categories(activities):
         _("Services"): [0, 0],
         _("VAE"): [0, 0],
         _("Scientific residencies"): [0, 0],
-        _("Confirmation paper"): [0, 0],
-        _("Thesis defences"): [0, 0],
+        _("Confirmation exam"): [0, 0],
+        _("Thesis defense"): [0, 0],
     }
     for activity in activities:
         # Increment global counts
@@ -678,9 +684,9 @@ def training_categories(activities):
             activity.category == CategorieActivite.PAPER.name
             and activity.type == ChoixTypeEpreuve.CONFIRMATION_PAPER.name
         ):
-            categories[_("Confirmation paper")][index] += activity.ects
+            categories[_("Confirmation exam")][index] += activity.ects
         elif activity.category == CategorieActivite.PAPER.name:
-            categories[_("Thesis defences")][index] += activity.ects
+            categories[_("Thesis defense")][index] += activity.ects
     if not added:
         return {}
     return {
@@ -731,7 +737,7 @@ def concat(*args):
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
-def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specificities')):
+def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects')):
     """Display the answers of the specific questions based on a list of configurations."""
     return {
         'fields': configurations,
@@ -850,3 +856,13 @@ def checklist_state_button(context, **kwargs):
 @register.filter
 def edit_button(string, url):
     return str(string) + f'<a class="btn btn-default" href="{url}"><i class="fas fa-edit"></i></a>'
+
+
+@register.filter
+def history_entry_message(history_entry: Optional[HistoryEntry]):
+    if history_entry:
+        return {
+            settings.LANGUAGE_CODE_FR: history_entry.message_fr,
+            settings.LANGUAGE_CODE_EN: history_entry.message_en,
+        }[get_language()]
+    return ''

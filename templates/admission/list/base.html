@@ -58,7 +58,7 @@
       {% if perms.admission.view_doctorate_enrolment_applications %}
         <li class="{% if request.path == admission_doctorate_list %}active{% endif %}" role="presentation">
           <a href="{{ admission_doctorate_list }}" role="tab">
-            {% translate "Doctorate" %}
+            {% translate "PhD" %}
           </a>
         </li>
       {% endif %}
@@ -98,7 +98,7 @@
                   id="bt_submit_admission_doctorate_groups_search"
                   class="btn btn-primary"
                   role="button"
-                  aria-label="{% trans 'Search' %}"
+                  aria-label="{% trans 'Search' context 'verb' %}"
               >
                 <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
               </button>

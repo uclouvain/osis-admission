@@ -82,7 +82,7 @@ def admission_pdf_archive(task_uuid, language=None):
                 'residential_address': addresses.get(PersonAddressType.RESIDENTIAL.name),
                 "noma": admission.student_registration_id,
                 "date_envoi_supervision": date_envoi,
-                'allocated_time_label': _("Allocated time for the thesis (in %)"),
+                'allocated_time_label': _("Time allocated for thesis (in %)"),
                 'actors': SupervisionActor.objects.filter(process=admission.supervision_group).order_by('-type'),
                 'experiences': experiences,
             },

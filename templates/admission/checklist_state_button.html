@@ -33,7 +33,7 @@
       data-status="{{ state }}"
       data-class="btn-{{ class }}"
       data-icon="{{ icon }}"
-      {% if disabled or is_current_status %}disabled{% endif %}
+      {% if disabled or is_current_status %}disabled="disabled"{% endif %}
       {% if extra %}hx-vals="{{ extra|to_json }}"{% endif %}
       {% if open_modal %}
       data-toggle="modal"

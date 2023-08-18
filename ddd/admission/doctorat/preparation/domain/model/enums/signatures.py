@@ -38,4 +38,4 @@ class ChoixEtatSignature(ChoiceEnum):
     NOT_INVITED = _('NOT_INVITED')  # Pas encore envoyée au signataire
     INVITED = _('INVITED')  # Envoyée au signataire
     APPROVED = pgettext_lazy("admission decision", "Approved")  # Approuvée par le signataire
-    DECLINED = pgettext_lazy("admission decision", "Rejected")  # Refusée par le signataire
+    DECLINED = pgettext_lazy("admission decision", "Denied")  # Refusée par le signataire

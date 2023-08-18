@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
 #
 # ##############################################################################
 import freezegun
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class TestRechercherFormationService(TestCase):
+class TestRechercherFormationService(SimpleTestCase):
     def setUp(self) -> None:
         self.cmd = RechercherFormationGeneraleQuery(
             intitule_formation='Bachelier en sciences économiques',

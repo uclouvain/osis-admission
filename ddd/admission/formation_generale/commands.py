@@ -161,9 +161,11 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     carte_a_b_refugie: List[str]
     annexe_25_26_refugies_apatrides: List[str]
     attestation_immatriculation: List[str]
+    preuve_statut_apatride: List[str]
     carte_a_b: List[str]
     decision_protection_subsidiaire: List[str]
     decision_protection_temporaire: List[str]
+    carte_a: List[str]
 
     # Assimilation 3
     sous_type_situation_assimilation_3: Optional[str]
@@ -210,6 +212,14 @@ class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     code_bic_swift_banque: Optional[str]
     prenom_titulaire_compte: Optional[str]
     nom_titulaire_compte: Optional[str]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+    documents_additionnels: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -343,3 +353,69 @@ class PayerFraisDossierPropositionSuiteSoumissionCommand(interface.CommandReques
 @attr.dataclass(frozen=True, slots=True)
 class PayerFraisDossierPropositionSuiteDemandeCommand(interface.CommandRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserPropositionParFaculteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserPropositionParFaculteAvecNouveauMotifCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    uuid_motif: str
+    autre_motif: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierMotifRefusFacultairePropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_motif: str
+    autre_motif: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverPropositionParFaculteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierInformationsAcceptationFacultairePropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    sigle_autre_formation: str = ''
+    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
+    avec_conditions_complementaires: Optional[bool] = None
+    conditions_complementaires_libres: List[str] = attr.Factory(list)
+    avec_complements_formation: Optional[bool] = None
+    uuids_complements_formation: List[str] = attr.Factory(list)
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel: str = ''
+    email_personne_contact_programme_annuel: str = ''
+    commentaire_programme_conjoint: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    sigle_autre_formation: str = ''
+    avec_conditions_complementaires: Optional[bool] = None
+    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
+    conditions_complementaires_libres: List[str] = attr.Factory(list)
+    avec_complements_formation: Optional[bool] = None
+    uuids_complements_formation: List[str] = attr.Factory(list)
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel: str = ''
+    email_personne_contact_programme_annuel: str = ''
+    commentaire_programme_conjoint: str = ''

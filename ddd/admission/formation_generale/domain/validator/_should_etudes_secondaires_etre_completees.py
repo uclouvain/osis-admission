@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -93,7 +93,6 @@ class ShouldDiplomeBelgesEtudesSecondairesEtreComplete(BusinessValidator):
 
         if (
             self.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name
-            and not self.diplome_belge.diplome
             and not self.diplome_belge.certificat_inscription
         ) or (self.diplome_etudes_secondaires == GotDiploma.YES.name and not self.diplome_belge.diplome):
             raise EtudesSecondairesNonCompleteesPourDiplomeBelgeException

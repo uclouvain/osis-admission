@@ -95,7 +95,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 ),
                 is_vip=ExpressionWrapper(
                     Q(doctorateadmission__international_scholarship_id__isnull=False)
-                    | Q(doctorateadmission__erasmus_mundus_scholarship_id__isnull=False)
                     | Q(generaleducationadmission__international_scholarship_id__isnull=False)
                     | Q(generaleducationadmission__erasmus_mundus_scholarship_id__isnull=False)
                     | Q(generaleducationadmission__double_degree_scholarship_id__isnull=False),
@@ -152,10 +151,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 | Q(generaleducationadmission__international_scholarship_id=bourse_internationale),
             )
         if bourse_erasmus_mundus:
-            qs = qs.filter(
-                Q(doctorateadmission__erasmus_mundus_scholarship_id=bourse_erasmus_mundus)
-                | Q(generaleducationadmission__erasmus_mundus_scholarship_id=bourse_erasmus_mundus),
-            )
+            qs = qs.filter(generaleducationadmission__erasmus_mundus_scholarship_id=bourse_erasmus_mundus)
         if bourse_double_diplomation:
             qs = qs.filter(generaleducationadmission__double_degree_scholarship_id=bourse_double_diplomation)
 

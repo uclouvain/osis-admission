@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,55 +31,57 @@ from base.models.utils.utils import ChoiceEnum
 
 class TypeSituationAssimilation(ChoiceEnum):
     AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE = _(
-        'I have a settlement permit or I am a long-term resident in Belgium (assimilation 1)'
+        'I have a settlement permit or am a long-term resident in Belgium (Belgian student status category 1)'
     )
     REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE = _(
-        'I am a refugee, stateless person, or have been granted a subsidiary or temporary protection (assimilation 2)'
+        'I am a refugee, an asylum seeker, or a stateless person or have subsidiary/temporary protection '
+        '(Belgian student status category 2)'
     )
     AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT = _(
-        'I have a residence permit for more than 3 months, and I also have professional or replacement '
-        'income (assimilation 3)'
+        'I have a residence permit valid for more than 3 months and receive professional or replacement income '
+        '(Belgian student status category 3)'
     )
     PRIS_EN_CHARGE_OU_DESIGNE_CPAS = _(
-        'I am supported by the CPAS, or by a CPAS rest home or designated by the CPAS (assimilation 4)'
+        'I am supported by the CPAS or by a CPAS home or nominated by the CPAS (Belgian student status category 4)'
     )
     PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4 = _(
-        'My father, mother, legal tutor, spouse or legal cohabitant has the nationality of a country of a Member State '
-        'of the European Union, or fulfills the conditions referred to by one of the assimilations from 1 to 4 '
-        '(assimilation 5)'
+        'My father, mother, legal guardian, spouse or legal cohabitant has the nationality of a country of a European '
+        'Union member state, or fulfils the conditions covered by one of the Belgian student statuses from 1 to 4 '
+        '(Belgian student status 5)'
     )
     A_BOURSE_ARTICLE_105_PARAGRAPH_2 = _(
-        'I benefit from a grant covered by the paragraph 2 of article 105 of the decree of 7 November 2013 '
-        '(assimilation 6)'
+        'I have a scholarship as referred to in Article 105 S 2 of the Decree of 7 November 2013 (CFWB or Development '
+        'Cooperation) (Belgian student status category 6)'
     )
     RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE = _(
-        'I am a long-term resident in the European Union outside Belgium (assimilation 7)'
+        'I am a long-term resident of the European Union outside Belgium (Belgian student status category 7)'
     )
-    AUCUNE_ASSIMILATION = _('None of these proposals are relevant to me')
+    AUCUNE_ASSIMILATION = _('None of these are relevant to me')
 
 
 class ChoixAssimilation1(ChoiceEnum):
     TITULAIRE_CARTE_RESIDENT_LONGUE_DUREE = _('I have a long-term resident card')
-    TITULAIRE_CARTE_ETRANGER = _('I have a foreigner\'s card')
-    TITULAIRE_CARTE_SEJOUR_MEMBRE_UE = _('I have a residence card as a family member of an EU citizen.')
+    TITULAIRE_CARTE_ETRANGER = _('I have a foreign national card')
+    TITULAIRE_CARTE_SEJOUR_MEMBRE_UE = _('I have a resident card as a family member of a European Union citizen.')
     TITULAIRE_CARTE_SEJOUR_PERMANENT_MEMBRE_UE = _(
-        'I have a permanent residence card as a family member of a European Union citizen'
+        'I have a permanent resident card as a family member of a European Union citizen'
     )
 
 
 class ChoixAssimilation2(ChoiceEnum):
     REFUGIE = _('I am a refugee')
     DEMANDEUR_ASILE = _('I am an asylum seeker')
-    PROTECTION_SUBSIDIAIRE = _('I benefit from subsidiary protection')
-    PROTECTION_TEMPORAIRE = _('I benefit from temporary protection')
+    APATRIDE = _('I am a stateless person')
+    PROTECTION_SUBSIDIAIRE = _('I have been granted subsidiary protection')
+    PROTECTION_TEMPORAIRE = _('I have been granted temporary protection')
 
 
 class ChoixAssimilation3(ChoiceEnum):
     AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS = _(
-        'I have a residence permit for more than 3 months, and I have a professional income'
+        'I have a residence permit valid for more than 3 months and earn professional income'
     )
     AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT = _(
-        'I have a residence permit for more than 3 months, and I receive a replacement income'
+        'I have a residence permit valid for more than 3 months and earn replacement income'
     )
 
 
@@ -88,47 +90,43 @@ dynamic_person_concerned_lowercase = '<span class="relationship-lw">{}</span>'.f
 
 
 class ChoixAssimilation5(ChoiceEnum):
-    A_NATIONALITE_UE = _(
-        '%(person_concerned)s has the nationality of a country of a Member State of the European Union'
-    )
+    A_NATIONALITE_UE = _('%(person_concerned)s has the nationality of a European Union member state.')
     TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE = _(
-        '%(person_concerned)s has a long-term residence permit (B, C, D, F, F+, K, L or M cards) in Belgium'
+        '%(person_concerned)s has a long-term residence permit (B, C, D, F, F+, K, L or M cards) in Belgium.'
     )
     CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE = _(
-        '%(person_concerned)s is a refugee applicant, refugee, stateless person, or has '
-        'temporary/subsidiary protection'
+        '%(person_concerned)s is a refugee applicant, refugee, stateless person, or has temporary/subsidiary '
+        'protection.',
     )
     AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT = _(
-        '%(person_concerned)s has a residence permit for more than 3 months and receives professional or '
-        'replacement income'
+        '%(person_concerned)s has a residence permit valid for more than 3 months and receives professional '
+        'or replacement income.'
     )
     PRIS_EN_CHARGE_OU_DESIGNE_CPAS = _(
-        '%(person_concerned)s is supported by the CPAS, or by a CPAS rest home or designated by the CPAS'
+        '%(person_concerned)s is supported by the CPAS or a CPAS care home, or is nominated by the CPAS.',
     )
 
 
 class ChoixAssimilation6(ChoiceEnum):
-    A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE = _(
-        'I benefit from a grant given by the study allowance service of the French Community'
-    )
-    A_BOURSE_COOPERATION_DEVELOPPEMENT = _('I benefit from a Development Cooperation grant')
+    A_BOURSE_ETUDES_COMMUNAUTE_FRANCAISE = _('I have a scholarship from the French Community student grant service')
+    A_BOURSE_COOPERATION_DEVELOPPEMENT = _('I have a Development Cooperation scholarship')
 
 
 class ChoixAffiliationSport(ChoiceEnum):
-    LOUVAIN_WOLUWE = _('Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (60 EUR)')
-    MONS_UCL = _('Yes, in Mons and other UCLouvain sites (60 EUR)')
-    MONS = _('Yes, only in Mons (10 EUR)')
-    SAINT_GILLES_UCL = _('Yes, in Saint-Gilles and other UCLouvain sites (60 EUR)')
-    SAINT_GILLES = _('Yes, only in Saint-Gilles (10 EUR)')
-    TOURNAI_UCL = _('Yes, in Tournai and other UCLouvain sites (60 EUR)')
-    TOURNAI = _('Yes, only in Tournai (10 EUR)')
+    LOUVAIN_WOLUWE = _('Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (E60)')
+    MONS_UCL = _('Yes, in Mons and other UCLouvain campuses (E60)')
+    MONS = _('Yes, only in Mons (E10)')
+    SAINT_GILLES_UCL = _('Yes, in Saint-Gilles and other UCLouvain campuses (E60)')
+    SAINT_GILLES = _('Yes, only in Saint-Gilles (E10)')
+    TOURNAI_UCL = _('Yes, in Tournai and other UCLouvain campuses (E60)')
+    TOURNAI = _('Yes, only in Tournai (E10)')
     NON = _('No')
 
 
 class LienParente(ChoiceEnum):
     PERE = _('My father')
     MERE = _('My mother')
-    TUTEUR_LEGAL = _('My legal tutor')
+    TUTEUR_LEGAL = _('My legal guardian')
     CONJOINT = _('My partner')
     COHABITANT_LEGAL = _('My legal cohabitant')
 
@@ -142,7 +140,7 @@ class ChoixTypeCompteBancaire(ChoiceEnum):
 FORMATTED_RELATIONSHIPS = {
     'PERE': _('your father'),
     'MERE': _('your mother'),
-    'TUTEUR_LEGAL': _('your legal tutor'),
+    'TUTEUR_LEGAL': _('your legal guardian'),
     'CONJOINT': _('your partner'),
     'COHABITANT_LEGAL': _('your legal cohabitant'),
 }

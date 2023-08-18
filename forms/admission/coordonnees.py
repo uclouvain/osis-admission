@@ -30,7 +30,12 @@ from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pge
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd import BE_ISO_CODE
-from admission.forms import get_example_text, AdmissionModelCountryChoiceField
+from admission.forms import (
+    get_example_text,
+    AdmissionModelCountryChoiceField,
+    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+    PhoneField,
+)
 from admission.utils import force_title
 from base.models.person import Person
 from reference.models.country import Country
@@ -40,21 +45,31 @@ from reference.models.zipcode import ZipCode
 class AdmissionCoordonneesForm(forms.ModelForm):
     show_contact = forms.BooleanField(
         required=False,
-        label=_('I wish to receive my mail at an address other than my legal address'),
+        label=_('I would like to receive my mail at an address other than my legal address'),
     )
 
     private_email = forms.EmailField(
-        label=__('admission', 'Private email'),
+        label=__('admission', 'Personal email'),
         disabled=True,
         required=False,
     )
 
-    phone_mobile = forms.CharField(
+    phone_mobile = PhoneField(
         required=False,
-        label=__('admission', 'Phone (GSM/mobile)'),
+        label=__('admission', 'Telephone (mobile)'),
         widget=forms.TextInput(
             attrs={
                 'placeholder': get_example_text('+32 490 00 00 00'),
+            },
+        ),
+    )
+
+    emergency_contact_phone = PhoneField(
+        required=False,
+        label=_("Emergency contact (telephone number)"),
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": get_example_text('+32 490 00 00 00'),
             },
         ),
     )
@@ -70,6 +85,7 @@ class AdmissionCoordonneesForm(forms.ModelForm):
         fields = [
             'private_email',
             'phone_mobile',
+            'emergency_contact_phone',
         ]
 
     def __init__(self, show_contact, *args, **kwargs):
@@ -94,11 +110,6 @@ class AdmissionAddressForm(forms.ModelForm):
         label=pgettext_lazy('address', 'Number'),
     )
 
-    place = forms.CharField(
-        required=False,
-        label=_('Place (optional)'),
-    )
-
     postal_box = forms.CharField(
         required=False,
         label=_('Box'),
@@ -106,7 +117,7 @@ class AdmissionAddressForm(forms.ModelForm):
 
     postal_code = forms.CharField(
         required=False,
-        label=_('Postal code'),
+        label=_('Postcode'),
         help_text=get_example_text('1234'),
     )
 
@@ -129,7 +140,7 @@ class AdmissionAddressForm(forms.ModelForm):
     # Enable autocompletion only for Belgium postal codes
     be_postal_code = forms.CharField(
         required=False,
-        label=_('Postal code'),
+        label=_('Postcode'),
         help_text=get_example_text('1234'),
     )
 
@@ -139,6 +150,7 @@ class AdmissionAddressForm(forms.ModelForm):
         widget=autocomplete.ListSelect2(
             url='admission:autocomplete:cities',
             forward=(forward.Field('be_postal_code', 'postal_code'),),
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
 
@@ -147,7 +159,6 @@ class AdmissionAddressForm(forms.ModelForm):
         fields = [
             'street',
             'street_number',
-            'place',
             'postal_box',
             'postal_code',
             'city',
@@ -193,7 +204,7 @@ class AdmissionAddressForm(forms.ModelForm):
                     self.add_error(field, FIELD_REQUIRED_MESSAGE)
 
         # Lowercase the specified fields
-        for field in ['street', 'place', 'city']:
+        for field in ['street', 'city']:
             if cleaned_data.get(field):
                 cleaned_data[field] = force_title(cleaned_data[field])
 

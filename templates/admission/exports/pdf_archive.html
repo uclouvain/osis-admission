@@ -69,7 +69,7 @@
     <p>Noma : {{ noma }}</p>
 
     <p>
-      {% trans "Doctorate" %} :
+      {% trans "PhD" %} :
       {% if LANGUAGE_CODE == 'en' %}
         {{ admission.doctorate.title_english }}
       {% else %}
@@ -104,7 +104,7 @@
 
       {% if experience.expected_graduation_date %}
         <p>
-          {% trans "Expected date of graduation" %} :
+          {% trans "Expected date of graduation" context 'admission' %} :
           {{ experience.expected_graduation_date }}
         </p>
       {% endif %}
@@ -128,7 +128,7 @@
     </p>
 
     <p>
-      {% trans "Thesis redacting language" %} :
+      {% trans "Thesis language" %} :
       {{ admission.get_thesis_language_display }}
     </p>
     <p>
@@ -142,7 +142,7 @@
     </p>
 
     <p>
-      {% trans "Estimated time to complete the doctorate (in months)" %} :
+      {% trans "Estimated time to complete the PhD (in months)" %} :
       {{ admission.planned_duration }}
     </p>
 
@@ -152,7 +152,7 @@
     </p>
     {% if admission.cotutelle %}
       <p>
-        {% trans "Cotutelle institution" %} :
+        {% trans "Partner institution" %} :
         {{ admission.cotutelle_institution }}
       </p>
     {% endif %}
@@ -171,7 +171,7 @@
       {% endifchanged %}
 
       <p>
-        {% if actor.supervisionactor.is_doctor %}{% trans "Dr." %} {% endif %}
+        {% if actor.supervisionactor.is_doctor %}{% trans "Dr" %} {% endif %}
         {% display actor.first_name ' ' actor.last_name '-' actor.institute '-' actor.city '-' actor.country %}
       </p>
     {% endfor %}

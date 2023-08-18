@@ -155,11 +155,10 @@ class ContinuingEducationAdmission(BaseAdmission):
         verbose_name=_('Billing address country'),
     )
 
-    billing_address_place = models.CharField(
+    additional_documents = FileField(
         blank=True,
-        default='',
-        max_length=255,
-        verbose_name=_('Billing address place'),
+        upload_to=admission_directory_path,
+        verbose_name=_('Additional documents'),
     )
 
     class Meta:

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -157,12 +157,16 @@ DEPENDANCES_CHAMPS_ASSIMILATION: Dict[str, Dict[str, List[str]]] = {
             'annexe_25_26_refugies_apatrides',
             'attestation_immatriculation',
         ],
+        ChoixAssimilation2.APATRIDE.name: [
+            'preuve_statut_apatride',
+        ],
         ChoixAssimilation2.PROTECTION_SUBSIDIAIRE.name: [
             'carte_a_b',
             'decision_protection_subsidiaire',
         ],
         ChoixAssimilation2.PROTECTION_TEMPORAIRE.name: [
             'decision_protection_temporaire',
+            'carte_a',
         ],
     },
     'sous_type_situation_assimilation_3': {

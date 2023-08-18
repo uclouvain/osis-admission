@@ -57,7 +57,7 @@
 
 
 {% block tab_content %}
-  <h3>{% trans "Doctoral training" %}</h3>
+  <h3>{% trans "PhD training" %}</h3>
 
   <p>{% trans "The declaration of you doctoral training activities must be consistent with the specifics disposition of your domain. Please refer to those on the website of your Domain Doctoral Commission for more information." %}</p>
 
@@ -77,7 +77,7 @@
       </div>
     </div>
     <div class="filter-status form-group">
-      <strong>{% trans "Status" %}</strong>
+      <strong>{% trans "Status" context 'admission' %}</strong>
       <div class="btn-group btn-group-sm" role="radiogroup">
         <button type="button" class="btn btn-default active" data-status="all">
           {% trans "All" context "filters" %}
@@ -117,7 +117,7 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-body alert-danger">
-              {% trans "If you submit the activity, you will no longer be able to modify the seminar, nor the different activities within it." %}
+              {% trans "If you submit the activity, you will no longer be able to modify the seminar or the various activities within it." %}
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>

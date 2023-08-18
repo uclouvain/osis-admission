@@ -39,4 +39,3 @@ class Adresse(interface.ValueObject):
     pays: str
     destinataire: Optional[str] = ''
     boite_postale: Optional[str] = ''
-    lieu_dit: Optional[str] = ''

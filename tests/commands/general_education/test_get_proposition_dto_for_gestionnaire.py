@@ -24,30 +24,40 @@
 #
 # ##############################################################################
 import uuid
-from unittest.mock import ANY
+from unittest.mock import ANY, patch
 
 import freezegun
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.dtos.bourse import BourseDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.faculty_decision import RefusalReasonFactory, AdditionalApprovalConditionFactory
+from admission.tests.factories.general_education import (
+    GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
+)
 from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory
+from base.models.enums.organization_type import MAIN
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from base.tests.factories.student import StudentFactory
+from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO
 from infrastructure.messages_bus import message_bus_instance
+from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
 
 
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class GetPropositionDTOForGestionnaireTestCase(TestCase):
     @freezegun.freeze_time('2023-01-01')
     def setUp(self) -> None:
@@ -62,6 +72,16 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             international_scholarship=None,
             candidate__private_email='john.doe@example.com',
         )
+
+        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch("osis_document.api.utils.confirm_remote_upload", return_value=str(uuid.uuid4()))
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def _get_command_result(self, uuid_proposition=None) -> PropositionGestionnaireDTO:
         return message_bus_instance.invoke(
@@ -204,3 +224,116 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
     def test_get_unknown_proposition_triggers_exception(self):
         with self.assertRaises(PropositionNonTrouveeException):
             self._get_command_result(uuid_proposition=uuid.uuid4())
+
+    def test_get_proposition_with_faculty_refusal_reason(self):
+        self.admission.fac_refusal_certificate = ['uuid-fac-refusal-certificate']
+
+        # Choose an existing reason
+        self.admission.fac_refusal_reason = RefusalReasonFactory()
+        self.admission.other_fac_refusal_reason = ''
+        self.admission.save()
+
+        result = self._get_command_result()
+        self.assertEqual([str(result.certificat_refus_fac[0])], self.admission.fac_refusal_certificate)
+        self.assertIsNotNone(result.motif_refus_fac)
+        self.assertEqual(result.motif_refus_fac.motif, self.admission.fac_refusal_reason.name_fr)
+        self.assertEqual(result.motif_refus_fac.categorie, self.admission.fac_refusal_reason.category.name_fr)
+
+        # Choose a free reason
+        self.admission.fac_refusal_reason = None
+        self.admission.other_fac_refusal_reason = 'other reason'
+        self.admission.save()
+
+        result = self._get_command_result()
+        self.assertIsNotNone(result.motif_refus_fac)
+        self.assertEqual(result.motif_refus_fac.motif, 'other reason')
+        self.assertEqual(result.motif_refus_fac.categorie, gettext('Other'))
+
+    def test_get_proposition_with_faculty_approval_reason(self):
+        # Approval data
+        self.admission.fac_approval_certificate = ['uuid-fac-approval-certificate']
+        self.admission.with_additional_approval_conditions = True
+        self.admission.additional_approval_conditions.set(
+            [
+                AdditionalApprovalConditionFactory(),
+                AdditionalApprovalConditionFactory(),
+            ]
+        )
+        self.admission.free_additional_approval_conditions = [
+            'first free condition',
+            'second free condition',
+        ]
+        self.admission.other_training_accepted_by_fac = GeneralEducationTrainingFactory(
+            academic_year__current=True,
+            enrollment_campus__name='Mons',
+            enrollment_campus__organization__type=MAIN,
+        )
+
+        self.admission.with_prerequisite_courses = True
+        self.admission.prerequisite_courses.set(
+            [
+                LearningUnitYearFactory(),
+                LearningUnitYearFactory(),
+            ]
+        )
+        self.admission.prerequisite_courses_fac_comment = 'My comment about the additional trainings'
+        self.admission.program_planned_years_number = 3
+        self.admission.annual_program_contact_person_name = 'John Doe'
+        self.admission.annual_program_contact_person_email = 'john.doe@example.com'
+        self.admission.join_program_fac_comment = 'My comment about the join program'
+
+        self.admission.save()
+
+        result = self._get_command_result()
+        self.assertEqual([str(result.certificat_approbation_fac[0])], self.admission.fac_approval_certificate)
+
+        self.assertIsNotNone(result.autre_formation_choisie_fac)
+        self.assertEqual(
+            result.autre_formation_choisie_fac,
+            BaseFormationDTO(
+                sigle=self.admission.other_training_accepted_by_fac.acronym,
+                annee=self.admission.other_training_accepted_by_fac.academic_year.year,
+                intitule=self.admission.other_training_accepted_by_fac.title,
+                uuid=self.admission.other_training_accepted_by_fac.uuid,
+                lieu_enseignement=(
+                    EducationGroupVersion.objects.filter(offer=self.admission.other_training_accepted_by_fac)
+                    .first()
+                    .root_group.main_teaching_campus.name
+                ),
+            ),
+        )
+
+        self.assertEqual(result.avec_conditions_complementaires, self.admission.with_additional_approval_conditions)
+
+        self.assertCountEqual(
+            result.conditions_complementaires,
+            self.admission.free_additional_approval_conditions
+            + [condition.name_fr for condition in self.admission.additional_approval_conditions.all()],
+        )
+
+        prerequisite_courses = self.admission.prerequisite_courses.all()
+        self.assertEqual(result.avec_complements_formation, self.admission.with_prerequisite_courses)
+        self.assertCountEqual(
+            result.complements_formation,
+            [
+                LearningUnitPartimDTO(
+                    code=prerequisite_courses[0].acronym,
+                    full_title=prerequisite_courses[0].complete_title_i18n,
+                ),
+                LearningUnitPartimDTO(
+                    code=prerequisite_courses[1].acronym,
+                    full_title=prerequisite_courses[1].complete_title_i18n,
+                ),
+            ],
+        )
+        self.assertEqual(result.commentaire_complements_formation, self.admission.prerequisite_courses_fac_comment)
+        self.assertEqual(result.nombre_annees_prevoir_programme, self.admission.program_planned_years_number)
+        self.assertEqual(
+            result.nom_personne_contact_programme_annuel_annuel,
+            self.admission.annual_program_contact_person_name,
+        )
+        self.assertEqual(
+            result.email_personne_contact_programme_annuel_annuel,
+            self.admission.annual_program_contact_person_email,
+        )
+        self.assertEqual(result.commentaire_programme_conjoint, self.admission.join_program_fac_comment)

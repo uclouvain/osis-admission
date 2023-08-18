@@ -87,7 +87,6 @@ class AdressePersonnelle:
     ville: Optional[str]
     pays: Optional[str]
     nom_pays: Optional[str]
-    lieu_dit: Optional[str]
     numero_rue: Optional[str]
     boite_postale: Optional[str]
     personne: str
@@ -101,6 +100,7 @@ class CoordonneesCandidat:
     adresse_correspondance: Optional[AdressePersonnelle] = None
     adresse_email_privee: str = ''
     numero_mobile: str = ''
+    numero_contact_urgence: str = ''
 
 
 @dataclass
@@ -254,11 +254,12 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays_naissance='BE',
                 etat_civil=CivilState.MARRIED.name,
                 pays_residence="BE",
-                prenom_d_usage='John',
                 autres_prenoms='Joe, James',
                 nom_pays_nationalite='Belgique',
                 nom_pays_naissance='Belgique',
                 nom_langue_contact='Français',
+                date_expiration_passeport=datetime.date(2020, 1, 1),
+                date_expiration_carte_identite=datetime.date(2020, 1, 1),
             ),
             _IdentificationDTO(
                 matricule="0000000001",
@@ -284,11 +285,12 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays_naissance='BE',
                 etat_civil=CivilState.MARRIED.name,
                 pays_residence="BE",
-                prenom_d_usage='Mary',
                 autres_prenoms='Jessy',
                 nom_pays_nationalite='Belgique',
                 nom_pays_naissance='Belgique',
                 nom_langue_contact='Français',
+                date_expiration_passeport=datetime.date(2020, 1, 1),
+                date_expiration_carte_identite=datetime.date(2020, 1, 1),
             ),
             _IdentificationDTO(
                 matricule="0000000002",
@@ -314,11 +316,12 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays_naissance='BE',
                 etat_civil=CivilState.MARRIED.name,
                 pays_residence="BE",
-                prenom_d_usage='Jimmy',
                 autres_prenoms='Jack',
                 nom_pays_nationalite='Belgique',
                 nom_pays_naissance='Belgique',
                 nom_langue_contact='Français',
+                date_expiration_passeport=datetime.date(2020, 1, 1),
+                date_expiration_carte_identite=datetime.date(2020, 1, 1),
             ),
             _IdentificationDTO(
                 matricule="0000000003",
@@ -345,10 +348,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 etat_civil=CivilState.MARRIED.name,
                 pays_residence="BE",
                 nom_langue_contact='Anglais',
-                prenom_d_usage='',
                 autres_prenoms='',
                 nom_pays_nationalite='Argentine',
                 nom_pays_naissance='Belgique',
+                date_expiration_passeport=datetime.date(2020, 1, 1),
+                date_expiration_carte_identite=datetime.date(2020, 1, 1),
             ),
         ]
         cls.adresses_candidats = [
@@ -359,7 +363,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays='BE',
                 rue="Boulevard de Wallonie",
                 type='RESIDENTIAL',
-                lieu_dit='',
                 numero_rue='10',
                 boite_postale='B1',
                 nom_pays='Belgique',
@@ -371,7 +374,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays='BE',
                 rue="Place de l'Université",
                 type='CONTACT',
-                lieu_dit='',
                 numero_rue='14',
                 boite_postale='B2',
                 nom_pays='Belgique',
@@ -383,7 +385,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays='BE',
                 rue="Place de l'Université",
                 type='RESIDENTIAL',
-                lieu_dit='',
                 numero_rue='14',
                 boite_postale='B2',
                 nom_pays='Belgique',
@@ -395,7 +396,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays='BE',
                 rue="Place de l'Université",
                 type='RESIDENTIAL',
-                lieu_dit='',
                 numero_rue='14',
                 boite_postale='B2',
                 nom_pays='Belgique',
@@ -835,11 +835,12 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
                 noma_derniere_inscription_ucl=candidate.noma_derniere_inscription_ucl,
                 pays_residence=domicile_legal.pays if domicile_legal else None,
-                prenom_d_usage=candidate.prenom_d_usage,
                 autres_prenoms=candidate.autres_prenoms,
                 nom_pays_nationalite=candidate.nom_pays_nationalite,
                 nom_langue_contact=candidate.nom_langue_contact,
                 nom_pays_naissance=candidate.nom_pays_naissance,
+                date_expiration_passeport=candidate.date_expiration_passeport,
+                date_expiration_carte_identite=candidate.date_expiration_carte_identite,
             )
         except StopIteration:  # pragma: no cover
             raise CandidatNonTrouveException
@@ -857,12 +858,14 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 adresse_correspondance=None,
                 numero_mobile='',
                 adresse_email_privee='',
+                numero_contact_urgence='',
             )
 
         domicile_legal = coordonnees.domicile_legal
         adresse_correspondance = coordonnees.adresse_correspondance
         adresse_email_privee = coordonnees.adresse_email_privee
         numero_mobile = coordonnees.numero_mobile
+        numero_contact_urgence = coordonnees.numero_contact_urgence
 
         return CoordonneesDTO(
             domicile_legal=AdressePersonnelleDTO(
@@ -870,7 +873,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 code_postal=domicile_legal.code_postal,
                 ville=domicile_legal.ville,
                 pays=domicile_legal.pays,
-                lieu_dit=domicile_legal.lieu_dit,
                 numero_rue=domicile_legal.numero_rue,
                 boite_postale=domicile_legal.boite_postale,
                 nom_pays=domicile_legal.nom_pays,
@@ -882,7 +884,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 code_postal=adresse_correspondance.code_postal,
                 ville=adresse_correspondance.ville,
                 pays=adresse_correspondance.pays,
-                lieu_dit=adresse_correspondance.lieu_dit,
                 numero_rue=adresse_correspondance.numero_rue,
                 boite_postale=adresse_correspondance.boite_postale,
                 nom_pays=adresse_correspondance.nom_pays,
@@ -891,6 +892,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             else None,
             adresse_email_privee=adresse_email_privee,
             numero_mobile=numero_mobile,
+            numero_contact_urgence=numero_contact_urgence,
         )
 
     @classmethod

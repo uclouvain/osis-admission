@@ -48,7 +48,7 @@ from admission.ddd.admission.formation_continue.test.factory.proposition import 
     PropositionFactory as PropositionContinueFactory,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
-from admission.ddd.admission.test.factory.formation import FormationFactory
+from admission.ddd.admission.test.factory.formation import FormationFactory, FormationIdentityFactory
 from admission.ddd.admission.test.factory.profil import ProfilCandidatFactory
 from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
@@ -359,7 +359,12 @@ class CalendrierInscriptionTestCase(TestCase):
 
     @freezegun.freeze_time('22/09/2022')
     def test_formation_non_dispensee_annee_suivante(self):
-        proposition = PropositionFactory()
+        proposition = PropositionFactory(
+            formation_id=FormationIdentityFactory(
+                annee=2022,
+                sigle='MA_FORMATION_NON_TROUVEE',
+            )
+        )
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees

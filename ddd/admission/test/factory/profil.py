@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -68,11 +68,12 @@ class IdentificationDTOFactory(factory.Factory):
     etat_civil = CivilState.MARRIED.name
     pays_residence = "BE"
     langue_contact = "fr-be"
-    prenom_d_usage = factory.Faker('first_name')
     autres_prenoms = factory.Faker('first_name')
     nom_pays_nationalite = factory.Faker('country')
     nom_pays_naissance = factory.Faker('country')
     nom_langue_contact = 'Français'
+    date_expiration_passeport = factory.Faker('date')
+    date_expiration_carte_identite = factory.Faker('date')
 
 
 class AdressePersonnelleDTOFactory(factory.Factory):
@@ -84,7 +85,6 @@ class AdressePersonnelleDTOFactory(factory.Factory):
     code_postal = factory.Faker('postcode')
     ville = factory.Faker('city')
     pays = factory.Faker('country_code')
-    lieu_dit = ''
     numero_rue = 1
     boite_postale = ''
     nom_pays = factory.Faker('country')
@@ -95,6 +95,7 @@ class CoordonneesDTOFactory(factory.Factory):
     adresse_correspondance = factory.SubFactory(AdressePersonnelleDTOFactory)
     numero_mobile = factory.Faker('phone_number')
     adresse_email_privee = factory.Faker('email')
+    numero_contact_urgence = factory.Faker('phone_number')
 
     class Meta:
         model = CoordonneesDTO

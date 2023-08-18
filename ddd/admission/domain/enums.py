@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,16 +24,16 @@
 #
 # ##############################################################################
 
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from base.models.utils.utils import ChoiceEnum
 
 
 class TypeFormation(ChoiceEnum):
     BACHELIER = _('Bachelor')
-    MASTER = _('Master')
-    DOCTORAT = _('Doctorate')
-    AGREGATION_CAPES = _('Aggregation and CAPAES')
+    MASTER = pgettext_lazy('course', 'Master')
+    DOCTORAT = _('PhD')
+    AGREGATION_CAPES = _('Teaching degree and CAPAES')
     FORMATION_CONTINUE = _('Continuing education')
     CERTIFICAT = _("Certificate")
 

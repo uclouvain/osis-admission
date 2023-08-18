@@ -27,7 +27,7 @@ import uuid
 
 from django.db import models
 from django.db.models import CheckConstraint, Q
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import RoleJury, TitreMembre, GenreMembre
@@ -43,13 +43,13 @@ class JuryMember(models.Model):
         db_index=True,
     )
     role = models.CharField(
-        verbose_name=_('Role'),
+        verbose_name=pgettext_lazy('jury', 'Role'),
         choices=RoleJury.choices(),
         max_length=50,
     )
     doctorate = models.ForeignKey(
         'admission.DoctorateAdmission',
-        verbose_name=_('Doctorate'),
+        verbose_name=_('PhD'),
         on_delete=models.CASCADE,
         related_name='jury_members',
     )
@@ -64,7 +64,7 @@ class JuryMember(models.Model):
     # Promoter only
     promoter = models.ForeignKey(
         'admission.SupervisionActor',
-        verbose_name=_('Promoter'),
+        verbose_name=_('Supervisor'),
         on_delete=models.PROTECT,
         limit_choices_to={"type": ActorType.PROMOTER.name},
         null=True,
@@ -82,7 +82,7 @@ class JuryMember(models.Model):
 
     # External member only
     institute = models.CharField(
-        verbose_name=_('Institute'),
+        verbose_name=pgettext_lazy('jury', 'Institute'),
         max_length=255,
         default='',
         blank=True,
@@ -95,7 +95,7 @@ class JuryMember(models.Model):
         on_delete=models.SET_NULL,
     )
     last_name = models.CharField(
-        verbose_name=_('Last name'),
+        verbose_name=_('Surname'),
         max_length=255,
         default='',
         blank=True,
@@ -107,7 +107,7 @@ class JuryMember(models.Model):
         blank=True,
     )
     title = models.CharField(
-        verbose_name=_('Title'),
+        verbose_name=pgettext_lazy('admission', 'Title'),
         choices=TitreMembre.choices(),
         max_length=50,
         default='',
@@ -127,7 +127,7 @@ class JuryMember(models.Model):
         blank=True,
     )
     email = models.EmailField(
-        verbose_name=_('Email'),
+        verbose_name=pgettext_lazy('admission', 'Email'),
         max_length=255,
         default='',
         blank=True,

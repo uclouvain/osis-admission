@@ -29,13 +29,18 @@ from typing import List, Optional
 import factory
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
@@ -55,17 +60,9 @@ from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
 @dataclass
-class _Candidat:
-    prenom: str
-    nom: str
-    nationalite: str
-
-
-@dataclass
-class _Formation:
+class _MotifRefus:
     intitule: str
-    campus: str
-    type: str
+    categorie: str
 
 
 class PropositionInMemoryRepository(
@@ -83,6 +80,11 @@ class PropositionInMemoryRepository(
     }
     documents_libres_fac_uclouvain = {
         'uuid-MASTER-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f143'],
+    }
+    motifs_refus = {
+        'uuid-refus-1': _MotifRefus(intitule='Motif 1', categorie='Categorie 1'),
+        'uuid-refus-2': _MotifRefus(intitule='Motif 2', categorie='Categorie 2'),
+        'uuid-refus-3': _MotifRefus(intitule='Motif 3', categorie='Categorie 3'),
     }
 
     @classmethod
@@ -248,19 +250,34 @@ class PropositionInMemoryRepository(
             formulaire_modification_inscription=proposition.formulaire_modification_inscription,
             est_reorientation_inscription_externe=proposition.est_reorientation_inscription_externe,
             attestation_inscription_reguliere=proposition.attestation_inscription_reguliere,
-            pdf_recapitulatif=[],
+            pdf_recapitulatif=['recap.pdf'],
             documents_demandes=proposition.documents_demandes,
             documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
+            certificat_refus_fac=proposition.certificat_refus_fac,
+            certificat_approbation_fac=proposition.certificat_approbation_fac,
+            documents_additionnels=proposition.documents_additionnels,
         )
 
     @classmethod
-    def get_dto_for_gestionnaire(cls, entity_id: 'PropositionIdentity') -> 'PropositionGestionnaireDTO':
+    def get_dto_for_gestionnaire(
+        cls,
+        entity_id: 'PropositionIdentity',
+        unites_enseignement_translator: 'IUnitesEnseignementTranslator',
+    ) -> 'PropositionGestionnaireDTO':
         proposition = cls.get(entity_id=entity_id)
         propositions = cls.search_dto(matricule_candidat=proposition.matricule_candidat)
         base_proposition = cls._load_dto(proposition)
-
+        motif_refus = cls.motifs_refus.get(proposition.motif_refus_fac.uuid) if proposition.motif_refus_fac else None
         candidat = ProfilCandidatInMemoryTranslator.get_identification(proposition.matricule_candidat)
+        formation_choisie_fac = (
+            FormationGeneraleInMemoryTranslator.get_dto(
+                proposition.autre_formation_choisie_fac_id.sigle,
+                proposition.autre_formation_choisie_fac_id.annee,
+            )
+            if proposition.autre_formation_choisie_fac_id
+            else None
+        )
 
         return PropositionGestionnaireDTO(
             **dto_to_dict(base_proposition),
@@ -274,6 +291,7 @@ class PropositionInMemoryRepository(
             nationalite_ue_candidat=candidat.pays_nationalite_europeen,
             photo_identite_candidat=candidat.photo_identite,
             poursuite_de_cycle_a_specifier=proposition.poursuite_de_cycle_a_specifier,
+            candidat_a_reussi_experience_academique_belge=proposition.poursuite_de_cycle_a_specifier,
             poursuite_de_cycle=proposition.poursuite_de_cycle if proposition.poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=any(
                 proposition.statut == ChoixStatutPropositionGenerale.EN_BROUILLON for proposition in propositions
@@ -294,11 +312,32 @@ class PropositionInMemoryRepository(
                 nom_pays=cls.countries.get(proposition.profil_soumis_candidat.pays, ''),
                 code_postal=proposition.profil_soumis_candidat.code_postal,
                 ville=proposition.profil_soumis_candidat.ville,
-                lieu_dit=proposition.profil_soumis_candidat.lieu_dit,
                 rue=proposition.profil_soumis_candidat.rue,
                 numero_rue=proposition.profil_soumis_candidat.numero_rue,
                 boite_postale=proposition.profil_soumis_candidat.boite_postale,
             )
             if proposition.profil_soumis_candidat
             else None,
+            motif_refus_fac=motif_refus
+            and MotifRefusDTO(
+                motif=motif_refus.intitule,
+                categorie=motif_refus.categorie,
+            ),
+            autre_formation_choisie_fac=formation_choisie_fac
+            and BaseFormationDTO(
+                sigle=formation_choisie_fac.sigle,
+                annee=formation_choisie_fac.annee,
+                uuid='',
+                intitule=formation_choisie_fac.intitule,
+                lieu_enseignement=formation_choisie_fac.campus,
+            ),
+            avec_conditions_complementaires=proposition.avec_conditions_complementaires,
+            conditions_complementaires=proposition.conditions_complementaires_libres,
+            avec_complements_formation=proposition.avec_complements_formation,
+            complements_formation=[],
+            commentaire_complements_formation=proposition.commentaire_complements_formation,
+            nombre_annees_prevoir_programme=proposition.nombre_annees_prevoir_programme,
+            nom_personne_contact_programme_annuel_annuel=proposition.nom_personne_contact_programme_annuel_annuel,
+            email_personne_contact_programme_annuel_annuel=proposition.email_personne_contact_programme_annuel_annuel,
+            commentaire_programme_conjoint=proposition.commentaire_programme_conjoint,
         )

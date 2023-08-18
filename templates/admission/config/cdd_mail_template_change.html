@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@
       {% endfor %}
       <button class="btn btn-primary">
         <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
-        {% trans "Save" %}
+        {% trans "Save" context 'admission' %}
       </button>
       <button class="btn btn-primary" name="_preview" value="1">
         <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
@@ -83,7 +83,7 @@
 
     <div class="col-md-6 panel">
       <table class="table">
-        <caption>{% trans "Tokens that can be used for replacement" %}</caption>
+        <caption>{% trans "Tokens that can be used for replacement" context 'admission' %}</caption>
         <thead>
         <tr>
           <th>{% trans "Token" %}</th>

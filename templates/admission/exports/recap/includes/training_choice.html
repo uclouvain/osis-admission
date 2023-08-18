@@ -22,7 +22,7 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% panel _('Desired training') %}
+{% panel _('Choose your course') %}
   {% if is_doctorate %}
       {% field_data _("Admission type") proposition.type_admission|enum_display:'ChoixTypeAdmission' %}
       {% if proposition.justification %}
@@ -30,7 +30,8 @@
       {% endif %}
       {% field_data _("Sector") proposition.intitule_secteur_formation %}
   {% endif %}
-  {% field_data _('Education name') formation.intitule %}
+  {% translate 'Course name' context 'admission' as education_name_label %}
+  {% field_data education_name_label formation.intitule %}
   {% field_data _('Campus') formation.campus %}
   {% if is_doctorate %}
     {% if proposition.commission_proximite %}
@@ -39,19 +40,13 @@
   {% endif %}
 {% endpanel %}
 
-{% if is_doctorate %}
-  {% panel _('Specific profile') %}
-    {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
-      {% field_data _('Erasmus mundus scholarship') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
-    {% endwith %}
-  {% endpanel %}
-{% elif formation.type|admission_training_type == 'MASTER' %}
+{% if formation.type|admission_training_type == 'MASTER' %}
   {% panel _('Specific profile') %}
     {% with proposition.bourse_double_diplome.nom_court|default:_('No') as short_name %}
-      {% field_data _('Double degree scholarship') proposition.bourse_double_diplome.nom_long|default:short_name %}
+      {% field_data _('Dual degree scholarship') proposition.bourse_double_diplome.nom_long|default:short_name %}
     {% endwith %}
     {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
-      {% field_data _('Erasmus mundus scholarship') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
+      {% field_data _('Erasmus Mundus') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
     {% endwith %}
     {% with proposition.bourse_internationale.nom_court|default:_('No') as short_name %}
       {% field_data _('International scholarship') proposition.bourse_internationale.nom_long|default:short_name %}

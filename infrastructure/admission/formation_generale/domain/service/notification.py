@@ -41,8 +41,15 @@ from admission.ddd.admission.formation_generale.domain.model.enums import ChoixS
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
-from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
+from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
+    send_mail_to_generic_email,
+)
+from admission.mail_templates import (
+    ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
+    ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
+)
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
+from admission.utils import get_portal_admission_url, get_backoffice_admission_url
 from base.models.person import Person
 
 
@@ -50,21 +57,19 @@ class Notification(INotification):
     @classmethod
     def get_common_tokens(cls, proposition: Proposition, candidat):
         """Return common tokens about a submission"""
-        frontend_link = settings.ADMISSION_FRONTEND_LINK.format(
-            context='general-education',
-            uuid=proposition.entity_id.uuid,
-        )
         formation_id = proposition.formation_id
-        backend_link = "{}{}".format(
-            settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
-            resolve_url('admission:general-education', uuid=proposition.entity_id.uuid),
-        )
         return {
             "candidate_first_name": candidat.first_name,
             "candidate_last_name": candidat.last_name,
             "training_title": FormationGeneraleTranslator().get_dto(formation_id.sigle, formation_id.annee).intitule,
-            "admission_link_front": frontend_link,
-            "admission_link_back": backend_link,
+            "admission_link_front": get_portal_admission_url(
+                context='general-education',
+                admission_uuid=proposition.entity_id.uuid,
+            ),
+            "admission_link_back": get_backoffice_admission_url(
+                context='general-education',
+                admission_uuid=proposition.entity_id.uuid,
+            ),
         }
 
     @classmethod
@@ -137,3 +142,48 @@ class Notification(INotification):
         EmailNotificationHandler.create(email_message, person=admission.candidate)
 
         return email_message
+
+    @classmethod
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
+        admission = (
+            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            .select_related('candidate__country_of_citizenship')
+            .get(uuid=proposition.entity_id.uuid)
+        )
+
+        faculty_email = 'mail-inscription-formation-a-developper@uclouvain.be'  # TODO get the right faculty email
+
+        current_language = settings.LANGUAGE_CODE
+
+        with translation.override(current_language):
+            common_tokens = cls.get_common_tokens(proposition, admission.candidate)
+            common_tokens['admission_reference'] = admission.formatted_reference
+            common_tokens['admission_link_back_for_fac_approval_checklist'] = get_backoffice_admission_url(
+                context='general-education',
+                admission_uuid=proposition.entity_id.uuid,
+                sub_namespace=':checklist',
+                url_suffix='#decision_facultaire',
+            )
+            common_tokens['admission_link_back_for_uclouvain_documents'] = get_backoffice_admission_url(
+                context='general-education',
+                admission_uuid=proposition.entity_id.uuid,
+                sub_namespace=':documents',
+            )
+            common_tokens['candidate_nationality_country'] = getattr(
+                admission.candidate.country_of_citizenship,
+                {
+                    settings.LANGUAGE_CODE_FR: 'name',
+                    settings.LANGUAGE_CODE_EN: 'name_en',
+                }[current_language],
+            )
+
+            email_message = generate_email(
+                ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
+                current_language,
+                common_tokens,
+                recipients=[faculty_email],
+            )
+
+            send_mail_to_generic_email(email_message)
+
+            return email_message

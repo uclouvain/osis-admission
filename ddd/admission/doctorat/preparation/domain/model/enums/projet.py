@@ -30,11 +30,11 @@ from base.models.utils.utils import ChoiceEnum
 
 
 class ChoixStatutPropositionDoctorale(ChoiceEnum):
-    EN_BROUILLON = _('In draft')
+    EN_BROUILLON = _('In draft form')
     EN_ATTENTE_DE_SIGNATURE = _('Waiting for signature')
-    CONFIRMEE = _('Confirmed application (by student)')
+    CONFIRMEE = _('Application confirmed (by student)')
     ANNULEE = _('Cancelled application')
-    INSCRIPTION_AUTORISEE = _('Enrollment allowed')
+    INSCRIPTION_AUTORISEE = _('Application accepted')
 
 
 STATUTS_PROPOSITION_AVANT_SOUMISSION = {

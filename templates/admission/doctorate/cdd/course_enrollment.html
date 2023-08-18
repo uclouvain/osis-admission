@@ -36,14 +36,14 @@
 
 {% block tab_content %}
   {% url "admission:doctorate:course-enrollment:add" uuid=view.kwargs.uuid category='UCL_COURSE' as add_url %}
-  <h3>{% trans "Course enrollment" %}</h3>
+  <h3>{% trans "Course unit enrolment" %}</h3>
 
   <p>{% lorem %}</p>
 
-  <h4>{% trans "Courses" %}</h4>
+  <h4>{% trans "Course units" context 'admission' %}</h4>
   {% if activities %}
     <div class="filter-status form-group">
-      <strong>{% trans "Status" %}</strong>
+      <strong>{% trans "Status" context 'admission' %}</strong>
       <div class="btn-group btn-group-sm" role="radiogroup">
         <button type="button" class="btn btn-default active" data-status="all">
           {% trans "All" context "filters" %}

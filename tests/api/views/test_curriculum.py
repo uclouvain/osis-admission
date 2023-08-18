@@ -139,7 +139,6 @@ class BaseCurriculumTestCase:
         )
         AdmissionAcademicCalendarFactory.produce_all_required()
 
-
     def setUp(self):
         # Mock files
         patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
@@ -226,9 +225,9 @@ class BaseCurriculumTestCase:
             response.get('incomplete_periods'),
             [
                 'De Septembre 2019 à Décembre 2019',
-                'De Septembre 2018 à Janvier 2019',
-                'De Septembre 2017 à Janvier 2018',
-                'De Septembre 2016 à Janvier 2017',
+                'De Septembre 2018 à Février 2019',
+                'De Septembre 2017 à Février 2018',
+                'De Septembre 2016 à Février 2017',
             ]
             if self.with_incomplete_periods
             else [],
@@ -291,8 +290,8 @@ class BaseCurriculumTestCase:
         self.assertEqual(
             response.get('incomplete_periods'),
             [
-                'De Septembre 2017 à Janvier 2018',
-                'De Septembre 2016 à Janvier 2017',
+                'De Septembre 2017 à Février 2018',
+                'De Septembre 2016 à Février 2017',
             ]
             if self.with_incomplete_periods
             else [],
@@ -629,6 +628,7 @@ class GeneralEducationCurriculumTestCase(
 
         self.assertEqual(response.status_code, HTTP_200_OK)
         updated_admission = GeneralEducationAdmission.objects.get(uuid=self.admission.uuid)
+        self.assertEqual(response.json().get('errors'), updated_admission.detailed_status)
 
         self.assertEqual(
             updated_admission.specific_question_answers,

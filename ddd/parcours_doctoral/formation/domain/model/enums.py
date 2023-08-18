@@ -57,8 +57,8 @@ class ChoixComiteSelection(ChoiceEnum):
 class ChoixStatutPublication(ChoiceEnum):
     UNSUBMITTED = _("Unsubmitted for publication")
     SUBMITTED = _("Submitted for publication")
-    IN_REVIEW = _("In review")
-    ACCEPTED = _("Accepted")
+    IN_REVIEW = _("Awaiting approval")
+    ACCEPTED = pgettext_lazy("publication-status", "Accepted")
     PUBLISHED = _("Published")
 
 

@@ -26,47 +26,46 @@
 {% endcomment %}
 
 {% block tab_content %}
-    {% panel _("Residential address") %}
+    {% panel _("Legal domicile") %}
         <div class="row">
             <div class="col-md-4">{% field_data _("Street") coordonnees.residential.street %}</div>
             {% trans "Number" context "address" as address_number_label %}
-            <div class="col-md-2">{% field_data address_number_label coordonnees.residential.street_number %}</div>
-            <div class="col-md-2">{% field_data _("Box") coordonnees.residential.postal_box hide_empty=True %} </div>
-            {% trans "Place" context "address" as address_place_label %}
-            <div class="col-md-4">{% field_data address_place_label coordonnees.residential.place hide_empty=True %}</div>
+            <div class="col-md-4">{% field_data address_number_label coordonnees.residential.street_number %}</div>
+            <div class="col-md-4">{% field_data _("Box") coordonnees.residential.postal_box hide_empty=True %} </div>
         </div>
         <div class="row">
             {% get_country_name coordonnees.residential.country as residential_country %}
             <div class="col-md-4">{% field_data _("Country") residential_country %}</div>
-            <div class="col-md-4">{% field_data _("Postal code") coordonnees.residential.postal_code %}</div>
+            <div class="col-md-4">{% field_data _("Postcode") coordonnees.residential.postal_code %}</div>
             <div class="col-md-4">{% field_data _("City") coordonnees.residential.city %}</div>
         </div>
     {% endpanel %}
     {% if coordonnees.contact %}
-        {% translate 'Contact address' context 'admission' as contact_panel_title %}
+        {% translate 'Postal address' context 'admission' as contact_panel_title %}
         {% panel contact_panel_title %}
             <div class="row">
                 <div class="col-md-4">{% field_data _("Street") coordonnees.contact.street %}</div>
                 {% trans "Number" context "address" as address_number_label %}
-                <div class="col-md-2">{% field_data address_number_label coordonnees.contact.street_number %}</div>
-                <div class="col-md-2">{% field_data _("Box") coordonnees.contact.postal_box hide_empty=True %}</div>
-                {% trans "Place" context "address" as address_place_label %}
-                <div class="col-md-4">{% field_data address_place_label coordonnees.contact.place hide_empty=True %}</div>
+                <div class="col-md-4">{% field_data address_number_label coordonnees.contact.street_number %}</div>
+                <div class="col-md-4">{% field_data _("Box") coordonnees.contact.postal_box hide_empty=True %}</div>
             </div>
             <div class="row">
                 {% get_country_name coordonnees.contact.country as contact_country %}
                 <div class="col-md-4">{% field_data _("Country") contact_country %}</div>
-                <div class="col-md-4">{% field_data _("Postal code") coordonnees.contact.postal_code %}</div>
+                <div class="col-md-4">{% field_data _("Postcode") coordonnees.contact.postal_code %}</div>
                 <div class="col-md-4">{% field_data _("City") coordonnees.contact.city %}</div>
             </div>
         {% endpanel %}
     {% endif %}
     {% panel _("Contact") %}
         <div class="row">
-            {% trans "Phone (GSM/mobile)" context "admission" as mobile_phone_label %}
+            {% trans "Telephone (mobile)" context "admission" as mobile_phone_label %}
             {% field_data mobile_phone_label coordonnees.phone_mobile "col-md-6" %}
-            {% trans "Private email" context "admission" as email_label %}
+            {% trans "Personal email" context "admission" as email_label %}
             {% field_data email_label coordonnees.private_email "col-md-6" %}
+        </div>
+        <div class="row">
+            {% field_data _('Emergency contact (telephone number)') coordonnees.emergency_contact_phone "col-md-6" %}
         </div>
     {% endpanel %}
 {% endblock %}

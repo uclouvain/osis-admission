@@ -32,15 +32,33 @@
         hx-swap="outerHTML"
     >
       {% csrf_token %}
-      {% bootstrap_form form %}
-      {% bootstrap_button _("Save") button_type="submit" button_class='btn-primary pull-right' %}
+      {% bootstrap_field form.type_demande %}
+      {% bootstrap_field form.annee_academique %}
+      {% bootstrap_field form.formation %}
+      <div
+          id="bachelor-cycle-continuation-container"
+          class="required_field{% if not form.has_success_be_experience or form.initial_training_type != 'BACHELOR' %} hidden{% endif %}"
+      >
+        {% bootstrap_field form.poursuite_cycle %}
+      </div>
+      {% translate 'Save' context 'admission' as save_label %}
+      {% bootstrap_button save_label button_type="submit" button_class='btn-primary pull-right' %}
       <a class="btn btn-secondary pull-right" hx-swap="outerHTML" hx-target="#choix-formation-form" hx-push-url="false" hx-get="{% url 'admission:general-education:choix-formation-detail' uuid=view.kwargs.uuid %}">{% trans "Cancel" %}</a>
     </form>
   {% endpanel %}
   {{ form.media }}
   <script>
-    $('#id_annee_academique').change(function() {
-        $('#id_formation').val(null).trigger('change');
-    });
+      $('#id_annee_academique').change(function() {
+          $('#id_formation').val(null).trigger('change');
+      });
+      {% if form.has_success_be_experience %}
+          $('#id_formation').on('select2:select select2:clear', function (event) {
+              if(event.params.data.type === 'BACHELOR') {
+                  $('#bachelor-cycle-continuation-container').removeClass('hidden');
+              } else {
+                  $('#bachelor-cycle-continuation-container').addClass('hidden');
+              }
+          });
+      {% endif %}
   </script>
 </div>

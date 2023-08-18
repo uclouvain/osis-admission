@@ -73,7 +73,7 @@ EMPLACEMENTS_SIC = {
 
 class StatutEmplacementDocument(ChoiceEnum):
     A_RECLAMER = _('To be requested')
-    RECLAME = _('Requested')
+    RECLAME = pgettext_lazy('document', 'Requested')
     NON_ANALYSE = _('Not analyzed')
     VALIDE = _('Validated')
     COMPLETE_APRES_RECLAMATION = _('Completed after the request')
@@ -82,12 +82,12 @@ class StatutEmplacementDocument(ChoiceEnum):
 class OngletsDemande(ChoiceEnum):
     IDENTIFICATION = _('Identification')
     COORDONNEES = _('Coordinates')
-    CHOIX_FORMATION = _('Training choice')
+    CHOIX_FORMATION = _('Course choice')
     ETUDES_SECONDAIRES = _('Secondary studies')
     CURRICULUM = _('Curriculum')
-    LANGUES = _('Languages knowledge')
+    LANGUES = _('Knowledge of languages')
     COMPTABILITE = _('Accounting')
-    PROJET = _('Research project')
+    PROJET = pgettext_lazy('tab', 'Research project')
     COTUTELLE = _('Cotutelle')
     SUPERVISION = _('Supervision')
     INFORMATIONS_ADDITIONNELLES = _('Additional information')
@@ -110,44 +110,50 @@ IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE = {
 
 
 DocumentsIdentification = {
-    'PHOTO_IDENTITE': _('Identity picture'),
+    'PHOTO_IDENTITE': _('Identification photo'),
     'CARTE_IDENTITE': _('Identity card (both sides)'),
     'PASSEPORT': _('Passport'),
 }
 
 
+DocumentsSystemeFAC = {
+    'ATTESTATION_ACCORD_FACULTAIRE': _('Approval certificate of faculty'),
+    'ATTESTATION_REFUS_FACULTAIRE': _('Refusal certificate of faculty'),
+}
+
+
 DocumentsSysteme = {
     'DOSSIER_ANALYSE': _('Analysis folder'),
+    **DocumentsSystemeFAC,
 }
 
 
 DocumentsEtudesSecondaires = {
-    'DIPLOME_BELGE_DIPLOME': _('High school diploma'),
+    'DIPLOME_BELGE_DIPLOME': _('Secondary school diploma'),
     'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION': _('Certificate of enrolment or school attendance'),
     'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE': _(
-        "A double-sided copy of the final equivalence decision (possibly with the DAES or "
-        "the admission test for the first cycle of higher education in case of "
-        "restrictive equivalence)"
+        "Copy of both sides of the definitive equivalency decision (accompanied, "
+        "where applicable, by the DAES or undergraduate exam, in the case of restrictive equivalency)"
     ),
-    'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE': _('Proof of the final equivalence decision'),
+    'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE': _('Proof of equivalency request'),
     'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE': _(
-        "A double-sided copy of the final equivalence decision issued by the Ministry of the "
-        "French Community of Belgium (possibly with the DAES or the admission test for the "
-        "first cycle of higher education if your equivalence doesn't give access to the "
-        "desired programme)"
+        "Copy of both sides of the definitive equivalency decision by the Ministry of the French-speaking Community "
+        "of Belgium (possibly accompanied by the DAES or the undergraduate studies exam, if your equivalency does "
+        "not confer eligibility for the desired programme)"
     ),
-    'DIPLOME_ETRANGER_DIPLOME': _('High school diploma'),
-    'DIPLOME_ETRANGER_TRADUCTION_DIPLOME': _('A certified translation of your high school diploma'),
+    'DIPLOME_ETRANGER_DIPLOME': _('Secondary school diploma'),
+    'DIPLOME_ETRANGER_TRADUCTION_DIPLOME': _('A translation of your secondary school diploma by a sworn translator'),
     'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION': _('Certificate of enrolment or school attendance'),
     'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION': _(
-        'A certified translation of your certificate of enrolment or school attendance'
+        'A translation of the enrolment or school attendance certificate by a sworn translator',
     ),
-    'DIPLOME_ETRANGER_RELEVE_NOTES': _('A transcript or your last year at high school'),
+    'DIPLOME_ETRANGER_RELEVE_NOTES': _('A transcript for your last year of secondary school'),
     'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES': _(
-        'A certified translation of your official transcript of marks for your final year of secondary education'
+        'A translation of your official transcript of marks for your final year of secondary school by a '
+        'sworn translator'
     ),
     'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE': _(
-        'Certificate of successful completion of the admission test for the first cycle of higher education'
+        "Certificate of passing the bachelor's course entrance exam"
     ),
 }
 
@@ -159,28 +165,31 @@ DocumentsConnaissancesLangues = {
 
 DocumentsCurriculum = {
     'DIPLOME_EQUIVALENCE': _(
-        'Copy of the equivalence decision delivered by the French Community of Belgium making your '
-        '2nd cycle diploma (bac+5) equivalent to the academic grade of a corresponding master.'
+        "Copy of equivalency decision issued by the French Community of Belgium making your bachelor's diploma (bac+5) "
+        "equivalent to the academic rank of a corresponding master's degree."
     ),
-    'CURRICULUM': _('Curriculum vitae detailed, dated and signed'),
+    'CURRICULUM': _('Detailed curriculum vitae, dated and signed'),
     'RELEVE_NOTES': _('Transcript'),
     'TRADUCTION_RELEVE_NOTES': _('Transcript translation'),
     'RELEVE_NOTES_ANNUEL': _('Transcript'),
     'TRADUCTION_RELEVE_NOTES_ANNUEL': _('Transcript translation'),
     'RESUME_MEMOIRE': _('Dissertation summary'),
-    'DIPLOME': _('Graduate degree'),
-    'TRADUCTION_DIPLOME': _('Graduate degree translation'),
+    'DIPLOME': _('Diploma'),
+    'TRADUCTION_DIPLOME': _('Diploma translation'),
     'CERTIFICAT_EXPERIENCE': _('Certificate of experience'),
 }
 
 
 DocumentsQuestionsSpecifiques = {
     'COPIE_TITRE_SEJOUR': _(
-        'Copy of the residence permit covering the entire course, including the evaluation test '
-        '(except for courses organised online)'
+        'Copy of residence permit covering entire course, including assessment test (except for online courses).'
     ),
     'ATTESTATION_INSCRIPTION_REGULIERE': _('Certificate of regular enrolment'),
-    'FORMULAIRE_MODIFICATION_INSCRIPTION': _('Registration modification form'),
+    'FORMULAIRE_MODIFICATION_INSCRIPTION': _('Change of enrolment form'),
+    'ADDITIONAL_DOCUMENTS': _(
+        'You can add any document you feel is relevant to your application '
+        '(supporting documents, proof of language level, etc.)'
+    ),
 }
 
 
@@ -188,99 +197,95 @@ DocumentsQuestionsSpecifiques = {
 # admission.ddd.admission.formation_generale.domain.model._comptabilite.Comptabilite
 # admission.ddd.admission.doctorat.preparation.domain.model._comptabilite.Comptabilite
 DocumentsAssimilation = {
-    'CARTE_RESIDENT_LONGUE_DUREE': _('Copy of both sides of the EC long-term resident card (D or L card)'),
+    'CARTE_RESIDENT_LONGUE_DUREE': _('Copy of both sides of EC long-term resident card (D or L Card)'),
     'CARTE_CIRE_SEJOUR_ILLIMITE_ETRANGER': _(
-        "Copy of both sides of the Certificate of Registration in the Register of Foreigners CIRE - "
-        "unlimited stay (B card) or copy of the foreigner's card - unlimited stay (C or K card)"
+        "Copy of both sides of Certificate of Registration in the Foreigners Registry (CIRE), "
+        "unlimited stay (B Card), or of Foreign National's Card, unlimited stay (C or K Card)"
     ),
     'CARTE_SEJOUR_MEMBRE_UE': _(
-        'Copy of both sides of the residence card of a family member of a European Union citizen (F card)'
+        'Copy of both sides of residence permit for a family member of a European Union citizen (F Card)'
     ),
     'CARTE_SEJOUR_PERMANENT_MEMBRE_UE': _(
-        'Copy of both sides of the permanent residence card of a family member of a European Union citizen (F+ card)'
+        'Copy of both sides of permanent residence card of a family member of a European Union citizen (F+ Card)'
     ),
-    'CARTE_A_B_REFUGIE': _('Copy of both sides of the A or B card (with "refugee" written on the back of the card)'),
+    'CARTE_A_B_REFUGIE': _('Copy of both sides of A or B Card (with "refugee" on card back)'),
     'ANNEXE_25_26_REFUGIES_APATRIDES': _(
-        'Copy of the Annex 25 or 26 completed by the Office of the Commissioner General for Refugees and Stateless '
-        'Persons'
+        'Copy of Annex 25 or 26 completed by the Office of the Commissioner General for Refugees and Stateless Persons'
     ),
-    'ATTESTATION_IMMATRICULATION': _('Copy of the registration certificate "orange card"'),
-    'CARTE_A_B': _('Copy of both sides of the A or B Card'),
-    'DECISION_PROTECTION_SUBSIDIAIRE': _(
-        'Copy of the decision of the Foreigners\' Office confirming the granting of subsidiary protection'
+    'PREUVE_STATUT_APATRIDE': _(
+        'Copy of official document from the local authority or Foreign Nationals Office proving stateless status'
     ),
-    'DECISION_PROTECTION_TEMPORAIRE': _(
-        'Copy of the decision of the Foreigners\' Office confirming the granting of temporary protection'
-    ),
-    'TITRE_SEJOUR_3_MOIS_PROFESSIONEL': _('Copy of both sides of the residence permit valid for more than 3 months'),
-    'FICHES_REMUNERATION': _('Copy of 6 salary slips issued in the 12 months preceding the application'),
-    'TITRE_SEJOUR_3_MOIS_REMPLACEMENT': _('Copy of both sides of the residence permit valid for more than 3 months'),
+    'CARTE_A_B': _('Copy of both sides of A or B Card'),
+    'DECISION_PROTECTION_SUBSIDIAIRE': _('Copy of Foreign Nationals Office decision granting subsidiary protection'),
+    'DECISION_PROTECTION_TEMPORAIRE': _('Copy of Foreign Nationals Office decision granting temporary protection'),
+    'CARTE_A': _('Copy of both sides of A Card'),
+    'TITRE_SEJOUR_3_MOIS_PROFESSIONEL': _('Copy of both sides of residence permit valid for more than 3 months'),
+    'FICHES_REMUNERATION': _('Copy of 6 payslips issued in the 12 months preceding application'),
+    'TITRE_SEJOUR_3_MOIS_REMPLACEMENT': _('Copy of both sides of residence permit valid for more than 3 months'),
     'PREUVE_ALLOCATIONS_CHOMAGE_PENSION_INDEMNITE': _(
         'Proof of receipt of unemployment benefit, pension or compensation from the mutual insurance company'
     ),
-    'ATTESTATION_CPAS': _('Recent certificate of support from the CPAS'),
-    'COMPOSITION_MENAGE_ACTE_NAISSANCE': _('Household composition, or a copy of your birth certificate'),
-    'ACTE_TUTELLE': _('Copy of the tutorship act authenticated by the Belgian authorities'),
+    'ATTESTATION_CPAS': _('Recent CPAS certificate of coverage'),
+    'COMPOSITION_MENAGE_ACTE_NAISSANCE': _('Household composition, or copy of your birth certificate'),
+    'ACTE_TUTELLE': _('Copy of guardianship appointment legalised by Belgian authorities'),
     'COMPOSITION_MENAGE_ACTE_MARIAGE': _(
         'Household composition or marriage certificate authenticated by the Belgian authorities'
     ),
     'ATTESTATION_COHABITATION_LEGALE': _('Certificate of legal cohabitation'),
-    'CARTE_IDENTITE_PARENT': _('Copy of both sides of the identity card of %(person_concerned)s'),
+    'CARTE_IDENTITE_PARENT': _('Copy of both sides of identity card of %(person_concerned)s'),
     'TITRE_SEJOUR_LONGUE_DUREE_PARENT': _(
-        'Copy of both sides of the long-term residence permit in Belgium of %(person_concerned)s '
-        '(B, C, D, F, F+, K, L or M cards)'
+        'Copy of both sides of long-term residence permit in Belgium of %(person_concerned)s (B, C, D, F, F+, '
+        'K, L or M Card)'
     ),
     'ANNEXE_25_26_REFUGIES_APATRIDES_DECISION_PROTECTION_PARENT': _(
-        'Copy of the Annex 25 or 26 or the A/B card mentioning the refugee status or copy of the decision of the '
-        'Foreigners\' Office confirming the temporary/subsidiary protection of %(person_concerned)s '
-        'or copy of the official document from the municipality or the Foreigners\' Office proving the '
-        'stateless status of %(person_concerned)s'
+        'Copy of Annex 25 or 26 or A/B Card indicating refugee status or copy of Foreign Nationals '
+        'Office decision confirming temporary/subsidiary protection of %(person_concerned)s or copy of official '
+        'Foreign Nationals Office or municipality document proving the stateless status of %(person_concerned)s'
     ),
     'TITRE_SEJOUR_3_MOIS_PARENT': _(
-        'Copy of both sides of the residence permit valid for more than 3 months of %(person_concerned)s'
+        'Copy of both sides of residence permit valid for more than 3 months of %(person_concerned)s'
     ),
     'FICHES_REMUNERATION_PARENT': _(
-        'Copy of the 6 salary slips issued in the 12 months preceding the application for registration or proof of '
-        'receipt of unemployment benefit, pension or an indemnity from the mutual insurance company of '
-        '%(person_concerned)s'
+        'Copy of 6 payslips issued in the 12 months preceding application or proof of receipt of unemployment benefit, '
+        'pension or allowance from a mutual insurance company of %(person_concerned)s'
     ),
-    'ATTESTATION_CPAS_PARENT': _('Recent certificate of support from the CPAS of %(person_concerned)s'),
-    'DECISION_BOURSE_CFWB': _('Copy of the decision to grant the scholarship from the CFWB'),
+    'ATTESTATION_CPAS_PARENT': _('Recent CPAS certificate of coverage for %(person_concerned)s'),
+    'DECISION_BOURSE_CFWB': _('Copy of decision to grant CFWB scholarship'),
     'ATTESTATION_BOURSIER': _(
-        'Copy of the certificate of scholarship holder issued by the General Administration for Development Cooperation'
+        "Copy of holder's certificate of scholarship issued by the General Administration for Development Cooperation"
     ),
     'TITRE_IDENTITE_SEJOUR_LONGUE_DUREE_UE': _(
-        'Copy of both sides of the identity document proving the long-term stay in a member state of the European Union'
+        'Copy of both sides of identity document proving long-term residence in a European Union member state'
     ),
-    'TITRE_SEJOUR_BELGIQUE': _('Copy of both sides of the residence permit in Belgium'),
+    'TITRE_SEJOUR_BELGIQUE': _('Copy of both sides of residence permit in Belgium'),
 }
 DocumentsComptabilite = {
     'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT': ngettext_lazy(
-        'Certificate stating the absence of debts towards the institution attended '
-        'during the academic year %(academic_year)s: %(names)s',
-        'Certificates stating the absence of debts towards the institutions attended '
-        'during the academic year %(academic_year)s: %(names)s',
+        'Certificate stating no debts to the institution attended during the academic year '
+        '%(academic_year)s: %(names)s',
+        'Certificates stating no debts to the institutions attended during the academic year '
+        '%(academic_year)s: %(names)s',
         'count',
     ),
-    'ATTESTATION_ENFANT_PERSONNEL': _('Staff child certificate'),
+    'ATTESTATION_ENFANT_PERSONNEL': _('Certificate for children of staff'),
     **DocumentsAssimilation,
 }
 
 
 DocumentsProjetRecherche = {
-    'PREUVE_BOURSE': _('Scholarship proof'),
-    'DOCUMENTS_PROJET': _('Research project'),
-    'PROPOSITION_PROGRAMME_DOCTORAL': _('Doctoral program proposition'),
+    'PREUVE_BOURSE': _('Proof of scholarship'),
+    'DOCUMENTS_PROJET': _('PhD research project'),
+    'PROPOSITION_PROGRAMME_DOCTORAL': _('PhD proposal'),
     'PROJET_FORMATION_COMPLEMENTAIRE': _('Complementary training proposition'),
-    'GRAPHE_GANTT': _("Gantt graph"),
-    'LETTRES_RECOMMANDATION': _("Recommendation letters"),
+    'GRAPHE_GANTT': _("Gantt chart"),
+    'LETTRES_RECOMMANDATION': _("Letters of recommendation"),
 }
 
 
 DocumentsCotutelle = {
-    'DEMANDE_OUVERTURE': _('Cotutelle opening request'),
-    'CONVENTION': _('Cotutelle convention'),
-    'AUTRES_DOCUMENTS': _('Other documents concerning cotutelle'),
+    'DEMANDE_OUVERTURE': _('Joint supervision request'),
+    'CONVENTION': _('Joint supervision agreement'),
+    'AUTRES_DOCUMENTS': _('Other documents relating to joint supervision'),
 }
 
 

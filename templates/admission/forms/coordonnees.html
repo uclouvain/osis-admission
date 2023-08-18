@@ -30,12 +30,11 @@
     {% bootstrap_form_errors residential %}
     {% bootstrap_form_errors contact %}
 
-    {% panel _("Residential address") %}
+    {% panel _("Legal domicile") %}
         <div class="row">
             <div class="col-md-4 required_field formatted-field">{% bootstrap_field residential.street %}</div>
-            <div class="col-md-2 required_field">{% bootstrap_field residential.street_number placeholder="" %}</div>
-            <div class="col-md-2">{% bootstrap_field residential.postal_box placeholder="" %}</div>
-            <div class="col-md-4 formatted-field">{% bootstrap_field residential.place placeholder="" %}</div>
+            <div class="col-md-4 required_field">{% bootstrap_field residential.street_number placeholder="" %}</div>
+            <div class="col-md-4">{% bootstrap_field residential.postal_box placeholder="" %}</div>
         </div>
         <div class="row">
             <div class="col-md-4 required_field">{% bootstrap_field residential.country %}</div>
@@ -51,13 +50,12 @@
         <div>{% bootstrap_field main_form.show_contact %}</div>
     {% endpanel %}
 
-    {% translate "Contact address" context "admission" as contact_address_label %}
+    {% translate "Postal address" context "admission" as contact_address_label %}
     {% panel contact_address_label id="contact_address" %}
         <div class="row">
             <div class="col-md-4 required_field formatted-field">{% bootstrap_field contact.street %}</div>
-            <div class="col-md-2 required_field">{% bootstrap_field contact.street_number placeholder="" %}</div>
-            <div class="col-md-2">{% bootstrap_field contact.postal_box placeholder="" %}</div>
-            <div class="col-md-4 formatted-field">{% bootstrap_field contact.place placeholder="" %}</div>
+            <div class="col-md-4 required_field">{% bootstrap_field contact.street_number placeholder="" %}</div>
+            <div class="col-md-4">{% bootstrap_field contact.postal_box placeholder="" %}</div>
         </div>
         <div class="row">
             <div class="col-md-4 required_field">{% bootstrap_field contact.country %}</div>
@@ -76,6 +74,9 @@
         <div class="row">
             <div class="col-md-6">{% bootstrap_field main_form.phone_mobile %}</div>
             <div class="col-md-6">{% bootstrap_field main_form.private_email placeholder="" %}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">{% bootstrap_field main_form.emergency_contact_phone %}</div>
         </div>
     {% endpanel %}
 {% endblock %}

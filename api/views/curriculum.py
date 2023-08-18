@@ -49,6 +49,7 @@ from admission.api.views.mixins import (
     ContinuingEducationPersonRelatedMixin,
     SpecificPersonRelatedSchema,
 )
+from admission.api.views.submission import SubmitPropositionMixin
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ExperiencesAcademiquesNonCompleteesException,
@@ -176,7 +177,7 @@ class PersonCurriculumView(PersonRelatedMixin, BaseCurriculumView):
     serializer_class = serializers.CurriculumDetailsSerializer
 
 
-class CurriculumView(BaseCurriculumView):
+class CurriculumView(SubmitPropositionMixin, BaseCurriculumView):
     complete_command_class = None
     serializer_mapping = {}
 
@@ -188,7 +189,9 @@ class CurriculumView(BaseCurriculumView):
         serializer.is_valid(raise_exception=True)
         message_bus_instance.invoke(self.complete_command_class(**serializer.data))
         self.get_permission_object().update_detailed_status(request.user.person)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = {**serializer.data, 'errors': self.get_permission_object().detailed_status}
+        self.add_access_conditions_url(data)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class DoctorateCurriculumView(PersonRelatedMixin, CurriculumView):

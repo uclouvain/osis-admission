@@ -31,7 +31,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, pgettext
+from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy
 from hijack.contrib.admin import HijackUserAdminMixin
 
 from admission.auth.roles.adre import AdreSecretary
@@ -57,6 +57,7 @@ from admission.contrib.models import (
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
+from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
@@ -149,7 +150,6 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
         'training',
         'thesis_institute',
         'international_scholarship',
-        'erasmus_mundus_scholarship',
     ]
     list_display = ['reference', 'candidate_fmt', 'doctorate', 'type', 'status', 'view_on_portal']
     list_filter = ['status', 'type']
@@ -180,6 +180,9 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'double_degree_scholarship',
         'international_scholarship',
         'erasmus_mundus_scholarship',
+        'additional_approval_conditions',
+        'other_training_accepted_by_fac',
+        'prerequisite_courses',
     ]
 
     @staticmethod
@@ -377,6 +380,24 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         return False
 
 
+class DisplayTranslatedNameMixin:
+    search_fields = ['name_fr', 'name_en']
+
+
+class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
+    list_display = ['name_fr', 'name_en']
+
+
+class RefusalReasonAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
+    autocomplete_fields = ['category']
+    list_display = ['name_fr', 'name_en', 'category']
+    list_filter = ['category']
+
+
+class AdditionalApprovalConditionAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
+    list_display = ['name_fr', 'name_en']
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
@@ -388,6 +409,9 @@ admin.site.register(ContinuingEducationAdmission, ContinuingEducationAdmissionAd
 admin.site.register(BaseAdmission, BaseAdmissionAdmin)
 admin.site.register(AdmissionViewer, AdmissionViewerAdmin)
 admin.site.register(Accounting, AccountingAdmin)
+admin.site.register(RefusalReasonCategory, RefusalReasonCategoryAdmin)
+admin.site.register(RefusalReason, RefusalReasonAdmin)
+admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
@@ -541,7 +565,7 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
         'entity__entityversion__acronym',
     ]
 
-    @admin.display(description=_('Entity'))
+    @admin.display(description=pgettext_lazy('admission', 'Entity'))
     def most_recent_acronym(self, obj):
         return obj.most_recent_acronym
 

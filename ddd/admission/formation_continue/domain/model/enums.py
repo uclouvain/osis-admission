@@ -30,10 +30,10 @@ from base.models.utils.utils import ChoiceEnum
 
 
 class ChoixStatutPropositionContinue(ChoiceEnum):
-    EN_BROUILLON = _('In draft')
-    CONFIRMEE = _('Confirmed application (by student)')
+    EN_BROUILLON = _('In draft form')
+    CONFIRMEE = _('Application confirmed (by student)')
     ANNULEE = _('Cancelled application')
-    INSCRIPTION_AUTORISEE = _('Enrollment allowed')
+    INSCRIPTION_AUTORISEE = _('Application accepted')
 
 
 class ChoixInscriptionATitre(ChoiceEnum):
@@ -42,8 +42,8 @@ class ChoixInscriptionATitre(ChoiceEnum):
 
 
 class ChoixTypeAdresseFacturation(ChoiceEnum):
-    RESIDENTIEL = _("Residential address")
-    CONTACT = pgettext_lazy("admission", "Contact address")
+    RESIDENTIEL = _("Legal domicile")
+    CONTACT = pgettext_lazy("admission", "Postal address")
     AUTRE = _("Another address")
 
 

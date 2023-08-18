@@ -98,7 +98,8 @@
                       <br>
                       <div class="row">
                         <div class="col-md-12">
-                          {% bootstrap_label _("modified") label_class="d-block" %}
+                          {% translate 'modified' context 'feminine' as modified_label %}
+                          {% bootstrap_label modified_label label_class="d-block" %}
                           <p>{{ object.modified_at }} </p>
                         </div>
                       </div>

@@ -36,18 +36,18 @@ TRAINING_TYPES_WITH_EQUIVALENCE = {
 FORMATTED_RELATIONSHIPS = {
     'PERE': _('your father'),
     'MERE': _('your mother'),
-    'TUTEUR_LEGAL': _('your legal tutor'),
+    'TUTEUR_LEGAL': _('your legal guardian'),
     'CONJOINT': _('your partner'),
     'COHABITANT_LEGAL': _('your legal cohabitant'),
 }
 CURRICULUM_ACTIVITY_LABEL = {
     ActivityType.LANGUAGE_TRAVEL.name: _(
-        'Certificate justifying your activity, mentioning this activity, for the specified period'
+        'Certificate justifying and mentioning your activity for the period concerned'
     ),
-    ActivityType.INTERNSHIP.name: _('Training certificate, with dates, justifying the specified period'),
+    ActivityType.INTERNSHIP.name: _('Internship certificate, with dates, justifying the period concerned'),
     ActivityType.UNEMPLOYMENT.name: _(
-        'Unemployment certificate issued by the relevant organisation, justifying the specified period'
+        'Unemployment certificate issued by the relevant body, justifying the period concerned'
     ),
-    ActivityType.VOLUNTEERING.name: _('Certificate, with dates, justifying the specified period'),
-    ActivityType.WORK.name: _('Employment certificate from the employer, with dates, justifying the specified period'),
+    ActivityType.VOLUNTEERING.name: _('Certificate, with dates, justifying the period concerned'),
+    ActivityType.WORK.name: _('Proof of employment from the employer, with dates, justifying the period in question'),
 }

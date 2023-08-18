@@ -909,8 +909,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
-                'justificatifs': IElementsConfirmation.JUSTIFICATIFS
-                % {'by_service': _("by the UCLouvain Registration Service")},
+                'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
             },
@@ -1012,7 +1011,6 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                     'country': 'BE',
                     'postal_code': '1348',
                     'city': 'Louvain-La-Neuve',
-                    'place': 'P2',
                     'street': 'University street',
                     'street_number': '2',
                     'postal_box': 'B2',

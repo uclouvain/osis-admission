@@ -163,7 +163,7 @@ class Activity(models.Model):
     # Conference, communication, publication
     title = models.CharField(
         max_length=200,
-        verbose_name=_("Title"),
+        verbose_name=pgettext_lazy("admission", "Title"),
         default="",
         blank=True,
     )
@@ -220,13 +220,13 @@ class Activity(models.Model):
     )
     organizing_institution = models.CharField(
         max_length=100,
-        verbose_name=_("Organizing institution"),
+        verbose_name=_("Organising institution"),
         default="",
         blank=True,
     )
     website = models.URLField(
         default="",
-        verbose_name=_("Website"),
+        verbose_name=pgettext_lazy("admission", "Website"),
         blank=True,
     )
 
@@ -276,19 +276,19 @@ class Activity(models.Model):
         blank=True,
     )
     role = models.CharField(
-        verbose_name=_("Role"),
+        verbose_name=pgettext_lazy("activity", "Role"),
         max_length=100,
         default="",
         blank=True,
     )
     keywords = models.CharField(
-        verbose_name=_("Keywords"),
+        verbose_name=pgettext_lazy("admission", "Keywords"),
         max_length=100,
         default="",
         blank=True,
     )
     journal = models.CharField(
-        verbose_name=_("Journal"),
+        verbose_name=_("Journal or publishing house name"),
         max_length=100,
         default="",
         blank=True,
@@ -323,11 +323,11 @@ class Activity(models.Model):
 
     # Process
     reference_promoter_assent = models.BooleanField(
-        verbose_name=_("Reference promoter assent"),
+        verbose_name=_("Lead supervisor assent"),
         null=True,
     )
     reference_promoter_comment = models.TextField(
-        verbose_name=_("Reference promoter comment"),
+        verbose_name=_("Lead supervisor comment"),
         default="",
     )
     cdd_comment = models.TextField(
@@ -338,7 +338,7 @@ class Activity(models.Model):
     # Management
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_("Created at"),
+        verbose_name=pgettext_lazy("admission", "Created at"),
     )
     modified_at = models.DateTimeField(
         auto_now=True,

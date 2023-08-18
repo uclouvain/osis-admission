@@ -25,7 +25,7 @@
 <div>
 <strong>{% if membre.justification_non_docteur %}<a tabindex="0" class="fa fa-exclamation-triangle popover-buttons" data-content="{{ membre.justification_non_docteur|linebreaksbr }}" role="button" data-original-title="" title=""></a> {% endif %}{% if membre.titre and membre.titre != 'NON_DOCTEUR' %}{{ membre.titre | enum_display:'TitreMembre' }} {% endif %}{{ membre.prenom }} {{ membre.nom }}</strong>
 (<a href="mailto:{{ membre.email }}">{{ membre.email }}</a>) - {{ membre.institution }}{% if membre.autre_institution %}, {{ membre.autre_institution }}{% endif %}
-{% if membre.est_promoteur %} - <strong>{% trans "Promoter" %}</strong>{% endif %}
+{% if membre.est_promoteur %} - <strong>{% trans "Supervisor" %}</strong>{% endif %}
 </div>
 {% if form %}
 <div class="btn-group">
@@ -41,7 +41,7 @@
     {% if not membre.role == 'SECRETAIRE' %}<li><a class="membre-role-submit" href="#" data-role="SECRETAIRE">{% trans "Set as secretary" %}</a></li>{% endif %}
     {% if not membre.role == 'MEMBRE' %}<li><a class="membre-role-submit" href="#" data-role="MEMBRE">{% trans "Set as member" %}</a></li>{% endif %}
     {% if not membre.est_promoteur %}
-    <li><a href="{% url 'admission:doctorate:update:jury-member:update' uuid=jury.uuid member_uuid=membre.uuid %}">{% trans "Update" %}</a></li>
+    <li><a href="{% url 'admission:doctorate:update:jury-member:update' uuid=jury.uuid member_uuid=membre.uuid %}">{% trans "Update" context 'verb' %}</a></li>
     <li><a href="#deleteModal-{{ membre.uuid }}" data-toggle="modal" data-target="#deleteModal-{{ membre.uuid }}">{% trans "Remove" context "jury member" %}</a></li>
     {% endif %}
   </ul>

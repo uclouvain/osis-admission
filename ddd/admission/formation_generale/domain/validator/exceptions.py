@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -132,4 +132,38 @@ class PaiementNonRealiseException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("The payment has not been made.")
+        super().__init__(message, **kwargs)
+
+
+class SituationPropositionNonSICException(BusinessException):
+    status_code = "FORMATION-GENERALE-15"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be managed by SIC to realized this action.")
+        super().__init__(message, **kwargs)
+
+
+class SituationPropositionNonFACException(BusinessException):
+    status_code = "FORMATION-GENERALE-16"
+
+    def __init__(self, **kwargs):
+        message = _("The proposition must be managed by FAC to realized this action.")
+        super().__init__(message, **kwargs)
+
+
+class MotifRefusFacultaireNonSpecifieException(BusinessException):
+    status_code = "FORMATION-GENERALE-17"
+
+    def __init__(self, **kwargs):
+        message = _("When refusing a proposition, the reason must be specified.")
+        super().__init__(message, **kwargs)
+
+
+class InformationsAcceptationFacultaireNonSpecifieesException(BusinessException):
+    status_code = "FORMATION-GENERALE-18"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "When accepting a proposition, all the required information in the approval form must be specified.",
+        )
         super().__init__(message, **kwargs)

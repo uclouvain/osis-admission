@@ -54,7 +54,6 @@ from base.utils.cte import CTESubquery
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
-from reference.models.country import Country
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 
 __all__ = [
@@ -93,7 +92,7 @@ class DoctorateAdmission(BaseAdmission):
     # Financement
     financing_type = models.CharField(
         max_length=255,
-        verbose_name=_("Financing type"),
+        verbose_name=_("Funding type"),
         choices=ChoixTypeFinancement.choices(),
         default='',
         blank=True,
@@ -120,7 +119,7 @@ class DoctorateAdmission(BaseAdmission):
         blank=True,
     )
     scholarship_proof = FileField(
-        verbose_name=_("Scholarship proof"),
+        verbose_name=_("Proof of scholarship"),
         upload_to=admission_directory_path,
     )
     planned_duration = models.PositiveSmallIntegerField(
@@ -172,7 +171,7 @@ class DoctorateAdmission(BaseAdmission):
         upload_to=admission_directory_path,
     )
     gantt_graph = FileField(
-        verbose_name=_("Gantt graph"),
+        verbose_name=_("Gantt chart"),
         upload_to=admission_directory_path,
     )
     program_proposition = FileField(
@@ -184,7 +183,7 @@ class DoctorateAdmission(BaseAdmission):
         upload_to=admission_directory_path,
     )
     recommendation_letters = FileField(
-        verbose_name=_("Recommendation letters"),
+        verbose_name=_("Letters of recommendation"),
         upload_to=admission_directory_path,
     )
 
@@ -204,7 +203,7 @@ class DoctorateAdmission(BaseAdmission):
     )
     phd_already_done_thesis_domain = models.CharField(
         max_length=255,
-        verbose_name=_("Thesis domain"),
+        verbose_name=_("Thesis field"),
         default='',
         blank=True,
     )
@@ -246,7 +245,7 @@ class DoctorateAdmission(BaseAdmission):
         upload_to=admission_directory_path,
     )
     cotutelle_convention = FileField(
-        verbose_name=_("Cotutelle convention"),
+        verbose_name=_("Joint supervision agreement"),
         max_files=1,
         upload_to=admission_directory_path,
     )
@@ -289,14 +288,6 @@ class DoctorateAdmission(BaseAdmission):
 
     supervision_group = SignatureProcessField()
 
-    erasmus_mundus_scholarship = models.ForeignKey(
-        to="admission.Scholarship",
-        verbose_name=_("Erasmus Mundus scholarship"),
-        related_name="+",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-    )
     other_international_scholarship = models.CharField(
         max_length=255,
         verbose_name=_("Other international scholarship"),
@@ -492,7 +483,6 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "determined_academic_year",
                 "thesis_institute",
                 "accounting",
-                "erasmus_mundus_scholarship",
                 "international_scholarship",
             )
             .annotate(
@@ -619,12 +609,12 @@ class ConfirmationPaper(models.Model):
     )
 
     confirmation_date = models.DateField(
-        verbose_name=_("Date of confirmation"),
+        verbose_name=_("Confirmation exam date"),
         null=True,
         blank=True,
     )
     confirmation_deadline = models.DateField(
-        verbose_name=_("Deadline for confirmation"),
+        verbose_name=_("Confirmation deadline"),
         blank=True,
     )
     research_report = FileField(
@@ -633,7 +623,7 @@ class ConfirmationPaper(models.Model):
         max_files=1,
     )
     supervisor_panel_report = FileField(
-        verbose_name=_("Report of the supervisory panel"),
+        verbose_name=_("Support Committee minutes"),
         upload_to=confirmation_paper_directory_path,
         max_files=1,
     )
@@ -643,7 +633,7 @@ class ConfirmationPaper(models.Model):
         max_files=1,
     )
     research_mandate_renewal_opinion = FileField(
-        verbose_name=_("Opinion on the renewal of the research mandate"),
+        verbose_name=_("Opinion on research mandate renewal"),
         upload_to=confirmation_paper_directory_path,
         max_files=1,
     )

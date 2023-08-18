@@ -30,27 +30,27 @@ class Migration(migrations.Migration):
                 choices=[
                     (
                         'A_NATIONALITE_UE',
-                        '%(person_concerned)s has the nationality of a country of a Member State of the European Union',
+                        '%(person_concerned)s has the nationality of a European Union member state.',
                     ),
                     (
                         'TITULAIRE_TITRE_SEJOUR_LONGUE_DUREE',
                         '%(person_concerned)s has a long-term residence permit (B, C, D, F, F+, K, L or M cards) '
-                        'in Belgium',
+                        'in Belgium.',
                     ),
                     (
                         'CANDIDATE_REFUGIE_OU_REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE',
                         '%(person_concerned)s is a refugee applicant, refugee, stateless person, or has '
-                        'temporary/subsidiary protection',
+                        'temporary/subsidiary protection.',
                     ),
                     (
                         'AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT',
-                        '%(person_concerned)s has a residence permit for more than 3 months and receives professional '
-                        'or replacement income',
+                        '%(person_concerned)s has a residence permit valid for more than 3 months and receives ' 
+                        'professional or replacement income.'
                     ),
                     (
                         'PRIS_EN_CHARGE_OU_DESIGNE_CPAS',
-                        '%(person_concerned)s is supported by the CPAS, or by a CPAS rest home or designated by the '
-                        'CPAS',
+                        '%(person_concerned)s is supported by the CPAS or a CPAS care home, or is nominated by the '
+                        'CPAS.',
                     ),
                 ],
                 default='',

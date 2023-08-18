@@ -70,7 +70,7 @@
                 {% if document.dernier_acteur %}
                   {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
                   {% if document.statut == 'RECLAME' %}
-                    <i class="fa-solid fa-envelope" title="{% translate 'Requested' %}"></i>
+                    <i class="fa-solid fa-envelope" title="{% translate 'Requested' context 'document' %}"></i>
                   {% endif %}
                 {% else %}
                   {% translate 'System' %}

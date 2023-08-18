@@ -129,7 +129,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             lieu_formation=proposition.doctorat.campus,
             nationalite_candidat=proposition.nationalite_candidat,
             nationalite_ue_candidat=None,
-            vip=any([proposition.bourse_erasmus_mundus, proposition.bourse_recherche]),
+            vip=any([proposition.bourse_recherche]),
             etat_demande=proposition.statut,
             type_demande=proposition.type_admission,
             derniere_modification_le=proposition.modifiee_le,

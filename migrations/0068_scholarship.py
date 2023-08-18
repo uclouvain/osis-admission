@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                     'type',
                     models.CharField(
                         choices=[
-                            ('DOUBLE_TRIPLE_DIPLOMATION', 'Double or triple diplomation'),
+                            ('DOUBLE_TRIPLE_DIPLOMATION', 'Dual or triple degree'),
                             ('BOURSE_INTERNATIONALE_DOCTORAT', 'International for doctorate'),
                             ('BOURSE_INTERNATIONALE_FORMATION_GENERALE', 'International for general education'),
                             ('ERASMUS_MUNDUS', 'Erasmus Mundus'),

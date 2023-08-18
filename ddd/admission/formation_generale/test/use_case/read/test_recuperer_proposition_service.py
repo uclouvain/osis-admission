@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.test import TestCase
+from django.test import SimpleTestCase
 
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.enums.type_bourse import TypeBourse
@@ -33,7 +33,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import ChoixS
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class RecupererPropositionServiceTestCase(TestCase):
+class RecupererPropositionServiceTestCase(SimpleTestCase):
     def setUp(self):
         self.cmd = RecupererPropositionQuery(uuid_proposition='uuid-MASTER-SCI')
         self.message_bus = message_bus_in_memory_instance

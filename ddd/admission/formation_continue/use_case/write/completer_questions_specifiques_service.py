@@ -54,9 +54,9 @@ def completer_questions_specifiques(
         adresse_facturation_pays=cmd.adresse_facturation_pays,
         adresse_facturation_destinataire=cmd.adresse_facturation_destinataire,
         adresse_facturation_boite_postale=cmd.adresse_facturation_boite_postale,
-        adresse_facturation_lieu_dit=cmd.adresse_facturation_lieu_dit,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
         copie_titre_sejour=cmd.copie_titre_sejour,
+        documents_additionnels=cmd.documents_additionnels,
     )
 
     # THEN

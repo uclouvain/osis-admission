@@ -37,7 +37,7 @@ from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, Repl
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _, get_language
+from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -82,21 +82,28 @@ def admission_directory_path(admission: 'BaseAdmission', filename: str):
     )
 
 
-class BaseAdmissionQuerySet(models.QuerySet):
-    def annotate_campus(self):
-        return self.annotate(
-            teaching_campus=Subquery(
-                EducationGroupVersion.objects.filter(offer_id=OuterRef('training_id'))
-                .annotate(
-                    campus_name=StringAgg(
-                        'root_group__main_teaching_campus__name',
-                        delimiter=',',
-                        distinct=True,
-                    )
-                )
-                .values('campus_name')[:1]
-            ),
+def training_campus_subquery(training_field: str):
+    return Subquery(
+        EducationGroupVersion.objects.filter(offer_id=OuterRef(training_field))
+        .annotate(
+            campus_name=StringAgg(
+                'root_group__main_teaching_campus__name',
+                delimiter=',',
+                distinct=True,
+            )
         )
+        .values('campus_name')[:1]
+    )
+
+
+class BaseAdmissionQuerySet(models.QuerySet):
+    def annotate_campus(self, training_field='training_id', annotation_name='teaching_campus'):
+        """
+        Annotate the queryset with the teaching campus.
+        @param training_field: the name of the training field in the model
+        @param annotation_name: the name of the output annotation
+        """
+        return self.annotate(**{annotation_name: training_campus_subquery(training_field)})
 
     def annotate_pool_end_date(self):
         today = timezone.now().today()
@@ -275,7 +282,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     )
 
     created_at = models.DateTimeField(verbose_name=_('Created'), auto_now_add=True)
-    modified_at = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
+    modified_at = models.DateTimeField(verbose_name=pgettext_lazy('feminine', 'Modified'), auto_now=True)
 
     professional_valuated_experiences = models.ManyToManyField(
         'osis_profile.ProfessionalExperience',
@@ -296,7 +303,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
 
     training = models.ForeignKey(
         to="base.EducationGroupYear",
-        verbose_name=_("Training"),
+        verbose_name=pgettext_lazy("admission", "Course"),
         related_name="+",
         on_delete=models.CASCADE,
     )
