@@ -23,19 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import contextlib
 import datetime
 import logging
-from _decimal import Decimal
-from time import sleep
-from typing import Dict, List
+from decimal import Decimal
+from typing import Dict
 
 import attr
 import requests
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import get_language
-from requests.exceptions import RetryError
 
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 
@@ -142,13 +139,17 @@ class MollieService:
         )
 
 
-class FetchMolliePaymentException(Exception):
+class MollieException(Exception):
+    pass
+
+
+class FetchMolliePaymentException(MollieException):
     def __init__(self, mollie_id: str, **kwargs):
         self.message = f"[MOLLIE] Impossible de récupérer le paiement avec mollie_id: {mollie_id}"
         super().__init__(**kwargs)
 
 
-class CreateMolliePaymentException(Exception):
+class CreateMolliePaymentException(MollieException):
     def __init__(self, reference: str, **kwargs):
         self.message = f"[MOLLIE] Impossible de créer le paiement pour l'admission avec reference: {reference}"
         super().__init__(**kwargs)

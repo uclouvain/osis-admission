@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import logging
-from _decimal import Decimal
+from decimal import Decimal
 
 from django.conf import settings
 from django.db.models import QuerySet
@@ -59,11 +59,14 @@ class PaiementEnLigneService:
 
     @classmethod
     def _update_payment(cls, online_payment: OnlinePayment, paiement_mollie: PaiementMollie):
-        online_payment.methode = paiement_mollie.methode
+        online_payment.method = paiement_mollie.methode
         online_payment.status = paiement_mollie.statut
         online_payment.updated_date = paiement_mollie.date_de_mise_a_jour
         online_payment.checkout_url = paiement_mollie.checkout_url
-        online_payment.save()
+        try:
+            online_payment.save()
+        except Exception as e:
+            raise UpdateOnlinePaymentException(reference=str(online_payment.admission)) from e
 
     @classmethod
     def get_or_create_payment(cls, url_redirection: str, admission: BaseAdmission, montant: Decimal) -> OnlinePayment:
@@ -73,8 +76,8 @@ class PaiementEnLigneService:
         )
         if paiements_ouverts.exists():
             paiement_ouvert = paiements_ouverts.first()
-            cls.update_payment(paiement_id=paiement_ouvert.payment_id)
-            if paiement_ouvert.status  in PaymentStatus.open_payments:
+            paiement_ouvert = cls.update_payment(paiement_id=paiement_ouvert.payment_id)
+            if paiement_ouvert.status in PaymentStatus.open_payments:
                 return paiement_ouvert
 
         paiement_mollie = cls.paiement_service.creer_paiement(
@@ -83,7 +86,10 @@ class PaiementEnLigneService:
             url_redirection=url_redirection
         )
         paiement_en_ligne = cls._convert_to_db_object(paiement_mollie, admission)
-        paiement_en_ligne.save()
+        try:
+            paiement_en_ligne.save()
+        except Exception as e:
+            raise SaveOnlinePaymentException(reference=str(admission)) from e
         return paiement_en_ligne
 
     @classmethod
@@ -112,3 +118,21 @@ class PaiementEnLigneService:
             last_open_payment = open_payments.last()
             cls.get_and_update_payment(paiement_id=last_open_payment.paiement_id, admission=admission)
         return payments
+
+
+class PaiementEnLigneException(Exception):
+    pass
+
+
+class SaveOnlinePaymentException(PaiementEnLigneException):
+    def __init__(self, reference: str, **kwargs):
+        self.message = (f"[PAIEMENT EN LIGNE] Une erreur est survenue durant la création du paiement en ligne "
+                        f"du dossier {reference} en DB")
+        super().__init__(**kwargs)
+
+
+class UpdateOnlinePaymentException(PaiementEnLigneException):
+    def __init__(self, reference: str, **kwargs):
+        self.message = (f"[PAIEMENT EN LIGNE] Une erreur est survenue durang la mise à jour du paiement en ligne "
+                        f"du dossier {reference} en DB")
+        super().__init__(**kwargs)
