@@ -120,7 +120,7 @@ class Section:
                     'is_continuing': context.est_proposition_continue,
                     'is_doctorate': context.est_proposition_doctorale,
                     'all_inline': True,
-                    'load_files': False,
+                    'hide_files': True,
                     **(extra_context or {}),
                 },
             )
