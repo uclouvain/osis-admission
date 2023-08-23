@@ -68,4 +68,18 @@
             {% field_data _('Emergency contact (telephone number)') coordonnees.emergency_contact_phone "col-md-6" %}
         </div>
     {% endpanel %}
+    {% panel _("UCLouvain account - DIgIT") %}
+        <div class="row">
+            {% trans "Account available" context "admission" as account_available_label %}
+            {% field_data account_available_label coordonnees.account.available|yesno|capfirst "col-md-6" %}
+            {% trans "E-mail address" context "admission" as account_mail_label %}
+            {% field_data account_mail_label coordonnees.account.email|default_if_none_or_empty:"-" "col-md-6" %}
+        </div>
+        <form method="POST" action="{% url 'admission:services:digit' uuid=uuid %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">
+                {% trans "Request account" %}
+            </button>
+        </form>
+    {% endpanel %}
 {% endblock %}
