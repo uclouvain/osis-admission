@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,8 +25,9 @@
 # ##############################################################################
 from functools import partial
 
-from rest_framework import mixins
+from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
@@ -36,6 +37,7 @@ from admission.api.views.mixins import (
     ContinuingEducationPersonRelatedMixin,
 )
 from osis_role.contrib.views import APIPermissionRequiredMixin
+from reference.services.postal_code_validator import PostalCodeValidatorService, PersonAddressException
 
 
 class BaseCoordonneesViewSet(
@@ -51,7 +53,40 @@ class BaseCoordonneesViewSet(
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
 
+    def validate_data(self, data):
+        errors = {}
+        if data.get('residential'):
+            try:
+                PostalCodeValidatorService(
+                    country_iso_code=data['residential'].get('country'),
+                    postal_code=data['residential'].get('postal_code'),
+                ).validate()
+            except PersonAddressException as exception:
+                errors['residential_postal_code'] = [
+                    {
+                        "status_code": f'RESIDENTIAL-{exception.status_code}',
+                        "detail": exception.message,
+                    }
+                ]
+        if data.get('contact'):
+            try:
+                PostalCodeValidatorService(
+                    country_iso_code=data['contact'].get('country'),
+                    postal_code=data['contact'].get('postal_code'),
+                ).validate()
+            except PersonAddressException as exception:
+                errors['contact_postal_code'] = [
+                    {
+                        "status_code": f'CONTACT-{exception.status_code}',
+                        "detail": exception.message,
+                    }
+                ]
+        return errors
+
     def put(self, request, *args, **kwargs):
+        errors = self.validate_data(request.data)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         response = self.update(request, *args, **kwargs)
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status(request.user.person)
