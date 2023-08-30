@@ -1,0 +1,98 @@
+{% load i18n bootstrap3 admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+
+<div class="modal-dialog modal-xl-responsive" tabindex="-1" role="document">
+    <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+            <h4 class="modal-title" id="">{% trans "DigIT search account" %}</h4>
+        </div>
+        <div class="modal-body">
+
+            <div class="sticky-header" style="top:0;">
+
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <div class="panel-title" style="line-height: 2;">
+                            <b>{% trans 'Candidate information' %}:</b> {{ candidate.last_name }}, {{ candidate.first_name }}
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        {% for value in candidate.items %}
+                            {% field_data value.0|render_display_field_name value.1 "col-md-3" %}
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+                {% if matches %}
+                    <h5 style="padding-bottom: 15px;">{% trans 'Click on a match to view more info' %}</h5>
+                {% endif %}
+
+            </div>
+
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            {% for match in matches %}
+                <div class="panel panel-default">
+                    <div class="panel-heading clearfix" style="cursor: pointer;" data-toggle="collapse" data-parent="#accordion" data-target="#match-content-{{ forloop.counter }}">
+                        <button id="retrieve-existing-account-btn-{{ forloop.counter }}" type="submit" class="btn btn-primary pull-right">
+                            {% trans "Retrieve data" %}
+                        </button>
+                        <span class="panel-title" style="line-height: 2;">
+                            {{ match.person.lastName }}, {{ match.person.firstName }}
+                        </span>
+                        <span style="margin-left: 20px;">
+                            {% trans 'Similarity' %}
+                            <div class="badge panel-default-badge-success">{{ match.similarityRate }}</div>
+                        </span>
+                    </div>
+                    <div id="match-content-{{ forloop.counter }}" class="panel-body collapse">
+                        {% for value in match.person.items %}
+                            {% field_data value.0|render_display_field_name value.1 "col-md-3" %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% empty %}
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <span class="panel-title">{% trans 'No match found' %}</span>
+                    </div>
+                </div>
+
+            {% endfor %}
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                {% trans "Close" %}
+            </button>
+        </div>
+    </div>
+</div>
+

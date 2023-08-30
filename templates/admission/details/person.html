@@ -84,5 +84,25 @@
         {% else %}
             {% field_data _('Have you previously enrolled at UCLouvain?') _('No') %}
         {% endif %}
+        <form id="search-existing-account-form" method="POST" action="{% url 'admission:services:digit:search-account' uuid=uuid %}">
+            {% csrf_token %}
+            <button id="search-existing-account-btn" type="submit" class="btn btn-primary">
+                {% trans "Search existing account" %}
+            </button>
+        </form>
     {% endpanel %}
+{% endblock %}
+
+{% block script %}
+    <script>
+        $('#search-existing-account-form').on('submit', (e) => {
+            e.preventDefault();
+            htmx.ajax('POST', e.target.action, {
+                source: '#search-existing-account-btn',
+                target: '#form-ajax-modal',
+                indicator: '#htmx-overlay',
+                swap: 'innerHTML',
+            }).then(() => $('#form-ajax-modal').modal('show'));
+        })
+    </script>
 {% endblock %}

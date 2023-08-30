@@ -785,7 +785,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     def dispatch(self, request, *args, **kwargs):
         if not request.htmx:
             return redirect(
-                reverse('admission:general-education:checklist', kwargs={'uuid': self.admission_uuid})
+                reverse('admission:general-education:checklist', kwargs={'uuid': str(self.admission_uuid)})
                 + '#choix_formation'
             )
         return super().dispatch(request, *args, **kwargs)

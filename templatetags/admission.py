@@ -785,7 +785,7 @@ def part_of_dict(member, container):
 
 @register.simple_tag
 def is_current_checklist_status(current, state, extra):
-    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {}))
+    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {})) if current and state else False
 
 
 @register.simple_tag
@@ -866,3 +866,8 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
             settings.LANGUAGE_CODE_EN: history_entry.message_en,
         }[get_language()]
     return ''
+
+
+@register.filter
+def render_display_field_name(field_name: str) -> str:
+    return _(field_name.replace('_', ' ').capitalize())

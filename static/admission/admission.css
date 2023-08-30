@@ -268,3 +268,8 @@ fieldset.custom-fieldset > legend {
 .comment-content {
   white-space: pre-wrap;
 }
+
+.panel-default-badge-success{
+    color: #fff !important;
+    background-color: #28a745 !important;
+}

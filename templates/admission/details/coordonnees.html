@@ -75,7 +75,7 @@
             {% trans "E-mail address" context "admission" as account_mail_label %}
             {% field_data account_mail_label coordonnees.account.email|default_if_none_or_empty:"-" "col-md-6" %}
         </div>
-        <form method="POST" action="{% url 'admission:services:digit' uuid=uuid %}">
+        <form method="POST" action="{% url 'admission:services:digit:request-account' uuid=uuid %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary">
                 {% trans "Request account" %}

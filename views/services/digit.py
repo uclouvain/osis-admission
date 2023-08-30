@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import json
 
 import requests
@@ -34,6 +35,7 @@ from django.views import View
 
 __all__ = [
     "RequestDigitAccountCreationView",
+    "SearchDigitAccountView"
 ]
 
 from django.views.generic import FormView
@@ -46,7 +48,7 @@ from django.utils.translation import gettext_lazy as _
 
 class RequestDigitAccountCreationView(FormView):
 
-    urlpatterns = {'digit': 'digit/<uuid:uuid>'}
+    urlpatterns = {'request-account': 'request-account/<uuid:uuid>'}
 
     def post(self, request, *args, **kwargs):
 
@@ -57,7 +59,7 @@ class RequestDigitAccountCreationView(FormView):
 
         response = request_digit_account_creation({
             "last_name": admission.candidate.last_name,
-            "first_name": admission.candidate.last_name,
+            "first_name": admission.candidate.first_name,
             "birth_date": str(admission.candidate.birth_date),
             "gender": admission.candidate.gender,
             "national_register": admission.candidate.national_number,
@@ -83,9 +85,39 @@ class RequestDigitAccountCreationView(FormView):
         return has_missing_fields
 
 
+class SearchDigitAccountView(FormView):
+
+    urlpatterns = {'search-account': 'search-account/<uuid:uuid>'}
+
+    def post(self, request, *args, **kwargs):
+
+        admission = BaseAdmission.objects.get(uuid=kwargs['uuid'])
+
+        if self._is_valid_for_search(request, admission):
+            return redirect(to=reverse('admission:doctorate:person', kwargs={'uuid': kwargs['uuid']}))
+
+        response = search_digit_account(request, admission)
+        return response
+
+    @staticmethod
+    def _is_valid_for_search(request, admission):
+        candidate_required_fields = [
+            "last_name", "first_name", "birth_date",
+        ]
+        missing_fields = [field for field in candidate_required_fields if not getattr(admission.candidate, field)]
+        has_missing_fields = any(missing_fields)
+
+        if has_missing_fields:
+            display_error_messages(request, _(
+                "Admission is not yet valid for searching UCLouvain. The following fields are required: "
+            ) + ", ".join(missing_fields))
+
+        return has_missing_fields
+
+
 def request_digit_account_creation(data):
     response = requests.post(
-        headers={'Content-Type': 'application/json'},
+        headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ab2dbc5b-5278-3370-98de-40df855c2265'},
         data=json.dumps({
             "provider": {
                 "source": "ETU",
@@ -93,49 +125,141 @@ def request_digit_account_creation(data):
                 "actif": True,
             },
             "person": {
-                # "matricule": None,
                 "lastName": data['last_name'],
                 "firstName": data['first_name'],
                 "birthDate": data['birth_date'],
                 "gender": data["gender"],
                 "nationalRegister": data["national_register"],
                 "nationality": data["nationality"],
-                # "deceased": False,
-                # "displayLastname": None,
-                # "displayFirstname": None,
-                # "otherFirstName": None,
             },
             "addresses": [
                 {
                     "addressType": "RES",
                     "country": data["residence_address"].country.iso_code,
-                    # "state": None,
                     "postalCode": data["residence_address"].postal_code,
                     "locality": data["residence_address"].city,
                     "street": data["residence_address"].street,
                     "number": data["residence_address"].street_number,
                     "box": data["residence_address"].postal_box,
-                    # "additionalAddressDetails": "",
                 }
             ],
-            # "applicationAccounts": [
-            #     {
-            #         "source": "",
-            #         "sourceId": "",
-            #         "actif": "",
-            #     },
-            # ],
-            # "communications": [
-            #     {
-            #         "communicationType": "",
-            #         "value": "",
-            #         "recovery": False,
-            #         "phoneAddressType": "",
-            #     },
-            # ],
-            # "activities": [],
             "physicalPerson": True,
         }),
         url=settings.DIGIT_ACCOUNT_CREATION_URL,
     )
     return response
+
+
+def search_digit_account(request, admission):
+    mock = True
+
+    if mock:
+        matches = _mock_search_digit_account_return_response()
+        request.session['search_context'] = {'matches': matches}
+        return redirect(reverse('admission:services:search-account-modal', kwargs={'uuid': admission.uuid}))
+
+    response = requests.post(
+        headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ab2dbc5b-5278-3370-98de-40df855c2265'},
+        data=json.dumps({
+            "last_name": admission.candidate.last_name,
+            "first_name": admission.candidate.first_name,
+            "birth_date": str(admission.candidate.birth_date),
+        }),
+        url=settings.DIGIT_ACCOUNT_SEARCH_URL,
+    )
+    return response
+
+
+def _mock_search_digit_account_return_response():
+    return json.loads(
+            '['
+            '   {'
+            '        "person" : {'
+            '          "matricule" : "217017" ,'
+            '          "lastName" : "Bosman" ,'
+            '          "firstName" : "Vincianne" ,'
+            '          "birthDate" : "1975-11-27" ,'
+            '          "gender" : "F" ,'
+            '          "nationalRegister" : "75112730354" ,'
+            '          "nationality" : "BE" ,'
+            '          "deceased" : false ,'
+            '          "displayLastname" : null ,'
+            '          "displayFirstname" : null ,'
+            '          "otherFirstName" : null ,'
+            '          "placeOfBirth" : null ,'
+            '          "postname" : null'
+            '        } ,'
+            '        "similarityRate" : 406.0 ,'
+            '        "links" : {'
+            '          "financialCustomer" : "/identity/applicationsAccount/financialCustomer/217017" ,'
+            '          "addresses" : "/identity/addresses/find/217017"'
+            '        } ,'
+            '        "transition" : {'
+            '          "previousFirstname" : "Vincent" ,'
+            '          "previousGender" : "M" ,'
+            '          "previousNationalRegister" : null'
+            '        } ,'
+            '        "applicationAccounts" : ['
+            '          {'
+            '            "source" : "ETU" ,'
+            '            "sourceId" : "00000000" ,'
+            '            "actif" : true'
+            '          } ,'
+            '          {'
+            '            "source" : "ETU" ,'
+            '            "sourceId" : "00000001" ,'
+            '            "actif" : false'
+            '          }'
+            '        ]'
+            '      } ,'
+            '      {'
+            '        "person" : {'
+            '          "matricule" : "379409" ,'
+            '          "lastName" : "Boesmans" ,'
+            '          "firstName" : "Vincent" ,'
+            '          "birthDate" : "1973-10-20" ,'
+            '          "gender" : "M" ,'
+            '          "nationalRegister" : "" ,'
+            '          "nationality" : "BE" ,'
+            '          "deceased" : false ,'
+            '          "displayLastname" : null ,'
+            '          "displayFirstname" : null ,'
+            '          "otherFirstName" : null ,'
+            '          "placeOfBirth" : null ,'
+            '          "postname" : null'
+            '        } ,'
+            '        "similarityRate" : 380.0 ,'
+            '        "links" : {'
+            '          "financialCustomer" : "/identity/applicationsAccount/financialCustomer/379409" ,'
+            '          "addresses" : "/identity/addresses/find/379409"'
+            '        } ,'
+            '        "transition" : null ,'
+            '        "applicationAccounts" : []'
+            '      } ,'
+            '      {'
+            '        "person" : {'
+            '          "matricule" : "12345678" ,'
+            '          "lastName" : "Bigger" ,'
+            '          "firstName" : "Match" ,'
+            '          "birthDate" : "1980-10-20" ,'
+            '          "gender" : "M" ,'
+            '          "nationalRegister" : "12345678910" ,'
+            '          "nationality" : "BE" ,'
+            '          "deceased" : false ,'
+            '          "displayLastname" : null ,'
+            '          "displayFirstname" : null ,'
+            '          "otherFirstName" : null ,'
+            '          "placeOfBirth" : null ,'
+            '          "postname" : null'
+            '        } ,'
+            '        "similarityRate" : 1000.0 ,'
+            '        "links" : {'
+            '          "financialCustomer" : "/identity/applicationsAccount/financialCustomer/379409" ,'
+            '          "addresses" : "/identity/addresses/find/379409"'
+            '        } ,'
+            '        "transition" : null ,'
+            '        "applicationAccounts" : []'
+            '      }'
+            '    ]'
+    )
+
