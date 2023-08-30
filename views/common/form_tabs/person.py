@@ -53,24 +53,10 @@ class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, UpdateVi
             kwargs=self.kwargs,
         )
 
-    @cached_property
-    def resides_in_belgium(self):
-        return PersonAddress.objects.filter(
-            person=self.admission.candidate,
-            label=PersonAddressType.RESIDENTIAL.name,
-            country__iso_code=BE_ISO_CODE,
-        ).exists()
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['resides_in_belgium'] = self.resides_in_belgium
         context['BE_ISO_CODE'] = Country.objects.get(iso_code=BE_ISO_CODE).pk
         return context
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['resides_in_belgium'] = self.resides_in_belgium
-        return kwargs
 
     def update_current_admission_on_form_valid(self, form, admission):
         # Update submitted profile with newer data
