@@ -23,33 +23,48 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.db import models
 
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
-
+from admission.contrib.models.base import BaseAdmission
 from base.models.utils.utils import ChoiceEnum
 
 
-class RoleJury(ChoiceEnum):
-    PRESIDENT = _('PRESIDENT')
-    SECRETAIRE = _('SECRETAIRE')
-    MEMBRE = _('MEMBRE')
+class PaymentStatus(ChoiceEnum):
+    OPEN = 'open'
+    CANCELED = 'canceled'
+    PENDING = 'pending'
+    EXPIRED = 'expired'
+    FAILED = 'failed'
+    PAID = 'paid'
+
+    @property
+    def open_payments(self):
+        return [
+            self.OPEN.name,
+            self.PENDING.name
+        ]
 
 
-class TitreMembre(ChoiceEnum):
-    DOCTEUR = _('Doctor')
-    PROFESSEUR = _('Professor')
-    NON_DOCTEUR = _('Does not have a doctor title')
+class PaymentMethod(ChoiceEnum):
+    BANCONTACT = 'bancontact'
+    CREDIT_CARD = 'creditcard'
+    BANK_TRANSFER = 'banktransfer'
 
 
-class GenreMembre(ChoiceEnum):
-    FEMININ = pgettext_lazy('admission gender', 'Female')
-    MASCULIN = pgettext_lazy('admission gender', 'Male')
-    AUTRE = _('Other')
-
-
-class FormuleDefense(ChoiceEnum):
-    FORMULE_1 = _('Method 1 (the private defense and the public defense are separated by at least a month')
-    FORMULE_2 = _(
-        'Method 2 (The private defense and the public defense are organised the same day, and subjected to '
-        'an admissibility condition)'
+class OnlinePayment(models.Model):
+    admission = models.ForeignKey(
+        BaseAdmission,
+        on_delete=models.CASCADE,
+        related_name='online_payments',
     )
+
+    payment_id = models.CharField(max_length=14)
+    status = models.CharField(choices=PaymentStatus.choices(), max_length=10)
+    expiration_date = models.DateTimeField(null=True)
+    method = models.CharField(choices=PaymentMethod.choices(), max_length=17, blank=True)
+    creation_date = models.DateTimeField()
+    updated_date = models.DateTimeField()
+    dashboard_url = models.URLField()
+    checkout_url = models.URLField(blank=True)
+    payment_url = models.URLField()
+    amount = models.DecimalField(decimal_places=2, max_digits=6)

@@ -24,32 +24,28 @@
 #
 # ##############################################################################
 
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.http import HttpResponse
+from rest_framework.views import APIView
 
-from base.models.utils.utils import ChoiceEnum
+from admission.services.paiement_en_ligne import PaiementEnLigneService
 
-
-class RoleJury(ChoiceEnum):
-    PRESIDENT = _('PRESIDENT')
-    SECRETAIRE = _('SECRETAIRE')
-    MEMBRE = _('MEMBRE')
-
-
-class TitreMembre(ChoiceEnum):
-    DOCTEUR = _('Doctor')
-    PROFESSEUR = _('Professor')
-    NON_DOCTEUR = _('Does not have a doctor title')
+__all__ = [
+    'MollieWebHook',
+]
 
 
-class GenreMembre(ChoiceEnum):
-    FEMININ = pgettext_lazy('admission gender', 'Female')
-    MASCULIN = pgettext_lazy('admission gender', 'Male')
-    AUTRE = _('Other')
+class MollieWebHook(APIView):
+    """
+        Mollie appelle le webhook quand un paiement atteint l'un des statuts suivants :
+            PaymentStatus.PAID
+            PaymentStatus.EXPIRED
+            PaymentStatus.FAILED
+            PaymentStatus.CANCELED
+        DEV étant inaccessible depuis l'extérieur, il faut simuler l'appel au webhook
+    """
+    permission_classes = []
 
-
-class FormuleDefense(ChoiceEnum):
-    FORMULE_1 = _('Method 1 (the private defense and the public defense are separated by at least a month')
-    FORMULE_2 = _(
-        'Method 2 (The private defense and the public defense are organised the same day, and subjected to '
-        'an admissibility condition)'
-    )
+    def post(self, request, *args, **kwargs):
+        paiement_id = request.POST.get('id')
+        PaiementEnLigneService.update_payment(paiement_id=paiement_id)
+        return HttpResponse()

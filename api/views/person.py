@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,8 +25,9 @@
 # ##############################################################################
 from functools import partial
 
-from rest_framework import mixins
+from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
@@ -35,11 +36,14 @@ from admission.api.views.mixins import (
     GeneralEducationPersonRelatedMixin,
     ContinuingEducationPersonRelatedMixin,
 )
+from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from osis_role.contrib.views import APIPermissionRequiredMixin
+from reference.services.belgian_niss_validator import BelgianNISSException
 
 
 class BasePersonViewSet(
     APIPermissionRequiredMixin,
+    DisplayExceptionsByFieldNameAPIMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     GenericAPIView,
@@ -52,7 +56,18 @@ class BasePersonViewSet(
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-        response = self.update(request, *args, **kwargs)
+        try:
+            response = self.update(request, *args, **kwargs)
+        except BelgianNISSException as exception:
+            data = {
+                'national_number': [
+                    {
+                        "status_code": exception.status_code,
+                        "detail": exception.message,
+                    }
+                ]
+            }
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status(request.user.person)
         return response

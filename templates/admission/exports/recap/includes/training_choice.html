@@ -30,7 +30,8 @@
       {% endif %}
       {% field_data _("Sector") proposition.intitule_secteur_formation %}
   {% endif %}
-  {% field_data _('Course name') formation.intitule %}
+  {% translate 'Course name' context 'admission' as education_name_label %}
+  {% field_data education_name_label formation.intitule %}
   {% field_data _('Campus') formation.campus %}
   {% if is_doctorate %}
     {% if proposition.commission_proximite %}

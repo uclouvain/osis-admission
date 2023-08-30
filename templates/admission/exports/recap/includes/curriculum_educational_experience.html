@@ -33,7 +33,8 @@
       {% endwith %}
     </div>
     <div class="col-md-6">
-      {% field_data _("End") experience.annees.0.annee|get_academic_year %}
+      {% translate 'End' context 'admission' as end_label %}
+      {% field_data end_label experience.annees.0.annee|get_academic_year %}
     </div>
   </div>
   <div class="row">
@@ -165,7 +166,8 @@
         </div>
       {% else %}
         <div class="col-md-6">
-          {% field_data _('Grade') experience.grade_obtenu|enum_display:'Grade' %}
+          {% translate 'Grade' context 'admission' as grade_label %}
+          {% field_data grade_label experience.grade_obtenu|enum_display:'Grade' %}
         </div>
         </div>
         {% if is_doctorate %}

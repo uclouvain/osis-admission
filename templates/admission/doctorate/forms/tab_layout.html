@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,8 @@
   <a class="btn btn-default" href="{% detail_tab_path_from_update view.kwargs.uuid %}">{% trans 'Cancel' %}</a>
   <button class="btn btn-primary" type="submit" form="form">
     <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
-    {{ submit_label|default:_('Save') }}
+    {% translate 'Save' context 'admission' as save_label %}
+    {{ submit_label|default:save_label }}
   </button>
 {% endblock %}
 
@@ -46,7 +47,8 @@
         <a class="btn btn-default" href="{% detail_tab_path_from_update view.kwargs.uuid %}">{% trans 'Cancel' %}</a>
         <button class="btn btn-primary" type="submit">
           <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
-          {{ submit_label|default:_('Save') }}
+          {% translate 'Save' context 'admission' as save_label %}
+          {{ submit_label|default:save_label }}
         </button>
       </div>
     </form>

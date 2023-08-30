@@ -31,7 +31,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, pgettext
+from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy
 from hijack.contrib.admin import HijackUserAdminMixin
 
 from admission.auth.roles.adre import AdreSecretary
@@ -565,7 +565,7 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
         'entity__entityversion__acronym',
     ]
 
-    @admin.display(description=_('Entity'))
+    @admin.display(description=pgettext_lazy('admission', 'Entity'))
     def most_recent_acronym(self, obj):
         return obj.most_recent_acronym
 

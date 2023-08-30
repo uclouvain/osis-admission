@@ -163,7 +163,7 @@ class Activity(models.Model):
     # Conference, communication, publication
     title = models.CharField(
         max_length=200,
-        verbose_name=_("Title"),
+        verbose_name=pgettext_lazy("admission", "Title"),
         default="",
         blank=True,
     )
@@ -226,7 +226,7 @@ class Activity(models.Model):
     )
     website = models.URLField(
         default="",
-        verbose_name=_("Website"),
+        verbose_name=pgettext_lazy("admission", "Website"),
         blank=True,
     )
 
@@ -276,13 +276,13 @@ class Activity(models.Model):
         blank=True,
     )
     role = models.CharField(
-        verbose_name=_("Role"),
+        verbose_name=pgettext_lazy("activity", "Role"),
         max_length=100,
         default="",
         blank=True,
     )
     keywords = models.CharField(
-        verbose_name=_("Keywords"),
+        verbose_name=pgettext_lazy("admission", "Keywords"),
         max_length=100,
         default="",
         blank=True,
@@ -338,7 +338,7 @@ class Activity(models.Model):
     # Management
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_("Created at"),
+        verbose_name=pgettext_lazy("admission", "Created at"),
     )
     modified_at = models.DateTimeField(
         auto_now=True,

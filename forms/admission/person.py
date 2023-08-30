@@ -260,10 +260,8 @@ class AdmissionPersonForm(AdmissionModelForm):
             'admission/formatter.js',
         ]
 
-    def __init__(self, resides_in_belgium, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.resides_in_belgium = resides_in_belgium
 
         self.initial['already_registered'] = True if self.initial.get('last_registration_year') else False
 
@@ -330,7 +328,7 @@ class AdmissionPersonForm(AdmissionModelForm):
 
         is_belgian = data.get('country_of_citizenship') and data.get('country_of_citizenship').iso_code == BE_ISO_CODE
 
-        if self.resides_in_belgium and is_belgian or data.get('has_national_number'):
+        if is_belgian or data.get('has_national_number'):
             data['id_card_number'] = ''
             data['passport_number'] = ''
             data['passport'] = []

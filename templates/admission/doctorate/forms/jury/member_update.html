@@ -32,7 +32,7 @@
   <h3>{% trans "Jury composition" %}</h3>
 
   {% panel _("Update member") %}
-    {% trans "Update" as submit_label %}
+    {% trans "Update" context 'verb' as submit_label %}
     {% include "admission/doctorate/forms/jury/includes/member_form.html" with cancel=True %}
   {% endpanel %}
 
