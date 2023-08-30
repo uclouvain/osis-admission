@@ -125,7 +125,6 @@ class PersonFormTestCase(TestCase):
 
     def test_already_registered_field_initialization(self):
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 last_registration_year=AcademicYearFactory(year=2020),
             ),
@@ -133,7 +132,6 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(form.initial.get('already_registered'), True)
 
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 last_registration_year=None,
             ),
@@ -142,7 +140,6 @@ class PersonFormTestCase(TestCase):
 
     def test_unknown_birth_date_field_initialization(self):
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 birth_year=1990,
             ),
@@ -150,7 +147,6 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(form.initial.get('unknown_birth_date'), True)
 
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 birth_year=None,
             ),
@@ -160,7 +156,6 @@ class PersonFormTestCase(TestCase):
     def test_country_fields_initialization(self):
         # Without birth or citizenship country
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 birth_country=None,
                 country_of_citizenship=None,
@@ -171,7 +166,6 @@ class PersonFormTestCase(TestCase):
 
         # With birth country but no citizenship country
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 birth_country=self.france_country,
                 country_of_citizenship=None,
@@ -181,7 +175,6 @@ class PersonFormTestCase(TestCase):
 
         # With citizenship country but no birth country
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 birth_country=None,
                 country_of_citizenship=self.belgium_country,
@@ -191,7 +184,6 @@ class PersonFormTestCase(TestCase):
 
         # With birth country and citizenship country
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 birth_country=self.france_country,
                 country_of_citizenship=self.belgium_country,
@@ -203,7 +195,6 @@ class PersonFormTestCase(TestCase):
     def test_identification_type_field_initialization(self):
         # With id card number
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 id_card_number='123456789',
                 passport_number='',
@@ -213,7 +204,6 @@ class PersonFormTestCase(TestCase):
 
         # With passport number
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 id_card_number='',
                 passport_number='123456789',
@@ -224,7 +214,6 @@ class PersonFormTestCase(TestCase):
     def test_national_number_field_initialization(self):
         # With national number
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 national_number='123456789',
                 passport_number='',
@@ -234,7 +223,6 @@ class PersonFormTestCase(TestCase):
 
         # With passport number
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 national_number='',
                 passport_number='123456789',
@@ -244,7 +232,6 @@ class PersonFormTestCase(TestCase):
 
         # With id card number
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 national_number='',
                 passport_number='',
@@ -255,7 +242,6 @@ class PersonFormTestCase(TestCase):
 
         # Without any number
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             instance=PersonFactory(
                 national_number='',
                 passport_number='',
@@ -266,7 +252,6 @@ class PersonFormTestCase(TestCase):
 
     def form_submission_without_any_data(self):
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={},
         )
         self.assertFalse(form.is_valid())
@@ -286,7 +271,6 @@ class PersonFormTestCase(TestCase):
 
     def test_base_data_form_submission(self):
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data=self.form_data,
         )
         self.assertTrue(form.is_valid())
@@ -294,7 +278,6 @@ class PersonFormTestCase(TestCase):
     def test_birth_dates_fields_submission(self):
         # The birth date is unknown and the birth year and the birth date are specified
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'birth_year': 1990,
@@ -308,7 +291,6 @@ class PersonFormTestCase(TestCase):
 
         # The birthdate is known and the birth year and the birth date are specified
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'birth_year': 1990,
@@ -322,7 +304,6 @@ class PersonFormTestCase(TestCase):
 
         # The birth date is unknown but the birth year is not specified
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'birth_year': None,
@@ -334,7 +315,6 @@ class PersonFormTestCase(TestCase):
 
         # The birth date is known but not specified
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'birth_date': None,
@@ -346,7 +326,6 @@ class PersonFormTestCase(TestCase):
 
         # Nothing is specified -> the birth date is required
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={},
         )
         self.assertFalse(form.is_valid())
@@ -355,7 +334,6 @@ class PersonFormTestCase(TestCase):
     def test_last_registration_fields_submission(self):
         # The candidate hasn't already been registered but the related fields are specified -> to clean
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'already_registered': False,
@@ -369,7 +347,6 @@ class PersonFormTestCase(TestCase):
 
         # The candidate has already been registered but one related field is missing
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'already_registered': True,
@@ -383,7 +360,6 @@ class PersonFormTestCase(TestCase):
     def test_name_fields_on_submission(self):
         # The first name and / or the last name must be specified
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'first_name': '',
@@ -397,7 +373,6 @@ class PersonFormTestCase(TestCase):
     def test_national_number_fields(self):
         # The candidate is belgian and resides in Belgium -> the belgian national number is required
         form = AdmissionPersonForm(
-            resides_in_belgium=True,
             data={
                 **self.form_data,
                 'has_national_number': False,
@@ -412,7 +387,6 @@ class PersonFormTestCase(TestCase):
 
         # The candidate indicated that he has a belgian national number -> the belgian national number is required
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'has_national_number': True,
@@ -425,7 +399,6 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
 
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'has_national_number': True,
@@ -446,9 +419,9 @@ class PersonFormTestCase(TestCase):
 
         # The candidate indicated that he has another national number -> this number is required
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
+                'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.ID_CARD_NUMBER.name,
                 'id_card_number': '',
@@ -460,9 +433,9 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
 
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
+                'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.ID_CARD_NUMBER.name,
                 'id_card_number': '0123456',
@@ -481,9 +454,9 @@ class PersonFormTestCase(TestCase):
 
         # The candidate indicated that he has a passport number -> this number is required
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
+                'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.PASSPORT_NUMBER.name,
                 'passport_number': '',
@@ -495,9 +468,9 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(form.cleaned_data.get('passport'), ['file-1-token'])
 
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
+                'country_of_citizenship': self.france_country.pk,
                 'has_national_number': False,
                 'identification_type': IdentificationType.PASSPORT_NUMBER.name,
                 'passport_number': '0123456',
@@ -516,9 +489,9 @@ class PersonFormTestCase(TestCase):
 
         # Some data are specified but the type of national number is not -> to clean
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
+                'country_of_citizenship': self.france_country.pk,
                 'has_national_number': None,
                 'identification_type': '',
                 'passport_number': '0123456',
@@ -537,7 +510,6 @@ class PersonFormTestCase(TestCase):
 
     def test_transform_fields_to_title_case(self):
         form = AdmissionPersonForm(
-            resides_in_belgium=False,
             data={
                 **self.form_data,
                 'first_name': 'JOHN',
@@ -568,7 +540,6 @@ class PersonFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        self.assertFalse(response.context['resides_in_belgium'])
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
 
         # Legal domicile > Belgium
@@ -581,7 +552,6 @@ class PersonFormTestCase(TestCase):
         response = self.client.get(self.general_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['resides_in_belgium'])
 
         # Legal domicile > Foreign country
         residential_address.country = self.france_country
@@ -590,7 +560,6 @@ class PersonFormTestCase(TestCase):
         response = self.client.get(self.general_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context['resides_in_belgium'])
 
     def test_general_person_form_post_with_valid_data(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -688,7 +657,6 @@ class PersonFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        self.assertFalse(response.context['resides_in_belgium'])
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
 
         # Legal domicile > Belgium
@@ -701,7 +669,6 @@ class PersonFormTestCase(TestCase):
         response = self.client.get(self.continuing_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['resides_in_belgium'])
 
         # Legal domicile > Foreign country
         residential_address.country = self.france_country
@@ -710,7 +677,6 @@ class PersonFormTestCase(TestCase):
         response = self.client.get(self.continuing_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context['resides_in_belgium'])
 
     def test_continuing_person_form_post_with_valid_data(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -746,7 +712,6 @@ class PersonFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        self.assertFalse(response.context['resides_in_belgium'])
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.pk)
 
         # Legal domicile > Belgium
@@ -759,7 +724,6 @@ class PersonFormTestCase(TestCase):
         response = self.client.get(self.doctorate_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['resides_in_belgium'])
 
         # Legal domicile > Foreign country
         residential_address.country = self.france_country
@@ -768,7 +732,6 @@ class PersonFormTestCase(TestCase):
         response = self.client.get(self.doctorate_url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context['resides_in_belgium'])
 
     def test_doctorate_person_form_post_with_valid_data(self):
         self.client.force_login(user=self.sic_manager_user)
