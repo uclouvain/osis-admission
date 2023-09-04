@@ -73,7 +73,7 @@ def admission_pdf_recap(
             commands.RecupererQuestionsSpecifiquesQuery(uuid_proposition=admission.uuid),
         )
 
-        pdf_sections = get_sections(context, specific_questions, load_content=True)
+        pdf_sections = get_sections(context, specific_questions, load_content=True, hide_curriculum=True)
 
         # Get a read token and metadata of all attachments
         all_file_uuids = [

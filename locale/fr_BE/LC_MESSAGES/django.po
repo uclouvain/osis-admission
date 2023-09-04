@@ -3781,9 +3781,6 @@ msgstr "Autre"
 msgid "Obtained grade"
 msgstr "Grade obtenu"
 
-msgid "Offer:"
-msgstr "Offre :"
-
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
 
@@ -5726,6 +5723,9 @@ msgstr "Spécificités de la formation"
 msgctxt "admission"
 msgid "Training title"
 msgstr "Intitulé formation"
+
+msgid "Training:"
+msgstr "Formation :"
 
 msgid "Transcript"
 msgstr "Relevé de notes"

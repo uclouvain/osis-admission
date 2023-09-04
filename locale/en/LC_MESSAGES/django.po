@@ -3394,9 +3394,6 @@ msgstr "Other"
 msgid "Obtained grade"
 msgstr ""
 
-msgid "Offer:"
-msgstr ""
-
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr ""
 
@@ -5179,6 +5176,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Training title"
+msgstr ""
+
+msgid "Training:"
 msgstr ""
 
 msgid "Transcript"

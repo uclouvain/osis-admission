@@ -59,6 +59,7 @@ from admission.exports.admission_recap.attachments import (
     get_cotutelle_attachments,
     get_supervision_group_attachments,
     get_documents_attachments,
+    get_dynamic_questions_attachments,
 )
 from admission.exports.admission_recap.constants import (
     TRAINING_TYPES_WITH_EQUIVALENCE,
@@ -251,6 +252,27 @@ def get_curriculum_section(
             context=context,
             **curriculum_extra_context,
         ),
+        load_content=load_content,
+    )
+
+
+def get_curriculum_specific_questions_section(
+    context: ResumePropositionDTO,
+    specific_questions_by_tab: Dict[str, List[QuestionSpecifiqueDTO]],
+    load_content: bool,
+) -> Section:
+    """Returns the curriculum section."""
+    curriculum_extra_context = {
+        'display_equivalence': False,
+        'display_curriculum': False,
+        'specific_questions': specific_questions_by_tab[Onglets.CURRICULUM.name],
+    }
+    return Section(
+        identifier=OngletsDemande.CURRICULUM,
+        content_template='admission/exports/recap/includes/curriculum.html',
+        context=context,
+        extra_context=curriculum_extra_context,
+        attachments=get_dynamic_questions_attachments(specific_questions_by_tab[Onglets.CURRICULUM.name]),
         load_content=load_content,
     )
 
@@ -498,6 +520,7 @@ def get_sections(
     specific_questions: List[QuestionSpecifiqueDTO],
     load_content=False,
     with_free_requestable_documents=False,
+    hide_curriculum=False,
 ):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
@@ -514,13 +537,17 @@ def get_sections(
     if context.est_proposition_doctorale:
         pdf_sections.append(get_languages_section(context, load_content))
 
-    pdf_sections.append(get_curriculum_section(context, specific_questions_by_tab, load_content))
+    if not hide_curriculum:
+        pdf_sections.append(get_curriculum_section(context, specific_questions_by_tab, load_content))
 
     for educational_experience in context.curriculum.experiences_academiques:
         pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
 
     for non_educational_experience in context.curriculum.experiences_non_academiques:
         pdf_sections.append(get_non_educational_experience_section(context, non_educational_experience, load_content))
+
+    if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
+        pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))
 
     if context.est_proposition_generale or context.est_proposition_continue:
         pdf_sections.append(get_specific_questions_section(context, specific_questions_by_tab, load_content))
