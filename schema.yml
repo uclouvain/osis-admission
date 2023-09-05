@@ -9923,6 +9923,7 @@ components:
           maxLength: 50
         global_id:
           type: string
+          nullable: true
           maxLength: 10
     Scholarship:
       type: object
