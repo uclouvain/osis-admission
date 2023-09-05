@@ -236,9 +236,6 @@ msgstr "Admission in progress"
 msgid "ADMITTED"
 msgstr "Admitted"
 
-msgid "Absence of debt"
-msgstr ""
-
 msgid "Abstract"
 msgstr ""
 
@@ -1886,6 +1883,10 @@ msgstr ""
 msgid ""
 "Email sent to the faculty when the SIC submits the application during the "
 "faculty decision process."
+msgstr ""
+
+msgctxt "admission"
+msgid "Emergency contact"
 msgstr ""
 
 msgid "Emergency contact (telephone number)"
