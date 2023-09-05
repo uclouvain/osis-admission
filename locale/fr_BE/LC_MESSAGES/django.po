@@ -294,9 +294,6 @@ msgstr "Admission en cours"
 msgid "ADMITTED"
 msgstr "Admis"
 
-msgid "Absence of debt"
-msgstr "Absence de dettes"
-
 msgid "Abstract"
 msgstr "Résumé"
 
@@ -2052,6 +2049,10 @@ msgid ""
 msgstr ""
 "E-mail envoyé à la faculté quand le SIC envoie le dossier lors du processus "
 "de décision facultaire."
+
+msgctxt "admission"
+msgid "Emergency contact"
+msgstr "Contact en cas d'urgence"
 
 msgid "Emergency contact (telephone number)"
 msgstr "Contact en cas d'urgence (numéro de téléphone)"
