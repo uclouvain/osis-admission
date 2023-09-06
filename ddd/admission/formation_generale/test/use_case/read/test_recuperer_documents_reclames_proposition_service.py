@@ -102,6 +102,7 @@ class RecupererDocumentsReclamesPropositionTestCase(SimpleTestCase):
                 prenom=ANY,
                 nom=ANY,
                 adresse_professionnelle=ANY,
+                langue=ANY,
             ),
         )
         self.assertEqual(curriculum.derniere_action_le, datetime.datetime(2023, 1, 2))
@@ -136,6 +137,7 @@ class RecupererDocumentsReclamesPropositionTestCase(SimpleTestCase):
                 prenom=ANY,
                 nom=ANY,
                 adresse_professionnelle=ANY,
+                langue=ANY,
             ),
         )
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 3))
