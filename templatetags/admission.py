@@ -52,7 +52,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE,
+)
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -364,6 +367,11 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
     for parent_tab, sub_tabs in tab_tree.items():
         # Get the accessible sub tabs depending on the user permissions
         valid_sub_tabs = [tab for tab in sub_tabs if can_read_tab(context, tab.name, permission_obj)]
+
+        # Checklist is available for submitted admissions only
+        if Tab('checklist') in valid_sub_tabs:
+            if permission_obj.status not in STATUTS_PROPOSITION_GENERALE_SOUMISE:
+                valid_sub_tabs.remove(Tab('checklist'))
 
         # Add dynamic badge on parent for internal notes
         if Tab('internal-note') in valid_sub_tabs:

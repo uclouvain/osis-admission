@@ -26,6 +26,7 @@
 from django.utils.functional import cached_property
 from django.views.generic import RedirectView
 
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
 from admission.views.common.detail_tabs.checklist import ChecklistView
 from admission.views.common.detail_tabs.documents import DocumentView
 from admission.views.common.detail_tabs.person import AdmissionPersonDetailView
@@ -57,7 +58,11 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     @cached_property
     def can_access_checklist(self):
         self.permission_required = ChecklistView.permission_required
-        return self.available_checklist_by_context[self.current_context] and super().has_permission()
+        return (
+            self.available_checklist_by_context[self.current_context]
+            and self.admission.status in STATUTS_PROPOSITION_GENERALE_SOUMISE
+            and super().has_permission()
+        )
 
     @cached_property
     def can_access_documents_management(self):

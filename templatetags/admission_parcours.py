@@ -75,6 +75,8 @@ def get_experience_year(experience: ExperienceAcademiqueDTO, annee):
 
 @register.filter
 def filter_experiences_trainings(experiences):
+    if not experiences:
+        return {}
     experiences = {
         annee: [
             experience for experience in experiences.get(annee, []) if not est_experience_non_academique(experience)
