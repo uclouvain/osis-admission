@@ -418,7 +418,7 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_training_choice': {
-        'path_name': 'admission_api_v1:general_propositions',
+        'path_name': 'admission_api_v1:general_training_choice',
         'method': 'GET',
         'params': ['uuid'],
     },
@@ -529,7 +529,7 @@ CONTINUING_EDUCATION_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_training_choice': {
-        'path_name': 'admission_api_v1:continuing_propositions',
+        'path_name': 'admission_api_v1:continuing_training_choice',
         'method': 'GET',
         'params': ['uuid'],
     },
