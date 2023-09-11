@@ -103,7 +103,7 @@ class MollieService:
             "amount[currency]": "EUR",
             'description': f"Frais de dossier {reference}",
             'redirectUrl': url_redirection,
-            'webhookUrl': f"https://dddf-2001-6a8-3081-a001-00-8268-f0de.ngrok-free.app/{reverse('admission:mollie-webhook')}",
+            'webhookUrl': f"{settings.ADMISSION_BACKEND_LINK_PREFIX}{reverse('admission:mollie-webhook')}",
             'locale': 'fr_BE' if get_language() == settings.LANGUAGE_CODE else 'en_US'
         }
         logger.info(f"[MOLLIE] Création d'un paiement pour l'admission avec référence {reference} - data : {data}")
