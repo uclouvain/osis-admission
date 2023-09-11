@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 choices=[
                     ('EN_BROUILLON', 'In draft form'),
-                    ('FRAIS_DOSSIER_EN_ATTENTE', 'Pending application fees'),
+                    ('FRAIS_DOSSIER_EN_ATTENTE', 'Pending application fee'),
                     ('CONFIRMEE', 'Application confirmed (by student)'),
                     ('ANNULEE', 'Cancelled application'),
                     ('A_COMPLETER_POUR_SIC', 'To be completed (by student) for the Enrolment Office (SIC)'),

@@ -132,7 +132,7 @@ class PayApplicationFeesAfterSubmissionViewTestCase(APITestCase):
 
         self.assertEqual(
             response_data,
-            {'detail': gettext('You must be invited to pay the application fees by the system.')},
+            {'detail': gettext('You must be invited to pay the application fee by the system.')},
         )
 
     def test_pay_application_fees_other_candidate_is_forbidden(self):
@@ -227,7 +227,7 @@ class PayApplicationFeesAfterRequestViewTestCase(APITestCase):
 
         self.assertEqual(
             response_data,
-            {'detail': gettext('You must be invited to pay the application fees by a manager.')},
+            {'detail': gettext('You must be invited to pay the application fee by a manager.')},
         )
 
         self.admission.status = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name

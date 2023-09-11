@@ -46,7 +46,7 @@ ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL = 'osis-admission-request-appli
 templates.register(
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
     description=_(
-        'Email sent to the candidate to inform him that he must pay the application fees to finalize '
+        'Email sent to the candidate to inform him that he must pay the application fee to finalize '
         'an application for general education'
     ),
     tag=GENERAL_ADMISSION_TAG,

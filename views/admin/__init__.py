@@ -23,16 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from django.db import migrations
-
-
-class Migration(migrations.Migration):
-
-    dependencies = [
-        ('admission', '0114_auto_20230808_1838'),
-    ]
-
-    operations = [
-        migrations.RunPython(migrations.RunPython.noop, migrations.RunPython.noop),
-    ]
+__namespace__ = {
+    'admin': 'admin',
+}

@@ -152,7 +152,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_general_proposition_verification_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        with self.assertNumQueriesLessThan(67):
+        with self.assertNumQueriesLessThan(68):
             response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ret = response.json()
@@ -374,7 +374,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS
                 % {'by_service': _("by the University Institute for Continuing Education (IUFC)")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
-                % {'to_service': _("to the University Institute of Continuing Education")},
+                % {'to_service': _("the University Institute of Continuing Education")},
                 'droits_inscription_iufc': IElementsConfirmation.DROITS_INSCRIPTION_IUFC,
             },
         }

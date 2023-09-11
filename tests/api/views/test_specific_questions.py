@@ -34,6 +34,7 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE, EN_ISO_CODE, FR_ISO_CODE
+from admission.ddd.admission.enums import CritereItemFormulaireNationaliteDiplome
 from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireFormation,
     CritereItemFormulaireLangueEtudes,
@@ -84,13 +85,13 @@ class BaseDoctorateSpecificQuestionListApiTestCase(APITestCase):
         cls.promoter = PromoterFactory(actor_ptr__person__first_name="Joe")
         cls.message_item = MessageAdmissionFormItemFactory(
             uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da551'),
-            internal_label='message_item',
+            internal_label='message_item.0',
             text={'en': 'My very short message.', 'fr-be': 'Mon très court message.'},
             configuration={},
         )
         TextAdmissionFormItemFactory(
             uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da552'),
-            internal_label='text_item',
+            internal_label='text_item.0',
             title={'en': 'Text field', 'fr-be': 'Champ texte'},
             text={'en': 'Detailed data.', 'fr-be': 'Données détaillées.'},
             help_text={'en': 'Write here', 'fr-be': 'Ecrivez ici'},
@@ -98,7 +99,7 @@ class BaseDoctorateSpecificQuestionListApiTestCase(APITestCase):
         )
         DocumentAdmissionFormItemFactory(
             uuid=uuid.UUID('fe254203-17c7-47d6-95e4-3c5c532da553'),
-            internal_label='document_item',
+            internal_label='document_item.0',
             title={'en': 'Document field', 'fr-be': 'Champ document'},
             text={'en': 'Detailed data.', 'fr-be': 'Données détaillées.'},
             configuration={},
@@ -279,6 +280,146 @@ class DoctorateSpecificQuestionListApiTestCase(BaseDoctorateSpecificQuestionList
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 1)
         self.assertEqual(response.json()[0].get('uuid'), 'fe254203-17c7-47d6-95e4-3c5c532da551')
+
+    def test_retrieve_items_related_to_be_diploma_nationality(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        self.message_instantiation.diploma_nationality = CritereItemFormulaireNationaliteDiplome.BELGE.name
+        self.message_instantiation.save()
+
+        # The candidate has no educational experience
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The candidate has a belgian educational experience but without a diploma
+        educational_experience = EducationalExperienceFactory(
+            person=self.candidate,
+            obtained_diploma=False,
+            country=self.be_country,
+        )
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The candidate has a belgian educational experience with a diploma
+        educational_experience.obtained_diploma = True
+        educational_experience.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+
+        # The candidate has a foreign educational experience with a diploma
+        educational_experience.country = self.fr_country
+        educational_experience.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+    def test_retrieve_items_related_to_non_be_diploma_nationality(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        self.message_instantiation.diploma_nationality = CritereItemFormulaireNationaliteDiplome.NON_BELGE.name
+        self.message_instantiation.save()
+
+        # The candidate has no educational experience
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The candidate has a belgian educational experience but without a diploma
+        educational_experience = EducationalExperienceFactory(
+            person=self.candidate,
+            obtained_diploma=False,
+            country=self.be_country,
+        )
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The candidate has a belgian educational experience with a diploma
+        educational_experience.obtained_diploma = True
+        educational_experience.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The candidate has a foreign educational experience with a diploma
+        educational_experience.country = self.fr_country
+        educational_experience.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+
+    def test_retrieve_items_related_to_eu_diploma_nationality(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        self.message_instantiation.diploma_nationality = CritereItemFormulaireNationaliteDiplome.UE.name
+        self.message_instantiation.save()
+
+        # The candidate has no educational experience
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The candidate has a ue educational experience but without a diploma
+        educational_experience = EducationalExperienceFactory(
+            person=self.candidate,
+            obtained_diploma=False,
+            country=self.fr_country,
+        )
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The candidate has a ue educational experience with a diploma
+        educational_experience.obtained_diploma = True
+        educational_experience.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+
+        # The candidate has a non ue educational experience with a diploma
+        educational_experience.country = self.us_country
+        educational_experience.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+    def test_retrieve_items_related_to_not_eu_diploma_nationality(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        self.message_instantiation.diploma_nationality = CritereItemFormulaireNationaliteDiplome.NON_UE.name
+        self.message_instantiation.save()
+
+        # The candidate has no educational experience
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The candidate has a non-ue educational experience but without a diploma
+        educational_experience = EducationalExperienceFactory(
+            person=self.candidate,
+            obtained_diploma=False,
+            country=self.us_country,
+        )
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+        # The candidate has a non-ue educational experience with a diploma
+        educational_experience.obtained_diploma = True
+        educational_experience.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+
+        # The candidate has a ue educational experience with a diploma
+        educational_experience.country = self.fr_country
+        educational_experience.save()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
 
     def test_retrieve_items_related_to_be_nationality(self):
         self.client.force_authenticate(user=self.candidate.user)

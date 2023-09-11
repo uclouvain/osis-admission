@@ -44,7 +44,7 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             "Les frais de dossier de la proposition ont été payés suite à sa soumission.",
-            "The application fees of the proposition have been paid following its submission.",
+            "The application fee of the proposition have been paid following its submission.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
             tags=["proposition", "application-fees-payment", "status-changed", "payment"],
         )
@@ -55,7 +55,7 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             "Les frais de dossier de la proposition ont été payés suite à une demande gestionnaire.",
-            "The application fees of the proposition have been paid following a request from a manager.",
+            "The application fee of the proposition have been paid following a request from a manager.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
             tags=["proposition", "application-fees-payment", "status-changed", "payment"],
         )
@@ -97,7 +97,7 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             "Un gestionnaire a demandé au candidat de ne pas payer des frais de dossier.",
-            "A manager asked the candidate to not pay any application fees.",
+            "A manager asked the candidate to not pay any application fee.",
             "{gestionnaire.prenom} {gestionnaire.nom}".format(gestionnaire=gestionnaire),
             tags=["proposition", "application-fees-payment", "status-changed", "cancel-request"],
         )

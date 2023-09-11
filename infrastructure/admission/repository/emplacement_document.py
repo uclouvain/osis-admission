@@ -119,11 +119,12 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                     entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES
                     and entity.entity_id.identifiant not in admission.requested_documents
                 ):
+                    uuid_value = entity.entity_id.identifiant.split('.')[-1]
                     form_item = AdmissionFormItem(
-                        internal_label=f'{admission.reference}.{slugify(entity.libelle)}',
+                        internal_label=f'{admission.reference}.{uuid_value}',
                         type=TypeItemFormulaire.DOCUMENT.name,
                         title={language: entity.libelle for language in TRANSLATION_LANGUAGES},
-                        uuid=entity.entity_id.identifiant.split('.')[-1],
+                        uuid=uuid_value,
                     )
                     form_item.save()
                     form_item_instantiation = AdmissionFormItemInstantiation(

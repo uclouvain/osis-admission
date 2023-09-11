@@ -28,14 +28,14 @@
 
 {% block modal_id %}{% if remind %}remind-{% endif %}request-application-fees-modal{% endblock %}
 
-{% block modal_title %}{% translate "Application fees" %}{% endblock %}
+{% block modal_title %}{% translate "Application fee" %}{% endblock %}
 
 {% block modal_body %}
   <p>
-    {% blocktranslate with amount=application_fees_amount %}Application fees: <strong>&euro;{{ amount }}</strong>{% endblocktranslate %}
+    {% blocktranslate with amount=application_fees_amount %}Application fee: <strong>&euro;{{ amount }}</strong>{% endblocktranslate %}
   </p>
   <p>
-    {% translate 'Do you want to request the application fees now?' %}
+    {% translate 'Do you want to request the application fee now?' %}
   </p>
 {% endblock %}
 

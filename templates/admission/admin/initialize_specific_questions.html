@@ -1,5 +1,5 @@
-{% extends "admission/modal/modal.html" %}
-{% load i18n %}
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls bootstrap3 %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -26,28 +26,23 @@
 {% endcomment %}
 
 
-{% block modal_id %}application-fees-request-cancel-modal-{{ target_status }}{% endblock %}
+{% block bodyclass %}{{ block.super }} delete-confirmation delete-selected-confirmation{% endblock %}
 
-{% block modal_title %}{% translate "Cancel the application fee request" %}{% endblock %}
-
-{% block modal_body %}
-  <p>
-    {% translate 'This status change will close the transaction in the payment application. The applicant will still need to be informed.' %}
-  </p>
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='admission' %}">{% translate 'Admission' %}</a>
+    &rsaquo; <a href="{% url 'admin:admission_admissionformitem_changelist' %}">{% translate 'Admission form items' %}</a>
+    &rsaquo; {% translate 'Initialization of the predefined specific questions' %}
+  </div>
 {% endblock %}
 
-{% block modal_footer %}
-  <button
-      class="btn btn-danger"
-      hx-post="{% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status=target_status %}?confirm=1"
-      data-dismiss="modal"
-      data-checklist-button="#frais_dossier-{{ target_status }}"
-  >
-    {% translate 'Confirm' %}
-  </button>
-
-  <button type="button" class="btn btn-default" data-dismiss="modal">
-    {% translate 'Cancel' %}
-  </button>
-
+{% block content %}
+  <h1>{% translate 'Initialization of the predefined specific questions for an academic year' %}</h1>
+  <form method="post" action="">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <input type="submit" value="{% translate 'Launch' %}">
+    <a href="{% url 'admin:admission_admissionformitem_changelist' %}" class="button cancel-link">{% translate "Cancel" %}</a>
+  </form>
 {% endblock %}
