@@ -89,6 +89,11 @@ class MollieService:
             raise FetchMolliePaymentException(mollie_id=paiement_id) from e
 
         logger.info(f"[MOLLIE] JSON reçu : {result}")
+        if response.status_code != 200:
+            logger.error(
+                f"[MOLLIE] La récupération du paiement avec mollie_id = {paiement_id} "
+                f"a échouée avec un status code = {response.status_code}"
+            )
         return cls._convert_to_dto(result)
 
     @classmethod
@@ -118,6 +123,11 @@ class MollieService:
             raise CreateMolliePaymentException(reference=reference) from e
 
         logger.info(f"[MOLLIE] JSON reçu : {result}")
+        if response.status_code != 201:
+            logger.error(
+                f"[MOLLIE] La création du paiement a échouée avec un status code = {response.status_code}"
+            )
+            raise CreateMolliePaymentException(reference=reference)
         return cls._convert_to_dto(result)
 
     @classmethod
