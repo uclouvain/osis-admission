@@ -22,16 +22,6 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% if last_fr_institutes %}
-    {% blocktranslate trimmed with academic_year=last_fr_institutes.annee|get_academic_year names=last_fr_institutes.noms|join:', ' count counter=last_fr_institutes.noms|length asvar absence_of_debt_label %}
-      Certificate stating no debts to the institution attended during the academic year {{ academic_year}}: {{ names }}
-      {% plural %}
-      Certificates stating no debts to the institutions attended during the academic year {{ academic_year}}: {{ names }}
-    {% endblocktranslate %}
-  {% panel _('Absence of debt') %}
-    {% field_data absence_of_debt_label comptabilite.attestation_absence_dette_etablissement inline=True %}
-  {% endpanel %}
-{% endif %}
 
 {% if is_general %}
   {% panel _('Reduced tuition fee') %}

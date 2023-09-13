@@ -118,7 +118,6 @@ class AdmissionAddressForm(forms.ModelForm):
     postal_code = forms.CharField(
         required=False,
         label=_('Postcode'),
-        help_text=get_example_text('1234'),
     )
 
     city = forms.CharField(
@@ -141,7 +140,6 @@ class AdmissionAddressForm(forms.ModelForm):
     be_postal_code = forms.CharField(
         required=False,
         label=_('Postcode'),
-        help_text=get_example_text('1234'),
     )
 
     be_city = forms.CharField(

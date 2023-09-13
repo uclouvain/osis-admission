@@ -381,8 +381,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         )
         self.get_raw_content_mock.assert_called_once_with('token')
         self.convert_img_mock.assert_called_once_with(
-            self.get_raw_content_mock.return_value,
-            rotation=img2pdf.Rotation.ifvalid
+            self.get_raw_content_mock.return_value, rotation=img2pdf.Rotation.ifvalid
         )
 
     def test_convert_and_get_raw_with_png_attachment(self):
@@ -397,8 +396,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         )
         self.get_raw_content_mock.assert_called_once_with('token')
         self.convert_img_mock.assert_called_once_with(
-            self.get_raw_content_mock.return_value,
-            rotation=img2pdf.Rotation.ifvalid
+            self.get_raw_content_mock.return_value, rotation=img2pdf.Rotation.ifvalid
         )
 
     def test_get_default_content_if_mimetype_is_not_supported(self):
@@ -449,9 +447,9 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
                     'coordinates',
                     'training_choice',
                     'education',
-                    'curriculum',
                     'curriculum_academic_experience',
                     'curriculum_non_academic_experience',
+                    'curriculum',
                     'specific_question',
                     'confirmation',
                 ]
@@ -463,7 +461,6 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['coordinates'].title, 'Coordonnées')
         self.assertEqual(call_args_by_tab['training_choice'].title, 'Choix de formation')
         self.assertEqual(call_args_by_tab['education'].title, 'Études secondaires')
-        self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
         self.assertEqual(
             call_args_by_tab['curriculum_academic_experience'].title,
             'Curriculum > Computer science (2021-2022)',
@@ -472,6 +469,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
             call_args_by_tab['curriculum_non_academic_experience'].title,
             'Curriculum > Travail (01/2021 - 03/2021)',
         )
+        self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
         self.assertEqual(len(call_args_by_tab['specific_question'].children), 1)
         self.assertEqual(

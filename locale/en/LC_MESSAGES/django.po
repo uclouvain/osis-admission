@@ -236,9 +236,6 @@ msgstr "Admission in progress"
 msgid "ADMITTED"
 msgstr "Admitted"
 
-msgid "Absence of debt"
-msgstr ""
-
 msgid "Abstract"
 msgstr ""
 
@@ -1888,6 +1885,10 @@ msgid ""
 "faculty decision process."
 msgstr ""
 
+msgctxt "admission"
+msgid "Emergency contact"
+msgstr ""
+
 msgid "Emergency contact (telephone number)"
 msgstr ""
 
@@ -3392,9 +3393,6 @@ msgid "OTHER"
 msgstr "Other"
 
 msgid "Obtained grade"
-msgstr ""
-
-msgid "Offer:"
 msgstr ""
 
 msgid "One choice per line, leave the \"Other\" value out"
@@ -5179,6 +5177,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Training title"
+msgstr ""
+
+msgid "Training:"
 msgstr ""
 
 msgid "Transcript"

@@ -294,9 +294,6 @@ msgstr "Admission en cours"
 msgid "ADMITTED"
 msgstr "Admis"
 
-msgid "Absence of debt"
-msgstr "Absence de dettes"
-
 msgid "Abstract"
 msgstr "Résumé"
 
@@ -2053,6 +2050,10 @@ msgstr ""
 "E-mail envoyé à la faculté quand le SIC envoie le dossier lors du processus "
 "de décision facultaire."
 
+msgctxt "admission"
+msgid "Emergency contact"
+msgstr "Contact en cas d'urgence"
+
 msgid "Emergency contact (telephone number)"
 msgstr "Contact en cas d'urgence (numéro de téléphone)"
 
@@ -3780,9 +3781,6 @@ msgstr "Autre"
 
 msgid "Obtained grade"
 msgstr "Grade obtenu"
-
-msgid "Offer:"
-msgstr "Offre :"
 
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
@@ -5726,6 +5724,9 @@ msgstr "Spécificités de la formation"
 msgctxt "admission"
 msgid "Training title"
 msgstr "Intitulé formation"
+
+msgid "Training:"
+msgstr "Formation :"
 
 msgid "Transcript"
 msgstr "Relevé de notes"
