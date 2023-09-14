@@ -25,7 +25,7 @@
 # ##############################################################################
 
 import freezegun
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from admission.tests import QueriesAssertionsMixin
@@ -34,6 +34,7 @@ from admission.tests.factories.roles import SicManagementRoleFactory
 
 
 @freezegun.freeze_time('2023-01-01')
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionAccessConditionsURLTestCase(QueriesAssertionsMixin, TestCase):
     @classmethod
     def setUpTestData(cls):

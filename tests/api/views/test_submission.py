@@ -28,6 +28,7 @@ from unittest.mock import patch
 
 import freezegun
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 from osis_history.models import HistoryEntry
 from rest_framework import status
@@ -61,7 +62,6 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.person import (
     IncompletePersonForBachelorFactory,
     IncompletePersonForIUFCFactory,
-    CompletePersonForBachelorFactory,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -70,6 +70,7 @@ from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
 @freezegun.freeze_time("1980-02-25")
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):

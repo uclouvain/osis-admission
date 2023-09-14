@@ -28,6 +28,7 @@ from unittest import mock
 
 import freezegun
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -41,6 +42,7 @@ from base.models.enums.education_group_types import TrainingType
 
 
 @freezegun.freeze_time('2023-01-01')
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
     @classmethod
     def setUpTestData(cls):
