@@ -30,7 +30,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.permissions import IsSelfPersonTabOrTabPermission
+from admission.api.permissions import IsSelfPersonTabOrTabPermission, DoesNotHaveSubmittedPropositions
 from admission.api.views.mixins import (
     PersonRelatedMixin,
     GeneralEducationPersonRelatedMixin,
@@ -75,7 +75,10 @@ class BasePersonViewSet(
 
 class PersonViewSet(PersonRelatedMixin, BasePersonViewSet):
     name = "person"
-    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='person', can_edit=True)]
+    permission_classes = [
+        DoesNotHaveSubmittedPropositions,
+        partial(IsSelfPersonTabOrTabPermission, permission_suffix='person', can_edit=True),
+    ]
 
 
 class GeneralPersonView(GeneralEducationPersonRelatedMixin, BasePersonViewSet):

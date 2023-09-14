@@ -37,7 +37,7 @@ class CalendrierInscription(ICalendrierInscription):
     @classmethod
     def get_annees_academiques_pour_calcul(cls) -> List[int]:
         current = AcademicYear.objects.current()
-        return [current.year, current.year - 1, current.year + 1]
+        return [current.year, current.year - 1, current.year + 1, current.year + 2]
 
     @classmethod
     def get_pool_ouverts(cls) -> List[Tuple[str, int]]:

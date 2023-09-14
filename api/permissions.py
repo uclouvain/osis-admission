@@ -26,8 +26,16 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 from admission.contrib.models import SupervisionActor
+from admission.contrib.models.base import BaseAdmissionProxy
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
+
+
+class DoesNotHaveSubmittedPropositions(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return not BaseAdmissionProxy.objects.candidate_has_submission(request.user.person)
 
 
 class IsSelfPersonTabOrTabPermission(BasePermission):

@@ -52,6 +52,7 @@ from admission.ddd.admission.formation_generale.dtos import PropositionDTO as Fo
 from base.utils.serializers import DTOSerializer
 
 __all__ = [
+    "PropositionCreatePermissionsSerializer",
     "PropositionIdentityDTOSerializer",
     "PropositionSearchSerializer",
     "InitierPropositionCommandSerializer",
@@ -291,6 +292,15 @@ class PropositionSearchSerializer(serializers.Serializer):
     doctorate_propositions = DoctoratePropositionSearchDTOSerializer(many=True)
     general_education_propositions = GeneralEducationPropositionSearchDTOSerializer(many=True)
     continuing_education_propositions = ContinuingEducationPropositionSearchDTOSerializer(many=True)
+
+
+class PropositionCreatePermissionsSerializer(serializers.Serializer):
+    links = ActionLinksField(
+        actions={
+            'create_person': ACTION_LINKS['update_person'],
+            'create_coordinates': ACTION_LINKS['update_coordinates'],
+        }
+    )
 
 
 class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):

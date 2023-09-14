@@ -154,10 +154,18 @@ class GeneralUpdateTrainingChoiceAPIView(
     schema = GeneralTrainingChoiceSchema()
     permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
     permission_mapping = {
+        'GET': 'admission.view_generaleducationadmission_training_choice',
         'PUT': 'admission.change_generaleducationadmission_training_choice',
     }
     pagination_class = None
     filter_backends = []
+
+    def get(self, request, *args, **kwargs):
+        """
+        This method is only used to check the permission.
+        We have to return some data as the schema expects a 200 status and the deserializer expects some data.
+        """
+        return Response(data=[])
 
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
@@ -211,10 +219,18 @@ class ContinuingUpdateTrainingChoiceAPIView(
     name = "continuing_training_choice"
     schema = ContinuingTrainingChoiceSchema()
     permission_mapping = {
+        'GET': 'admission.view_continuingeducationadmission_training_choice',
         'PUT': 'admission.change_continuingeducationadmission_training_choice',
     }
     pagination_class = None
     filter_backends = []
+
+    def get(self, request, *args, **kwargs):
+        """
+        This method is only used to check the permission.
+        We have to return some data as the schema expects a 200 status and the deserializer expects some data.
+        """
+        return Response(data=[])
 
     def get_permission_object(self):
         return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
