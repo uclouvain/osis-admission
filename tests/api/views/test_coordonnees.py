@@ -165,7 +165,7 @@ class CoordonneesTestCase(APITestCase):
         candidate = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name).candidate
         self.client.force_authenticate(candidate.user)
         response = self.client.put(self.agnostic_url, self.updated_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_coordonnees_update_candidate_with_submitted_proposition(self):
         self.client.force_authenticate(self.candidate_user)

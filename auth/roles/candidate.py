@@ -40,6 +40,7 @@ from admission.auth.predicates import (
     is_jury_in_progress,
     is_invited_to_pay_after_submission,
     is_invited_to_pay_after_request,
+    does_not_have_a_submitted_admission,
 )
 from osis_role.contrib.models import RoleModel
 
@@ -66,8 +67,12 @@ _CANDIDATE_RULESET = {
     # Can edit while not confirmed proposition
     'delete_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
     'change_doctorateadmission': is_admission_request_author & unconfirmed_proposition,
-    'change_admission_person': is_admission_request_author & unconfirmed_proposition,
-    'change_admission_coordinates': is_admission_request_author & unconfirmed_proposition,
+    'change_admission_person': is_admission_request_author
+    & unconfirmed_proposition
+    & does_not_have_a_submitted_admission,
+    'change_admission_coordinates': is_admission_request_author
+    & unconfirmed_proposition
+    & does_not_have_a_submitted_admission,
     'change_admission_curriculum': is_admission_request_author & unconfirmed_proposition,
     'change_admission_secondary_studies': is_admission_request_author & unconfirmed_proposition,
     'change_admission_languages': is_admission_request_author & unconfirmed_proposition,
@@ -120,8 +125,12 @@ _CANDIDATE_RULESET = {
     'download_generaleducationadmission_pdf_recap': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is in progress
     'change_generaleducationadmission_training_choice': is_admission_request_author & in_progress,
-    'change_generaleducationadmission_person': is_admission_request_author & in_progress,
-    'change_generaleducationadmission_coordinates': is_admission_request_author & in_progress,
+    'change_generaleducationadmission_person': is_admission_request_author
+    & in_progress
+    & does_not_have_a_submitted_admission,
+    'change_generaleducationadmission_coordinates': is_admission_request_author
+    & in_progress
+    & does_not_have_a_submitted_admission,
     'change_generaleducationadmission_curriculum': is_admission_request_author & in_progress,
     'change_generaleducationadmission_secondary_studies': is_admission_request_author & in_progress,
     'change_generaleducationadmission_languages': is_admission_request_author & in_progress,
@@ -148,8 +157,12 @@ _CANDIDATE_RULESET = {
     'download_continuingeducationadmission_pdf_recap': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is in progress
     'change_continuingeducationadmission_training_choice': is_admission_request_author & in_progress,
-    'change_continuingeducationadmission_person': is_admission_request_author & in_progress,
-    'change_continuingeducationadmission_coordinates': is_admission_request_author & in_progress,
+    'change_continuingeducationadmission_person': is_admission_request_author
+    & in_progress
+    & does_not_have_a_submitted_admission,
+    'change_continuingeducationadmission_coordinates': is_admission_request_author
+    & in_progress
+    & does_not_have_a_submitted_admission,
     'change_continuingeducationadmission_curriculum': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_secondary_studies': is_admission_request_author & in_progress,
     'change_continuingeducationadmission_languages': is_admission_request_author & in_progress,

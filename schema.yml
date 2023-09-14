@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.82
+  version: 1.0.83
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -87,6 +87,33 @@ paths:
           content:
             application/json:
               schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/permissions:
+    get:
+      operationId: list_proposition_create_permissions
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PropositionCreatePermissions'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -5991,6 +6018,18 @@ components:
       - doctorate_propositions
       - general_education_propositions
       - continuing_education_propositions
+    PropositionCreatePermissions:
+      type: object
+      properties:
+        links:
+          type: object
+          properties:
+            create_person:
+              $ref: '#/components/schemas/ActionLink'
+            create_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
     DoctoratePropositionSearchDTO:
       type: object
       properties:

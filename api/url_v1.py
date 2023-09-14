@@ -84,6 +84,7 @@ urlpatterns = [
     # > Every education
     path('dashboard', views.DashboardViewSet),
     path('propositions', views.PropositionListView),
+    path('propositions/permissions', views.PropositionCreatePermissionsView),
     # > Doctorate education
     path('supervised_propositions', views.SupervisedPropositionListView),
     # Creation tabs

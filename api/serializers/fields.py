@@ -179,6 +179,15 @@ ACTION_LINKS = {
         'path_name': 'admission_api_v1:propositions',
         'method': 'POST',
     },
+    # Create
+    'update_person': {
+        'path_name': 'admission_api_v1:person',
+        'method': 'PUT',
+    },
+    'update_coordinates': {
+        'path_name': 'admission_api_v1:coordonnees',
+        'method': 'PUT',
+    },
     # Supervised
     'list_supervised': {
         'path_name': 'admission_api_v1:supervised_propositions',
