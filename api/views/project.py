@@ -27,6 +27,7 @@ from django.db.models import Prefetch
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from admission.api import serializers
 from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
@@ -53,10 +54,31 @@ from osis_role.contrib.views import APIPermissionRequiredMixin
 from osis_signature.models import Actor
 
 __all__ = [
+    "PropositionCreatePermissionsView",
     "PropositionListView",
     "SupervisedPropositionListView",
     "PropositionViewSet",
 ]
+
+
+class PropositionCreatePermissionsSchema(ResponseSpecificSchema):
+    serializer_mapping = {
+        'GET': serializers.PropositionCreatePermissionsSerializer,
+    }
+
+    def get_operation_id_base(self, path, method, action):
+        return '_proposition_create_permissions'
+
+
+class PropositionCreatePermissionsView(APIPermissionRequiredMixin, APIView):
+    name = "proposition_create_permissions"
+    schema = PropositionCreatePermissionsSchema()
+    pagination_class = None
+    filter_backends = []
+
+    def get(self, request, *args, **kwargs):
+        serializer = serializers.PropositionCreatePermissionsSerializer({}, context={'request': request})
+        return Response(serializer.data)
 
 
 class PropositionListSchema(ResponseSpecificSchema):

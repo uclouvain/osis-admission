@@ -610,6 +610,9 @@ msgstr ""
 msgid "Another address"
 msgstr "Une autre adresse"
 
+msgid "Another admission has been submitted."
+msgstr "Une autre admission a déjà été soumise."
+
 msgid "Application accepted"
 msgstr "Inscription autorisée"
 

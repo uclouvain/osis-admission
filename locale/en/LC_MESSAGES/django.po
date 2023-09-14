@@ -538,6 +538,9 @@ msgstr ""
 msgid "Another address"
 msgstr ""
 
+msgid "Another admission has been submitted."
+msgstr ""
+
 msgid "Application accepted"
 msgstr ""
 
