@@ -35,6 +35,7 @@ class PersonneConnueUclDTOFactory(factory.Factory):
     prenom = factory.Faker('first_name')
     email = factory.Faker('email')
     adresse_professionnelle = None
+    langue = None
 
     class Meta:
         model = PersonneConnueUclDTO

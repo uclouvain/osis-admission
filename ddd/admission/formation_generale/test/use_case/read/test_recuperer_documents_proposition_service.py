@@ -140,6 +140,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
                 prenom=ANY,
                 nom=ANY,
                 adresse_professionnelle=ANY,
+                langue=ANY,
             ),
         )
         self.assertEqual(curriculum.derniere_action_le, datetime.datetime(2023, 1, 2))
@@ -174,6 +175,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
                 prenom=ANY,
                 nom=ANY,
                 adresse_professionnelle=ANY,
+                langue=ANY,
             ),
         )
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 3))
@@ -204,6 +206,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
                 prenom=ANY,
                 nom=ANY,
                 adresse_professionnelle=ANY,
+                langue=ANY,
             ),
         )
         self.assertEqual(document.document_soumis_le, datetime.datetime(2023, 1, 2))
@@ -239,6 +242,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
                 prenom=ANY,
                 nom=ANY,
                 adresse_professionnelle=ANY,
+                langue=ANY,
             ),
         )
         self.assertEqual(document.document_soumis_le, datetime.datetime(2023, 1, 3))
