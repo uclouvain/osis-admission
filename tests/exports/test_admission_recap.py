@@ -262,6 +262,7 @@ class _GroupeDeSupervisionDTO(UnfrozenDTO, GroupeDeSupervisionDTO):
 
 
 @freezegun.freeze_time('2023-01-01')
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
     @classmethod
     def setUpTestData(cls):

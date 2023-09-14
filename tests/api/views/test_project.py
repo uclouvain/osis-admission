@@ -83,6 +83,7 @@ from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
 
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinksMixin, APITestCase):
     @classmethod
     @freezegun.freeze_time('2023-01-01')
@@ -366,6 +367,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):

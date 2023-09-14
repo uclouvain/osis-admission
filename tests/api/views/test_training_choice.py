@@ -520,7 +520,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/', WAFFLE_CREATE_MISSING_SWITCHES=False)
 class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, APITestCase):
     file_uuid = str(uuid.uuid4())
 

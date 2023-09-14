@@ -26,9 +26,8 @@
 import datetime
 from typing import List
 
-from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from admission.contrib.models import DoctorateAdmission
@@ -61,6 +60,7 @@ from base.tests.factories.user import UserFactory
 from reference.tests.factories.country import CountryFactory
 
 
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
     NB_MAX_QUERIES = 21

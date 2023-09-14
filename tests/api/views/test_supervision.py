@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -46,6 +47,7 @@ from osis_signature.models import StateHistory
 from reference.tests.factories.country import CountryFactory
 
 
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
