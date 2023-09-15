@@ -1,5 +1,5 @@
-{% extends "admission/modal/modal.html" %}
-{% load i18n %}
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls bootstrap3 %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,29 +25,11 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-
-{% block modal_id %}application-fees-request-cancel-modal-{{ target_status }}{% endblock %}
-
-{% block modal_title %}{% translate "Cancel the application fee request" %}{% endblock %}
-
-{% block modal_body %}
-  <p>
-    {% translate 'This status change will close the transaction in the payment application. The applicant will still need to be informed.' %}
-  </p>
-{% endblock %}
-
-{% block modal_footer %}
-  <button
-      class="btn btn-danger"
-      hx-post="{% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status=target_status %}?confirm=1"
-      data-dismiss="modal"
-      data-checklist-button="#frais_dossier-{{ target_status }}"
-  >
-    {% translate 'Confirm' %}
-  </button>
-
-  <button type="button" class="btn btn-default" data-dismiss="modal">
-    {% translate 'Cancel' %}
-  </button>
-
+{% block object-tools-items %}
+  {{ block.super }}
+  <li>
+    <a href="{% url 'admission:admin:initialize-specific-questions' %}" class="addlink">
+      {% translate 'Initialization of the predefined specific questions' %}
+    </a>
+  </li>
 {% endblock %}

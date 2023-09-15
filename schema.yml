@@ -5271,7 +5271,7 @@ paths:
   /propositions/general-education/{uuid}/pay-application-fees:
     post:
       operationId: pay_application_fees_after_submission
-      description: Pay the application fees of the proposition after its submission.
+      description: Pay the application fee of the proposition after its submission.
       parameters:
       - name: uuid
         in: path
@@ -5307,7 +5307,7 @@ paths:
   /propositions/general-education/{uuid}/pay-application-fees-after-request:
     post:
       operationId: pay_application_fees_after_request
-      description: Pay the application fees of the proposition after a manager request.
+      description: Pay the application fee of the proposition after a manager request.
       parameters:
       - name: uuid
         in: path

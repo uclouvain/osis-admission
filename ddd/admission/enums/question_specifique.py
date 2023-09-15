@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@
 # ##############################################################################
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from base.models.utils.utils import ChoiceEnum
 
 
@@ -61,6 +60,14 @@ class CleConfigurationItemFormulaire(ChoiceEnum):
 
 
 class CritereItemFormulaireNationaliteCandidat(ChoiceEnum):
+    BELGE = _('Belgian')
+    NON_BELGE = _('Not Belgian')
+    UE = _('UE')
+    NON_UE = _('Not UE')
+    TOUS = _('All')
+
+
+class CritereItemFormulaireNationaliteDiplome(ChoiceEnum):
     BELGE = _('Belgian')
     NON_BELGE = _('Not Belgian')
     UE = _('UE')

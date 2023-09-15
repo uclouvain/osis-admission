@@ -49,11 +49,11 @@
 
     {% if last_request %}
       <p>
-        {% blocktranslate with amount=application_fees_amount %}Application fees: <strong>&euro;{{ amount }}</strong>{% endblocktranslate %}
+        {% blocktranslate with amount=application_fees_amount %}Application fee: <strong>&euro;{{ amount }}</strong>{% endblocktranslate %}
       </p>
       <p class="bg-success">
         {% blocktranslate trimmed with date=last_request.created|date:'DATETIME_FORMAT' author=last_request.author %}
-          Email requesting the application fees sent to the candidate on {{ date }} by {{ author }}.
+          Email requesting the application fee sent to the candidate on {{ date }} by {{ author }}.
         {% endblocktranslate %}
       </p>
 

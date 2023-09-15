@@ -35,7 +35,7 @@
           role="button"
       ></a>{% endif %}
   </dt>
-  {% with data|default_if_none_or_empty:_('Not specified') as data_to_display %}
+  {% with data|default_if_none_or_empty:_('Incomplete field') as data_to_display %}
   <dd>
     {% if html_tag and data %}<{{ html_tag }}>{{ data_to_display }}</{{ html_tag }}>
     {% else %}
