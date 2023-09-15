@@ -65,7 +65,7 @@ class PersonFormTestCase(TestCase):
             'birth_date': datetime.date(1990, 1, 1),
             'birth_country': cls.belgium_country.pk,
             'country_of_citizenship': cls.belgium_country.pk,
-            'birth_place': 'Louvain-La-Neuve',
+            'birth_place': 'Louvain-la-Neuve',
             'sex': ChoixSexe.M.name,
             'gender': ChoixGenre.H.name,
             'civil_state': CivilState.MARRIED.name,
@@ -598,7 +598,7 @@ class PersonFormTestCase(TestCase):
             'coordinates': {
                 'country': 'BE',
                 'postal_code': '1348',
-                'city': 'Louvain-La-Neuve',
+                'city': 'Louvain-la-Neuve',
                 'place': 'P1',
                 'street': 'University street',
                 'street_number': '1',

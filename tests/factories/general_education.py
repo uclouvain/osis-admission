@@ -118,7 +118,7 @@ class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
             status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
             submitted_profile={
                 "coordinates": {
-                    "city": "Louvain-La-Neuve",
+                    "city": "Louvain-la-Neuve",
                     "place": "",
                     "street": "Place de l'Université",
                     "country": "BE",

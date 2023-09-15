@@ -35,7 +35,7 @@ from admission.ddd.admission.domain.model.complement_formation import Complement
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
-from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.enums import (
@@ -157,6 +157,8 @@ class Proposition(interface.RootEntity):
         self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
         self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
+
+        self.comptabilite.affiliation_sport = None  # Ce choix dépend du campus de formation
 
     def modifier_checklist_choix_formation(
         self,

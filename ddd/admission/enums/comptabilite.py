@@ -115,12 +115,19 @@ class ChoixAssimilation6(ChoiceEnum):
 class ChoixAffiliationSport(ChoiceEnum):
     LOUVAIN_WOLUWE = _('Yes, in Louvain-la-Neuve and/or Woluwe-Saint-Lambert (E60)')
     MONS_UCL = _('Yes, in Mons and other UCLouvain campuses (E60)')
-    MONS = _('Yes, only in Mons (E10)')
+    MONS = _('Yes, only in Mons (E12)')
     SAINT_GILLES_UCL = _('Yes, in Saint-Gilles and other UCLouvain campuses (E60)')
-    SAINT_GILLES = _('Yes, only in Saint-Gilles (E10)')
+    SAINT_GILLES = _('Yes, only in Saint-Gilles (E12)')
     TOURNAI_UCL = _('Yes, in Tournai and other UCLouvain campuses (E60)')
-    TOURNAI = _('Yes, only in Tournai (E10)')
+    TOURNAI = _('Yes, only in Tournai (E12)')
+    SAINT_LOUIS_UCL = _('Yes, in Saint-Louis and other UCLouvain campuses (E60)')
+    SAINT_LOUIS = _('Yes, only in Saint-Louis (E12)')
     NON = _('No')
+
+    @classmethod
+    def choices_by_education_site(cls, education_site=''):
+        choices = CHOIX_AFFILIATION_SPORT_SELON_SITE.get(education_site, [])
+        return tuple((x.name, x.value) for x in choices + [cls.NON])
 
 
 class LienParente(ChoiceEnum):
@@ -143,4 +150,29 @@ FORMATTED_RELATIONSHIPS = {
     'TUTEUR_LEGAL': _('your legal guardian'),
     'CONJOINT': _('your partner'),
     'COHABITANT_LEGAL': _('your legal cohabitant'),
+}
+
+CHOIX_AFFILIATION_SPORT_SELON_SITE = {
+    'Bruxelles Saint-Gilles': [
+        ChoixAffiliationSport.SAINT_GILLES_UCL,
+        ChoixAffiliationSport.SAINT_GILLES,
+    ],
+    'Bruxelles Saint-Louis': [
+        ChoixAffiliationSport.SAINT_LOUIS_UCL,
+        ChoixAffiliationSport.SAINT_LOUIS,
+    ],
+    'Bruxelles Woluwe': [
+        ChoixAffiliationSport.LOUVAIN_WOLUWE,
+    ],
+    'Louvain-la-Neuve': [
+        ChoixAffiliationSport.LOUVAIN_WOLUWE,
+    ],
+    'Mons': [
+        ChoixAffiliationSport.MONS_UCL,
+        ChoixAffiliationSport.MONS,
+    ],
+    'Tournai': [
+        ChoixAffiliationSport.TOURNAI_UCL,
+        ChoixAffiliationSport.TOURNAI,
+    ],
 }

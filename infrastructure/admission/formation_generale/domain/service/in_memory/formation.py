@@ -56,7 +56,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2020,
             type=TrainingType.BACHELOR,
-            campus='Louvain-La-Neuve',
+            campus='Louvain-la-Neuve',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
@@ -78,7 +78,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__sigle='MASTER-SCI',
             entity_id__annee=2022,
             type=TrainingType.MASTER_M1,
-            campus='Louvain-La-Neuve',
+            campus='Louvain-la-Neuve',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
@@ -92,7 +92,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__sigle='SC3DP',
             entity_id__annee=2022,
             type=TrainingType.CERTIFICATE,
-            campus='Louvain-La-Neuve',
+            campus='Louvain-la-Neuve',
         ),
         FormationFactory(
             intitule='Formation ESP3DP',
@@ -113,14 +113,21 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__sigle='MASTER-SCI',
             entity_id__annee=2021,
             type=TrainingType.MASTER_M1,
-            campus='Louvain-La-Neuve',
+            campus='Louvain-la-Neuve',
+        ),
+        FormationFactory(
+            intitule='Master en sciences',
+            entity_id__sigle='MASTER-SCI-UNKNOWN-CAMPUS',
+            entity_id__annee=2021,
+            type=TrainingType.MASTER_M1,
+            campus='Unknown campus',
         ),
         FormationFactory(
             intitule='Master en sciences',
             entity_id__sigle='MASTER-SCI',
             entity_id__annee=2020,
             type=TrainingType.MASTER_M1,
-            campus='Louvain-La-Neuve',
+            campus='Louvain-la-Neuve',
         ),
         FormationFactory(
             intitule='Aggrégation en économie',
@@ -211,6 +218,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
                 entity_id=training.entity_id,
                 type=training.type,
                 code_domaine=training.code_domaine,
+                campus=training.campus or '',
             )
 
         raise FormationNonTrouveeException

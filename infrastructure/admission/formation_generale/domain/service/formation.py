@@ -86,6 +86,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
                 type=TrainingType[dto.type],
                 code_domaine=dto.main_domain_code or '',
+                campus=dto.main_teaching_campus_name or '',
             )
 
         raise FormationNonTrouveeException

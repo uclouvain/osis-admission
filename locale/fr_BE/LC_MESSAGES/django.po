@@ -6016,8 +6016,8 @@ msgstr ""
 "à un éventuel remboursement ?"
 
 msgid ""
-"Would you like to pursue fitness or sport activities? If so, the cost of "
-"membership will be added to your tuition fee."
+"Would you like to join the sport activities? If so, the cost of membership "
+"will be added to your tuition fee."
 msgstr ""
 "Désirez-vous l'affiliation aux activités sportives ? Dans l'affirmative, le "
 "coût de cette affiliation sera ajouté à vos droits d'inscription."
@@ -6069,17 +6069,23 @@ msgstr "Oui, sur Mons et les autres sites de l’UCLouvain (60 EUR)"
 msgid "Yes, in Saint-Gilles and other UCLouvain campuses (E60)"
 msgstr "Oui, sur Saint-Gilles et les autres sites de l’UCLouvain (60 EUR)"
 
+msgid "Yes, in Saint-Louis and other UCLouvain campuses (E60)"
+msgstr "Oui, sur Saint-Louis et les autres sites de l’UCLouvain (60 EUR)"
+
 msgid "Yes, in Tournai and other UCLouvain campuses (E60)"
 msgstr "Oui, sur Tournai et les autres sites de l’UCLouvain (60 EUR)"
 
-msgid "Yes, only in Mons (E10)"
-msgstr "Oui, sur Mons uniquement (10 EUR)"
+msgid "Yes, only in Mons (E12)"
+msgstr "Oui, sur Mons uniquement (12 EUR)"
 
-msgid "Yes, only in Saint-Gilles (E10)"
-msgstr "Oui, sur Saint-Gilles uniquement (10 EUR)"
+msgid "Yes, only in Saint-Gilles (E12)"
+msgstr "Oui, sur Saint-Gilles uniquement (12 EUR)"
 
-msgid "Yes, only in Tournai (E10)"
-msgstr "Oui, sur Tournai uniquement (10 EUR)"
+msgid "Yes, only in Saint-Louis (E12)"
+msgstr "Oui, sur Saint-Louis uniquement (12 EUR)"
+
+msgid "Yes, only in Tournai (E12)"
+msgstr "Oui, sur Tournai uniquement (12 EUR)"
 
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
