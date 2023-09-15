@@ -92,6 +92,7 @@ def create_default_propositions_in_progress(candidate):
 
 class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
     @classmethod
+    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
         cls.candidate = PersonFactory()
         root = EntityVersionFactory(parent=None).entity

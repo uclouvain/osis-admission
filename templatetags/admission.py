@@ -507,7 +507,7 @@ def field_data(
             data = None
             hide_empty = True
         elif context.get('load_files') is False:
-            data = _('Specified') if data else _('Not specified')
+            data = _('Specified') if data else _('Incomplete field')
         elif data:
             template_string = "{% load osis_document %}{% document_visualizer files %}"
             template_context = {'files': data}

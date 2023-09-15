@@ -187,7 +187,7 @@ def is_invited_to_complete(self, user: User, obj: GeneralEducationAdmission):
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("You must be invited to pay the application fees by the system."))
+@predicate_failed_msg(message=_("You must be invited to pay the application fee by the system."))
 def is_invited_to_pay_after_submission(self, user: User, obj: GeneralEducationAdmission):
     checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
     return (
@@ -198,7 +198,7 @@ def is_invited_to_pay_after_submission(self, user: User, obj: GeneralEducationAd
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("You must be invited to pay the application fees by a manager."))
+@predicate_failed_msg(message=_("You must be invited to pay the application fee by a manager."))
 def is_invited_to_pay_after_request(self, user: User, obj: GeneralEducationAdmission):
     checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
     return (

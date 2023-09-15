@@ -70,7 +70,7 @@ class PayApplicationFeesAfterSubmissionView(
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
     def post(self, request, *args, **kwargs):
-        """Pay the application fees of the proposition after its submission."""
+        """Pay the application fee of the proposition after its submission."""
         proposition_id = message_bus_instance.invoke(
             PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition=str(self.kwargs['uuid']))
         )
@@ -104,7 +104,7 @@ class PayApplicationFeesAfterRequestView(
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
     def post(self, request, *args, **kwargs):
-        """Pay the application fees of the proposition after a manager request."""
+        """Pay the application fee of the proposition after a manager request."""
         proposition_id = message_bus_instance.invoke(
             PayerFraisDossierPropositionSuiteDemandeCommand(uuid_proposition=str(self.kwargs['uuid']))
         )

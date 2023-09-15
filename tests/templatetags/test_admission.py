@@ -373,7 +373,7 @@ class AdmissionFieldsDataTestCase(TestCase):
             name='My field label',
             data=[],
         )
-        self.assertEqual(result['data'], _('Not specified'))
+        self.assertEqual(result['data'], _('Incomplete field'))
 
 
 class DisplayTagTestCase(TestCase):

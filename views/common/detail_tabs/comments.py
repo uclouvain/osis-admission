@@ -52,7 +52,7 @@ COMMENT_TAG_FAC = 'FAC'
 class CheckListTagsEnum(ChoiceEnum):
     assimilation = _('Belgian student status')
     financabilite = _('Financeability')
-    frais_dossier = _('Application fees')
+    frais_dossier = _('Application fee')
     choix_formation = _('Course choice')
     parcours_anterieur = _('Previous experience')
     donnees_personnelles = _('Personal data')

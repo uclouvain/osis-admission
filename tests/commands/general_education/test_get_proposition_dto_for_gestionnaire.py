@@ -58,8 +58,8 @@ from reference.tests.factories.country import CountryFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+@freezegun.freeze_time('2023-01-01')
 class GetPropositionDTOForGestionnaireTestCase(TestCase):
-    @freezegun.freeze_time('2023-01-01')
     def setUp(self) -> None:
         school = EntityFactory()
         EntityVersionFactory(entity=school, acronym='SCH')

@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     ]
 
     OBJECT_TEMPLATE = {
-        'en': '[OSIS] Payment of your application fees ({admission_reference})',
+        'en': '[OSIS] Payment of your application fee ({admission_reference})',
         'fr-be': "[OSIS] Paiement de vos frais de dossier ({admission_reference})",
     }
 

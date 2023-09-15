@@ -59,6 +59,7 @@ class DoctorateAPIViewTestCase(APITestCase):
     other_doctorate_url: Optional[str] = None
 
     @classmethod
+    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
         # Create supervision group members
         promoter = PromoterFactory()
