@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.83
+  version: 1.0.84
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -4396,10 +4396,10 @@ paths:
           - MASTER
           - AGREGATION_CAPES
           - CERTIFICAT
-      - name: name
+      - name: acronym_or_name
         required: true
         in: query
-        description: The name of the training
+        description: The name or the acronym of the training
         schema:
           type: string
       - name: campus
@@ -4435,10 +4435,10 @@ paths:
       operationId: listFormationContinueDTOs
       description: Autocomplete to find a continuing education
       parameters:
-      - name: name
+      - name: acronym_or_name
         required: true
         in: query
-        description: The name of the training
+        description: The name or the acronym of the training
         schema:
           type: string
       - name: campus

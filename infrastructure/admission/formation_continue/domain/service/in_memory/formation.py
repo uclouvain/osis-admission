@@ -159,12 +159,12 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
         raise FormationNonTrouveeException
 
     @classmethod
-    def search(cls, annee: Optional[int], intitule: str, campus: Optional[str]) -> List['FormationDTO']:
+    def search(cls, annee: Optional[int], terme_de_recherche: str, campus: Optional[str]) -> List['FormationDTO']:
         return [
             cls._build_dto(entity=training)
             for training in cls.trainings
             if training.entity_id.annee == annee
-            and intitule in training.intitule
+            and terme_de_recherche in training.intitule
             and (not campus or training.campus == campus)
         ]
 
