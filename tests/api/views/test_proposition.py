@@ -250,7 +250,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             billing_address_street_number='1',
             billing_address_postal_box='PB1',
             billing_address_postal_code='1348',
-            billing_address_city='Louvain-La-Neuve',
+            billing_address_city='Louvain-la-Neuve',
             billing_address_country=CountryFactory(iso_code=BE_ISO_CODE),
             training__management_entity=cls.commission.entity,
         )

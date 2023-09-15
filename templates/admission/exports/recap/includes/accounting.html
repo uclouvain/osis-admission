@@ -161,8 +161,8 @@
 {% endif %}
 
 {% panel _('Memberships') %}
-  {% if is_general %}
-    {% field_data _('Would you like to pursue fitness or sport activities? If so, the cost of membership will be added to your tuition fee.') comptabilite.affiliation_sport|enum_display:'ChoixAffiliationSport' %}
+  {% if is_general and proposition.formation.campus in sport_affiliation_choices_by_campus %}
+    {% field_data _('Would you like to join the sport activities? If so, the cost of membership will be added to your tuition fee.') comptabilite.affiliation_sport|enum_display:'ChoixAffiliationSport' %}
   {% endif %}
   {% field_data _("Would you like to become a Solidarity Student, that is, a member of a programme proposed by UCLouvain's NGO, Louvain Cooperation? This membership will give you access to a fund for your solidarity projects. If so, the membership cost, which is E12, will be added to your tuition fee.") comptabilite.etudiant_solidaire %}
 {% endpanel %}

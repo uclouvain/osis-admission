@@ -41,7 +41,7 @@ from admission.ddd.admission.enums.comptabilite import (
 from osis_common.ddd import interface
 
 
-@attr.dataclass(frozen=True, slots=True)
+@attr.dataclass(slots=True)
 class Comptabilite(interface.ValueObject):
     # Absence de dettes
     attestation_absence_dette_etablissement: List[str] = attr.Factory(list)

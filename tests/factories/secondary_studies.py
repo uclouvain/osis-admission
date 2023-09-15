@@ -45,7 +45,7 @@ class BelgianHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
     community = BelgianCommunitiesOfEducation.GERMAN_SPEAKING.name
     educational_type = EducationalType.PROFESSIONAL_EDUCATION.name
     other_institute_name = ('HS UCL',)
-    other_institute_address = ('Louvain-La-Neuve',)
+    other_institute_address = ('Louvain-la-Neuve',)
 
     class Meta:
         model = BelgianHighSchoolDiploma

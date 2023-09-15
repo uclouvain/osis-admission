@@ -1080,7 +1080,7 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             'adresse_facturation_rue': 'rue du moulin',
             'adresse_facturation_numero_rue': '1',
             'adresse_facturation_code_postal': '1348',
-            'adresse_facturation_ville': 'Louvain-La-Neuve',
+            'adresse_facturation_ville': 'Louvain-la-Neuve',
             'adresse_facturation_pays': 'BE',
             'adresse_facturation_destinataire': 'John Doe',
             'adresse_facturation_boite_postale': 'B1',

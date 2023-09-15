@@ -119,6 +119,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
     pays_nationalite_ue: Optional[bool]
     a_frequente_recemment_etablissement_communaute_fr: Optional[bool]
     comptabilite: Comptabilite
+    formation: Formation
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -143,6 +144,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
             ShouldAffiliationsEtreCompletees(
                 affiliation_sport=self.comptabilite.affiliation_sport,
                 etudiant_solidaire=self.comptabilite.etudiant_solidaire,
+                formation=self.formation,
             ),
             ShouldTypeCompteBancaireRemboursementEtreComplete(
                 type_numero_compte=self.comptabilite.type_numero_compte,

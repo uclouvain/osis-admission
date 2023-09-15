@@ -1012,7 +1012,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                 'coordinates': {
                     'country': 'BE',
                     'postal_code': '1348',
-                    'city': 'Louvain-La-Neuve',
+                    'city': 'Louvain-la-Neuve',
                     'street': 'University street',
                     'street_number': '2',
                     'postal_box': 'B2',

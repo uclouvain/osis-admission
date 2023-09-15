@@ -5446,8 +5446,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Would you like to pursue fitness or sport activities? If so, the cost of "
-"membership will be added to your tuition fee."
+"Would you like to join the sport activities? If so, the cost of membership "
+"will be added to your tuition fee."
 msgstr ""
 
 msgid "Would you like to switch courses this academic year at UCLouvain?"
@@ -5496,17 +5496,23 @@ msgstr "Yes, in Mons and other UCLouvain campuses (€60)"
 msgid "Yes, in Saint-Gilles and other UCLouvain campuses (E60)"
 msgstr "Yes, in Saint-Gilles and other UCLouvain campuses (€60)"
 
+msgid "Yes, in Saint-Louis and other UCLouvain campuses (E60)"
+msgstr "Yes, in Saint-Louis and other UCLouvain campuses (€60)"
+
 msgid "Yes, in Tournai and other UCLouvain campuses (E60)"
 msgstr "Yes, in Tournai and other UCLouvain campuses (€60)"
 
-msgid "Yes, only in Mons (E10)"
-msgstr "Yes, only in Mons (€10)"
+msgid "Yes, only in Mons (E12)"
+msgstr "Yes, only in Mons (€12)"
 
-msgid "Yes, only in Saint-Gilles (E10)"
-msgstr "Yes, only in Saint-Gilles (€10)"
+msgid "Yes, only in Saint-Gilles (E12)"
+msgstr "Yes, only in Saint-Gilles (€12)"
 
-msgid "Yes, only in Tournai (E10)"
-msgstr "Yes, only in Tournai (€10)"
+msgid "Yes, only in Saint-Louis (E12)"
+msgstr "Yes, only in Saint-Louis (€12)"
+
+msgid "Yes, only in Tournai (E12)"
+msgstr "Yes, only in Tournai (€12)"
 
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""

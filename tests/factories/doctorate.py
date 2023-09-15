@@ -116,7 +116,7 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
             post_enrolment_status=ChoixStatutDoctorat.ADMITTED.name,
             submitted_profile={
                 "coordinates": {
-                    "city": "Louvain-La-Neuve",
+                    "city": "Louvain-la-Neuve",
                     "place": "",
                     "street": "Place de l'Université",
                     "country": "BE",

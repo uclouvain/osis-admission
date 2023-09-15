@@ -48,7 +48,7 @@ class CitiesAutocompleteTestCase(TestCase):
 
         ZipCodeFactory(
             zip_code='1348',
-            municipality='Louvain-La-Neuve',
+            municipality='Louvain-la-Neuve',
             country=belgian_country,
         )
 
@@ -78,7 +78,7 @@ class CitiesAutocompleteTestCase(TestCase):
                 'pagination': {'more': False},
                 'results': [
                     {'id': 'Bruxelles', 'text': 'Bruxelles'},
-                    {'id': 'Louvain-La-Neuve', 'text': 'Louvain-La-Neuve'},
+                    {'id': 'Louvain-la-Neuve', 'text': 'Louvain-la-Neuve'},
                 ],
             },
         )
@@ -100,7 +100,7 @@ class CitiesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'Louvain-La-Neuve', 'text': 'Louvain-La-Neuve'},
+                    {'id': 'Louvain-la-Neuve', 'text': 'Louvain-la-Neuve'},
                 ],
             },
         )
@@ -122,7 +122,7 @@ class CitiesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'Louvain-La-Neuve', 'text': 'Louvain-La-Neuve'},
+                    {'id': 'Louvain-la-Neuve', 'text': 'Louvain-la-Neuve'},
                 ],
             },
         )
@@ -145,7 +145,7 @@ class CitiesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'Louvain-La-Neuve', 'text': 'Louvain-La-Neuve'},
+                    {'id': 'Louvain-la-Neuve', 'text': 'Louvain-la-Neuve'},
                 ],
             },
         )
