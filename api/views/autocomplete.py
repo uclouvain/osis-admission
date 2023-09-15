@@ -113,10 +113,10 @@ class AutocompleteSectorView(ListAPIView):
 
 class EducationSearchingBackendMixin:
     NAME_SCHEMA = {
-        'name': 'name',
+        'name': 'acronym_or_name',
         'required': True,
         'in': 'query',
-        'description': "The name of the training",
+        'description': "The name or the acronym of the training",
         'schema': {
             'type': 'string',
         },

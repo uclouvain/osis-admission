@@ -98,7 +98,7 @@ paths:
       - propositions
   /propositions/permissions:
     get:
-      operationId: list_proposition_create_permissions
+      operationId: detail_proposition_create_permissions
       description: ''
       parameters:
       - $ref: '#/components/parameters/Accept-Language'
@@ -111,9 +111,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PropositionCreatePermissions'
+                $ref: '#/components/schemas/PropositionCreatePermissions'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'

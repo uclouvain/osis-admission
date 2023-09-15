@@ -164,7 +164,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             cls._build_dto(entity=training)
             for training in cls.trainings
             if training.entity_id.annee == annee
-            and terme_de_recherche in training.intitule
+            and (terme_de_recherche in training.intitule or terme_de_recherche in training.entity_id.sigle)
             and (not campus or training.campus == campus)
         ]
 

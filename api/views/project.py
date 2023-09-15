@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.db.models import Prefetch
+from osis_signature.models import Actor
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
@@ -51,7 +52,6 @@ from admission.utils import get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
-from osis_signature.models import Actor
 
 __all__ = [
     "PropositionCreatePermissionsView",
@@ -75,6 +75,7 @@ class PropositionCreatePermissionsView(APIPermissionRequiredMixin, APIView):
     schema = PropositionCreatePermissionsSchema()
     pagination_class = None
     filter_backends = []
+    action = 'detail'
 
     def get(self, request, *args, **kwargs):
         serializer = serializers.PropositionCreatePermissionsSerializer({}, context={'request': request})
