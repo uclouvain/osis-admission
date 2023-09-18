@@ -5134,6 +5134,17 @@ msgstr ""
 "supérieures. Des études en Belgique sont considérées comme des études en "
 "français et en anglais."
 
+msgid ""
+"Takes into account the nationality of higher education diplomas. 'Not "
+"Belgian' means that the candidate hasn't got any Belgian diploma but has a "
+"foreign diploma. Similarly, 'Not UE' means that the candidate hasn't got any "
+"UE diploma but has a non-UE diploma."
+msgstr ""
+"Prend en considération la nationalité des diplômes du supérieur. 'Non-Belge' "
+"signifie que le candidat n'a pas de diplôme belge mais au-moins un diplôme "
+"étranger. De la même manière, 'Non-UE' signifie que le candidat n'a pas de "
+"diplôme de l'UE mais au-moins un diplôme hors UE."
+
 msgid "Teaching campus of the training"
 msgstr "Campus d'enseignement de la formation"
 

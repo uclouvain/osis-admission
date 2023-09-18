@@ -43,6 +43,10 @@ class Migration(migrations.Migration):
                 default='TOUS',
                 max_length=30,
                 verbose_name='Diploma nationality',
+                help_text="Takes into account the nationality of higher education diplomas. "
+                          "'Not Belgian' means that the candidate hasn't got any Belgian diploma but has a foreign "
+                          "diploma. Similarly, 'Not UE' means that the candidate hasn't got any UE diploma but "
+                          "has a non-UE diploma.",
             ),
         ),
         migrations.AlterField(
