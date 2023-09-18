@@ -97,8 +97,9 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
     def search(
         cls,
         sigle_secteur_entite_gestion: str,
-        annee: Optional[int],
-        campus: Optional[str],
+        annee: Optional[int] = None,
+        campus: Optional[str] = '',
+        terme_de_recherche: Optional[str] = '',
     ) -> List['DoctoratDTO']:
         doctorates = cls.sector_doctorates_mapping.get(sigle_secteur_entite_gestion, [])
         return [
@@ -111,6 +112,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             if doc.entity_id.sigle in doctorates
             and doc.entity_id.annee == annee
             and (not campus or doc.campus == campus)
+            and (terme_de_recherche in doc.intitule or terme_de_recherche in doc.sigle)
         ]
 
     @classmethod

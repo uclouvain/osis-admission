@@ -145,6 +145,7 @@ class EducationSearchingBackendMixin:
 class DoctorateEducationSearchingBackend(BaseFilterBackend, EducationSearchingBackendMixin):
     def get_schema_operation_parameters(self, view):  # pragma: no cover
         return [
+            self.NAME_SCHEMA,
             self.CAMPUS_SCHEMA,
         ]
 
@@ -162,6 +163,7 @@ class AutocompleteDoctoratView(ListAPIView):
         doctorat_list = message_bus_instance.invoke(
             RechercherDoctoratQuery(
                 sigle_secteur_entite_gestion=kwargs.get('sigle'),
+                terme_de_recherche=request.GET.get('acronym_or_name'),
                 campus=request.GET.get('campus'),
             )
         )
