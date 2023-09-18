@@ -30,6 +30,7 @@ from unittest import TestCase, mock
 
 import freezegun
 
+from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ReductionDesDroitsInscriptionNonCompleteeException,
     AbsenceDeDetteNonCompleteeException,
@@ -39,9 +40,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AffiliationsNonCompleteesException,
     ExperiencesAcademiquesNonCompleteesException,
     TypeCompteBancaireRemboursementNonCompleteException,
-    CoordonneesNonCompleteesException,
 )
-from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
+from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
@@ -56,7 +56,6 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
 )
-from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
     ChoixAssimilation1,
@@ -67,6 +66,7 @@ from admission.ddd.admission.enums import (
     ChoixAssimilation6,
     ChoixTypeCompteBancaire,
 )
+from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -996,6 +996,17 @@ class TestVerifierPropositionService(TestCase):
             comptabilite=comptabilite,
             exception=AffiliationsNonCompleteesException,
         )
+
+        # No exception as the training campus is not concerned by the sport affiliation
+        with mock.patch.multiple(
+            self.master_proposition,
+            formation_id=FormationIdentity(sigle='MASTER-SCI-UNKNOWN-CAMPUS', annee=2021),
+        ):
+            comptabilite = _ComptabiliteFactory(
+                affiliation_sport='',
+            )
+            with mock.patch.object(self.master_proposition, 'comptabilite', comptabilite):
+                self.message_bus.invoke(self.cmd(uuid='uuid-MASTER-SCI'))
 
     def test_should_retourner_erreur_si_etudiant_solidaire_non_renseigne(self):
         comptabilite = _ComptabiliteFactory(

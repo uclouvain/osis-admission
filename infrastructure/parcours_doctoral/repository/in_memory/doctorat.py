@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -59,6 +59,7 @@ class Formation:
     intitule: str
     sigle: str
     annee: int
+    campus: str
 
 
 class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository):
@@ -70,8 +71,8 @@ class DoctoratInMemoryRepository(InMemoryGenericRepository, IDoctoratRepository)
     ]
 
     formations = [
-        Formation("Doctorat en sciences", "SC3DP", 2022),
-        Formation("Doctorat en sciences économiques et de gestion", "ECGM3D", 2022),
+        Formation("Doctorat en sciences", "SC3DP", 2022, "Mons"),
+        Formation("Doctorat en sciences économiques et de gestion", "ECGM3D", 2022, "Mons"),
     ]
 
     @classmethod

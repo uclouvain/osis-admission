@@ -92,6 +92,7 @@ def create_default_propositions_in_progress(candidate):
 
 class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
     @classmethod
+    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
         cls.candidate = PersonFactory()
         root = EntityVersionFactory(parent=None).entity
@@ -520,7 +521,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/', WAFFLE_CREATE_MISSING_SWITCHES=False)
 class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, APITestCase):
     file_uuid = str(uuid.uuid4())
 

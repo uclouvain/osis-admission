@@ -254,6 +254,7 @@ class ProfilCandidat(interface.DomainService):
         proposition: PropositionGenerale,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
+        formation: Formation,
     ):
         conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
             matricule=proposition.matricule_candidat,
@@ -265,4 +266,5 @@ class ProfilCandidat(interface.DomainService):
                 conditions_comptabilite.a_frequente_recemment_etablissement_communaute_fr
             ),
             comptabilite=proposition.comptabilite,
+            formation=formation,
         ).validate()

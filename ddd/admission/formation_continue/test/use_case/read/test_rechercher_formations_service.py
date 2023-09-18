@@ -33,7 +33,7 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 class TestRechercherFormationService(SimpleTestCase):
     def setUp(self) -> None:
         self.cmd = RechercherFormationContinueQuery(
-            intitule_formation='USCC1',
+            terme_de_recherche='USCC1',
         )
         self.message_bus = message_bus_in_memory_instance
 
@@ -51,13 +51,13 @@ class TestRechercherFormationService(SimpleTestCase):
     @freezegun.freeze_time('2022-11-01')
     def test_should_rechercher_par_intitule_formation_et_par_campus(self):
         # Tous les campus
-        results = self.message_bus.invoke(RechercherFormationContinueQuery(intitule_formation='USCC'))
+        results = self.message_bus.invoke(RechercherFormationContinueQuery(terme_de_recherche='USCC'))
         self.assertEqual(len(results), 5)
 
         # Un campus
         results = self.message_bus.invoke(
             RechercherFormationContinueQuery(
-                intitule_formation='USCC',
+                terme_de_recherche='USCC',
                 campus='Mons',
             )
         )

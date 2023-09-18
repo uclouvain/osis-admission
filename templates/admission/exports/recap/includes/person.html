@@ -69,7 +69,7 @@
       {% field_data _('Passport expiry date') identification.date_expiration_passeport "col-md-6" %}
     </div>
   {% else %}
-    {% translate 'Not specified' %}
+    {% translate 'Incomplete field' %}
   {% endif %}
 {% endpanel %}
 
@@ -77,7 +77,7 @@
   {% if identification.annee_derniere_inscription_ucl %}
     {% field_data _('Have you previously enrolled at UCLouvain?') _('Yes') %}
     <div class="row">
-      {% field_data _("Last registration year") identification.annee_derniere_inscription_ucl|get_academic_year "col-md-6" %}
+      {% field_data _("Most recent year of enrolment") identification.annee_derniere_inscription_ucl|get_academic_year "col-md-6" %}
       {% field_data _("Your previous NOMA (matriculation number)") identification.noma_derniere_inscription_ucl "col-md-6" %}
     </div>
   {% else %}

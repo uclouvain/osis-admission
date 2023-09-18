@@ -68,6 +68,7 @@ class ProfessionalExperienceSerializer(serializers.ModelSerializer):
         model = ProfessionalExperience
         exclude = [
             'id',
+            'external_id',
         ]
 
     @staticmethod
@@ -99,6 +100,7 @@ class EducationalExperienceYearSerializer(serializers.ModelSerializer):
         exclude = [
             'id',
             'educational_experience',
+            'external_id',
         ]
 
 
@@ -146,6 +148,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         depth = 1
         exclude = [
             'id',
+            'external_id',
         ]
 
     @staticmethod

@@ -41,7 +41,7 @@ from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCand
 from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.enums import Onglets, CHOIX_AFFILIATION_SPORT_SELON_SITE
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande, IdentifiantBaseEmplacementDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 from admission.exports.admission_recap.attachments import (
@@ -414,6 +414,7 @@ def get_accounting_section(context: ResumePropositionDTO, load_content: bool) ->
             'last_fr_institutes': last_fr_institutes,
             'with_assimilation': with_assimilation,
             'formatted_relationship': formatted_relationship,
+            'sport_affiliation_choices_by_campus': CHOIX_AFFILIATION_SPORT_SELON_SITE,
         },
         attachments=get_accounting_attachments(
             context,

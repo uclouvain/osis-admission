@@ -29,7 +29,7 @@ from typing import List, Union
 import freezegun
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
@@ -55,6 +55,7 @@ from reference.tests.factories.country import CountryFactory
 
 
 @freezegun.freeze_time('2023-01-01')
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
     NB_MAX_QUERIES = 24

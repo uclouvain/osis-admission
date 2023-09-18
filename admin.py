@@ -33,18 +33,19 @@ from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy
 from hijack.contrib.admin import HijackUserAdminMixin
+from osis_mail_template.admin import MailTemplateAdmin
 
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_configurator import CddConfigurator
+from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.jury_secretary import JurySecretary
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
-from admission.auth.roles.central_manager import CentralManager
 from admission.contrib.models import (
     AdmissionTask,
     AdmissionViewer,
@@ -60,6 +61,7 @@ from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.ddd.admission.enums import CritereItemFormulaireFormation
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
@@ -69,7 +71,6 @@ from base.models.person import Person
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from osis_document.contrib import FileField
-from osis_mail_template.admin import MailTemplateAdmin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
@@ -267,6 +268,53 @@ class AcademicYearListFilter(admin.SimpleListFilter):
         return queryset.filter(academic_year__pk=value) if value else queryset
 
 
+class SimpleListFilterWithDefaultValue(admin.SimpleListFilter):
+    default_value = ''
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.used_parameters.setdefault(self.parameter_name, self.default_value)
+
+    def choices(self, changelist):
+        for lookup, title in [('all', _('All'))] + self.lookup_choices:
+            yield {
+                'selected': self.value() == str(lookup),
+                'query_string': changelist.get_query_string({self.parameter_name: lookup}),
+                'display': title,
+            }
+
+    def filtered_queryset(self, value, request, queryset):
+        raise NotImplementedError(
+            'subclasses of SimpleListFilterWithDefaultValue must provide a filtered_queryset() method'
+        )
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value != 'all':
+            return self.filtered_queryset(value, request, queryset)
+        return queryset
+
+
+class AdmissionFormItemFreeDocumentListFilter(SimpleListFilterWithDefaultValue):
+    title = _("use")
+    parameter_name = "use"
+    default_value = 'without_free_documents'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('without_free_documents', _("Without free documents")),
+            ('free_documents', _("Free documents")),
+        ]
+
+    def filtered_queryset(self, value, request, queryset):
+        filter_by = models.Q(
+            admissionformiteminstantiation__display_according_education=(
+                CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name
+            )
+        )
+        return queryset.filter(filter_by if value == 'free_documents' else ~filter_by)
+
+
 class AdmissionFormItemAdmin(admin.ModelAdmin):
     list_display = [
         'id',
@@ -281,7 +329,17 @@ class AdmissionFormItemAdmin(admin.ModelAdmin):
     list_filter = [
         'type',
         'active',
+        AdmissionFormItemFreeDocumentListFilter,
     ]
+    create_only_fields = {
+        'internal_label',
+    }
+
+    def get_readonly_fields(self, request, obj=None):
+        read_only_fields = super().get_readonly_fields(request, obj)
+        if obj:
+            return [field for field in read_only_fields if field not in self.create_only_fields]
+        return read_only_fields
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
@@ -309,6 +367,12 @@ class AdmissionFormItemInstantiationForm(forms.ModelForm):
         fields = '__all__'
 
 
+class AdmissionFormItemInstantiationFreeDocumentListFilter(AdmissionFormItemFreeDocumentListFilter):
+    def filtered_queryset(self, value, request, queryset):
+        filter_by = models.Q(display_according_education=CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name)
+        return queryset.filter(filter_by if value == 'free_documents' else ~filter_by)
+
+
 class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
     list_display = [
         'academic_year',
@@ -320,6 +384,7 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
         'education_group_type',
         'education_group_acronym',
         'candidate_nationality',
+        'diploma_nationality',
         'study_language',
         'vip_candidate',
         'tab',
@@ -332,9 +397,11 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
         EducationGroupTypeListFilter,
         'tab',
         'candidate_nationality',
+        'diploma_nationality',
         'study_language',
         'vip_candidate',
         AcademicYearListFilter,
+        AdmissionFormItemInstantiationFreeDocumentListFilter,
     ]
     raw_id_fields = ['education_group']
     autocomplete_fields = ['form_item', 'admission']

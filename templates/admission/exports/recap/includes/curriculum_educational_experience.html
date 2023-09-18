@@ -131,7 +131,7 @@
                   </td>
                 {% endif %}
                 <td>
-                  {{ experience_year.resultat|enum_display:'Result'|default:_('Not specified') }}
+                  {{ experience_year.resultat|enum_display:'Result'|default:_('Incomplete field') }}
                 </td>
               </tr>
               {% if experience.type_releve_notes == 'ONE_A_YEAR' %}

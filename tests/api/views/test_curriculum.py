@@ -1171,7 +1171,7 @@ class EducationalExperienceTestCase(APITestCase):
                 'institute_name': 'Second institute',
                 'country': self.country.iso_code,
                 'institute': None,
-                'institute_address': 'Louvain-La-Neuve',
+                'institute_address': 'Louvain-la-Neuve',
                 'study_system': '',
                 'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
                 'linguistic_regime': self.linguistic_regime.code,
@@ -1210,7 +1210,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(json_response.get('institute_name'), 'Second institute')
         self.assertEqual(json_response.get('country'), self.country.iso_code)
         self.assertEqual(json_response.get('institute'), None)
-        self.assertEqual(json_response.get('institute_address'), 'Louvain-La-Neuve')
+        self.assertEqual(json_response.get('institute_address'), 'Louvain-la-Neuve')
         self.assertEqual(json_response.get('study_system'), '')
         self.assertEqual(json_response.get('evaluation_type'), EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(json_response.get('linguistic_regime'), self.linguistic_regime.code)
@@ -1249,7 +1249,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(experience.institute_name, 'Second institute')
         self.assertEqual(experience.country, self.country)
         self.assertEqual(experience.institute, None)
-        self.assertEqual(experience.institute_address, 'Louvain-La-Neuve')
+        self.assertEqual(experience.institute_address, 'Louvain-la-Neuve')
         self.assertEqual(experience.study_system, '')
         self.assertEqual(experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(experience.linguistic_regime, self.linguistic_regime)

@@ -133,7 +133,7 @@ class CoordonneesFormTestCase(TestCase):
             instance=PersonAddressFactory(
                 country=None,
                 postal_code='1348',
-                city='Louvain-La-Neuve',
+                city='Louvain-la-Neuve',
             ),
         )
         self.assertEqual(form.initial.get('be_postal_code'), None)
@@ -144,7 +144,7 @@ class CoordonneesFormTestCase(TestCase):
             instance=PersonAddressFactory(
                 country=self.france_country,
                 postal_code='1348',
-                city='Louvain-La-Neuve',
+                city='Louvain-la-Neuve',
             ),
         )
         self.assertEqual(form.initial.get('be_postal_code'), None)
@@ -155,12 +155,12 @@ class CoordonneesFormTestCase(TestCase):
             instance=PersonAddressFactory(
                 country=self.belgium_country,
                 postal_code='1348',
-                city='Louvain-La-Neuve',
+                city='Louvain-la-Neuve',
             ),
         )
         self.assertEqual(form.initial.get('be_postal_code'), '1348')
-        self.assertEqual(form.initial.get('be_city'), 'Louvain-La-Neuve')
-        self.assertEqual(form.fields['be_city'].widget.choices, [('Louvain-La-Neuve', 'Louvain-La-Neuve')])
+        self.assertEqual(form.initial.get('be_city'), 'Louvain-la-Neuve')
+        self.assertEqual(form.fields['be_city'].widget.choices, [('Louvain-la-Neuve', 'Louvain-la-Neuve')])
 
     def form_submission_without_any_data(self):
         # By default, the form can be empty
@@ -227,7 +227,7 @@ class CoordonneesFormTestCase(TestCase):
                 'street_number': '123',
                 'city': 'PARIS',
                 'postal_code': '92000',
-                'be_city': 'Louvain-La-Neuve',
+                'be_city': 'Louvain-la-Neuve',
                 'be_postal_code': '1348',
             },
         )
@@ -241,7 +241,7 @@ class CoordonneesFormTestCase(TestCase):
                 'postal_code': '92000',
                 'street': 'Art Street',
                 'postal_box': '',
-                'be_city': 'Louvain-La-Neuve',
+                'be_city': 'Louvain-la-Neuve',
                 'be_postal_code': '1348',
                 'street_number': '123',
             },
@@ -280,7 +280,7 @@ class CoordonneesFormTestCase(TestCase):
                 'street_number': '123',
                 'city': 'PARIS',
                 'postal_code': '92000',
-                'be_city': 'Louvain-La-Neuve',
+                'be_city': 'Louvain-la-Neuve',
                 'be_postal_code': '1348',
             },
         )
@@ -294,7 +294,7 @@ class CoordonneesFormTestCase(TestCase):
                 'postal_code': '92000',
                 'street': 'Art Street',
                 'postal_box': '',
-                'be_city': 'Louvain-La-Neuve',
+                'be_city': 'Louvain-la-Neuve',
                 'be_postal_code': '1348',
                 'street_number': '123',
             },
@@ -303,7 +303,7 @@ class CoordonneesFormTestCase(TestCase):
             form.get_prepare_data,
             {
                 'country': self.belgium_country,
-                'city': 'Louvain-La-Neuve',
+                'city': 'Louvain-la-Neuve',
                 'postal_code': '1348',
                 'street': 'Art Street',
                 'postal_box': '',
@@ -363,7 +363,7 @@ class CoordonneesFormTestCase(TestCase):
             {
                 'residential-country': self.belgium_country.pk,
                 'residential-be_postal_code': '1348',
-                'residential-be_city': 'Louvain-La-Neuve',
+                'residential-be_city': 'Louvain-la-Neuve',
                 'residential-street': 'Art street',
                 'residential-street_number': '1',
             },
@@ -379,7 +379,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertEqual(len(residential_addresses), 1)
         self.assertEqual(residential_addresses[0].country, self.belgium_country)
         self.assertEqual(residential_addresses[0].postal_code, '1348')
-        self.assertEqual(residential_addresses[0].city, 'Louvain-La-Neuve')
+        self.assertEqual(residential_addresses[0].city, 'Louvain-la-Neuve')
         self.assertEqual(residential_addresses[0].street, 'Art street')
         self.assertEqual(residential_addresses[0].street_number, '1')
 
@@ -421,7 +421,7 @@ class CoordonneesFormTestCase(TestCase):
                 'show_contact': True,
                 'contact-country': self.belgium_country.pk,
                 'contact-be_postal_code': '1348',
-                'contact-be_city': 'Louvain-La-Neuve',
+                'contact-be_city': 'Louvain-la-Neuve',
                 'contact-street': 'Art street',
                 'contact-street_number': '1',
                 'residential-country': self.france_country.pk,
@@ -442,7 +442,7 @@ class CoordonneesFormTestCase(TestCase):
         self.assertEqual(len(contact_addresses), 1)
         self.assertEqual(contact_addresses[0].country, self.belgium_country)
         self.assertEqual(contact_addresses[0].postal_code, '1348')
-        self.assertEqual(contact_addresses[0].city, 'Louvain-La-Neuve')
+        self.assertEqual(contact_addresses[0].city, 'Louvain-la-Neuve')
         self.assertEqual(contact_addresses[0].street, 'Art street')
 
         # The candidate has an existing address and specifies a new one
@@ -520,7 +520,7 @@ class CoordonneesFormTestCase(TestCase):
             'coordinates': {
                 'country': 'BE',
                 'postal_code': '1348',
-                'city': 'Louvain-La-Neuve',
+                'city': 'Louvain-la-Neuve',
                 'street': 'University street',
                 'street_number': '1',
                 'postal_box': 'PB1',

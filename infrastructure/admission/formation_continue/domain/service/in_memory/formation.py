@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -50,8 +50,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC1',
             entity_id__annee=2020,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Louvain-La-Neuve',
-            campus_inscription='Louvain-La-Neuve',
+            campus='Louvain-la-Neuve',
+            campus_inscription='Louvain-la-Neuve',
             sigle_entite_gestion='FC1',
         ),
         FormationFactory(
@@ -59,8 +59,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC2',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Louvain-La-Neuve',
-            campus_inscription='Louvain-La-Neuve',
+            campus='Louvain-la-Neuve',
+            campus_inscription='Louvain-la-Neuve',
             sigle_entite_gestion='FC1',
         ),
         FormationFactory(
@@ -77,8 +77,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC4',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Louvain-La-Neuve',
-            campus_inscription='Louvain-La-Neuve',
+            campus='Louvain-la-Neuve',
+            campus_inscription='Louvain-la-Neuve',
             sigle_entite_gestion='FC1',
         ),
         FormationFactory(
@@ -104,8 +104,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC4',
             entity_id__annee=2020,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Louvain-La-Neuve',
-            campus_inscription='Louvain-La-Neuve',
+            campus='Louvain-la-Neuve',
+            campus_inscription='Louvain-la-Neuve',
             sigle_entite_gestion='FC1',
         ),
     ]
@@ -154,17 +154,18 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
                 entity_id=training.entity_id,
                 type=training.type,
                 code_domaine=training.code_domaine,
+                campus=training.campus or '',
             )
 
         raise FormationNonTrouveeException
 
     @classmethod
-    def search(cls, annee: Optional[int], intitule: str, campus: Optional[str]) -> List['FormationDTO']:
+    def search(cls, annee: Optional[int], terme_de_recherche: str, campus: Optional[str]) -> List['FormationDTO']:
         return [
             cls._build_dto(entity=training)
             for training in cls.trainings
             if training.entity_id.annee == annee
-            and intitule in training.intitule
+            and (terme_de_recherche in training.intitule or terme_de_recherche in training.entity_id.sigle)
             and (not campus or training.campus == campus)
         ]
 

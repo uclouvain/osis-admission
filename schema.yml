@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.82
+  version: 1.0.84
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -87,6 +87,31 @@ paths:
           content:
             application/json:
               schema: {}
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
+  /propositions/permissions:
+    get:
+      operationId: detail_proposition_create_permissions
+      description: ''
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionCreatePermissions'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -4369,10 +4394,10 @@ paths:
           - MASTER
           - AGREGATION_CAPES
           - CERTIFICAT
-      - name: name
+      - name: acronym_or_name
         required: true
         in: query
-        description: The name of the training
+        description: The name or the acronym of the training
         schema:
           type: string
       - name: campus
@@ -4408,10 +4433,10 @@ paths:
       operationId: listFormationContinueDTOs
       description: Autocomplete to find a continuing education
       parameters:
-      - name: name
+      - name: acronym_or_name
         required: true
         in: query
-        description: The name of the training
+        description: The name or the acronym of the training
         schema:
           type: string
       - name: campus
@@ -5244,7 +5269,7 @@ paths:
   /propositions/general-education/{uuid}/pay-application-fees:
     post:
       operationId: pay_application_fees_after_submission
-      description: Pay the application fees of the proposition after its submission.
+      description: Pay the application fee of the proposition after its submission.
       parameters:
       - name: uuid
         in: path
@@ -5280,7 +5305,7 @@ paths:
   /propositions/general-education/{uuid}/pay-application-fees-after-request:
     post:
       operationId: pay_application_fees_after_request
-      description: Pay the application fees of the proposition after a manager request.
+      description: Pay the application fee of the proposition after a manager request.
       parameters:
       - name: uuid
         in: path
@@ -5991,6 +6016,18 @@ components:
       - doctorate_propositions
       - general_education_propositions
       - continuing_education_propositions
+    PropositionCreatePermissions:
+      type: object
+      properties:
+        links:
+          type: object
+          properties:
+            create_person:
+              $ref: '#/components/schemas/ActionLink'
+            create_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+          readOnly: true
+          default: {}
     DoctoratePropositionSearchDTO:
       type: object
       properties:

@@ -44,5 +44,5 @@ class IFormationContinueTranslator(IFormationTranslator):
 
     @classmethod
     @abstractmethod
-    def search(cls, annee: Optional[int], intitule: str, campus: Optional[str]) -> List['FormationDTO']:
+    def search(cls, annee: Optional[int], terme_de_recherche: str, campus: Optional[str]) -> List['FormationDTO']:
         raise NotImplementedError

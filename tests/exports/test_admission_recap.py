@@ -262,6 +262,7 @@ class _GroupeDeSupervisionDTO(UnfrozenDTO, GroupeDeSupervisionDTO):
 
 
 @freezegun.freeze_time('2023-01-01')
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
     @classmethod
     def setUpTestData(cls):
@@ -747,7 +748,7 @@ class SectionsAttachmentsTestCase(TestCase):
             domicile_legal=_AdressePersonnelleDTO(
                 rue='Rue du pin',
                 code_postal='1048',
-                ville='Louvain-La-Neuve',
+                ville='Louvain-la-Neuve',
                 pays='BE',
                 nom_pays='Belgique',
                 numero_rue='1',
@@ -866,7 +867,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 type_enseignement=EducationalType.PROFESSIONAL_EDUCATION.name,
                 autre_type_enseignement='Other type',
                 nom_institut='UCL',
-                adresse_institut='Louvain-La-Neuve',
+                adresse_institut='Louvain-la-Neuve',
                 communaute=BelgianCommunitiesOfEducation.FRENCH_SPEAKING.name,
             ),
             diplome_etranger=_DiplomeEtrangerEtudesSecondairesDTO(
@@ -958,7 +959,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 sigle='FC1',
                 annee=2023,
                 intitule='Formation continue 1',
-                campus='Louvain-La-Neuve',
+                campus='Louvain-la-Neuve',
                 type=TrainingType.CERTIFICATE_OF_SUCCESS.name,
                 code_domaine='CDFC',
                 campus_inscription='Mons',
@@ -1000,7 +1001,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 sigle='FG1',
                 annee=2023,
                 intitule='Bachelor 1',
-                campus='Louvain-La-Neuve',
+                campus='Louvain-la-Neuve',
                 type=TrainingType.BACHELOR.name,
                 code_domaine='CDFG',
                 campus_inscription='Mons',
@@ -1046,7 +1047,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 sigle='FD1',
                 annee=2023,
                 intitule='Doctorate 1',
-                campus='Louvain-La-Neuve',
+                campus='Louvain-la-Neuve',
                 type=TrainingType.BACHELOR.name,
                 campus_inscription='Mons',
                 sigle_entite_gestion='FFD',
