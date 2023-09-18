@@ -306,30 +306,19 @@ class AdmissionFormItemInstantiationManager(models.Manager):
     ):
         criteria = [CritereItemFormulaireNationaliteDiplome.TOUS.name]
 
-        if educational_experiences:
-            if any(
-                experience.country.iso_code == BE_ISO_CODE and experience.obtained_diploma
-                for experience in educational_experiences
-            ):
-                criteria.append(CritereItemFormulaireNationaliteDiplome.BELGE.name)
+        experiences_with_diploma = [experience for experience in educational_experiences if experience.obtained_diploma]
 
-            if any(
-                experience.country.iso_code != BE_ISO_CODE and experience.obtained_diploma
-                for experience in educational_experiences
-            ):
-                criteria.append(CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
-
-            if any(
-                experience.country.european_union and experience.obtained_diploma
-                for experience in educational_experiences
-            ):
-                criteria.append(CritereItemFormulaireNationaliteDiplome.UE.name)
-
-            if any(
-                not experience.country.european_union and experience.obtained_diploma
-                for experience in educational_experiences
-            ):
-                criteria.append(CritereItemFormulaireNationaliteDiplome.NON_UE.name)
+        if experiences_with_diploma:
+            criteria.append(
+                CritereItemFormulaireNationaliteDiplome.BELGE.name
+                if any(experience.country.iso_code == BE_ISO_CODE for experience in experiences_with_diploma)
+                else CritereItemFormulaireNationaliteDiplome.NON_BELGE.name
+            )
+            criteria.append(
+                CritereItemFormulaireNationaliteDiplome.UE.name
+                if any(experience.country.european_union for experience in experiences_with_diploma)
+                else CritereItemFormulaireNationaliteDiplome.NON_UE.name
+            )
 
         return criteria
 
@@ -512,6 +501,11 @@ class AdmissionFormItemInstantiation(models.Model):
         default=CritereItemFormulaireNationaliteDiplome.TOUS.name,
         max_length=30,
         verbose_name=_('Diploma nationality'),
+        help_text=_(
+            "Takes into account the nationality of higher education diplomas. 'Not Belgian' means that "
+            "the candidate hasn't got any Belgian diploma but has a foreign diploma. Similarly, 'Not UE' means that "
+            "the candidate hasn't got any UE diploma but has a non-UE diploma."
+        ),
     )
     study_language = models.CharField(
         choices=CritereItemFormulaireLangueEtudes.choices(),
