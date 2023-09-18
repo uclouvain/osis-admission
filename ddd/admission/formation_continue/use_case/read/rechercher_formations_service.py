@@ -45,6 +45,6 @@ def rechercher_formations(
     # THEN
     return formation_continue_translator.search(
         annee=annee_inscription,
-        intitule=cmd.intitule_formation,
+        terme_de_recherche=cmd.terme_de_recherche,
         campus=cmd.campus,
     )

@@ -33,18 +33,18 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.schema import AuthorizationAwareSchema
 from admission.api.serializers import PersonSerializer
+from admission.contrib.models import EntityProxy, Scholarship
+from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
+from admission.ddd.admission.domain.enums import LISTE_TYPES_FORMATION_GENERALE
+from admission.ddd.admission.formation_continue.commands import RechercherFormationContinueQuery
+from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
-from admission.ddd.admission.formation_continue.commands import RechercherFormationContinueQuery
-from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
-from admission.contrib.models import EntityProxy, Scholarship
-from admission.ddd.admission.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from base.auth.roles.tutor import Tutor
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
@@ -113,10 +113,10 @@ class AutocompleteSectorView(ListAPIView):
 
 class EducationSearchingBackendMixin:
     NAME_SCHEMA = {
-        'name': 'name',
+        'name': 'acronym_or_name',
         'required': True,
         'in': 'query',
-        'description': "The name of the training",
+        'description': "The name or the acronym of the training",
         'schema': {
             'type': 'string',
         },
@@ -200,7 +200,7 @@ class AutocompleteGeneralEducationView(ListAPIView):
             RechercherFormationGeneraleQuery(
                 type_formation=request.GET.get('type'),
                 campus=request.GET.get('campus'),
-                intitule_formation=request.GET.get('name'),
+                terme_de_recherche=request.GET.get('acronym_or_name'),
             )
         )
         serializer = serializers.FormationGeneraleDTOSerializer(instance=education_list, many=True)
@@ -220,7 +220,7 @@ class AutocompleteContinuingEducationView(ListAPIView):
         education_list = message_bus_instance.invoke(
             RechercherFormationContinueQuery(
                 campus=request.GET.get('campus'),
-                intitule_formation=request.GET.get('name'),
+                terme_de_recherche=request.GET.get('acronym_or_name'),
             )
         )
         serializer = serializers.FormationContinueDTOSerializer(instance=education_list, many=True)

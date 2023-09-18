@@ -322,12 +322,12 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             offer=cls.next_year_training,
         )
 
-    def test_autocomplete_general_education_with_name(self):
+    def test_autocomplete_general_education_with_acronym_or_name(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(
             resolve_url('autocomplete-general-education'),
             format='json',
-            data={'name': 'informatique 1'},
+            data={'acronym_or_name': 'informatique 1'},
         )
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(len(response.json()), 2)
@@ -496,12 +496,12 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
             offer=cls.next_year_training,
         )
 
-    def test_autocomplete_continuing_education_with_name(self):
+    def test_autocomplete_continuing_education_with_acronym_or_name(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(
             resolve_url('autocomplete-continuing-education'),
             format='json',
-            data={'name': 'informatique 1'},
+            data={'acronym_or_name': 'informatique 1'},
         )
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(len(response.json()), 2)

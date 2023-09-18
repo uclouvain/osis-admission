@@ -94,7 +94,12 @@ class FormationContinueTranslator(IFormationContinueTranslator):
         raise FormationNonTrouveeException
 
     @classmethod
-    def search(cls, annee: Optional[int], intitule: Optional[str], campus: Optional[str]) -> List['FormationDTO']:
+    def search(
+        cls,
+        annee: Optional[int],
+        terme_de_recherche: Optional[str],
+        campus: Optional[str]
+    ) -> List['FormationDTO']:
         from infrastructure.messages_bus import message_bus_instance
 
         if not annee:
@@ -105,7 +110,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
                 annee=annee,
                 campus=campus,
                 est_inscriptible=True,
-                intitule=intitule,
+                terme_de_recherche=terme_de_recherche,
                 types=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
                     TypeFormation.FORMATION_CONTINUE.name
                 ),
