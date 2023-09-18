@@ -476,7 +476,7 @@ class AdmissionPoolHue5BelgiumResidencyCalendar(PoolCalendar):
 class AdmissionPoolHue5ForeignResidencyCalendar(PoolCalendar):
     event_reference = AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY.name
     cutover_date = Date(jour=1, mois=5, annee=-1)
-    end_date = Date(jour=30, mois=4, annee=0)
+    end_date = Date(jour=31, mois=3, annee=0)
 
     @classmethod
     def ensure_consistency_until_n_plus_6(cls):
