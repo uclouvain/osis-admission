@@ -101,7 +101,7 @@ class ProgramManager(EducationGroupRoleModel):
             # Management
             'admission.add_internalnote': is_part_of_education_group,
             'admission.view_internalnote': is_part_of_education_group,
-            'admission.view_documents_management': is_part_of_education_group,
+            'admission.view_documents_management': is_part_of_education_group & is_submitted,
             'admission.view_checklist': is_part_of_education_group & is_submitted,
             'admission.checklist_change_faculty_decision': is_part_of_education_group & in_fac_status_extended,
             'admission.checklist_faculty_decision_transfer_to_sic': is_part_of_education_group & in_fac_status,

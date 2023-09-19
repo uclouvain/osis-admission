@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ from .lister_propositions_supervisees_service import lister_propositions_supervi
 from .rechercher_doctorats_service import rechercher_doctorats
 from .recuperer_comptabilite_service import recuperer_comptabilite
 from .recuperer_cotutelle_service import recuperer_cotutelle
+from .recuperer_documents_proposition_service import recuperer_documents_proposition
 from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
 from .recuperer_groupe_de_supervision_service import recuperer_groupe_de_supervision
 from .recuperer_proposition_service import recuperer_proposition

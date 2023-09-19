@@ -145,6 +145,7 @@ class DocumentViewTestCase(TestCase):
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             curriculum=[uuid.uuid4()],
             pdf_recap=[uuid.uuid4()],
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
     def _create_a_free_document(self, user: User, document_type: str, url='', data=None, with_file=False):

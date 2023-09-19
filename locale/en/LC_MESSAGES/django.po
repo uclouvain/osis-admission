@@ -1756,6 +1756,10 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
+#, python-format
+msgid "Document merging of the proposition %(reference)s"
+msgstr ""
+
 msgid "Document not found."
 msgstr ""
 
@@ -3148,6 +3152,18 @@ msgstr ""
 
 msgid "Membre CA not found."
 msgstr "Supervisory panel member not found."
+
+msgid "Merging of each document field of a continuing proposition into one PDF"
+msgstr ""
+
+msgid "Merging of each document field of a doctorate proposition into one PDF"
+msgstr ""
+
+msgid "Merging of each document field of a general proposition into one PDF"
+msgstr ""
+
+msgid "Merging of each document field of the proposition into one PDF"
+msgstr ""
 
 msgid "Message"
 msgstr ""
@@ -5763,6 +5779,12 @@ msgid "your mother"
 msgstr ""
 
 msgid "your partner"
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"{current_mimetype} is not a valid mimetype for the field "
+"\"{field}\" ({field_mimetypes_as_str})"
 msgstr ""
 
 #, python-brace-format

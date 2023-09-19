@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,6 +33,9 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
+from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
+    EmplacementsDocumentsPropositionTranslator,
+)
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
@@ -43,6 +46,7 @@ from admission.infrastructure.admission.formation_continue.domain.service.questi
 )
 from admission.infrastructure.admission.formation_continue.repository.proposition import PropositionRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
 COMMAND_HANDLERS = {
     RechercherFormationContinueQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -127,5 +131,14 @@ COMMAND_HANDLERS = {
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
         question_specifique_translator=QuestionSpecifiqueTranslator(),
+    ),
+    RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        question_specifique_translator=QuestionSpecifiqueTranslator(),
+        emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+        personne_connue_translator=PersonneConnueUclTranslator(),
     ),
 }

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,6 +41,9 @@ from admission.infrastructure.admission.domain.service.in_memory.maximum_proposi
     MaximumPropositionsAutoriseesInMemory,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
+    EmplacementsDocumentsPropositionInMemoryTranslator,
+)
 from admission.infrastructure.admission.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
@@ -55,6 +58,9 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 _proposition_repository = PropositionInMemoryRepository()
 _formation_continue_translator = FormationContinueInMemoryTranslator()
@@ -64,6 +70,8 @@ _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 _academic_year_repository = AcademicYearInMemoryRepository()
+_emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
+_personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -149,5 +157,14 @@ COMMAND_HANDLERS = {
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
         question_specifique_translator=_question_specific_translator,
+    ),
+    RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        question_specifique_translator=_question_specific_translator,
+        emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        academic_year_repository=_academic_year_repository,
+        personne_connue_translator=_personne_connue_ucl_translator,
     ),
 }

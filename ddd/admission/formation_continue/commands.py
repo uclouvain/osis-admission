@@ -151,3 +151,8 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererQuestionsSpecifiquesQuery(commands.RecupererQuestionsSpecifiquesQuery):
     pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererDocumentsPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
