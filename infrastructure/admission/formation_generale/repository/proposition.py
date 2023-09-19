@@ -227,6 +227,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'annual_program_contact_person_email': entity.email_personne_contact_programme_annuel_annuel,
                 'join_program_fac_comment': entity.commentaire_programme_conjoint,
                 'additional_documents': entity.documents_additionnels,
+                'digit_response': entity.reponse_digit,
             },
         )
 
@@ -398,6 +399,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,
             documents_additionnels=admission.additional_documents,
+            reponse_digit=admission.digit_response,
         )
 
     @classmethod

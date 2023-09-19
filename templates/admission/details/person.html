@@ -27,51 +27,130 @@
 
 {% block tab_content %}
     {% panel _("Identification") %}
-        <div class="row">
-            {% field_data _("Surname") person.last_name "col-md-4" %}
-            {% field_data _("First name") person.first_name "col-md-4" %}
-            {% field_data _("Other given names") person.middle_name "col-md-4" hide_empty=True %}
-        </div>
-        <div class="row">
-            {% field_data _("Sex") person.sex|enum_display:'ChoixSexe' "col-md-4" %}
-            {% field_data _("Gender") person.gender|enum_display:'ChoixGenre' "col-md-4" %}
-        </div>
-        <div class="row">
-            {% if person.birth_date %}
-                {% field_data _("Date of birth") person.birth_date|date:'d/m/Y' "col-md-4" %}
-            {% elif person.birth_year %}
-                {% field_data _("Year of birth") person.birth_year "col-md-4" %}
+        <div style="display:flex; flex-direction: row;">
+
+            <div class="original-person-data" style="flex: 1;">
+
+                {% if proposition_fusion %}
+                    <div class="alert alert-warning">
+                        Données originales fournies par le candidat
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    {% field_data _("Surname") person.last_name "col-md-4" %}
+                    {% field_data _("First name") person.first_name "col-md-4" %}
+                    {% field_data _("Other given names") person.middle_name "col-md-4" hide_empty=True %}
+                </div>
+                <div class="row">
+                    {% field_data _("Sex") person.sex|enum_display:'ChoixSexe' "col-md-4" %}
+                    {% field_data _("Gender") person.gender|enum_display:'ChoixGenre' "col-md-4" %}
+                </div>
+                <div class="row">
+                    {% if person.birth_date %}
+                        {% field_data _("Date of birth") person.birth_date|date:'d/m/Y' "col-md-4" %}
+                    {% elif person.birth_year %}
+                        {% field_data _("Year of birth") person.birth_year "col-md-4" %}
+                    {% endif %}
+                    {% get_country_name person.birth_country as birth_country %}
+                    {% field_data _("Country of birth") birth_country "col-md-4" %}
+                    {% field_data _("Place of birth") person.birth_place "col-md-4" %}
+                </div>
+                <div class="row">
+                  {% field_data _("Civil status") person.civil_state|enum_display:'CivilState' "col-md-4" %}
+                  {% get_country_name person.country_of_citizenship as country_of_citizenship %}
+                  {% field_data _("Country of citizenship") country_of_citizenship "col-md-4" %}
+                </div>
+                {% field_data _("Identification photo") person.id_photo %}
+                {% field_data _("Contact language") contact_language %}
+
+            </div>
+
+            {% if proposition_fusion %}
+
+            <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
+
+            <div class="proposition-fusion-data" style="flex:1;">
+
+                <div class="alert alert-warning">
+                    Proposition de fusion avec personne déjà connue
+                </div>
+
+                <div class="row">
+                    {% field_data _("Surname") proposition_fusion.last_name "col-md-4" %}
+                    {% field_data _("First name") proposition_fusion.first_name "col-md-4" %}
+                    {% field_data _("Other given names") proposition_fusion.middle_name "col-md-4" hide_empty=True %}
+                </div>
+                <div class="row">
+                    {% field_data _("Sex") proposition_fusion.sex|enum_display:'ChoixSexe' "col-md-4" %}
+                    {% field_data _("Gender") proposition_fusion.gender|enum_display:'ChoixGenre' "col-md-4" %}
+                </div>
+                <div class="row">
+                    {% if person.birth_date %}
+                        {% field_data _("Date of birth") proposition_fusion.birth_date|date:'d/m/Y' "col-md-4" %}
+                    {% endif %}
+                    {% field_data _("Place of birth") proposition_fusion.birth_place "col-md-4" %}
+                </div>
+                <div class="row">
+                  {% field_data _("Civil status") proposition_fusion.civil_state|enum_display:'CivilState' "col-md-4" %}
+                  {% field_data _("Country of citizenship") country_of_citizenship "col-md-4" %}
+                </div>
+
+            </div>
+
             {% endif %}
-            {% get_country_name person.birth_country as birth_country %}
-            {% field_data _("Country of birth") birth_country "col-md-4" %}
-            {% field_data _("Place of birth") person.birth_place "col-md-4" %}
+
         </div>
-        <div class="row">
-          {% field_data _("Civil status") person.civil_state|enum_display:'CivilState' "col-md-4" %}
-          {% get_country_name person.country_of_citizenship as country_of_citizenship %}
-          {% field_data _("Country of citizenship") country_of_citizenship "col-md-4" %}
-        </div>
-        {% field_data _("Identification photo") person.id_photo %}
-        {% field_data _("Contact language") contact_language %}
+
     {% endpanel %}
 
     {% panel _("Identity document") %}
-        {% if person.national_number or person.id_card_number %}
-            {% field_data _("Belgian national registry number (NISS)") person.national_number hide_empty=True %}
-            {% field_data _("Identity card number") person.id_card_number hide_empty=True %}
-            {% field_data _("Identity card (both sides)") person.id_card %}
-            <div class="row">
-              {% field_data _('Identity card expiry date') person.id_card_expiry_date "col-md-6" %}
+
+        <div style="display:flex; flex-direction: row;">
+
+            <div class="original-person-data" style="flex: 1;">
+
+            {% if person.national_number or person.id_card_number %}
+                {% field_data _("Belgian national registry number (NISS)") person.national_number hide_empty=True %}
+                {% field_data _("Identity card number") person.id_card_number hide_empty=True %}
+                {% field_data _("Identity card (both sides)") person.id_card %}
+                <div class="row">
+                  {% field_data _('Identity card expiry date') person.id_card_expiry_date "col-md-6" %}
+                </div>
+            {% elif person.passport_number %}
+                {% field_data _("Passport number") person.passport_number %}
+                {% field_data _("Passport") person.passport %}
+                <div class="row">
+                  {% field_data _('Passport expiry date') person.passport_expiry_date "col-md-6" %}
+                </div>
+            {% else %}
+                {% translate 'Not specified' %}
+            {% endif %}
+
             </div>
-        {% elif person.passport_number %}
-            {% field_data _("Passport number") person.passport_number %}
-            {% field_data _("Passport") person.passport %}
-            <div class="row">
-              {% field_data _('Passport expiry date') person.passport_expiry_date "col-md-6" %}
+
+        {% if proposition_fusion %}
+
+            <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
+
+            <div class="proposition-fusion-data" style="flex:1;">
+
+                {% if proposition_fusion.national_number or proposition_fusion.id_card_number %}
+                    {% field_data _("Belgian national registry number (NISS)") proposition_fusion.national_number hide_empty=True %}
+                    {% field_data _("Identity card number") proposition_fusion.id_card_number hide_empty=True %}
+                {% elif proposition_fusion.passport_number %}
+                    {% field_data _("Passport number") proposition_fusion.passport_number %}
+                {% else %}
+                    {% translate 'Not specified' %}
+                {% endif %}
+
             </div>
-        {% else %}
-            {% translate 'Not specified' %}
+
         {% endif %}
+
+        </div>
+
+
     {% endpanel %}
 
     {% panel _("Former UCLouvain student") %}

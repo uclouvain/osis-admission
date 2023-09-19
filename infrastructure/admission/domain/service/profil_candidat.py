@@ -72,6 +72,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from base.models.person_merge_proposal import PersonMergeProposal
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from osis_profile.models import (
     EducationalExperienceYear,
@@ -398,6 +399,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
+
         person = (
             Person.objects.select_related(
                 'country_of_citizenship',

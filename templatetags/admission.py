@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 import re
 from dataclasses import dataclass
 from functools import wraps
@@ -871,3 +871,56 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
 @register.filter
 def render_display_field_name(field_name: str) -> str:
     return _(field_name.replace('_', ' ').capitalize())
+
+
+@register.inclusion_tag('admission/search_account_digit_result_message.html')
+def search_account_digit_result_msg(admission):
+    status = None
+    if hasattr(admission.candidate, 'personmergeproposal'):
+        status = admission.candidate.personmergeproposal.status
+    return {
+        'uuid': admission.uuid,
+        'result_code': status
+    }
+
+
+@register.filter
+def map_fields_items(digit_fields):
+
+    mapping = {
+        "first_name": "firstName",
+        "middle_name": "",
+        "last_name": "lastName",
+        "email": "",
+        "gender": "gender",
+        "birth_date": "birthDate",
+        "civil_state": "",
+        "birth_place": "placeOfBirth",
+        "country_of_citizenship__name": "nationality",
+        "national_number": "nationalRegister",
+        "id_card_number": "",
+        "passport_number": "",
+        "last_registration_id": "",
+    }
+
+    mapped_fields = {}
+    for admission_field, digit_field in mapping.items():
+        mapped_fields[admission_field] = digit_fields.get(digit_field)
+
+    mapped_fields['birth_date'] = datetime.datetime.strptime(mapped_fields['birth_date'], "%Y-%m-%d")
+    mapped_fields['gender'] = "H" if mapped_fields['gender'] == "M" else "F"
+    mapped_fields['country_of_citizenship__name'] = Country.objects.get(
+        iso_code=mapped_fields['country_of_citizenship__name']
+    ).name
+
+    return mapped_fields.items()
+
+
+@register.inclusion_tag('admission/includes/input_field_data.html')
+def input_field_data(label, value, editable=True, mask=None):
+    return {
+        'label': label,
+        'value': str(value) if value else None,
+        'editable': editable,
+        'mask': mask,
+    }

@@ -143,6 +143,8 @@ class Proposition(interface.RootEntity):
     email_personne_contact_programme_annuel_annuel: str = ''
     commentaire_programme_conjoint: str = ''
 
+    reponse_digit: str = ''
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,

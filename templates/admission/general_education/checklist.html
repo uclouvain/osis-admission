@@ -53,6 +53,7 @@
         class="tab-content"
         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
     >
+
       {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation next_url=next_base_url|add:'assimilation' %}
         <div role="tabpanel" class="tab-pane in active" id="assimilation">
           <div class="form-group btn-group status-group" role="group">
@@ -82,6 +83,9 @@
 
       {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
+
+        {% search_account_digit_result_msg original_admission %}
+
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
             {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' %}
@@ -579,7 +583,7 @@
                   event.params.args.data.id = event.params.args.data.original_id;
               }
           });
-      })(jQuery);
+      })(jQuery)
   </script>
 {% endblock script %}
 

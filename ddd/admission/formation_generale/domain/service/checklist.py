@@ -28,6 +28,7 @@ from typing import Optional
 
 from django.utils.translation import gettext_noop as _
 
+from admission.ddd.admission.domain.service.i_digit import IDigitService
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.enums import TypeSituationAssimilation, Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -52,6 +53,7 @@ class Checklist(interface.DomainService):
         proposition: Proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
+        digit_service: 'IDigitService',
     ):
         checklist_initiale = cls.recuperer_checklist_initiale(
             proposition=proposition,
@@ -60,6 +62,13 @@ class Checklist(interface.DomainService):
         )
         proposition.checklist_initiale = checklist_initiale
         proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
+
+        identification_candidat = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+        proposition.reponse_digit = digit_service.rechercher_compte_existant(
+            last_name=identification_candidat.nom,
+            first_name=identification_candidat.prenom,
+            birth_date=str(identification_candidat.date_naissance),
+        )
 
     @classmethod
     def recuperer_checklist_initiale(

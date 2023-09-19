@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from admission.ddd.admission.commands import RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
@@ -39,11 +40,15 @@ from admission.ddd.admission.use_case.write import (
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
 )
+from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
+from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import \
+    initialiser_proposition_fusion_personne
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
+from admission.infrastructure.admission.domain.service.digit import DigitService
 from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
@@ -73,6 +78,8 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
     EmplacementDocumentRepository,
 )
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
+from admission.infrastructure.admission.repository.proposition_fusion_personne import \
+    PropositionPersonneFusionRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
@@ -381,4 +388,12 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
+    RechercherCompteExistantQuery: lambda msg_bus, cmd: rechercher_compte_existant(
+        cmd,
+        digit_service=DigitService()
+    ),
+    InitialiserPropositionFusionPersonneCommand: lambda msg_bus, cmd: initialiser_proposition_fusion_personne(
+        cmd,
+        proposition_fusion_personne_repository=PropositionPersonneFusionRepository()
+    )
 }

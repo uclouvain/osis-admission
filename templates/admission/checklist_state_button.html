@@ -42,7 +42,7 @@
         hx-post="{{ htmx_post }}"
       {% else %}
       hx-swap="none"
-      hx-post="{% url view.base_namespace|add:':change-checklist-status' uuid=view.kwargs.uuid tab=tab status='test' %}"
+      hx-post="{% url view.base_namespace|add:':change-checklist-status' uuid=view.kwargs.uuid tab=tab status="INITIAL_CANDIDAT" %}"
       {% endif %}
   >
     <i class="fas fa-{{ icon }}"></i>

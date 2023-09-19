@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import json
-from typing import Union
+from typing import Union, Optional
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -39,6 +39,7 @@ from admission.auth.roles.sic_management import SicManagement
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission
 from admission.contrib.models.base import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.commands import GetPropositionFusionQuery
 from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand, GetCotutelleCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
@@ -46,6 +47,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, Co
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.domain.validator.exceptions import DemandeNonTrouveeException
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
+from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.formation_continue.commands import RecupererPropositionQuery
 from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -151,6 +153,10 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     def cotutelle(self) -> 'CotutelleDTO':
         return message_bus_instance.invoke(GetCotutelleCommand(uuid_proposition=self.admission_uuid))
 
+    @cached_property
+    def proposition_fusion(self) -> Optional['PropositionFusionPersonneDTO']:
+        return message_bus_instance.invoke(GetPropositionFusionQuery(global_id=self.admission.candidate.global_id))
+
     def update_current_admission_on_form_valid(self, form, admission):
         pass
 
@@ -167,6 +173,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['base_template'] = f'admission/{self.formatted_current_context}/tab_layout.html'
         context['original_admission'] = self.admission
         context['next_url'] = self.next_url
+
+        context['proposition_fusion'] = self.proposition_fusion
 
         if self.is_doctorate:
             try:

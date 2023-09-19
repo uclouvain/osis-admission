@@ -30,8 +30,6 @@ import requests
 from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.views import View
-
 
 __all__ = [
     "RequestDigitAccountCreationView",
@@ -41,6 +39,7 @@ __all__ = [
 from django.views.generic import FormView
 
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd.admission.commands import RechercherCompteExistantQuery
 from base.views.common import display_error_messages
 
 from django.utils.translation import gettext_lazy as _
@@ -96,8 +95,15 @@ class SearchDigitAccountView(FormView):
         if self._is_valid_for_search(request, admission):
             return redirect(to=reverse('admission:doctorate:person', kwargs={'uuid': kwargs['uuid']}))
 
-        response = search_digit_account(request, admission)
-        return response
+        matches = search_digit_account(
+            global_id=admission.candidate.global_id,
+            last_name=admission.candidate.last_name,
+            first_name=admission.candidate.first_name,
+            birth_date=str(admission.candidate.birth_date)
+        )
+
+        request.session['search_context'] = {'matches': matches}
+        return redirect(reverse('admission:services:search-account-modal', kwargs={'uuid': admission.uuid}))
 
     @staticmethod
     def _is_valid_for_search(request, admission):
@@ -117,7 +123,7 @@ class SearchDigitAccountView(FormView):
 
 def request_digit_account_creation(data):
     response = requests.post(
-        headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ab2dbc5b-5278-3370-98de-40df855c2265'},
+        headers={'Content-Type': 'application/json'},
         data=json.dumps({
             "provider": {
                 "source": "ETU",
@@ -150,116 +156,11 @@ def request_digit_account_creation(data):
     return response
 
 
-def search_digit_account(request, admission):
-    mock = True
+def search_digit_account(global_id: str, last_name: str, first_name: str, birth_date: str):
+    from infrastructure.messages_bus import message_bus_instance
 
-    if mock:
-        matches = _mock_search_digit_account_return_response()
-        request.session['search_context'] = {'matches': matches}
-        return redirect(reverse('admission:services:search-account-modal', kwargs={'uuid': admission.uuid}))
-
-    response = requests.post(
-        headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ab2dbc5b-5278-3370-98de-40df855c2265'},
-        data=json.dumps({
-            "last_name": admission.candidate.last_name,
-            "first_name": admission.candidate.first_name,
-            "birth_date": str(admission.candidate.birth_date),
-        }),
-        url=settings.DIGIT_ACCOUNT_SEARCH_URL,
+    return message_bus_instance.invoke(
+        RechercherCompteExistantQuery(
+            matricule=global_id, nom=last_name, prenom=first_name, date_naissance=birth_date
+        )
     )
-    return response
-
-
-def _mock_search_digit_account_return_response():
-    return json.loads(
-            '['
-            '   {'
-            '        "person" : {'
-            '          "matricule" : "217017" ,'
-            '          "lastName" : "Bosman" ,'
-            '          "firstName" : "Vincianne" ,'
-            '          "birthDate" : "1975-11-27" ,'
-            '          "gender" : "F" ,'
-            '          "nationalRegister" : "75112730354" ,'
-            '          "nationality" : "BE" ,'
-            '          "deceased" : false ,'
-            '          "displayLastname" : null ,'
-            '          "displayFirstname" : null ,'
-            '          "otherFirstName" : null ,'
-            '          "placeOfBirth" : null ,'
-            '          "postname" : null'
-            '        } ,'
-            '        "similarityRate" : 406.0 ,'
-            '        "links" : {'
-            '          "financialCustomer" : "/identity/applicationsAccount/financialCustomer/217017" ,'
-            '          "addresses" : "/identity/addresses/find/217017"'
-            '        } ,'
-            '        "transition" : {'
-            '          "previousFirstname" : "Vincent" ,'
-            '          "previousGender" : "M" ,'
-            '          "previousNationalRegister" : null'
-            '        } ,'
-            '        "applicationAccounts" : ['
-            '          {'
-            '            "source" : "ETU" ,'
-            '            "sourceId" : "00000000" ,'
-            '            "actif" : true'
-            '          } ,'
-            '          {'
-            '            "source" : "ETU" ,'
-            '            "sourceId" : "00000001" ,'
-            '            "actif" : false'
-            '          }'
-            '        ]'
-            '      } ,'
-            '      {'
-            '        "person" : {'
-            '          "matricule" : "379409" ,'
-            '          "lastName" : "Boesmans" ,'
-            '          "firstName" : "Vincent" ,'
-            '          "birthDate" : "1973-10-20" ,'
-            '          "gender" : "M" ,'
-            '          "nationalRegister" : "" ,'
-            '          "nationality" : "BE" ,'
-            '          "deceased" : false ,'
-            '          "displayLastname" : null ,'
-            '          "displayFirstname" : null ,'
-            '          "otherFirstName" : null ,'
-            '          "placeOfBirth" : null ,'
-            '          "postname" : null'
-            '        } ,'
-            '        "similarityRate" : 380.0 ,'
-            '        "links" : {'
-            '          "financialCustomer" : "/identity/applicationsAccount/financialCustomer/379409" ,'
-            '          "addresses" : "/identity/addresses/find/379409"'
-            '        } ,'
-            '        "transition" : null ,'
-            '        "applicationAccounts" : []'
-            '      } ,'
-            '      {'
-            '        "person" : {'
-            '          "matricule" : "12345678" ,'
-            '          "lastName" : "Bigger" ,'
-            '          "firstName" : "Match" ,'
-            '          "birthDate" : "1980-10-20" ,'
-            '          "gender" : "M" ,'
-            '          "nationalRegister" : "12345678910" ,'
-            '          "nationality" : "BE" ,'
-            '          "deceased" : false ,'
-            '          "displayLastname" : null ,'
-            '          "displayFirstname" : null ,'
-            '          "otherFirstName" : null ,'
-            '          "placeOfBirth" : null ,'
-            '          "postname" : null'
-            '        } ,'
-            '        "similarityRate" : 1000.0 ,'
-            '        "links" : {'
-            '          "financialCustomer" : "/identity/applicationsAccount/financialCustomer/379409" ,'
-            '          "addresses" : "/identity/addresses/find/379409"'
-            '        } ,'
-            '        "transition" : null ,'
-            '        "applicationAccounts" : []'
-            '      }'
-            '    ]'
-    )
-

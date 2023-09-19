@@ -23,28 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation.trans_real import get_languages
-from django.views.generic import TemplateView
+import attr
 
-from admission.views.doctorate.mixins import LoadDossierViewMixin
-
-__all__ = ['AdmissionPersonDetailView']
-
-from base.models.person_merge_proposal import PersonMergeProposal
-from osis_common.utils.models import get_object_or_none
+from osis_common.ddd import interface
 
 
-class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
-    permission_required = 'admission.view_admission_person'
-    template_name = 'admission/details/person_backoffice.html'
+@attr.dataclass(frozen=True, slots=True, eq=False)
+class PropositionFusionPersonneIdentity(interface.EntityIdentity):
+    uuid: str
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['person'] = self.admission.candidate
-        context['contact_language'] = get_languages().get(self.admission.candidate.language)
-        if self.is_doctorate and 'dossier' in context:
-            context['profil_candidat'] = context['dossier'].profil_soumis_candidat
-        elif self.is_general:
-            context['profil_candidat'] = context['admission'].profil_soumis_candidat
-        return context
+    def __eq__(self, other):
+        return self.uuid == other.uuid
