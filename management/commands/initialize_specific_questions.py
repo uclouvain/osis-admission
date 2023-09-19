@@ -620,7 +620,8 @@ class Command(BaseCommand):
             internal_label=SpecificQuestionToInit.BELGIAN_RESIDENT_MESSAGE.value,
             defaults={
                 'type': TypeItemFormulaire.MESSAGE.name,
-                'title': {
+                'title': {},
+                'text': {
                     settings.LANGUAGE_CODE_EN: "The programme is open only to people who are active in Belgium "
                     "(or border regions). Students who do not reside in Belgium (or border "
                     "regions) are not eligible for this programme.",
@@ -629,7 +630,6 @@ class Command(BaseCommand):
                     "étudiants qui ne résident pas en Belgique (ou dans les régions "
                     "frontalières) ne sont pas admis à ce programme.",
                 },
-                'text': {},
                 'help_text': {},
                 'values': [],
                 'configuration': {},
@@ -841,9 +841,7 @@ class Command(BaseCommand):
                     },
                 ],
                 'configuration': {
-                    CleConfigurationItemFormulaire.TYPE_SELECTION.name: (
-                        TypeChampSelectionFormulaire.CASES_A_COCHER.name,
-                    )
+                    CleConfigurationItemFormulaire.TYPE_SELECTION.name: TypeChampSelectionFormulaire.CASES_A_COCHER.name
                 },
             },
         )
