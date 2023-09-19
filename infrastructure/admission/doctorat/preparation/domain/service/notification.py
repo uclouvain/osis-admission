@@ -262,6 +262,18 @@ class Notification(INotification):
             type=AdmissionTask.TaskType.DOCTORATE_RECAP.name,
         )
 
+        # Create the async task to merge each document field of the proposition into one PDF
+        task = AsyncTask.objects.create(
+            name=_('Document merging of the proposition %(reference)s') % {'reference': proposition.reference},
+            description=_('Merging of each document field of the proposition into one PDF'),
+            person=admission.candidate,
+        )
+        AdmissionTask.objects.create(
+            task=task,
+            admission=admission,
+            type=AdmissionTask.TaskType.DOCTORATE_MERGE.name,
+        )
+
         # Notifier le doctorant via mail
         common_tokens = cls.get_common_tokens(proposition, candidat)
         email_message = generate_email(

@@ -59,6 +59,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         blank=True,
         upload_to=admission_directory_path,
         verbose_name=_('Residence permit covering the entire course'),
+        max_files=1,
     )
 
     registration_as = models.CharField(
@@ -159,6 +160,7 @@ class ContinuingEducationAdmission(BaseAdmission):
         blank=True,
         upload_to=admission_directory_path,
         verbose_name=_('Additional documents'),
+        max_files=10,
     )
 
     class Meta:

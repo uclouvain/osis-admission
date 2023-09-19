@@ -1911,6 +1911,10 @@ msgstr "Demandes d'inscription en doctorat"
 msgid "Document"
 msgstr "Document"
 
+#, python-format
+msgid "Document merging of the proposition %(reference)s"
+msgstr "Fusion des documents de la proposition %(reference)s"
+
 msgid "Document not found."
 msgstr "Document non trouvé."
 
@@ -3522,6 +3526,18 @@ msgstr "Affiliations"
 
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé."
+
+msgid "Merging of each document field of a continuing proposition into one PDF"
+msgstr "Fusion de chaque champ document d'une proposition continue en un PDF"
+
+msgid "Merging of each document field of a doctorate proposition into one PDF"
+msgstr "Fusion de chaque champ document d'une proposition doctorale en un PDF"
+
+msgid "Merging of each document field of a general proposition into one PDF"
+msgstr "Fusion de chaque champ document d'une proposition générale en un PDF"
+
+msgid "Merging of each document field of the proposition into one PDF"
+msgstr "Fusion de chaque champ document d'une proposition en un PDF"
 
 msgid "Message"
 msgstr "Message"
@@ -6380,6 +6396,14 @@ msgstr "votre mère"
 
 msgid "your partner"
 msgstr "votre conjoint"
+
+#, python-brace-format
+msgid ""
+"{current_mimetype} is not a valid mimetype for the field "
+"\"{field}\" ({field_mimetypes_as_str})"
+msgstr ""
+"{current_mimetype} n'est pas un type mime valide pour le champ "
+"\"{field}\" ({field_mimetypes_as_str})"
 
 #, python-brace-format
 msgid "{items} types out of {total}"

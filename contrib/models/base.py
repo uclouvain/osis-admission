@@ -350,6 +350,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
         upload_to=admission_directory_path,
         verbose_name=_('Curriculum'),
+        max_files=1,
     )
     valuated_secondary_studies_person = models.OneToOneField(
         to='base.Person',

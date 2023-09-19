@@ -34,6 +34,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
@@ -46,6 +47,7 @@ from .repository.proposition import PropositionRepository
 from ..validation.repository.demande import DemandeRepository
 from ...domain.service.calendrier_inscription import CalendrierInscription
 from ...domain.service.elements_confirmation import ElementsConfirmation
+from ...domain.service.emplacements_documents_proposition import EmplacementsDocumentsPropositionTranslator
 from ...domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from ...domain.service.titres_acces import TitresAcces
 
@@ -261,5 +263,18 @@ COMMAND_HANDLERS = {
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
         question_specifique_translator=QuestionSpecifiqueTranslator(),
+    ),
+    RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        comptabilite_translator=ComptabiliteTranslator(),
+        question_specifique_translator=QuestionSpecifiqueTranslator(),
+        emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+        personne_connue_translator=PersonneConnueUclTranslator(),
+        groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        promoteur_translator=PromoteurTranslator(),
+        membre_ca_translator=MembreCATranslator(),
     ),
 }

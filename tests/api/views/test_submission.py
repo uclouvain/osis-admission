@@ -34,6 +34,7 @@ from osis_history.models import HistoryEntry
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
@@ -244,6 +245,11 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertIsNotNone(history_entry)
         self.assertEqual(history_entry.message_fr, 'La proposition a été soumise.')
 
+        admission_tasks = AdmissionTask.objects.filter(admission=self.admission_ok).order_by('type')
+        self.assertEqual(len(admission_tasks), 2)
+        self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.GENERAL_MERGE.name)
+        self.assertEqual(admission_tasks[1].type, AdmissionTask.TaskType.GENERAL_RECAP.name)
+
     @freezegun.freeze_time("1980-10-22")
     def test_general_proposition_submission_with_late_enrollment(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
@@ -421,6 +427,9 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
+        admission_tasks = AdmissionTask.objects.filter(admission=self.admission_ok).order_by('type')
+        self.assertEqual(len(admission_tasks), 2)
+        self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.CONTINUING_MERGE.name)
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()

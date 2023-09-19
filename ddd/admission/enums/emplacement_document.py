@@ -292,3 +292,8 @@ DocumentsCotutelle = {
 DocumentsSupervision = {
     'APPROBATION_PDF': _('Approbation by pdf'),
 }
+
+
+DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION = {
+    f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+}
