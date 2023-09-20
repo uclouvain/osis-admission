@@ -74,7 +74,7 @@ class MollieService:
 
     @classmethod
     def recuperer_paiement(cls, paiement_id: str) -> PaiementMollie:
-        logger.info(f"[MOLLIE] Récupération paiement avec mollie_id {paiement_id}")
+        logger.info(f"[MOLLIE] Recuperation du paiement avec mollie_id {paiement_id}")
         try:
             response = requests.get(
                 url=f"{cls.MOLLIE_BASE_URL}/{paiement_id}",
@@ -83,16 +83,16 @@ class MollieService:
             result = response.json()
         except Exception as e:
             logger.error(
-                f"[MOLLIE] Une erreur est survenue durant la requête à Mollie "
-                f"pour la récupération du paiement avec mollie_id : {paiement_id}"
+                f"[MOLLIE] Une erreur est survenue durant la requete a Mollie "
+                f"pour la recuperation du paiement avec mollie_id : {paiement_id}"
             )
             raise FetchMolliePaymentException(mollie_id=paiement_id) from e
 
-        logger.info(f"[MOLLIE] JSON reçu : {result}")
+        logger.info(f"[MOLLIE] JSON recu : {result}")
         if response.status_code != 200:
             logger.error(
-                f"[MOLLIE] La récupération du paiement avec mollie_id = {paiement_id} "
-                f"a échouée avec un status code = {response.status_code}"
+                f"[MOLLIE] La recuperation du paiement avec mollie_id = {paiement_id} "
+                f"a echouee avec un status code = {response.status_code}"
             )
         return cls._convert_to_dto(result)
 
@@ -106,7 +106,7 @@ class MollieService:
             'webhookUrl': f"{settings.ADMISSION_BACKEND_LINK_PREFIX}{reverse('admission:mollie-webhook')}",
             'locale': 'fr_BE' if get_language() == settings.LANGUAGE_CODE else 'en_US'
         }
-        logger.info(f"[MOLLIE] Création d'un paiement pour l'admission avec référence {reference} - data : {data}")
+        logger.info(f"[MOLLIE] Creation d'un paiement pour l'admission avec reference {reference} - data : {data}")
 
         try:
             response = requests.post(
@@ -117,15 +117,15 @@ class MollieService:
             result = response.json()
         except Exception as e:
             logger.error(
-                f"[MOLLIE] Une erreur est survenue durant la requête à Mollie "
-                f"pour la création d'un paiement pour l'admission avec référence {reference}"
+                f"[MOLLIE] Une erreur est survenue durant la requete à Mollie "
+                f"pour la creation d'un paiement pour l'admission avec reference {reference}"
             )
             raise CreateMolliePaymentException(reference=reference) from e
 
         logger.info(f"[MOLLIE] JSON reçu : {result}")
         if response.status_code != 201:
             logger.error(
-                f"[MOLLIE] La création du paiement a échouée avec un status code = {response.status_code}"
+                f"[MOLLIE] La creation du paiement a echouee avec un status code = {response.status_code}"
             )
             raise CreateMolliePaymentException(reference=reference)
         return cls._convert_to_dto(result)
@@ -155,11 +155,11 @@ class MollieException(Exception):
 
 class FetchMolliePaymentException(MollieException):
     def __init__(self, mollie_id: str, **kwargs):
-        self.message = f"[MOLLIE] Impossible de récupérer le paiement avec mollie_id: {mollie_id}"
+        self.message = f"[MOLLIE] Impossible de recuperer le paiement avec mollie_id: {mollie_id}"
         super().__init__(**kwargs)
 
 
 class CreateMolliePaymentException(MollieException):
     def __init__(self, reference: str, **kwargs):
-        self.message = f"[MOLLIE] Impossible de créer le paiement pour l'admission avec reference: {reference}"
+        self.message = f"[MOLLIE] Impossible de creer le paiement pour l'admission avec reference: {reference}"
         super().__init__(**kwargs)

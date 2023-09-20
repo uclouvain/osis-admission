@@ -126,13 +126,13 @@ class PaiementEnLigneException(Exception):
 
 class SaveOnlinePaymentException(PaiementEnLigneException):
     def __init__(self, reference: str, **kwargs):
-        self.message = (f"[PAIEMENT EN LIGNE] Une erreur est survenue durant la création du paiement en ligne "
+        self.message = (f"[PAIEMENT EN LIGNE] Une erreur est survenue durant la creation du paiement en ligne "
                         f"du dossier {reference} en DB")
         super().__init__(**kwargs)
 
 
 class UpdateOnlinePaymentException(PaiementEnLigneException):
     def __init__(self, reference: str, **kwargs):
-        self.message = (f"[PAIEMENT EN LIGNE] Une erreur est survenue durang la mise à jour du paiement en ligne "
+        self.message = (f"[PAIEMENT EN LIGNE] Une erreur est survenue durant la mise a jour du paiement en ligne "
                         f"du dossier {reference} en DB")
         super().__init__(**kwargs)
