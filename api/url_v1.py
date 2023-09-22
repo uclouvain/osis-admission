@@ -150,12 +150,12 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/submit', views.SubmitGeneralEducationPropositionView),
     path('propositions/general-education/<uuid:uuid>/documents', views.GeneralRequestedDocumentListView),
     path(
-        'propositions/general-education/<uuid:uuid>/pay-application-fees',
-        views.PayApplicationFeesAfterSubmissionView,
+        'propositions/general-education/<uuid:uuid>/open-application-fees-payment',
+        views.OpenApplicationFeesPaymentView,
     ),
     path(
-        'propositions/general-education/<uuid:uuid>/pay-application-fees-after-request',
-        views.PayApplicationFeesAfterRequestView,
+        'propositions/general-education/<uuid:uuid>/list-application-fees',
+        views.ApplicationFeesListView,
     ),
     # > Continuing education
     path('propositions/continuing-education', views.ContinuingTrainingChoiceAPIView),

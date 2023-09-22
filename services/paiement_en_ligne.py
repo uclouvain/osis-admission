@@ -49,17 +49,14 @@ class PaiementEnLigneService:
 
     @classmethod
     def get_and_update_payment(cls, paiement_id: str, admission: BaseAdmission) -> OnlinePayment:
-        online_payment = OnlinePayment.objects.get(
-            payment_id=paiement_id,
-            admission_id=admission.pk
-        )
+        online_payment = OnlinePayment.objects.get(payment_id=paiement_id, admission_id=admission.pk)
         paiement_mollie = cls.paiement_service.recuperer_paiement(paiement_id=paiement_id)
         cls._update_payment(online_payment, paiement_mollie)
         return online_payment
 
     @classmethod
     def _update_payment(cls, online_payment: OnlinePayment, paiement_mollie: PaiementMollie):
-        online_payment.method = paiement_mollie.methode
+        online_payment.method = paiement_mollie.methode or ''
         online_payment.status = paiement_mollie.statut
         online_payment.updated_date = paiement_mollie.date_de_mise_a_jour
         online_payment.checkout_url = paiement_mollie.checkout_url
@@ -72,18 +69,18 @@ class PaiementEnLigneService:
     def get_or_create_payment(cls, url_redirection: str, admission: BaseAdmission, montant: Decimal) -> OnlinePayment:
         paiements_ouverts = OnlinePayment.objects.filter(
             admission_id=admission.id,
-            status__in=PaymentStatus.open_payments,
+            status__in=PaymentStatus.open_payments(),
         )
         if paiements_ouverts.exists():
             paiement_ouvert = paiements_ouverts.first()
             paiement_ouvert = cls.update_payment(paiement_id=paiement_ouvert.payment_id)
-            if paiement_ouvert.status in PaymentStatus.open_payments:
+            if paiement_ouvert.status in PaymentStatus.open_payments():
                 return paiement_ouvert
 
         paiement_mollie = cls.paiement_service.creer_paiement(
             reference=str(admission),
             montant=montant,
-            url_redirection=url_redirection
+            url_redirection=url_redirection,
         )
         paiement_en_ligne = cls._convert_to_db_object(paiement_mollie, admission)
         try:
@@ -99,24 +96,22 @@ class PaiementEnLigneService:
             admission_id=admission.id,
             status=paiement_mollie.statut,
             expiration_date=paiement_mollie.date_d_expiration,
-            method=paiement_mollie.methode,
+            method=paiement_mollie.methode or '',
             creation_date=paiement_mollie.date_de_creation,
             updated_date=datetime.datetime.now(),
             checkout_url=paiement_mollie.checkout_url,
             payment_url=paiement_mollie.paiement_url,
             dashboard_url=paiement_mollie.dashboard_url,
-            amount=paiement_mollie.montant
+            amount=paiement_mollie.montant,
         )
 
     @classmethod
     def get_all_payments(cls, admission: BaseAdmission) -> QuerySet[OnlinePayment]:
-        payments = OnlinePayment.objects.filter(
-            admission_id=admission.pk
-        ).order_by('creation_date')
-        open_payments = payments.filter(status__in=PaymentStatus.open_payments)
+        payments = OnlinePayment.objects.filter(admission_id=admission.pk).order_by('creation_date')
+        open_payments = payments.filter(status__in=PaymentStatus.open_payments())
         if open_payments.exists():
             last_open_payment = open_payments.last()
-            cls.get_and_update_payment(paiement_id=last_open_payment.paiement_id, admission=admission)
+            cls.get_and_update_payment(paiement_id=last_open_payment.payment_id, admission=admission)
         return payments
 
 
@@ -126,13 +121,17 @@ class PaiementEnLigneException(Exception):
 
 class SaveOnlinePaymentException(PaiementEnLigneException):
     def __init__(self, reference: str, **kwargs):
-        self.message = (f"[PAIEMENT EN LIGNE] Une erreur est survenue durant la création du paiement en ligne "
-                        f"du dossier {reference} en DB")
+        self.message = (
+            f"[PAIEMENT EN LIGNE] Une erreur est survenue durant la création du paiement en ligne "
+            f"du dossier {reference} en DB"
+        )
         super().__init__(**kwargs)
 
 
 class UpdateOnlinePaymentException(PaiementEnLigneException):
     def __init__(self, reference: str, **kwargs):
-        self.message = (f"[PAIEMENT EN LIGNE] Une erreur est survenue durang la mise à jour du paiement en ligne "
-                        f"du dossier {reference} en DB")
+        self.message = (
+            f"[PAIEMENT EN LIGNE] Une erreur est survenue durang la mise à jour du paiement en ligne "
+            f"du dossier {reference} en DB"
+        )
         super().__init__(**kwargs)

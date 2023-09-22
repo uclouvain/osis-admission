@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.db import models
+from django.utils.translation import gettext_noop, gettext_lazy, pgettext_lazy
 
 from admission.contrib.models.base import BaseAdmission
 from base.models.utils.utils import ChoiceEnum
@@ -37,18 +38,37 @@ class PaymentStatus(ChoiceEnum):
     FAILED = 'failed'
     PAID = 'paid'
 
-    @property
-    def open_payments(self):
+    @classmethod
+    def open_payments(cls):
         return [
-            self.OPEN.name,
-            self.PENDING.name
+            cls.OPEN.name,
+            cls.PENDING.name,
         ]
+
+    @classmethod
+    def translated_names(cls):
+        return {
+            cls.OPEN.name: pgettext_lazy('payment', 'open'),
+            cls.CANCELED.name: pgettext_lazy('payment', 'canceled'),
+            cls.PENDING.name: pgettext_lazy('payment', 'pending'),
+            cls.EXPIRED.name: pgettext_lazy('payment', 'expired'),
+            cls.FAILED.name: pgettext_lazy('payment', 'failed'),
+            cls.PAID.name: pgettext_lazy('payment', 'paid'),
+        }
 
 
 class PaymentMethod(ChoiceEnum):
     BANCONTACT = 'bancontact'
     CREDIT_CARD = 'creditcard'
     BANK_TRANSFER = 'banktransfer'
+
+    @classmethod
+    def translated_names(cls):
+        return {
+            cls.BANCONTACT.name: pgettext_lazy('payment', 'bancontact'),
+            cls.CREDIT_CARD.name: pgettext_lazy('payment', 'creditcard'),
+            cls.BANK_TRANSFER.name: pgettext_lazy('payment', 'banktransfer'),
+        }
 
 
 class OnlinePayment(models.Model):
@@ -61,7 +81,7 @@ class OnlinePayment(models.Model):
     payment_id = models.CharField(max_length=14)
     status = models.CharField(choices=PaymentStatus.choices(), max_length=10)
     expiration_date = models.DateTimeField(null=True)
-    method = models.CharField(choices=PaymentMethod.choices(), max_length=17, blank=True)
+    method = models.CharField(choices=PaymentMethod.choices(), max_length=17, blank=True, default='')
     creation_date = models.DateTimeField()
     updated_date = models.DateTimeField()
     dashboard_url = models.URLField()

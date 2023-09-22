@@ -114,6 +114,35 @@
           {% bootstrap_form comment_forms.frais_dossier %}
 
           <div class="info-part">
+            <table class="table table-bordered table-condensed admission-scrollable-table">
+              <caption>
+                {% translate 'Online payment history' %}
+              </caption>
+              <thead>
+                <tr>
+                  <th>{% translate 'Amount' %}</th>
+                  <th>{% translate 'Mollie ID' %}</th>
+                  <th>{% translate 'Status' %}</th>
+                  <th>{% translate 'Creation date' %}</th>
+                  <th>{% translate 'Update date' %}</th>
+                  <th>{% translate 'Payment method' %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for payment in payments %}
+                  <tr>
+                    <td>{{ payment.montant }}</td>
+                    <td>{{ payment.identifiant_paiement }}</td>
+                    <td>{{ payment_status_translations|get_item:payment.statut }}</td>
+                    <td>{{ payment.date_creation|date:'d/m/Y H:i' }}</td>
+                    <td>{{ payment.date_mise_a_jour|date:'d/m/Y H:i' }}</td>
+                    <td>{{ payment_method_translations|get_item:payment.methode }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+
             {% firstof person_url|add:next_url as contextual_person_url %}
             {% display _("Citizenship") ''|edit_button:contextual_person_url as button %}
             {% field_data button resume_proposition.identification.nom_pays_nationalite %}
@@ -599,7 +628,7 @@
     #tabs-content, #info-viewer-tab, #document-viewer-tab {
       height: max(60vh, 100px);
       overflow-y: auto;
-      overflow-x: hidden;
+      overflow-x: auto;
     }
 
 

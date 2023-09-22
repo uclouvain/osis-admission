@@ -488,6 +488,9 @@ msgstr ""
 msgid "Already a member."
 msgstr "Already a member of the supervisory panel."
 
+msgid "Amount"
+msgstr ""
+
 msgid "An education type"
 msgstr ""
 
@@ -3207,6 +3210,9 @@ msgstr ""
 msgid "Modified at"
 msgstr ""
 
+msgid "Mollie ID"
+msgstr ""
+
 msgid "Most recent year of enrolment"
 msgstr ""
 
@@ -3460,6 +3466,9 @@ msgstr ""
 msgid "Online or in person"
 msgstr ""
 
+msgid "Online payment history"
+msgstr ""
+
 msgid "Only one admission"
 msgstr ""
 
@@ -3627,6 +3636,9 @@ msgid "Passport number"
 msgstr ""
 
 msgid "Payed"
+msgstr ""
+
+msgid "Payment method"
 msgstr ""
 
 msgid "Pending application fee"
@@ -4553,6 +4565,9 @@ msgstr ""
 msgid "Start date"
 msgstr ""
 
+msgid "Status"
+msgstr ""
+
 msgctxt "admission"
 msgid "Status"
 msgstr ""
@@ -4873,6 +4888,16 @@ msgstr ""
 msgid "The first name of the student"
 msgstr ""
 
+msgid "The following admission has been updated: {}."
+msgid_plural "The following admissions have been updated: {}."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "The following admission has not been updated: {}."
+msgid_plural "The following admissions have not been updated: {}."
+msgstr[0] ""
+msgstr[1] ""
+
 #, python-format
 msgid ""
 "The global status of the application must be one of the following in order "
@@ -4937,6 +4962,9 @@ msgstr ""
 msgid ""
 "The option {index} must have an identifier and a translation for each "
 "required language."
+msgstr ""
+
+msgid "The payment has already been made."
 msgstr ""
 
 msgid "The payment has not been made."
@@ -5240,6 +5268,9 @@ msgstr ""
 msgid "Transcript type"
 msgstr ""
 
+msgid "Trigger the payment hook"
+msgstr ""
+
 msgid "Tutorship act"
 msgstr ""
 
@@ -5316,6 +5347,9 @@ msgstr ""
 
 msgctxt "verb"
 msgid "Update"
+msgstr ""
+
+msgid "Update date"
 msgstr ""
 
 msgid "Update doctorate admission"
@@ -5641,6 +5675,11 @@ msgstr ""
 msgid "You must be invited to pay the application fee by the system."
 msgstr ""
 
+msgid ""
+"You must be invited to pay the application fee or you must have submitted "
+"your application."
+msgstr ""
+
 msgid "You must be the reference promoter to access this admission"
 msgstr ""
 
@@ -5691,17 +5730,33 @@ msgstr ""
 msgid "actions"
 msgstr ""
 
+msgctxt "payment"
+msgid "bancontact"
+msgstr "Bancontact"
+
+msgctxt "payment"
+msgid "banktransfer"
+msgstr "Bank transfer"
+
 msgid "by the Enrolment Office"
 msgstr ""
 
 msgid "by the University Institute for Continuing Education (IUFC)"
 msgstr ""
 
+msgctxt "payment"
+msgid "canceled"
+msgstr "Canceled"
+
 msgid "candidate"
 msgstr ""
 
 msgid "created"
 msgstr ""
+
+msgctxt "payment"
+msgid "creditcard"
+msgstr "Credit card"
 
 msgid "dd/mm/yyyy"
 msgstr ""
@@ -5712,6 +5767,14 @@ msgstr ""
 
 msgid "education group type"
 msgstr ""
+
+msgctxt "payment"
+msgid "expired"
+msgstr "Expired"
+
+msgctxt "payment"
+msgid "failed"
+msgstr "Failed"
 
 #, python-format
 msgid "from %(start)s to %(end)s"
@@ -5727,6 +5790,18 @@ msgstr ""
 #, python-format
 msgid "on %(date)s at %(time)s"
 msgstr ""
+
+msgctxt "payment"
+msgid "open"
+msgstr "Open"
+
+msgctxt "payment"
+msgid "paid"
+msgstr "Paid"
+
+msgctxt "payment"
+msgid "pending"
+msgstr "Pending"
 
 msgid "the <strong>failure</strong> of the confirmation paper."
 msgstr ""

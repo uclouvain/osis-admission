@@ -443,6 +443,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
                 'retrieve_documents',
                 'update_documents',
                 # Payment
+                'view_payment',
                 'pay_after_submission',
                 'pay_after_request',
             ]

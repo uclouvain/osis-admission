@@ -82,7 +82,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
     NotificationInMemory,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
-    PaiementFraisDossierInMemory,
+    PaiementFraisDossierInMemoryRepository,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.pdf_generation import (
     PDFGenerationInMemory,
@@ -116,7 +116,7 @@ _historique_formation_generale = HistoriqueFormationGeneraleInMemory()
 _emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
-_paiement_frais_dossier = PaiementFraisDossierInMemory()
+_paiement_frais_dossier = PaiementFraisDossierInMemoryRepository()
 _notification = NotificationInMemory()
 _pdf_generation = PDFGenerationInMemory()
 _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
@@ -426,5 +426,16 @@ COMMAND_HANDLERS = {
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    SpecifierPaiementVaEtreOuvertParCandidatCommand: (
+        lambda msg_bus, cmd: specifier_paiement_va_etre_ouvert_par_candidat(
+            cmd,
+            proposition_repository=_proposition_repository,
+            paiement_frais_dossier_service=_paiement_frais_dossier,
+        )
+    ),
+    RecupererListePaiementsPropositionQuery: lambda msg_bus, cmd: recuperer_liste_paiements_proposition(
+        cmd,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
     ),
 }
