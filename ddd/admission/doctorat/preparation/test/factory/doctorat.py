@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import attr
 import factory.fuzzy
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import Doctorat
+
 # FIXME import this factory from shared kernel when available
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
 from admission.ddd.admission.domain.model.formation import FormationIdentity
@@ -48,6 +49,8 @@ class _DoctoratIdentityFactory(factory.Factory):
 @attr.dataclass(frozen=True, slots=True)
 class DoctoratEtendu(Doctorat):
     campus: str
+    intitule: str
+    sigle: str
 
 
 class _DoctoratFactory(factory.Factory):
@@ -68,6 +71,8 @@ class _DoctoratFactory(factory.Factory):
             "St-Gilles",
         ]
     )
+    intitule = factory.Faker('sentence')
+    sigle = factory.Faker('word')
 
 
 class _DoctoratDTOFactory(factory.Factory):
