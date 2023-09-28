@@ -79,7 +79,6 @@ class ForeignHighSchoolDiplomaSerializer(serializers.ModelSerializer):
             "academic_graduation_year",
             "high_school_transcript",
             "high_school_diploma",
-            "result",
             "foreign_diploma_type",
             "linguistic_regime",
             "other_linguistic_regime",

@@ -266,7 +266,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 decision_final_equivalence_ue=foreign_high_school_diploma.final_equivalence_decision_ue,
                 decision_final_equivalence_hors_ue=foreign_high_school_diploma.final_equivalence_decision_not_ue,
                 preuve_decision_equivalence=foreign_high_school_diploma.equivalence_decision_proof,
-                resultat=foreign_high_school_diploma.result or '',
             )
             if foreign_high_school_diploma
             else None,
