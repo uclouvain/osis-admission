@@ -32,7 +32,7 @@ from rest_framework.serializers import Serializer
 from admission.api.serializers.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.86"
+ADMISSION_SDK_VERSION = "1.0.87"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):

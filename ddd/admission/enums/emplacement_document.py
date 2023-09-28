@@ -130,7 +130,6 @@ DocumentsSysteme = {
 
 DocumentsEtudesSecondaires = {
     'DIPLOME_BELGE_DIPLOME': _('Secondary school diploma'),
-    'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION': _('Certificate of enrolment or school attendance'),
     'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE': _(
         "Copy of both sides of the definitive equivalency decision (accompanied, "
         "where applicable, by the DAES or undergraduate exam, in the case of restrictive equivalency)"
@@ -143,10 +142,6 @@ DocumentsEtudesSecondaires = {
     ),
     'DIPLOME_ETRANGER_DIPLOME': _('Secondary school diploma'),
     'DIPLOME_ETRANGER_TRADUCTION_DIPLOME': _('A translation of your secondary school diploma by a sworn translator'),
-    'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION': _('Certificate of enrolment or school attendance'),
-    'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION': _(
-        'A translation of the enrolment or school attendance certificate by a sworn translator',
-    ),
     'DIPLOME_ETRANGER_RELEVE_NOTES': _('A transcript for your last year of secondary school'),
     'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES': _(
         'A translation of your official transcript of marks for your final year of secondary school by a '

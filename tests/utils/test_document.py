@@ -424,21 +424,6 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.field, 'high_school_diploma')
         self.assertEqual(document.uuids, [file_uuid])
 
-        # enrolment certificate
-        file_uuid = uuid.uuid4()
-        self.general_admission.candidate.belgianhighschooldiploma.enrolment_certificate = [file_uuid]
-        self.general_admission.candidate.belgianhighschooldiploma.save()
-
-        document = get_document_from_identifier(
-            self.general_admission,
-            f'{base_identifier}.DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
-        )
-
-        self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission.candidate.belgianhighschooldiploma)
-        self.assertEqual(document.field, 'enrolment_certificate')
-        self.assertEqual(document.uuids, [file_uuid])
-
         # Foreign high school
 
         document = get_document_from_identifier(
@@ -522,36 +507,6 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertIsNotNone(document)
         self.assertEqual(document.obj, self.general_admission.candidate.foreignhighschooldiploma)
         self.assertEqual(document.field, 'high_school_diploma_translation')
-        self.assertEqual(document.uuids, [file_uuid])
-
-        # enrolment certificate
-        file_uuid = uuid.uuid4()
-        self.general_admission.candidate.foreignhighschooldiploma.enrolment_certificate = [file_uuid]
-        self.general_admission.candidate.foreignhighschooldiploma.save()
-
-        document = get_document_from_identifier(
-            self.general_admission,
-            f'{base_identifier}.DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
-        )
-
-        self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission.candidate.foreignhighschooldiploma)
-        self.assertEqual(document.field, 'enrolment_certificate')
-        self.assertEqual(document.uuids, [file_uuid])
-
-        # enrolment certificate translation
-        file_uuid = uuid.uuid4()
-        self.general_admission.candidate.foreignhighschooldiploma.enrolment_certificate_translation = [file_uuid]
-        self.general_admission.candidate.foreignhighschooldiploma.save()
-
-        document = get_document_from_identifier(
-            self.general_admission,
-            f'{base_identifier}.DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
-        )
-
-        self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission.candidate.foreignhighschooldiploma)
-        self.assertEqual(document.field, 'enrolment_certificate_translation')
         self.assertEqual(document.uuids, [file_uuid])
 
         # high school transcript
