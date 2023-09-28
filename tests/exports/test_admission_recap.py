@@ -158,7 +158,6 @@ from osis_profile.models.enums.curriculum import (
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
-    DiplomaResults,
     EducationalType,
     Equivalence,
     ForeignDiplomaTypes,
@@ -870,7 +869,6 @@ class SectionsAttachmentsTestCase(TestCase):
                 communaute=BelgianCommunitiesOfEducation.FRENCH_SPEAKING.name,
             ),
             diplome_etranger=_DiplomeEtrangerEtudesSecondairesDTO(
-                resultat=DiplomaResults.GT_75_RESULT.name,
                 type_diplome=ForeignDiplomaTypes.EUROPEAN_BACHELOR.name,
                 regime_linguistique=FR_ISO_CODE,
                 pays_regime_linguistique='France',

@@ -29,7 +29,7 @@ import factory
 from admission.tests.factories import PdfUploadFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
-from osis_profile.models.enums.education import DiplomaResults, BelgianCommunitiesOfEducation, EducationalType
+from osis_profile.models.enums.education import BelgianCommunitiesOfEducation, EducationalType
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
