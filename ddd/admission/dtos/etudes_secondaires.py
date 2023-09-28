@@ -42,7 +42,6 @@ class DiplomeBelgeEtudesSecondairesDTO(interface.DTO):
 
 @attr.dataclass(slots=True, frozen=True)
 class DiplomeEtrangerEtudesSecondairesDTO(interface.DTO):
-    resultat: str = ''
     type_diplome: str = ''
     regime_linguistique: str = ''
     pays_regime_linguistique: str = ''

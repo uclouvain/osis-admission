@@ -5964,9 +5964,6 @@ msgstr "Poids"
 msgid "What diploma have you obtained (or will obtain)?"
 msgstr "Quel diplôme avez-vous obtenu (ou obtiendrez-vous) ?"
 
-msgid "What result did you achieve?"
-msgstr "Quel résultat avez-vous obtenu ?"
-
 msgid "What was the most recent year you were enrolled at UCLouvain?"
 msgstr "Quelle est votre dernière année d'inscription à l'UCLouvain ?"
 
