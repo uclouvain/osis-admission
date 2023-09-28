@@ -44,10 +44,8 @@
     {% endpanel %}
 
     {% panel _('Attachments') %}
-      {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' %}
+      {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' or etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
         {% field_data _('Secondary school diploma') etudes_secondaires.diplome_belge.diplome %}
-      {% elif etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
-        {% field_data _('Certificate of enrolment or school attendance') etudes_secondaires.diplome_belge.certificat_inscription %}
       {% endif %}
     {% endpanel %}
 
@@ -84,13 +82,6 @@
 
       {% if need_translations %}
         {% field_data _('A translation of your secondary school diploma by a sworn translator') etudes_secondaires.diplome_etranger.traduction_diplome %}
-      {% endif %}
-
-      {% if etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' and ue_or_assimilated %}
-        {% field_data _('Certificate of enrolment or school attendance') etudes_secondaires.diplome_etranger.certificat_inscription %}
-        {% if need_translations %}
-          {% field_data _('A translation of the enrolment or school attendance certificate by a sworn translator') etudes_secondaires.diplome_etranger.traduction_certificat_inscription %}
-        {% endif %}
       {% endif %}
 
       {% field_data _('A transcript for your last year of secondary school') etudes_secondaires.diplome_etranger.releve_notes %}

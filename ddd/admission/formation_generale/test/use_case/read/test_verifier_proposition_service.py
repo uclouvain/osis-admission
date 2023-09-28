@@ -1114,7 +1114,7 @@ class TestVerifierPropositionService(TestCase):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
-            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(certificat_inscription=['certificat.pdf']),
+            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(diplome=[]),
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
@@ -1130,11 +1130,11 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeBelgeException)
 
-    def test_should_etre_ok_si_diplome_belge_etudes_secondaires_en_cours_avec_certificat_pour_bachelier(self):
+    def test_should_etre_ok_si_diplome_belge_etudes_secondaires_en_cours_avec_diplome_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
             annee_diplome_etudes_secondaires=2020,
-            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(certificat_inscription=['certificat.pdf']),
+            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(diplome=['diplome.pdf']),
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
@@ -1219,7 +1219,7 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
-    def test_should_etre_ok_si_diplome_etranger_etudes_secondaires_en_cours_avec_certif_pour_bachelier(self):
+    def test_should_etre_ok_si_diplome_etranger_etudes_secondaires_en_cours_avec_diplome_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
             annee_diplome_etudes_secondaires=2020,
@@ -1229,7 +1229,7 @@ class TestVerifierPropositionService(TestCase):
                 pays_membre_ue=True,
                 pays_iso_code=FR_ISO_CODE,
                 releve_notes=['releve.pdf'],
-                certificat_inscription=['certificat.pdf'],
+                diplome=['diplome.pdf'],
             ),
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
@@ -1480,24 +1480,6 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
-    def test_should_retourner_erreur_si_diplome_etranger_incomplet_traduction_certif_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
-            diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
-            annee_diplome_etudes_secondaires=2020,
-            diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
-                regime_linguistique='SV',
-                type_diplome=ForeignDiplomaTypes.EUROPEAN_BACHELOR.name,
-                pays_membre_ue=True,
-                pays_iso_code=FR_ISO_CODE,
-                releve_notes=['releve.pdf'],
-                traduction_releve_notes=['traduction_releve_notes.pdf'],
-                certificat_inscription=['traduction_diplome.pdf'],
-            ),
-        )
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
-
     def test_should_etre_ok_si_diplome_etranger_complet_avec_traductions_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
@@ -1509,8 +1491,6 @@ class TestVerifierPropositionService(TestCase):
                 pays_iso_code=FR_ISO_CODE,
                 releve_notes=['releve.pdf'],
                 traduction_releve_notes=['traduction_releve_notes.pdf'],
-                certificat_inscription=['traduction_diplome.pdf'],
-                traduction_certificat_inscription=['traduction_diplome.pdf'],
                 diplome=['diplome.pdf'],
                 traduction_diplome=['traduction_diplome.pdf'],
             ),

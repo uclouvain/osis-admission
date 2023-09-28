@@ -766,7 +766,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         cls.etudes_secondaires = {
             cls.matricule_candidat: _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                    certificat_inscription=['certificat_inscription.pdf'],
                     diplome=['diplome.pdf'],
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
@@ -774,7 +773,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             ),
             "0123456789": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                    certificat_inscription=['certificat_inscription.pdf'],
                     diplome=['diplome.pdf'],
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
@@ -782,7 +780,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             ),
             "0000000001": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                    certificat_inscription=['certificat_inscription.pdf'],
                     diplome=['diplome.pdf'],
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
@@ -790,7 +787,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             ),
             "0000000002": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                    certificat_inscription=['certificat_inscription.pdf'],
                     diplome=['diplome.pdf'],
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,

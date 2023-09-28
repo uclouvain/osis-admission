@@ -41,7 +41,6 @@ class HighSchoolDiplomaFactory(factory.django.DjangoModelFactory):
 
 class BelgianHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
     high_school_diploma = factory.LazyAttribute(lambda _: [PdfUploadFactory().uuid])
-    enrolment_certificate = factory.LazyAttribute(lambda _: [PdfUploadFactory().uuid])
     community = BelgianCommunitiesOfEducation.GERMAN_SPEAKING.name
     educational_type = EducationalType.PROFESSIONAL_EDUCATION.name
     other_institute_name = ('HS UCL',)

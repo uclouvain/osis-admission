@@ -55,6 +55,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
 from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.utils import format_academic_year
 from base.models.enums.education_group_types import TrainingType
@@ -162,22 +163,12 @@ def get_secondary_studies_attachments(
     got_diploma = context.etudes_secondaires.diplome_etudes_secondaires
     if context.proposition.formation.type == TrainingType.BACHELOR.name:
         if context.etudes_secondaires.diplome_belge:
-            if context.etudes_secondaires.diplome_etudes_secondaires == GotDiploma.YES.name:
+            if got_diploma in CHOIX_DIPLOME_OBTENU:
                 attachments.append(
                     Attachment(
                         identifier='DIPLOME_BELGE_DIPLOME',
                         label=DocumentsEtudesSecondaires['DIPLOME_BELGE_DIPLOME'],
                         uuids=context.etudes_secondaires.diplome_belge.diplome,
-                        required=True,
-                        candidate_language=context.identification.langue_contact,
-                    )
-                )
-            elif context.etudes_secondaires.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name:
-                attachments.append(
-                    Attachment(
-                        identifier='DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
-                        label=DocumentsEtudesSecondaires['DIPLOME_BELGE_CERTIFICAT_INSCRIPTION'],
-                        uuids=context.etudes_secondaires.diplome_belge.certificat_inscription,
                         required=True,
                         candidate_language=context.identification.langue_contact,
                     )
@@ -216,58 +207,24 @@ def get_secondary_studies_attachments(
                         )
                     )
 
-            attachments.append(
-                Attachment(
-                    identifier='DIPLOME_ETRANGER_DIPLOME',
-                    label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'],
-                    uuids=context.etudes_secondaires.diplome_etranger.diplome,
-                    required=not ue_or_assimilated
-                    or (got_diploma == GotDiploma.YES.name)
-                    or bool(
-                        got_diploma == GotDiploma.THIS_YEAR.name
-                        and context.etudes_secondaires.diplome_etranger.diplome
-                        and not context.etudes_secondaires.diplome_etranger.certificat_inscription
+            if got_diploma in CHOIX_DIPLOME_OBTENU:
+                attachments.append(
+                    Attachment(
+                        identifier='DIPLOME_ETRANGER_DIPLOME',
+                        label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'],
+                        uuids=context.etudes_secondaires.diplome_etranger.diplome,
+                        required=True,
+                        candidate_language=context.identification.langue_contact,
                     ),
-                    candidate_language=context.identification.langue_contact,
-                ),
-            )
-
-            if need_translations:
-                attachments.append(
-                    Attachment(
-                        identifier='DIPLOME_ETRANGER_TRADUCTION_DIPLOME',
-                        label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'],
-                        uuids=context.etudes_secondaires.diplome_etranger.traduction_diplome,
-                        required=not ue_or_assimilated
-                        or (got_diploma == GotDiploma.YES.name)
-                        or bool(
-                            got_diploma == GotDiploma.THIS_YEAR.name
-                            and context.etudes_secondaires.diplome_etranger.diplome
-                        ),
-                        candidate_language=context.identification.langue_contact,
-                    )
                 )
 
-            if context.etudes_secondaires.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name and ue_or_assimilated:
-                attachments.append(
-                    Attachment(
-                        identifier='DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
-                        label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION'],
-                        uuids=context.etudes_secondaires.diplome_etranger.certificat_inscription,
-                        required=bool(
-                            context.etudes_secondaires.diplome_etranger.certificat_inscription
-                            and not context.etudes_secondaires.diplome_etranger.diplome
-                        ),
-                        candidate_language=context.identification.langue_contact,
-                    )
-                )
                 if need_translations:
                     attachments.append(
                         Attachment(
-                            identifier='DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
-                            label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION'],
-                            uuids=context.etudes_secondaires.diplome_etranger.traduction_certificat_inscription,
-                            required=bool(context.etudes_secondaires.diplome_etranger.certificat_inscription),
+                            identifier='DIPLOME_ETRANGER_TRADUCTION_DIPLOME',
+                            label=DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'],
+                            uuids=context.etudes_secondaires.diplome_etranger.traduction_diplome,
+                            required=True,
                             candidate_language=context.identification.langue_contact,
                         )
                     )

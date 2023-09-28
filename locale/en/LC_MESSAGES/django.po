@@ -204,11 +204,6 @@ msgid "A transcript for your last year of secondary school"
 msgstr ""
 
 msgid ""
-"A translation of the enrolment or school attendance certificate by a sworn "
-"translator"
-msgstr ""
-
-msgid ""
 "A translation of your official transcript of marks for your final year of "
 "secondary school by a sworn translator"
 msgstr ""
@@ -1071,9 +1066,6 @@ msgid ""
 msgstr ""
 
 msgid "Certificate of achievement"
-msgstr ""
-
-msgid "Certificate of enrolment or school attendance"
 msgstr ""
 
 msgid "Certificate of experience"
