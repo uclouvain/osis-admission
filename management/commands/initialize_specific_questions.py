@@ -422,7 +422,6 @@ class Command(BaseCommand):
         matched_acronyms = self.get_matched_acronyms(
             [
                 'CORP2M',
-                'COMU2M',
                 'EJL2M',
                 'STIC2M',
             ],
@@ -470,7 +469,7 @@ class Command(BaseCommand):
             ],
         )
         for acronym in [
-            'GEST2M/1',
+            'GEST2M1',
         ] + matched_acronyms:
             self.instantiate_education_group_question(
                 acronym=acronym,
