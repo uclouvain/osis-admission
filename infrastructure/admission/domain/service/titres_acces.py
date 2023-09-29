@@ -38,7 +38,9 @@ from osis_profile.models import (
     ForeignHighSchoolDiploma,
     HighSchoolDiplomaAlternative,
     ProfessionalExperience,
+    EducationalExperienceYear,
 )
+from osis_profile.models.enums.curriculum import Result
 from reference.models.enums.cycle import Cycle
 
 
@@ -97,18 +99,20 @@ class TitresAcces(ITitresAcces):
                 ),
                 # diplômé d'une formation académique belge
                 diplomation_academique_belge=models.Exists(
-                    EducationalExperience.objects.filter(
-                        models.Q(person_id=models.OuterRef('pk')),
-                        country__iso_code="BE",
-                        obtained_diploma=True,
+                    EducationalExperienceYear.objects.filter(
+                        models.Q(result=Result.WAITING_RESULT.name)
+                        | models.Q(educational_experience__obtained_diploma=True),
+                        educational_experience__person_id=models.OuterRef('pk'),
+                        educational_experience__country__iso_code="BE",
                     )
                 ),
                 # diplômé d'une formation académique étrangère
                 diplomation_academique_etranger=models.Exists(
-                    EducationalExperience.objects.filter(
-                        models.Q(person_id=models.OuterRef('pk')),
-                        ~models.Q(country__iso_code="BE"),
-                        obtained_diploma=True,
+                    EducationalExperienceYear.objects.filter(
+                        models.Q(result=Result.WAITING_RESULT.name)
+                        | models.Q(educational_experience__obtained_diploma=True),
+                        ~models.Q(educational_experience__country__iso_code="BE"),
+                        educational_experience__person_id=models.OuterRef('pk'),
                     )
                 ),
                 # avoir suivi, sans en être diplômé, une formation académique belge
@@ -132,43 +136,47 @@ class TitresAcces(ITitresAcces):
                 #     de 2e cycle (c.-à-d. formation sélectionnée dans la liste déroulante ET étant de 2e cycle)
                 #     OU en ayant coché "autre formation"
                 diplomation_potentiel_master_belge=models.Exists(
-                    EducationalExperience.objects.filter(
-                        models.Q(person_id=models.OuterRef('pk')),
+                    EducationalExperienceYear.objects.filter(
+                        models.Q(educational_experience__person_id=models.OuterRef('pk')),
                         # formation académique de 2e cycle
-                        models.Q(program__cycle=Cycle.SECOND_CYCLE.name)
+                        models.Q(educational_experience__program__cycle=Cycle.SECOND_CYCLE.name)
                         # OU autre formation
-                        | ~models.Q(education_name=''),
+                        | ~models.Q(educational_experience__education_name=''),
+                        # diplomé ou en attente de résultat ou ancient étudiant de l'UCL
+                        models.Q(educational_experience__obtained_diploma=True)
+                        | models.Q(result=Result.WAITING_RESULT.name)
+                        | models.Q(educational_experience__person__last_registration_year__isnull=False),
                         # belge
-                        country__iso_code="BE",
-                        # diplomé
-                        obtained_diploma=True,
+                        educational_experience__country__iso_code="BE",
                     )
                 ),
                 # diplômé d'une formation académique étrangère
                 #     ET présence de la PJ d'équivalence de(s) diplôme(s) étranger(s)
                 diplomation_potentiel_master_etranger=models.Exists(
-                    EducationalExperience.objects.filter(
-                        models.Q(person_id=models.OuterRef('pk')),
+                    EducationalExperienceYear.objects.filter(
+                        models.Q(educational_experience__person_id=models.OuterRef('pk')),
                         # étranger
-                        ~models.Q(country__iso_code="BE"),
-                        # diplomé
-                        obtained_diploma=True,
+                        ~models.Q(educational_experience__country__iso_code="BE"),
+                        # diplomé ou en attente de résultat
+                        models.Q(educational_experience__obtained_diploma=True)
+                        | models.Q(result=Result.WAITING_RESULT.name),
                     )
                 ),
                 # diplômé d'une formation académique belge
                 #     de 3e cycle (c.-à-d. formation sélectionnée dans la liste déroulante ET étant de 3e cycle)
                 #     OU en ayant coché "autre formation"
                 diplomation_potentiel_doctorat_belge=models.Exists(
-                    EducationalExperience.objects.filter(
-                        models.Q(person_id=models.OuterRef('pk')),
+                    EducationalExperienceYear.objects.filter(
+                        models.Q(educational_experience__person_id=models.OuterRef('pk')),
                         # formation académique de 3e cycle
-                        models.Q(program__cycle=Cycle.THIRD_CYCLE.name)
+                        models.Q(educational_experience__program__cycle=Cycle.THIRD_CYCLE.name)
                         # OU autre formation
-                        | ~models.Q(education_name=''),
+                        | ~models.Q(educational_experience__education_name=''),
+                        # diplomé ou en attente de résultat
+                        models.Q(educational_experience__obtained_diploma=True)
+                        | models.Q(result=Result.WAITING_RESULT.name),
                         # belge
-                        country__iso_code="BE",
-                        # diplomé
-                        obtained_diploma=True,
+                        educational_experience__country__iso_code="BE",
                     )
                 ),
                 # avoir renseigné des activités non académiques dont le total fait au moins 36 mois.
