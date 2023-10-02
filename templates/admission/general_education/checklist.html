@@ -207,7 +207,7 @@
             {% endif %}
 
             {% panel _("Parcours") %}
-            {% include "admission/general_education/includes/checklist/parcours.html" %}
+              {% include "admission/general_education/includes/checklist/parcours.html" %}
             {% endpanel %}
           </div>
         </div>
@@ -568,14 +568,6 @@
 
           // Faculty decision
           const facultyDecisionContainer = $('#decision_facultaire');
-          facultyDecisionContainer.on('change', '#id_fac-decision-refusal-category', function(event){
-              const currentCategory = $(this).val();
-              const reasonContainer = $('#fac-decision-refusal-reason-container');
-              const otherReasonContainer = $('#fac-decision-refusal-other-reason-container');
-              currentCategory === 'OTHER' ? otherReasonContainer.removeClass('hidden'): otherReasonContainer.addClass('hidden');
-              reasonContainer.find('select').val('').change();
-              currentCategory !== 'OTHER' ? reasonContainer.removeClass('hidden') : reasonContainer.addClass('hidden');
-          })
 
           facultyDecisionContainer.on('change', '#id_fac-decision-approval-another_training', function(event){
               const container = $('#fac-decision-other-training-container');
@@ -601,13 +593,6 @@
                   CKEDITOR.instances[editor].updateElement();
               }
           });
-
-          {# Django autocomplete overrides the option value with the option label when the tags are used so we revert this process here. #}
-          facultyDecisionContainer.on('select2:selecting', '#id_fac-decision-approval-prerequisite_courses', function (event) {
-              if(event.params.args.data.original_id) {
-                  event.params.args.data.id = event.params.args.data.original_id;
-              }
-          });
       })(jQuery);
   </script>
 {% endblock script %}
@@ -618,6 +603,7 @@
   {{ fac_decision_refusal_form.media.css }}
   {{ fac_decision_approval_form.media.css }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
+  <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
   <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
   <style>
     #three-pane-checklist {
@@ -828,16 +814,25 @@
       margin: 0 0 0 5px
     }
 
-    .select2-selection--multiple .select2-selection__choice {
-      display: block !important;
-      width: fit-content;
+    .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {
+      word-wrap: break-word;
+      text-overflow: inherit;
+      white-space: normal;
     }
 
-    #fac-decision-approval-form {
+    .fac-decision-modal .select2-selection--multiple .select2-selection__choice {
+      background-color: rgba(200, 200, 200, 0.1);
+      width: 100%;
+      display: flex;
+      padding: 5px;
+      align-items: center;
+    }
+
+    .fac-decision-modal {
       overflow: auto;
     }
 
-    #fac-decision-approval-form .modal-footer {
+    .fac-decision-modal .modal-footer {
       position: sticky;
       bottom: 0;
       background: white;

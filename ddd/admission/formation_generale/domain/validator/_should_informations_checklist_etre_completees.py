@@ -49,11 +49,11 @@ from base.ddd.utils.business_validator import BusinessValidator
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldSpecifierMotifRefusFacultaire(BusinessValidator):
-    motif_refus_fac: Optional[MotifRefusIdentity]
-    autre_motif_refus_fac: str
+    motifs_refus: List[MotifRefusIdentity]
+    autres_motifs_refus: List[str]
 
     def validate(self, *args, **kwargs):
-        if not self.motif_refus_fac and not self.autre_motif_refus_fac:
+        if not self.motifs_refus and not self.autres_motifs_refus:
             raise MotifRefusFacultaireNonSpecifieException
 
 

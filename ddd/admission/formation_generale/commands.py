@@ -374,18 +374,18 @@ class RefuserPropositionParFaculteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RefuserPropositionParFaculteAvecNouveauMotifCommand(interface.CommandRequest):
+class RefuserPropositionParFaculteAvecNouveauxMotifsCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    uuid_motif: str
-    autre_motif: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SpecifierMotifRefusFacultairePropositionCommand(interface.CommandRequest):
+class SpecifierMotifsRefusPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
-    uuid_motif: str
-    autre_motif: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -395,7 +395,7 @@ class ApprouverPropositionParFaculteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SpecifierInformationsAcceptationFacultairePropositionCommand(interface.CommandRequest):
+class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     sigle_autre_formation: str = ''
     uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)

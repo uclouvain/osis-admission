@@ -279,7 +279,7 @@ class PropositionInMemoryRepository(
         proposition = cls.get(entity_id=entity_id)
         propositions = cls.search_dto(matricule_candidat=proposition.matricule_candidat)
         base_proposition = cls._load_dto(proposition)
-        motif_refus = cls.motifs_refus.get(proposition.motif_refus_fac.uuid) if proposition.motif_refus_fac else None
+        motifs_refus = [cls.motifs_refus.get(motif_refus.uuid) for motif_refus in proposition.motifs_refus]
         candidat = ProfilCandidatInMemoryTranslator.get_identification(proposition.matricule_candidat)
         formation_choisie_fac = (
             FormationGeneraleInMemoryTranslator.get_dto(
@@ -329,11 +329,7 @@ class PropositionInMemoryRepository(
             )
             if proposition.profil_soumis_candidat
             else None,
-            motif_refus_fac=motif_refus
-            and MotifRefusDTO(
-                motif=motif_refus.intitule,
-                categorie=motif_refus.categorie,
-            ),
+            motifs_refus=[MotifRefusDTO(motif=motif.intitule, categorie=motif.categorie) for motif in motifs_refus],
             autre_formation_choisie_fac=formation_choisie_fac
             and BaseFormationDTO(
                 sigle=formation_choisie_fac.sigle,

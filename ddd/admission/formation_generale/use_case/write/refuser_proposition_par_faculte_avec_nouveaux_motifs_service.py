@@ -25,23 +25,40 @@
 # ##############################################################################
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    SpecifierMotifRefusFacultairePropositionCommand,
+    RefuserPropositionParFaculteAvecNouveauxMotifsCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def specifier_motif_refus_facultaire(
-    cmd: SpecifierMotifRefusFacultairePropositionCommand,
+def refuser_proposition_par_faculte_avec_nouveaux_motifs(
+    cmd: RefuserPropositionParFaculteAvecNouveauxMotifsCommand,
     proposition_repository: 'IPropositionRepository',
+    historique: 'IHistorique',
+    pdf_generation: 'IPDFGeneration',
 ) -> PropositionIdentity:
+    # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.specifier_motif_refus_par_fac(
-        uuid_motif=cmd.uuid_motif,
-        autre_motif=cmd.autre_motif,
+    # WHEN
+    proposition.specifier_motifs_refus_par_fac(uuids_motifs=cmd.uuids_motifs, autres_motifs=cmd.autres_motifs)
+
+    proposition.refuser_par_fac()
+
+    # THEN
+    pdf_generation.generer_attestation_refus_facultaire(
+        proposition_repository=proposition_repository,
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
     )
 
     proposition_repository.save(entity=proposition)
+
+    historique.historiser_refus_fac(
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+    )
 
     return proposition.entity_id
