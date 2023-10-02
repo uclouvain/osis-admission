@@ -57,8 +57,8 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_generaleducationadmission',
-        'PUT': 'admission.change_generaleducationadmission',
+        'GET': 'admission.view_generaleducationadmission_specific_question',
+        'PUT': 'admission.change_generaleducationadmission_specific_question',
     }
     serializer_class = PoolQuestionsSerializer
 
