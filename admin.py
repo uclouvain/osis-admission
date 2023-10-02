@@ -493,17 +493,30 @@ class DisplayTranslatedNameMixin:
 
 
 class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
-    list_display = ['name_fr', 'name_en']
+    list_display = ['name']
+    search_fields = ['name']
 
 
 class RefusalReasonAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
     autocomplete_fields = ['category']
-    list_display = ['name_fr', 'name_en', 'category']
+    list_display = ['safe_name', 'category']
     list_filter = ['category']
+
+    @admin.display(description=_('Name'))
+    def safe_name(self, obj):
+        return mark_safe(obj.name)
 
 
 class AdditionalApprovalConditionAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
-    list_display = ['name_fr', 'name_en']
+    list_display = ['safe_name_fr', 'safe_name_en']
+
+    @admin.display(description=_('French name'))
+    def safe_name_fr(self, obj):
+        return mark_safe(obj.name_fr)
+
+    @admin.display(description=_('English name'))
+    def safe_name_en(self, obj):
+        return mark_safe(obj.name_en)
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)

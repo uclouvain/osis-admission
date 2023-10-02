@@ -25,14 +25,14 @@
 # ##############################################################################
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    SpecifierInformationsAcceptationFacultairePropositionCommand,
+    SpecifierInformationsAcceptationPropositionParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def specifier_informations_acceptation_facultaire(
-    cmd: SpecifierInformationsAcceptationFacultairePropositionCommand,
+def specifier_informations_acceptation_proposition_par_faculte(
+    cmd: SpecifierInformationsAcceptationPropositionParFaculteCommand,
     proposition_repository: 'IPropositionRepository',
 ) -> PropositionIdentity:
     # GIVEN

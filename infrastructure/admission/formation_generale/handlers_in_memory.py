@@ -389,9 +389,11 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
         )
     ),
-    SpecifierMotifRefusFacultairePropositionCommand: lambda msg_bus, cmd: specifier_motif_refus_facultaire(
-        cmd,
-        proposition_repository=_proposition_repository,
+    SpecifierMotifsRefusPropositionParFaculteCommand: (
+        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_faculte(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
     ),
     RefuserPropositionParFaculteCommand: lambda msg_bus, cmd: refuser_proposition_par_faculte(
         cmd,
@@ -399,16 +401,16 @@ COMMAND_HANDLERS = {
         historique=_historique_formation_generale,
         pdf_generation=_pdf_generation,
     ),
-    RefuserPropositionParFaculteAvecNouveauMotifCommand: (
-        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveau_motif(
+    RefuserPropositionParFaculteAvecNouveauxMotifsCommand: (
+        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveaux_motifs(
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
             pdf_generation=_pdf_generation,
         )
     ),
-    SpecifierInformationsAcceptationFacultairePropositionCommand: (
-        lambda msg_bus, cmd: specifier_informations_acceptation_facultaire(
+    SpecifierInformationsAcceptationPropositionParFaculteCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
             cmd,
             proposition_repository=_proposition_repository,
         )

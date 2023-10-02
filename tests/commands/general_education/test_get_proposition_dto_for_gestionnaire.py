@@ -28,7 +28,7 @@ from unittest.mock import ANY, patch
 
 import freezegun
 from django.test import TestCase, override_settings
-from django.utils.translation import gettext
+from django.utils.translation import gettext, pgettext
 from osis_history.models import HistoryEntry
 
 from admission.contrib.models import GeneralEducationAdmission
@@ -229,25 +229,26 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.admission.fac_refusal_certificate = ['uuid-fac-refusal-certificate']
 
         # Choose an existing reason
-        self.admission.fac_refusal_reason = RefusalReasonFactory()
-        self.admission.other_fac_refusal_reason = ''
+        chosen_reason = RefusalReasonFactory()
+        self.admission.refusal_reasons.add(chosen_reason)
+        self.admission.other_refusal_reasons = []
         self.admission.save()
 
         result = self._get_command_result()
         self.assertEqual([str(result.certificat_refus_fac[0])], self.admission.fac_refusal_certificate)
-        self.assertIsNotNone(result.motif_refus_fac)
-        self.assertEqual(result.motif_refus_fac.motif, self.admission.fac_refusal_reason.name_fr)
-        self.assertEqual(result.motif_refus_fac.categorie, self.admission.fac_refusal_reason.category.name_fr)
+        self.assertEqual(len(result.motifs_refus), 1)
+        self.assertEqual(result.motifs_refus[0].motif, chosen_reason.name)
+        self.assertEqual(result.motifs_refus[0].categorie, chosen_reason.category.name)
 
         # Choose a free reason
-        self.admission.fac_refusal_reason = None
-        self.admission.other_fac_refusal_reason = 'other reason'
+        self.admission.refusal_reasons.all().delete()
+        self.admission.other_refusal_reasons = ['other reason']
         self.admission.save()
 
         result = self._get_command_result()
-        self.assertIsNotNone(result.motif_refus_fac)
-        self.assertEqual(result.motif_refus_fac.motif, 'other reason')
-        self.assertEqual(result.motif_refus_fac.categorie, gettext('Other'))
+        self.assertEqual(len(result.motifs_refus), 1)
+        self.assertEqual(result.motifs_refus[0].motif, 'other reason')
+        self.assertEqual(result.motifs_refus[0].categorie, pgettext('admission', 'Other reasons'))
 
     def test_get_proposition_with_faculty_approval_reason(self):
         # Approval data

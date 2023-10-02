@@ -29,7 +29,6 @@ import factory
 
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    RefuserPropositionParFaculteAvecNouveauMotifCommand,
     RefuserPropositionParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -76,8 +75,8 @@ class TestRefuserPropositionParFaculte(TestCase):
 
     def test_should_etre_ok_si_traitement_fac_et_motif_connu(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
-        self.proposition.motif_refus_fac = MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')
-        self.proposition.autre_motif_refus_fac = ''
+        self.proposition.motifs_refus = [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')]
+        self.proposition.autres_motifs_refus = []
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -92,8 +91,8 @@ class TestRefuserPropositionParFaculte(TestCase):
 
     def test_should_etre_ok_si_completee_pour_fac_et_motif_libre(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC
-        self.proposition.motif_refus_fac = None
-        self.proposition.autre_motif_refus_fac = 'Autre motif'
+        self.proposition.motifs_refus = []
+        self.proposition.autres_motifs_refus = ['Autre motif']
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -115,8 +114,8 @@ class TestRefuserPropositionParFaculte(TestCase):
 
     def test_should_lever_exception_si_aucun_motif_specifie(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC
-        self.proposition.motif_refus_fac = None
-        self.proposition.autre_motif_refus_fac = ''
+        self.proposition.motifs_refus = []
+        self.proposition.autres_motifs_refus = []
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))

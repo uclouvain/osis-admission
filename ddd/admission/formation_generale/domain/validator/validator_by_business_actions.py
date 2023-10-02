@@ -242,8 +242,8 @@ class SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(TwoStepsMultip
 @attr.dataclass(frozen=True, slots=True)
 class RefuserParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionGenerale
-    motif_refus_fac: Optional[MotifRefusIdentity]
-    autre_motif_refus_fac: str
+    motifs_refus: List[MotifRefusIdentity]
+    autres_motifs_refus: List[str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -254,8 +254,8 @@ class RefuserParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
                 statut=self.statut,
             ),
             ShouldSpecifierMotifRefusFacultaire(
-                motif_refus_fac=self.motif_refus_fac,
-                autre_motif_refus_fac=self.autre_motif_refus_fac,
+                motifs_refus=self.motifs_refus,
+                autres_motifs_refus=self.autres_motifs_refus,
             ),
         ]
 

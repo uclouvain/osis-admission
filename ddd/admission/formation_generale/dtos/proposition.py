@@ -126,7 +126,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]
 
-    motif_refus_fac: Optional[MotifRefusDTO]
+    motifs_refus: List[MotifRefusDTO]
 
     autre_formation_choisie_fac: Optional['BaseFormationDTO']
     avec_conditions_complementaires: Optional[bool]

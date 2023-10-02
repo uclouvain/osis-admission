@@ -98,7 +98,6 @@ class AutocompleteTestCase(TestCase):
             results[0],
             {
                 'id': first_learning_unit.acronym,
-                'original_id': first_learning_unit.acronym,
                 'text': f'{first_learning_unit.acronym} - {first_learning_unit.complete_title_i18n}',
             },
         )
@@ -122,7 +121,6 @@ class AutocompleteTestCase(TestCase):
                 results[0],
                 {
                     'id': first_learning_unit.acronym,
-                    'original_id': first_learning_unit.acronym,
                     'text': f'{first_learning_unit.acronym} - {first_learning_unit.complete_title_i18n}',
                 },
             )

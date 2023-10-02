@@ -2243,9 +2243,6 @@ msgstr "Commentaire de la Faculté pour le SIC"
 msgid "Faculty process"
 msgstr "Traitement facultaire"
 
-msgid "Faculty refusal reason"
-msgstr "Motif de refus facultaire"
-
 msgid "Failure of the confirmation paper"
 msgstr "Échec de l'épreuve de confirmation"
 
@@ -2496,6 +2493,9 @@ msgstr "Commentaires globaux SIC"
 msgctxt "admission"
 msgid "Grade"
 msgstr "Mention obtenue"
+
+msgid "Graduation of {}"
+msgstr "L'obtention de votre diplôme de"
 
 msgid "Grounds for denied"
 msgstr "Motif de refus"
@@ -3819,9 +3819,6 @@ msgstr "Non-UE"
 msgid "Not VIP"
 msgstr "Non-VIP"
 
-msgid "Not all the conditions have been found."
-msgstr "Toutes les conditions n'ont pas été trouvées."
-
 msgid "Not analyzed"
 msgstr "Non analysé"
 
@@ -3931,6 +3928,9 @@ msgstr "Communication orale"
 msgid "Oral presentation"
 msgstr "Exposé oral"
 
+msgid "Order"
+msgstr "Ordre"
+
 msgid "Organising country"
 msgstr "Pays organisateur"
 
@@ -3959,9 +3959,6 @@ msgstr "Autre formation acceptée par la facultée"
 msgid "Other documents relating to joint supervision"
 msgstr "Autres documents relatifs à la cotutelle"
 
-msgid "Other faculty refusal reason"
-msgstr "Autre motif de refus facultaire"
-
 msgid "Other given names"
 msgstr "Autres prénoms"
 
@@ -3981,8 +3978,11 @@ msgid "Other members of the supervisory panel"
 msgstr "Autres membres du comité d’accompagnement"
 
 msgctxt "admission"
-msgid "Other reason"
-msgstr "Autre raison"
+msgid "Other reasons"
+msgstr "Autres raisons"
+
+msgid "Other refusal reasons"
+msgstr "Autres motifs de refus facultaire"
 
 msgctxt "CategorieActivite"
 msgid "PAPER"
@@ -4520,6 +4520,13 @@ msgstr "Motif du dépassement de l’échéance"
 
 msgid "Reason for refusal"
 msgstr "Motif de refus"
+
+msgid "Reasons"
+msgstr "Raisons"
+
+msgctxt "admission"
+msgid "Reasons"
+msgstr "Raisons"
 
 #, python-format
 msgid "Recap of the proposition %(reference)s"
@@ -6428,6 +6435,9 @@ msgstr "Annulé"
 
 msgid "candidate"
 msgstr "candidat"
+
+msgid "contact language"
+msgstr "langue de contact"
 
 msgid "created"
 msgstr "créé"

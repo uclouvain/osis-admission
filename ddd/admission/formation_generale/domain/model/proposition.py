@@ -127,12 +127,12 @@ class Proposition(interface.RootEntity):
 
     poste_diplomatique: Optional[PosteDiplomatiqueIdentity] = None
 
-    # Décision facultaire
+    # Décision facultaire & sic
     certificat_approbation_fac: List[str] = attr.Factory(list)
     certificat_refus_fac: List[str] = attr.Factory(list)
 
-    motif_refus_fac: Optional[MotifRefusIdentity] = None
-    autre_motif_refus_fac: str = ''
+    motifs_refus: List[MotifRefusIdentity] = attr.Factory(list)
+    autres_motifs_refus: List[str] = attr.Factory(list)
 
     autre_formation_choisie_fac_id: Optional['FormationIdentity'] = None
     avec_conditions_complementaires: Optional[bool] = None
@@ -233,13 +233,13 @@ class Proposition(interface.RootEntity):
             libelle=__('Approval'),
         )
 
-    def specifier_motif_refus_par_fac(self, uuid_motif: str, autre_motif: str):
+    def specifier_motifs_refus_par_fac(self, uuids_motifs: List[str], autres_motifs: List[str]):
         SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
             statut=self.statut,
         ).validate()
         self.specifier_refus_par_fac()
-        self.motif_refus_fac = MotifRefusIdentity(uuid=uuid_motif) if uuid_motif else None
-        self.autre_motif_refus_fac = autre_motif
+        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
+        self.autres_motifs_refus = autres_motifs
 
     def specifier_informations_acceptation_par_fac(
         self,
@@ -297,8 +297,8 @@ class Proposition(interface.RootEntity):
     def refuser_par_fac(self):
         RefuserParFacValidatorList(
             statut=self.statut,
-            motif_refus_fac=self.motif_refus_fac,
-            autre_motif_refus_fac=self.autre_motif_refus_fac,
+            motifs_refus=self.motifs_refus,
+            autres_motifs_refus=self.autres_motifs_refus,
         ).validate()
 
         self.specifier_refus_par_fac()

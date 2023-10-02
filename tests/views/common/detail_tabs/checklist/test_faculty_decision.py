@@ -33,10 +33,12 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.test import override_settings
+from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
+from admission.contrib.models.checklist import AdditionalApprovalCondition
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -325,8 +327,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.client.force_login(user=self.fac_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
-        self.general_admission.fac_refusal_reason = None
-        self.general_admission.other_fac_refusal_reason = ''
+        self.general_admission.refusal_reasons.all().delete()
+        self.general_admission.other_refusal_reasons = []
         self.general_admission.fac_refusal_certificate = []
         self.general_admission.save()
 
@@ -342,7 +344,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             self.assertEqual(response.status_code, 400)
             self.assertIsInstance(context.exception.exceptions.pop(), MotifRefusFacultaireNonSpecifieException)
 
-        self.general_admission.other_fac_refusal_reason = 'test'
+        self.general_admission.other_refusal_reasons = ['test']
         self.general_admission.save()
 
         # Valid request
@@ -556,9 +558,9 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         refusal_reason = RefusalReasonFactory()
 
-        # The reason is empty
-        self.general_admission.fac_refusal_reason = None
-        self.general_admission.other_fac_refusal_reason = ''
+        # No reason
+        self.general_admission.refusal_reasons.all().delete()
+        self.general_admission.other_refusal_reasons = []
 
         self.general_admission.save()
 
@@ -568,12 +570,10 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         form = response.context['fac_decision_refusal_form']
 
-        self.assertEqual(form.initial.get('reason'), None)
-        self.assertEqual(form.initial.get('other_reason'), '')
-        self.assertEqual(form.initial.get('category'), '')
+        self.assertEqual(form.initial.get('reasons'), [])
 
-        # The existing reason is selected
-        self.general_admission.fac_refusal_reason = refusal_reason
+        # One existing reason is selected
+        self.general_admission.refusal_reasons.add(refusal_reason)
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -582,13 +582,11 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         form = response.context['fac_decision_refusal_form']
 
-        self.assertEqual(form.initial.get('reason'), refusal_reason)
-        self.assertEqual(form.initial.get('other_reason'), '')
-        self.assertEqual(form.initial.get('category'), refusal_reason.category)
+        self.assertEqual(form.initial.get('reasons'), [refusal_reason.uuid])
 
-        # The other reason is selected
-        self.general_admission.fac_refusal_reason = None
-        self.general_admission.other_fac_refusal_reason = 'Other reason'
+        # One other reason is selected
+        self.general_admission.refusal_reasons.all().delete()
+        self.general_admission.other_refusal_reasons = ['Other reason']
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -597,36 +595,20 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         form = response.context['fac_decision_refusal_form']
 
-        self.assertEqual(form.initial.get('reason'), None)
-        self.assertEqual(form.initial.get('other_reason'), 'Other reason')
-        self.assertEqual(form.initial.get('category'), 'OTHER')
+        self.assertEqual(form.initial.get('reasons'), ['Other reason'])
 
     def test_refusal_decision_form_submitting_with_invalid_data(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        refusal_reason = RefusalReasonFactory()
-
         # Check form submitting
-        self.general_admission.fac_refusal_reason = None
-        self.general_admission.other_fac_refusal_reason = ''
+        self.general_admission.refusal_reasons.all().delete()
+        self.general_admission.other_refusal_reasons = []
         self.general_admission.save()
 
-        # No chosen category
-        response = self.client.post(self.url, **self.default_headers)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['fac_decision_refusal_form']
-
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('category', []))
-
-        # Chosen category but no chosen reason
+        # No chosen reason
         response = self.client.post(
             self.url,
-            data={
-                'fac-decision-refusal-category': refusal_reason.category_id,
-            },
+            data={},
             **self.default_headers,
         )
 
@@ -635,35 +617,18 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         form = response.context['fac_decision_refusal_form']
 
         self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('reason', []))
-
-        # Chosen category (=OTHER) but no specified other reason
-        response = self.client.post(
-            self.url,
-            data={
-                'fac-decision-refusal-category': 'OTHER',
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['fac_decision_refusal_form']
-
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_reason', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('reasons', []))
 
     def test_refusal_decision_form_submitting_with_valid_data(self):
         self.client.force_login(user=self.fac_manager_user)
 
         refusal_reason = RefusalReasonFactory()
 
-        # Chosen category and existing reason
+        # Choose an existing reason
         response = self.client.post(
             self.url,
             data={
-                'fac-decision-refusal-category': refusal_reason.category_id,
-                'fac-decision-refusal-reason': refusal_reason.uuid,
+                'fac-decision-refusal-reasons': [refusal_reason.uuid],
             },
             **self.default_headers,
         )
@@ -677,8 +642,10 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         # Check that the admission has been updated
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.fac_refusal_reason, refusal_reason)
-        self.assertEqual(self.general_admission.other_fac_refusal_reason, '')
+        refusal_reasons = self.general_admission.refusal_reasons.all()
+        self.assertEqual(len(refusal_reasons), 1)
+        self.assertEqual(refusal_reasons[0], refusal_reason)
+        self.assertEqual(self.general_admission.other_refusal_reasons, [])
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['statut'],
@@ -689,12 +656,11 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
             {'decision': '1'},
         )
 
-        # Chosen category (=OTHER) and specified other reason
+        # Choose another reason
         response = self.client.post(
             self.url,
             data={
-                'fac-decision-refusal-category': 'OTHER',
-                'fac-decision-refusal-other_reason': 'My other reason',
+                'fac-decision-refusal-reasons': ['My other reason'],
             },
             **self.default_headers,
         )
@@ -708,20 +674,19 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         # Check that the admission has been updated
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.fac_refusal_reason, None)
-        self.assertEqual(self.general_admission.other_fac_refusal_reason, 'My other reason')
+        self.assertFalse(self.general_admission.refusal_reasons.exists())
+        self.assertEqual(self.general_admission.other_refusal_reasons, ['My other reason'])
 
     def test_refusal_decision_form_submitting_with_transfer_to_sic(self):
         self.client.force_login(user=self.fac_manager_user)
 
         refusal_reason = RefusalReasonFactory()
 
-        # Chosen category and reason and transfer to SIC
+        # Chosen reason and transfer to SIC
         response = self.client.post(
             self.url,
             data={
-                'fac-decision-refusal-category': refusal_reason.category_id,
-                'fac-decision-refusal-reason': refusal_reason.uuid,
+                'fac-decision-refusal-reasons': [refusal_reason.uuid],
                 'save-transfer': '1',
             },
             **self.default_headers,
@@ -736,8 +701,10 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         # Check that the admission has been updated
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.fac_refusal_reason, refusal_reason)
-        self.assertEqual(self.general_admission.other_fac_refusal_reason, '')
+        refusal_reasons = self.general_admission.refusal_reasons.all()
+        self.assertEqual(len(refusal_reasons), 1)
+        self.assertEqual(refusal_reasons[0], refusal_reason)
+        self.assertEqual(self.general_admission.other_refusal_reasons, [])
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['statut'],
@@ -795,6 +762,8 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
         cls.default_headers = {'HTTP_HX-Request': 'true'}
+
+        AdditionalApprovalCondition.objects.all().delete()
 
     def setUp(self) -> None:
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
@@ -975,6 +944,10 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             form.fields['all_additional_approval_conditions'].choices,
             [
                 (
+                    gettext('Graduation of {}').format('Computer science'),
+                    gettext('Graduation of {}').format('Computer science'),
+                ),
+                (
                     self.general_admission.free_additional_approval_conditions[0],
                     self.general_admission.free_additional_approval_conditions[0],
                 ),
@@ -1049,6 +1022,10 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             [
                 (approval_conditions[0].uuid, approval_conditions[0].name_fr),
                 ('Free condition', 'Free condition'),
+                (
+                    gettext('Graduation of {}').format('Computer science'),
+                    gettext('Graduation of {}').format('Computer science'),
+                ),
             ],
         )
 

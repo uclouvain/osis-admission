@@ -92,7 +92,6 @@ class LearningUnitYearAutocomplete(BaseLearningUnitYearAutoComplete):
         title_attribute = self.title_attribute[get_language()]
         results = [
             {
-                'original_id': dto.code,
                 'id': dto.code,
                 'text': f"{dto.code} - {getattr(dto, title_attribute)}",
             }

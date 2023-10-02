@@ -2078,9 +2078,6 @@ msgstr ""
 msgid "Faculty process"
 msgstr ""
 
-msgid "Faculty refusal reason"
-msgstr ""
-
 msgid "Failure of the confirmation paper"
 msgstr ""
 
@@ -2302,6 +2299,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Grade"
+msgstr ""
+
+msgid "Graduation of {}"
 msgstr ""
 
 msgid "Grounds for denied"
@@ -3429,9 +3429,6 @@ msgstr ""
 msgid "Not VIP"
 msgstr ""
 
-msgid "Not all the conditions have been found."
-msgstr ""
-
 msgid "Not analyzed"
 msgstr ""
 
@@ -3529,6 +3526,9 @@ msgstr ""
 msgid "Oral presentation"
 msgstr "Oral exposé"
 
+msgid "Order"
+msgstr ""
+
 msgid "Organising country"
 msgstr ""
 
@@ -3557,9 +3557,6 @@ msgstr ""
 msgid "Other documents relating to joint supervision"
 msgstr ""
 
-msgid "Other faculty refusal reason"
-msgstr ""
-
 msgid "Other given names"
 msgstr ""
 
@@ -3579,7 +3576,10 @@ msgid "Other members of the supervisory panel"
 msgstr ""
 
 msgctxt "admission"
-msgid "Other reason"
+msgid "Other reasons"
+msgstr ""
+
+msgid "Other refusal reasons"
 msgstr ""
 
 msgctxt "CategorieActivite"
@@ -4069,6 +4069,13 @@ msgid "Reason for exceeding the deadline"
 msgstr ""
 
 msgid "Reason for refusal"
+msgstr ""
+
+msgid "Reasons"
+msgstr ""
+
+msgctxt "admission"
+msgid "Reasons"
 msgstr ""
 
 #, python-format
@@ -5797,6 +5804,9 @@ msgid "canceled"
 msgstr "Canceled"
 
 msgid "candidate"
+msgstr ""
+
+msgid "contact language"
 msgstr ""
 
 msgid "created"

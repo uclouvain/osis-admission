@@ -28,6 +28,7 @@
     hx-post="{% url view.base_namespace|add:':fac-decision-refusal' uuid=view.kwargs.uuid %}"
     hx-target="this"
     hx-swap="outerHTML"
+    style="overflow: auto;"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -36,23 +37,15 @@
 
     {% bootstrap_form_errors fac_decision_refusal_form %}
 
-    {% bootstrap_field fac_decision_refusal_form.category %}
-
     <div
         id="fac-decision-refusal-reason-container"
-        class="required_field {% if not fac_decision_refusal_form.category.value or fac_decision_refusal_form.category.value == 'OTHER' %}hidden{% endif %}"
     >
-      {% bootstrap_field fac_decision_refusal_form.reason %}
+      {% bootstrap_field fac_decision_refusal_form.reasons %}
     </div>
+  </div>
 
-    <div
-        id="fac-decision-refusal-other-reason-container"
-        class="required_field {% if not fac_decision_refusal_form.category.value or fac_decision_refusal_form.category.value != 'OTHER' %}hidden{% endif %}"
-    >
-      {% bootstrap_field fac_decision_refusal_form.other_reason %}
-    </div>
-
-    <p>
+  <div class="modal-footer">
+    <p class="text-left alert alert-info">
       {% if can_transfer_to_sic %}
         {% translate 'If you want, you can save these information and directly send the application to the SIC by selecting the appropriate button below.' %}
       {% elif original_admission.status == 'A_COMPLETER_POUR_FAC' %}
@@ -62,9 +55,7 @@
         {% endblocktranslate %}
       {% endif %}
     </p>
-  </div>
 
-  <div class="modal-footer">
     <button
         class="btn btn-default"
         data-dismiss="modal"
@@ -88,14 +79,18 @@
     {% endif %}
   </div>
 
-  {% if request.htmx and fac_decision_refusal_form.is_valid %}
-    {# Update the content of the tab #}
-    {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
+  {% if request.htmx %}
+    {% if fac_decision_refusal_form.is_valid %}
+      {# Update the content of the tab #}
+      {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
+    {% endif %}
     <script>
         $(document).ready(function(){
-            $('#fac-decision-refusal-modal').modal('hide');
+            AdmissionSelectFilter.init('id_fac-decision-refusal-reasons');
+            {% if fac_decision_refusal_form.is_valid %}
+                $('#fac-decision-refusal-modal').modal('hide');
+            {% endif %}
         });
     </script>
   {% endif %}
-
 </form>

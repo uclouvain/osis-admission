@@ -134,9 +134,25 @@
             {% endif %}
           </div>
           <div class="panel-body">
-            {% field_data _('Category') admission.motif_refus_fac.categorie %}
-            {% translate 'Reason' context 'admission' as reason_label %}
-            {% field_data reason_label admission.motif_refus_fac.motif %}
+            <dl>
+              <dt>{% translate 'Reasons' %}</dt>
+              <dd>
+                <ul>
+                  {% for reason in admission.motifs_refus %}
+                    {% ifchanged reason.categorie %}
+                      {% if not forloop.first %}
+                        </ul></li>
+                      {% endif %}
+                      <li>{{ reason.categorie }}<ul>
+                    {% endifchanged %}
+                    <li>{{ reason.motif }}</li>
+                    {% if forloop.last %}
+                    </ul></li>
+                    {% endif %}
+                  {% endfor %}
+                  </ul>
+              </dd>
+            </dl>
           </div>
         </div>
       </div>

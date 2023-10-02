@@ -268,3 +268,10 @@ fieldset.custom-fieldset > legend {
 .comment-content {
   white-space: pre-wrap;
 }
+
+@media (min-width: 992px) {
+  .admission-modal-lg {
+    width: 90%;
+    min-width: 900px;
+  }
+}
