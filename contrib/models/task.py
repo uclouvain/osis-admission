@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,6 +55,11 @@ class AdmissionTask(models.Model):
         GENERAL_RECAP = 'GENERAL_RECAP', _('PDF recap for a general education admission')
         CONTINUING_RECAP = 'CONTINUING_RECAP', _('PDF recap for a continuing education admission')
         DOCTORATE_RECAP = 'DOCTORATE_RECAP', _('PDF recap for a doctorate education admission')
+        GENERAL_MERGE = 'GENERAL_MERGE', _('Merging of each document field of a general proposition into one PDF')
+        CONTINUING_MERGE = 'CONTINUING_MERGE', _(
+            'Merging of each document field of a continuing proposition into one PDF',
+        )
+        DOCTORATE_MERGE = 'DOCTORATE_MERGE', _('Merging of each document field of a doctorate proposition into one PDF')
 
     task = models.ForeignKey(
         'osis_async.AsyncTask',

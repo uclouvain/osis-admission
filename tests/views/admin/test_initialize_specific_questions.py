@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import random
+
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase, Client
@@ -53,63 +55,63 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
         academic_year = AcademicYearFactory(year=2023)
 
         acronyms = {
-            'EDPH2M/*',
+            'EDPH2M',
             'KINE2M1',
-            'MOTR2M/*',
+            'MOTR2M',
             'GEHM2M',
             'GEHM2M1',
             'GEHC2M',
             'GEHC2M1',
             'FEHC2M',
             'COMU2M1',
-            'CORP2M/*',
-            'COMU2M/*',
-            'EJL2M/*',
-            'STIC2M/*',
+            'CORP2M',
+            'COMU2M',
+            'EJL2M',
+            'STIC2M',
             'OPES2M',
-            'ENVI2MC/*',
-            'ENVI2MC/*',
+            'ENVI2MC',
+            'ENVI2MC',
             'COMM2M',
             'PRIM2M',
             'ADPM2M',
-            'COM2M1',
+            'COMM2M1',
             'SPOM2M1',
             'COHM2M',
             'COAM2M',
             'APHM2M',
             'SPHM2M',
             'SPHM2M1',
-            'ARCB2M/*',
-            'ARCT2M/*',
-            'ARCH2M/*',
-            'SINF2M/*',
-            'NRGY2M/*',
-            'MAP2M/*',
-            'MECA2M/*',
-            'GCE2M/*',
-            'INFO2M/*',
-            'GBIO2M/*',
-            'ELME2M/*',
-            'DATI2M/*',
-            'DATE2M/*',
+            'ARCB2M',
+            'ARCT2M',
+            'ARCH2M',
+            'SINF2M',
+            'NRGY2M',
+            'MAP2M',
+            'MECA2M',
+            'GCE2M',
+            'INFO2M',
+            'GBIO2M',
+            'ELME2M',
+            'DATI2M',
+            'DATE2M',
             'SINF2M1',
             'ECON2M1',
-            'ECON2M/*',
-            'ETRI2M/*',
-            'GESA2M/*',
-            'GESM2M/*',
-            'GEST2M/*',
+            'ECON2M',
+            'ETRI2M',
+            'GESA2M',
+            'GESM2M',
+            'GEST2M',
             'GEST2M/1',
-            'INGE2M/*',
-            'INGM2M/*',
-            'GESA2M/*',
-            'GESM2M/*',
-            'GEST2M/*',
-            'INGE2M/*',
-            'INGM2M/*',
+            'INGE2M',
+            'INGM2M',
+            'GESA2M',
+            'GESM2M',
+            'GEST2M',
+            'INGE2M',
+            'INGM2M',
             'EBEP2MC',
             'EDUC2MC',
-            'GERM2M/*',
+            'GERM2M',
             'MD1BA',
             'DENT1BA',
             'MD2M',
@@ -117,10 +119,10 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'DEGE2MC',
             'ORTD2MC',
             'PARO2MC',
-            'SBIM2M/*',
-            'SBIM2M/*',
-            'FARM2M/*',
-            'FARM2M/*',
+            'SBIM2M',
+            'SBIM2M',
+            'FARM2M',
+            'FARM2M',
             'FSA1BA',
             'ARCH1BA',
             'KINE1BA',
@@ -133,18 +135,29 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         cls.education_groups = {}
 
+        masters_in_programs = [
+            TrainingType.MASTER_MA_120.name,
+            TrainingType.MASTER_MD_120.name,
+            TrainingType.MASTER_MS_120.name,
+            TrainingType.MASTER_MS_180_240.name,
+        ]
+
         for acronym in acronyms:
-            final_acronym = acronym.replace('/*', 'MD1')
+            program_acronym = acronym.endswith('2M')
+            final_acronym = f'{acronym}D' if program_acronym else acronym
             cls.education_groups[final_acronym] = (
                 Master120TrainingFactory(
                     academic_year=academic_year,
                     acronym=final_acronym,
+                    education_group_type__name=masters_in_programs[random.randint(0, 3)],
+                    enrollment_enabled=True,
                 )
-                if '/*' in acronym
+                if program_acronym
                 else EducationGroupYearFactory(
                     academic_year=academic_year,
                     acronym=final_acronym,
                     education_group_type__name=TrainingType.MASTER_M1.name,
+                    enrollment_enabled=True,
                 )
             ).education_group
 
@@ -260,16 +273,16 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'EDPH2MMD1',
+            'EDPH2MD',
             'KINE2M1',
-            'MOTR2MMD1',
-            'GEHM2M',
+            'MOTR2MD',
+            'GEHM2MD',
             'GEHM2M1',
-            'GEHC2M',
+            'GEHC2MD',
             'GEHC2M1',
-            'FEHC2M',
-            'FARM2MMD1',
-            'SBIM2MMD1',
+            'FEHC2MD',
+            'FARM2MD',
+            'SBIM2MD',
         ]
 
         form_item_instantiations: QuerySet[
@@ -279,9 +292,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
         for acronym in [
-            'EDPH2MMD1',
+            'EDPH2MD',
             'KINE2M1',
-            'MOTR2MMD1',
+            'MOTR2MD',
         ]:
             instantiation = next(
                 (i for i in form_item_instantiations if i.education_group == self.education_groups[acronym]),
@@ -296,11 +309,11 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
         for acronym in [
-            'GEHM2M',
+            'GEHM2MD',
             'GEHM2M1',
-            'GEHC2M',
+            'GEHC2MD',
             'GEHC2M1',
-            'FEHC2M',
+            'FEHC2MD',
         ]:
             instantiation = next(
                 (i for i in form_item_instantiations if i.education_group == self.education_groups[acronym]),
@@ -315,8 +328,8 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
         for acronym in [
-            'FARM2MMD1',
-            'SBIM2MMD1',
+            'FARM2MD',
+            'SBIM2MD',
         ]:
             instantiation = next(
                 (i for i in form_item_instantiations if i.education_group == self.education_groups[acronym]),
@@ -340,15 +353,15 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'COMM2M',
-            'PRIM2M',
-            'ADPM2M',
-            'COM2M1',
+            'COMM2MD',
+            'PRIM2MD',
+            'ADPM2MD',
+            'COMM2M1',
             'SPOM2M1',
-            'COHM2M',
-            'COAM2M',
-            'APHM2M',
-            'SPHM2M',
+            'COHM2MD',
+            'COAM2MD',
+            'APHM2MD',
+            'SPHM2MD',
             'SPHM2M1',
         ]
 
@@ -382,10 +395,10 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
         # Check that the question has been instantiated
         acronyms = [
             'COMU2M1',
-            'CORP2MMD1',
-            'COMU2MMD1',
-            'EJL2MMD1',
-            'STIC2MMD1',
+            'CORP2MD',
+            'COMU2MD',
+            'EJL2MD',
+            'STIC2MD',
         ]
 
         form_item_instantiations: QuerySet[
@@ -417,12 +430,12 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'GESA2MMD1',
-            'GESM2MMD1',
-            'GEST2MMD1',
+            'GESA2MD',
+            'GESM2MD',
+            'GEST2MD',
             'GEST2M/1',
-            'INGE2MMD1',
-            'INGM2MMD1',
+            'INGE2MD',
+            'INGM2MD',
             'EBEP2MC',
         ]
 
@@ -433,12 +446,12 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
         for acronym in [
-            'GESA2MMD1',
-            'GESM2MMD1',
-            'GEST2MMD1',
+            'GESA2MD',
+            'GESM2MD',
+            'GEST2MD',
             'GEST2M/1',
-            'INGE2MMD1',
-            'INGM2MMD1',
+            'INGE2MD',
+            'INGM2MD',
         ]:
             instantiation = next(
                 (i for i in form_item_instantiations if i.education_group == self.education_groups[acronym]),
@@ -478,8 +491,8 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
         # Check that the question has been instantiated
         acronyms = [
             'ECON2M1',
-            'ECON2MMD1',
-            'ETRI2MMD1',
+            'ECON2MD',
+            'ETRI2MD',
         ]
 
         form_item_instantiations: QuerySet[
@@ -511,16 +524,16 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'SINF2MMD1',
-            'NRGY2MMD1',
-            'MAP2MMD1',
-            'MECA2MMD1',
-            'GCE2MMD1',
-            'INFO2MMD1',
-            'GBIO2MMD1',
-            'ELME2MMD1',
-            'DATI2MMD1',
-            'DATE2MMD1',
+            'SINF2MD',
+            'NRGY2MD',
+            'MAP2MD',
+            'MECA2MD',
+            'GCE2MD',
+            'INFO2MD',
+            'GBIO2MD',
+            'ELME2MD',
+            'DATI2MD',
+            'DATE2MD',
             'SINF2M1',
         ]
 
@@ -553,8 +566,8 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'SBIM2MMD1',
-            'FARM2MMD1',
+            'SBIM2MD',
+            'FARM2MD',
         ]
 
         form_item_instantiations: QuerySet[
@@ -586,7 +599,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'OPES2M',
+            'OPES2MD',
         ]
 
         form_item_instantiations: QuerySet[
@@ -618,7 +631,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'ENVI2MCMD1',
+            'ENVI2MC',
         ]
 
         form_item_instantiations: QuerySet[
@@ -650,7 +663,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'ENVI2MCMD1',
+            'ENVI2MC',
         ]
 
         form_item_instantiations: QuerySet[
@@ -682,9 +695,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'ARCB2MMD1',
-            'ARCT2MMD1',
-            'ARCH2MMD1',
+            'ARCB2MD',
+            'ARCT2MD',
+            'ARCH2MD',
         ]
 
         form_item_instantiations: QuerySet[
@@ -716,11 +729,11 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'GESA2MMD1',
-            'GESM2MMD1',
-            'GEST2MMD1',
-            'INGE2MMD1',
-            'INGM2MMD1',
+            'GESA2MD',
+            'GESM2MD',
+            'GEST2MD',
+            'INGE2MD',
+            'INGM2MD',
         ]
 
         form_item_instantiations: QuerySet[
@@ -784,7 +797,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
 
         # Check that the question has been instantiated
         acronyms = [
-            'GERM2MMD1',
+            'GERM2MD',
         ]
 
         form_item_instantiations: QuerySet[
@@ -818,8 +831,8 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
         acronyms = [
             'MD1BA',
             'DENT1BA',
-            'MD2M',
-            'DENT2M',
+            'MD2MD',
+            'DENT2MD',
         ]
 
         form_item_instantiations: QuerySet[
@@ -845,8 +858,8 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
         for acronym in [
-            'MD2M',
-            'DENT2M',
+            'MD2MD',
+            'DENT2MD',
         ]:
             instantiation = next(
                 (i for i in form_item_instantiations if i.education_group == self.education_groups[acronym]),

@@ -257,13 +257,6 @@ msgid "A transcript for your last year of secondary school"
 msgstr "Un relevé de notes pour votre dernière année d'études secondaires"
 
 msgid ""
-"A translation of the enrolment or school attendance certificate by a sworn "
-"translator"
-msgstr ""
-"Une traduction du certificat d'inscription ou de fréquentation scolaire par "
-"un traducteur juré"
-
-msgid ""
 "A translation of your official transcript of marks for your final year of "
 "secondary school by a sworn translator"
 msgstr ""
@@ -1162,9 +1155,6 @@ msgstr ""
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
-msgid "Certificate of enrolment or school attendance"
-msgstr "Certificat d'inscription ou de fréquentation scolaire"
-
 msgid "Certificate of experience"
 msgstr "Attestation d'une expérience"
 
@@ -1910,6 +1900,10 @@ msgstr "Demandes d'inscription en doctorat"
 
 msgid "Document"
 msgstr "Document"
+
+#, python-format
+msgid "Document merging of the proposition %(reference)s"
+msgstr "Fusion des documents de la proposition %(reference)s"
 
 msgid "Document not found."
 msgstr "Document non trouvé."
@@ -3522,6 +3516,18 @@ msgstr "Affiliations"
 
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé."
+
+msgid "Merging of each document field of a continuing proposition into one PDF"
+msgstr "Fusion de chaque champ document d'une proposition continue en un PDF"
+
+msgid "Merging of each document field of a doctorate proposition into one PDF"
+msgstr "Fusion de chaque champ document d'une proposition doctorale en un PDF"
+
+msgid "Merging of each document field of a general proposition into one PDF"
+msgstr "Fusion de chaque champ document d'une proposition générale en un PDF"
+
+msgid "Merging of each document field of the proposition into one PDF"
+msgstr "Fusion de chaque champ document d'une proposition en un PDF"
 
 msgid "Message"
 msgstr "Message"
@@ -5958,9 +5964,6 @@ msgstr "Poids"
 msgid "What diploma have you obtained (or will obtain)?"
 msgstr "Quel diplôme avez-vous obtenu (ou obtiendrez-vous) ?"
 
-msgid "What result did you achieve?"
-msgstr "Quel résultat avez-vous obtenu ?"
-
 msgid "What was the most recent year you were enrolled at UCLouvain?"
 msgstr "Quelle est votre dernière année d'inscription à l'UCLouvain ?"
 
@@ -6149,10 +6152,10 @@ msgid_plural ""
 "have submitted %(maximum_number)s of them."
 msgstr[0] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation continue car "
-"vous en avez déjà soumise une."
+"vous en avez déjà envoyé une."
 msgstr[1] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation continue car "
-"vous en avez déjà soumises %(maximum_number)s."
+"vous en avez déjà envoyé %(maximum_number)s."
 
 #, python-format
 msgid ""
@@ -6163,10 +6166,10 @@ msgid_plural ""
 "have submitted %(maximum_number)s of them."
 msgstr[0] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation doctorale car "
-"vous en avez déjà soumise une."
+"vous en avez déjà envoyé une."
 msgstr[1] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation doctorale car "
-"vous en avez déjà soumises %(maximum_number)s."
+"vous en avez déjà envoyé %(maximum_number)s."
 
 #, python-format
 msgid ""
@@ -6177,10 +6180,10 @@ msgid_plural ""
 "submitted %(maximum_number)s of them."
 msgstr[0] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation générale car "
-"vous en avez déjà soumise une."
+"vous en avez déjà envoyé une."
 msgstr[1] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation générale car "
-"vous en avez déjà soumises %(maximum_number)s."
+"vous en avez déjà envoyé %(maximum_number)s."
 
 msgid ""
 "You haven't answered to the question about your bank account in the "
@@ -6380,6 +6383,14 @@ msgstr "votre mère"
 
 msgid "your partner"
 msgstr "votre conjoint"
+
+#, python-brace-format
+msgid ""
+"{current_mimetype} is not a valid mimetype for the field "
+"\"{field}\" ({field_mimetypes_as_str})"
+msgstr ""
+"{current_mimetype} n'est pas un type mime valide pour le champ "
+"\"{field}\" ({field_mimetypes_as_str})"
 
 #, python-brace-format
 msgid "{items} types out of {total}"

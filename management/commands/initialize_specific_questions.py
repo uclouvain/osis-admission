@@ -181,6 +181,7 @@ class Command(BaseCommand):
             EducationGroupYear.objects.filter(
                 academic_year=self.academic_year,
                 education_group_type__category=Categories.TRAINING.name,
+                enrollment_enabled=True,
             )
             .order_by('acronym')
             .values('acronym', 'education_group_id', 'education_group_type__name')
@@ -314,12 +315,17 @@ class Command(BaseCommand):
                 candidate_nationality=CritereItemFormulaireNationaliteCandidat.NON_UE.name,
             )
 
-        for acronym in [
-            'GEHM2M',
+        matched_acronyms = self.get_matched_acronyms(
+            [
+                'GEHM2M',
+                'GEHC2M',
+                'FEHC2M',
+            ]
+        )
+
+        for acronym in matched_acronyms + [
             'GEHM2M1',
-            'GEHC2M',
             'GEHC2M1',
-            'FEHC2M',
         ]:
             self.instantiate_education_group_question(
                 acronym=acronym,
@@ -367,18 +373,23 @@ class Command(BaseCommand):
             },
         )
 
+        matched_acronyms = self.get_matched_acronyms(
+            [
+                'COMM2M',
+                'PRIM2M',
+                'ADPM2M',
+                'COHM2M',
+                'COAM2M',
+                'APHM2M',
+                'SPHM2M',
+            ]
+        )
+
         for acronym in [
-            'COMM2M',
-            'PRIM2M',
-            'ADPM2M',
-            'COM2M1',
+            'COMM2M1',
             'SPOM2M1',
-            'COHM2M',
-            'COAM2M',
-            'APHM2M',
-            'SPHM2M',
             'SPHM2M1',
-        ]:
+        ] + matched_acronyms:
             self.instantiate_education_group_question(
                 acronym=acronym,
                 form_item=b1_french_level,
@@ -636,9 +647,13 @@ class Command(BaseCommand):
             },
         )
 
-        for acronym in [
-            'OPES2M',
-        ]:
+        matched_acronyms = self.get_matched_acronyms(
+            [
+                'OPES2M',
+            ],
+        )
+
+        for acronym in matched_acronyms:
             self.instantiate_education_group_question(
                 acronym=acronym,
                 form_item=belgian_resident_message,
@@ -680,12 +695,7 @@ class Command(BaseCommand):
             },
         )
 
-        matched_acronyms = self.get_matched_acronyms(
-            [
-                'ENVI2MC',
-            ],
-        )
-        for acronym in matched_acronyms:
+        for acronym in ['ENVI2MC']:
             self.instantiate_education_group_question(
                 acronym=acronym,
                 form_item=dissertation_summary,
@@ -896,10 +906,14 @@ class Command(BaseCommand):
                 required=False,
             )
 
-        for acronym in [
-            'MD2M',
-            'DENT2M',
-        ]:
+        matched_acronyms = self.get_matched_acronyms(
+            [
+                'MD2M',
+                'DENT2M',
+            ]
+        )
+
+        for acronym in matched_acronyms:
             self.instantiate_education_group_question(
                 acronym=acronym,
                 form_item=medical_entrance_proof,

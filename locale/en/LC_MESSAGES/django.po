@@ -204,11 +204,6 @@ msgid "A transcript for your last year of secondary school"
 msgstr ""
 
 msgid ""
-"A translation of the enrolment or school attendance certificate by a sworn "
-"translator"
-msgstr ""
-
-msgid ""
 "A translation of your official transcript of marks for your final year of "
 "secondary school by a sworn translator"
 msgstr ""
@@ -1073,9 +1068,6 @@ msgstr ""
 msgid "Certificate of achievement"
 msgstr ""
 
-msgid "Certificate of enrolment or school attendance"
-msgstr ""
-
 msgid "Certificate of experience"
 msgstr ""
 
@@ -1754,6 +1746,10 @@ msgid "Doctorate enrolment applications"
 msgstr ""
 
 msgid "Document"
+msgstr ""
+
+#, python-format
+msgid "Document merging of the proposition %(reference)s"
 msgstr ""
 
 msgid "Document not found."
@@ -3148,6 +3144,18 @@ msgstr ""
 
 msgid "Membre CA not found."
 msgstr "Supervisory panel member not found."
+
+msgid "Merging of each document field of a continuing proposition into one PDF"
+msgstr ""
+
+msgid "Merging of each document field of a doctorate proposition into one PDF"
+msgstr ""
+
+msgid "Merging of each document field of a general proposition into one PDF"
+msgstr ""
+
+msgid "Merging of each document field of the proposition into one PDF"
+msgstr ""
 
 msgid "Message"
 msgstr ""
@@ -5394,9 +5402,6 @@ msgstr ""
 msgid "What diploma have you obtained (or will obtain)?"
 msgstr ""
 
-msgid "What result did you achieve?"
-msgstr ""
-
 msgid "What was the most recent year you were enrolled at UCLouvain?"
 msgstr ""
 
@@ -5763,6 +5768,12 @@ msgid "your mother"
 msgstr ""
 
 msgid "your partner"
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"{current_mimetype} is not a valid mimetype for the field "
+"\"{field}\" ({field_mimetypes_as_str})"
 msgstr ""
 
 #, python-brace-format

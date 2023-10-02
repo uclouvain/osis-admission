@@ -54,7 +54,6 @@
 
 {% block list_block_row_result %}
   {% admission_url admission.uuid admission.type_formation as admission_url %}
-  {% url 'admission:access-conditions-url' admission.type_formation admission.sigle_formation|urlencode:'' admission.code_formation as access_conditions_url %}
   <td>
     <div class="flex-content-no-wrap">
       <a href="{{ admission_url }}">
@@ -94,10 +93,8 @@
     </div>
   </td>
   <td>
-    <a href="{{ access_conditions_url }}" target="_blank">
-      {% display admission.sigle_formation '-' admission.intitule_formation ' ' '(' admission.lieu_formation ')' as training_complete_name %}
-      {{ training_complete_name }}
-    </a>
+    {% display admission.sigle_formation '-' admission.intitule_formation ' ' '(' admission.lieu_formation ')' as training_complete_name %}
+    {{ training_complete_name }}
   </td>
   <td>
     <div class="flex-content-no-wrap">

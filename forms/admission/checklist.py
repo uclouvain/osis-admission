@@ -86,9 +86,11 @@ class CommentForm(forms.Form):
             else _('Comment')
         )
 
+        self.fields['comment'].label = label
+
         if comment:
             self.fields['comment'].initial = comment.content
-            self.fields['comment'].label = label + _(" (last update by {author} on {date} at {time}):").format(
+            self.fields['comment'].label += _(" (last update by {author} on {date} at {time}):").format(
                 author=comment.author,
                 date=comment.modified_at.strftime("%d/%m/%Y"),
                 time=comment.modified_at.strftime("%H:%M"),

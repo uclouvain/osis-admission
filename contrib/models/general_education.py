@@ -126,6 +126,7 @@ class GeneralEducationAdmission(BaseAdmission):
         blank=True,
         upload_to=admission_directory_path,
         verbose_name=_('Additional documents'),
+        max_files=10,
     )
 
     # Fac approval

@@ -23,7 +23,22 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
+
+from django.utils.translation import gettext_lazy as _
 
 
 class MergePDFException(Exception):
     pass
+
+
+class DocumentPostProcessingException(Exception):
+    pass
+
+
+class InvalidMimeTypeException(Exception):
+    def __init__(self, field, field_mimetypes: List[str], current_mimetype: str):
+        field_mimetypes_as_str = ', '.join(field_mimetypes)
+        super().__init__(
+            _(f'{current_mimetype} is not a valid mimetype for the field "{field}" ({field_mimetypes_as_str})')
+        )

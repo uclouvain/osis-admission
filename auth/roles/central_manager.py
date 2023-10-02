@@ -88,7 +88,7 @@ class CentralManager(EntityRoleModel):
             'admission.view_debug_info': is_entity_manager & is_debug,
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
-            'admission.view_documents_management': is_entity_manager,
+            'admission.view_documents_management': is_entity_manager & is_submitted,
             'admission.view_checklist': is_entity_manager & is_submitted,
             'admission.checklist_faculty_decision_transfer_to_fac': is_entity_manager & in_sic_status,
         }
