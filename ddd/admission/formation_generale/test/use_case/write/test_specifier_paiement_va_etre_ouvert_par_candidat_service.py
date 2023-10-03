@@ -30,17 +30,18 @@ import freezegun
 
 from admission.contrib.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.commands import (
-    PayerFraisDossierPropositionSuiteSoumissionCommand,
+    SpecifierPaiementVaEtreOuvertParCandidatCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    PaiementNonRealiseException,
     PropositionPourPaiementInvalideException,
+    PaiementDejaRealiseException,
 )
+from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
+from admission.ddd.admission.formation_generale.test.factory.paiement import PaiementFactory
 from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
     PaiementFraisDossierInMemoryRepositoryFactory,
 )
@@ -54,7 +55,7 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 
 
 @freezegun.freeze_time('2020-11-01')
-class TestPayerFraisDossierPropositionSuiteSoumission(TestCase):
+class TestSpecifierPaiementVaEtreOuvertParCandidat(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
@@ -74,36 +75,66 @@ class TestPayerFraisDossierPropositionSuiteSoumission(TestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.candidat = self.candidat_translator.profil_candidats[1]
-        paiement_frais_dossier_repository = PaiementFraisDossierInMemoryRepositoryFactory()
+        self.proposition = self.proposition_repository.get(
+            PropositionIdentity(
+                uuid='uuid-MASTER-SCI-CONFIRMED',
+            ),
+        )
+
+        self.command = SpecifierPaiementVaEtreOuvertParCandidatCommand(
+            uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+        )
+
+        self.paiement_repository = PaiementFraisDossierInMemoryRepositoryFactory()
         self.paiement_courant = next(
             paiement
-            for paiement in paiement_frais_dossier_repository.paiements
+            for paiement in self.paiement_repository.paiements
             if paiement.uuid_proposition == 'uuid-MASTER-SCI-CONFIRMED'
         )
-        self.proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-MASTER-SCI-CONFIRMED'))
-        self.proposition.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
-        self.command = PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition='uuid-MASTER-SCI-CONFIRMED')
 
-    def test_should_payer_frais_etre_ok_si_paiement_realise(self):
-        with mock.patch.multiple(self.paiement_courant, statut=PaymentStatus.PAID.name):
-            proposition_id = self.message_bus.invoke(self.command)
+    def test_should_specifier_paiement_va_etre_ouvert_par_candidat_etre_ok(self):
+        with mock.patch.multiple(
+            self.proposition,
+            statut=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
+        ):
+            # Si un paiement en cours n'existe pas pour cette proposition, un nouveau est créé
+            self.paiement_repository.paiements = []
 
-        proposition = self.proposition_repository.get(proposition_id)
+            nb_paiements = len(self.paiement_repository.recuperer_paiements_proposition(self.command.uuid_proposition))
 
-        # Résultat de la commande
-        self.assertEqual(proposition_id.uuid, proposition.entity_id.uuid)
+            nouveau_paiement_1: PaiementDTO = self.message_bus.invoke(self.command)
+            nb_paiements_apres_premier_ajout = len(
+                self.paiement_repository.recuperer_paiements_proposition(self.command.uuid_proposition)
+            )
+            self.assertEqual(nb_paiements + 1, nb_paiements_apres_premier_ajout)
 
-        # Vérification de la proposition
-        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.CONFIRMEE)
-        self.assertEqual(proposition.checklist_actuelle.frais_dossier.statut, ChoixStatutChecklist.SYST_REUSSITE)
-        self.assertEqual(proposition.checklist_actuelle.frais_dossier.libelle, 'Payed')
+            # Si un paiement en cours existe déjà pour cette proposition, on le récupère
+            nouveau_paiement_2 = self.message_bus.invoke(self.command)
+            nb_paiements_apres_second_ajout = len(
+                self.paiement_repository.recuperer_paiements_proposition(self.command.uuid_proposition)
+            )
 
-    def test_should_lever_exception_si_frais_pas_encore_payes(self):
-        with mock.patch.multiple(self.paiement_courant, statut=PaymentStatus.CANCELED.name):
-            with self.assertRaises(PaiementNonRealiseException):
+            self.assertEqual(nb_paiements_apres_second_ajout, nb_paiements_apres_premier_ajout)
+            self.assertEqual(nouveau_paiement_1, nouveau_paiement_2)
+
+    def test_should_lever_exception_si_pas_en_attente_de_paiement(self):
+        with mock.patch.multiple(
+            self.proposition,
+            statut=ChoixStatutPropositionGenerale.CONFIRMEE,
+        ):
+            with self.assertRaises(PropositionPourPaiementInvalideException):
                 self.message_bus.invoke(self.command)
 
-    def test_should_lever_exception_si_proposition_pas_dans_statut_frais_dossier_en_attente(self):
-        with mock.patch.multiple(self.proposition, statut=ChoixStatutPropositionGenerale.CONFIRMEE.name):
-            with self.assertRaises(PropositionPourPaiementInvalideException):
+    def test_should_lever_exception_si_paiement_deja_realise(self):
+        with mock.patch.multiple(
+            self.proposition,
+            statut=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
+        ):
+            self.paiement_repository.paiements.append(
+                PaiementFactory(
+                    uuid_proposition=self.proposition.entity_id.uuid,
+                    statut=PaymentStatus.PAID.name,
+                )
+            )
+            with self.assertRaises(PaiementDejaRealiseException):
                 self.message_bus.invoke(self.command)

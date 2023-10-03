@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -32,81 +33,94 @@ from admission.api.schema import ResponseSpecificSchema
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteDemandeCommand,
     PayerFraisDossierPropositionSuiteSoumissionCommand,
+    SpecifierPaiementVaEtreOuvertParCandidatCommand,
+    RecupererListePaiementsPropositionQuery,
 )
 from admission.utils import get_cached_general_education_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 __all__ = [
-    'PayApplicationFeesAfterSubmissionView',
-    'PayApplicationFeesAfterRequestView',
+    'OpenApplicationFeesPaymentView',
+    'ApplicationFeesListView',
 ]
 
 
-class PayApplicationFeesAfterSubmissionSchema(ResponseSpecificSchema):
-    operation_id_base = '_application_fees_after_submission'
+class OpenApplicationFeesPaymentSchema(ResponseSpecificSchema):
     serializer_mapping = {
         'POST': (
-            serializers.PayerFraisDossierPropositionSuiteSoumissionCommandSerializer,
-            serializers.PropositionIdentityDTOSerializer,
+            serializers.SpecifierPaiementVaEtreOuvertParCandidatCommandSerializer,
+            serializers.PaiementDTOSerializer,
+        ),
+        'PUT': (
+            serializers.SpecifierPaiementVaEtreOuvertParCandidatCommandSerializer,
+            serializers.PaiementDTOSerializer,
         ),
     }
 
     def get_operation_id(self, path, method):
-        return 'pay_application_fees_after_submission'
+        return {
+            'POST': 'open_application_fees_payment_after_submission',
+            'PUT': 'open_application_fees_payment_after_request',
+        }[method]
 
 
-class PayApplicationFeesAfterSubmissionView(
+class OpenApplicationFeesPaymentView(
     APIPermissionRequiredMixin,
     APIView,
 ):
-    name = "pay_after_submission"
-    schema = PayApplicationFeesAfterSubmissionSchema()
+    name = "open_application_fees_payment"
+    schema = OpenApplicationFeesPaymentSchema()
     permission_mapping = {
         'POST': 'admission.pay_generaleducationadmission_fees',
+        'PUT': 'admission.pay_generaleducationadmission_fees_after_request',
     }
+    serializer_class = serializers.PaiementDTOSerializer
 
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
     def post(self, request, *args, **kwargs):
-        """Pay the application fee of the proposition after its submission."""
-        proposition_id = message_bus_instance.invoke(
-            PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition=str(self.kwargs['uuid']))
+        """Open the payment of the application fee of the proposition after its submission."""
+        created_payment = message_bus_instance.invoke(
+            SpecifierPaiementVaEtreOuvertParCandidatCommand(uuid_proposition=str(self.kwargs['uuid']))
         )
-        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        serializer = self.serializer_class(instance=created_payment)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def put(self, request, *args, **kwargs):
+        """Open the payment of the application fee of the proposition after a manager request."""
+        return self.post(request, *args, **kwargs)
 
-class PayApplicationFeesAfterRequestSchema(ResponseSpecificSchema):
+
+class ApplicationFeesListSchema(ResponseSpecificSchema):
     serializer_mapping = {
-        'POST': (
-            serializers.PayerFraisDossierPropositionSuiteDemandeCommandSerializer,
-            serializers.PropositionIdentityDTOSerializer,
-        ),
+        'GET': serializers.PaiementDTOSerializer,
     }
 
     def get_operation_id(self, path, method):
-        return 'pay_application_fees_after_request'
+        return 'list_application_fees_payments'
 
 
-class PayApplicationFeesAfterRequestView(
-    APIPermissionRequiredMixin,
-    APIView,
-):
-    name = "pay_after_request"
-    schema = PayApplicationFeesAfterRequestSchema()
+class ApplicationFeesListView(APIPermissionRequiredMixin, ListAPIView):
+    name = "view_application_fees"
     permission_mapping = {
-        'POST': 'admission.pay_generaleducationadmission_fees_after_request',
+        'GET': 'admission.view_generaleducationadmission_fees',
     }
+    serializer_class = serializers.PaiementDTOSerializer
+    pagination_class = None
+    filter_backends = []
+    schema = ApplicationFeesListSchema()
 
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
-    def post(self, request, *args, **kwargs):
-        """Pay the application fee of the proposition after a manager request."""
-        proposition_id = message_bus_instance.invoke(
-            PayerFraisDossierPropositionSuiteDemandeCommand(uuid_proposition=str(self.kwargs['uuid']))
+    def list(self, request, *args, **kwargs):
+        application_fees = message_bus_instance.invoke(
+            RecupererListePaiementsPropositionQuery(uuid_proposition=str(self.kwargs['uuid']))
         )
-        serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
+        serializer = serializers.PaiementDTOSerializer(
+            instance=application_fees,
+            many=True,
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)

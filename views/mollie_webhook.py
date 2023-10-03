@@ -25,27 +25,68 @@
 # ##############################################################################
 
 from django.http import HttpResponse
+from rest_framework.parsers import FormParser
 from rest_framework.views import APIView
 
+from admission.contrib.models import GeneralEducationAdmission
+
+from admission.auth.predicates import (
+    payment_needed_after_submission,
+    payment_needed_after_manager_request,
+)
+from admission.contrib.models.online_payment import PaymentStatus
+from admission.ddd.admission.formation_generale.commands import (
+    PayerFraisDossierPropositionSuiteDemandeCommand,
+    PayerFraisDossierPropositionSuiteSoumissionCommand,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PropositionPourPaiementInvalideException,
+)
 from admission.services.paiement_en_ligne import PaiementEnLigneService
 
 __all__ = [
     'MollieWebHook',
 ]
 
+from infrastructure.messages_bus import message_bus_instance
+
 
 class MollieWebHook(APIView):
     """
-        Mollie appelle le webhook quand un paiement atteint l'un des statuts suivants :
-            PaymentStatus.PAID
-            PaymentStatus.EXPIRED
-            PaymentStatus.FAILED
-            PaymentStatus.CANCELED
-        DEV étant inaccessible depuis l'extérieur, il faut simuler l'appel au webhook
+    Mollie appelle le webhook quand un paiement atteint l'un des statuts suivants :
+        PaymentStatus.PAID
+        PaymentStatus.EXPIRED
+        PaymentStatus.FAILED
+        PaymentStatus.CANCELED
+    DEV étant inaccessible depuis l'extérieur, il faut simuler l'appel au webhook
     """
+
+    parser_classes = [FormParser]
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
         paiement_id = request.POST.get('id')
-        PaiementEnLigneService.update_payment(paiement_id=paiement_id)
+        self.update_from_payment(paiement_id)
         return HttpResponse()
+
+    @staticmethod
+    def update_from_payment(paiement_id):
+        # Update the payment
+        updated_payment = PaiementEnLigneService.update_payment(paiement_id=paiement_id)
+
+        if updated_payment.status == PaymentStatus.PAID.name:
+            # Update the admission and inform the candidate that the payment is successful
+            admission = GeneralEducationAdmission.objects.get(pk=updated_payment.admission_id)
+
+            if payment_needed_after_submission(admission=admission):
+                # After the submission
+                return message_bus_instance.invoke(
+                    PayerFraisDossierPropositionSuiteSoumissionCommand(uuid_proposition=admission.uuid)
+                )
+            elif payment_needed_after_manager_request(admission=admission):
+                # After a manager request
+                return message_bus_instance.invoke(
+                    PayerFraisDossierPropositionSuiteDemandeCommand(uuid_proposition=admission.uuid)
+                )
+
+            raise PropositionPourPaiementInvalideException

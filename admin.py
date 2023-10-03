@@ -27,11 +27,12 @@
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy
+from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext
 from hijack.contrib.admin import HijackUserAdminMixin
 from osis_mail_template.admin import MailTemplateAdmin
 
@@ -61,8 +62,10 @@ from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.contrib.models.online_payment import OnlinePayment
 from admission.ddd.admission.enums import CritereItemFormulaireFormation
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
+from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
@@ -185,10 +188,48 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'other_training_accepted_by_fac',
         'prerequisite_courses',
     ]
+    actions = ['trigger_payment_hook']
 
     @staticmethod
     def view_on_site(obj):
         return resolve_url(f'admission:general-education', uuid=obj.uuid)
+
+    def has_payment_hook_triggering_permission(self, request):
+        return settings.DEBUG and request.user.is_staff
+
+    @admin.action(description=_('Trigger the payment hook'), permissions=['payment_hook_triggering'])
+    def trigger_payment_hook(self, request, queryset):
+        """Manually trigger the payment hook as it's not always possible to do it automatically."""
+        admissions_ids = set(request.POST.getlist('_selected_action'))
+
+        payments = OnlinePayment.objects.filter(admission_id__in=admissions_ids)
+        achieved_admissions_ids = set()
+
+        for payment in payments:
+            result = MollieWebHook.update_from_payment(paiement_id=payment.payment_id)
+            if result:
+                achieved_admissions_ids.add(payment.admission_id)
+
+        if achieved_admissions_ids:
+            info(
+                request,
+                ngettext(
+                    'The following admission has been updated: {}.',
+                    'The following admissions have been updated: {}.',
+                    len(achieved_admissions_ids),
+                ).format(', '.join(map(str, achieved_admissions_ids))),
+            )
+
+        not_achieved_admissions_ids = admissions_ids - achieved_admissions_ids
+        if not_achieved_admissions_ids:
+            warning(
+                request,
+                ngettext(
+                    'The following admission has not been updated: {}.',
+                    'The following admissions have not been updated: {}.',
+                    len(not_achieved_admissions_ids),
+                ).format(', '.join(map(str, not_achieved_admissions_ids))),
+            )
 
 
 class CddMailTemplateAdmin(MailTemplateAdmin):

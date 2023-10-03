@@ -515,13 +515,18 @@ GENERAL_EDUCATION_ACTION_LINKS = {
     },
     # Payment
     'pay_after_submission': {
-        'path_name': 'admission_api_v1:pay_after_submission',
+        'path_name': 'admission_api_v1:open_application_fees_payment',
         'method': 'POST',
         'params': ['uuid'],
     },
     'pay_after_request': {
-        'path_name': 'admission_api_v1:pay_after_request',
-        'method': 'POST',
+        'path_name': 'admission_api_v1:open_application_fees_payment',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'view_payment': {
+        'path_name': 'admission_api_v1:view_application_fees',
+        'method': 'GET',
         'params': ['uuid'],
     },
 }

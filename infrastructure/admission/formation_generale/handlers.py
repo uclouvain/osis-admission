@@ -381,4 +381,15 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
+    SpecifierPaiementVaEtreOuvertParCandidatCommand: (
+        lambda msg_bus, cmd: specifier_paiement_va_etre_ouvert_par_candidat(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            paiement_frais_dossier_service=PaiementFraisDossier(),
+        )
+    ),
+    RecupererListePaiementsPropositionQuery: lambda msg_bus, cmd: recuperer_liste_paiements_proposition(
+        cmd,
+        paiement_frais_dossier_service=PaiementFraisDossier(),
+    ),
 }
