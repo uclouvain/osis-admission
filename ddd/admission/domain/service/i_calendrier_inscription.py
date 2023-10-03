@@ -59,13 +59,6 @@ logger = logging.getLogger(__name__)
 
 
 class ICalendrierInscription(interface.DomainService):
-    PLUS_5_ISO_CODES = {
-        'CH',  # Suisse
-        "IS",  # Islande
-        "NO",  # Norvège
-        "LI",  # Liechtenstein
-        "MC",  # Monaco
-    }
     pools = [
         DoctorateAdmissionCalendar(),
         ContinuingEducationAdmissionCalendar(),

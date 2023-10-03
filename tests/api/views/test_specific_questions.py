@@ -29,11 +29,13 @@ from unittest.mock import patch
 
 import freezegun
 from django.shortcuts import resolve_url
+from django.utils.translation import gettext
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE, EN_ISO_CODE, FR_ISO_CODE
+from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
 from admission.ddd.admission.enums import CritereItemFormulaireNationaliteDiplome
 from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireFormation,
@@ -47,9 +49,11 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,
     DocumentAdmissionFormItemFactory,
@@ -57,17 +61,21 @@ from admission.tests.factories.form_item import (
     TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory, InternationalScholarshipFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
+from base.models.enums.person_address_type import PersonAddressType
+from base.models.person_address import PersonAddress
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group import EducationGroupFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
+from learning_unit.tests.ddd.factories.entities import EntitiesFactory
 from osis_profile.models import EducationalExperience
 from osis_profile.tests.factories.curriculum import EducationalExperienceFactory
 from reference.tests.factories.country import CountryFactory
@@ -1030,11 +1038,14 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
         )
 
+        cls.diplomatic_post = DiplomaticPostFactory()
+
         cls.update_data = {
             'reponses_questions_specifiques': {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
             'documents_additionnels': ['uuid'],
+            'poste_diplomatique': cls.diplomatic_post.code,
         }
 
         # Users
@@ -1089,6 +1100,28 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         self.assertEqual(
             str(admission.additional_documents[0]),
             '4bdffb42-552d-415d-9e4c-725f10dce228',
+        )
+        self.assertEqual(admission.diplomatic_post, self.diplomatic_post)
+
+        # Unknown diplomatic post
+        response = self.client.put(
+            self.url,
+            data={
+                **self.update_data,
+                'poste_diplomatique': -1,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_result = response.json()
+
+        self.assertIn('non_field_errors', json_result)
+        self.assertIn(
+            {
+                'status_code': PosteDiplomatiqueNonTrouveException.status_code,
+                'detail': gettext('No diplomatic post found.'),
+            },
+            json_result['non_field_errors'],
         )
 
 
@@ -1316,3 +1349,81 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             admission.billing_address_country.iso_code,
             self.update_data_with_custom_address['adresse_facturation_pays'],
         )
+
+
+class GeneralIdentificationViewTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.be_country = CountryFactory(iso_code=BE_ISO_CODE, european_union=True)
+        cls.en_country = CountryFactory(iso_code=EN_ISO_CODE, european_union=False)
+
+        cls.person = CompletePersonFactory(
+            country_of_citizenship=cls.be_country,
+        )
+        cls.admission = GeneralEducationAdmissionFactory(
+            candidate=cls.person,
+            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+        )
+
+        cls.url = resolve_url('admission_api_v1:general_identification', uuid=cls.admission.uuid)
+
+    def test_retrieve_identification_is_forbidden_without_permission(self):
+        # Not authenticated
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Other user
+        self.client.force_authenticate(user=CandidateFactory().person.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_retrieve_identification(self):
+        self.client.force_authenticate(user=self.person.user)
+
+        # Nationality => European country (BE)
+        # Residential country => BE
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        result = response.json()
+
+        self.assertEqual(result['pays_nationalite_europeen'], True)
+        self.assertEqual(result['pays_nationalite'], BE_ISO_CODE)
+        self.assertEqual(result['pays_residence'], BE_ISO_CODE)
+
+        # Nationality => Not European country (US)
+        # Residential country => US
+        self.person.country_of_citizenship = self.en_country
+        self.person.save()
+
+        address = PersonAddress.objects.get(person=self.person, label=PersonAddressType.RESIDENTIAL.name)
+        address.country = self.en_country
+        address.save()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        result = response.json()
+
+        self.assertEqual(result['pays_nationalite_europeen'], False)
+        self.assertEqual(result['pays_nationalite'], EN_ISO_CODE)
+        self.assertEqual(result['pays_residence'], EN_ISO_CODE)
+
+        # No nationality
+        # No residential country
+        self.person.country_of_citizenship = None
+        self.person.save()
+
+        address.delete()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        result = response.json()
+
+        self.assertEqual(result['pays_nationalite_europeen'], None)
+        self.assertEqual(result['pays_nationalite'], '')
+        self.assertEqual(result['pays_residence'], '')

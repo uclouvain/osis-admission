@@ -483,6 +483,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             'equivalence_diplome',
             'pdf_recapitulatif',
             'documents_additionnels',
+            'poste_diplomatique',
         ]
 
 

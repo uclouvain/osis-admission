@@ -139,6 +139,7 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/coordonnees', views.GeneralCoordonneesView),
     path('propositions/general-education/<uuid:uuid>/secondary-studies', views.GeneralSecondaryStudiesView),
     path('propositions/general-education/<uuid:uuid>/specific-question', views.GeneralSpecificQuestionAPIView),
+    path('propositions/general-education/<uuid:uuid>/identification', views.GeneralIdentificationView),
     path('propositions/general-education/<uuid:uuid>/curriculum', views.GeneralCurriculumView),
     path('propositions/general-education/<uuid:uuid>/pool-questions', views.PoolQuestionsView),
     path(
@@ -180,9 +181,11 @@ urlpatterns = [
     path('autocomplete/continuing-education', views.AutocompleteContinuingEducationView),
     path('autocomplete/tutor', views.AutocompleteTutorView),
     path('autocomplete/person', views.AutocompletePersonView),
+    path('autocomplete/diplomatic-post', views.AutocompleteDiplomaticPostView),
     path('autocomplete/<str:scholarship_type>/scholarship', views.AutocompleteScholarshipView),
     # Others
     path('scholarship/<uuid:uuid>', views.RetrieveScholarshipView),
     path('campus', views.ListCampusView),
     path('campus/<uuid:uuid>', views.RetrieveCampusView),
+    path('diplomatic-post/<int:code>', views.RetrieveDiplomaticPostView),
 ]

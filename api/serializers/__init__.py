@@ -72,3 +72,4 @@ from .pdf_recap import PDFRecapSerializer
 from .documents import *
 from .jury import *
 from .payment import *
+from .diplomatic_post import DiplomaticPostSerializer

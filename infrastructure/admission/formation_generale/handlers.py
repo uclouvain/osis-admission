@@ -50,6 +50,7 @@ from admission.infrastructure.admission.domain.service.emplacements_documents_pr
 )
 from admission.infrastructure.admission.domain.service.historique import Historique as HistoriqueGlobal
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
+from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
@@ -380,6 +381,7 @@ COMMAND_HANDLERS = {
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
         proposition_repository=PropositionRepository(),
+        poste_diplomatique_translator=PosteDiplomatiqueTranslator(),
     ),
     SpecifierPaiementVaEtreOuvertParCandidatCommand: (
         lambda msg_bus, cmd: specifier_paiement_va_etre_ouvert_par_candidat(

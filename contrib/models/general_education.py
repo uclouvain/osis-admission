@@ -222,6 +222,13 @@ class GeneralEducationAdmission(BaseAdmission):
         default='',
         verbose_name=_('Faculty comment about the collaborative program'),
     )
+    diplomatic_post = models.ForeignKey(
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+        to='admission.DiplomaticPost',
+        verbose_name=_('Diplomatic post'),
+    )
 
     class Meta:
         verbose_name = _("General education admission")
@@ -297,6 +304,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
                 "international_scholarship",
                 "erasmus_mundus_scholarship",
                 "fac_refusal_reason",
+                "diplomatic_post",
             )
             .annotate_pool_end_date()
         )

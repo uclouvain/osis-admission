@@ -31,7 +31,7 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import AuthorizationAwareSchema
-from admission.contrib.models import Scholarship
+from admission.contrib.models import Scholarship, DiplomaticPost
 from base.models.campus import Campus
 from ddd.logic.shared_kernel.campus.commands import SearchUclouvainCampusesCommand, GetCampusCommand
 from infrastructure.messages_bus import message_bus_instance
@@ -94,3 +94,14 @@ class ListCampusView(ListAPIView):
         campuses.sort(key=lambda campus: self.campus_order_by_uuid.get(campus.entity_id.uuid, 100))
         serializer = serializers.CampusSerializer(instance=campuses, many=True)
         return Response(serializer.data)
+
+
+class RetrieveDiplomaticPostView(RetrieveAPIView):
+    """Retrieves a diplomatic post"""
+
+    name = 'retrieve-diplomatic-post'
+    schema = AuthorizationAwareSchema()
+    filter_backends = []
+    serializer_class = serializers.DiplomaticPostSerializer
+    queryset = DiplomaticPost.objects.annotate_countries().all()
+    lookup_field = 'code'

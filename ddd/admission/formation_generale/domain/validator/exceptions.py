@@ -175,3 +175,11 @@ class PaiementDejaRealiseException(BusinessException):
     def __init__(self, **kwargs):
         message = _("The payment has already been made.")
         super().__init__(message, **kwargs)
+
+
+class InformationsVisaNonCompleteesException(BusinessException):
+    status_code = "FORMATION-GENERALE-20"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the 'Additional information > Visa' tab.")
+        super().__init__(message, **kwargs)
