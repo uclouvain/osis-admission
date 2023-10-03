@@ -24,6 +24,9 @@
 #
 ##############################################################################
 from admission.ddd.admission.formation_generale.commands import *
+from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
+    PaiementFraisDossierInMemoryRepositoryFactory,
+)
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
 from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
@@ -81,9 +84,6 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.notification import (
     NotificationInMemory,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
-    PaiementFraisDossierInMemoryRepository,
-)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.pdf_generation import (
     PDFGenerationInMemory,
 )
@@ -116,7 +116,7 @@ _historique_formation_generale = HistoriqueFormationGeneraleInMemory()
 _emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
-_paiement_frais_dossier = PaiementFraisDossierInMemoryRepository()
+_paiement_frais_dossier = PaiementFraisDossierInMemoryRepositoryFactory()
 _notification = NotificationInMemory()
 _pdf_generation = PDFGenerationInMemory()
 _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()

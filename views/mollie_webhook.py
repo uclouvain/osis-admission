@@ -31,8 +31,6 @@ from rest_framework.views import APIView
 from admission.contrib.models import GeneralEducationAdmission
 
 from admission.auth.predicates import (
-    is_invited_to_pay_after_submission,
-    is_invited_to_pay_after_request,
     payment_needed_after_submission,
     payment_needed_after_manager_request,
 )
@@ -40,10 +38,6 @@ from admission.contrib.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteDemandeCommand,
     PayerFraisDossierPropositionSuiteSoumissionCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionPourPaiementInvalideException,

@@ -42,10 +42,10 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 )
 from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
 from admission.ddd.admission.formation_generale.test.factory.paiement import PaiementFactory
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
-    PaiementFraisDossierInMemoryRepository,
+from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
+    PaiementFraisDossierInMemoryRepositoryFactory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -85,8 +85,12 @@ class TestSpecifierPaiementVaEtreOuvertParCandidat(TestCase):
             uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
         )
 
-        self.paiement_repository = PaiementFraisDossierInMemoryRepository
-        self.paiement_repository.reset()
+        self.paiement_repository = PaiementFraisDossierInMemoryRepositoryFactory()
+        self.paiement_courant = next(
+            paiement
+            for paiement in self.paiement_repository.paiements
+            if paiement.uuid_proposition == 'uuid-MASTER-SCI-CONFIRMED'
+        )
 
     def test_should_specifier_paiement_va_etre_ouvert_par_candidat_etre_ok(self):
         with mock.patch.multiple(
@@ -94,6 +98,8 @@ class TestSpecifierPaiementVaEtreOuvertParCandidat(TestCase):
             statut=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
         ):
             # Si un paiement en cours n'existe pas pour cette proposition, un nouveau est créé
+            self.paiement_repository.paiements = []
+
             nb_paiements = len(self.paiement_repository.recuperer_paiements_proposition(self.command.uuid_proposition))
 
             nouveau_paiement_1: PaiementDTO = self.message_bus.invoke(self.command)

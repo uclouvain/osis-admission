@@ -32,14 +32,7 @@ from admission.ddd.admission.formation_generale.test.factory.paiement import Pai
 
 
 class PaiementFraisDossierInMemoryRepository(IPaiementFraisDossier):
-    paiements: List[Paiement] = []
-
-    @classmethod
-    def reset(cls):
-        cls.paiements = [
-            PaiementFactory(uuid_proposition='uuid-MASTER-SCI-CONFIRMED', statut=PaymentStatus.CANCELED.name),
-            PaiementFactory(uuid_proposition='uuid-MASTER-SCI', statut=PaymentStatus.OPEN.name),
-        ]
+    paiements: List[Paiement]
 
     @classmethod
     def paiement_realise(cls, proposition_uuid: str) -> bool:
@@ -77,6 +70,3 @@ class PaiementFraisDossierInMemoryRepository(IPaiementFraisDossier):
     @classmethod
     def recuperer_paiements_proposition(cls, proposition_uuid: str) -> List[PaiementDTO]:
         return [cls._to_dto(paiement) for paiement in cls.paiements if paiement.uuid_proposition == proposition_uuid]
-
-
-PaiementFraisDossierInMemoryRepository.reset()

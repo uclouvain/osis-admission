@@ -41,10 +41,10 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     PaiementNonRealiseException,
     PropositionPourPaiementInvalideException,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
-    PaiementFraisDossierInMemoryRepository,
+from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
+    PaiementFraisDossierInMemoryRepositoryFactory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -68,17 +68,18 @@ class TestPayerFraisDossierPropositionSuiteDemande(TestCase):
                 )
             )
         cls.message_bus = message_bus_in_memory_instance
-        cls.paiement_courant = next(
-            paiement
-            for paiement in PaiementFraisDossierInMemoryRepository.paiements
-            if paiement.uuid_proposition == 'uuid-MASTER-SCI-CONFIRMED'
-        )
 
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.candidat = self.candidat_translator.profil_candidats[1]
+        paiement_frais_dossier_repository = PaiementFraisDossierInMemoryRepositoryFactory()
+        self.paiement_courant = next(
+            paiement
+            for paiement in paiement_frais_dossier_repository.paiements
+            if paiement.uuid_proposition == 'uuid-MASTER-SCI-CONFIRMED'
+        )
         self.proposition = self.proposition_repository.get(
             PropositionIdentity(
                 uuid='uuid-MASTER-SCI-CONFIRMED',
