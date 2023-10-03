@@ -98,13 +98,18 @@ class TitresAcces(ITitresAcces):
                     )
                 ),
                 # diplômé d'une formation académique belge
-                diplomation_academique_belge=models.Exists(
-                    EducationalExperienceYear.objects.filter(
-                        models.Q(result=Result.WAITING_RESULT.name)
-                        | models.Q(educational_experience__obtained_diploma=True),
-                        educational_experience__person_id=models.OuterRef('pk'),
-                        educational_experience__country__iso_code="BE",
+                diplomation_academique_belge=models.ExpressionWrapper(
+                    models.Exists(
+                        EducationalExperienceYear.objects.filter(
+                            models.Q(result=Result.WAITING_RESULT.name)
+                            | models.Q(educational_experience__obtained_diploma=True),
+                            educational_experience__person_id=models.OuterRef('pk'),
+                            educational_experience__country__iso_code="BE",
+                        )
                     )
+                    # OU ancien élève UCL
+                    | models.Q(last_registration_year__isnull=False),
+                    output_field=models.BooleanField(),
                 ),
                 # diplômé d'une formation académique étrangère
                 diplomation_academique_etranger=models.Exists(
@@ -135,20 +140,24 @@ class TitresAcces(ITitresAcces):
                 # diplômé d'une formation académique belge
                 #     de 2e cycle (c.-à-d. formation sélectionnée dans la liste déroulante ET étant de 2e cycle)
                 #     OU en ayant coché "autre formation"
-                diplomation_potentiel_master_belge=models.Exists(
-                    EducationalExperienceYear.objects.filter(
-                        models.Q(educational_experience__person_id=models.OuterRef('pk')),
-                        # formation académique de 2e cycle
-                        models.Q(educational_experience__program__cycle=Cycle.SECOND_CYCLE.name)
-                        # OU autre formation
-                        | ~models.Q(educational_experience__education_name=''),
-                        # diplomé ou en attente de résultat ou ancient étudiant de l'UCL
-                        models.Q(educational_experience__obtained_diploma=True)
-                        | models.Q(result=Result.WAITING_RESULT.name)
-                        | models.Q(educational_experience__person__last_registration_year__isnull=False),
-                        # belge
-                        educational_experience__country__iso_code="BE",
+                diplomation_potentiel_master_belge=models.ExpressionWrapper(
+                    models.Exists(
+                        EducationalExperienceYear.objects.filter(
+                            models.Q(educational_experience__person_id=models.OuterRef('pk')),
+                            # formation académique de 2e cycle
+                            models.Q(educational_experience__program__cycle=Cycle.SECOND_CYCLE.name)
+                            # OU autre formation
+                            | ~models.Q(educational_experience__education_name=''),
+                            # diplomé ou en attente de résultat ou ancient étudiant de l'UCL
+                            models.Q(educational_experience__obtained_diploma=True)
+                            | models.Q(result=Result.WAITING_RESULT.name),
+                            # belge
+                            educational_experience__country__iso_code="BE",
+                        )
                     )
+                    # OU ancien élève UCL
+                    | models.Q(last_registration_year__isnull=False),
+                    output_field=models.BooleanField(),
                 ),
                 # diplômé d'une formation académique étrangère
                 #     ET présence de la PJ d'équivalence de(s) diplôme(s) étranger(s)
@@ -158,8 +167,7 @@ class TitresAcces(ITitresAcces):
                         # étranger
                         ~models.Q(educational_experience__country__iso_code="BE"),
                         # diplomé ou en attente de résultat
-                        models.Q(educational_experience__obtained_diploma=True)
-                        | models.Q(result=Result.WAITING_RESULT.name),
+                        models.Q(educational_experience__obtained_diploma=True),
                     )
                 ),
                 # diplômé d'une formation académique belge

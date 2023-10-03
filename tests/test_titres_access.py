@@ -147,6 +147,13 @@ class TitresAccesTestCase(TestCase):
             result = TitresAcces.conditions_remplies(person_avec_diplome.global_id, [])
             self.assertTrue(result.diplomation_academique_belge)
 
+        with self.subTest('etudiant_ucl'):
+            person_etudiant_ucl = PersonFactory(
+                last_registration_year=AcademicYearFactory(),
+            )
+            result = TitresAcces.conditions_remplies(person_etudiant_ucl.global_id, [])
+            self.assertTrue(result.diplomation_academique_belge)
+
     def test_diplomation_academique_etranger(self):
         with self.subTest('resultat_en_attente'):
             person_avec_resultat_en_attente = PersonFactory()
@@ -270,17 +277,6 @@ class TitresAccesTestCase(TestCase):
             person_etudiant_ucl = PersonFactory(
                 last_registration_year=AcademicYearFactory(),
             )
-            educational_experience = EducationalExperienceFactory(
-                person=person_etudiant_ucl,
-                program=DiplomaTitleFactory(cycle=Cycle.SECOND_CYCLE.name),
-                education_name='',
-                country__iso_code="BE",
-                obtained_diploma=False,
-            )
-            EducationalExperienceYearFactory(
-                result=Result.FAILURE.name,
-                educational_experience=educational_experience,
-            )
             result = TitresAcces.conditions_remplies(person_etudiant_ucl.global_id, [])
             self.assertTrue(result.diplomation_potentiel_master_belge)
 
@@ -297,7 +293,7 @@ class TitresAccesTestCase(TestCase):
                 educational_experience=educational_experience,
             )
             result = TitresAcces.conditions_remplies(person_avec_resultat_en_attente.global_id, ['foo'])
-            self.assertTrue(result.diplomation_potentiel_master_etranger)
+            self.assertFalse(result.diplomation_potentiel_master_etranger)
 
         with self.subTest('avec_diplome'):
             person_avec_diplome = PersonFactory()
