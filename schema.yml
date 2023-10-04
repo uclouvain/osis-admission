@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.86
+  version: 1.0.87
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -3527,6 +3527,39 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /propositions/general-education/{uuid}/list-application-fees:
+    get:
+      operationId: list_application_fees_payments
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaiementDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/continuing-education/{uuid}:
     get:
       operationId: retrieve_continuing_education_proposition
@@ -5272,10 +5305,11 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
-  /propositions/general-education/{uuid}/pay-application-fees:
+  /propositions/general-education/{uuid}/open-application-fees-payment:
     post:
-      operationId: pay_application_fees_after_submission
-      description: Pay the application fee of the proposition after its submission.
+      operationId: open_application_fees_payment_after_submission
+      description: Open the payment of the application fee of the proposition after
+        its submission.
       parameters:
       - name: uuid
         in: path
@@ -5292,13 +5326,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PayerFraisDossierPropositionSuiteSoumissionCommand'
+              $ref: '#/components/schemas/SpecifierPaiementVaEtreOuvertParCandidatCommand'
       responses:
         201:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
+                $ref: '#/components/schemas/PaiementDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -5308,10 +5342,10 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
-  /propositions/general-education/{uuid}/pay-application-fees-after-request:
-    post:
-      operationId: pay_application_fees_after_request
-      description: Pay the application fee of the proposition after a manager request.
+    put:
+      operationId: open_application_fees_payment_after_request
+      description: Open the payment of the application fee of the proposition after
+        a manager request.
       parameters:
       - name: uuid
         in: path
@@ -5328,13 +5362,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PayerFraisDossierPropositionSuiteDemandeCommand'
+              $ref: '#/components/schemas/SpecifierPaiementVaEtreOuvertParCandidatCommand'
       responses:
-        201:
+        200:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PropositionIdentityDTO'
+                $ref: '#/components/schemas/PaiementDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -9316,6 +9350,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_documents:
               $ref: '#/components/schemas/ActionLink'
+            view_payment:
+              $ref: '#/components/schemas/ActionLink'
             pay_after_submission:
               $ref: '#/components/schemas/ActionLink'
             pay_after_request:
@@ -9709,6 +9745,41 @@ components:
       - tab
       - tab_name
       - required
+    PaiementDTO:
+      type: object
+      properties:
+        identifiant_paiement:
+          type: string
+        statut:
+          type: string
+        methode:
+          type: string
+        montant:
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 10000
+          minimum: -10000
+        url_checkout:
+          type: string
+        date_creation:
+          type: string
+          format: date-time
+        date_mise_a_jour:
+          type: string
+          format: date-time
+        date_expiration:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - identifiant_paiement
+      - statut
+      - methode
+      - montant
+      - url_checkout
+      - date_creation
+      - date_mise_a_jour
     ContinuingEducationPropositionDTO:
       type: object
       properties:
@@ -10312,14 +10383,7 @@ components:
           type: object
       required:
       - reponses_documents_a_completer
-    PayerFraisDossierPropositionSuiteSoumissionCommand:
-      type: object
-      properties:
-        uuid_proposition:
-          type: string
-      required:
-      - uuid_proposition
-    PayerFraisDossierPropositionSuiteDemandeCommand:
+    SpecifierPaiementVaEtreOuvertParCandidatCommand:
       type: object
       properties:
         uuid_proposition:

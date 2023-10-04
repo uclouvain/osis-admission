@@ -351,6 +351,11 @@ class PayerFraisDossierPropositionSuiteSoumissionCommand(interface.CommandReques
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SpecifierPaiementVaEtreOuvertParCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class PayerFraisDossierPropositionSuiteDemandeCommand(interface.CommandRequest):
     uuid_proposition: str
 
@@ -419,3 +424,8 @@ class ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(interface.C
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
     commentaire_programme_conjoint: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererListePaiementsPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str

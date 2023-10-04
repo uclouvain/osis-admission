@@ -65,7 +65,6 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'FEHC2M',
             'COMU2M1',
             'CORP2M',
-            'COMU2M',
             'EJL2M',
             'STIC2M',
             'OPES2M',
@@ -101,7 +100,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'GESA2M',
             'GESM2M',
             'GEST2M',
-            'GEST2M/1',
+            'GEST2M1',
             'INGE2M',
             'INGM2M',
             'GESA2M',
@@ -396,7 +395,6 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
         acronyms = [
             'COMU2M1',
             'CORP2MD',
-            'COMU2MD',
             'EJL2MD',
             'STIC2MD',
         ]
@@ -433,7 +431,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'GESA2MD',
             'GESM2MD',
             'GEST2MD',
-            'GEST2M/1',
+            'GEST2M1',
             'INGE2MD',
             'INGM2MD',
             'EBEP2MC',
@@ -449,7 +447,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'GESA2MD',
             'GESM2MD',
             'GEST2MD',
-            'GEST2M/1',
+            'GEST2M1',
             'INGE2MD',
             'INGM2MD',
         ]:

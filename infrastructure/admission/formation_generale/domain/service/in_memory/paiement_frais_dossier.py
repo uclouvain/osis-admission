@@ -25,34 +25,48 @@
 ##############################################################################
 from typing import List
 
-import attr
-
+from admission.contrib.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
+from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
+from admission.ddd.admission.formation_generale.test.factory.paiement import Paiement, PaiementFactory
 
 
-@attr.dataclass
-class Paiement:
-    uuid_proposition: str
-    effectue: bool = False
-
-
-class PaiementFraisDossierInMemory(IPaiementFraisDossier):
-    paiements: List[Paiement] = []
-
-    @classmethod
-    def reset(cls):
-        cls.paiements = [
-            Paiement(uuid_proposition='uuid-MASTER-SCI-CONFIRMED', effectue=False),
-            Paiement(uuid_proposition='uuid-MASTER-SCI', effectue=False),
-        ]
+class PaiementFraisDossierInMemoryRepository(IPaiementFraisDossier):
+    paiements: List[Paiement]
 
     @classmethod
     def paiement_realise(cls, proposition_uuid: str) -> bool:
         return any(
             paiement
             for paiement in cls.paiements
-            if paiement.uuid_proposition == proposition_uuid and paiement.effectue
+            if paiement.uuid_proposition == proposition_uuid and paiement.statut == PaymentStatus.PAID.name
         )
 
+    @classmethod
+    def ouvrir_paiement(cls, proposition_uuid: str) -> PaiementDTO:
+        paiements_proposition = cls.recuperer_paiements_proposition(proposition_uuid)
+        paiement_en_cours = next(
+            (paiement for paiement in paiements_proposition if paiement.statut == PaymentStatus.OPEN.name),
+            None,
+        )
+        if not paiement_en_cours:
+            paiement_en_cours = PaiementFactory(uuid_proposition=proposition_uuid, statut=PaymentStatus.OPEN.name)
+            cls.paiements.append(paiement_en_cours)
+        return cls._to_dto(paiement_en_cours)
 
-PaiementFraisDossierInMemory.reset()
+    @classmethod
+    def _to_dto(cls, paiement: Paiement) -> PaiementDTO:
+        return PaiementDTO(
+            identifiant_paiement=paiement.identifiant_paiement,
+            statut=paiement.statut,
+            methode=paiement.methode,
+            montant=paiement.montant,
+            url_checkout=paiement.url_checkout,
+            date_creation=paiement.date_creation,
+            date_mise_a_jour=paiement.date_mise_a_jour,
+            date_expiration=paiement.date_expiration,
+        )
+
+    @classmethod
+    def recuperer_paiements_proposition(cls, proposition_uuid: str) -> List[PaiementDTO]:
+        return [cls._to_dto(paiement) for paiement in cls.paiements if paiement.uuid_proposition == proposition_uuid]

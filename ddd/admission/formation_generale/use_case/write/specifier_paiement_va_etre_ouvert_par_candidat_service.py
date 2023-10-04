@@ -23,46 +23,34 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import serializers
-
 from admission.ddd.admission.formation_generale.commands import (
-    PayerFraisDossierPropositionSuiteDemandeCommand,
-    PayerFraisDossierPropositionSuiteSoumissionCommand,
     SpecifierPaiementVaEtreOuvertParCandidatCommand,
 )
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
-from base.utils.serializers import DTOSerializer
-
-__all__ = [
-    'PayerFraisDossierPropositionSuiteDemandeCommandSerializer',
-    'PayerFraisDossierPropositionSuiteSoumissionCommandSerializer',
-    'SpecifierPaiementVaEtreOuvertParCandidatCommandSerializer',
-    'PaiementDTOSerializer',
-]
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-class PayerFraisDossierPropositionSuiteDemandeCommandSerializer(DTOSerializer):
-    class Meta:
-        source = PayerFraisDossierPropositionSuiteDemandeCommand
+def specifier_paiement_va_etre_ouvert_par_candidat(
+    cmd: 'SpecifierPaiementVaEtreOuvertParCandidatCommand',
+    proposition_repository: 'IPropositionRepository',
+    paiement_frais_dossier_service: 'IPaiementFraisDossier',
+) -> PaiementDTO:
+    # GIVEN
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
 
+    # WHEN
+    paiement_frais_dossier_service.verifier_paiement_frais_dossier_necessaire(
+        proposition=proposition,
+    )
 
-class PayerFraisDossierPropositionSuiteSoumissionCommandSerializer(DTOSerializer):
-    class Meta:
-        source = PayerFraisDossierPropositionSuiteSoumissionCommand
+    # THEN
+    paiement_dto = paiement_frais_dossier_service.ouvrir_paiement(
+        proposition_uuid=proposition.entity_id.uuid,
+    )
 
-
-class SpecifierPaiementVaEtreOuvertParCandidatCommandSerializer(DTOSerializer):
-    class Meta:
-        source = SpecifierPaiementVaEtreOuvertParCandidatCommand
-
-
-class PaiementDTOSerializer(DTOSerializer):
-    class Meta:
-        source = PaiementDTO
-        extra_kwargs = {
-            # Necessary for decimal fields
-            'montant': {
-                'decimal_places': 2,
-                'max_digits': 6,
-            }
-        }
+    return paiement_dto

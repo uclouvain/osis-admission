@@ -552,6 +552,9 @@ msgstr "Tous les promoteurs doivent approuver la proposition."
 msgid "Already a member."
 msgstr "Déjà membre."
 
+msgid "Amount"
+msgstr "Montant"
+
 msgid "An education type"
 msgstr "Un type de formation"
 
@@ -3583,6 +3586,9 @@ msgstr "Modifiée"
 msgid "Modified at"
 msgstr "Modifié le"
 
+msgid "Mollie ID"
+msgstr "ID Mollie"
+
 msgid "Most recent year of enrolment"
 msgstr "Dernière année d'inscription"
 
@@ -3848,6 +3854,9 @@ msgstr "Événement en ligne"
 msgid "Online or in person"
 msgstr "En ligne ou en présentiel"
 
+msgid "Online payment history"
+msgstr "Historique des paiements en ligne"
+
 msgid "Only one admission"
 msgstr "Une seule admission"
 
@@ -4016,6 +4025,9 @@ msgstr "Numéro de passeport"
 
 msgid "Payed"
 msgstr "Payés"
+
+msgid "Payment method"
+msgstr "Méthode de paiement"
 
 msgid "Pending application fee"
 msgstr "Frais de dossier en attente"
@@ -5018,6 +5030,9 @@ msgstr "Début"
 msgid "Start date"
 msgstr "Date de début"
 
+msgid "Status"
+msgstr "Statut"
+
 msgctxt "admission"
 msgid "Status"
 msgstr "Statut"
@@ -5375,6 +5390,16 @@ msgstr "Le prénom du signataire"
 msgid "The first name of the student"
 msgstr "Le prénom de l'étudiant"
 
+msgid "The following admission has been updated: {}."
+msgid_plural "The following admissions have been updated: {}."
+msgstr[0] "La proposition suivante a été mise à jour : {}."
+msgstr[1] "Les propositions suivantes ont été mises à jour : {}"
+
+msgid "The following admission has not been updated: {}."
+msgid_plural "The following admissions have not been updated: {}."
+msgstr[0] "La proposition suivante n'a pas été mise à jour : {}."
+msgstr[1] "Les propositions suivantes n'ont pas été mises à jour : {}"
+
 #, python-format
 msgid ""
 "The global status of the application must be one of the following in order "
@@ -5454,6 +5479,9 @@ msgid ""
 msgstr ""
 "L'option {index} doit avoir un identifiant et une traduction pour chaque "
 "langue requise."
+
+msgid "The payment has already been made."
+msgstr "Le paiement a déjà été réalisé."
 
 msgid "The payment has not been made."
 msgstr "Le paiement n'a pas a été réalisé."
@@ -5794,6 +5822,9 @@ msgstr "Traduction du relevé de notes"
 msgid "Transcript type"
 msgstr "Type de relevé de notes"
 
+msgid "Trigger the payment hook"
+msgstr "Déclencher le webhook de paiement"
+
 msgid "Tutorship act"
 msgstr "Acte de tutelle"
 
@@ -5877,6 +5908,9 @@ msgstr "Non soumis pour publication"
 msgctxt "verb"
 msgid "Update"
 msgstr "Mettre à jour"
+
+msgid "Update date"
+msgstr "Date de mise à jour"
 
 msgid "Update doctorate admission"
 msgstr "Mettre à jour admission en doctorat"
@@ -6250,6 +6284,13 @@ msgstr ""
 msgid "You must be invited to pay the application fee by the system."
 msgstr "Vous devez être invité par le système à payer les frais de dossier."
 
+msgid ""
+"You must be invited to pay the application fee or you must have submitted "
+"your application."
+msgstr ""
+"Vous devez être invité à payer les frais de dossier ou vous devez avoir "
+"soumis votre demande."
+
 msgid "You must be the reference promoter to access this admission"
 msgstr ""
 "Vous devez être le promoteur de référence pour accéder à cette admission"
@@ -6305,17 +6346,33 @@ msgstr "année académique"
 msgid "actions"
 msgstr "actions"
 
+msgctxt "payment"
+msgid "bancontact"
+msgstr "Bancontact"
+
+msgctxt "payment"
+msgid "banktransfer"
+msgstr "Transfert bancaire"
+
 msgid "by the Enrolment Office"
 msgstr "par le Service des Inscriptions de l'UCLouvain"
 
 msgid "by the University Institute for Continuing Education (IUFC)"
 msgstr "par l'Institut Universitaire de Formation Continue (IUFC)"
 
+msgctxt "payment"
+msgid "canceled"
+msgstr "Annulé"
+
 msgid "candidate"
 msgstr "candidat"
 
 msgid "created"
 msgstr "créé"
+
+msgctxt "payment"
+msgid "creditcard"
+msgstr "Carte de crédit"
 
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
@@ -6326,6 +6383,14 @@ msgstr "ex: %(example)s"
 
 msgid "education group type"
 msgstr "type de formation"
+
+msgctxt "payment"
+msgid "expired"
+msgstr "Expiré"
+
+msgctxt "payment"
+msgid "failed"
+msgstr "En échec"
 
 #, python-format
 msgid "from %(start)s to %(end)s"
@@ -6341,6 +6406,18 @@ msgstr "modifiée"
 #, python-format
 msgid "on %(date)s at %(time)s"
 msgstr "le %(date)s à %(time)s"
+
+msgctxt "payment"
+msgid "open"
+msgstr "Ouvert"
+
+msgctxt "payment"
+msgid "paid"
+msgstr "Payé"
+
+msgctxt "payment"
+msgid "pending"
+msgstr "En attente"
 
 msgid "the <strong>failure</strong> of the confirmation paper."
 msgstr "l'<strong>échec</strong> de l'épreuve de confirmation."

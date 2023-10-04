@@ -97,7 +97,10 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             entity_type=EntityType.FACULTY.name,
             acronym='CMC',
         )
-        cls.admission = GeneralEducationAdmissionFactory(training__management_entity=cls.commission.entity)
+        cls.admission = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+            training__management_entity=cls.commission.entity,
+        )
         cls.teaching_campus_name = (
             cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
         )
@@ -181,6 +184,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
                 'update_documents',
                 'pay_after_submission',
                 'pay_after_request',
+                'view_payment',
             ],
         )
 

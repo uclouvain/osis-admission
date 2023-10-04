@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,18 +22,16 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from decimal import Decimal
+##############################################################################
+from typing import List
+
+from admission.ddd.admission.formation_generale.commands import RecupererListePaiementsPropositionQuery
+from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
+from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
 
 
-BE_ISO_CODE = "BE"
-FR_ISO_CODE = "FR"
-EN_ISO_CODE = "EN"
-CODE_BACHELIER_VETERINAIRE = 'VETE1BA'
-PREFIXES_DOMAINES_FORMATIONS_DENT_MED = {'11', '13'}
-REGIMES_LINGUISTIQUES_SANS_TRADUCTION = {'FR', 'NL', 'DE', 'EN', 'IT', 'ES', 'PT'}
-LANGUES_OBLIGATOIRES_DOCTORAT = ["EN", "FR"]
-NB_MOIS_MIN_VAE = 36
-MONTANT_FRAIS_DOSSIER = Decimal(200)
-DUREE_MINIMALE_PROGRAMME = 1
-DUREE_MAXIMALE_PROGRAMME = 5
+def recuperer_liste_paiements_proposition(
+    cmd: 'RecupererListePaiementsPropositionQuery',
+    paiement_frais_dossier_service: 'IPaiementFraisDossier',
+) -> List[PaiementDTO]:
+    return paiement_frais_dossier_service.recuperer_paiements_proposition(cmd.uuid_proposition)
