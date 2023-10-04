@@ -99,7 +99,7 @@ class Notification(INotification):
             "training_title": cls._get_doctorate_title_translation(doctorat),
             "admission_link_front": settings.ADMISSION_FRONTEND_LINK.format(context='doctorate', uuid=doctorat.uuid),
             "admission_link_back": "{}{}".format(
-                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                settings.ADMISSION_BACKEND_LINK_PREFIX,
                 resolve_url('admission:doctorate:project', uuid=doctorat.uuid),
             ),
         }
