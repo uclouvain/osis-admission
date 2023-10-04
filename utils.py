@@ -207,7 +207,7 @@ def get_portal_admission_url(context, admission_uuid) -> str:
 def get_backoffice_admission_url(context, admission_uuid, sub_namespace='', url_suffix='') -> str:
     """Return the url of the admission in the backoffice."""
     return '{}{}{}'.format(
-        settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+        settings.ADMISSION_BACKEND_LINK_PREFIX,
         resolve_url(f'admission:{context}{sub_namespace}', uuid=admission_uuid),
         url_suffix,
     )
