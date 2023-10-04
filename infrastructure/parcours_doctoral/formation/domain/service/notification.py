@@ -96,19 +96,19 @@ class Notification(INotification):
             ),
             "admission_link_front_course_enrollment": cls.get_admission_link_front(doctorate.uuid, 'course-enrollment'),
             "admission_link_back": "{}{}".format(
-                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                settings.ADMISSION_BACKEND_LINK_PREFIX,
                 resolve_url('admission:doctorate:project', uuid=doctorate.uuid),
             ),
             "admission_link_back_doctoral_training": "{}{}".format(
-                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                settings.ADMISSION_BACKEND_LINK_PREFIX,
                 resolve_url('admission:doctorate:doctoral-training', uuid=doctorate.uuid),
             ),
             "admission_link_back_complementary_training": "{}{}".format(
-                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                settings.ADMISSION_BACKEND_LINK_PREFIX,
                 resolve_url('admission:doctorate:complementary-training', uuid=doctorate.uuid),
             ),
             "admission_link_back_course_enrollment": "{}{}".format(
-                settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+                settings.ADMISSION_BACKEND_LINK_PREFIX,
                 resolve_url('admission:doctorate:course-enrollment', uuid=doctorate.uuid),
             ),
             "reference": doctorate.reference,
