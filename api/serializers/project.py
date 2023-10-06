@@ -27,7 +27,6 @@ from rest_framework import serializers
 
 from admission.api.serializers.fields import (
     ACTION_LINKS,
-    ActionLinksField,
     AnswerToSpecificQuestionField,
     CONTINUING_EDUCATION_ACTION_LINKS,
     DOCTORATE_ACTION_LINKS,
@@ -49,6 +48,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, Propo
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
+from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.utils.serializers import DTOSerializer
 
 __all__ = [
