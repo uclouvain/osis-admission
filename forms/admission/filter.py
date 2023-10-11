@@ -39,8 +39,8 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from base.forms.widgets import Select2MultipleCheckboxesWidget
-from base.models.academic_year import current_academic_year
 from base.models.entity_version import EntityVersion
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
@@ -185,7 +185,9 @@ class AllAdmissionsFilterForm(forms.Form):
     def __init__(self, user, load_labels=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['annee_academique'].choices = get_academic_year_choices()
-        self.fields['annee_academique'].initial = current_academic_year().year
+        self.fields['annee_academique'].initial = AnneeInscriptionFormationTranslator().recuperer(
+            AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT
+        )
         self.fields['types_formation'].initial = list(
             AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
             | AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
