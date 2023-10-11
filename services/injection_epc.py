@@ -106,9 +106,8 @@ class InjectionEPC:
     def recuperer_donnees(self, admission: BaseAdmission):
         candidat = admission.candidate  # Person
         comptabilite = admission.accounting
-        adresse_domicile = candidat.personaddress_set.filter(
-            label=PersonAddressType.RESIDENTIAL.name
-        ).select_related('country').first()  # type: PersonAddress
+        adresses = candidat.personaddress_set.select_related('country')
+        adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
         return {
             'dossier_uuid': str(admission.uuid),
             'signaletique': self._get_signaletique(candidat=candidat, adresse_domicile=adresse_domicile),
@@ -119,8 +118,7 @@ class InjectionEPC:
             'inscription_annee_academique': self._get_inscription_annee_academique(admission=admission),
             'inscription_offre': self._get_inscription_offre(admission=admission),
             'donnees_comptables': self._get_donnees_comptables(admission=admission),
-            'adresse_domicile': self._get_adresse(adresse_domicile=adresse_domicile, numero_gsm=candidat.phone_mobile),
-            # adresse contact ?
+            'adresses': self._get_adresses(adresses=adresses),
         }
 
     @staticmethod
@@ -246,7 +244,7 @@ class InjectionEPC:
                 'type_occupation': experience_pro.type,
                 'debut': experience_pro.start_date.strftime("%d/%m/%Y"),
                 'fin': experience_pro.end_date.strftime("%d/%m/%Y"),
-                'type_experience_profesionnel': experience_pro.type,
+                'type_experience_professionnel': experience_pro.type,
                 'intitule_autre_activite': experience_pro.activity,
                 'etablissement_autre': experience_pro.institute_name,
 
@@ -320,7 +318,7 @@ class InjectionEPC:
                 if groupe_de_supervision
                 else ''
             ),
-            'condition_acces': '',  # pas encore dev
+            'condition_acces': 'WORK_IN_PROGRESS',  # pas encore dev
             'double_diplome': double_diplome.short_name if double_diplome else '',
             'type_demande_bourse': type_demande_bourse.short_name if type_demande_bourse else '',
             'type_erasmus': type_erasmus.short_name if type_erasmus else '',
@@ -331,25 +329,28 @@ class InjectionEPC:
     def _get_donnees_comptables(admission: BaseAdmission) -> Dict:
         return {
             'annee_academique': admission.training.academic_year.year,
-            'droits_majores': '',  # pas encore dev
-            'montant_doits_majores': ''  # pas encore dev
+            'droits_majores': 'WORK_IN_PROGRESS',  # pas encore dev
+            'montant_doits_majores': 'WORK_IN_PROGRESS'  # pas encore dev
         }
 
     @staticmethod
-    def _get_adresse(adresse_domicile: PersonAddress, numero_gsm: str) -> Dict:
-        if adresse_domicile:
-            return {
-                'lieu_dit': adresse_domicile.place,
-                'rue': (
-                    f"{adresse_domicile.street}, {adresse_domicile.street_number}"
-                    f"{' - ' if adresse_domicile.postal_box else ''}{adresse_domicile.postal_box}"
-                ),
-                'code_postal': adresse_domicile.postal_code,
-                'localite': adresse_domicile.city,
-                'pays': adresse_domicile.country.iso_code,
-                'numero_telephone': numero_gsm
-            }
-        return {}
+    def _get_adresses(adresses: QuerySet[PersonAddress]) -> List[Dict[str, str]]:
+        if adresses:
+            return [
+                {
+                    'lieu_dit': adresse.place,
+                    'rue': (
+                        f"{adresse.street}, {adresse.street_number}"
+                        f"{' - ' if adresse.postal_box else ''}{adresse.postal_box}"
+                    ),
+                    'code_postal': adresse.postal_code,
+                    'localite': adresse.city,
+                    'pays': adresse.country.iso_code,
+                    'type': adresse.label
+                }
+                for adresse in adresses
+            ]
+        return []
 
     @staticmethod
     def envoyer_admission_dans_queue(donnees: Dict, admission_uuid: str, admission_reference: str):
