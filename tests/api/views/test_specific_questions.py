@@ -1073,6 +1073,7 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
     @freezegun.freeze_time('2020-11-01')
     def test_with_valid_candidate_user(self):
+        AdmissionAcademicCalendarFactory.produce_all_required(current_year=2020)
         self.client.force_authenticate(user=self.candidate.user)
 
         response = self.client.put(self.url, data=self.update_data)
@@ -1168,6 +1169,7 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             'adresse_facturation_destinataire': 'John Doe',
             'adresse_facturation_boite_postale': 'B1',
         }
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Users
         cls.candidate = cls.admission.candidate

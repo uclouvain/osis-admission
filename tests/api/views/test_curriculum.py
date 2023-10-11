@@ -727,6 +727,8 @@ class ProfessionalExperienceTestCase(APITestCase):
         cls.today_date = datetime.date(2020, 11, 1)
         cls.today_datetime = datetime.datetime(2020, 11, 1)
 
+        AdmissionAcademicCalendarFactory.produce_all_required()
+
         # Targeted urls
         cls.agnostic_url = resolve_url('cv_professional_experiences-list')
         cls.admission_url = resolve_url('cv_professional_experiences-list', uuid=cls.admission.uuid)
@@ -966,6 +968,8 @@ class EducationalExperienceTestCase(APITestCase):
         cls.today_datetime = datetime.datetime(2020, 11, 1)
 
         cls.country = CountryFactory()
+
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         cls.educational_experience_data = {
             'program': cls.diploma.uuid,

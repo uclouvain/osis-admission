@@ -41,6 +41,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     SignataireNonTrouveException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from osis_notification.models import EmailNotification
@@ -63,6 +64,7 @@ class RequestSignaturesApiTestCase(APITestCase):
             program_proposition=[WriteTokenFactory().token],
         )
         ProgramManagerRoleFactory(education_group_id=cls.admission.training.education_group_id)
+        AdmissionAcademicCalendarFactory.produce_all_required()
         cls.patcher.stop()
         cls.candidate = cls.admission.candidate
         cls.url = resolve_url("admission_api_v1:request-signatures", uuid=cls.admission.uuid)

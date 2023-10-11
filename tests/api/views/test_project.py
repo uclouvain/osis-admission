@@ -414,6 +414,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         cls.other_promoter_user = PromoterFactory().person.user
         cls.committee_member_user = committee_member.person.user
         cls.other_committee_member_user = CaMemberFactory().person.user
+        AdmissionAcademicCalendarFactory.produce_all_required()
         # Targeted url
         cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
 

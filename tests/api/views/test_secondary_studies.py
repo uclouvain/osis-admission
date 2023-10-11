@@ -331,6 +331,7 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
                 "country": "FR",
             },
         }
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
     def create_foreign_diploma(self, data):
         self.client.force_authenticate(self.user)
@@ -403,6 +404,7 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
                 "first_cycle_admission_exam": [cls.file_uuid],
             },
         }
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
     def setUp(self):
         patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")

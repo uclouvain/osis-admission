@@ -67,6 +67,7 @@ def verifier_proposition(
         cmd.uuid_proposition,
         onglets=Onglets.get_names(),
     )
+
     formation = formation_translator.get(proposition.formation_id)
     titres = titres_acces.recuperer_titres_access(
         proposition.matricule_candidat,
