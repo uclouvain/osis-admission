@@ -96,11 +96,19 @@ class ListCampusView(ListAPIView):
         return Response(serializer.data)
 
 
+class RetrieveDiplomaticPostSchema(AuthorizationAwareSchema):
+    def get_operation(self, path, method):
+        operation = super().get_operation(path, method)
+        # Override the parameter type because every url parameter is considered as a string
+        operation['parameters'][0]['schema']['type'] = 'integer'
+        return operation
+
+
 class RetrieveDiplomaticPostView(RetrieveAPIView):
     """Retrieves a diplomatic post"""
 
     name = 'retrieve-diplomatic-post'
-    schema = AuthorizationAwareSchema()
+    schema = RetrieveDiplomaticPostSchema()
     filter_backends = []
     serializer_class = serializers.DiplomaticPostSerializer
     queryset = DiplomaticPost.objects.annotate_countries().all()

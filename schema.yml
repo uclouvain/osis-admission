@@ -4895,7 +4895,7 @@ paths:
         required: true
         description: A unique value identifying this diplomatic post.
         schema:
-          type: string
+          type: integer
       - $ref: '#/components/parameters/Accept-Language'
       - $ref: '#/components/parameters/X-User-FirstName'
       - $ref: '#/components/parameters/X-User-LastName'

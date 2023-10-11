@@ -49,7 +49,6 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -61,21 +60,17 @@ from admission.tests.factories.form_item import (
     TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory, InternationalScholarshipFactory
+from admission.tests.factories.scholarship import InternationalScholarshipFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
-from base.models.enums.person_address_type import PersonAddressType
-from base.models.person_address import PersonAddress
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group import EducationGroupFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
-from learning_unit.tests.ddd.factories.entities import EntitiesFactory
 from osis_profile.models import EducationalExperience
 from osis_profile.tests.factories.curriculum import EducationalExperienceFactory
 from reference.tests.factories.country import CountryFactory
@@ -1349,81 +1344,3 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             admission.billing_address_country.iso_code,
             self.update_data_with_custom_address['adresse_facturation_pays'],
         )
-
-
-class GeneralIdentificationViewTestCase(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.be_country = CountryFactory(iso_code=BE_ISO_CODE, european_union=True)
-        cls.en_country = CountryFactory(iso_code=EN_ISO_CODE, european_union=False)
-
-        cls.person = CompletePersonFactory(
-            country_of_citizenship=cls.be_country,
-        )
-        cls.admission = GeneralEducationAdmissionFactory(
-            candidate=cls.person,
-            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
-        )
-
-        cls.url = resolve_url('admission_api_v1:general_identification', uuid=cls.admission.uuid)
-
-    def test_retrieve_identification_is_forbidden_without_permission(self):
-        # Not authenticated
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-        # Other user
-        self.client.force_authenticate(user=CandidateFactory().person.user)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_retrieve_identification(self):
-        self.client.force_authenticate(user=self.person.user)
-
-        # Nationality => European country (BE)
-        # Residential country => BE
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        result = response.json()
-
-        self.assertEqual(result['pays_nationalite_europeen'], True)
-        self.assertEqual(result['pays_nationalite'], BE_ISO_CODE)
-        self.assertEqual(result['pays_residence'], BE_ISO_CODE)
-
-        # Nationality => Not European country (US)
-        # Residential country => US
-        self.person.country_of_citizenship = self.en_country
-        self.person.save()
-
-        address = PersonAddress.objects.get(person=self.person, label=PersonAddressType.RESIDENTIAL.name)
-        address.country = self.en_country
-        address.save()
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        result = response.json()
-
-        self.assertEqual(result['pays_nationalite_europeen'], False)
-        self.assertEqual(result['pays_nationalite'], EN_ISO_CODE)
-        self.assertEqual(result['pays_residence'], EN_ISO_CODE)
-
-        # No nationality
-        # No residential country
-        self.person.country_of_citizenship = None
-        self.person.save()
-
-        address.delete()
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        result = response.json()
-
-        self.assertEqual(result['pays_nationalite_europeen'], None)
-        self.assertEqual(result['pays_nationalite'], '')
-        self.assertEqual(result['pays_residence'], '')
