@@ -43,7 +43,10 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
+from base.models.academic_year import AcademicYear
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
+from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
 from base.tests.factories.person import PersonFactory
@@ -125,6 +128,19 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             .root_group.main_teaching_campus.name
         )
 
+        cls.academic_calendar_2023 = AcademicCalendarFactory(
+            reference=AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT.name,
+            start_date=datetime.date(2022, 11, 1),
+            end_date=datetime.date(2023, 10, 31),
+            data_year=AcademicYear.objects.get(year=2023),
+        )
+        cls.academic_calendar_2024 = AcademicCalendarFactory(
+            reference=AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT.name,
+            start_date=datetime.date(2023, 11, 1),
+            end_date=datetime.date(2024, 10, 31),
+            data_year=AcademicYear.objects.get(year=2024),
+        )
+
         cls.results = [
             DemandeRechercheDTO(
                 uuid=cls.admissions[0].uuid,
@@ -201,7 +217,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(response.context['object_list'], [])
 
         form = response.context['filter_form']
-        self.assertEqual(form['annee_academique'].initial, 2022)
+        self.assertEqual(form['annee_academique'].initial, 2023)
         self.assertEqual(
             form['annee_academique'].field.choices,
             [
@@ -212,6 +228,25 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 (2021, '2021-22'),
             ],
         )
+
+    @freezegun.freeze_time('2023-10-31')
+    def test_list_initialization_just_before_academic_year_change(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['filter_form']
+        self.assertEqual(form['annee_academique'].initial, 2023)
+
+    @freezegun.freeze_time('2023-11-01')
+    def test_list_initialization_just_after_academic_year_change(self):
+        self.client.force_login(user=self.sic_management_user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['filter_form']
+        self.assertEqual(form['annee_academique'].initial, 2024)
 
     def test_list_central_manager_scoped_not_entity(self):
         manager = CentralManagerRoleFactory(scopes=[Scope.ALL.name])
