@@ -84,6 +84,15 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
         for osis_type in osis_types
     }
 
+    ADMISSION_CALENDAR_TYPE_BY_ADMISSION_EDUCATION_TYPE = {
+        TypeFormation.BACHELIER.name: AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT,
+        TypeFormation.MASTER.name: AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT,
+        TypeFormation.AGREGATION_CAPES.name: AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT,
+        TypeFormation.CERTIFICAT.name: AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT,
+        TypeFormation.FORMATION_CONTINUE.name: AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT,
+        TypeFormation.DOCTORAT.name: AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT,
+    }
+
     GENERAL_EDUCATION_TYPES = set(
         osis_type
         for osis_type, admission_type in ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.items()
@@ -120,6 +129,14 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
 
         if academic_calendar_year:
             return academic_calendar_year.get('data_year__year')
+
+    @classmethod
+    def recuperer_annee_selon_type_formation(cls, type_formation: TrainingType) -> Optional[int]:
+        return cls.recuperer(
+            cls.ADMISSION_CALENDAR_TYPE_BY_ADMISSION_EDUCATION_TYPE[
+                cls.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE[type_formation.name]
+            ]
+        )
 
 
 ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE = {
