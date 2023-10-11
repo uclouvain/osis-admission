@@ -276,8 +276,7 @@ class TestVerifierPropositionService(TestCase):
     def test_should_retourner_erreur_si_conditions_acces_non_remplies(self):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd('uuid-BACHELIER-ECO2'))
-        self.assertEqual(len(context.exception.exceptions), 1)
-        self.assertIsInstance(context.exception.exceptions.pop(), ConditionsAccessNonRempliesException)
+        self.assertHasInstance(context.exception.exceptions, ConditionsAccessNonRempliesException)
 
     def test_should_retourner_erreur_si_fichier_pdf_cv_non_fourni_master(self):
         with mock.patch.multiple(self.master_proposition, curriculum=[]):

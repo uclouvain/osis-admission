@@ -435,6 +435,7 @@ class AdmissionPoolUe5NonBelgianCalendar(PoolCalendar):
         return (
             isinstance(proposition, PropositionGenerale)
             and ue_plus_5
+            and bool(access_diplomas)
             and not any(belgian_diploma in access_diplomas for belgian_diploma in DIPLOMES_ACCES_BELGE)
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
