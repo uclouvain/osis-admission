@@ -31,18 +31,19 @@ from admission.contrib.models import DiplomaticPost
 
 
 class DiplomaticPostFactory(DjangoModelFactory):
-    code = factory.LazyFunction(lambda: DiplomaticPostFactory._increment_counter())
+    code = factory.Sequence(lambda n: n)
     name_fr = factory.Faker('city')
     name_en = factory.Faker('city')
     email = factory.Faker('email')
 
     @classmethod
-    def _increment_counter(cls):
-        last_counter = (
-            cls.COUNTER if hasattr(cls, 'COUNTER') else DiplomaticPost.objects.aggregate(Max('code'))['code__max'] or 0
-        )
-        cls.COUNTER = last_counter + 1
-        return cls.COUNTER
+    def _setup_next_sequence(cls):
+        """Set up an initial sequence value for Sequence attributes.
+
+        Returns:
+            int: the first available ID to use for instances of this factory.
+        """
+        return (DiplomaticPost.objects.aggregate(Max('code'))['code__max'] or 0) + 1
 
     class Meta:
         model = DiplomaticPost

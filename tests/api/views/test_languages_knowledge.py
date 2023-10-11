@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import CandidateFactory
 from reference.tests.factories.language import LanguageFactory, FrenchLanguageFactory, EnglishLanguageFactory
 
@@ -67,6 +68,7 @@ class LanguagesKnowledgeTestCase(APITestCase):
         FrenchLanguageFactory()
         EnglishLanguageFactory()
         LanguageFactory(code="DE", name="Allemand")
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

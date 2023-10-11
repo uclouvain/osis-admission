@@ -30,6 +30,7 @@ from django.shortcuts import resolve_url
 from rest_framework.test import APITestCase
 
 from admission.calendar.admission_calendar import *
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -39,21 +40,7 @@ class PoolQuestionApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         AcademicYearFactory.produce(number_future=6)
-        for pool in [
-            DoctorateAdmissionCalendar,
-            ContinuingEducationAdmissionCalendar,
-            AdmissionPoolExternalEnrollmentChangeCalendar,
-            AdmissionPoolExternalReorientationCalendar,
-            AdmissionPoolVipCalendar,
-            AdmissionPoolHueUclPathwayChangeCalendar,
-            AdmissionPoolInstituteChangeCalendar,
-            AdmissionPoolUe5BelgianCalendar,
-            AdmissionPoolUe5NonBelgianCalendar,
-            AdmissionPoolHue5BelgiumResidencyCalendar,
-            AdmissionPoolHue5ForeignResidencyCalendar,
-            AdmissionPoolNonResidentQuotaCalendar,
-        ]:
-            pool.ensure_consistency_until_n_plus_6()
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
     @freezegun.freeze_time('2022-08-01')
     def test_pool_question_api_get_with_not_bachelor(self):
