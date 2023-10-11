@@ -23,16 +23,21 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from rest_framework import serializers
+
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteDemandeCommand,
     PayerFraisDossierPropositionSuiteSoumissionCommand,
+    SpecifierPaiementVaEtreOuvertParCandidatCommand,
 )
+from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
 from base.utils.serializers import DTOSerializer
-
 
 __all__ = [
     'PayerFraisDossierPropositionSuiteDemandeCommandSerializer',
     'PayerFraisDossierPropositionSuiteSoumissionCommandSerializer',
+    'SpecifierPaiementVaEtreOuvertParCandidatCommandSerializer',
+    'PaiementDTOSerializer',
 ]
 
 
@@ -44,3 +49,20 @@ class PayerFraisDossierPropositionSuiteDemandeCommandSerializer(DTOSerializer):
 class PayerFraisDossierPropositionSuiteSoumissionCommandSerializer(DTOSerializer):
     class Meta:
         source = PayerFraisDossierPropositionSuiteSoumissionCommand
+
+
+class SpecifierPaiementVaEtreOuvertParCandidatCommandSerializer(DTOSerializer):
+    class Meta:
+        source = SpecifierPaiementVaEtreOuvertParCandidatCommand
+
+
+class PaiementDTOSerializer(DTOSerializer):
+    class Meta:
+        source = PaiementDTO
+        extra_kwargs = {
+            # Necessary for decimal fields
+            'montant': {
+                'decimal_places': 2,
+                'max_digits': 6,
+            }
+        }

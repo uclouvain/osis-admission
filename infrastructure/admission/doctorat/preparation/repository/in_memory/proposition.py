@@ -284,6 +284,6 @@ class PropositionInMemoryRepository(
             reponses_questions_specifiques=proposition.reponses_questions_specifiques,
             curriculum=proposition.curriculum,
             elements_confirmation=proposition.elements_confirmation,
-            pdf_recapitulatif=[],
+            pdf_recapitulatif=['recap.pdf'],
             soumise_le=None,
         )

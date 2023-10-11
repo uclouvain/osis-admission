@@ -23,8 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rules import RuleSet
 from django.utils.translation import gettext_lazy as _
+from rules import RuleSet
 
 from admission.auth.predicates import (
     complementary_training_enabled,
@@ -41,9 +41,9 @@ from admission.auth.predicates import (
     is_invited_to_pay_after_submission,
     is_invited_to_pay_after_request,
     does_not_have_a_submitted_admission,
+    can_view_payment,
 )
 from osis_role.contrib.models import RoleModel
-
 
 author_and_enrolled = is_admission_request_author & is_enrolled
 
@@ -122,6 +122,7 @@ _CANDIDATE_RULESET = {
     'view_generaleducationadmission_languages': is_admission_request_author & in_progress,
     'view_generaleducationadmission_accounting': is_admission_request_author & in_progress,
     'view_generaleducationadmission_specific_question': is_admission_request_author & in_progress,
+    'view_generaleducationadmission_fees': is_admission_request_author & can_view_payment,
     'download_generaleducationadmission_pdf_recap': is_admission_request_author,
     # A candidate can edit some tabs as long as the proposition is in progress
     'change_generaleducationadmission_training_choice': is_admission_request_author & in_progress,

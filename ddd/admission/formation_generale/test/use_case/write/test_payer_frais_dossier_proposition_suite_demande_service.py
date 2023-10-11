@@ -28,6 +28,7 @@ from unittest import TestCase, mock
 
 import freezegun
 
+from admission.contrib.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteDemandeCommand,
 )
@@ -40,10 +41,10 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     PaiementNonRealiseException,
     PropositionPourPaiementInvalideException,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
-    PaiementFraisDossierInMemory,
+from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
+    PaiementFraisDossierInMemoryRepositoryFactory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -67,17 +68,18 @@ class TestPayerFraisDossierPropositionSuiteDemande(TestCase):
                 )
             )
         cls.message_bus = message_bus_in_memory_instance
-        cls.paiement_courant = next(
-            paiement
-            for paiement in PaiementFraisDossierInMemory.paiements
-            if paiement.uuid_proposition == 'uuid-MASTER-SCI-CONFIRMED'
-        )
 
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.candidat = self.candidat_translator.profil_candidats[1]
+        paiement_frais_dossier_repository = PaiementFraisDossierInMemoryRepositoryFactory()
+        self.paiement_courant = next(
+            paiement
+            for paiement in paiement_frais_dossier_repository.paiements
+            if paiement.uuid_proposition == 'uuid-MASTER-SCI-CONFIRMED'
+        )
         self.proposition = self.proposition_repository.get(
             PropositionIdentity(
                 uuid='uuid-MASTER-SCI-CONFIRMED',
@@ -91,7 +93,7 @@ class TestPayerFraisDossierPropositionSuiteDemande(TestCase):
         )
 
     def test_should_payer_frais_etre_ok_si_paiement_realise(self):
-        with mock.patch.multiple(self.paiement_courant, effectue=True):
+        with mock.patch.multiple(self.paiement_courant, statut=PaymentStatus.PAID.name):
             proposition_id = self.message_bus.invoke(self.command)
 
         proposition = self.proposition_repository.get(proposition_id)
@@ -105,7 +107,7 @@ class TestPayerFraisDossierPropositionSuiteDemande(TestCase):
         self.assertEqual(proposition.checklist_actuelle.frais_dossier.libelle, 'Payed')
 
     def test_should_lever_exception_si_frais_pas_encore_payes(self):
-        with mock.patch.multiple(self.paiement_courant, effectue=False):
+        with mock.patch.multiple(self.paiement_courant, statut=PaymentStatus.OPEN.name):
             with self.assertRaises(PaiementNonRealiseException):
                 self.message_bus.invoke(self.command)
 

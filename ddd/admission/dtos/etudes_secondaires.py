@@ -32,7 +32,6 @@ from osis_common.ddd import interface
 
 @attr.dataclass(slots=True, frozen=True)
 class DiplomeBelgeEtudesSecondairesDTO(interface.DTO):
-    certificat_inscription: List = attr.Factory(list)
     diplome: List = attr.Factory(list)
     type_enseignement: str = ''
     autre_type_enseignement: str = ''
@@ -43,7 +42,6 @@ class DiplomeBelgeEtudesSecondairesDTO(interface.DTO):
 
 @attr.dataclass(slots=True, frozen=True)
 class DiplomeEtrangerEtudesSecondairesDTO(interface.DTO):
-    resultat: str = ''
     type_diplome: str = ''
     regime_linguistique: str = ''
     pays_regime_linguistique: str = ''
@@ -54,8 +52,6 @@ class DiplomeEtrangerEtudesSecondairesDTO(interface.DTO):
     traduction_releve_notes: List = attr.Factory(list)
     diplome: List = attr.Factory(list)
     traduction_diplome: List = attr.Factory(list)
-    certificat_inscription: List = attr.Factory(list)
-    traduction_certificat_inscription: List = attr.Factory(list)
     equivalence: str = ''
     decision_final_equivalence_ue: List = attr.Factory(list)
     decision_final_equivalence_hors_ue: List = attr.Factory(list)

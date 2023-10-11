@@ -35,7 +35,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import AdmissionFormItemInstantiation, DoctorateAdmission
+from admission.contrib.models import AdmissionFormItemInstantiation, DoctorateAdmission, AdmissionTask
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -1021,6 +1021,11 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         )
         self.assertEqual(WebNotification.objects.count(), 1)
         self.assertEqual(WebNotification.objects.first().person, manager.person)
+
+        admission_tasks = AdmissionTask.objects.filter(admission=admission).order_by('type')
+        self.assertEqual(len(admission_tasks), 2)
+        self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.DOCTORATE_MERGE.name)
+        self.assertEqual(admission_tasks[1].type, AdmissionTask.TaskType.DOCTORATE_RECAP.name)
 
     def test_submit_valid_proposition_using_api_but_too_much_submitted_propositions(self):
         DoctorateAdmissionFactory(

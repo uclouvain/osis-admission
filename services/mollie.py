@@ -26,7 +26,7 @@
 import datetime
 import logging
 from decimal import Decimal
-from typing import Dict
+from typing import Dict, Optional
 
 import attr
 import requests
@@ -49,27 +49,28 @@ class PaiementMollie:
     methode: str
     description: str
     montant: Decimal
-    date_d_expiration: datetime.datetime
+    date_d_expiration: Optional[datetime.datetime]
     date_de_creation: datetime.datetime
     date_de_mise_a_jour: datetime.datetime
 
 
 class MollieService:
     """
-        Mollie status transition:
-              ┌───────────┬─────►PAID
-              │           │
-              ├───────────┼─────►CANCELED
-        OPEN──┤           │
-              ├───►PENDING├─────►EXPIRED
-              │           │
-              └───────────┴─────►FAILED
-              PENDING --> FAILED only for banktransfer
-        Expiry times per payment method:
-            Bancontact : 1 hour
-            Bank transfer : 12 (+2) days
-            Credit card : 30 minutes
+    Mollie status transition:
+          ┌───────────┬─────►PAID
+          │           │
+          ├───────────┼─────►CANCELED
+    OPEN──┤           │
+          ├───►PENDING├─────►EXPIRED
+          │           │
+          └───────────┴─────►FAILED
+          PENDING --> FAILED only for banktransfer
+    Expiry times per payment method:
+        Bancontact : 1 hour
+        Bank transfer : 12 (+2) days
+        Credit card : 30 minutes
     """
+
     MOLLIE_BASE_URL: str = settings.MOLLIE_API_BASE_URL
 
     @classmethod
@@ -78,7 +79,7 @@ class MollieService:
         try:
             response = requests.get(
                 url=f"{cls.MOLLIE_BASE_URL}/{paiement_id}",
-                headers={'Authorization': f'Bearer {settings.MOLLIE_API_TOKEN}'}
+                headers={'Authorization': f'Bearer {settings.MOLLIE_API_TOKEN}'},
             )
             result = response.json()
         except Exception as e:
@@ -104,7 +105,7 @@ class MollieService:
             'description': f"Frais de dossier {reference}",
             'redirectUrl': url_redirection,
             'webhookUrl': f"{settings.ADMISSION_BACKEND_LINK_PREFIX}{reverse('admission:mollie-webhook')}",
-            'locale': 'fr_BE' if get_language() == settings.LANGUAGE_CODE else 'en_US'
+            'locale': 'fr_BE' if get_language() == settings.LANGUAGE_CODE else 'en_US',
         }
         logger.info(f"[MOLLIE] Creation d'un paiement pour l'admission avec reference {reference} - data : {data}")
 
@@ -112,7 +113,7 @@ class MollieService:
             response = requests.post(
                 url=cls.MOLLIE_BASE_URL,
                 data=data,
-                headers={'Authorization': f'Bearer {settings.MOLLIE_API_TOKEN}'}
+                headers={'Authorization': f'Bearer {settings.MOLLIE_API_TOKEN}'},
             )
             result = response.json()
         except Exception as e:
@@ -133,7 +134,6 @@ class MollieService:
     @classmethod
     def _convert_to_dto(cls, result: Dict) -> PaiementMollie:
         date_d_expiration = result.get('expiresAt', result.get('expiredAt'))
-        date_format = '%Y-%m-%dT%H:%M:%S+00:00'
         return PaiementMollie(
             checkout_url=result['_links'].get('checkout', {}).get('href', ''),
             paiement_url=result['_links']['self']['href'],
@@ -141,11 +141,11 @@ class MollieService:
             paiement_id=result['id'],
             statut=PaymentStatus(result['status']).name,
             methode=PaymentMethod(result['method']).name if result['method'] else None,
-            date_d_expiration=datetime.datetime.strptime(date_d_expiration, date_format),
-            date_de_creation=datetime.datetime.strptime(result.get('createdAt'), date_format),
+            date_d_expiration=date_d_expiration and datetime.datetime.fromisoformat(date_d_expiration),
+            date_de_creation=datetime.datetime.fromisoformat(result.get('createdAt')),
             date_de_mise_a_jour=datetime.datetime.now(),
             description=result['description'],
-            montant=Decimal(result['amount']['value'])
+            montant=Decimal(result['amount']['value']),
         )
 
 

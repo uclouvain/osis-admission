@@ -167,3 +167,11 @@ class InformationsAcceptationFacultaireNonSpecifieesException(BusinessException)
             "When accepting a proposition, all the required information in the approval form must be specified.",
         )
         super().__init__(message, **kwargs)
+
+
+class PaiementDejaRealiseException(BusinessException):
+    status_code = "FORMATION-GENERALE-19"
+
+    def __init__(self, **kwargs):
+        message = _("The payment has already been made.")
+        super().__init__(message, **kwargs)

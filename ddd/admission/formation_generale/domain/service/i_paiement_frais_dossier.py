@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from typing import Dict
+from typing import Dict, List
 
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -36,7 +36,9 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     PropositionDoitEtreEnAttenteDePaiementException,
     StatutPropositionInvalidePourPaiementInscriptionException,
     PaiementNonRealiseException,
+    PaiementDejaRealiseException,
 )
+from admission.ddd.admission.formation_generale.dtos.paiement import PaiementDTO
 from osis_common.ddd import interface
 
 
@@ -46,8 +48,16 @@ class IPaiementFraisDossier(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    def recuperer_paiements_proposition(cls, proposition_uuid: str) -> List[PaiementDTO]:
+        raise NotImplementedError
+
+    @classmethod
     def doit_payer(cls, elements_confirmation: Dict[str, str]) -> bool:
         return 'frais_dossier' in elements_confirmation
+
+    @classmethod
+    def ouvrir_paiement(cls, proposition_uuid: str) -> PaiementDTO:
+        raise NotImplementedError
 
     @classmethod
     def verifier_paiement_frais_dossier(cls, proposition: PropositionGenerale) -> None:
@@ -58,6 +68,14 @@ class IPaiementFraisDossier(interface.DomainService):
             raise PaiementNonRealiseException
 
     @classmethod
+    def verifier_paiement_frais_dossier_necessaire(cls, proposition: PropositionGenerale) -> None:
+        if not proposition.statut == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE:
+            raise PropositionPourPaiementInvalideException
+
+        if cls.paiement_realise(proposition_uuid=proposition.entity_id.uuid):
+            raise PaiementDejaRealiseException
+
+    @classmethod
     def verifier_paiement_necessaire_par_gestionnaire(cls, proposition: PropositionGenerale) -> None:
         if (
             not proposition.statut == ChoixStatutPropositionGenerale.CONFIRMEE
@@ -65,6 +83,9 @@ class IPaiementFraisDossier(interface.DomainService):
             or proposition.checklist_actuelle.frais_dossier.statut == ChoixStatutChecklist.SYST_REUSSITE
         ):
             raise StatutPropositionInvalidePourPaiementInscriptionException(proposition.statut.value)
+
+        if cls.paiement_realise(proposition_uuid=proposition.entity_id.uuid):
+            raise PaiementDejaRealiseException
 
     @classmethod
     def verifier_proposition_en_attente_paiement_suite_demande_gestionnaire(
@@ -85,3 +106,6 @@ class IPaiementFraisDossier(interface.DomainService):
             or proposition.checklist_actuelle.frais_dossier.statut == ChoixStatutChecklist.SYST_REUSSITE
         ):
             raise PropositionPourPaiementInvalideException
+
+        if cls.paiement_realise(proposition_uuid=proposition.entity_id.uuid):
+            raise PaiementDejaRealiseException

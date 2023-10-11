@@ -55,3 +55,4 @@ from .approuver_proposition_par_faculte_avec_nouvelles_informations_service impo
     approuver_proposition_par_faculte_avec_nouvelles_informations,
 )
 from .modifier_checklist_choix_formation_service import modifier_checklist_choix_formation
+from .specifier_paiement_va_etre_ouvert_par_candidat_service import specifier_paiement_va_etre_ouvert_par_candidat

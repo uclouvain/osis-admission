@@ -57,8 +57,6 @@ class DocumentSpecificQuestionSerializer(serializers.Serializer):
             document_identifier=instance.identifiant,
         )
 
-        document_mimetypes = document.mimetypes if document else list(SUPPORTED_MIME_TYPES)
-
         return {
             'uuid': instance.identifiant,
             'type': TypeItemFormulaire.DOCUMENT.name,
@@ -71,7 +69,14 @@ class DocumentSpecificQuestionSerializer(serializers.Serializer):
                 settings.LANGUAGE_CODE_EN: instance.justification_gestionnaire,
             },
             'help_text': {},
-            'configuration': {CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name: document_mimetypes},
+            'configuration': {
+                CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name: document.mimetypes,
+                CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name: document.max_documents_number,
+            }
+            if document
+            else {
+                CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name: list(SUPPORTED_MIME_TYPES),
+            },
             'values': [],
             'tab': instance.onglet,
             'tab_name': instance.nom_onglet_langue_candidat,

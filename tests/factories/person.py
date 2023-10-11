@@ -200,6 +200,7 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
 
 class IncompletePersonForBachelorFactory(CompletePersonFactory):
     graduated_from_high_school = GotDiploma.NO.name
+    last_registration_year = None
 
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
@@ -215,6 +216,8 @@ class IncompletePersonForBachelorFactory(CompletePersonFactory):
 
 
 class IncompletePersonForIUFCFactory(CompletePersonFactory):
+    last_registration_year = None
+
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         PersonAddressFactory(

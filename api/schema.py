@@ -29,10 +29,10 @@ from rest_framework.schemas.openapi import AutoSchema, SchemaGenerator
 from rest_framework.schemas.utils import is_list_view
 from rest_framework.serializers import Serializer
 
-from admission.api.serializers.fields import ActionLinksField
+from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.85"
+ADMISSION_SDK_VERSION = "1.0.87"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):

@@ -24,11 +24,15 @@
 #
 ##############################################################################
 import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import attr
 
-from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, DocumentsSystemeFAC
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    DocumentsSystemeFAC,
+    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+)
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
 
@@ -53,8 +57,14 @@ class EmplacementDocumentDTO(interface.Entity):
     nom_onglet_langue_candidat: str
     uuid_proposition: str
     requis_automatiquement: bool
+    types_documents: Dict[str, str]
+    noms_documents_televerses: Dict[str, str]
 
     def est_emplacement_systeme_fac(self):
         return (
             self.type == TypeEmplacementDocument.SYSTEME.name and self.identifiant.split('.')[-1] in DocumentsSystemeFAC
         )
+
+    @property
+    def est_reclamable(self):
+        return self.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES

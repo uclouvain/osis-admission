@@ -158,7 +158,6 @@ from osis_profile.models.enums.curriculum import (
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
-    DiplomaResults,
     EducationalType,
     Equivalence,
     ForeignDiplomaTypes,
@@ -862,7 +861,6 @@ class SectionsAttachmentsTestCase(TestCase):
         )
         bachelor_secondary_studies_dto = _EtudesSecondairesDTO(
             diplome_belge=_DiplomeBelgeEtudesSecondairesDTO(
-                certificat_inscription=['uuid-certificat-inscription'],
                 diplome=['uuid-diplome'],
                 type_enseignement=EducationalType.PROFESSIONAL_EDUCATION.name,
                 autre_type_enseignement='Other type',
@@ -871,7 +869,6 @@ class SectionsAttachmentsTestCase(TestCase):
                 communaute=BelgianCommunitiesOfEducation.FRENCH_SPEAKING.name,
             ),
             diplome_etranger=_DiplomeEtrangerEtudesSecondairesDTO(
-                resultat=DiplomaResults.GT_75_RESULT.name,
                 type_diplome=ForeignDiplomaTypes.EUROPEAN_BACHELOR.name,
                 regime_linguistique=FR_ISO_CODE,
                 pays_regime_linguistique='France',
@@ -882,8 +879,6 @@ class SectionsAttachmentsTestCase(TestCase):
                 traduction_releve_notes=['uuid-traduction-releve-notes'],
                 diplome=['uuid-diplome'],
                 traduction_diplome=['uuid-traduction-diplome'],
-                certificat_inscription=['uuid-certificat-inscription'],
-                traduction_certificat_inscription=['uuid-traduction-certificat-inscription'],
                 equivalence=Equivalence.YES.name,
                 decision_final_equivalence_ue=['uuid-decision-final-equivalence-ue'],
                 decision_final_equivalence_hors_ue=['uuid-decision-final-equivalence-hors-ue'],
@@ -1358,19 +1353,18 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(len(attachments), 1)
 
-            self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
-            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_BELGE_CERTIFICAT_INSCRIPTION'])
+            self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
+            self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_BELGE_DIPLOME'])
             self.assertEqual(
                 attachments[0].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_belge.certificat_inscription,
+                self.general_bachelor_context.etudes_secondaires.diplome_belge.diplome,
             )
             self.assertTrue(attachments[0].required)
 
-            # The document is are missing
+            # The document is missing
             with mock.patch.multiple(
                 self.general_bachelor_context.etudes_secondaires.diplome_belge,
                 diplome=[],
-                certificat_inscription=[],
             ):
                 section = get_secondary_studies_section(
                     self.general_bachelor_context,
@@ -1381,7 +1375,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
                 self.assertEqual(len(attachments), 1)
 
-                self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION')
+                self.assertEqual(attachments[0].identifier, 'DIPLOME_BELGE_DIPLOME')
                 self.assertTrue(attachments[0].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_alternative(self):
@@ -1675,7 +1669,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 6)
+            self.assertEqual(len(attachments), 4)
 
             self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
             self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
@@ -1683,7 +1677,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
-            self.assertFalse(attachments[0].required)
+            self.assertTrue(attachments[0].required)
 
             self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
             self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_DIPLOME'])
@@ -1691,58 +1685,31 @@ class SectionsAttachmentsTestCase(TestCase):
                 attachments[1].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_diplome,
             )
-            # The diploma is specified -> the related translation is required
             self.assertTrue(attachments[1].required)
 
-            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION')
-            self.assertEqual(
-                attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION']
-            )
+            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[2].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.certificat_inscription,
-            )
-            self.assertFalse(attachments[2].required)
-
-            self.assertEqual(
-                attachments[3].identifier,
-                'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
-            )
-            self.assertEqual(
-                attachments[3].label,
-                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION'],
-            )
-            self.assertEqual(
-                attachments[3].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_certificat_inscription,
-            )
-            # The enrolment certificate is specified -> the related translation is required
-            self.assertTrue(attachments[3].required)
-
-            self.assertEqual(attachments[4].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
-            self.assertEqual(attachments[4].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
-            self.assertEqual(
-                attachments[4].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
-            self.assertTrue(attachments[4].required)
+            self.assertTrue(attachments[2].required)
 
-            self.assertEqual(attachments[5].identifier, 'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES')
+            self.assertEqual(attachments[3].identifier, 'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES')
             self.assertEqual(
-                attachments[5].label,
+                attachments[3].label,
                 DocumentsEtudesSecondaires['DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES'],
             )
             self.assertEqual(
-                attachments[5].uuids,
+                attachments[3].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.traduction_releve_notes,
             )
-            self.assertTrue(attachments[5].required)
+            self.assertTrue(attachments[3].required)
 
-            # The diploma and the enrolment certificate are not specified -> the related translations are not required
+            # The diploma is not specified
             with mock.patch.multiple(
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger,
                 diplome=[],
-                certificat_inscription=[],
             ):
                 section = get_secondary_studies_section(
                     self.general_bachelor_context,
@@ -1751,19 +1718,12 @@ class SectionsAttachmentsTestCase(TestCase):
                 )
                 attachments = section.attachments
 
-                self.assertEqual(len(attachments), 6)
+                self.assertEqual(len(attachments), 4)
 
                 self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_TRADUCTION_DIPLOME')
-                self.assertEqual(
-                    attachments[3].identifier,
-                    'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
-                )
-                self.assertFalse(attachments[1].required)
-                self.assertFalse(attachments[3].required)
+                self.assertTrue(attachments[1].required)
 
-    def test_secondary_studies_attachments_for_bachelor_proposition_and_assimilated_foreign_diploma_this_year(
-        self,
-    ):
+    def test_secondary_studies_attachments_for_bachelor_proposition_and_assimilated_foreign_diploma_this_year(self):
         with mock.patch.multiple(
             self.general_bachelor_context.etudes_secondaires,
             diplome_belge=None,
@@ -1780,7 +1740,7 @@ class SectionsAttachmentsTestCase(TestCase):
 
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 3)
+            self.assertEqual(len(attachments), 2)
 
             self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
             self.assertEqual(attachments[0].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_DIPLOME'])
@@ -1788,32 +1748,20 @@ class SectionsAttachmentsTestCase(TestCase):
                 attachments[0].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.diplome,
             )
-            self.assertFalse(attachments[0].required)
+            self.assertTrue(attachments[0].required)
 
-            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION')
-            self.assertEqual(
-                attachments[1].label,
-                DocumentsEtudesSecondaires['DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION'],
-            )
+            self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
+            self.assertEqual(attachments[1].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
             self.assertEqual(
                 attachments[1].uuids,
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger.certificat_inscription,
-            )
-            self.assertFalse(attachments[1].required)
-
-            self.assertEqual(attachments[2].identifier, 'DIPLOME_ETRANGER_RELEVE_NOTES')
-            self.assertEqual(attachments[2].label, DocumentsEtudesSecondaires['DIPLOME_ETRANGER_RELEVE_NOTES'])
-            self.assertEqual(
-                attachments[2].uuids,
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
-            self.assertTrue(attachments[2].required)
+            self.assertTrue(attachments[1].required)
 
-            # Both attachments are missing -> we consider them as facultative
+            # The diploma is missing
             with mock.patch.multiple(
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger,
                 diplome=[],
-                certificat_inscription=[],
             ):
                 section = get_secondary_studies_section(
                     self.general_bachelor_context,
@@ -1822,53 +1770,10 @@ class SectionsAttachmentsTestCase(TestCase):
                 )
                 attachments = section.attachments
 
-                self.assertEqual(len(attachments), 3)
+                self.assertEqual(len(attachments), 2)
 
                 self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
-                self.assertEqual(
-                    attachments[1].identifier,
-                    'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
-                )
-                self.assertFalse(attachments[0].required)
-                self.assertFalse(attachments[1].required)
-
-            # Only one document is specified -> we consider it as mandatory
-            with mock.patch.multiple(
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-                certificat_inscription=[],
-            ):
-                section = get_secondary_studies_section(
-                    self.general_bachelor_context,
-                    self.empty_questions,
-                    False,
-                )
-                attachments = section.attachments
-
-                self.assertEqual(len(attachments), 3)
-
-                self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
-                self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION')
                 self.assertTrue(attachments[0].required)
-                self.assertFalse(attachments[1].required)
-
-            # Only one document is specified -> we consider it as mandatory
-            with mock.patch.multiple(
-                self.general_bachelor_context.etudes_secondaires.diplome_etranger,
-                diplome=[],
-            ):
-                section = get_secondary_studies_section(
-                    self.general_bachelor_context,
-                    self.empty_questions,
-                    False,
-                )
-                attachments = section.attachments
-
-                self.assertEqual(len(attachments), 3)
-
-                self.assertEqual(attachments[0].identifier, 'DIPLOME_ETRANGER_DIPLOME')
-                self.assertEqual(attachments[1].identifier, 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION')
-                self.assertFalse(attachments[0].required)
-                self.assertTrue(attachments[1].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_not_ue_foreign_national_bachelor_diploma_equiv(
         self,

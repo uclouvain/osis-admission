@@ -23,6 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from decimal import Decimal
+
+
 BE_ISO_CODE = "BE"
 FR_ISO_CODE = "FR"
 EN_ISO_CODE = "EN"
@@ -31,6 +34,6 @@ PREFIXES_DOMAINES_FORMATIONS_DENT_MED = {'11', '13'}
 REGIMES_LINGUISTIQUES_SANS_TRADUCTION = {'FR', 'NL', 'DE', 'EN', 'IT', 'ES', 'PT'}
 LANGUES_OBLIGATOIRES_DOCTORAT = ["EN", "FR"]
 NB_MOIS_MIN_VAE = 36
-MONTANT_FRAIS_DOSSIER = 200
+MONTANT_FRAIS_DOSSIER = Decimal(200)
 DUREE_MINIMALE_PROGRAMME = 1
 DUREE_MAXIMALE_PROGRAMME = 5

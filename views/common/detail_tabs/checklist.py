@@ -44,6 +44,7 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
@@ -63,6 +64,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverPropositionParFaculteCommand,
     RefuserPropositionParFaculteCommand,
     ApprouverPropositionParFaculteAvecNouvellesInformationsCommand,
+    RecupererListePaiementsPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -162,6 +164,14 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 class RequestApplicationFeesContextDataMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        payments = message_bus_instance.invoke(
+            RecupererListePaiementsPropositionQuery(uuid_proposition=self.admission_uuid)
+        )
+
+        context['payments'] = payments
+        context['payment_status_translations'] = PaymentStatus.translated_names()
+        context['payment_method_translations'] = PaymentMethod.translated_names()
 
         context['last_request'] = (
             HistoryEntry.objects.filter(

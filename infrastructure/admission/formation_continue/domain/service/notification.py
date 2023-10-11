@@ -49,7 +49,7 @@ class Notification(INotification):
         )
         formation_id = proposition.formation_id
         backend_link = "{}{}".format(
-            settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+            settings.ADMISSION_BACKEND_LINK_PREFIX,
             resolve_url('admission:continuing-education', uuid=proposition.entity_id.uuid),
         )
         return {
@@ -74,6 +74,18 @@ class Notification(INotification):
             task=task,
             admission=admission,
             type=AdmissionTask.TaskType.CONTINUING_RECAP.name,
+        )
+
+        # Create the async task to merge each document field of the proposition into one PDF
+        task = AsyncTask.objects.create(
+            name=_('Document merging of the proposition %(reference)s') % {'reference': proposition.reference},
+            description=_('Merging of each document field of the proposition into one PDF'),
+            person=admission.candidate,
+        )
+        AdmissionTask.objects.create(
+            task=task,
+            admission=admission,
+            type=AdmissionTask.TaskType.CONTINUING_MERGE.name,
         )
 
         # Notifier le doctorant via mail

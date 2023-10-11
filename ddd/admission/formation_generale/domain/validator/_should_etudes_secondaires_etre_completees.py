@@ -91,10 +91,7 @@ class ShouldDiplomeBelgesEtudesSecondairesEtreComplete(BusinessValidator):
         if not self.diplome_belge:
             return
 
-        if (
-            self.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name
-            and not self.diplome_belge.certificat_inscription
-        ) or (self.diplome_etudes_secondaires == GotDiploma.YES.name and not self.diplome_belge.diplome):
+        if not self.diplome_belge.diplome:
             raise EtudesSecondairesNonCompleteesPourDiplomeBelgeException
 
 
@@ -122,33 +119,19 @@ class ShouldDiplomeEtrangerEtudesSecondairesEtreComplete(BusinessValidator):
                 and not self.diplome_etranger.preuve_decision_equivalence
             ):
                 raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
-
-            # Diplôme
-            if self.diplome_etudes_secondaires == GotDiploma.THIS_YEAR.name:
-                if not self.diplome_etranger.diplome and not self.diplome_etranger.certificat_inscription:
-                    raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
-
-            elif self.diplome_etudes_secondaires == GotDiploma.YES.name:
-                if not self.diplome_etranger.diplome:
-                    raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
         else:
             # Hors UE non MED/DENT
             if equivalence_requise and not self.diplome_etranger.decision_final_equivalence_hors_ue:
                 raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
 
-            if not self.diplome_etranger.diplome:
-                raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
+        if not self.diplome_etranger.diplome:
+            raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
 
         if not self.diplome_etranger.releve_notes:
             raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
 
-        if traductions_requises and (
-            self.diplome_etranger.releve_notes
-            and not self.diplome_etranger.traduction_releve_notes
-            or self.diplome_etranger.diplome
-            and not self.diplome_etranger.traduction_diplome
-            or self.diplome_etranger.certificat_inscription
-            and not self.diplome_etranger.traduction_certificat_inscription
+        if traductions_requises and not (
+            self.diplome_etranger.traduction_releve_notes and self.diplome_etranger.traduction_diplome
         ):
             raise EtudesSecondairesNonCompleteesPourDiplomeEtrangerException
 
