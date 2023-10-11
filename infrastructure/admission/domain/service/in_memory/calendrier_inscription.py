@@ -26,6 +26,7 @@
 from datetime import date, timedelta
 from typing import List, Tuple
 
+from admission.ddd import PLUS_5_ISO_CODES
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
@@ -79,5 +80,5 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
         situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
         return identification.pays_nationalite in (
-            ProfilCandidatInMemoryTranslator.pays_union_europeenne | cls.PLUS_5_ISO_CODES
+            ProfilCandidatInMemoryTranslator.pays_union_europeenne | PLUS_5_ISO_CODES
         ) or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)

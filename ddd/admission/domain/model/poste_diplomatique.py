@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,24 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from decimal import Decimal
+import attr
+
+from osis_common.ddd import interface
 
 
-BE_ISO_CODE = "BE"
-FR_ISO_CODE = "FR"
-EN_ISO_CODE = "EN"
-CODE_BACHELIER_VETERINAIRE = 'VETE1BA'
-PREFIXES_DOMAINES_FORMATIONS_DENT_MED = {'11', '13'}
-REGIMES_LINGUISTIQUES_SANS_TRADUCTION = {'FR', 'NL', 'DE', 'EN', 'IT', 'ES', 'PT'}
-LANGUES_OBLIGATOIRES_DOCTORAT = ["EN", "FR"]
-NB_MOIS_MIN_VAE = 36
-MONTANT_FRAIS_DOSSIER = Decimal(200)
-DUREE_MINIMALE_PROGRAMME = 1
-DUREE_MAXIMALE_PROGRAMME = 5
-PLUS_5_ISO_CODES = {
-    'CH',  # Suisse
-    "IS",  # Islande
-    "NO",  # Norvège
-    "LI",  # Liechtenstein
-    "MC",  # Monaco
-}
+@attr.dataclass(frozen=True, slots=True)
+class PosteDiplomatiqueIdentity(interface.EntityIdentity):
+    code: int

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.87
+  version: 1.0.88
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -2904,6 +2904,37 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - person
+  /propositions/general-education/{uuid}/identification:
+    get:
+      operationId: retrieve_general_identification
+      description: ''
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - propositions
   /propositions/general-education/{uuid}/curriculum:
     get:
       operationId: retrieveCurriculumDetailsGeneralEducationAdmission
@@ -4630,6 +4661,74 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - autocomplete
+  /autocomplete/diplomatic-post:
+    get:
+      operationId: listDiplomaticPosts
+      description: Autocomplete diplomatic posts
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: The term to search the diplomatic post on (its name)
+        schema:
+          type: string
+      - name: country
+        required: false
+        in: query
+        description: If specified, the diplomatic posts of this country are returned
+          first
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=400&limit=100
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?offset=200&limit=100
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiplomaticPost'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - autocomplete
   /autocomplete/{scholarship_type}/scholarship:
     get:
       operationId: listScholarships
@@ -4786,6 +4885,37 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - campus
+  /diplomatic-post/{code}:
+    get:
+      operationId: retrieveDiplomaticPost
+      description: Retrieves a diplomatic post
+      parameters:
+      - name: code
+        in: path
+        required: true
+        description: A unique value identifying this diplomatic post.
+        schema:
+          type: integer
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiplomaticPost'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - diplomatic-post
   /curriculum/educational:
     post:
       operationId: createEducationalExperience
@@ -9436,6 +9566,20 @@ components:
           type: array
           items:
             type: string
+        poste_diplomatique:
+          type: object
+          properties:
+            code:
+              type: integer
+            nom_francais:
+              type: string
+            nom_anglais:
+              type: string
+          required:
+          - code
+          - nom_francais
+          - nom_anglais
+          nullable: true
       required:
       - uuid
       - reference
@@ -9450,6 +9594,112 @@ components:
       - equivalence_diplome
       - pdf_recapitulatif
       - documents_additionnels
+    IdentificationDTO:
+      type: object
+      properties:
+        matricule:
+          type: string
+        nom:
+          type: string
+        prenom:
+          type: string
+        autres_prenoms:
+          type: string
+        date_naissance:
+          type: string
+          format: date
+          nullable: true
+        annee_naissance:
+          type: integer
+          nullable: true
+        pays_nationalite:
+          type: string
+        pays_nationalite_europeen:
+          type: boolean
+          nullable: true
+        nom_pays_nationalite:
+          type: string
+        sexe:
+          type: string
+        genre:
+          type: string
+        photo_identite:
+          type: array
+          items:
+            type: string
+        pays_naissance:
+          type: string
+        nom_pays_naissance:
+          type: string
+        lieu_naissance:
+          type: string
+        etat_civil:
+          type: string
+        pays_residence:
+          type: string
+        carte_identite:
+          type: array
+          items:
+            type: string
+        passeport:
+          type: array
+          items:
+            type: string
+        numero_registre_national_belge:
+          type: string
+        numero_carte_identite:
+          type: string
+        numero_passeport:
+          type: string
+        date_expiration_carte_identite:
+          type: string
+          format: date
+          nullable: true
+        date_expiration_passeport:
+          type: string
+          format: date
+          nullable: true
+        langue_contact:
+          type: string
+        nom_langue_contact:
+          type: string
+        email:
+          type: string
+        annee_derniere_inscription_ucl:
+          type: integer
+          nullable: true
+        noma_derniere_inscription_ucl:
+          type: string
+      required:
+      - matricule
+      - nom
+      - prenom
+      - autres_prenoms
+      - pays_nationalite
+      - nom_pays_nationalite
+      - sexe
+      - genre
+      - photo_identite
+      - pays_naissance
+      - nom_pays_naissance
+      - lieu_naissance
+      - etat_civil
+      - pays_residence
+      - carte_identite
+      - passeport
+      - numero_registre_national_belge
+      - numero_carte_identite
+      - numero_passeport
+      - langue_contact
+      - nom_langue_contact
+      - email
+      - noma_derniere_inscription_ucl
+    PropositionIdentityDTO:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
     PoolQuestions:
       type: object
       properties:
@@ -10085,6 +10335,33 @@ components:
           type: string
           nullable: true
           maxLength: 10
+    DiplomaticPost:
+      type: object
+      properties:
+        code:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        name_fr:
+          type: string
+          maxLength: 255
+        name_en:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        countries_iso_codes:
+          type: array
+          items:
+            type: string
+      required:
+      - code
+      - name_fr
+      - name_en
+      - email
+      - countries_iso_codes
     Scholarship:
       type: object
       properties:
@@ -10114,12 +10391,6 @@ components:
           type: string
           readOnly: true
         name:
-          type: string
-          readOnly: true
-    PropositionIdentityDTO:
-      type: object
-      properties:
-        uuid:
           type: string
           readOnly: true
     InitierPropositionCommand:
@@ -10939,6 +11210,9 @@ components:
           type: array
           items:
             type: string
+        poste_diplomatique:
+          type: integer
+          nullable: true
       required:
       - documents_additionnels
     GeneralEducationCompleterCurriculumCommand:

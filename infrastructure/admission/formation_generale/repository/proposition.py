@@ -34,7 +34,7 @@ from django.utils.translation import get_language, gettext
 from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
+from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship, DiplomaticPost
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
@@ -45,6 +45,7 @@ from admission.ddd.admission.domain.model.condition_complementaire_approbation i
     ConditionComplementaireApprobationIdentity,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
@@ -68,6 +69,7 @@ from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRef
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
+from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
@@ -227,6 +229,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'annual_program_contact_person_email': entity.email_personne_contact_programme_annuel_annuel,
                 'join_program_fac_comment': entity.commentaire_programme_conjoint,
                 'additional_documents': entity.documents_additionnels,
+                'diplomatic_post_id': entity.poste_diplomatique.code if entity.poste_diplomatique else None,
             },
         )
 
@@ -398,6 +401,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,
             documents_additionnels=admission.additional_documents,
+            poste_diplomatique=PosteDiplomatiqueIdentity(code=admission.diplomatic_post.code)
+            if admission.diplomatic_post
+            else None,
         )
 
     @classmethod
@@ -456,6 +462,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
             documents_additionnels=admission.additional_documents,
+            poste_diplomatique=PosteDiplomatiqueTranslator.build_dto(admission.diplomatic_post)
+            if admission.diplomatic_post
+            else None,
         )
 
     @classmethod

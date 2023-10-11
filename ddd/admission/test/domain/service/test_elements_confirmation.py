@@ -140,6 +140,72 @@ class ElementsConfirmationTestCase(TestCase):
             ]
             self.assertListEqual([e.nom for e in elements], expected)
 
+    def test_recuperer_elements_confirmation_visa(self):
+        candidat = ProfilCandidatInMemoryTranslator.profil_candidats[1]
+        adresse_residence = next(
+            adresse
+            for adresse in ProfilCandidatInMemoryTranslator.adresses_candidats
+            if adresse.personne == candidat.matricule
+        )
+
+        # Candidat de nationalité HORS UE+5 et de pays de résidence hors BE
+        with patch.multiple(candidat, pays_nationalite='AR', pays_nationalite_europeen=False):
+            with patch.multiple(adresse_residence, pays='FR'):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                expected = [
+                    'reglement_general',
+                    'protection_donnees',
+                    'professions_reglementees',
+                    'frais_dossier',
+                    'visa',
+                    'justificatifs',
+                    'declaration_sur_lhonneur',
+                ]
+                self.assertListEqual([e.nom for e in elements], expected)
+
+        # Nationalité non spécifiée
+        with patch.multiple(candidat, pays_nationalite='', pays_nationalite_europeen=False):
+            with patch.multiple(adresse_residence, pays='FR'):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('visa', [e.nom for e in elements])
+
+        # Nationalité dans UE
+        with patch.multiple(candidat, pays_nationalite='FR', pays_nationalite_europeen=True):
+            with patch.multiple(adresse_residence, pays='FR'):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('visa', [e.nom for e in elements])
+
+        # Nationalité dans UE+5
+        with patch.multiple(candidat, pays_nationalite='CH', pays_nationalite_europeen=False):
+            with patch.multiple(adresse_residence, pays='FR'):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('visa', [e.nom for e in elements])
+
+        # Nationalité hors UE+5
+        # Pas d'adresse de résidence
+        with patch.multiple(candidat, pays_nationalite='US', pays_nationalite_europeen=False):
+            with patch.multiple(adresse_residence, pays=''):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('visa', [e.nom for e in elements])
+
+        # Adresse de résidence en belgique
+        with patch.multiple(candidat, pays_nationalite='US', pays_nationalite_europeen=False):
+            with patch.multiple(adresse_residence, pays='BE'):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('visa', [e.nom for e in elements])
+
     def test_recuperer_elements_confirmation_etudes_contingentees(self):
         with patch.object(
             PropositionGeneraleRepository.entities[1],

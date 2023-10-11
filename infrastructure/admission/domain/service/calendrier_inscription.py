@@ -26,6 +26,7 @@
 from datetime import date
 from typing import List, Tuple
 
+from admission.ddd import PLUS_5_ISO_CODES
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
@@ -56,5 +57,5 @@ class CalendrierInscription(ICalendrierInscription):
         return (
             identification.pays_nationalite_europeen
             or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)
-            or identification.pays_nationalite in cls.PLUS_5_ISO_CODES
+            or identification.pays_nationalite in PLUS_5_ISO_CODES
         )

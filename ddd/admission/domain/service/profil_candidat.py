@@ -55,6 +55,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     FormationGeneraleComptabiliteValidatorList,
     EtudesSecondairesValidatorList,
     BachelierEtudesSecondairesValidatorList,
+    FormationGeneraleInformationsComplementairesValidatorList,
 )
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -267,4 +268,18 @@ class ProfilCandidat(interface.DomainService):
             ),
             comptabilite=proposition.comptabilite,
             formation=formation,
+        ).validate()
+
+    @classmethod
+    def verifier_informations_complementaires_formation_generale(
+        cls,
+        proposition: PropositionGenerale,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+    ):
+        identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+        FormationGeneraleInformationsComplementairesValidatorList(
+            poste_diplomatique=proposition.poste_diplomatique,
+            pays_nationalite=identification.pays_nationalite,
+            pays_nationalite_europeen=identification.pays_nationalite_europeen,
+            pays_residence=identification.pays_residence,
         ).validate()

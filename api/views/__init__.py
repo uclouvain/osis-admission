@@ -58,7 +58,12 @@ from admission.api.views.payment import (
     OpenApplicationFeesPaymentView,
     ApplicationFeesListView,
 )
-from admission.api.views.references import RetrieveScholarshipView, RetrieveCampusView, ListCampusView
+from admission.api.views.references import (
+    ListCampusView,
+    RetrieveCampusView,
+    RetrieveDiplomaticPostView,
+    RetrieveScholarshipView,
+)
 from admission.api.views.training_choice import (
     ContinuingTrainingChoiceAPIView,
     ContinuingUpdateTrainingChoiceAPIView,
@@ -74,4 +79,5 @@ from admission.api.views.specific_questions import (
     ContinuingSpecificQuestionListView,
     GeneralSpecificQuestionAPIView,
     ContinuingSpecificQuestionAPIView,
+    GeneralIdentificationView,
 )

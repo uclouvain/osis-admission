@@ -1208,7 +1208,13 @@ msgstr ""
 msgid "Communication with Host Hospitals"
 msgstr ""
 
+msgid "Communication with the diplomatic post for your visa application"
+msgstr ""
+
 msgid "Communication with your secondary school"
+msgstr ""
+
+msgid "Competent diplomatic post"
 msgstr ""
 
 msgid "Complementary training"
@@ -1457,6 +1463,9 @@ msgstr ""
 msgid "Cotutelle thesis"
 msgstr ""
 
+msgid "Countries"
+msgstr ""
+
 msgid "Country"
 msgstr ""
 
@@ -1693,6 +1702,12 @@ msgid "Diploma nationality"
 msgstr ""
 
 msgid "Diploma translation"
+msgstr ""
+
+msgid "Diplomatic post"
+msgstr ""
+
+msgid "Diplomatic post code"
 msgstr ""
 
 msgid "Disabled"
@@ -2381,6 +2396,14 @@ msgid ""
 "performance of the internship and is never transmitted to parties other than "
 "those mentioned above. Appropriate technical and organisational measures are "
 "put in place to ensure an adequate level of protection for this data."
+msgstr ""
+
+msgid ""
+"I am aware that the university may verify with third parties all of the "
+"application information I provide. In this context, I understand UCLouvain "
+"reserves the right to send the information or documents in my application to "
+"the selected diplomatic post (e.g. diplomas, transcripts, enrolment "
+"authorisation, etc.) in order to ensure their authenticity."
 msgstr ""
 
 msgid ""
@@ -3094,6 +3117,10 @@ msgid ""
 "questions' tab."
 msgstr ""
 
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Visa' tab."
+msgstr ""
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr ""
 
@@ -3281,6 +3308,12 @@ msgstr "Not invited to sign"
 msgid "Name"
 msgstr ""
 
+msgid "Name in english"
+msgstr ""
+
+msgid "Name in french"
+msgstr ""
+
 msgid "Name in the language of the manifestation"
 msgstr ""
 
@@ -3322,6 +3355,9 @@ msgid "No continuing enrolment"
 msgstr ""
 
 msgid "No defense reason"
+msgstr ""
+
+msgid "No diplomatic post found."
 msgstr ""
 
 msgid "No doctorate found."
@@ -3438,6 +3474,15 @@ msgid "OTHER"
 msgstr "Other"
 
 msgid "Obtained grade"
+msgstr ""
+
+msgid ""
+"On the basis of the information you have provided, you will need to apply "
+"for a student visa if your application to attend our university is accepted "
+"(i.e. if UCLouvain sends you an \"enrolment authorisation\"). Please read "
+"the student <a href=\"https://uclouvain.be/en/study/inscriptions/welcome-to-"
+"international-students.html\" target=\"_blank\"> visa </a> application "
+"information."
 msgstr ""
 
 msgid "One choice per line, leave the \"Other\" value out"
@@ -5407,6 +5452,9 @@ msgid "Viewed at"
 msgstr ""
 
 msgid "Viewed by"
+msgstr ""
+
+msgid "Visa"
 msgstr ""
 
 msgid "Visualize"

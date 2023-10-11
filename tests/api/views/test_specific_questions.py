@@ -29,11 +29,13 @@ from unittest.mock import patch
 
 import freezegun
 from django.shortcuts import resolve_url
+from django.utils.translation import gettext
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE, EN_ISO_CODE, FR_ISO_CODE
+from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
 from admission.ddd.admission.enums import CritereItemFormulaireNationaliteDiplome
 from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireFormation,
@@ -50,6 +52,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,
     DocumentAdmissionFormItemFactory,
@@ -58,7 +61,7 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.scholarship import ErasmusMundusScholarshipFactory, InternationalScholarshipFactory
+from admission.tests.factories.scholarship import InternationalScholarshipFactory
 from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory, ForeignHighSchoolDiplomaFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType
@@ -1030,11 +1033,14 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
         )
 
+        cls.diplomatic_post = DiplomaticPostFactory()
+
         cls.update_data = {
             'reponses_questions_specifiques': {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
             'documents_additionnels': ['uuid'],
+            'poste_diplomatique': cls.diplomatic_post.code,
         }
 
         # Users
@@ -1089,6 +1095,28 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         self.assertEqual(
             str(admission.additional_documents[0]),
             '4bdffb42-552d-415d-9e4c-725f10dce228',
+        )
+        self.assertEqual(admission.diplomatic_post, self.diplomatic_post)
+
+        # Unknown diplomatic post
+        response = self.client.put(
+            self.url,
+            data={
+                **self.update_data,
+                'poste_diplomatique': -1,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_result = response.json()
+
+        self.assertIn('non_field_errors', json_result)
+        self.assertIn(
+            {
+                'status_code': PosteDiplomatiqueNonTrouveException.status_code,
+                'detail': gettext('No diplomatic post found.'),
+            },
+            json_result['non_field_errors'],
         )
 
 

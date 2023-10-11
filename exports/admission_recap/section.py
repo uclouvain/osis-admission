@@ -32,7 +32,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
 )
-from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE
+from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE, PLUS_5_ISO_CODES
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
@@ -375,11 +375,20 @@ def get_specific_questions_section(
     enrolled_for_contingent_training = CalendrierInscription.inscrit_formation_contingentee(
         sigle=context.proposition.formation.sigle,
     )
+    display_visa_question = bool(
+        context.est_proposition_generale
+        and context.identification.pays_nationalite
+        and context.identification.pays_nationalite_europeen is False
+        and context.identification.pays_nationalite not in PLUS_5_ISO_CODES
+        and context.identification.pays_residence
+        and context.identification.pays_residence != BE_ISO_CODE
+    )
     extra_context = {
         'specific_questions': specific_questions_by_tab[Onglets.INFORMATIONS_ADDITIONNELLES.name],
         'eligible_for_reorientation': eligible_for_reorientation,
         'eligible_for_modification': eligible_for_modification,
         'enrolled_for_contingent_training': enrolled_for_contingent_training,
+        'display_visa_question': display_visa_question,
     }
     return Section(
         identifier=OngletsDemande.INFORMATIONS_ADDITIONNELLES,

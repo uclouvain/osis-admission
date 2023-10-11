@@ -78,6 +78,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
     EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
+    InformationsVisaNonCompleteesException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import _ComptabiliteFactory
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
@@ -111,6 +112,10 @@ class TestVerifierPropositionService(TestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
             self.fail(msg or f"No instance of '{cls}' has been found")
+
+    def assertHasNoInstance(self, container, cls, msg=None):
+        if any(isinstance(obj, cls) for obj in container):
+            self.fail(msg or f"Instance of '{cls}' has been found")
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -208,6 +213,12 @@ class TestVerifierPropositionService(TestCase):
         self.candidat = self.candidat_translator.profil_candidats[1]
         self.experiences_non_academiques = self.candidat_translator.experiences_non_academiques
 
+        self.adresse_residentielle = next(
+            adresse
+            for adresse in self.candidat_translator.adresses_candidats
+            if adresse.personne == self.candidat.matricule
+        )
+
         self.master_proposition = self.proposition_in_memory.get(
             entity_id=PropositionIdentityBuilder.build_from_uuid(uuid='uuid-MASTER-SCI'),
         )
@@ -239,6 +250,9 @@ class TestVerifierPropositionService(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
         self.cmd = lambda uuid: VerifierPropositionQuery(uuid_proposition=uuid)
+
+    def tearDown(self):
+        mock.patch.stopall()
 
     def _test_should_retourner_erreur_si_assimilation_incomplete(self, comptabilite, exception):
         with mock.patch.object(self.candidat, 'pays_nationalite', 'CA'):
@@ -1663,3 +1677,48 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))
 
         self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
+
+    def test_should_verification_renvoyer_erreur_si_visa_necessaire_et_non_renseigne(self):
+        mock.patch.multiple(self.candidat, pays_nationalite='CA', pays_nationalite_europeen=False).start()
+        mock.patch.multiple(self.adresse_residentielle, pays='FR').start()
+        mock.patch.multiple(self.master_proposition, poste_diplomatique=None).start()
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, InformationsVisaNonCompleteesException)
+
+    def test_should_verification_etre_ok_si_visa_non_renseigne_et_non_necessaire(self):
+        # Visa non renseigné
+        mock.patch.multiple(self.master_proposition, poste_diplomatique=None).start()
+
+        mock.patch.multiple(self.adresse_residentielle, pays='FR').start()
+
+        # Adresse résidentielle à l'étranger + Nationalité non spécifiée
+        mock.patch.multiple(self.candidat, pays_nationalite='', pays_nationalite_europeen=None).start()
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasNoInstance(context.exception.exceptions, InformationsVisaNonCompleteesException)
+
+        # Adresse résidentielle à l'étranger + Nationalité dans UE
+        self.candidat.pays_nationalite = 'FR'
+        self.candidat.pays_nationalite_europeen = True
+        self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+        # Adresse résidentielle à l'étranger + Nationalité dans UE+5
+        self.candidat.pays_nationalite = 'CH'
+        self.candidat.pays_nationalite_europeen = False
+        self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+        self.candidat.pays_nationalite = 'CA'
+        self.candidat.pays_nationalite_europeen = False
+
+        # Pas d'adresse de résidence + Nationalité hors UE+5
+        self.adresse_residentielle.pays = ''
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasNoInstance(context.exception.exceptions, InformationsVisaNonCompleteesException)
+
+        # Adresse de résidence en belgique + Nationalité hors UE+5
+        self.adresse_residentielle.pays = 'BE'
+        self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))

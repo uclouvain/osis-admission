@@ -23,17 +23,21 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db.models import Exists, F, OuterRef, Q, TextField
+from django.conf import settings
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import Exists, F, OuterRef, Q, TextField, ExpressionWrapper, BooleanField
 from django.utils.decorators import method_decorator
+from django.utils.translation import get_language, get_language_from_request
 from django.views.decorators.cache import cache_page
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
+from rules.contrib.views import LoginRequiredMixin
 
 from admission.api import serializers
-from admission.api.schema import AuthorizationAwareSchema
+from admission.api.schema import AuthorizationAwareSchema, ResponseSpecificSchema, BetterChoicesSchema
 from admission.api.serializers import PersonSerializer
-from admission.contrib.models import EntityProxy, Scholarship
+from admission.contrib.models import EntityProxy, Scholarship, DiplomaticPost
 from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
 from admission.ddd.admission.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from admission.ddd.admission.formation_continue.commands import RechercherFormationContinueQuery
@@ -61,6 +65,7 @@ __all__ = [
     "AutocompleteGeneralEducationView",
     "AutocompleteContinuingEducationView",
     "AutocompleteScholarshipView",
+    "AutocompleteDiplomaticPostView",
 ]
 
 
@@ -349,3 +354,60 @@ class AutocompletePersonView(ListAPIView):
         )
         .filter(is_student=False)
     )
+
+
+class DiplomaticPostSearchBackend(BaseFilterBackend):
+    searching_param = 'search'
+    country_param = 'country'
+
+    def filter_queryset(self, request, queryset, view):
+        search_term = request.GET.get(self.searching_param, '')
+        country_term = request.GET.get(self.country_param, '')
+        name_field = 'name_fr' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
+
+        if search_term:
+            # Filter the queryset by name
+            queryset = queryset.filter(**{f'{name_field}__icontains': search_term})
+
+        if country_term:
+            # Order the queryset to retrieve the diplomatic posts of the specified country first
+            return queryset.annotate(
+                in_specified_country=ExpressionWrapper(
+                    Q(countries_iso_codes__contains=[country_term]),
+                    output_field=BooleanField(),
+                )
+            ).order_by('-in_specified_country', name_field)
+
+        return queryset.order_by(name_field)
+
+    def get_schema_operation_parameters(self, view):  # pragma: no cover
+        return [
+            {
+                'name': self.searching_param,
+                'required': False,
+                'in': 'query',
+                'description': 'The term to search the diplomatic post on (its name)',
+                'schema': {
+                    'type': 'string',
+                },
+            },
+            {
+                'name': self.country_param,
+                'required': False,
+                'in': 'query',
+                'description': 'If specified, the diplomatic posts of this country are returned first',
+                'schema': {
+                    'type': 'string',
+                },
+            },
+        ]
+
+
+class AutocompleteDiplomaticPostView(ListAPIView):
+    """Autocomplete diplomatic posts"""
+
+    name = 'autocomplete-diplomatic-post'
+    schema = AuthorizationAwareSchema()
+    filter_backends = [DiplomaticPostSearchBackend]
+    serializer_class = serializers.DiplomaticPostSerializer
+    queryset = DiplomaticPost.objects.annotate_countries().all()
