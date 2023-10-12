@@ -220,6 +220,7 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     documents_additionnels: List[str] = attr.Factory(list)
+    poste_diplomatique: Optional[int] = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

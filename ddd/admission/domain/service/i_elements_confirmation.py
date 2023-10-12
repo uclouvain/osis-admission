@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Union
 import attr
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd import PLUS_5_ISO_CODES, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -111,6 +112,12 @@ class IElementsConfirmation(interface.DomainService):
         'I am aware that no additional documents specific to limited-enrolment courses can be added once '
         'my online application has been confirmed.'
     )
+    VISA = _(
+        'I am aware that the university may verify with third parties all of the application information I provide. '
+        'In this context, I understand UCLouvain reserves the right to send the information or documents in '
+        'my application to the selected diplomatic post (e.g. diplomas, transcripts, enrolment authorisation, etc.) '
+        'in order to ensure their authenticity.'
+    )
     COMMUNICATION_ECOLE_SECONDAIRE = _(
         'UCLouvain to forward to the secondary school at which I obtained my Belgian secondary school, '
         'information relating to the successful completion of the first year of the bachelor\'s course, '
@@ -144,6 +151,7 @@ class IElementsConfirmation(interface.DomainService):
         'justificatifs': _("Supporting documents"),
         'declaration_sur_lhonneur': _("I hereby declare that"),
         'droits_inscription_iufc': _("Registration fees"),
+        'visa': _("Communication with the diplomatic post for your visa application"),
     }
 
     @classmethod
@@ -155,6 +163,12 @@ class IElementsConfirmation(interface.DomainService):
         annee_soumise: int = None,
     ) -> List['ElementConfirmation']:
         elements = []
+        identification_dto = (
+            profil_candidat_translator.get_identification(proposition.matricule_candidat)
+            if isinstance(proposition, PropositionGenerale)
+            else None
+        )
+
         # Confirmation de l'année académique concernée
         annee_a_prendre_en_compte = annee_soumise if annee_soumise is not None else proposition.annee_calculee
         if annee_a_prendre_en_compte and annee_a_prendre_en_compte > proposition.formation_id.annee:
@@ -203,9 +217,7 @@ class IElementsConfirmation(interface.DomainService):
             # excepté master de spécialisation
             and formation_translator.get(proposition.formation_id).type != TrainingType.MASTER_MC
             # et HUE
-            and not profil_candidat_translator.get_identification(
-                proposition.matricule_candidat
-            ).pays_nationalite_europeen
+            and not identification_dto.pays_nationalite_europeen
         ):
             elements.append(
                 ElementConfirmation(
@@ -238,6 +250,23 @@ class IElementsConfirmation(interface.DomainService):
                     nom='documents_etudes_contingentees',
                     titre=cls.TITRE_ELEMENT_CONFIRMATION['documents_etudes_contingentees'],
                     texte=cls.DOCUMENTS_ETUDES_CONTINGENTEES,
+                )
+            )
+
+        # Visa
+        if (
+            isinstance(proposition, PropositionGenerale)
+            and identification_dto.pays_nationalite
+            and identification_dto.pays_nationalite_europeen is False
+            and identification_dto.pays_nationalite not in PLUS_5_ISO_CODES
+            and identification_dto.pays_residence
+            and identification_dto.pays_residence != BE_ISO_CODE
+        ):
+            elements.append(
+                ElementConfirmation(
+                    nom='visa',
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['visa'],
+                    texte=cls.VISA,
                 )
             )
 

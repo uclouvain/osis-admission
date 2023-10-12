@@ -61,6 +61,9 @@ from admission.infrastructure.admission.domain.service.in_memory.historique impo
 from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
+    PosteDiplomatiqueInMemoryFactory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
@@ -120,6 +123,7 @@ _paiement_frais_dossier = PaiementFraisDossierInMemoryRepositoryFactory()
 _notification = NotificationInMemory()
 _pdf_generation = PDFGenerationInMemory()
 _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
+_poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
 
 
 COMMAND_HANDLERS = {
@@ -426,6 +430,7 @@ COMMAND_HANDLERS = {
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
         proposition_repository=_proposition_repository,
+        poste_diplomatique_translator=_poste_diplomatique_translator,
     ),
     SpecifierPaiementVaEtreOuvertParCandidatCommand: (
         lambda msg_bus, cmd: specifier_paiement_va_etre_ouvert_par_candidat(

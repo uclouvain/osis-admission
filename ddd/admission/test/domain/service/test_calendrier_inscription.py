@@ -23,11 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import uuid
 from unittest import TestCase
 
 import freezegun
 
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,
     IdentificationNonCompleteeException,
@@ -42,6 +43,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     PoolNonResidentContingenteNonOuvertException,
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
+    AucunPoolCorrespondantException,
 )
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.test.factory.proposition import (
@@ -49,7 +51,7 @@ from admission.ddd.admission.formation_continue.test.factory.proposition import 
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
 from admission.ddd.admission.test.factory.formation import FormationFactory, FormationIdentityFactory
-from admission.ddd.admission.test.factory.profil import ProfilCandidatFactory
+from admission.ddd.admission.test.factory.profil import ProfilCandidatFactory, ExperienceAcademiqueDTOFactory
 from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
@@ -165,15 +167,20 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
-            formation_id=proposition.formation_id,
-            proposition=proposition,
-            matricule_candidat=proposition.matricule_candidat,
-            titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
-            profil_candidat_translator=self.profil_candidat_translator,
-        )
-        self.assertNotEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE)
+        pool = None
+        try:
+            dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+                formation_id=proposition.formation_id,
+                proposition=proposition,
+                matricule_candidat=proposition.matricule_candidat,
+                titres_acces=Titres(AdmissionConditionsDTOFactory()),
+                type_formation=TrainingType.BACHELOR,
+                profil_candidat_translator=self.profil_candidat_translator,
+            )
+            pool = dto.pool
+        except AucunPoolCorrespondantException:
+            pass
+        self.assertNotEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE)
 
     @freezegun.freeze_time('2022-12-15')
     def test_verification_calendrier_inscription_reorientation_non_renseignee(self):
@@ -243,15 +250,20 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
-            formation_id=proposition.formation_id,
-            proposition=proposition,
-            matricule_candidat=proposition.matricule_candidat,
-            titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
-            profil_candidat_translator=self.profil_candidat_translator,
-        )
-        self.assertNotEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
+        pool = None
+        try:
+            dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+                formation_id=proposition.formation_id,
+                proposition=proposition,
+                matricule_candidat=proposition.matricule_candidat,
+                titres_acces=Titres(AdmissionConditionsDTOFactory()),
+                type_formation=TrainingType.BACHELOR,
+                profil_candidat_translator=self.profil_candidat_translator,
+            )
+            pool = dto.pool
+        except AucunPoolCorrespondantException:
+            pass
+        self.assertNotEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
 
     def test_formation_contigentee_mais_residence_non_choisie(self):
         # Inscription à une formation contingentée, mais le candidat n'a pas renseigné sa résidence
@@ -319,15 +331,20 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
-            formation_id=proposition.formation_id,
-            proposition=proposition,
-            matricule_candidat=proposition.matricule_candidat,
-            titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
-            profil_candidat_translator=self.profil_candidat_translator,
-        )
-        self.assertNotEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA)
+        pool = None
+        try:
+            dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+                formation_id=proposition.formation_id,
+                proposition=proposition,
+                matricule_candidat=proposition.matricule_candidat,
+                titres_acces=Titres(AdmissionConditionsDTOFactory()),
+                type_formation=TrainingType.BACHELOR,
+                profil_candidat_translator=self.profil_candidat_translator,
+            )
+            pool = dto.pool
+        except AucunPoolCorrespondantException:
+            pass
+        self.assertNotEqual(pool, AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA)
 
     def test_determination_sans_adresse(self):
         proposition = PropositionFactory()
@@ -361,19 +378,20 @@ class CalendrierInscriptionTestCase(TestCase):
     def test_formation_non_dispensee_annee_suivante(self):
         proposition = PropositionFactory(
             formation_id=FormationIdentityFactory(
-                annee=2022,
+                annee=2025,
                 sigle='MA_FORMATION_NON_TROUVEE',
             )
         )
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
+        conditions = ITitresAcces.condition_matrix[(TrainingType.BACHELOR,)]
         with self.assertRaises(FormationNonTrouveeException):
             CalendrierInscriptionInMemory.verifier(
                 formation_id=proposition.formation_id,
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
-                titres_acces=Titres(AdmissionConditionsDTOFactory()),
+                titres_acces=Titres(AdmissionConditionsDTOFactory(diplomation_secondaire_belge=True), *conditions),
                 type_formation=TrainingType.BACHELOR,
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
@@ -464,11 +482,12 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
+        conditions = ITitresAcces.condition_matrix[(TrainingType.BACHELOR,)]
         dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
-            titres_acces=Titres(AdmissionConditionsDTOFactory()),
+            titres_acces=Titres(AdmissionConditionsDTOFactory(diplomation_secondaire_etranger=True), *conditions),
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )
@@ -484,13 +503,15 @@ class CalendrierInscriptionTestCase(TestCase):
             identification__pays_nationalite="AR",
             coordonnees__domicile_legal__pays="AR",
         )
+
+        conditions = ITitresAcces.condition_matrix[(TrainingType.BACHELOR,)]
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
         dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
             formation_id=proposition.formation_id,
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
-            titres_acces=Titres(AdmissionConditionsDTOFactory()),
+            titres_acces=Titres(AdmissionConditionsDTOFactory(diplomation_secondaire_etranger=True), *conditions),
             type_formation=TrainingType.BACHELOR,
             profil_candidat_translator=self.profil_candidat_translator,
         )

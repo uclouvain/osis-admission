@@ -31,6 +31,7 @@ import attr
 from admission.ddd.admission.dtos.bourse import BourseDTO
 from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.poste_diplomatique import PosteDiplomatiqueDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
 from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO
@@ -73,6 +74,8 @@ class PropositionDTO(interface.DTO):
     formulaire_modification_inscription: List[str]
 
     est_non_resident_au_sens_decret: Optional[bool]
+
+    poste_diplomatique: Optional[PosteDiplomatiqueDTO]
 
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]

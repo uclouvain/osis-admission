@@ -874,3 +874,13 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
             settings.LANGUAGE_CODE_EN: history_entry.message_en,
         }[get_language()]
     return ''
+
+
+@register.filter
+def diplomatic_post_name(diplomatic_post):
+    """Get the name of a diplomatic post"""
+    if diplomatic_post:
+        return getattr(
+            diplomatic_post,
+            'nom_francais' if get_language() == settings.LANGUAGE_CODE_FR else 'nom_anglais',
+        )

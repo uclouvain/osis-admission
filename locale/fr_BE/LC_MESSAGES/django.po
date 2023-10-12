@@ -1303,8 +1303,14 @@ msgstr ""
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
 
+msgid "Communication with the diplomatic post for your visa application"
+msgstr "Communication avec le poste diplomatique pour votre demande de Visa"
+
 msgid "Communication with your secondary school"
 msgstr "Communication avec votre école secondaire"
+
+msgid "Competent diplomatic post"
+msgstr "Poste diplomatique compétent"
 
 msgid "Complementary training"
 msgstr "Formation complémentaire"
@@ -1607,6 +1613,9 @@ msgstr "Demande d'ouverture de cotutelle"
 msgid "Cotutelle thesis"
 msgstr "Thèse en cotutelle"
 
+msgid "Countries"
+msgstr "Pays"
+
 msgid "Country"
 msgstr "Pays"
 
@@ -1847,6 +1856,12 @@ msgstr "Nationalité du diplôme"
 
 msgid "Diploma translation"
 msgstr "Traduction du diplôme"
+
+msgid "Diplomatic post"
+msgstr "Poste diplomatique"
+
+msgid "Diplomatic post code"
+msgstr "Code poste diplomatique"
 
 msgid "Disabled"
 msgstr "Désactivé"
@@ -2608,6 +2623,20 @@ msgstr ""
 "que celles susmentionnées. Des mesures techniques et organisationnelles "
 "appropriées sont mises en place afin d'assurer un niveau de protection "
 "adéquat de ces données."
+
+msgid ""
+"I am aware that the university may verify with third parties all of the "
+"application information I provide. In this context, I understand UCLouvain "
+"reserves the right to send the information or documents in my application to "
+"the selected diplomatic post (e.g. diplomas, transcripts, enrolment "
+"authorisation, etc.) in order to ensure their authenticity."
+msgstr ""
+"J’ai pris connaissance que l’Université pourra vérifier tous les éléments "
+"constitutifs du dossier avec des tiers. Dans ce cadre, l’UCLouvain se "
+"réserve également le droit de transmettre des informations ou des documents "
+"constitutifs du dossier au poste diplomatique sélectionné (exemples : "
+"diplômes, relevés de notes, autorisation d’inscription, …) afin de s’assurer "
+"de l’authenticité des documents transmis par mes soins."
 
 msgid ""
 "I am supported by the CPAS or by a CPAS home or nominated by the CPAS "
@@ -3457,6 +3486,12 @@ msgstr ""
 "Les champs requis dans l'onglet 'Informations complémentaires > Questions "
 "spécifiques' sont manquants."
 
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Visa' tab."
+msgstr ""
+"Les champs requis dans l'onglet 'Informations complémentaires > Visa' sont "
+"manquants."
+
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
 
@@ -3660,6 +3695,12 @@ msgstr "Pas encore invité à signer"
 msgid "Name"
 msgstr "Nom"
 
+msgid "Name in english"
+msgstr "Nom en anglais"
+
+msgid "Name in french"
+msgstr "Nom en français"
+
 msgid "Name in the language of the manifestation"
 msgstr "Nom dans la langue de la manifestation"
 
@@ -3704,6 +3745,9 @@ msgstr "Aucune inscription en formation continue n'a été trouvée"
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
+
+msgid "No diplomatic post found."
+msgstr "Poste diplomatique non trouvé."
 
 msgid "No doctorate found."
 msgstr "Doctorat non trouvé."
@@ -3823,6 +3867,21 @@ msgstr "Autre"
 
 msgid "Obtained grade"
 msgstr "Grade obtenu"
+
+msgid ""
+"On the basis of the information you have provided, you will need to apply "
+"for a student visa if your application to attend our university is accepted "
+"(i.e. if UCLouvain sends you an \"enrolment authorisation\"). Please read "
+"the student <a href=\"https://uclouvain.be/en/study/inscriptions/welcome-to-"
+"international-students.html\" target=\"_blank\"> visa </a> application "
+"information."
+msgstr ""
+"Sur la base des informations que vous avez précédemment complétées, vous "
+"êtes concerné·e par la demande de visa si vous deviez obtenir une "
+"autorisation d’inscription. Nous vous invitons à prendre connaissance des "
+"informations relatives à la demande <a href=\"https://uclouvain.be/fr/"
+"etudier/inscriptions/bienvenue-aux-etudiants-internationaux-et-aux-"
+"etudiantes-internationales.html\" target=\"_blank\"> visa </a>."
 
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
@@ -5968,6 +6027,9 @@ msgstr "Vue le"
 
 msgid "Viewed by"
 msgstr "Vue par"
+
+msgid "Visa"
+msgstr "Visa"
 
 msgid "Visualize"
 msgstr "Visualiser"

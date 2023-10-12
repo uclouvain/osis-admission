@@ -37,6 +37,7 @@ from admission.ddd.admission.domain.model.condition_complementaire_approbation i
 )
 from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
@@ -123,6 +124,8 @@ class Proposition(interface.RootEntity):
 
     poursuite_de_cycle_a_specifier: bool = False
     poursuite_de_cycle: PoursuiteDeCycle = PoursuiteDeCycle.TO_BE_DETERMINED
+
+    poste_diplomatique: Optional[PosteDiplomatiqueIdentity] = None
 
     # Décision facultaire
     certificat_approbation_fac: List[str] = attr.Factory(list)
@@ -483,6 +486,8 @@ class Proposition(interface.RootEntity):
         self,
         reponses_questions_specifiques: Dict,
         documents_additionnels: List[str],
+        poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
     ):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.documents_additionnels = documents_additionnels
+        self.poste_diplomatique = poste_diplomatique

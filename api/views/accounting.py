@@ -35,7 +35,6 @@ from admission.ddd.admission.formation_generale import commands as general_comma
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
-    get_cached_continuing_education_admission_perm_obj,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin

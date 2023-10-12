@@ -37,6 +37,7 @@ from admission.ddd.admission.domain.model.condition_complementaire_approbation i
 )
 from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldAbsenceDeDetteEtreCompletee,
@@ -68,6 +69,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldFacPeutDonnerDecision,
     ShouldSpecifierInformationsAcceptationFacultaire,
     ShouldPeutSpecifierInformationsDecisionFacultaire,
+    ShouldVisaEtreComplete,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
@@ -301,5 +303,27 @@ class SpecifierNouvellesInformationsDecisionFacultaireValidatorList(TwoStepsMult
         return [
             ShouldPeutSpecifierInformationsDecisionFacultaire(
                 statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    pays_nationalite: str
+    pays_nationalite_europeen: Optional[bool]
+    pays_residence: str
+
+    poste_diplomatique: Optional[PosteDiplomatiqueIdentity]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldVisaEtreComplete(
+                pays_nationalite=self.pays_nationalite,
+                pays_nationalite_europeen=self.pays_nationalite_europeen,
+                pays_residence=self.pays_residence,
+                poste_diplomatique=self.poste_diplomatique,
             ),
         ]

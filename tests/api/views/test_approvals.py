@@ -32,6 +32,7 @@ from rest_framework.test import APITestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from base.tests.factories.user import UserFactory
 from osis_signature.enums import SignatureState
@@ -65,6 +66,8 @@ class ApprovalMixin:
             supervision_group=cls.promoter.process,
             cotutelle=False,
         )
+
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Mocked data
         cls.approved_data = {

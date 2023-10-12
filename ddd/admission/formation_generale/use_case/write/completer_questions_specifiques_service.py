@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.domain.service.i_poste_diplomatique import IPosteDiplomatiqueTranslator
 from admission.ddd.admission.formation_generale.commands import CompleterQuestionsSpecifiquesCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -34,15 +35,19 @@ from admission.ddd.admission.formation_generale.repository.i_proposition import 
 def completer_questions_specifiques(
     cmd: 'CompleterQuestionsSpecifiquesCommand',
     proposition_repository: 'IPropositionRepository',
+    poste_diplomatique_translator: 'IPosteDiplomatiqueTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition_candidat = proposition_repository.get(entity_id=proposition_entity_id)
 
+    poste_diplomatique = poste_diplomatique_translator.get(cmd.poste_diplomatique)
+
     # WHEN
     proposition_candidat.completer_informations_complementaires(
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
         documents_additionnels=cmd.documents_additionnels,
+        poste_diplomatique=poste_diplomatique,
     )
 
     # THEN

@@ -59,13 +59,6 @@ logger = logging.getLogger(__name__)
 
 
 class ICalendrierInscription(interface.DomainService):
-    PLUS_5_ISO_CODES = {
-        'CH',  # Suisse
-        "IS",  # Islande
-        "NO",  # Norvège
-        "LI",  # Liechtenstein
-        "MC",  # Monaco
-    }
     pools = [
         DoctorateAdmissionCalendar(),
         ContinuingEducationAdmissionCalendar(),
@@ -108,7 +101,7 @@ class ICalendrierInscription(interface.DomainService):
             and getattr(proposition.comptabilite, 'type_situation_assimilation', None)
         )
         ue_plus_5 = cls.est_ue_plus_5(identification, situation_assimilation)
-        annees = cls.get_annees_academiques_pour_calcul()
+        annees = cls.get_annees_academiques_pour_calcul(type_formation=type_formation)
         changements_etablissement = profil_candidat_translator.get_changements_etablissement(matricule_candidat, annees)
 
         log_messages = [
@@ -271,7 +264,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         raise NotImplementedError
 
     @classmethod
-    def get_annees_academiques_pour_calcul(cls) -> List[int]:
+    def get_annees_academiques_pour_calcul(cls, type_formation: TrainingType) -> List[int]:
         raise NotImplementedError
 
     @classmethod

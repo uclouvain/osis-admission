@@ -37,3 +37,10 @@ NB_MOIS_MIN_VAE = 36
 MONTANT_FRAIS_DOSSIER = Decimal(200)
 DUREE_MINIMALE_PROGRAMME = 1
 DUREE_MAXIMALE_PROGRAMME = 5
+PLUS_5_ISO_CODES = {
+    'CH',  # Suisse
+    "IS",  # Islande
+    "NO",  # Norvège
+    "LI",  # Liechtenstein
+    "MC",  # Monaco
+}

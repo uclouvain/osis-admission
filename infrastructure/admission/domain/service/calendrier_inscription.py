@@ -26,18 +26,22 @@
 from datetime import date
 from typing import List, Tuple
 
+from admission.ddd import PLUS_5_ISO_CODES
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
 from base.models.academic_calendar import AcademicCalendar
-from base.models.academic_year import AcademicYear
+from base.models.enums.education_group_types import TrainingType
 
 
 class CalendrierInscription(ICalendrierInscription):
     @classmethod
-    def get_annees_academiques_pour_calcul(cls) -> List[int]:
-        current = AcademicYear.objects.current()
-        return [current.year, current.year - 1, current.year + 1, current.year + 2]
+    def get_annees_academiques_pour_calcul(cls, type_formation: TrainingType) -> List[int]:
+        year = AnneeInscriptionFormationTranslator().recuperer_annee_selon_type_formation(type_formation)
+        return [year, year - 1, year + 1, year + 2]
 
     @classmethod
     def get_pool_ouverts(cls) -> List[Tuple[str, int]]:
@@ -56,5 +60,5 @@ class CalendrierInscription(ICalendrierInscription):
         return (
             identification.pays_nationalite_europeen
             or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)
-            or identification.pays_nationalite in cls.PLUS_5_ISO_CODES
+            or identification.pays_nationalite in PLUS_5_ISO_CODES
         )

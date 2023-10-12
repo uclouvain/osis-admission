@@ -29,6 +29,7 @@ from rest_framework.test import APITestCase
 
 from admission.contrib.models import DoctorateAdmission, JuryMember
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.jury import JuryMemberFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
@@ -61,6 +62,7 @@ class JuryApiTestCase(APITestCase):
         committee_member = CaMemberFactory(process=promoter.process)
         cls.admission.supervision_group = promoter.process
         cls.admission.save()
+        AdmissionAcademicCalendarFactory.produce_all_required()
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate_user = CandidateFactory().person.user
@@ -176,6 +178,7 @@ class JuryMembersListApiTestCase(APITestCase):
             'genre': 'AUTRE',
             'email': 'email@example.org',
         }
+        AdmissionAcademicCalendarFactory.produce_all_required()
         # Targeted url
         cls.url = resolve_url("admission_api_v1:jury-members-list", uuid=cls.admission.uuid)
         # Create an admission supervision group
@@ -289,6 +292,7 @@ class JuryMembersDetailApiTestCase(APITestCase):
             training__management_entity=doctoral_commission,
             passed_confirmation=True,
         )
+        AdmissionAcademicCalendarFactory.produce_all_required()
         cls.member = JuryMemberFactory(doctorate=cls.admission)
         cls.udpated_data = {
             'matricule': '',
