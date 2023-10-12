@@ -44,6 +44,7 @@ from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from osis_profile.models.enums.curriculum import Result
 
@@ -126,8 +127,8 @@ class ChecklistViewTestCase(TestCase):
         self.assertContains(response, 'id="parcours"')
 
     def test_poursuite_de_cycle_no(self):
-        self.training.education_group_type.name = TrainingType.BACHELOR.name
-        self.training.education_group_type.save(update_fields=['name'])
+        self.training.education_group_type = EducationGroupTypeFactory(name=TrainingType.BACHELOR.name)
+        self.training.save(update_fields=['education_group_type'])
         EducationalExperienceYearFactory(
             result=Result.SUCCESS.name,
             educational_experience=EducationalExperienceFactory(person=self.candidate),
@@ -149,8 +150,8 @@ class ChecklistViewTestCase(TestCase):
         self.assertContains(response, f'{self.training.acronym}-1')
 
     def test_poursuite_de_cycle_yes(self):
-        self.training.education_group_type.name = TrainingType.BACHELOR.name
-        self.training.education_group_type.save(update_fields=['name'])
+        self.training.education_group_type = EducationGroupTypeFactory(name=TrainingType.BACHELOR.name)
+        self.training.save(update_fields=['education_group_type'])
         EducationalExperienceYearFactory(
             result=Result.SUCCESS.name,
             educational_experience=EducationalExperienceFactory(person=self.candidate),
