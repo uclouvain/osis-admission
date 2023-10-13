@@ -1304,7 +1304,7 @@ msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
 
 msgid "Communication with the diplomatic post for your visa application"
-msgstr "Communication avec le poste diplomatique pour votre demande de Visa"
+msgstr "Communication avec le poste diplomatique pour votre demande de visa"
 
 msgid "Communication with your secondary school"
 msgstr "Communication avec votre école secondaire"
