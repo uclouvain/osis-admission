@@ -37,6 +37,7 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
@@ -99,7 +100,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
         cls,
         annee: Optional[int],
         terme_de_recherche: Optional[str],
-        campus: Optional[str]
+        campus: Optional[str],
     ) -> List['FormationDTO']:
         from infrastructure.messages_bus import message_bus_instance
 
@@ -111,6 +112,9 @@ class FormationContinueTranslator(IFormationContinueTranslator):
                 annee=annee,
                 campus=campus,
                 est_inscriptible=True,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
                 terme_de_recherche=terme_de_recherche,
                 types=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
                     TypeFormation.FORMATION_CONTINUE.name
@@ -134,6 +138,10 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             SearchFormationsCommand(
                 sigle=sigle,
                 annee=annee,
+                est_inscriptible=True,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
                 type=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
                     TypeFormation.FORMATION_CONTINUE.name
                 ),

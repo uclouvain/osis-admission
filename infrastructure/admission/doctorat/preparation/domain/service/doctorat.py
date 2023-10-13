@@ -34,6 +34,7 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat impo
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
@@ -100,6 +101,10 @@ class DoctoratTranslator(IDoctoratTranslator):
                 type=TrainingType.PHD.name,
                 campus=campus,
                 terme_de_recherche=terme_de_recherche,
+                est_inscriptible=True,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
             )
         )
 
@@ -116,6 +121,14 @@ class DoctoratTranslator(IDoctoratTranslator):
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigle=sigle, annee=annee, type=TrainingType.PHD.name)
+            SearchFormationsCommand(
+                sigle=sigle,
+                annee=annee,
+                type=TrainingType.PHD.name,
+                est_inscriptible=True,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
+            )
         )
         return bool(dtos)
