@@ -83,6 +83,17 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ModifierChoixFormationParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    bourse_double_diplome: Optional[str] = ''
+    bourse_internationale: Optional[str] = ''
+    bourse_erasmus_mundus: Optional[str] = ''
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
     uuid_proposition: str
 

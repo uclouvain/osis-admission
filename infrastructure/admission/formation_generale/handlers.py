@@ -396,4 +396,9 @@ COMMAND_HANDLERS = {
         cmd,
         paiement_frais_dossier_service=PaiementFraisDossier(),
     ),
+    ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        bourse_translator=BourseTranslator(),
+    ),
 }

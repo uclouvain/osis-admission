@@ -36,7 +36,8 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
 
 from admission.constants import SUPPORTED_MIME_TYPES
-from admission.contrib.models.checklist import AdditionalApprovalCondition
+from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.enums import TypeBourse
 from base.forms.utils.datefield import DATE_FORMAT
 from base.models.academic_year import AcademicYear
 from education_group.templatetags.education_group_extra import format_to_academic_year
@@ -48,6 +49,7 @@ NONE_CHOICE = ((None, ' - '),)
 ALL_EMPTY_CHOICE = (('', _('All')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
+EMPTY_CHOICE_AS_LIST = [list(EMPTY_CHOICE[0])]
 
 DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
     'data-minimum-input-length': 3,
@@ -175,6 +177,33 @@ def get_year_choices(min_year=1920, max_year=None):
 
 def get_example_text(example: str):
     return _("e.g.: %(example)s") % {'example': example}
+
+
+def get_scholarship_choices(scholarships, scholarship_type: TypeBourse):
+    """
+    Return the list of choices of a scholarship choice field.
+    :param scholarships: The queryset containing the scholarships
+    :param scholarship_type: The type of the scholarship
+    :return: The list of choices
+    """
+    return EMPTY_CHOICE_AS_LIST + [
+        [str(scholarship.uuid), scholarship.long_name or scholarship.short_name]
+        for scholarship in scholarships
+        if scholarship.type == scholarship_type.name
+    ]
+
+
+def format_training(training: FormationDTO):
+    """
+    Format a training into an html string
+    :param training: The training
+    :return: An html string
+    """
+    return '{intitule} ({campus}) <span class="training-acronym">{sigle}</span>'.format(
+        intitule=training.intitule,
+        campus=training.campus,
+        sigle=training.sigle,
+    )
 
 
 class AdmissionFileUploadField(FileUploadField):

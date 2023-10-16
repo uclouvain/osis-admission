@@ -163,6 +163,19 @@ class Proposition(interface.RootEntity):
 
         self.comptabilite.affiliation_sport = None  # Ce choix dépend du campus de formation
 
+    def modifier_choix_formation_par_gestionnaire(
+        self,
+        bourses_ids: Dict[str, BourseIdentity],
+        bourse_double_diplome: Optional[str],
+        bourse_internationale: Optional[str],
+        bourse_erasmus_mundus: Optional[str],
+        reponses_questions_specifiques: Dict,
+    ):
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
+        self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
+        self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
+
     def modifier_checklist_choix_formation(
         self,
         type_demande: 'TypeDemande',

@@ -524,6 +524,12 @@ msgid ""
 "admission)."
 msgstr ""
 
+msgid ""
+"An international scholarship may be awarded to students as part of a "
+"project. These international grants are awarded by ARES and a scholarship "
+"certificate must be provided."
+msgstr ""
+
 msgid "Analysis folder"
 msgstr ""
 
@@ -609,7 +615,13 @@ msgstr ""
 msgid "Are there any prerequisite courses?"
 msgstr ""
 
+msgid "Are you a dual degree student?"
+msgstr ""
+
 msgid "Are you a non-resident (as defined by government decree)?"
+msgstr ""
+
+msgid "Are you an Erasmus Mundus student?"
 msgstr ""
 
 msgid "Are you confirming that the application will be sent to the SIC?"
@@ -882,6 +894,9 @@ msgid "CSS class"
 msgstr ""
 
 msgid "Campus"
+msgstr ""
+
+msgid "Campus (optional)"
 msgstr ""
 
 msgid "Can add a member to the supervision group"
@@ -1494,6 +1509,9 @@ msgstr ""
 msgid "Course completed"
 msgstr ""
 
+msgid "Course name"
+msgstr ""
+
 msgctxt "admission"
 msgid "Course name"
 msgstr ""
@@ -1737,6 +1755,9 @@ msgstr ""
 msgid "Do you have a secondary school diploma?"
 msgstr ""
 
+msgid "Do you have an international scholarship?"
+msgstr ""
+
 msgid "Do you want to request the application fee now?"
 msgstr ""
 
@@ -1836,6 +1857,11 @@ msgstr ""
 msgid "Dual degree scholarship"
 msgstr ""
 
+msgid ""
+"Dual degrees involve joint coursework between two or more universities, "
+"leading to two separate diplomas awarded by each signatory university."
+msgstr ""
+
 msgid "Dual or triple degree"
 msgstr ""
 
@@ -1920,6 +1946,9 @@ msgstr ""
 msgid "Enable complementary training tab"
 msgstr ""
 
+msgid "Enabled"
+msgstr ""
+
 msgctxt "admission"
 msgid "End"
 msgstr ""
@@ -1969,6 +1998,12 @@ msgid "Entity"
 msgstr ""
 
 msgid "Erasmus Mundus"
+msgstr ""
+
+msgid ""
+"Erasmus Mundus is a study abroad programme devised by an international "
+"partnership of higher education institutions. Scholarships are awarded to "
+"students and proof of funding is therefore required."
 msgstr ""
 
 msgid "Erasmus Mundus scholarship"
@@ -3744,6 +3779,9 @@ msgid ""
 "Please check the details of the activity to fill in all mandatory fields"
 msgstr ""
 
+msgid "Please complete this field: {}"
+msgstr ""
+
 msgid "Please confirm the change to this new status."
 msgstr ""
 
@@ -4599,6 +4637,10 @@ msgstr ""
 msgid "Specific profile"
 msgstr ""
 
+msgctxt "admission"
+msgid "Specific profile"
+msgstr ""
+
 msgid "Specific question"
 msgstr ""
 
@@ -5092,6 +5134,10 @@ msgstr ""
 
 #, python-format
 msgid "The text size must be one of the following values: %(values)s."
+msgstr ""
+
+#, python-format
+msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr ""
 
 msgid "There can be no more CA members in the supervision group."

@@ -256,7 +256,7 @@ class ScholarshipAdmin(admin.ModelAdmin):
         'short_name',
         'long_name',
         'type',
-        'disabled',
+        'enabled',
     ]
     search_fields = [
         'short_name',
@@ -272,6 +272,10 @@ class ScholarshipAdmin(admin.ModelAdmin):
         'long_name',
         'disabled',
     ]
+
+    @admin.display(description=_('Enabled'), boolean=True)
+    def enabled(self, obj):
+        return not obj.disabled
 
 
 FORM_ITEM_MIN_YEAR = 2022

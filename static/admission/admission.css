@@ -275,3 +275,7 @@ fieldset.custom-fieldset > legend {
     min-width: 900px;
   }
 }
+
+.debug-content {
+  background-color: #ffb4ff78;
+}
