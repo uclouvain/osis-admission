@@ -45,11 +45,11 @@
     {% with proposition.bourse_double_diplome.nom_court|default:_('No') as short_name %}
       {% field_data _('Dual degree scholarship') proposition.bourse_double_diplome.nom_long|default:short_name %}
     {% endwith %}
-    {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
-      {% field_data _('Erasmus Mundus') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
-    {% endwith %}
     {% with proposition.bourse_internationale.nom_court|default:_('No') as short_name %}
       {% field_data _('International scholarship') proposition.bourse_internationale.nom_long|default:short_name %}
+    {% endwith %}
+    {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
+      {% field_data _('Erasmus Mundus') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
     {% endwith %}
   {% endpanel %}
 {% endif %}

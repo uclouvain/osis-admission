@@ -291,7 +291,7 @@ class AutocompleteScholarshipView(ListAPIView):
     schema = AuthorizationAwareSchema()
     filter_backends = [ScholarshipSearchBackend]
     serializer_class = serializers.ScholarshipSerializer
-    queryset = Scholarship.objects.exclude(disabled=True)
+    queryset = Scholarship.objects.exclude(disabled=True).order_by('long_name', 'short_name')
 
 
 class CampusSearchBackend(BaseFilterBackend):

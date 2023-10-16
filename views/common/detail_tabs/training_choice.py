@@ -23,24 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Dict, Union, List, Tuple
+from django.views.generic import TemplateView
 
-import attr
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.views.doctorate.mixins import LoadDossierViewMixin
 
-from osis_common.ddd import interface
+__all__ = ['AdmissionTrainingChoiceDetailView']
 
 
-@attr.dataclass(slots=True)
-class QuestionSpecifiqueDTO(interface.DTO):
-    uuid: str
-    type: str
-    requis: bool
-    configuration: Dict
-    onglet: str
-    label: str
-    texte: str
-    texte_aide: str
-    valeur: Union[str, List[str]]
-    valeur_formatee: Union[str, List[str]]
-    label_langue_candidat: str
-    valeurs_possibles: List[Tuple[str, str]]
+class AdmissionTrainingChoiceDetailView(LoadDossierViewMixin, TemplateView):
+    template_name = 'admission/details/training_choice.html'
+    permission_required = 'admission.change_admission_training_choice'
+    specific_questions_tab = OngletsDemande.CHOIX_FORMATION
+    urlpatterns = 'training-choice'

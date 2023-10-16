@@ -594,6 +594,15 @@ msgstr ""
 "pour une formation spécifique et enfin les éléments associés à une admission "
 "unique)."
 
+msgid ""
+"An international scholarship may be awarded to students as part of a "
+"project. These international grants are awarded by ARES and a scholarship "
+"certificate must be provided."
+msgstr ""
+"Une bourse internationale peut être octroyée à des étudiants dans le cadre "
+"d'un projet. Ces bourses internationales sont notamment attribuées par "
+"l'organisme ARES et une attestation de bourse est dès lors à fournir."
+
 msgid "Analysis folder"
 msgstr "Dossier d'analyse"
 
@@ -682,8 +691,14 @@ msgstr "Y a-t-il des conditions complémentaires (\"sous réserve de ...\") ?"
 msgid "Are there any prerequisite courses?"
 msgstr "Y a-t-il des compléments de formation ?"
 
+msgid "Are you a dual degree student?"
+msgstr "Êtes-vous en double diplomation ?"
+
 msgid "Are you a non-resident (as defined by government decree)?"
 msgstr "Êtes-vous non-résident (au sens du décret) ?"
+
+msgid "Are you an Erasmus Mundus student?"
+msgstr "Êtes-vous Erasmus Mundus ?"
 
 msgid "Are you confirming that the application will be sent to the SIC?"
 msgstr "Confirmez-vous l'envoi du dossier en SIC ?"
@@ -965,6 +980,9 @@ msgstr "Classe CSS"
 
 msgid "Campus"
 msgstr "Campus"
+
+msgid "Campus (optional)"
+msgstr "Campus (optionnel)"
 
 msgid "Can add a member to the supervision group"
 msgstr "Peut ajouter un membre au groupe de supervision"
@@ -1644,6 +1662,9 @@ msgstr "Choix de formation"
 msgid "Course completed"
 msgstr "Cours terminé"
 
+msgid "Course name"
+msgstr "Intitulé de la formation"
+
 msgctxt "admission"
 msgid "Course name"
 msgstr "Intitulé de la formation"
@@ -1890,6 +1911,9 @@ msgstr "Avez-vous un numéro de registre national belge (NISS) ?"
 msgid "Do you have a secondary school diploma?"
 msgstr "Avez-vous obtenu un diplôme de fin d'études secondaires ?"
 
+msgid "Do you have an international scholarship?"
+msgstr "Bénéficiez-vous d'une bourse internationale ?"
+
 msgid "Do you want to request the application fee now?"
 msgstr "Voulez-vous réclamer les frais de dossier maintenant ?"
 
@@ -1995,6 +2019,14 @@ msgstr "Dr."
 msgid "Dual degree scholarship"
 msgstr "Bourse double diplomation"
 
+msgid ""
+"Dual degrees involve joint coursework between two or more universities, "
+"leading to two separate diplomas awarded by each signatory university."
+msgstr ""
+"La double diplomation concerne une formation conjointe entre deux ou "
+"plusieurs universités, qui débouchera sur l'obtention de deux diplômes "
+"distincts fournis par chaque université signataire."
+
 msgid "Dual or triple degree"
 msgstr "Double ou triple diplomation"
 
@@ -2085,6 +2117,9 @@ msgstr "Employeur"
 msgid "Enable complementary training tab"
 msgstr "Activer l'onglet Formation complémentaire"
 
+msgid "Enabled"
+msgstr "Activé"
+
 msgctxt "admission"
 msgid "End"
 msgstr "Fin"
@@ -2135,6 +2170,16 @@ msgstr "Entité"
 
 msgid "Erasmus Mundus"
 msgstr "Erasmus Mundus"
+
+msgid ""
+"Erasmus Mundus is a study abroad programme devised by an international "
+"partnership of higher education institutions. Scholarships are awarded to "
+"students and proof of funding is therefore required."
+msgstr ""
+"L'Erasmus Mundus est un programme d'études à l'étranger conçu par un "
+"partenariat international d'établissements d'enseignement supérieurs. Des "
+"bourses sont octroyées aux étudiants et une attestation de financement est "
+"dès lors à fournir."
 
 msgid "Erasmus Mundus scholarship"
 msgstr "Bourse Erasmus Mundus"
@@ -4154,6 +4199,9 @@ msgstr ""
 "Veuillez vérifier le détail de l’activité pour renseigner tous les champs "
 "obligatoires"
 
+msgid "Please complete this field: {}"
+msgstr "Merci de spécifier une valeur pour le champ suivant : {}"
+
 msgid "Please confirm the change to this new status."
 msgstr "Merci de confirmer le changement vers ce nouveau statut."
 
@@ -5078,6 +5126,10 @@ msgstr "Spécificités"
 msgid "Specific profile"
 msgstr "Profil particulier"
 
+msgctxt "admission"
+msgid "Specific profile"
+msgstr "Profil particulier"
+
 msgid "Specific question"
 msgstr "Question spécifique"
 
@@ -5631,6 +5683,10 @@ msgstr ""
 #, python-format
 msgid "The text size must be one of the following values: %(values)s."
 msgstr "La taille du texte doit être une des valeurs suivantes : %(values)s."
+
+#, python-format
+msgid "The type of the admission form item is unknown (%(type)s)."
+msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s)."
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""

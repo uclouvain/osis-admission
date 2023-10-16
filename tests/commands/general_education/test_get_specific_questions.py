@@ -27,7 +27,9 @@ import uuid
 from typing import List
 from unittest.mock import patch
 
+from django.conf import settings
 from django.test import TestCase, override_settings
+from django.utils import translation
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -59,6 +61,7 @@ class GetSpecificQuestionsTestCase(TestCase):
             double_degree_scholarship=None,
             international_scholarship=None,
             candidate__private_email='john.doe@example.com',
+            candidate__language=settings.LANGUAGE_CODE_EN,
         )
 
         related_admission_questions_args = {
@@ -120,9 +123,10 @@ class GetSpecificQuestionsTestCase(TestCase):
         }
         self.admission.save()
 
-        specific_questions = message_bus_instance.invoke(
-            RecupererQuestionsSpecifiquesQuery(uuid_proposition=str(self.admission.uuid)),
-        )
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
+                RecupererQuestionsSpecifiquesQuery(uuid_proposition=str(self.admission.uuid)),
+            )
 
         # Check that all questions are returned in the right order
         self.assertEqual(len(specific_questions), 5)
@@ -135,19 +139,67 @@ class GetSpecificQuestionsTestCase(TestCase):
         self.assertEqual(multiple_selection_field.uuid, str(self.questions_configurations[4].form_item.uuid))
         self.assertEqual(selection_field.uuid, str(self.questions_configurations[3].form_item.uuid))
 
-        # Check properties
+        # Check properties for a message field
         self.assertEqual(message_field.type, TypeItemFormulaire.MESSAGE.name)
         self.assertEqual(message_field.requis, False)
         self.assertEqual(message_field.configuration, {})
         self.assertEqual(message_field.onglet, Onglets.CHOIX_FORMATION.name)
         self.assertEqual(message_field.label, '')
+        self.assertEqual(message_field.label_langue_candidat, '')
+        self.assertEqual(message_field.valeur_formatee, 'Mon très court message.')
+        self.assertEqual(message_field.texte, 'Mon très court message.')
+        self.assertEqual(message_field.texte_aide, '')
+        self.assertEqual(message_field.valeur, None)
 
-        # Check values of all questions
-        self.assertEqual(message_field.valeur_formatee, 'My very short message.')
+        # Check properties for a text field
+        self.assertEqual(text_field.type, TypeItemFormulaire.TEXTE.name)
+        self.assertEqual(text_field.requis, False)
+        self.assertEqual(text_field.configuration, {})
+        self.assertEqual(text_field.onglet, Onglets.CHOIX_FORMATION.name)
+        self.assertEqual(text_field.label, 'Champ texte')
+        self.assertEqual(text_field.label_langue_candidat, 'Text field')
         self.assertEqual(text_field.valeur_formatee, 'My answer')
+        self.assertEqual(text_field.texte, 'Données détaillées.')
+        self.assertEqual(text_field.texte_aide, 'Ecrivez ici')
+        self.assertEqual(text_field.valeur, 'My answer')
+
+        # Check properties for a document field
+        self.assertEqual(document_field.type, TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(document_field.requis, False)
+        self.assertEqual(document_field.configuration, {})
+        self.assertEqual(document_field.onglet, Onglets.CHOIX_FORMATION.name)
+        self.assertEqual(document_field.label, 'Champ document')
+        self.assertEqual(document_field.label_langue_candidat, 'Document field')
         self.assertEqual(document_field.valeur_formatee, [self.document_uuid, 'other-token'])
-        self.assertEqual(multiple_selection_field.valeur_formatee, 'One, Two')
-        self.assertEqual(selection_field.valeur_formatee, 'One')
+        self.assertEqual(document_field.texte, 'Données détaillées.')
+        self.assertEqual(document_field.texte_aide, '')
+        self.assertEqual(document_field.valeur, [str(self.document_uuid), 'other-token'])
+
+        # Check properties for a multiple selection field
+        self.assertEqual(multiple_selection_field.type, TypeItemFormulaire.SELECTION.name)
+        self.assertEqual(multiple_selection_field.requis, False)
+        self.assertEqual(multiple_selection_field.configuration, {'TYPE_SELECTION': 'CASES_A_COCHER'})
+        self.assertEqual(multiple_selection_field.onglet, Onglets.CHOIX_FORMATION.name)
+        self.assertEqual(multiple_selection_field.label, 'Champ de sélection')
+        self.assertEqual(multiple_selection_field.label_langue_candidat, 'Selection field')
+        self.assertEqual(multiple_selection_field.valeur_formatee, 'Un, Deux')
+        self.assertEqual(multiple_selection_field.texte, 'Données détaillées.')
+        self.assertEqual(multiple_selection_field.texte_aide, '')
+        self.assertEqual(multiple_selection_field.valeur, ['1', '2'])
+        self.assertEqual(multiple_selection_field.valeurs_possibles, [('1', 'Un'), ('2', 'Deux'), ('3', 'Trois')])
+
+        # Check properties for a selection field
+        self.assertEqual(selection_field.type, TypeItemFormulaire.SELECTION.name)
+        self.assertEqual(selection_field.requis, False)
+        self.assertEqual(selection_field.configuration, {'TYPE_SELECTION': 'BOUTONS_RADIOS'})
+        self.assertEqual(selection_field.onglet, Onglets.CHOIX_FORMATION.name)
+        self.assertEqual(selection_field.label, 'Champ de sélection')
+        self.assertEqual(selection_field.label_langue_candidat, 'Selection field')
+        self.assertEqual(selection_field.valeur_formatee, 'Un')
+        self.assertEqual(selection_field.texte, 'Données détaillées.')
+        self.assertEqual(selection_field.texte_aide, '')
+        self.assertEqual(selection_field.valeur, '1')
+        self.assertEqual(selection_field.valeurs_possibles, [('1', 'Un'), ('2', 'Deux'), ('3', 'Trois')])
 
     def test_get_specific_questions_with_no_answer(self):
         specific_questions = message_bus_instance.invoke(

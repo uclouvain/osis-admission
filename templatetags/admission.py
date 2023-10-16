@@ -321,6 +321,9 @@ TAB_TREES = {
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
         ],
+        Tab('general-education', _('Course choice'), 'person-chalkboard'): [
+            Tab('training-choice', _('Course choice')),
+        ],
         Tab('education', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Previous experience'), 'list-alt'),
         ],
