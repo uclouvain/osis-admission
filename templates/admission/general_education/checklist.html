@@ -46,7 +46,7 @@
     {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
     {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
     {% url base_namespace|add:":update:accounting" view.kwargs.uuid as accounting_url %}
-    {% url base_namespace|add:":update:training_choice" view.kwargs.uuid as training_choice_url %}
+    {% url base_namespace|add:":update:training-choice" view.kwargs.uuid as training_choice_url %}
 
     <div
         id="tabs-content"
@@ -235,6 +235,11 @@
           {% bootstrap_form comment_forms.specificites_formation %}
 
           <div class="info-part">
+            {% if resume_proposition.identification.est_concerne_par_visa %}
+              {% panel _("Visa") edit_button="#" %}
+                {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
+              {% endpanel %}
+            {% endif %}
             {% multiple_field_data questions_specifiques title=_('Dynamic questions about "Specific aspects" sub-tab') %}
           </div>
 

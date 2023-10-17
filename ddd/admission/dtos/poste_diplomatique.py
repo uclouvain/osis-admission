@@ -24,6 +24,8 @@
 #
 ##############################################################################
 import attr
+from django.conf import settings
+from django.utils.translation import get_language
 
 from osis_common.ddd import interface
 
@@ -33,3 +35,13 @@ class PosteDiplomatiqueDTO(interface.DTO):
     code: int
     nom_francais: str
     nom_anglais: str
+    adresse_email: str
+
+    def __str__(self):
+        return '{nom} (<a href="mailto:{email}">{email}</a>)'.format(
+            nom={
+                settings.LANGUAGE_CODE_FR: self.nom_francais,
+                settings.LANGUAGE_CODE_EN: self.nom_anglais,
+            }.get(get_language()),
+            email=self.adresse_email,
+        )

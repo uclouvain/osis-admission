@@ -56,6 +56,7 @@ from admission.contrib.models import (
     GeneralEducationAdmission,
     Scholarship,
     Accounting,
+    DiplomaticPost,
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
@@ -187,6 +188,7 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'additional_approval_conditions',
         'other_training_accepted_by_fac',
         'prerequisite_courses',
+        'diplomatic_post',
     ]
     actions = ['trigger_payment_hook']
 
@@ -519,6 +521,12 @@ class AdditionalApprovalConditionAdmin(DisplayTranslatedNameMixin, admin.ModelAd
         return mark_safe(obj.name_en)
 
 
+class DiplomaticPostAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['countries']
+    search_fields = ['name_fr', 'name_en']
+    list_display = ['name_fr', 'name_en', 'email']
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
@@ -533,6 +541,7 @@ admin.site.register(Accounting, AccountingAdmin)
 admin.site.register(RefusalReasonCategory, RefusalReasonCategoryAdmin)
 admin.site.register(RefusalReason, RefusalReasonAdmin)
 admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
+admin.site.register(DiplomaticPost, DiplomaticPostAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
