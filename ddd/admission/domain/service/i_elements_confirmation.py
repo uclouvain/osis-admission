@@ -254,14 +254,7 @@ class IElementsConfirmation(interface.DomainService):
             )
 
         # Visa
-        if (
-            isinstance(proposition, PropositionGenerale)
-            and identification_dto.pays_nationalite
-            and identification_dto.pays_nationalite_europeen is False
-            and identification_dto.pays_nationalite not in PLUS_5_ISO_CODES
-            and identification_dto.pays_residence
-            and identification_dto.pays_residence != BE_ISO_CODE
-        ):
+        if isinstance(proposition, PropositionGenerale) and identification_dto.est_concerne_par_visa:
             elements.append(
                 ElementConfirmation(
                     nom='visa',

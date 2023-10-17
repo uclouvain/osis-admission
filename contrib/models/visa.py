@@ -23,8 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
-
+from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
 from django.utils.translation import gettext_lazy as _, pgettext
@@ -69,3 +68,9 @@ class DiplomaticPost(models.Model):
     )
 
     objects = DiplomaticPostManager()
+
+    def __str__(self):
+        return {
+            settings.LANGUAGE_CODE_FR: self.name_fr,
+            settings.LANGUAGE_CODE_EN: self.name_en,
+        }[settings.LANGUAGE_CODE]
