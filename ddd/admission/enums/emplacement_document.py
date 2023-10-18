@@ -257,9 +257,9 @@ DocumentsAssimilation = {
 DocumentsComptabilite = {
     'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT': ngettext_lazy(
         'Certificate stating no debts to the institution attended during the academic year '
-        '%(academic_year)s: %(names)s',
+        '%(academic_year)s: %(names)s.',
         'Certificates stating no debts to the institutions attended during the academic year '
-        '%(academic_year)s: %(names)s',
+        '%(academic_year)s: %(names)s.',
         'count',
     ),
     'ATTESTATION_ENFANT_PERSONNEL': _('Certificate for children of staff'),

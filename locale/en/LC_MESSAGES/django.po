@@ -173,6 +173,13 @@ msgid "A justification is needed when creating a pre-admission."
 msgstr ""
 
 msgid ""
+"A legal guardian has the prerogatives of parental authority over the child "
+"in the event of the parents' death or their inability to exercise parental "
+"authority following a court decision. A student of legal age cannot have a "
+"guardian. Under no circumstances is a guarantor a legal guardian."
+msgstr ""
+
+msgid ""
 "A member should be either internal or external, please check the fields."
 msgstr ""
 
@@ -231,6 +238,9 @@ msgstr "Admission in progress"
 
 msgid "ADMITTED"
 msgstr "Admitted"
+
+msgid "Absence of debt"
+msgstr ""
 
 msgid "Abstract"
 msgstr ""
@@ -660,8 +670,8 @@ msgstr ""
 msgid "Are you sure your want to reset the object of the message?"
 msgstr ""
 
-msgid "Are you the child of a UCLouvain or Martin V Lycee staff member?"
-msgstr "Are you the child of a UCLouvain or Martin V Lycée staff member?"
+msgid "Are you the child of a UCLouvain or Martin V staff member?"
+msgstr ""
 
 msgid "Assimilated,Non-assimilated"
 msgstr ""
@@ -1113,13 +1123,18 @@ msgstr ""
 msgid "Certificate stating no debts to the institution"
 msgstr ""
 
+msgid ""
+"Certificate stating no debts to the institution attended during the academic "
+"year"
+msgstr ""
+
 #, python-format
 msgid ""
 "Certificate stating no debts to the institution attended during the academic "
-"year %(academic_year)s: %(names)s"
+"year %(academic_year)s: %(names)s."
 msgid_plural ""
 "Certificates stating no debts to the institutions attended during the "
-"academic year %(academic_year)s: %(names)s"
+"academic year %(academic_year)s: %(names)s."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -1159,6 +1174,9 @@ msgid "China Scholarship Council (CSC)"
 msgstr ""
 
 msgid "Choice of joint supervision is not yet defined"
+msgstr ""
+
+msgid "Choose from the following"
 msgstr ""
 
 msgid "Choose your course"
@@ -2352,6 +2370,12 @@ msgid ""
 msgstr ""
 
 msgid ""
+"Have you applied <a href='https://allocations-etudes.cfwb.be/etudes-"
+"superieures/' target='_blank'>for a student grant</a> from the French "
+"Community of Belgium?"
+msgstr ""
+
+msgid ""
 "Have you applied for a student grant from the French Community of Belgium?"
 msgstr ""
 
@@ -3186,6 +3210,11 @@ msgstr ""
 msgid "Mandatory languages are missing."
 msgstr ""
 
+msgid ""
+"Martin V comprises both the Martin V Ecole Fondamentale and the Martin V "
+"Lycee."
+msgstr ""
+
 msgctxt "course"
 msgid "Master"
 msgstr ""
@@ -3843,6 +3872,10 @@ msgstr ""
 msgid ""
 "Please refer to the specifics disposition of your domain doctoral commission "
 "for your activities choice."
+msgstr ""
+
+msgid ""
+"Please select the Belgian student status situation that most applies to you"
 msgstr ""
 
 msgid "Please specify at least one identity number."
@@ -4710,6 +4743,13 @@ msgstr ""
 msgid "Submitted profile"
 msgstr ""
 
+msgid ""
+"Subsidiary protection status is granted to a foreign national who cannot be "
+"considered a refugee but with respect to whom there are serious grounds for "
+"believing that, if returned to his or her country of origin, he or she would "
+"face a genuine risk of suffering serious harm"
+msgstr ""
+
 msgid "Successful test"
 msgstr ""
 
@@ -4799,6 +4839,12 @@ msgctxt "admission"
 msgid "Telephone (mobile)"
 msgstr ""
 
+msgid ""
+"Temporary protection is granted for a period of one year, which can be "
+"extended. This protection is granted in the event of a mass influx of "
+"refugees."
+msgstr ""
+
 msgid "Text"
 msgstr ""
 
@@ -4811,6 +4857,13 @@ msgid ""
 msgstr ""
 
 msgid "The <strong>additional training</strong> has been completed: yes / no."
+msgstr ""
+
+msgid ""
+"The BIC/SWIFT code consists of 8 or 11 characters, which correspond to:"
+"<ul><li>bank code (four letters)</li><li>country code (two letters)</"
+"li><li>location code (two letters or numbers)</li><li>branch code (optional, "
+"three letters or numbers)</li></ul>"
 msgstr ""
 
 msgid ""
@@ -4829,6 +4882,13 @@ msgid "The CA members"
 msgstr "The supervisory panel members"
 
 msgid "The IBAN account number is valid"
+msgstr ""
+
+msgid ""
+"The IBAN contains up to 34 alphanumeric characters, which correspond to:"
+"<ul><li>country code (two letters)</li><li>verification key (two digits)</"
+"li><li>the Basic Bank Account Number (BBAN) (up to 30 alphanumeric "
+"characters)</li></ul>"
 msgstr ""
 
 msgid "The NOMA must contain 8 digits."
@@ -5184,6 +5244,9 @@ msgstr ""
 msgid "Thesis-related data"
 msgstr ""
 
+msgid "This account number has been verified"
+msgstr ""
+
 msgid "This activity and its potential subactivities will be discontinued"
 msgstr ""
 
@@ -5273,6 +5336,9 @@ msgstr ""
 msgid "Tick boxes"
 msgstr ""
 
+msgid "Tick the relationship"
+msgstr ""
+
 #, no-python-format
 msgid "Time allocated for thesis (in %)"
 msgstr ""
@@ -5314,6 +5380,11 @@ msgstr ""
 msgid ""
 "To be uploaded in your dossier on the doctoral platform as soon as possible "
 "after the confirmation test"
+msgstr ""
+
+msgid ""
+"To claim this Belgian student status, you will need to reside in Belgium "
+"during your studies and therefore obtain a residence permit in Belgium."
 msgstr ""
 
 msgid ""
@@ -5575,6 +5646,19 @@ msgid "Working contract type"
 msgstr ""
 
 msgid ""
+"Would you like to become a <a href='https://uclouvain.be/fr/decouvrir/carte-"
+"solidaire.html' target='_blank'>Solidarity Student</a>, that is, a member of "
+"a programme proposed by UCLouvain's NGO, Louvain Cooperation? This "
+"membership will give you access to a fund for your solidarity projects. If "
+"so, the membership cost, which is E12, will be added to your tuition fee."
+msgstr ""
+"Would you like to become a <a href='https://uclouvain.be/fr/decouvrir/carte-"
+"solidaire.html' target='_blank'>Solidarity Student</a>, that is, a member of "
+"a programme proposed by UCLouvain's NGO, Louvain Coopération? This "
+"membership will give you access to a fund for your solidarity projects. If "
+"so, the membership cost, which is €12, will be added to your tuition fee."
+
+msgid ""
 "Would you like to become a Solidarity Student, that is, a member of a "
 "programme proposed by UCLouvain's NGO, Louvain Cooperation? This membership "
 "will give you access to a fund for your solidarity projects. If so, the "
@@ -5591,6 +5675,12 @@ msgstr ""
 
 msgid ""
 "Would you like to enter an account number so that we can issue a refund?"
+msgstr ""
+
+msgid ""
+"Would you like to join the <a href='https://uclouvain.be/fr/etudier/sport/le-"
+"sport-uclouvain.html' target='_blank'>sports activities</a>? If so, the cost "
+"of membership will be added to your tuition fee."
 msgstr ""
 
 msgid ""
@@ -5669,6 +5759,11 @@ msgstr ""
 msgid ""
 "You are about to submit the application to the Faculty. This action will "
 "send an email to %(recipient)s."
+msgstr ""
+
+msgid ""
+"You are considered a long-term resident if you hold a residence permit valid "
+"for at least 5 years."
 msgstr ""
 
 msgid "You are enrolling as"
@@ -5791,6 +5886,12 @@ msgstr ""
 msgid "You must be the request promoter to access this admission"
 msgstr ""
 
+msgid ""
+"You must have worked in Belgium and your monthly salary must be at least "
+"half of the guaranteed minimum average monthly salary set by the National "
+"Labour Council. This corresponded to E903 in 2023."
+msgstr ""
+
 msgid "You must set a lead supervisor."
 msgstr ""
 
@@ -5801,6 +5902,11 @@ msgid "You need to set a member as secretary."
 msgstr ""
 
 msgid "You specified that no Belgian student status situation applies to you."
+msgstr ""
+
+msgid ""
+"You will receive a monthly newsletter explaining all the benefits and "
+"activities associated with this programme."
 msgstr ""
 
 msgid "Your Belgian student status"

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
@@ -34,11 +36,47 @@ from admission.infrastructure.admission.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from admission.utils import takewhile_return_attribute_values
-from base.models.academic_year import current_academic_year
+from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
+from base.models.person import Person
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from base.utils.serializers import DTOSerializer
 from osis_profile.models import EducationalExperienceYear
+
+
+def get_last_french_community_high_education_institutes(candidate: Person, date: datetime.datetime):
+    # Absence of debts conditions -> check, on the basis of the CV, the absence of debt to the last high
+    # education establishment of the French community attended by the candidate, when it is not UCLouvain, and
+    # only within the scope of the academic years that must be justified
+    cv_minimal_years = ProfilCandidatTranslator.get_annees_minimum_curriculum(
+        global_id=candidate.global_id,
+        current_year=AcademicYear.objects.current(date).year,
+    )
+    last_institutes = (
+        EducationalExperienceYear.objects.filter(
+            educational_experience__person=candidate,
+            educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
+            academic_year__year__gte=cv_minimal_years.get('minimal_date').year,
+        )
+        .exclude(
+            educational_experience__institute__acronym=UCLouvain_acronym,
+        )
+        .values('academic_year__year', 'educational_experience__institute__name')
+    )
+
+    if last_institutes:
+        year = last_institutes[0].get('academic_year__year')
+
+        names = takewhile_return_attribute_values(
+            lambda institute: institute.get('academic_year__year') == year,
+            last_institutes,
+            'educational_experience__institute__name',
+        )
+
+        return {
+            'academic_year': year,
+            'names': list(names),
+        }
 
 
 class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
@@ -65,35 +103,7 @@ class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
         # Absence of debts conditions -> check, on the basis of the CV, the absence of debt to the last high
         # education establishment of the French community attended by the candidate, when it is not UCLouvain, and
         # only within the scope of the academic years that must be justified
-        cv_minimal_years = ProfilCandidatTranslator.get_annees_minimum_curriculum(
-            global_id=self.context['candidate'].global_id,
-            current_year=current_academic_year().year,
-        )
-        last_institutes = (
-            EducationalExperienceYear.objects.filter(
-                educational_experience__person=self.context['candidate'],
-                educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
-                academic_year__year__gte=cv_minimal_years.get('minimal_date').year,
-            )
-            .exclude(
-                educational_experience__institute__acronym=UCLouvain_acronym,
-            )
-            .values('academic_year__year', 'educational_experience__institute__name')
-        )
-
-        if last_institutes:
-            year = last_institutes[0].get('academic_year__year')
-
-            names = takewhile_return_attribute_values(
-                lambda institute: institute.get('academic_year__year') == year,
-                last_institutes,
-                'educational_experience__institute__name',
-            )
-
-            return {
-                'academic_year': year,
-                'names': names,
-            }
+        return get_last_french_community_high_education_institutes(self.context['candidate'], datetime.datetime.now())
 
     def get_a_nationalite_ue(self, _):
         country = getattr(self.context['candidate'], 'country_of_citizenship')

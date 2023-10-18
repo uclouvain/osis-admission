@@ -62,7 +62,11 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
 
     @factory.post_generation
     def create_related_group_version_factory(self, create, extracted, **kwargs):
-        EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
+        EducationGroupVersionFactory(
+            offer=self,
+            root_group__academic_year__year=self.academic_year.year,
+            root_group__main_teaching_campus__name='Louvain-la-Neuve',
+        )
 
 
 def get_checklist():
