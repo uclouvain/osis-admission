@@ -215,7 +215,11 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
 
         if document.uuids:
             context['document_uuid'] = document.uuids[0]
-            context['document_write_token'] = get_remote_token(uuid=context['document_uuid'], write_token=True)
+            context['document_write_token'] = get_remote_token(
+                uuid=context['document_uuid'],
+                write_token=True,
+                for_modified_upload=True,
+            )
             context['document_metadata'] = get_remote_metadata(context['document_write_token'])
 
         # Request form

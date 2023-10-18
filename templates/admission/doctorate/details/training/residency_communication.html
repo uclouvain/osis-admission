@@ -59,7 +59,7 @@
       {% if activity.summary %}
         <div class="form-group">
           <strong class="d-block">{% trans "Summary of the communication" %}</strong>
-          {% document_visualizer activity.summary %}
+          {% document_visualizer activity.summary for_modified_upload=True %}
         </div>
       {% endif %}
       <div class="row">
@@ -79,7 +79,7 @@
       {% if activity.participating_proof %}
         <div class="form-group">
           <strong class="d-block">{% trans "Attestation of the communication" %}</strong>
-          {% document_visualizer activity.participating_proof %}
+          {% document_visualizer activity.participating_proof for_modified_upload=True %}
         </div>
       {% endif %}
       {% if activity.comment %}
