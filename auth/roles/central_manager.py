@@ -82,6 +82,8 @@ class CentralManager(EntityRoleModel):
             'admission.change_admission_cotutelle': is_entity_manager,
             'admission.view_admission_supervision': is_entity_manager,
             'admission.change_admission_supervision': is_entity_manager,
+            'admission.view_admission_accounting': is_entity_manager,
+            'admission.change_admission_accounting': is_entity_manager,
             'admission.view_admission_jury': is_entity_manager,
             'admission.change_admission_jury': is_entity_manager,
             'admission.add_supervision_member': is_entity_manager,

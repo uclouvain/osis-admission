@@ -327,6 +327,9 @@ TAB_TREES = {
         Tab('education', _('Previous experience'), 'list-alt'): [
             Tab('education', _('Previous experience'), 'list-alt'),
         ],
+        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+            Tab('accounting', _('Accounting')),
+        ],
         Tab('management', pgettext('tab', 'Management'), 'gear'): [
             Tab('debug', _('Debug'), 'bug'),
             Tab('history-all', _('All history')),

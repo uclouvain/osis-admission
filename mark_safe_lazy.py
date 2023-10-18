@@ -23,17 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.views.generic import TemplateView
-
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from django.utils.functional import lazy
+from django.utils.safestring import mark_safe
 
 
-__all__ = ['AdmissionTrainingChoiceDetailView']
+__all__ = ['mark_safe_lazy']
 
 
-class AdmissionTrainingChoiceDetailView(LoadDossierViewMixin, TemplateView):
-    template_name = 'admission/details/training_choice.html'
-    permission_required = 'admission.view_admission_training_choice'
-    specific_questions_tab = OngletsDemande.CHOIX_FORMATION
-    urlpatterns = 'training-choice'
+def _mark_safe(value, **kwargs):
+    """Mark a string as safe and interpolate variables inside if provided."""
+    return mark_safe(value % (kwargs or {}))
+
+
+mark_safe_lazy = lazy(_mark_safe, str)

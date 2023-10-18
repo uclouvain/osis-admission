@@ -26,6 +26,7 @@
 
 from django.utils.translation import gettext_lazy as _
 
+from admission.mark_safe_lazy import mark_safe_lazy
 from base.models.utils.utils import ChoiceEnum
 
 
@@ -105,6 +106,11 @@ class ChoixAssimilation5(ChoiceEnum):
     PRIS_EN_CHARGE_OU_DESIGNE_CPAS = _(
         '%(person_concerned)s is supported by the CPAS or a CPAS care home, or is nominated by the CPAS.',
     )
+
+    @classmethod
+    def choices_with_interpolation(cls, variables: dict):
+        """Returns a list of choices with interpolation."""
+        return tuple((x.name, mark_safe_lazy(x.value, **variables)) for x in cls)
 
 
 class ChoixAssimilation6(ChoiceEnum):

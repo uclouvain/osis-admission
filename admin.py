@@ -189,6 +189,7 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'other_training_accepted_by_fac',
         'prerequisite_courses',
         'diplomatic_post',
+        'refusal_reasons',
     ]
     actions = ['trigger_payment_hook']
 
