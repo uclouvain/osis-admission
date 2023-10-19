@@ -331,12 +331,16 @@ class FacultyDecisionSendToFacultyView(
     form_class = Form
 
     def form_valid(self, form):
-        message_bus_instance.invoke(
-            EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(
-                uuid_proposition=self.admission_uuid,
-                gestionnaire=self.request.user.person.global_id,
+        try:
+            message_bus_instance.invoke(
+                EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
             )
-        )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
         self.htmx_refresh = True
         return super().form_valid(form)
 
@@ -355,22 +359,27 @@ class FacultyDecisionSendToSicView(
     form_class = Form
 
     def form_valid(self, form):
-        if self.request.GET.get('approval'):
-            message_bus_instance.invoke(
-                ApprouverPropositionParFaculteCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
+        try:
+            if self.request.GET.get('approval'):
+                message_bus_instance.invoke(
+                    ApprouverPropositionParFaculteCommand(
+                        uuid_proposition=self.admission_uuid,
+                        gestionnaire=self.request.user.person.global_id,
+                    )
                 )
-            )
-        elif self.request.GET.get('refusal'):
-            message_bus_instance.invoke(
-                RefuserPropositionParFaculteCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
+            elif self.request.GET.get('refusal'):
+                message_bus_instance.invoke(
+                    RefuserPropositionParFaculteCommand(
+                        uuid_proposition=self.admission_uuid,
+                        gestionnaire=self.request.user.person.global_id,
+                    )
                 )
-            )
-        else:
-            raise BadRequest
+            else:
+                raise BadRequest
+
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
 
         self.htmx_refresh = True
 
@@ -406,16 +415,21 @@ class FacultyRefusalDecisionView(
             'uuids_motifs': form.cleaned_data['reasons'],
             'autres_motifs': form.cleaned_data['other_reasons'],
         }
-        if 'save-transfer' in self.request.POST:
-            message_bus_instance.invoke(
-                RefuserPropositionParFaculteAvecNouveauxMotifsCommand(
-                    gestionnaire=self.request.user.person.global_id,
-                    **base_params,
+
+        try:
+            if 'save-transfer' in self.request.POST:
+                message_bus_instance.invoke(
+                    RefuserPropositionParFaculteAvecNouveauxMotifsCommand(
+                        gestionnaire=self.request.user.person.global_id,
+                        **base_params,
+                    )
                 )
-            )
-            self.htmx_refresh = True
-        else:
-            message_bus_instance.invoke(SpecifierMotifsRefusPropositionParFaculteCommand(**base_params))
+                self.htmx_refresh = True
+            else:
+                message_bus_instance.invoke(SpecifierMotifsRefusPropositionParFaculteCommand(**base_params))
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
 
         return super().form_valid(form)
 
@@ -460,16 +474,20 @@ class FacultyApprovalDecisionView(
             'email_personne_contact_programme_annuel': form.cleaned_data['annual_program_contact_person_email'],
             'commentaire_programme_conjoint': form.cleaned_data['join_program_fac_comment'],
         }
-        if 'save-transfer' in self.request.POST:
-            message_bus_instance.invoke(
-                ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(
-                    gestionnaire=self.request.user.person.global_id,
-                    **base_params,
+        try:
+            if 'save-transfer' in self.request.POST:
+                message_bus_instance.invoke(
+                    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(
+                        gestionnaire=self.request.user.person.global_id,
+                        **base_params,
+                    )
                 )
-            )
-            self.htmx_refresh = True
-        else:
-            message_bus_instance.invoke(SpecifierInformationsAcceptationPropositionParFaculteCommand(**base_params))
+                self.htmx_refresh = True
+            else:
+                message_bus_instance.invoke(SpecifierInformationsAcceptationPropositionParFaculteCommand(**base_params))
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
 
         return super().form_valid(form)
 
