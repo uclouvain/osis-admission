@@ -944,8 +944,8 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             form.fields['all_additional_approval_conditions'].choices,
             [
                 (
-                    gettext('Graduation of {}').format('Computer science'),
-                    gettext('Graduation of {}').format('Computer science'),
+                    gettext('Graduation of {program_name}').format(program_name='Computer science'),
+                    gettext('Graduation of {program_name}').format(program_name='Computer science'),
                 ),
                 (
                     self.general_admission.free_additional_approval_conditions[0],
@@ -1023,8 +1023,8 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
                 (approval_conditions[0].uuid, approval_conditions[0].name_fr),
                 ('Free condition', 'Free condition'),
                 (
-                    gettext('Graduation of {}').format('Computer science'),
-                    gettext('Graduation of {}').format('Computer science'),
+                    gettext('Graduation of {program_name}').format(program_name='Computer science'),
+                    gettext('Graduation of {program_name}').format(program_name='Computer science'),
                 ),
             ],
         )

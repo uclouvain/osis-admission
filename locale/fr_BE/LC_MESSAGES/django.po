@@ -2494,8 +2494,9 @@ msgctxt "admission"
 msgid "Grade"
 msgstr "Mention obtenue"
 
-msgid "Graduation of {}"
-msgstr "L'obtention de votre diplôme de"
+#, python-brace-format
+msgid "Graduation of {program_name}"
+msgstr "L'obtention de votre diplôme de {program_name}"
 
 msgid "Grounds for denied"
 msgstr "Motif de refus"

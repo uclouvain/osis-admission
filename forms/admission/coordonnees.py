@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from dal import autocomplete, forward
+from dal import forward
 from django import forms
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pgettext_lazy
@@ -35,6 +35,7 @@ from admission.forms import (
     AdmissionModelCountryChoiceField,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     PhoneField,
+    autocomplete,
 )
 from admission.utils import force_title
 from base.models.person import Person
