@@ -270,8 +270,8 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
         )
         with translation.override(self.admission.candidate.language):
             return [
-                gettext('Graduation of {}').format(
-                    experience.program.title if experience.program else experience.education_name
+                gettext('Graduation of {program_name}').format(
+                    program_name=experience.program.title if experience.program else experience.education_name
                 )
                 for experience in experiences
             ]

@@ -2336,7 +2336,8 @@ msgctxt "admission"
 msgid "Grade"
 msgstr ""
 
-msgid "Graduation of {}"
+#, python-brace-format
+msgid "Graduation of {program_name}"
 msgstr ""
 
 msgid "Grounds for denied"
