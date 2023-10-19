@@ -26,34 +26,32 @@
 import datetime
 import itertools
 from collections import defaultdict
-from functools import reduce
 from typing import Optional
 
 from ckeditor.widgets import CKEditorWidget
-from dal import forward, autocomplete
+from dal import forward
 from dal_select2 import widgets as autocomplete_widgets
-from dal_select2.widgets import I18N_PATH, Select2WidgetMixin
 from django import forms
 from django.conf import settings
-from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.core.exceptions import ValidationError
 from django.db.models import F
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language, ngettext_lazy, pgettext_lazy, pgettext
-from django_filters.fields import ModelChoiceField
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
-from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
+from admission.contrib.models.checklist import RefusalReason, AdditionalApprovalCondition
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     FilterFieldWidget,
     get_initial_choices_for_additionnal_approval_conditions,
+    autocomplete,
 )
 from admission.forms import get_academic_year_choices
+from admission.forms.autocomplete import Select2MultipleWithTagWhenNoResultWidget
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from base.models.academic_year import AcademicYear
@@ -309,28 +307,6 @@ class MultipleChoiceFieldWithBetterError(forms.MultipleChoiceField):
             )
 
 
-class Select2MultipleWithTagWhenNoResultWidget(autocomplete.Select2Multiple):
-    """
-    We override the default widget:
-     - to prevent the overriding of the option value with the option label when the tags are used
-     - to insert the tag option only if there is no other result
-
-     Note that to simplify the code, the part related to the creation of objects in Django has been removed.
-    """
-
-    autocomplete_function = "select2_tag"
-
-    @property
-    def media(self):
-        """Return JS/CSS resources for the widget."""
-        media = super().media
-
-        return forms.Media(
-            js=[*media._js_lists[0], 'admission/select2_tag.js'],
-            css={**media._css_lists[0]},
-        )
-
-
 class FacDecisionApprovalForm(forms.ModelForm):
     SEPARATOR = ';'
 
@@ -344,7 +320,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
         queryset=EducationGroupYear.objects.none(),
         to_field_name='uuid',
         required=False,
-        widget=autocomplete_widgets.ListSelect2(
+        widget=autocomplete.ListSelect2(
             url="admission:autocomplete:managed-education-trainings",
             attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
@@ -372,7 +348,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
     all_additional_approval_conditions = forms.MultipleChoiceField(
         label=_('Additional conditions'),
         required=False,
-        widget=autocomplete_widgets.Select2Multiple(
+        widget=autocomplete.Select2Multiple(
             attrs={
                 'data-allow-clear': 'false',
                 'data-tags': 'true',

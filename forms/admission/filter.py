@@ -25,7 +25,6 @@
 # ##############################################################################
 import re
 
-from dal import autocomplete
 from django import forms
 from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy
 
@@ -34,7 +33,7 @@ from admission.contrib.models import Scholarship
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION, CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
+from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS, autocomplete
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )

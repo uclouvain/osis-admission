@@ -28,7 +28,6 @@ from functools import partial
 from typing import List, Optional
 
 import phonenumbers
-from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -38,6 +37,7 @@ from django.utils.translation import gettext_lazy as _, get_language
 from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
+from admission.forms import autocomplete
 from base.forms.utils.datefield import DATE_FORMAT
 from base.models.academic_year import AcademicYear
 from education_group.templatetags.education_group_extra import format_to_academic_year

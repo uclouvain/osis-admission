@@ -1,8 +1,6 @@
-;(function ($) {
-    if (window.__dal__initListenerIsSetForTag)
-        return;
+document.addEventListener('dal-init-function', function () {
 
-    $(document).on('autocompleteLightInitialize', '[data-autocomplete-light-function=select2_tag]', function() {
+    yl.registerFunction('select2_tag', function ($, element) {
         /*
          * We override the default select2 initialization:
          * - to prevent the overriding of the option value with the option label when the tags are used ("processResults" in the original file)
@@ -10,9 +8,8 @@
          *
          * Note that to simplify the code, the part related to the creation of objects in Django has been removed.
          */
-        var element = $(this);
+        const currentElement = $(element);
 
-        // Templating helper
         function template(text, is_html) {
             if (is_html) {
                 var $result = $('<span>');
@@ -24,15 +21,16 @@
         }
 
         function result_template(item) {
-            return template(item.text,
-                element.attr('data-html') !== undefined || element.attr('data-result-html') !== undefined
+            return template(
+                item.text,
+                currentElement.attr('data-html') !== undefined || currentElement.attr('data-result-html') !== undefined
             );
         }
 
         function selected_template(item) {
             if (item.selected_text !== undefined) {
                 return template(item.selected_text,
-                    element.attr('data-html') !== undefined || element.attr('data-selected-html') !== undefined
+                    currentElement.attr('data-html') !== undefined || currentElement.attr('data-selected-html') !== undefined
                 );
             } else {
                 return result_template(item);
@@ -40,9 +38,9 @@
         }
 
         var ajax = null;
-        if ($(this).attr('data-autocomplete-light-url')) {
+        if (currentElement.attr('data-autocomplete-light-url')) {
             ajax = {
-                url: $(this).attr('data-autocomplete-light-url'),
+                url: currentElement.attr('data-autocomplete-light-url'),
                 dataType: 'json',
                 delay: 250,
 
@@ -50,7 +48,7 @@
                     var data = {
                         q: params.term, // search term
                         page: params.page,
-                        forward: yl.getForwards(element)
+                        forward: yl.getForwards(currentElement)
                     };
 
                     return data;
@@ -58,29 +56,40 @@
                 cache: true
             };
         }
-
-        $(this).select2({
-            tokenSeparators: element.attr('data-tags') ? [','] : null,
+        let use_tags = false;
+        let tokenSeparators = null;
+        // Option 1: 'data-tags'
+        if (currentElement.attr('data-tags')) {
+            tokenSeparators = [','];
+            use_tags = true;
+        }
+        // Option 2: 'data-token-separators'
+        if (currentElement.attr('data-token-separators')) {
+            use_tags = true
+            tokenSeparators = currentElement.attr('data-token-separators')
+            if (tokenSeparators === 'null') {
+                tokenSeparators = null;
+            }
+        }
+        currentElement.select2({
+            tokenSeparators: tokenSeparators,
             debug: true,
             containerCssClass: ':all:',
-            placeholder: element.attr('data-placeholder') || '',
-            language: element.attr('data-autocomplete-light-language'),
-            minimumInputLength: element.attr('data-minimum-input-length') || 0,
-            allowClear: ! $(this).is('[required]'),
+            placeholder: currentElement.attr('data-placeholder') || '',
+            language: currentElement.attr('data-autocomplete-light-language'),
+            minimumInputLength: currentElement.attr('data-minimum-input-length') || 0,
+            allowClear: !currentElement.is('[required]'),
             templateResult: result_template,
             templateSelection: selected_template,
             ajax: ajax,
-            tags: Boolean(element.attr('data-tags')),
+            with: null,
+            tags: use_tags,
             insertTag: function (data, tag) {
                 // Insert the tag only if there is no result
                 if (data.length === 0) {
                     data.push(tag);
                 }
-            }
+            },
         });
     });
-    window.__dal__initListenerIsSetForTag = true;
-    $('[data-autocomplete-light-function=select2_tag]:not([id*="__prefix__"])').each(function() {
-        window.__dal__initialize(this);
-    });
-})(yl.jQuery);
+});

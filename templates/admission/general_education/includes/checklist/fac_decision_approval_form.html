@@ -151,7 +151,7 @@
             $('input[name="fac-decision-approval-with_prerequisite_courses"]:checked').change();
 
             {# Initialize the custom select2 component #}
-            $('select[data-autocomplete-light-function=select2_tag]').trigger('autocompleteLightInitialize');
+            window.__dal__initialize($('select[data-autocomplete-light-function=select2_tag]'))
 
             {# Initialize rich editors #}
             initializeCKEditor('id_fac-decision-approval-join_program_fac_comment');

@@ -28,7 +28,6 @@ from functools import partial
 from typing import List, Tuple
 
 import dal.forward
-from dal import autocomplete
 from django import forms
 from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
@@ -42,7 +41,7 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     ChoixTypeEpreuve,
     ContexteFormation,
 )
-from admission.forms import SelectOrOtherField, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
+from admission.forms import SelectOrOtherField, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS, autocomplete
 from base.forms.utils.datefield import DatePickerInput
 from base.models.academic_year import AcademicYear
 from base.models.learning_unit_year import LearningUnitYear
