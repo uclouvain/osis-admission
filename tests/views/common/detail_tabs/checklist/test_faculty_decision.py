@@ -44,10 +44,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    MotifRefusFacultaireNonSpecifieException,
-    InformationsAcceptationFacultaireNonSpecifieesException,
-)
 from admission.tests.factories.faculty_decision import RefusalReasonFactory, AdditionalApprovalConditionFactory
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
@@ -55,7 +51,6 @@ from admission.tests.factories.general_education import (
 )
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -339,10 +334,12 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
 
         # Invalid request -> We need to specify a reason
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            response = self.client.post(self.url + '?refusal=1', **self.default_headers)
-            self.assertEqual(response.status_code, 400)
-            self.assertIsInstance(context.exception.exceptions.pop(), MotifRefusFacultaireNonSpecifieException)
+        response = self.client.post(self.url + '?refusal=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            gettext('When refusing a proposition, the reason must be specified.'),
+            [m.message for m in response.context['messages']],
+        )
 
         self.general_admission.other_refusal_reasons = ['test']
         self.general_admission.save()
@@ -413,14 +410,15 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         # Check the response
         self.assertEqual(response.status_code, 400)
 
-        # Invalid request -> We need to specify the
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            response = self.client.post(self.url + '?approval=1', **self.default_headers)
-            self.assertEqual(response.status_code, 400)
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                InformationsAcceptationFacultaireNonSpecifieesException,
-            )
+        # Invalid request -> We need to specify the missing data
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            gettext(
+                'When accepting a proposition, all the required information in the approval form must be specified.'
+            ),
+            [m.message for m in response.context['messages']],
+        )
 
         self.general_admission.with_additional_approval_conditions = False
         self.general_admission.with_prerequisite_courses = False
