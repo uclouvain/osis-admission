@@ -504,3 +504,27 @@ class Proposition(interface.RootEntity):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.documents_additionnels = documents_additionnels
         self.poste_diplomatique = poste_diplomatique
+
+    def completer_informations_complementaires_par_gestionnaire(
+        self,
+        reponses_questions_specifiques: Dict,
+        documents_additionnels: List[str],
+        poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+        est_bachelier_belge: Optional[bool],
+        est_reorientation_inscription_externe: Optional[bool],
+        attestation_inscription_reguliere: List[str],
+        est_modification_inscription_externe: Optional[bool],
+        formulaire_modification_inscription: List[str],
+        est_non_resident_au_sens_decret: Optional[bool],
+    ):
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.documents_additionnels = documents_additionnels
+
+        self.poste_diplomatique = poste_diplomatique
+
+        self.est_non_resident_au_sens_decret = est_non_resident_au_sens_decret
+        self.est_bachelier_belge = est_bachelier_belge
+        self.est_reorientation_inscription_externe = est_reorientation_inscription_externe
+        self.attestation_inscription_reguliere = attestation_inscription_reguliere
+        self.est_modification_inscription_externe = est_modification_inscription_externe
+        self.formulaire_modification_inscription = formulaire_modification_inscription

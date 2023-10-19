@@ -401,4 +401,11 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         bourse_translator=BourseTranslator(),
     ),
+    CompleterQuestionsSpecifiquesParGestionnaireCommand: (
+        lambda msg_bus, cmd: completer_questions_specifiques_par_gestionnaire(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            poste_diplomatique_translator=PosteDiplomatiqueTranslator(),
+        )
+    ),
 }

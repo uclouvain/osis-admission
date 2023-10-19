@@ -231,7 +231,26 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     documents_additionnels: List[str] = attr.Factory(list)
-    poste_diplomatique: Optional[int] = ''
+    poste_diplomatique: Optional[int] = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+    documents_additionnels: List[str] = attr.Factory(list)
+
+    poste_diplomatique: Optional[int] = None
+
+    est_bachelier_belge: Optional[bool] = None
+    est_reorientation_inscription_externe: Optional[bool] = None
+    attestation_inscription_reguliere: List[str] = attr.Factory(list)
+
+    est_modification_inscription_externe: Optional[bool] = None
+    formulaire_modification_inscription: List[str] = attr.Factory(list)
+
+    est_non_resident_au_sens_decret: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)

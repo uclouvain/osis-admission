@@ -1254,6 +1254,9 @@ msgstr "Modifier le template d'email personnalisé <em>%(name)s</em>"
 msgid "Change of enrolment"
 msgstr "Modification d'inscription"
 
+msgid "Change of enrolment and course change"
+msgstr "Modification d'inscription et réorientation"
+
 msgid "Change of enrolment form"
 msgstr "Formulaire de modification d'inscription"
 
@@ -3966,7 +3969,7 @@ msgstr ""
 "autorisation d’inscription. Nous vous invitons à prendre connaissance des "
 "informations relatives à la demande <a href=\"https://uclouvain.be/fr/"
 "etudier/inscriptions/bienvenue-aux-etudiants-internationaux-et-aux-"
-"etudiantes-internationales.html\" target=\"_blank\"> visa </a>."
+"etudiantes-internationales.html\" target=\"_blank\"> visa</a>."
 
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
@@ -6300,6 +6303,14 @@ msgstr ""
 "Souhaitez-vous modifier votre inscription pour cette année académique, à "
 "l'UCLouvain ?"
 
+#, python-format
+msgid ""
+"Would you like to change your UCLouvain enrolment for this academic year? "
+"(<a href=\"%(url)s\" target=\"_blank\">Informations</a>)"
+msgstr ""
+"Souhaitez-vous modifier votre inscription pour cette année académique, à "
+"l'UCLouvain ? (<a href=\"%(url)s\" target=\"_blank\">Informations</a>)"
+
 msgid ""
 "Would you like to enter an account number so that we can issue a refund?"
 msgstr ""
@@ -6326,6 +6337,14 @@ msgstr ""
 msgid "Would you like to switch courses this academic year at UCLouvain?"
 msgstr ""
 "Souhaitez-vous vous réorienter pour cette année académique, à l’UCLouvain ?"
+
+#, python-format
+msgid ""
+"Would you like to switch courses this academic year at UCLouvain? (<a "
+"href=\"%(url)s\" target=\"_blank\">Informations</a>)"
+msgstr ""
+"Souhaitez-vous vous réorienter pour cette année académique, à l’UCLouvain ? "
+"(<a href=\"%(url)s\" target=\"_blank\">Informations</a>)"
 
 msgid "Writing ability"
 msgstr "Écrire"

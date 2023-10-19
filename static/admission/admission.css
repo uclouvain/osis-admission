@@ -279,3 +279,8 @@ fieldset.custom-fieldset > legend {
 .debug-content {
   background-color: #ffb4ff78;
 }
+
+.select2-results hr {
+  padding: 0;
+  margin: 0;
+}

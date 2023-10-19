@@ -96,6 +96,8 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.change_admission_training_choice': is_part_of_education_group,
             'admission.view_admission_accounting': is_part_of_education_group,
             'admission.change_admission_accounting': is_part_of_education_group,
+            'admission.view_admission_specific_questions': is_part_of_education_group,
+            'admission.change_admission_specific_questions': is_part_of_education_group,
             # Supervision
             'admission.view_admission_supervision': is_part_of_education_group,
             'admission.change_admission_supervision': is_part_of_education_group,

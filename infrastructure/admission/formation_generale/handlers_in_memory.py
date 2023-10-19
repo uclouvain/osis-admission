@@ -450,4 +450,11 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         bourse_translator=_bourse_translator,
     ),
+    CompleterQuestionsSpecifiquesParGestionnaireCommand: (
+        lambda msg_bus, cmd: completer_questions_specifiques_par_gestionnaire(
+            cmd,
+            proposition_repository=_proposition_repository,
+            poste_diplomatique_translator=_poste_diplomatique_translator,
+        )
+    ),
 }

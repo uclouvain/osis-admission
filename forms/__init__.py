@@ -293,3 +293,16 @@ def get_initial_choices_for_additionnal_approval_conditions(predefined_approval_
         choices.append((condition, condition))
 
     return choices
+
+
+def get_diplomatic_post_initial_choices(diplomatic_post):
+    """Return the unique initial choice for a diplomatic post."""
+    if not diplomatic_post:
+        return EMPTY_CHOICE
+
+    return EMPTY_CHOICE + (
+        (
+            diplomatic_post.code,
+            diplomatic_post.name_fr if get_language() == settings.LANGUAGE_CODE else diplomatic_post.name_en,
+        ),
+    )

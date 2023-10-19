@@ -332,6 +332,7 @@ TAB_TREES = {
             Tab('training-choice', _('Course choice')),
         ],
         Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+            Tab('specific-questions', _('Specific aspects')),
             Tab('accounting', _('Accounting')),
         ],
     },

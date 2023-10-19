@@ -40,6 +40,7 @@ READ_ACTIONS_BY_TAB = {
     'project': 'admission.view_admission_project',
     'supervision': 'admission.view_admission_supervision',
     # Additional information
+    'specific-questions': 'admission.view_admission_specific_questions',
     'accounting': 'admission.view_admission_accounting',
     # Confirmation exam
     'confirmation': 'admission.view_admission_confirmation',
@@ -82,6 +83,7 @@ UPDATE_ACTIONS_BY_TAB = {
     'project': 'admission.change_admission_project',
     'supervision': 'admission.change_admission_supervision',
     # Additional information
+    'specific-questions': 'admission.change_admission_specific_questions',
     'accounting': 'admission.change_admission_accounting',
     # Confirmation exam
     'confirmation': 'admission.change_admission_confirmation',
