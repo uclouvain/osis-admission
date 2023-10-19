@@ -27,7 +27,6 @@ from django.urls import reverse
 from django.views.generic import FormView
 
 from admission.ddd.admission.enums import Onglets
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import ModifierChoixFormationParGestionnaireCommand
 from admission.forms.admission.training_choice import TrainingChoiceForm
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin

@@ -74,7 +74,7 @@ class IdentificationDTO(interface.DTO):
         Retourne si le candidat est concerné par la question du visa.
         Prérequis: la demande concernée doit être une formation générale.
         """
-        return (
+        return bool(
             self.pays_nationalite
             and self.pays_nationalite_europeen is False
             and self.pays_nationalite not in PLUS_5_ISO_CODES

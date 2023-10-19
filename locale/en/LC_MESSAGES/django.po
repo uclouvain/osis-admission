@@ -1152,6 +1152,9 @@ msgstr ""
 msgid "Change of enrolment"
 msgstr ""
 
+msgid "Change of enrolment and course change"
+msgstr ""
+
 msgid "Change of enrolment form"
 msgstr ""
 
@@ -5677,6 +5680,12 @@ msgid ""
 "Would you like to change your UCLouvain enrolment for this academic year?"
 msgstr ""
 
+#, python-format
+msgid ""
+"Would you like to change your UCLouvain enrolment for this academic year? "
+"(<a href=\"%(url)s\" target=\"_blank\">Informations</a>)"
+msgstr ""
+
 msgid ""
 "Would you like to enter an account number so that we can issue a refund?"
 msgstr ""
@@ -5693,6 +5702,12 @@ msgid ""
 msgstr ""
 
 msgid "Would you like to switch courses this academic year at UCLouvain?"
+msgstr ""
+
+#, python-format
+msgid ""
+"Would you like to switch courses this academic year at UCLouvain? (<a "
+"href=\"%(url)s\" target=\"_blank\">Informations</a>)"
 msgstr ""
 
 msgid "Writing ability"
