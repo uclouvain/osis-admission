@@ -1,0 +1,133 @@
+{% load i18n static enums admission bootstrap3 %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div
+    id="previous-experiences-access-title-equivalency-container"
+>
+  {% panel _('Equivalency of the foreign access title') id='previous-experiences-access-title-equivalency-details' edit_link_button="JS_BUTTON" %}
+    <div class="row">
+      <div class="col-md-6">
+        {% field_data _('Type') original_admission.foreign_access_title_equivalency_type|enum_display:'TypeEquivalenceTitreAcces' %}
+      </div>
+      <div class="col-md-6">
+        {% field_data _('Status') original_admission.foreign_access_title_equivalency_status|enum_display:'StatutEquivalenceTitreAcces' %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        {% field_data _('State') original_admission.foreign_access_title_equivalency_state|enum_display:'EtatEquivalenceTitreAcces' %}
+      </div>
+      <div class="col-md-6">
+        {% field_data _('Effective date') original_admission.foreign_access_title_equivalency_effective_date %}
+      </div>
+    </div>
+  {% endpanel %}
+
+  {% firstof "" as edit_link_button %}
+  {% panel _('Equivalency of the foreign access title') id='previous-experiences-access-title-equivalency-form' edit_link_button=edit_link_button %}
+    <form
+        hx-boost="true"
+        hx-target="#previous-experiences-access-title-equivalency-container"
+        hx-swap="outerHTML"
+        action="{% url view.base_namespace|add:':past-experiences-access-title-equivalency' uuid=view.kwargs.uuid %}"
+        method="post"
+    >
+      {% bootstrap_form_errors past_experiences_admission_access_title_equivalency_form %}
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6 required_field">
+          {% bootstrap_field past_experiences_admission_access_title_equivalency_form.foreign_access_title_equivalency_type %}
+        </div>
+        <div id="equivalency-status-container" class="col-md-6 required_field">
+          {% bootstrap_field past_experiences_admission_access_title_equivalency_form.foreign_access_title_equivalency_status %}
+        </div>
+      </div>
+      <div class="row">
+        <div id="equivalency-state-container" class="col-md-6 required_field">
+          {% bootstrap_field past_experiences_admission_access_title_equivalency_form.foreign_access_title_equivalency_state %}
+        </div>
+        <div class="col-md-6 required_field">
+          {% bootstrap_field past_experiences_admission_access_title_equivalency_form.foreign_access_title_equivalency_effective_date %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 text-right">
+          <button class="btn btn-primary">{% translate 'Save' %} <i class="fas fa-save"></i></button>
+          <button type="reset" class="btn btn-default">{% translate 'Cancel' %}</button>
+        </div>
+      </div>
+    </form>
+  {% endpanel %}
+
+  {{ past_experiences_admission_access_title_equivalency_form.media }}
+  <script>
+      $(document).ready(function() {
+          const form = $('#previous-experiences-access-title-equivalency-form');
+          const details = $('#previous-experiences-access-title-equivalency-details');
+          const linkToEdit = details.find('.panel-heading a');
+
+          function display_form() {
+              form.removeClass('hidden');
+              details.addClass('hidden');
+          }
+
+          function display_details() {
+              form.addClass('hidden');
+              details.removeClass('hidden');
+          }
+
+          {% if past_experiences_admission_access_title_equivalency_form.is_bound and not past_experiences_admission_access_title_equivalency_form.is_valid %}
+              display_form();
+          {% else %}
+              display_details();
+          {% endif %}
+
+          linkToEdit.click(function() {
+              display_form();
+          });
+
+          $('#previous-experiences-access-title-equivalency-form button[type="reset"]').click(function() {
+              display_details();
+          });
+
+          $('#equivalency-status-container').dependsOn({
+              '#id_foreign_access_title_equivalency_type': { values: [
+                      'EQUIVALENCE_CESS',
+                      'EQUIVALENCE_GRADE_ACADEMIQUE_FWB',
+                      'EQUIVALENCE_DE_NIVEAU'
+                  ]},
+          }, { duration: 0, valueOnDisable: '', });
+
+          $('#equivalency-state-container').dependsOn({
+              '#id_foreign_access_title_equivalency_status': { values: ['COMPLETE', 'RESTRICTIVE'] },
+          }, { duration: 0, valueOnDisable: '', });
+
+          $('#id_foreign_access_title_equivalency_effective_date').dependsOn({
+              '#id_foreign_access_title_equivalency_state': { values: ['DEFINITIVE', 'PROVISOIRE'] },
+          }, { duration: 0, valueOnDisable: '', });
+      })
+  </script>
+</div>

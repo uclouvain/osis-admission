@@ -27,8 +27,15 @@
 <div class="panel panel-default {{ additional_class }}" {% for name, value in attributes.items %} {{ name }}="{{ value|stringformat:'s' }}"{% endfor %}>
   {% if title %}
   <div class="panel-heading">
-    {% if edit_button %}
-      <a class="btn btn-default pull-right btn-sm" href="{{ edit_button }}"><i class="fas fa-edit"></i></a>
+    {% if edit_link_button %}
+      <a
+          class="btn btn-default pull-right btn-sm"
+          {% if edit_link_button == 'JS_BUTTON' %}
+          tabindex="0"
+          {% else %}
+          href="{{ edit_link_button }}"
+          {% endif %}
+      ><i class="fas fa-edit"></i></a>
     {% endif %}
     <h{{ title_level }} class="panel-title">
         {{ title }}

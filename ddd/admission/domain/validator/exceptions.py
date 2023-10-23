@@ -215,3 +215,11 @@ class ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(BusinessExcep
 
     def __init__(self, **kwargs):
         super().__init__(self.message, **kwargs)
+
+
+class ExperienceNonTrouveeException(BusinessException):
+    status_code = "ADMISSION-21"
+
+    def __init__(self, **kwargs):
+        message = _("Experience not found.")
+        super().__init__(message, **kwargs)

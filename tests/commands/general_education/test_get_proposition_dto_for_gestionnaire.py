@@ -136,7 +136,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.nationalite_ue_candidat, None)
         self.assertEqual(result.photo_identite_candidat, self.admission.candidate.id_card)
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)
-        self.assertEqual(result.titre_access, '')
+        self.assertEqual(result.titre_acces, '')
         self.assertEqual(result.fraudeur_ares, False)
         self.assertEqual(result.non_financable, False)
         self.assertEqual(result.est_inscription_tardive, None)

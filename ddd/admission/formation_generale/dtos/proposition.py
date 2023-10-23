@@ -118,7 +118,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
 
     candidat_a_plusieurs_demandes: bool
 
-    titre_access: str
+    titre_acces: str
     candidat_assimile: bool
     fraudeur_ares: bool
     non_financable: bool
@@ -126,6 +126,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]
 
+    # Décision fac & sic
     motifs_refus: List[MotifRefusDTO]
 
     autre_formation_choisie_fac: Optional['BaseFormationDTO']
@@ -138,3 +139,11 @@ class PropositionGestionnaireDTO(PropositionDTO):
     nom_personne_contact_programme_annuel_annuel: str
     email_personne_contact_programme_annuel_annuel: str
     commentaire_programme_conjoint: str
+
+    # Titres et condition d'accès
+    condition_acces: str
+    millesime_condition_acces: Optional[int]
+    type_equivalence_titre_acces: str
+    statut_equivalence_titre_acces: str
+    etat_equivalence_titre_acces: str
+    date_prise_effet_equivalence_titre_acces: Optional[datetime.date]

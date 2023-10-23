@@ -38,6 +38,7 @@ from admission.ddd.admission.domain.model.condition_complementaire_approbation i
 from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldAbsenceDeDetteEtreCompletee,
@@ -53,7 +54,10 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
 )
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
+)
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldCurriculumFichierEtreSpecifie,
@@ -72,9 +76,12 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldVisaEtreComplete,
+    ShouldTitreAccesEtreSelectionne,
+    ShouldConditionAccesEtreSelectionne,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
+from epc.models.enums.condition_acces import ConditionAcces
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -307,6 +314,32 @@ class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidato
                 avec_complements_formation=self.avec_complements_formation,
                 complements_formation=self.complements_formation,
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutChecklist
+
+    titres_acces_selectionnes: List[TitreAccesSelectionnable]
+
+    condition_acces: Optional[ConditionAcces]
+    millesime_condition_acces: Optional[int]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldTitreAccesEtreSelectionne(
+                statut=self.statut,
+                titres_acces_selectionnes=self.titres_acces_selectionnes,
+            ),
+            ShouldConditionAccesEtreSelectionne(
+                statut=self.statut,
+                condition_acces=self.condition_acces,
+                millesime_condition_acces=self.millesime_condition_acces,
             ),
         ]
 

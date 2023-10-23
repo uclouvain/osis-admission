@@ -53,6 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -177,19 +178,20 @@ def reduce_list_separated(arg1, arg2, separator=", "):
 
 
 @register_panel('panel.html', takes_context=True)
-def panel(context, title='', title_level=4, additional_class='', edit_button='', **kwargs):
+def panel(context, title='', title_level=4, additional_class='', edit_link_button='', **kwargs):
     """
     Template tag for panel
     :param title: the panel title
     :param title_level: the title level
     :param additional_class: css class to add
+    :param edit_link_button: url of the edit button
     :type context: django.template.context.RequestContext
     """
     context['title'] = title
     context['title_level'] = title_level
     context['additional_class'] = additional_class
-    if edit_button:
-        context['edit_button'] = edit_button
+    if edit_link_button:
+        context['edit_link_button'] = edit_link_button
     context['attributes'] = {k.replace('_', '-'): v for k, v in kwargs.items()}
     return context
 
@@ -929,3 +931,17 @@ def is_profile_coordinates_different(profil_candidat, coordonnees):
             profil_candidat.nom_pays != coordonnees.domicile_legal.nom_pays,
         )
     )
+
+
+@register.inclusion_tag(
+    'admission/general_education/includes/checklist/parcours_row_access_title.html',
+    takes_context=True,
+)
+def access_title_checkbox(context, experience_uuid, experience_type, current_year):
+    access_title: Optional[TitreAccesSelectionnableDTO] = context['access_titles'].get(experience_uuid)
+    if access_title and access_title.annee == current_year:
+        return {
+            'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
+            'checked': access_title.selectionne,
+            'experience_uuid': experience_uuid,
+        }

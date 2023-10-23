@@ -74,6 +74,7 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
     EmplacementDocumentRepository,
 )
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
+from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
@@ -413,6 +414,32 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             historique=HistoriqueFormationGenerale(),
+        )
+    ),
+    ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+    ),
+    SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+    ),
+    SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
+        lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        cmd,
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+    ),
+    RecupererTitresAccesSelectionnablesPropositionQuery: (
+        lambda msg_bus, cmd: recuperer_titres_acces_selectionnables_proposition(
+            cmd,
+            titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
         )
     ),
 }

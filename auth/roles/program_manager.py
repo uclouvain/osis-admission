@@ -111,6 +111,7 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_checklist': is_part_of_education_group & is_submitted,
             'admission.checklist_change_faculty_decision': is_part_of_education_group & in_fac_status_extended,
             'admission.checklist_faculty_decision_transfer_to_sic': is_part_of_education_group & in_fac_status,
+            'admission.checklist_select_access_title': is_part_of_education_group & in_fac_status_extended,
             'admission.view_debug_info': is_part_of_education_group & is_debug,
             # Exports
             'admission.download_doctorateadmission_pdf_recap': is_part_of_education_group,

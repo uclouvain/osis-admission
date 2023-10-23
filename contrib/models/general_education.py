@@ -34,6 +34,11 @@ from rest_framework.settings import api_settings
 from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd.admission.domain.model.enums.equivalence import (
+    TypeEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    EtatEquivalenceTitreAcces,
+)
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -41,6 +46,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
+from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 from osis_document.contrib import FileField
 
@@ -227,6 +233,47 @@ class GeneralEducationAdmission(BaseAdmission):
         on_delete=models.PROTECT,
         to='admission.DiplomaticPost',
         verbose_name=_('Diplomatic post'),
+    )
+    admission_requirement = models.CharField(
+        choices=ConditionAcces.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Admission requirement'),
+    )
+    admission_requirement_year = models.ForeignKey(
+        to="base.AcademicYear",
+        related_name="+",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_('Admission requirement year'),
+    )
+    foreign_access_title_equivalency_type = models.CharField(
+        choices=TypeEquivalenceTitreAcces.choices(),
+        blank=True,
+        default='',
+        max_length=50,
+        verbose_name=_('Foreign access title equivalence type'),
+    )
+    foreign_access_title_equivalency_status = models.CharField(
+        choices=StatutEquivalenceTitreAcces.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Foreign access title equivalence status'),
+    )
+    foreign_access_title_equivalency_state = models.CharField(
+        choices=EtatEquivalenceTitreAcces.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Foreign access title equivalence state'),
+    )
+    foreign_access_title_equivalency_effective_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_('Foreign access title equivalence effective date'),
     )
 
     class Meta:
