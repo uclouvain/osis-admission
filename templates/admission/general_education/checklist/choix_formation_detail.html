@@ -31,7 +31,7 @@
      hx-swap="outerHTML"
      hx-push-url="false"
 >
-  {% panel _("Proposition features") edit_button=edit_choix_formation_url %}
+  {% panel _("Proposition features") edit_link_button=edit_choix_formation_url %}
     {% field_data _("Proposition type") admission.type|enum_display:'TypeDemande' %}
     {% field_data _("Academic year") admission.annee_calculee|get_short_academic_year %}
     <dl>

@@ -306,12 +306,14 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
         related_name='valuated_from_admission',
         verbose_name=_('The professional experiences that have been valuated from this admission.'),
+        through='AdmissionProfessionalValuatedExperiences',
     )
     educational_valuated_experiences = models.ManyToManyField(
         'osis_profile.EducationalExperience',
         blank=True,
         related_name='valuated_from_admission',
         verbose_name=_('The educational experiences that have been valuated from this admission.'),
+        through='AdmissionEducationalValuatedExperiences',
     )
     detailed_status = models.JSONField(
         default=dict,
@@ -359,7 +361,11 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         on_delete=models.SET_NULL,
         verbose_name=_('The person whose the secondary studies have been valuated by this admission'),
     )
-
+    are_secondary_studies_access_title = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Are the secondary studies the access title for this admission?'),
+    )
     confirmation_elements = models.JSONField(
         blank=True,
         default=dict,
@@ -443,6 +449,46 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
 
     def __str__(self):
         return '{:07,}'.format(self.reference).replace(',', '.')
+
+
+class AdmissionEducationalValuatedExperiences(models.Model):
+    baseadmission = models.ForeignKey(
+        BaseAdmission,
+        on_delete=models.CASCADE,
+        to_field='uuid',
+    )
+
+    educationalexperience = models.ForeignKey(
+        'osis_profile.EducationalExperience',
+        on_delete=models.CASCADE,
+        to_field='uuid',
+        related_name='educational_valuated_experiences',
+    )
+
+    is_access_title = models.BooleanField(
+        default=False,
+        verbose_name=_('Is access title of the proposition?'),
+    )
+
+
+class AdmissionProfessionalValuatedExperiences(models.Model):
+    baseadmission = models.ForeignKey(
+        BaseAdmission,
+        on_delete=models.CASCADE,
+        to_field='uuid',
+    )
+
+    professionalexperience = models.ForeignKey(
+        'osis_profile.ProfessionalExperience',
+        on_delete=models.CASCADE,
+        to_field='uuid',
+        related_name='professional_valuated_experiences',
+    )
+
+    is_access_title = models.BooleanField(
+        default=False,
+        verbose_name=_('Is access title of the proposition?'),
+    )
 
 
 @receiver(post_save, sender=EducationGroupYear)

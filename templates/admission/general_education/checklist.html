@@ -28,7 +28,11 @@
 {% block actions %}{% endblock %}
 
 {% block tab_content %}
-  <div id="three-pane-checklist">
+  <div
+      id="three-pane-checklist"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-push-url="false"
+  >
     <div id="shortcuts" class="btn-group" data-toggle="buttons">
       <label class="btn btn-default active">
         <input id="documents-shortcut" type="radio" name="shortcut" autocomplete="off" checked>
@@ -51,7 +55,6 @@
     <div
         id="tabs-content"
         class="tab-content"
-        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
     >
       {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation next_url=next_base_url|add:'assimilation' %}
         <div role="tabpanel" class="tab-pane in active" id="assimilation">
@@ -210,9 +213,16 @@
       {% endwith %}
       {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur %}
         <div role="tabpanel" class="tab-pane" id="parcours_anterieur">
-          <p>{% trans "This page is currently under construction." %}</p>
+          {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
+          {% bootstrap_form comment_forms.parcours_anterieur %}
+          {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' %}
+          {% panel _("Previous experience") %}
+            {% include "admission/general_education/includes/checklist/parcours.html" with tab='parcours_anterieur' %}
+          {% endpanel %}
           <div class="info-part">
+            {# TODO add here the financeability part when available #}
           </div>
+          {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
         </div>
       {% endwith %}
       {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation %}
@@ -232,7 +242,7 @@
 
           <div class="info-part">
             {% if resume_proposition.identification.est_concerne_par_visa %}
-              {% panel _("Visa") edit_button="#" %}
+              {% panel _("Visa") edit_link_button="#" %}
                 {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
               {% endpanel %}
             {% endif %}
@@ -319,6 +329,10 @@
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
   <script src="{% static 'admission/ckeditor.js' %}"></script>
   <script>
+      // Prevent to save the DOM in cache when using htmx requests
+      htmx.config.refreshOnHistoryMiss = true;
+      htmx.config.historyCacheSize = 0;
+
       (function ($) {
           const defaultTab = window.location.hash || '#donnees_personnelles';
 
@@ -366,12 +380,13 @@
 
               // refresh info viewer (e.target = active && e.relatedTarget = previous)
               if (configurationCache.getItem('side-tab', 'documents') === 'info') {
-                  // move old info to old tab
-                  const oldTabPaneId = $(e.relatedTarget).parent().attr('href');
                   const $info = $('#info-viewer-tab .info-content');
-                  $(oldTabPaneId).find(' .info-part').html($info.html());
-                  $info.html($(tabPaneId).find('.info-part').html());
-                  $(tabPaneId).find('.info-part').html('');
+                  // move old info from info viewer to old tab
+                  const oldTabPanel = $($(e.relatedTarget).parent().attr('href')).find('.info-part');
+                  $info.children().detach().appendTo(oldTabPanel);
+                  // move new info from current tab to info viewer
+                  const currentTabPanel = $(tabPaneId).find('.info-part');
+                  currentTabPanel.children().detach().appendTo($info);
               }
           });
 
@@ -423,17 +438,15 @@
               // move the current tab's info-part to the side
               configurationCache.setItem('side-tab', 'info');
               const $tabInfo = $('#tabs-content .tab-pane.active .info-part');
-              $info.html($tabInfo.html());
+              $tabInfo.children().detach().appendTo($info);
               $('#info-viewer-tab').show();
-              $tabInfo.empty();
               $('#document-viewer-tab').hide();
           });
           $('#documents-shortcut').change(function () {
               // move back the current tab's info-part
               configurationCache.setItem('side-tab', 'documents');
-              $('#tabs-content .tab-pane.active .info-part').html($info.html());
+              $info.children().detach().appendTo($('#tabs-content .tab-pane.active .info-part'));
               $('#info-viewer-tab').hide();
-              $info.empty();
               $('#document-viewer-tab').show();
               $('.osis-document-editor .editor-container').each(function () {
                   this.dispatchEvent(new CustomEvent('setScale', { detail: 'auto' }));
@@ -592,6 +605,23 @@
                   CKEDITOR.instances[editor].updateElement();
               }
           });
+
+          {# Access title events #}
+          $('.parcours').on('formValidation', function(event) {
+              {# As the list of the past experiences appears in different places, when we select an experience in one #}
+              {# list, we have to update the checkboxes related to this same experience in the other lists #}
+              if (event.originalEvent.detail.is_valid) {
+                  const elt = event.target;
+
+                  if (!elt) return;
+
+                  const accessTitleClass = Array.from(elt.classList).find(c => c.startsWith('access-title-'));
+                  if (accessTitleClass) {
+                      $('.' + accessTitleClass).prop('checked', elt.checked);
+                  }
+              }
+          })
+
       })(jQuery);
   </script>
 {% endblock script %}

@@ -231,6 +231,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             if candidate.graduated_from_high_school_year
             else None,
             diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                uuid=belgian_high_school_diploma.uuid,
                 diplome=belgian_high_school_diploma.high_school_diploma,
                 type_enseignement=belgian_high_school_diploma.educational_type,
                 autre_type_enseignement=belgian_high_school_diploma.educational_other,
@@ -245,6 +246,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             if belgian_high_school_diploma
             else None,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
+                uuid=foreign_high_school_diploma.uuid,
                 type_diplome=foreign_high_school_diploma.foreign_diploma_type,
                 regime_linguistique=foreign_high_school_diploma.linguistic_regime.code
                 if foreign_high_school_diploma.linguistic_regime
@@ -270,6 +272,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             if foreign_high_school_diploma
             else None,
             alternative_secondaires=AlternativeSecondairesDTO(
+                uuid=high_school_diploma_alternative.uuid,
                 examen_admission_premier_cycle=high_school_diploma_alternative.first_cycle_admission_exam,
             )
             if high_school_diploma_alternative

@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Dict, Set
+from typing import Dict, Set, Optional
 
 from django.conf import settings
 from django.db.models import QuerySet
@@ -66,6 +66,11 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverPropositionParFaculteAvecNouvellesInformationsCommand,
     RecupererListePaiementsPropositionQuery,
     EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
+    ModifierStatutChecklistParcoursAnterieurCommand,
+    SpecifierConditionAccesPropositionCommand,
+    SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
+    SpecifierExperienceEnTantQueTitreAccesCommand,
+    RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -75,7 +80,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
 )
-from admission.forms.admission.checklist import ChoixFormationForm
+from admission.forms.admission.checklist import (
+    ChoixFormationForm,
+    StatusForm,
+    PastExperiencesAdmissionRequirementForm,
+    PastExperiencesAdmissionAccessTitleForm,
+)
 from admission.forms.admission.checklist import (
     CommentForm,
     AssimilationForm,
@@ -95,6 +105,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_profile.models import EducationalExperience
 
 __all__ = [
     'ChecklistView',
@@ -109,12 +120,15 @@ __all__ = [
     'FacultyRefusalDecisionView',
     'FacultyApprovalDecisionView',
     'FacultyDecisionSendToSicView',
+    'PastExperiencesStatusView',
+    'PastExperiencesAdmissionRequirementView',
+    'PastExperiencesAccessTitleEquivalencyView',
+    'PastExperiencesAccessTitleView',
 ]
 
 
 __namespace__ = False
 
-from osis_profile.models import EducationalExperience
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
 
@@ -220,6 +234,31 @@ class RequestApplicationFeesContextDataMixin(CheckListDefaultContextMixin):
             context['request_message_body'] = mail_template.body_as_html(tokens)
 
         return context
+
+
+class PastExperiencesMixin:
+    @cached_property
+    def past_experiences_admission_requirement_form(self):
+        return PastExperiencesAdmissionRequirementForm(instance=self.admission, data=self.request.POST or None)
+
+    @cached_property
+    def past_experiences_admission_access_title_equivalency_form(self):
+        return PastExperiencesAdmissionAccessTitleForm(instance=self.admission, data=self.request.POST or None)
+
+    @cached_property
+    def access_titles(self):
+        return message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=self.kwargs['uuid'],
+            )
+        )
+
+    @property
+    def access_title_url(self):
+        return resolve_url(
+            f'{self.base_namespace}:past-experiences-access-title',
+            uuid=self.kwargs['uuid'],
+        )
 
 
 # Fac decision
@@ -493,7 +532,12 @@ class FacultyApprovalDecisionView(
         return super().form_valid(form)
 
 
-class ChecklistView(FacultyDecisionMixin, RequestApplicationFeesContextDataMixin, TemplateView):
+class ChecklistView(
+    PastExperiencesMixin,
+    FacultyDecisionMixin,
+    RequestApplicationFeesContextDataMixin,
+    TemplateView,
+):
     urlpatterns = 'checklist'
     template_name = "admission/general_education/checklist.html"
     permission_required = 'admission.view_checklist'
@@ -516,7 +560,14 @@ class ChecklistView(FacultyDecisionMixin, RequestApplicationFeesContextDataMixin
                 'ATTESTATION_INSCRIPTION_REGULIERE',
                 'FORMULAIRE_MODIFICATION_INSCRIPTION',
             },
-            'parcours_anterieur': set(),
+            'parcours_anterieur': {
+                'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
+                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE',
+                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE',
+                'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE',
+                'DIPLOME_EQUIVALENCE',
+                'CURRICULUM',
+            },
             'donnees_personnelles': assimilation_documents,
             'specificites_formation': set(),
             'decision_facultaire': {
@@ -607,6 +658,15 @@ class ChecklistView(FacultyDecisionMixin, RequestApplicationFeesContextDataMixin
             # Experiences
             context['experiences'] = self._get_experiences(command_result.resume)
 
+            # Access titles
+            context['access_title_url'] = self.access_title_url
+            context['access_titles'] = self.access_titles
+
+            context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
+            context[
+                'past_experiences_admission_access_title_equivalency_form'
+            ] = self.past_experiences_admission_access_title_equivalency_form
+
         return context
 
     def _get_experiences(self, resume):
@@ -641,8 +701,16 @@ class ChecklistView(FacultyDecisionMixin, RequestApplicationFeesContextDataMixin
             experiences.setdefault(annee, []).extend(experiences_annee)
 
         etudes_secondaires = resume.etudes_secondaires
-        if etudes_secondaires and etudes_secondaires.annee_diplome_etudes_secondaires:
-            experiences.setdefault(etudes_secondaires.annee_diplome_etudes_secondaires, []).append(etudes_secondaires)
+        if etudes_secondaires:
+            if etudes_secondaires.annee_diplome_etudes_secondaires:
+                experiences.setdefault(etudes_secondaires.annee_diplome_etudes_secondaires, []).append(
+                    etudes_secondaires
+                )
+            elif (
+                etudes_secondaires.alternative_secondaires
+                and etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle
+            ):
+                experiences.setdefault(0, []).append(etudes_secondaires)
 
         experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
 
@@ -696,6 +764,187 @@ class ApplicationFeesView(
             message_bus_instance.invoke(cmd)
         except BusinessException as exception:
             self.message_on_failure = exception.message
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class PastExperiencesStatusView(
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'past-experiences-status'
+    urlpatterns = {'past-experiences-change-status': 'past-experiences-change-status/<str:status>'}
+    permission_required = 'admission.checklist_change_past_experiences'
+    template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
+    form_class = StatusForm
+
+    def get_initial(self):
+        return self.admission.checklist['current']['parcours_anterieur']['statut']
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['data'] = self.kwargs
+        return kwargs
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                ModifierStatutChecklistParcoursAnterieurCommand(
+                    uuid_proposition=self.admission_uuid,
+                    statut=form.cleaned_data['status'],
+                )
+            )
+        except MultipleBusinessExceptions:
+            self.message_on_failure = _(
+                "To move to this state, an admission requirement must have been selected and at least one access title "
+                "line must be selected in the past experience views.",
+            )
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class PastExperiencesAdmissionRequirementView(
+    PastExperiencesMixin,
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'past-experiences-admission-requirement'
+    urlpatterns = 'past-experiences-admission-requirement'
+    permission_required = 'admission.checklist_change_past_experiences'
+    template_name = (
+        'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html'
+    )
+    htmx_template_name = (
+        'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html'
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['past_experiences_admission_requirement_form'] = context['form']
+        return context
+
+    def get_form(self, form_class=None):
+        return self.past_experiences_admission_requirement_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierConditionAccesPropositionCommand(
+                    uuid_proposition=self.admission_uuid,
+                    condition_acces=form.cleaned_data['admission_requirement'],
+                    millesime_condition_acces=form.cleaned_data['admission_requirement_year']
+                    and form.cleaned_data['admission_requirement_year'].year,
+                )
+            )
+
+            # The admission requirement year can be updated via the command
+            form.data = {
+                'admission_requirement': self.admission.admission_requirement,
+                'admission_requirement_year': self.admission.admission_requirement_year_id,
+            }
+
+        except BusinessException as exception:
+            self.message_on_failure = exception.message
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class PastExperiencesAccessTitleView(
+    PastExperiencesMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'past-experiences-access-title'
+    urlpatterns = 'past-experiences-access-title'
+    permission_required = 'admission.checklist_select_access_title'
+    template_name = 'admission/general_education/includes/checklist/parcours_row_access_title.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/parcours_row_access_title.html'
+    form_class = Form
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.checked: Optional[bool] = None
+        self.experience_uuid: str = ''
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['checked'] = self.checked
+        context['url'] = self.request.get_full_path()
+        context['experience_uuid'] = self.request.GET.get('experience_uuid')
+        return context
+
+    def form_valid(self, form):
+        experience_type = self.request.GET.get('experience_type')
+        self.experience_uuid = self.request.GET.get('experience_uuid')
+        self.checked = 'access-title' in self.request.POST
+        try:
+            message_bus_instance.invoke(
+                SpecifierExperienceEnTantQueTitreAccesCommand(
+                    uuid_proposition=self.admission_uuid,
+                    uuid_experience=self.experience_uuid,
+                    selectionne=self.checked,
+                    type_experience=experience_type,
+                )
+            )
+
+        except BusinessException as exception:
+            self.message_on_failure = exception.message
+            self.checked = not self.checked
+            return super().form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class PastExperiencesAccessTitleEquivalencyView(
+    PastExperiencesMixin,
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'past-experiences-access-title-equivalency'
+    urlpatterns = 'past-experiences-access-title-equivalency'
+    permission_required = 'admission.checklist_change_past_experiences'
+    template_name = (
+        'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html'
+    )
+    htmx_template_name = (
+        'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html'
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['past_experiences_admission_access_title_equivalency_form'] = context['form']
+        return context
+
+    def get_form(self, form_class=None):
+        return self.past_experiences_admission_access_title_equivalency_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(
+                    uuid_proposition=self.admission_uuid,
+                    type_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_type'],
+                    statut_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_status'],
+                    etat_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_state'],
+                    date_prise_effet_equivalence_titre_acces=form.cleaned_data[
+                        'foreign_access_title_equivalency_effective_date'
+                    ],
+                )
+            )
+
+        except MultipleBusinessExceptions as exception:
+            self.message_on_failure = exception.exceptions.pop().message
             return super().form_invalid(form)
 
         return super().form_valid(form)

@@ -183,3 +183,19 @@ class InformationsVisaNonCompleteesException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Mandatory fields are missing in the 'Additional information > Visa' tab.")
         super().__init__(message, **kwargs)
+
+
+class TitreAccesEtreSelectionneException(BusinessException):
+    status_code = "FORMATION-GENERALE-21"
+
+    def __init__(self, **kwargs):
+        message = _("You must choose a title of access among the previous experiences of the candidate.")
+        super().__init__(message, **kwargs)
+
+
+class ConditionAccesEtreSelectionneException(BusinessException):
+    status_code = "FORMATION-GENERALE-22"
+
+    def __init__(self, **kwargs):
+        message = _("You must choose an admission requirement.")
+        super().__init__(message, **kwargs)
