@@ -24,7 +24,7 @@
 {% endcomment %}
 
 <ul id="checklist-menu" class="list-group" hx-swap-oob="true">
-  {% for checklist_item_name, checklist_item in original_admission.checklist.initial.items %}
+  {% for checklist_item_name, checklist_item in original_admission.checklist.initial|get_ordered_checklist_items %}
     {% with initial=original_admission.checklist.initial|get_item:checklist_item_name current=original_admission.checklist.current|get_item:checklist_item_name %}
       {% firstof current.statut initial.statut as statut %}
       <li

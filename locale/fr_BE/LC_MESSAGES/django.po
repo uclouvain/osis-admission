@@ -2608,6 +2608,10 @@ msgstr "Nom du siège social"
 msgid "Help text"
 msgstr "Texte d'aide"
 
+msgctxt "tab"
+msgid "History"
+msgstr "Historique"
+
 msgid "Home"
 msgstr "Accueil"
 

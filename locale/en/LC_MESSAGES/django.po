@@ -2391,6 +2391,10 @@ msgstr ""
 msgid "Help text"
 msgstr ""
 
+msgctxt "tab"
+msgid "History"
+msgstr ""
+
 msgid "Home"
 msgstr ""
 

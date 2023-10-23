@@ -28,7 +28,6 @@ from typing import Optional
 
 from django.utils.translation import gettext_noop as _
 
-from admission.ddd import PLUS_5_ISO_CODES, BE_ISO_CODE
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation, Onglets

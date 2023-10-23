@@ -56,6 +56,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
 )
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -302,7 +303,6 @@ TAB_TREES = {
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
-            Tab('internal-note', _('Internal notes'), 'note-sticky'),
             Tab('debug', _('Debug'), 'bug'),
         ],
         Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
@@ -311,11 +311,18 @@ TAB_TREES = {
         # TODO Documents
     },
     CONTEXT_GENERAL: {
+        Tab('checklist', _('Checklist'), 'list-check'): [
+            Tab('checklist', _('Checklist'), 'list-check'),
+        ],
         Tab('documents', _('Documents'), 'folder-open'): [
             Tab('documents', _('Documents'), 'folder-open'),
         ],
-        Tab('checklist', _('Checklist'), 'list-check'): [
-            Tab('checklist', _('Checklist'), 'list-check'),
+        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        ],
+        Tab('history', pgettext('tab', 'History'), 'history'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
         ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
@@ -324,21 +331,8 @@ TAB_TREES = {
         Tab('general-education', _('Course choice'), 'person-chalkboard'): [
             Tab('training-choice', _('Course choice')),
         ],
-        Tab('education', _('Previous experience'), 'list-alt'): [
-            Tab('education', _('Previous experience'), 'list-alt'),
-        ],
         Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
             Tab('accounting', _('Accounting')),
-        ],
-        Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('debug', _('Debug'), 'bug'),
-            Tab('history-all', _('All history')),
-            Tab('history', _('Status changes')),
-            Tab('send-mail', _('Send a mail')),
-            Tab('internal-note', _('Internal notes'), 'note-sticky'),
-        ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
         ],
     },
     CONTEXT_CONTINUING: {
@@ -378,10 +372,6 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
         if Tab('checklist') in valid_sub_tabs:
             if permission_obj.status not in STATUTS_PROPOSITION_GENERALE_SOUMISE:
                 valid_sub_tabs.remove(Tab('checklist'))
-
-        # Add dynamic badge on parent for internal notes
-        if Tab('internal-note') in valid_sub_tabs:
-            parent_tab.badge = permission_obj.internalnote_set.count()
 
         # Add dynamic badge for comments
         if parent_tab == Tab('comments'):
@@ -841,6 +831,12 @@ def get_country_name(country: Optional[Country]):
     if not country:
         return ''
     return getattr(country, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
+
+
+@register.filter
+def get_ordered_checklist_items(checklist_items: dict):
+    """Return the ordered checklist items."""
+    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])
 
 
 @register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
