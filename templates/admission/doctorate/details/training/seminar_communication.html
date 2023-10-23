@@ -57,7 +57,7 @@
       {% if activity.participating_proof %}
         <div class="form-group">
           <strong class="d-block">{% trans "Certificate of participation in the presentation" %}</strong>
-          {% document_visualizer activity.participating_proof %}
+          {% document_visualizer activity.participating_proof for_modified_upload=True %}
         </div>
       {% endif %}
       {% if activity.comment %}

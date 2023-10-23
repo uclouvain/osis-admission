@@ -140,7 +140,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
 
         patcher = patch('osis_document.api.utils.get_remote_tokens')
         patched = patcher.start()
-        patched.side_effect = lambda uuids: {
+        patched.side_effect = lambda uuids, **kwargs: {
             document_uuid: self.tokens_by_uuid.get(document_uuid, f'token-{index}')
             for index, document_uuid in enumerate(uuids)
         }

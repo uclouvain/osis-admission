@@ -35,7 +35,7 @@ class EmplacementsDocumentsPropositionTranslator(IEmplacementsDocumentsPropositi
     def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> Dict[str, Dict]:
         from osis_document.api.utils import get_remote_tokens, get_several_remote_metadata
 
-        tokens = get_remote_tokens(uuids_documents)
+        tokens = get_remote_tokens(uuids_documents, for_modified_upload=True)
         metadata = get_several_remote_metadata(list(tokens.values()))
 
         return {

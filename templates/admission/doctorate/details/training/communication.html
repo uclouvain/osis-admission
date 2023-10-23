@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@
       {% if activity.summary %}
         <div class="form-group">
           <strong class="d-block">{% trans "Summary of the communication" %}</strong>
-          {% document_visualizer activity.summary %}
+          {% document_visualizer activity.summary for_modified_upload=True %}
         </div>
       {% endif %}
       {% if activity.committee %}
@@ -71,7 +71,7 @@
       {% if activity.acceptation_proof %}
         <div class="form-group">
           <strong class="d-block">{% trans "Proof of acceptation by the committee" %}</strong>
-          {% document_visualizer activity.acceptation_proof %}
+          {% document_visualizer activity.acceptation_proof for_modified_upload=True %}
         </div>
       {% endif %}
       <div class="row">
@@ -91,7 +91,7 @@
       {% if activity.participating_proof %}
         <div class="form-group">
           <strong class="d-block">{% trans "Communication attestation" %}</strong>
-          {% document_visualizer activity.participating_proof %}
+          {% document_visualizer activity.participating_proof for_modified_upload=True %}
         </div>
       {% endif %}
       {% if activity.comment %}
