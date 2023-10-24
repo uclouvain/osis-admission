@@ -46,20 +46,20 @@
       <div class="col-md-4">
         {% bootstrap_field form.gender form_group_class="form-group required_field" %}
       </div>
+      <div class="col-md-4">
+        {% bootstrap_field form.civil_state form_group_class="form-group required_field" %}
+      </div>
     </div>
 
     <div class="row">
-      <div class="col-md-3">
+      <div class="col-md-4">
         {% bootstrap_field form.birth_date form_group_class="form-group required_field" %}
       </div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         {% bootstrap_field form.unknown_birth_date %}
       </div>
-      <div class="col-md-3" id="birth_year">
+      <div class="col-md-4" id="birth_year">
         {% bootstrap_field form.birth_year form_group_class="form-group required_field" %}
-      </div>
-      <div class="col-md-3">
-        {% bootstrap_field form.civil_state form_group_class="form-group required_field" %}
       </div>
     </div>
     <div class="row">
