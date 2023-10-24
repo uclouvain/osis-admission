@@ -43,7 +43,7 @@ class DiplomaticPostFactory(DjangoModelFactory):
         Returns:
             int: the first available ID to use for instances of this factory.
         """
-        return (DiplomaticPost.objects.aggregate(Max('code'))['code__max'] or 0) + 1
+        return (DiplomaticPost.objects.aggregate(Max('code'))['code__max'] or 0) + 1000
 
     class Meta:
         model = DiplomaticPost
