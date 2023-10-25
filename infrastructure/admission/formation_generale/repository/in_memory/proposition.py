@@ -274,6 +274,10 @@ class PropositionInMemoryRepository(
             certificat_approbation_fac=proposition.certificat_approbation_fac,
             documents_additionnels=proposition.documents_additionnels,
             poste_diplomatique=poste_diplomatique,
+            financabilite_regle_calcule=proposition.financabilite_regle_calcule,
+            financabilite_regle_calcule_le=proposition.financabilite_regle_calcule_le,
+            financabilite_regle=proposition.financabilite_regle,
+            financabilite_regle_etabli_par=proposition.financabilite_regle_etabli_par,
         )
 
     @classmethod

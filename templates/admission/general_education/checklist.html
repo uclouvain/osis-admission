@@ -104,10 +104,36 @@
 
       {% with initial=original_admission.checklist.initial.financabilite current=original_admission.checklist.current.financabilite %}
         <div role="tabpanel" class="tab-pane" id="financabilite">
-          <p>{% trans "This page is currently under construction." %}</p>
+
+          {% include "admission/general_education/includes/checklist/financabilite.html" %}
+
           <div class="info-part">
+            <dl>
+              <dt>{% trans "Course" context 'admission' %}</dt>
+              <dd>
+                {% with formation=admission.formation %}
+                  {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
+                    {{ formation.sigle }}-1 - {% trans "First year of" %} {{ formation.intitule|lower }} ({{ formation.campus }})
+                  {% else %}
+                    {{ formation.sigle }} - {{ formation.intitule }} ({{ formation.campus }})
+                  {% endif %}
+                {% endwith %}
+              </dd>
+
+              <dt>{% trans "Number of previous registration" context 'admission' %}</dt>
+              <dd>{{ financabilite.inscription_precedentes }}</dd>
+
+              <dt>{% trans "Number of additional years the candidate can have" context 'admission' %}</dt>
+              <dd>{{ financabilite.inscription_supplementaire }}</dd>
+            </dl>
+
+            {% panel _("Parcours") %}
+            {% include "admission/general_education/includes/checklist/parcours.html" with prefix="financabilite" default_tab="financabilite" %}
+            {% endpanel %}
           </div>
         </div>
+
+        {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' %}
       {% endwith %}
 
       {% with next_url=next_base_url|add:'frais_dossier' %}
@@ -180,7 +206,7 @@
           </div>
 
           {% bootstrap_form comment_forms.choix_formation %}
-          {% include "admission/general_education/checklist/choix_formation_detail.html" %}
+          {% include "admission/general_education/includes/checklist/choix_formation_detail.html" %}
 
           <div class="info-part">
             {% field_data _("Proposition submission") admission.soumise_le %}
@@ -217,7 +243,7 @@
           {% bootstrap_form comment_forms.parcours_anterieur %}
           {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' %}
           {% panel _("Previous experience") %}
-            {% include "admission/general_education/includes/checklist/parcours.html" with tab='parcours_anterieur' %}
+            {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' %}
           {% endpanel %}
           <div class="info-part">
             {# TODO add here the financeability part when available #}

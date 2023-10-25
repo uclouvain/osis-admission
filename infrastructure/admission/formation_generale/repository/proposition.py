@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from contextlib import suppress
 from enum import Enum
 from typing import List, Optional, Union
 
@@ -167,6 +168,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
         candidate = Person.objects.get(global_id=entity.matricule_candidat)
 
+        financabilite_regle_etabli_par_person = None
+        if entity.financabilite_regle_etabli_par:
+            with suppress(Person.DoesNotExist):
+                financabilite_regle_etabli_par_person = Person.objects.get(uuid=entity.financabilite_regle_etabli_par)
+
         scholarships_uuids = list(
             scholarship.uuid
             for scholarship in [
@@ -228,6 +234,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     or {},
                 },
                 'cycle_pursuit': entity.poursuite_de_cycle.name,
+                'financability_computed_rule': entity.financabilite_regle_calcule,
+                'financability_computed_rule_on': entity.financabilite_regle_calcule_le,
+                'financability_rule': entity.financabilite_regle,
+                'financability_rule_established_by': financabilite_regle_etabli_par_person,
                 'fac_approval_certificate': entity.certificat_approbation_fac,
                 'fac_refusal_certificate': entity.certificat_refus_fac,
                 'other_refusal_reasons': entity.autres_motifs_refus,
@@ -401,6 +411,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
             motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
             autres_motifs_refus=admission.other_refusal_reasons,
+            financabilite_regle_calcule=admission.financability_computed_rule,
+            financabilite_regle_calcule_le=admission.financability_computed_rule_on,
+            financabilite_regle=admission.financability_rule,
+            financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
+            if admission.financability_rule_established_by
+            else None,
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
             autre_formation_choisie_fac_id=FormationIdentityBuilder.build(
@@ -501,6 +517,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_demandes=admission.requested_documents,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
+            financabilite_regle_calcule=admission.financability_computed_rule,
+            financabilite_regle_calcule_le=admission.financability_computed_rule_on,
+            financabilite_regle=admission.financability_rule,
+            financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
+            if admission.financability_rule_established_by
+            else None,
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
             documents_additionnels=admission.additional_documents,

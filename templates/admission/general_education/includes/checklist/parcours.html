@@ -24,20 +24,20 @@
 {% endcomment %}
 
 <ul class="nav nav-tabs" role="tablist">
-  <li role="presentation" class="active">
-    <a href="#{{ tab }}-parcours-complete" aria-controls="parcours-complete" role="tab" data-toggle="tab">{% trans "Whole view" %}</a>
+  <li role="presentation" {% if not default_tab or default_tab == 'complete' %}class="active"{% endif %}>
+    <a href="#{{ prefix }}-parcours-complete" aria-controls="{{ prefix }}-parcours-complete" role="tab" data-toggle="tab">{% trans "Whole view" %}</a>
   </li>
-  <li role="presentation">
-    <a href="#{{ tab }}-parcours-formations" aria-controls="parcours-formations" role="tab" data-toggle="tab">{% trans "Academics trainings view" %}</a>
+  <li role="presentation" {% if default_tab == 'formations' %}class="active"{% endif %}>
+    <a href="#{{ prefix }}-parcours-formations" aria-controls="{{ prefix }}-parcours-formations" role="tab" data-toggle="tab">{% trans "Academics trainings view" %}</a>
   </li>
-  <li role="presentation">
-    <a href="#{{ tab }}-parcours-financabilite" aria-controls="parcours-financabilite" role="tab" data-toggle="tab">{% trans "Financeability view" %}</a>
+  <li role="presentation" {% if default_tab == 'financabilite' %}class="active"{% endif %}>
+    <a href="#{{ prefix }}-parcours-financabilite" aria-controls="{{ prefix }}-parcours-financabilite" role="tab" data-toggle="tab">{% trans "Financeability view" %}</a>
   </li>
 </ul>
 
-<div id="{{ tab }}-parcours" class="tab-content parcours">
+<div id="{{ prefix }}-parcours" class="tab-content">
   {# Vue complète #}
-  <div role="tabpanel" class="tab-pane active" id="{{ tab }}-parcours-complete">
+  <div role="tabpanel" class="tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ prefix }}-parcours-complete">
     <table class="table">
       <thead>
         <tr>
@@ -63,7 +63,7 @@
   </div>
 
   {# Vue formations académiques #}
-  <div role="tabpanel" class="tab-pane" id="{{ tab }}-parcours-formations">
+  <div role="tabpanel" class="tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
     <table class="table">
       <thead>
         <tr>
@@ -97,7 +97,7 @@
   </div>
 
   {# Vue finançabilité #}
-  <div role="tabpanel" class="tab-pane" id="{{ tab }}-parcours-financabilite">
+  <div role="tabpanel" class="tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ prefix }}-parcours-financabilite">
     <table class="table">
       <thead>
         <tr>
