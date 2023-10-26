@@ -71,6 +71,8 @@ class PersonFormTestCase(TestCase):
             'civil_state': CivilState.MARRIED.name,
             'has_national_number': True,
             'national_number': '01234567899',
+            'id_card_expiry_date': datetime.date(2020, 2, 2),
+            'passport_expiry_date': datetime.date(2020, 2, 2),
         }
 
         # Create some academic years
@@ -377,12 +379,14 @@ class PersonFormTestCase(TestCase):
                 **self.form_data,
                 'has_national_number': False,
                 'national_number': '',
+                'id_card_expiry_date': '',
                 'id_card': ['file-2-token'],
                 'country_of_citizenship': self.belgium_country.pk,
             },
         )
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('national_number', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card_expiry_date', []))
         self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
 
         # The candidate indicated that he has a belgian national number -> the belgian national number is required
@@ -391,11 +395,13 @@ class PersonFormTestCase(TestCase):
                 **self.form_data,
                 'has_national_number': True,
                 'national_number': '',
+                'id_card_expiry_date': '',
                 'id_card': ['file-2-token'],
             },
         )
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('national_number', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card_expiry_date', []))
         self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
 
         form = AdmissionPersonForm(
@@ -403,7 +409,9 @@ class PersonFormTestCase(TestCase):
                 **self.form_data,
                 'has_national_number': True,
                 'national_number': '01234567899',
+                'id_card_expiry_date': datetime.date(2020, 1, 1),
                 'passport_number': '0123456',
+                'passport_expiry_date': datetime.date(2020, 1, 1),
                 'id_card_number': '0123456',
                 'passport': ['file-1-token'],
                 'id_card': ['file-2-token'],
@@ -412,7 +420,9 @@ class PersonFormTestCase(TestCase):
 
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data.get('national_number'), '01234567899')
+        self.assertEqual(form.cleaned_data.get('id_card_expiry_date'), datetime.date(2020, 1, 1))
         self.assertEqual(form.cleaned_data.get('passport_number'), '')
+        self.assertEqual(form.cleaned_data.get('passport_expiry_date'), None)
         self.assertEqual(form.cleaned_data.get('id_card_number'), '')
         self.assertEqual(form.cleaned_data.get('passport'), [])
         self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
@@ -425,11 +435,13 @@ class PersonFormTestCase(TestCase):
                 'has_national_number': False,
                 'identification_type': IdentificationType.ID_CARD_NUMBER.name,
                 'id_card_number': '',
+                'id_card_expiry_date': '',
                 'id_card': ['file-2-token'],
             },
         )
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card_number', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card_expiry_date', []))
         self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
 
         form = AdmissionPersonForm(
@@ -439,15 +451,19 @@ class PersonFormTestCase(TestCase):
                 'has_national_number': False,
                 'identification_type': IdentificationType.ID_CARD_NUMBER.name,
                 'id_card_number': '0123456',
+                'id_card_expiry_date': datetime.date(2020, 1, 1),
                 'id_card': ['file-2-token'],
                 'national_number': '01234567899',
                 'passport_number': '0123456',
+                'passport_expiry_date': datetime.date(2020, 1, 1),
                 'passport': ['file-1-token'],
             },
         )
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data.get('id_card_number'), '0123456')
+        self.assertEqual(form.cleaned_data.get('id_card_expiry_date'), datetime.date(2020, 1, 1))
         self.assertEqual(form.cleaned_data.get('passport_number'), '')
+        self.assertEqual(form.cleaned_data.get('passport_expiry_date'), None)
         self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
         self.assertEqual(form.cleaned_data.get('national_number'), '')
         self.assertEqual(form.cleaned_data.get('passport'), [])
@@ -460,11 +476,13 @@ class PersonFormTestCase(TestCase):
                 'has_national_number': False,
                 'identification_type': IdentificationType.PASSPORT_NUMBER.name,
                 'passport_number': '',
+                'passport_expiry_date': '',
                 'passport': ['file-1-token'],
             },
         )
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport_number', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport_expiry_date', []))
         self.assertEqual(form.cleaned_data.get('passport'), ['file-1-token'])
 
         form = AdmissionPersonForm(
@@ -474,17 +492,21 @@ class PersonFormTestCase(TestCase):
                 'has_national_number': False,
                 'identification_type': IdentificationType.PASSPORT_NUMBER.name,
                 'passport_number': '0123456',
+                'passport_expiry_date': datetime.date(2020, 1, 1),
                 'passport': ['file-1-token'],
                 'id_card_number': '0123456',
                 'national_number': '01234567899',
                 'id_card': ['file-2-token'],
+                'id_card_expiry_date': datetime.date(2020, 1, 1),
             },
         )
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data.get('passport_number'), '0123456')
+        self.assertEqual(form.cleaned_data.get('passport_expiry_date'), datetime.date(2020, 1, 1))
         self.assertEqual(form.cleaned_data.get('id_card_number'), '')
         self.assertEqual(form.cleaned_data.get('id_card'), [])
         self.assertEqual(form.cleaned_data.get('national_number'), '')
+        self.assertEqual(form.cleaned_data.get('id_card_expiry_date'), None)
         self.assertEqual(form.cleaned_data.get('passport'), ['file-1-token'])
 
         # Some data are specified but the type of national number is not -> to clean
@@ -499,6 +521,8 @@ class PersonFormTestCase(TestCase):
                 'id_card_number': '0123456',
                 'national_number': '01234567899',
                 'id_card': ['file-2-token'],
+                'id_card_expiry_date': datetime.date(2020, 1, 1),
+                'passport_expiry_date': datetime.date(2020, 1, 1),
             },
         )
         self.assertFalse(form.is_valid())
@@ -507,6 +531,8 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(form.cleaned_data.get('id_card'), [])
         self.assertEqual(form.cleaned_data.get('national_number'), '')
         self.assertEqual(form.cleaned_data.get('passport'), [])
+        self.assertEqual(form.cleaned_data.get('id_card_expiry_date'), None)
+        self.assertEqual(form.cleaned_data.get('passport_expiry_date'), None)
 
     def test_transform_fields_to_title_case(self):
         form = AdmissionPersonForm(

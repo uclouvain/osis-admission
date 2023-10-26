@@ -40,6 +40,6 @@ class AdmissionPDFRecapExportView(LoadDossierViewMixin, RedirectView):
     permission_required = 'admission.download_doctorateadmission_pdf_recap'
 
     def get(self, request, *args, **kwargs):
-        reading_token = admission_pdf_recap(self.admission, settings.LANGUAGE_CODE)
+        reading_token = admission_pdf_recap(self.admission, settings.LANGUAGE_CODE, with_annotated_documents=True)
         self.url = get_file_url(reading_token)
         return super().get(request, *args, **kwargs)

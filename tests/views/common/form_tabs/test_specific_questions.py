@@ -30,6 +30,7 @@ import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
+from django.utils.translation import gettext
 from rest_framework import status
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
@@ -371,14 +372,14 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         url = resolve_url('admission:general-education:update:specific-questions', uuid=general_admission.uuid)
         detail_url = resolve_url('admission:general-education:specific-questions', uuid=general_admission.uuid)
 
-        # With data
+        # With data -> reinscription
         response = self.client.post(
             url,
             data={
                 'poste_diplomatique': self.diplomatic_post.code,
                 'est_non_resident_au_sens_decret': False,
                 'est_bachelier_belge': True,
-                'est_modification_inscription_externe': True,
+                'est_modification_inscription_externe': False,
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
@@ -397,10 +398,60 @@ class SpecificQuestionsFormViewTestCase(TestCase):
             general_admission.regular_registration_proof,
             [self.file_uuids['attestation_inscription_reguliere']],
         )
+        self.assertEqual(general_admission.is_external_modification, False)
+        self.assertEqual(general_admission.registration_change_form, [])
+
+        # With data -> modification
+        response = self.client.post(
+            url,
+            data={
+                'poste_diplomatique': self.diplomatic_post.code,
+                'est_non_resident_au_sens_decret': False,
+                'est_bachelier_belge': True,
+                'est_modification_inscription_externe': True,
+                'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
+                'est_reorientation_inscription_externe': False,
+                'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+            },
+        )
+
+        self.assertRedirects(response=response, expected_url=detail_url, fetch_redirect_response=False)
+
+        general_admission.refresh_from_db()
+
+        self.assertEqual(general_admission.diplomatic_post, None)
+        self.assertEqual(general_admission.is_non_resident, False)
+        self.assertEqual(general_admission.is_belgian_bachelor, True)
+        self.assertEqual(general_admission.is_external_reorientation, False)
+        self.assertEqual(general_admission.regular_registration_proof, [])
         self.assertEqual(general_admission.is_external_modification, True)
         self.assertEqual(
             general_admission.registration_change_form,
             [self.file_uuids['formulaire_modification_inscription']],
+        )
+
+        # With data -> modification & reorientation
+        response = self.client.post(
+            url,
+            data={
+                'poste_diplomatique': self.diplomatic_post.code,
+                'est_non_resident_au_sens_decret': False,
+                'est_bachelier_belge': True,
+                'est_modification_inscription_externe': True,
+                'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
+                'est_reorientation_inscription_externe': True,
+                'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+        self.assertFalse(form.is_valid())
+
+        self.assertIn(
+            gettext('You cannot ask for both modification and reorientation at the same time.'),
+            form.errors.get('__all__', []),
         )
 
         # No completed field
@@ -421,7 +472,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
             data={
                 'est_non_resident_au_sens_decret': True,
                 'est_bachelier_belge': '',
-                'est_modification_inscription_externe': True,
+                'est_modification_inscription_externe': False,
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
@@ -444,7 +495,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
             data={
                 'est_non_resident_au_sens_decret': True,
                 'est_bachelier_belge': False,
-                'est_modification_inscription_externe': True,
+                'est_modification_inscription_externe': False,
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
                 'est_reorientation_inscription_externe': True,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
@@ -514,7 +565,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
                 'est_bachelier_belge': True,
                 'est_modification_inscription_externe': True,
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
-                'est_reorientation_inscription_externe': True,
+                'est_reorientation_inscription_externe': False,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
             },
         )
@@ -525,11 +576,8 @@ class SpecificQuestionsFormViewTestCase(TestCase):
 
         self.assertEqual(general_admission.is_non_resident, False)
         self.assertEqual(general_admission.is_belgian_bachelor, True)
-        self.assertEqual(general_admission.is_external_reorientation, True)
-        self.assertEqual(
-            general_admission.regular_registration_proof,
-            [self.file_uuids['attestation_inscription_reguliere']],
-        )
+        self.assertEqual(general_admission.is_external_reorientation, False)
+        self.assertEqual(general_admission.regular_registration_proof, [])
         self.assertEqual(general_admission.is_external_modification, True)
         self.assertEqual(
             general_admission.registration_change_form,
@@ -605,7 +653,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
                 'est_bachelier_belge': True,
                 'est_modification_inscription_externe': True,
                 'formulaire_modification_inscription_0': [self.file_uuids['formulaire_modification_inscription']],
-                'est_reorientation_inscription_externe': True,
+                'est_reorientation_inscription_externe': False,
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
             },
         )
@@ -615,11 +663,8 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         general_admission.refresh_from_db()
 
         self.assertEqual(general_admission.is_belgian_bachelor, True)
-        self.assertEqual(general_admission.is_external_reorientation, True)
-        self.assertEqual(
-            general_admission.regular_registration_proof,
-            [self.file_uuids['attestation_inscription_reguliere']],
-        )
+        self.assertEqual(general_admission.is_external_reorientation, False)
+        self.assertEqual(general_admission.regular_registration_proof, [])
         self.assertEqual(general_admission.is_external_modification, True)
         self.assertEqual(
             general_admission.registration_change_form,

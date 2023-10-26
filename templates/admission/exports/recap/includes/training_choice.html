@@ -54,4 +54,7 @@
   {% endpanel %}
 {% endif %}
 
-{% multiple_field_data specific_questions %}
+{% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}
+{% if specific_questions_to_display %}
+  {% multiple_field_data specific_questions %}
+{% endif %}

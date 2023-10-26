@@ -36,6 +36,7 @@ from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
+from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -51,6 +52,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -68,7 +70,6 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.utils import format_academic_year
-from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
@@ -750,6 +751,17 @@ def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], ti
         'all_inline': context.get('all_inline'),
         'load_files': context.get('load_files'),
     }
+
+
+@register.simple_tag
+def need_to_display_specific_questions(configurations: List[QuestionSpecifiqueDTO], hide_files=False):
+    return bool(
+        configurations
+        and (
+            not hide_files
+            or any(configuration.type != TypeItemFormulaire.DOCUMENT.name for configuration in configurations)
+        )
+    )
 
 
 @register.filter

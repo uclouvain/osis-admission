@@ -6445,6 +6445,12 @@ msgstr ""
 "Vous pouvez rechercher un complément de formation par son nom ou son code, "
 "ou bien coller une liste de codes séparés par le caractère \"%(separator)s\"."
 
+msgid ""
+"You cannot ask for both modification and reorientation at the same time."
+msgstr ""
+"Vous ne pouvez pas demander la modification et la réorientation en même "
+"temps."
+
 msgid "You cannot enter a language more than once, please correct the form."
 msgstr ""
 "Vous ne pouvez pas définir une langue plusieurs fois, merci de corriger le "

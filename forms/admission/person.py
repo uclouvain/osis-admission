@@ -334,6 +334,8 @@ class AdmissionPersonForm(AdmissionModelForm):
 
             if not data.get('national_number'):
                 self.add_error('national_number', FIELD_REQUIRED_MESSAGE)
+            if not data.get('id_card_expiry_date'):
+                self.add_error('id_card_expiry_date', FIELD_REQUIRED_MESSAGE)
 
         elif data.get('identification_type') == IdentificationType.ID_CARD_NUMBER.name:
             data['national_number'] = ''
@@ -343,6 +345,8 @@ class AdmissionPersonForm(AdmissionModelForm):
 
             if not data.get('id_card_number'):
                 self.add_error('id_card_number', FIELD_REQUIRED_MESSAGE)
+            if not data.get('id_card_expiry_date'):
+                self.add_error('id_card_expiry_date', FIELD_REQUIRED_MESSAGE)
 
         elif data.get('identification_type') == IdentificationType.PASSPORT_NUMBER.name:
             data['national_number'] = ''
@@ -352,6 +356,8 @@ class AdmissionPersonForm(AdmissionModelForm):
 
             if not data.get('passport_number'):
                 self.add_error('passport_number', FIELD_REQUIRED_MESSAGE)
+            if not data.get('passport_expiry_date'):
+                self.add_error('passport_expiry_date', FIELD_REQUIRED_MESSAGE)
 
         else:
             data['national_number'] = ''
@@ -359,6 +365,8 @@ class AdmissionPersonForm(AdmissionModelForm):
             data['passport_number'] = ''
             data['passport'] = []
             data['id_card'] = []
+            data['id_card_expiry_date'] = None
+            data['passport_expiry_date'] = None
 
             self.add_error('identification_type', FIELD_REQUIRED_MESSAGE)
 

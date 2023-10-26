@@ -5799,6 +5799,10 @@ msgid ""
 "list of acronyms separated by the \"%(separator)s\" character."
 msgstr ""
 
+msgid ""
+"You cannot ask for both modification and reorientation at the same time."
+msgstr ""
+
 msgid "You cannot enter a language more than once, please correct the form."
 msgstr ""
 

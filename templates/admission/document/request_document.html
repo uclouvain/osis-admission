@@ -24,7 +24,7 @@
 {% endcomment %}
 <form
     id="request-form"
-    hx-post="{% url request.resolver_match.namespace|add:':candidate-request' uuid=request.resolver_match.kwargs.uuid identifier=request.resolver_match.kwargs.identifier %}"
+    hx-post="{% url request.resolver_match.namespace|add:':candidate-request' uuid=request.resolver_match.kwargs.uuid identifier=document_identifier %}"
     method="post"
     hx-swap="outerHTML"
 >
