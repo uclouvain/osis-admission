@@ -44,41 +44,44 @@
   {% endpanel %}
 {% endif %}
 
-{% panel _('Specific aspects') %}
-  {% if is_continuing %}
-    {% if proposition.pays_nationalite_ue_candidat == False %}
-      {% field_data _('Copy of residence permit covering entire course, including assessment test (except for online courses).') proposition.copie_titre_sejour %}
-    {% endif %}
-    {% field_data _('You are enrolling as') proposition.inscription_a_titre|enum_display:'ChoixInscriptionATitre' %}
-    {% if proposition.inscription_a_titre == 'PROFESSIONNEL' %}
-      {% field_data _('Head office name') proposition.nom_siege_social %}
-      <div class="row">
-        {% field_data _('Unique business number') proposition.numero_unique_entreprise css_class="col-md-6" %}
-        {% field_data _('VAT number') proposition.numero_tva_entreprise css_class="col-md-6" %}
-      </div>
-      {% field_data _('Your professional email address') proposition.adresse_mail_professionnelle %}
-      {% if proposition.type_adresse_facturation == 'AUTRE' and proposition.adresse_facturation %}
-        {% panel _("Billing address") %}
-          <div class="row">
-            {% field_data _("Street") proposition.adresse_facturation.rue css_class="col-md-4" %}
-            {% trans "Number" context "address" as address_number_label %}
-            {% field_data address_number_label proposition.adresse_facturation.numero_rue css_class="col-md-2" %}
-            {% field_data _("Box") proposition.adresse_facturation.boite_postale css_class="col-md-2" hide_empty=True %}
-          </div>
-          <div class="row">
-            {% field_data _("Country") proposition.adresse_facturation.nom_pays css_class="col-md-4" %}
-            {% field_data _("Postcode") proposition.adresse_facturation.code_postal css_class="col-md-4" %}
-            {% field_data _("City") proposition.adresse_facturation.ville css_class="col-md-4" %}
-          </div>
-        {% endpanel %}
-      {% else %}
-        {% field_data _('Billing address') proposition.type_adresse_facturation|enum_display:'ChoixTypeAdresseFacturation' %}
+{% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}
+{% if is_continuing or not hide_files or hide_files and specific_questions_to_display %}
+  {% panel _('Specific aspects') %}
+    {% if is_continuing %}
+      {% if proposition.pays_nationalite_ue_candidat == False %}
+        {% field_data _('Copy of residence permit covering entire course, including assessment test (except for online courses).') proposition.copie_titre_sejour %}
+      {% endif %}
+      {% field_data _('You are enrolling as') proposition.inscription_a_titre|enum_display:'ChoixInscriptionATitre' %}
+      {% if proposition.inscription_a_titre == 'PROFESSIONNEL' %}
+        {% field_data _('Head office name') proposition.nom_siege_social %}
+        <div class="row">
+          {% field_data _('Unique business number') proposition.numero_unique_entreprise css_class="col-md-6" %}
+          {% field_data _('VAT number') proposition.numero_tva_entreprise css_class="col-md-6" %}
+        </div>
+        {% field_data _('Your professional email address') proposition.adresse_mail_professionnelle %}
+        {% if proposition.type_adresse_facturation == 'AUTRE' and proposition.adresse_facturation %}
+          {% panel _("Billing address") %}
+            <div class="row">
+              {% field_data _("Street") proposition.adresse_facturation.rue css_class="col-md-4" %}
+              {% trans "Number" context "address" as address_number_label %}
+              {% field_data address_number_label proposition.adresse_facturation.numero_rue css_class="col-md-2" %}
+              {% field_data _("Box") proposition.adresse_facturation.boite_postale css_class="col-md-2" hide_empty=True %}
+            </div>
+            <div class="row">
+              {% field_data _("Country") proposition.adresse_facturation.nom_pays css_class="col-md-4" %}
+              {% field_data _("Postcode") proposition.adresse_facturation.code_postal css_class="col-md-4" %}
+              {% field_data _("City") proposition.adresse_facturation.ville css_class="col-md-4" %}
+            </div>
+          {% endpanel %}
+        {% else %}
+          {% field_data _('Billing address') proposition.type_adresse_facturation|enum_display:'ChoixTypeAdresseFacturation' %}
+        {% endif %}
       {% endif %}
     {% endif %}
-  {% endif %}
-  {% multiple_field_data specific_questions title='' %}
-  {% field_data _("You can add any document you feel is relevant to your application (supporting documents, proof of language level, etc.).") proposition.documents_additionnels %}
-{% endpanel %}
+    {% multiple_field_data specific_questions title='' %}
+    {% field_data _("You can add any document you feel is relevant to your application (supporting documents, proof of language level, etc.).") proposition.documents_additionnels %}
+  {% endpanel %}
+{% endif %}
 
 {% if enrolled_for_contingent_training %}
   {% panel _("Enrolment in limited enrolment bachelor's course") %}

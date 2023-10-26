@@ -118,7 +118,7 @@ class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
         return {
             'data': {
                 'file_name': _('Analysis folder'),
-                'file_0': admission_pdf_recap(self.admission, get_language()),
+                'file_0': admission_pdf_recap(self.admission, get_language(), with_annotated_documents=True),
             }
         }
 
@@ -248,6 +248,11 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
     }
     permission_required = 'admission.view_documents_management'
     name = 'document-action'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['document_identifier'] = self.document_identifier
+        return context
 
     @property
     def document_identifier(self):

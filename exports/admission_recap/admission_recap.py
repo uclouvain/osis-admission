@@ -51,6 +51,7 @@ def admission_pdf_recap(
     admission: Union[BaseAdmission, ContinuingEducationAdmission, GeneralEducationAdmission, DoctorateAdmission],
     language: str,
     admission_class: Optional[type] = None,
+    with_annotated_documents=False,
 ):
     """Generates the admission pdf and returns a token to access it."""
     from admission.exports.utils import get_pdf_from_template
@@ -83,7 +84,7 @@ def admission_pdf_recap(
             for file_uuid in attachment.uuids
         ]
 
-        file_tokens = get_remote_tokens(all_file_uuids)
+        file_tokens = get_remote_tokens(all_file_uuids, for_modified_upload=with_annotated_documents)
         file_metadata = get_several_remote_metadata(list(file_tokens.values()))
 
         # Generate the PDF

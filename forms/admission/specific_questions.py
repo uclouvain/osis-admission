@@ -184,6 +184,10 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
 
         elif data.get('est_bachelier_belge') is True:
             # belgian bachelor, modification and reorientation asked
+
+            if data.get('est_modification_inscription_externe') and data.get('est_reorientation_inscription_externe'):
+                self.add_error(None, _('You cannot ask for both modification and reorientation at the same time.'))
+
             if data.get('est_modification_inscription_externe') is None:
                 self.add_error('est_modification_inscription_externe', FIELD_REQUIRED_MESSAGE)
             elif not data['est_modification_inscription_externe']:

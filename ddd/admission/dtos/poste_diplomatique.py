@@ -38,7 +38,7 @@ class PosteDiplomatiqueDTO(interface.DTO):
     adresse_email: str
 
     def __str__(self):
-        return '{nom} (<a href="mailto:{email}">{email}</a>)'.format(
+        return '{nom} (<a target="_blank" href="mailto:{email}">{email}</a>)'.format(
             nom={
                 settings.LANGUAGE_CODE_FR: self.nom_francais,
                 settings.LANGUAGE_CODE_EN: self.nom_anglais,
