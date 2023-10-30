@@ -124,7 +124,6 @@ class ChecklistViewTestCase(TestCase):
         self.assertNotContains(response, f'{self.training.acronym}-1')
         self.assertContains(response, self.training.acronym)
         self.assertContains(response, self.training.title)
-        self.assertContains(response, 'id="parcours"')
 
     def test_poursuite_de_cycle_no(self):
         self.training.education_group_type = EducationGroupTypeFactory(name=TrainingType.BACHELOR.name)

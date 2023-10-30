@@ -3710,9 +3710,6 @@ msgstr ""
 msgid "Page size"
 msgstr ""
 
-msgid "Parcours"
-msgstr ""
-
 msgid "Parent certificate of support from the CPAS"
 msgstr ""
 

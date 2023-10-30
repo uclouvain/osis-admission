@@ -4131,9 +4131,6 @@ msgstr "Page"
 msgid "Page size"
 msgstr "Taille de la page"
 
-msgid "Parcours"
-msgstr "Parcours"
-
 msgid "Parent certificate of support from the CPAS"
 msgstr "Attestation de prise en charge du parent par le CPAS"
 
