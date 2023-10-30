@@ -317,7 +317,7 @@ class AccountingForm(forms.Form):
     affiliation_sport = forms.ChoiceField(
         label=mark_safe_lazy(
             _(
-                "Would you like to join the <a href='https://uclouvain.be/fr/etudier/sport/le-sport-uclouvain.html' "
+                "Would you like to join the <a href='https://uclouvain.be/en/study/sport' "
                 "target='_blank'>sports activities</a>? If so, the cost of membership will be added to your tuition "
                 "fee."
             )
