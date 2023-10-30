@@ -1954,10 +1954,10 @@ msgid ""
 "faculty decision process."
 msgstr ""
 
-msgctxt "admission"
-msgid "Emergency contact"
+msgid "Emergency contact (telephone number)"
 msgstr ""
 
+msgctxt "admission"
 msgid "Emergency contact (telephone number)"
 msgstr ""
 
