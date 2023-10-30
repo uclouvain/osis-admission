@@ -22,6 +22,19 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% with profil_candidat=admission.profil_soumis_candidat %}
+  {% if profil_candidat|is_profile_identification_different:identification %}
+    <p class="alert alert-info" role="alert">
+      <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
+      {% trans "The dossier has been confirmed as:" %}
+      {{ profil_candidat.nom }}, {{ profil_candidat.prenom }}
+      ({{ profil_candidat.genre|enum_display:'ChoixGenre' }}) -
+      {{ profil_candidat.nom_pays_nationalite|default:_('Unknown citizenship') }}
+    </p>
+  {% endif %}
+{% endwith %}
+
 {% panel _("Identification") %}
   <div class="row">
     {% field_data _("Surname") identification.nom "col-md-4" %}

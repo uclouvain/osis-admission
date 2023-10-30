@@ -5012,7 +5012,7 @@ msgstr ""
 msgid "The dossier has been confirmed as:"
 msgstr ""
 
-msgid "The dossier has been confirmed with the following address:"
+msgid "The dossier has been confirmed with the following contact address:"
 msgstr ""
 
 msgid "The dossier is currently in SIC"

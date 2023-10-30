@@ -5563,8 +5563,8 @@ msgstr "Les documents ont été réclamés au candidat"
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
 
-msgid "The dossier has been confirmed with the following address:"
-msgstr "La demande a été confirmée avec pour adresse :"
+msgid "The dossier has been confirmed with the following contact address:"
+msgstr "La demande a été confirmée avec pour adresse de contact :"
 
 msgid "The dossier is currently in SIC"
 msgstr "Le dossier est actuellement en SIC"
