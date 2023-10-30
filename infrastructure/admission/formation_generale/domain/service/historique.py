@@ -115,10 +115,25 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             f"Un mail informant de la soumission du dossier en faculté a été envoyé à \"{recipient}\" le {now}.",
-            f"An e-mail notifying that the dossier had been submitted to the faculty was sent to "
+            f"An e-mail notifying that the dossier has been submitted to the faculty was sent to "
             f"\"{recipient}\" on {now}.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
             tags=["proposition", "fac-decision", "send-to-fac", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "Le dossier a été soumis au SIC par la faculté.",
+            "The dossier has been submitted to the SIC by the faculty.",
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "fac-decision", "send-to-sic", "status-changed"],
         )
 
     @classmethod

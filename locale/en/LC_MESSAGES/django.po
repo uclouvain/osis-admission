@@ -5793,7 +5793,8 @@ msgstr ""
 #, python-format
 msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
-"list of acronyms separated by the \"%(separator)s\" character."
+"list of acronyms separated by the \"%(separator)s\" character and ending "
+"with the same character."
 msgstr ""
 
 msgid ""
@@ -5950,6 +5951,9 @@ msgid "Your previous NOMA (matriculation number)"
 msgstr ""
 
 msgid "Your professional email address"
+msgstr ""
+
+msgid "Your training does not cover the useful prerequisites in mathematics."
 msgstr ""
 
 msgid "academic year"

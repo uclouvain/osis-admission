@@ -66,6 +66,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     RefuserParFacValidatorList,
     ApprouverParFacValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
+    FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
@@ -338,6 +339,13 @@ class Proposition(interface.RootEntity):
             statut=self.statut,
         ).validate()
         self.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+
+    def soumettre_au_sic_lors_de_la_decision_facultaire(self):
+        FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(
+            statut=self.statut,
+            checklist_actuelle=self.checklist_actuelle,
+        ).validate()
+        self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
 
     def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self):
         self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE

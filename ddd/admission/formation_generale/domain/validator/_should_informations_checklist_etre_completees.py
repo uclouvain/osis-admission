@@ -37,7 +37,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
+    ChoixStatutChecklist,
 )
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     MotifRefusFacultaireNonSpecifieException,
     InformationsAcceptationFacultaireNonSpecifieesException,
@@ -88,6 +90,25 @@ class ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC:
             raise SituationPropositionNonSICException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire(BusinessValidator):
+    statut: ChoixStatutPropositionGenerale
+    checklist_actuelle: StatutsChecklistGenerale
+
+    def validate(self, *args, **kwargs):
+        if (
+            self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC
+            or self.checklist_actuelle.decision_facultaire.statut
+            not in {
+                ChoixStatutChecklist.INITIAL_CANDIDAT,
+                ChoixStatutChecklist.GEST_EN_COURS,
+                ChoixStatutChecklist.GEST_BLOCAGE,
+            }
+            or self.checklist_actuelle.decision_facultaire.extra.get('decision') == '1'
+        ):
+            raise SituationPropositionNonFACException
 
 
 @attr.dataclass(frozen=True, slots=True)

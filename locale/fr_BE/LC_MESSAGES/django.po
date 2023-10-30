@@ -2304,7 +2304,7 @@ msgid "FRIA"
 msgstr "FRIA"
 
 msgid "Faculty approval certificate"
-msgstr "Attestation de refus facultaire"
+msgstr "Attestation d'accord facultaire"
 
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"
@@ -6436,10 +6436,12 @@ msgstr ""
 #, python-format
 msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
-"list of acronyms separated by the \"%(separator)s\" character."
+"list of acronyms separated by the \"%(separator)s\" character and ending "
+"with the same character."
 msgstr ""
 "Vous pouvez rechercher un complément de formation par son nom ou son code, "
-"ou bien coller une liste de codes séparés par le caractère \"%(separator)s\"."
+"ou bien coller une liste de codes séparés par le caractère \"%(separator)s\" "
+"et terminant par ce même caractère."
 
 msgid ""
 "You cannot ask for both modification and reorientation at the same time."
@@ -6637,6 +6639,9 @@ msgstr "Votre ancien NOMA (numéro de matricule)"
 
 msgid "Your professional email address"
 msgstr "Votre adresse e-mail professionnelle"
+
+msgid "Your training does not cover the useful prerequisites in mathematics."
+msgstr "Votre formation ne couvre pas les prérequis utiles en mathématiques."
 
 msgid "academic year"
 msgstr "année académique"

@@ -54,6 +54,7 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
 )
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
@@ -69,6 +70,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldFacPeutDonnerDecision,
     ShouldSpecifierInformationsAcceptationFacultaire,
     ShouldPeutSpecifierInformationsDecisionFacultaire,
+    ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldVisaEtreComplete,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
@@ -235,6 +237,23 @@ class SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(TwoStepsMultip
         return [
             ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire(
                 statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+    checklist_actuelle: StatutsChecklistGenerale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire(
+                statut=self.statut,
+                checklist_actuelle=self.checklist_actuelle,
             ),
         ]
 

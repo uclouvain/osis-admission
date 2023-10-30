@@ -39,6 +39,7 @@
             // Enable the desired functionalities depending on the specified parameters
             const withSearch = originalSelectField.dataset['withSearch'] === '1';
             const withFreeOptions = originalSelectField.dataset['withFreeOptions'] === '1';
+            const freeOptionsPlaceholder = originalSelectField.dataset['freeOptionsPlaceholder'];
 
             // Add containers
             const parent = originalSelectField.parentNode;
@@ -120,6 +121,7 @@
                 addOptionTextInput.type = 'text';
                 addOptionTextInput.className = 'form-control';
                 addOptionTextInput.title = gettext('Add a personalized item in the list of the selected items');
+                addOptionTextInput.placeholder = freeOptionsPlaceholder;
 
                 const newElementsContainer = originalSelectField.querySelector('optgroup:last-child') || originalSelectField;
 

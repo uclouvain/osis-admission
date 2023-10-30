@@ -30,6 +30,7 @@ from typing import List, Optional, Union
 import attrs
 from django.conf import settings
 from django.db.models import OuterRef, Subquery, Prefetch
+from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext, pgettext
 from osis_history.models import HistoryEntry
 
@@ -533,7 +534,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.submitted_profile
             else None,
             motifs_refus=[
-                MotifRefusDTO(motif=reason.name, categorie=reason.category.name)
+                MotifRefusDTO(motif=mark_safe(reason.name), categorie=reason.category.name)
                 for reason in admission.refusal_reasons.all()
             ]
             + [
@@ -553,7 +554,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else None,
             avec_conditions_complementaires=admission.with_additional_approval_conditions,
             conditions_complementaires=[
-                getattr(condition, additional_condition_title_field)
+                mark_safe(getattr(condition, additional_condition_title_field))
                 for condition in admission.additional_approval_conditions.all()
             ]
             + admission.free_additional_approval_conditions,

@@ -30,7 +30,6 @@ from typing import Optional
 
 from ckeditor.widgets import CKEditorWidget
 from dal import forward
-from dal_select2 import widgets as autocomplete_widgets
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -42,6 +41,7 @@ from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import RefusalReason, AdditionalApprovalCondition
+from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
 from admission.forms import (
@@ -49,6 +49,8 @@ from admission.forms import (
     FilterFieldWidget,
     get_initial_choices_for_additionnal_approval_conditions,
     autocomplete,
+    get_example_text,
+    EMPTY_CHOICE_AS_LIST,
 )
 from admission.forms import get_academic_year_choices
 from admission.forms.autocomplete import Select2MultipleWithTagWhenNoResultWidget
@@ -223,7 +225,13 @@ def get_group_by_choices(
 class FacDecisionRefusalForm(forms.Form):
     reasons = forms.MultipleChoiceField(
         label=pgettext_lazy('admission', 'Reasons'),
-        widget=FilterFieldWidget(with_search=True, with_free_options=True),
+        widget=FilterFieldWidget(
+            with_search=True,
+            with_free_options=True,
+            free_options_placeholder=get_example_text(
+                _('Your training does not cover the useful prerequisites in mathematics.'),
+            ),
+        ),
     )
 
     def __init__(self, *args, **kwargs):
@@ -316,7 +324,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
     )
 
     other_training_accepted_by_fac = TrainingModelChoiceField(
-        label=pgettext_lazy('admission', 'Course'),
+        label=_('Other course'),
         queryset=EducationGroupYear.objects.none(),
         to_field_name='uuid',
         required=False,
@@ -340,7 +348,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
         required=False,
         help_text=_(
             'You can search for an additional training by name or acronym, or paste in a list of acronyms separated '
-            'by the "%(separator)s" character.'
+            'by the "%(separator)s" character and ending with the same character.'
         )
         % {'separator': SEPARATOR},
     )
@@ -372,13 +380,16 @@ class FacDecisionApprovalForm(forms.ModelForm):
         labels = {
             'annual_program_contact_person_name': _('First name and last name'),
             'annual_program_contact_person_email': pgettext_lazy('admission', 'Email'),
-            'other_training_accepted_by_fac': _('Other course'),
         }
         widgets = {
-            'prerequisite_courses_fac_comment': CKEditorWidget(config_name='link_only'),
-            'join_program_fac_comment': CKEditorWidget(config_name='link_only'),
-            'with_prerequisite_courses': forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
-            'with_additional_approval_conditions': forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
+            'prerequisite_courses_fac_comment': CKEditorWidget(config_name='comment_link_only'),
+            'join_program_fac_comment': CKEditorWidget(config_name='comment_link_only'),
+            'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'with_additional_approval_conditions': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'program_planned_years_number': forms.Select(
+                choices=EMPTY_CHOICE_AS_LIST
+                + [(number, number) for number in range(DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME + 1)],
+            ),
         }
 
     def __init__(self, academic_year, additional_approval_conditions_for_diploma, *args, **kwargs):
