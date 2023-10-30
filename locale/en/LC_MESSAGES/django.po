@@ -5691,9 +5691,9 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Would you like to join the <a href='https://uclouvain.be/fr/etudier/sport/le-"
-"sport-uclouvain.html' target='_blank'>sports activities</a>? If so, the cost "
-"of membership will be added to your tuition fee."
+"Would you like to join the <a href='https://uclouvain.be/en/study/sport' "
+"target='_blank'>sports activities</a>? If so, the cost of membership will be "
+"added to your tuition fee."
 msgstr ""
 
 msgid ""
