@@ -231,11 +231,11 @@ class PropositionFactory(factory.Factory):
             checklist_actuelle=factory.SubFactory(StatutsChecklistGeneraleFactory),
         )
         est_refusee_par_fac_raison_libre = factory.Trait(
-            autre_motif_refus_fac='Ma raison',
+            autres_motifs_refus=['Ma raison'],
             certificat_refus_fac=['uuid-certificat_refus_fac'],
         )
         est_refusee_par_fac_raison_connue = factory.Trait(
-            motif_refus_fac=factory.SubFactory(MotifRefusIdentityFactory),
+            motifs_refus=[factory.SubFactory(MotifRefusIdentityFactory)],
             certificat_refus_fac=['uuid-certificat_refus_fac'],
         )
         est_approuvee_par_fac = factory.Trait(

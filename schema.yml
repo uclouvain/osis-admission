@@ -6543,7 +6543,7 @@ components:
               nullable: true
             educational_other:
               type: string
-              maxLength: 50
+              maxLength: 60
             institute:
               type: string
               nullable: true
@@ -9575,10 +9575,13 @@ components:
               type: string
             nom_anglais:
               type: string
+            adresse_email:
+              type: string
           required:
           - code
           - nom_francais
           - nom_anglais
+          - adresse_email
           nullable: true
       required:
       - uuid

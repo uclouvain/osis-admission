@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import factory
+from django.db.models import Max
 from factory.fuzzy import FuzzyText
 
 from admission.contrib.models.checklist import RefusalReason, RefusalReasonCategory, AdditionalApprovalCondition
@@ -33,16 +34,14 @@ class RefusalReasonCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = RefusalReasonCategory
 
-    name_fr = factory.fuzzy.FuzzyText(length=10)
-    name_en = factory.fuzzy.FuzzyText(length=10)
+    name = factory.fuzzy.FuzzyText(length=10)
 
 
 class RefusalReasonFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = RefusalReason
 
-    name_fr = FuzzyText(length=10)
-    name_en = FuzzyText(length=10)
+    name = FuzzyText(length=10)
     category = factory.SubFactory(RefusalReasonCategoryFactory)
 
 
@@ -50,5 +49,15 @@ class AdditionalApprovalConditionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AdditionalApprovalCondition
 
+    order = factory.Sequence(lambda n: n)
     name_fr = FuzzyText(length=10)
     name_en = FuzzyText(length=10)
+
+    @classmethod
+    def _setup_next_sequence(cls):
+        """Set up an initial sequence value for Sequence attributes.
+
+        Returns:
+            int: the first available ID to use for instances of this factory.
+        """
+        return (AdditionalApprovalCondition.objects.aggregate(Max('order'))['order__max'] or 0) + 1

@@ -40,6 +40,7 @@ class PosteDiplomatique:
     code: int
     nom_francais: str
     nom_anglais: str
+    adresse_email: str
 
 
 class PosteDiplomatiqueFactory(factory.Factory):
@@ -48,3 +49,4 @@ class PosteDiplomatiqueFactory(factory.Factory):
 
     nom_francais = factory.Faker('country')
     nom_anglais = factory.Faker('country')
+    adresse_email = factory.Faker('email')

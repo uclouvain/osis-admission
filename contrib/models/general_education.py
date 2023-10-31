@@ -129,7 +129,7 @@ class GeneralEducationAdmission(BaseAdmission):
         max_files=10,
     )
 
-    # Fac approval
+    # FAC & SIC approval
     fac_approval_certificate = FileField(
         blank=True,
         upload_to=admission_directory_path,
@@ -142,18 +142,17 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name=_('Refusal certificate of faculty'),
         mimetypes=[PDF_MIME_TYPE],
     )
-    fac_refusal_reason = models.ForeignKey(
+    refusal_reasons = models.ManyToManyField(
         blank=True,
-        null=True,
-        on_delete=models.PROTECT,
+        related_name='+',
         to='admission.RefusalReason',
-        verbose_name=_('Faculty refusal reason'),
+        verbose_name=_('Refusal reasons'),
     )
-    other_fac_refusal_reason = models.CharField(
+    other_refusal_reasons = ArrayField(
+        base_field=models.TextField(),
         blank=True,
-        default='',
-        max_length=255,
-        verbose_name=_('Other faculty refusal reason'),
+        default=list,
+        verbose_name=_('Other refusal reasons'),
     )
     with_additional_approval_conditions = models.BooleanField(
         blank=True,
@@ -167,7 +166,7 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name=_('Additional approval conditions'),
     )
     free_additional_approval_conditions = ArrayField(
-        base_field=models.CharField(max_length=255),
+        base_field=models.TextField(),
         blank=True,
         default=list,
         verbose_name=_('Free additional approval conditions'),
@@ -303,7 +302,6 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
                 "double_degree_scholarship",
                 "international_scholarship",
                 "erasmus_mundus_scholarship",
-                "fac_refusal_reason",
                 "diplomatic_post",
             )
             .annotate_pool_end_date()

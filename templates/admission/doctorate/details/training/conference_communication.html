@@ -58,7 +58,7 @@
       {% if activity.summary %}
         <div class="form-group">
           <strong class="d-block">{% trans "Summary" context "paper summary" %}</strong>
-          {% document_visualizer activity.summary %}
+          {% document_visualizer activity.summary for_modified_upload=True %}
         </div>
       {% endif %}
       <div class="row">
@@ -78,13 +78,13 @@
       {% if activity.participating_proof %}
         <div class="form-group">
           <strong class="d-block">{% trans "Attestation of the communication" %}</strong>
-          {% document_visualizer activity.participating_proof %}
+          {% document_visualizer activity.participating_proof for_modified_upload=True %}
         </div>
       {% endif %}
       {% if activity.acceptation_proof %}
         <div class="form-group">
           <strong class="d-block">{% trans "Proof of acceptation by the committee" %}</strong>
-          {% document_visualizer activity.acceptation_proof %}
+          {% document_visualizer activity.acceptation_proof for_modified_upload=True %}
         </div>
       {% endif %}
       {% if activity.comment %}

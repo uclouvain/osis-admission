@@ -56,4 +56,5 @@ class PosteDiplomatiqueTranslator(IPosteDiplomatiqueTranslator):
             nom_francais=diplomatic_post.name_fr,
             nom_anglais=diplomatic_post.name_en,
             code=diplomatic_post.code,
+            adresse_email=diplomatic_post.email,
         )

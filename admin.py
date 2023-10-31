@@ -56,6 +56,7 @@ from admission.contrib.models import (
     GeneralEducationAdmission,
     Scholarship,
     Accounting,
+    DiplomaticPost,
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
@@ -187,6 +188,8 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'additional_approval_conditions',
         'other_training_accepted_by_fac',
         'prerequisite_courses',
+        'diplomatic_post',
+        'refusal_reasons',
     ]
     actions = ['trigger_payment_hook']
 
@@ -254,7 +257,7 @@ class ScholarshipAdmin(admin.ModelAdmin):
         'short_name',
         'long_name',
         'type',
-        'disabled',
+        'enabled',
     ]
     search_fields = [
         'short_name',
@@ -270,6 +273,10 @@ class ScholarshipAdmin(admin.ModelAdmin):
         'long_name',
         'disabled',
     ]
+
+    @admin.display(description=_('Enabled'), boolean=True)
+    def enabled(self, obj):
+        return not obj.disabled
 
 
 FORM_ITEM_MIN_YEAR = 2022
@@ -493,17 +500,36 @@ class DisplayTranslatedNameMixin:
 
 
 class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
-    list_display = ['name_fr', 'name_en']
+    list_display = ['name']
+    search_fields = ['name']
 
 
 class RefusalReasonAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
     autocomplete_fields = ['category']
-    list_display = ['name_fr', 'name_en', 'category']
+    list_display = ['safe_name', 'category']
     list_filter = ['category']
+
+    @admin.display(description=_('Name'))
+    def safe_name(self, obj):
+        return mark_safe(obj.name)
 
 
 class AdditionalApprovalConditionAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
-    list_display = ['name_fr', 'name_en']
+    list_display = ['safe_name_fr', 'safe_name_en']
+
+    @admin.display(description=_('French name'))
+    def safe_name_fr(self, obj):
+        return mark_safe(obj.name_fr)
+
+    @admin.display(description=_('English name'))
+    def safe_name_en(self, obj):
+        return mark_safe(obj.name_en)
+
+
+class DiplomaticPostAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['countries']
+    search_fields = ['name_fr', 'name_en']
+    list_display = ['name_fr', 'name_en', 'email']
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
@@ -520,6 +546,7 @@ admin.site.register(Accounting, AccountingAdmin)
 admin.site.register(RefusalReasonCategory, RefusalReasonCategoryAdmin)
 admin.site.register(RefusalReason, RefusalReasonAdmin)
 admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
+admin.site.register(DiplomaticPost, DiplomaticPostAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):

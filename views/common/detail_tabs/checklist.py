@@ -27,13 +27,14 @@ from typing import Dict, Set
 
 from django.conf import settings
 from django.core.exceptions import BadRequest
+from django.db.models import QuerySet
 from django.forms import Form
 from django.http import HttpResponse
 from django.shortcuts import resolve_url, redirect
 from django.urls import reverse
 from django.utils import translation
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, gettext
 from django.views.generic import TemplateView, FormView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
@@ -58,9 +59,9 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementPlusNecessaireCommand,
     RecupererQuestionsSpecifiquesQuery,
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
-    RefuserPropositionParFaculteAvecNouveauMotifCommand,
-    SpecifierMotifRefusFacultairePropositionCommand,
-    SpecifierInformationsAcceptationFacultairePropositionCommand,
+    RefuserPropositionParFaculteAvecNouveauxMotifsCommand,
+    SpecifierMotifsRefusPropositionParFaculteCommand,
+    SpecifierInformationsAcceptationPropositionParFaculteCommand,
     ApprouverPropositionParFaculteCommand,
     RefuserPropositionParFaculteCommand,
     ApprouverPropositionParFaculteAvecNouvellesInformationsCommand,
@@ -113,6 +114,7 @@ __all__ = [
 
 __namespace__ = False
 
+from osis_profile.models import EducationalExperience
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
 
@@ -248,22 +250,40 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
 
     @cached_property
     def fac_decision_refusal_form(self):
-        return FacDecisionRefusalForm(
-            initial={
-                'reason': self.admission.fac_refusal_reason,
-                'other_reason': self.admission.other_fac_refusal_reason,
-            },
-            data=self.request.POST if self.request.method == 'POST' else None,
-            prefix='fac-decision-refusal',
+        form_kwargs = {
+            'prefix': 'fac-decision-refusal',
+        }
+        if self.request.method == 'POST':
+            form_kwargs['data'] = self.request.POST
+        else:
+            form_kwargs['initial'] = {
+                'reasons': [reason.uuid for reason in self.admission.refusal_reasons.all()]
+                + self.admission.other_refusal_reasons,
+            }
+
+        return FacDecisionRefusalForm(**form_kwargs)
+
+    @property
+    def additional_approval_conditions_for_diploma(self):
+        experiences: QuerySet[EducationalExperience] = EducationalExperience.objects.select_related('program').filter(
+            person=self.admission.candidate
         )
+        with translation.override(self.admission.candidate.language):
+            return [
+                gettext('Graduation of {program_name}').format(
+                    program_name=experience.program.title if experience.program else experience.education_name
+                )
+                for experience in experiences
+            ]
 
     @cached_property
     def fac_decision_approval_form(self):
         return FacDecisionApprovalForm(
             academic_year=self.admission.determined_academic_year.year,
-            instance=self.admission,
+            instance=self.admission if self.request.method != 'POST' else None,
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='fac-decision-approval',
+            additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
         )
 
 
@@ -311,12 +331,16 @@ class FacultyDecisionSendToFacultyView(
     form_class = Form
 
     def form_valid(self, form):
-        message_bus_instance.invoke(
-            EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(
-                uuid_proposition=self.admission_uuid,
-                gestionnaire=self.request.user.person.global_id,
+        try:
+            message_bus_instance.invoke(
+                EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
             )
-        )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
         self.htmx_refresh = True
         return super().form_valid(form)
 
@@ -335,22 +359,27 @@ class FacultyDecisionSendToSicView(
     form_class = Form
 
     def form_valid(self, form):
-        if self.request.GET.get('approval'):
-            message_bus_instance.invoke(
-                ApprouverPropositionParFaculteCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
+        try:
+            if self.request.GET.get('approval'):
+                message_bus_instance.invoke(
+                    ApprouverPropositionParFaculteCommand(
+                        uuid_proposition=self.admission_uuid,
+                        gestionnaire=self.request.user.person.global_id,
+                    )
                 )
-            )
-        elif self.request.GET.get('refusal'):
-            message_bus_instance.invoke(
-                RefuserPropositionParFaculteCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
+            elif self.request.GET.get('refusal'):
+                message_bus_instance.invoke(
+                    RefuserPropositionParFaculteCommand(
+                        uuid_proposition=self.admission_uuid,
+                        gestionnaire=self.request.user.person.global_id,
+                    )
                 )
-            )
-        else:
-            raise BadRequest
+            else:
+                raise BadRequest
+
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
 
         self.htmx_refresh = True
 
@@ -383,19 +412,24 @@ class FacultyRefusalDecisionView(
     def form_valid(self, form):
         base_params = {
             'uuid_proposition': self.admission_uuid,
-            'uuid_motif': form.cleaned_data['reason'].uuid if form.cleaned_data['reason'] else '',
-            'autre_motif': form.cleaned_data['other_reason'],
+            'uuids_motifs': form.cleaned_data['reasons'],
+            'autres_motifs': form.cleaned_data['other_reasons'],
         }
-        if 'save-transfer' in self.request.POST:
-            message_bus_instance.invoke(
-                RefuserPropositionParFaculteAvecNouveauMotifCommand(
-                    gestionnaire=self.request.user.person.global_id,
-                    **base_params,
+
+        try:
+            if 'save-transfer' in self.request.POST:
+                message_bus_instance.invoke(
+                    RefuserPropositionParFaculteAvecNouveauxMotifsCommand(
+                        gestionnaire=self.request.user.person.global_id,
+                        **base_params,
+                    )
                 )
-            )
-            self.htmx_refresh = True
-        else:
-            message_bus_instance.invoke(SpecifierMotifRefusFacultairePropositionCommand(**base_params))
+                self.htmx_refresh = True
+            else:
+                message_bus_instance.invoke(SpecifierMotifsRefusPropositionParFaculteCommand(**base_params))
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
 
         return super().form_valid(form)
 
@@ -440,16 +474,20 @@ class FacultyApprovalDecisionView(
             'email_personne_contact_programme_annuel': form.cleaned_data['annual_program_contact_person_email'],
             'commentaire_programme_conjoint': form.cleaned_data['join_program_fac_comment'],
         }
-        if 'save-transfer' in self.request.POST:
-            message_bus_instance.invoke(
-                ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(
-                    gestionnaire=self.request.user.person.global_id,
-                    **base_params,
+        try:
+            if 'save-transfer' in self.request.POST:
+                message_bus_instance.invoke(
+                    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(
+                        gestionnaire=self.request.user.person.global_id,
+                        **base_params,
+                    )
                 )
-            )
-            self.htmx_refresh = True
-        else:
-            message_bus_instance.invoke(SpecifierInformationsAcceptationFacultairePropositionCommand(**base_params))
+                self.htmx_refresh = True
+            else:
+                message_bus_instance.invoke(SpecifierInformationsAcceptationPropositionParFaculteCommand(**base_params))
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
 
         return super().form_valid(form)
 

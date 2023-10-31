@@ -25,41 +25,23 @@
 # ##############################################################################
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    RefuserPropositionParFaculteAvecNouveauMotifCommand,
+    SpecifierMotifsRefusPropositionParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def refuser_proposition_par_faculte_avec_nouveau_motif(
-    cmd: RefuserPropositionParFaculteAvecNouveauMotifCommand,
+def specifier_motifs_refus_proposition_par_faculte(
+    cmd: SpecifierMotifsRefusPropositionParFaculteCommand,
     proposition_repository: 'IPropositionRepository',
-    historique: 'IHistorique',
-    pdf_generation: 'IPDFGeneration',
 ) -> PropositionIdentity:
-    # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    # WHEN
-    proposition.specifier_motif_refus_par_fac(uuid_motif=cmd.uuid_motif, autre_motif=cmd.autre_motif)
-
-    proposition.refuser_par_fac()
-
-    # THEN
-    pdf_generation.generer_attestation_refus_facultaire(
-        proposition_repository=proposition_repository,
-        proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
+    proposition.specifier_motifs_refus_par_fac(
+        uuids_motifs=cmd.uuids_motifs,
+        autres_motifs=cmd.autres_motifs,
     )
 
     proposition_repository.save(entity=proposition)
-
-    historique.historiser_refus_fac(
-        proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
-    )
 
     return proposition.entity_id

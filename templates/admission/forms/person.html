@@ -46,20 +46,20 @@
       <div class="col-md-4">
         {% bootstrap_field form.gender form_group_class="form-group required_field" %}
       </div>
+      <div class="col-md-4">
+        {% bootstrap_field form.civil_state form_group_class="form-group required_field" %}
+      </div>
     </div>
 
     <div class="row">
-      <div class="col-md-3">
+      <div class="col-md-4">
         {% bootstrap_field form.birth_date form_group_class="form-group required_field" %}
       </div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         {% bootstrap_field form.unknown_birth_date %}
       </div>
-      <div class="col-md-3" id="birth_year">
+      <div class="col-md-4" id="birth_year">
         {% bootstrap_field form.birth_year form_group_class="form-group required_field" %}
-      </div>
-      <div class="col-md-3">
-        {% bootstrap_field form.civil_state form_group_class="form-group required_field" %}
       </div>
     </div>
     <div class="row">
@@ -99,11 +99,17 @@
     <div id="id_card_container">
       {% bootstrap_field form.id_card_number form_group_class="form-group required_field foreign" placeholder="" %}
       {% bootstrap_field form.id_card form_group_class="form-group required_field" %}
+      <div class="row">
+        {% bootstrap_field form.id_card_expiry_date form_group_class="col-md-6 form-group required_field" %}
+      </div>
     </div>
 
     <div id="passport_container">
       {% bootstrap_field form.passport_number form_group_class="form-group required_field foreign" placeholder="" %}
       {% bootstrap_field form.passport form_group_class="form-group required_field foreign" %}
+      <div class="row">
+        {% bootstrap_field form.passport_expiry_date form_group_class="col-md-6 form-group required_field" %}
+      </div>
     </div>
 
   {% endpanel %}
@@ -112,7 +118,7 @@
     {% bootstrap_field form.already_registered form_group_class="form-group required_field" %}
     <div id="already_registered">
       {% bootstrap_field form.last_registration_year form_group_class="form-group required_field" %}
-      {% bootstrap_field form.last_registration_id form_group_class="form-group required_field" %}
+      {% bootstrap_field form.last_registration_id form_group_class="form-group" %}
     </div>
   {% endpanel %}
 {% endblock %}
@@ -157,14 +163,15 @@
           $('#id_card_container').dependsOn({
               'input[name=has_national_number]': { values: ['True'] },
           }).or({
+              'input[name=has_national_number]': { values: ['False'] },
               'input[name=identification_type]': { values: ['ID_CARD_NUMBER'] },
           });
 
           $('#passport_container').dependsOn({
+              'input[name=has_national_number]': { values: ['False'] },
               'input[name=identification_type]': { values: ['PASSPORT_NUMBER'] },
           });
 
-          // Justification depends on pre-admission
           $('#birth_year').dependsOn({
               '#id_unknown_birth_date': { checked: true },
           });

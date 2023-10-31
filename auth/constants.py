@@ -30,6 +30,8 @@ READ_ACTIONS_BY_TAB = {
     'coordonnees': 'admission.view_admission_coordinates',
     'cotutelle': 'admission.view_admission_cotutelle',
     'person': 'admission.view_admission_person',
+    # Training choice
+    'training-choice': 'admission.view_admission_training_choice',
     # Previous experience
     'curriculum': 'admission.view_admission_curriculum',
     'education': 'admission.view_admission_secondary_studies',
@@ -37,6 +39,9 @@ READ_ACTIONS_BY_TAB = {
     # Project
     'project': 'admission.view_admission_project',
     'supervision': 'admission.view_admission_supervision',
+    # Additional information
+    'specific-questions': 'admission.view_admission_specific_questions',
+    'accounting': 'admission.view_admission_accounting',
     # Confirmation exam
     'confirmation': 'admission.view_admission_confirmation',
     'extension-request': 'admission.view_admission_confirmation',
@@ -68,6 +73,8 @@ UPDATE_ACTIONS_BY_TAB = {
     'coordonnees': 'admission.change_admission_coordinates',
     'cotutelle': 'admission.change_admission_cotutelle',
     'person': 'admission.change_admission_person',
+    # Training choice
+    'training-choice': 'admission.change_admission_training_choice',
     # Previous experience
     'curriculum': 'admission.change_admission_curriculum',
     'education': 'admission.change_admission_secondary_studies',
@@ -75,6 +82,9 @@ UPDATE_ACTIONS_BY_TAB = {
     # Project
     'project': 'admission.change_admission_project',
     'supervision': 'admission.change_admission_supervision',
+    # Additional information
+    'specific-questions': 'admission.change_admission_specific_questions',
+    'accounting': 'admission.change_admission_accounting',
     # Confirmation exam
     'confirmation': 'admission.change_admission_confirmation',
     'extension-request': 'admission.change_admission_confirmation_extension',

@@ -31,6 +31,7 @@
   <div class="row">
     {% field_data _("Sex") identification.sexe|enum_display:'ChoixSexe' "col-md-4" %}
     {% field_data _("Gender") identification.genre|enum_display:'ChoixGenre' "col-md-4" %}
+    {% field_data _("Civil status") identification.etat_civil|enum_display:'CivilState' "col-md-4" %}
   </div>
   <div class="row">
     {% if identification.date_naissance %}
@@ -42,7 +43,6 @@
     {% field_data _("Place of birth") identification.lieu_naissance "col-md-4" %}
   </div>
   <div class="row">
-    {% field_data _("Civil status") identification.etat_civil|enum_display:'CivilState' "col-md-4" %}
     {% field_data _("Country of citizenship") identification.nom_pays_nationalite "col-md-4" %}
   </div>
   {% field_data _("Identification photo") identification.photo_identite %}

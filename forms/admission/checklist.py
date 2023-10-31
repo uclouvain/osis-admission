@@ -24,26 +24,34 @@
 #
 # ##############################################################################
 import datetime
+import itertools
+from collections import defaultdict
 from typing import Optional
 
 from ckeditor.widgets import CKEditorWidget
-from dal import forward, autocomplete
+from dal import forward
 from dal_select2 import widgets as autocomplete_widgets
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import F
-from django.utils.translation import gettext_lazy as _, get_language, ngettext_lazy, pgettext_lazy
-from django_filters.fields import ModelChoiceField
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _, get_language, ngettext_lazy, pgettext_lazy, pgettext
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
-from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
+from admission.contrib.models.checklist import RefusalReason, AdditionalApprovalCondition
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
-from admission.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
+from admission.forms import (
+    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+    FilterFieldWidget,
+    get_initial_choices_for_additionnal_approval_conditions,
+    autocomplete,
+)
 from admission.forms import get_academic_year_choices
+from admission.forms.autocomplete import Select2MultipleWithTagWhenNoResultWidget
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from base.models.academic_year import AcademicYear
@@ -188,55 +196,77 @@ class ChoixFormationForm(forms.Form):
         return cleaned_data
 
 
+def get_group_by_choices(
+    queryset,
+    item_category_field,
+    item_category_name_field,
+    item_identifier_field,
+    item_name_field,
+):
+    """Get choices grouped by an attribute from the queryset.
+    :param queryset: A list of items to group by.
+    :param item_category_field: The name of the attribute to group the items by (i.e. the category).
+    :param item_category_name_field: The name of the attribute of the category name.
+    :param item_identifier_field: The name of the attribute identifying the items.
+    :param item_name_field: The name of the attribute of the the item name.
+    :return: The hierarchy of choices as list of lists.
+    """
+    item_by_category = defaultdict(list)
+    for item in queryset:
+        item_by_category[getattr(getattr(item, item_category_field), item_category_name_field)].append(
+            [getattr(item, item_identifier_field), mark_safe(getattr(item, item_name_field))]
+        )
+
+    return [[category_name, category_choices] for category_name, category_choices in item_by_category.items()]
+
+
 class FacDecisionRefusalForm(forms.Form):
-    category = ModelChoiceField(
-        label=_('Category'),
-        queryset=RefusalReasonCategory.objects.all(),
-        null_label=_('Other'),
-        null_value='OTHER',
-    )
-
-    reason = forms.ModelChoiceField(
-        label=pgettext_lazy('admission', 'Reason'),
-        queryset=RefusalReason.objects.all(),
-        required=False,
-        widget=autocomplete.ModelSelect2(
-            url='admission:autocomplete:checklist:refusal-reason',
-            forward=['category'],
-            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
-        ),
-    )
-
-    other_reason = forms.CharField(
-        label=pgettext_lazy('admission', 'Other reason'),
-        required=False,
+    reasons = forms.MultipleChoiceField(
+        label=pgettext_lazy('admission', 'Reasons'),
+        widget=FilterFieldWidget(with_search=True, with_free_options=True),
     )
 
     def __init__(self, *args, **kwargs):
-        initial = kwargs.get('initial', {})
-
-        if initial:
-            reason = initial.get('reason')
-            other_reason = initial.get('other_reason')
-
-            kwargs['initial']['category'] = reason.category if reason else 'OTHER' if other_reason else ''
-
         super().__init__(*args, **kwargs)
+
+        all_reasons = RefusalReason.objects.select_related('category').all().order_by('category__name', 'name')
+
+        choices = get_group_by_choices(
+            queryset=all_reasons,
+            item_category_field='category',
+            item_category_name_field='name',
+            item_identifier_field='uuid',
+            item_name_field='name',
+        )
+
+        selected_reasons = self.data.getlist(self.add_prefix('reasons'), self.initial.get('reasons')) or []
+
+        self.categorized_reasons = []
+        self.other_reasons = []
+        other_reasons_choices = []
+
+        for reason in selected_reasons:
+            if is_uuid(reason):
+                self.categorized_reasons.append(reason)
+            else:
+                self.other_reasons.append(reason)
+                other_reasons_choices.append([reason, reason])
+
+        choices.append([pgettext('admission', 'Other reasons'), other_reasons_choices])
+
+        self.fields['reasons'].choices = choices
+        self.fields['reasons'].widget.choices = choices
 
     def clean(self):
         cleaned_data = super().clean()
 
-        category = cleaned_data.get('category')
+        reasons = cleaned_data.get('reasons')
 
-        if category:
-            if cleaned_data.get('category') == 'OTHER':
-                cleaned_data['reason'] = None
-                if not cleaned_data.get('other_reason'):
-                    self.add_error('other_reason', FIELD_REQUIRED_MESSAGE)
-            else:
-                cleaned_data['other_reason'] = ''
-                if not cleaned_data.get('reason'):
-                    self.add_error('reason', FIELD_REQUIRED_MESSAGE)
+        if reasons:
+            cleaned_data['other_reasons'] = sorted(self.other_reasons)
+            cleaned_data['reasons'] = self.categorized_reasons
+        else:
+            self.add_error('reasons', FIELD_REQUIRED_MESSAGE)
 
         return cleaned_data
 
@@ -290,7 +320,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
         queryset=EducationGroupYear.objects.none(),
         to_field_name='uuid',
         required=False,
-        widget=autocomplete_widgets.ListSelect2(
+        widget=autocomplete.ListSelect2(
             url="admission:autocomplete:managed-education-trainings",
             attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
@@ -298,11 +328,12 @@ class FacDecisionApprovalForm(forms.ModelForm):
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
-        widget=autocomplete.Select2Multiple(
+        widget=Select2MultipleWithTagWhenNoResultWidget(
             url='admission:autocomplete:learning-unit-years',
             attrs={
-                'data-token-separators': [SEPARATOR],
+                'data-token-separators': '[{}]'.format(SEPARATOR),
                 'data-tags': 'true',
+                'data-allow-clear': 'false',
                 **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
             },
         ),
@@ -317,9 +348,11 @@ class FacDecisionApprovalForm(forms.ModelForm):
     all_additional_approval_conditions = forms.MultipleChoiceField(
         label=_('Additional conditions'),
         required=False,
-        widget=autocomplete_widgets.Select2Multiple(
-            url='admission:autocomplete:checklist:additional-approval-condition',
-            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+        widget=autocomplete.Select2Multiple(
+            attrs={
+                'data-allow-clear': 'false',
+                'data-tags': 'true',
+            },
         ),
     )
 
@@ -348,23 +381,13 @@ class FacDecisionApprovalForm(forms.ModelForm):
             'with_additional_approval_conditions': forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')]),
         }
 
-    def __init__(self, academic_year, *args, **kwargs):
+    def __init__(self, academic_year, additional_approval_conditions_for_diploma, *args, **kwargs):
         instance: Optional[GeneralEducationAdmission] = kwargs.get('instance', None)
         data = kwargs.get('data', {})
-
-        existing_approval_conditions = []
-        free_approval_conditions = []
+        initial = kwargs.setdefault('initial', {})
 
         if instance:
-            initial = kwargs.setdefault('initial', {})
             initial['another_training'] = bool(instance.other_training_accepted_by_fac_id)
-
-            # Additional conditions
-            existing_approval_conditions = instance.additional_approval_conditions.all()
-            free_approval_conditions = instance.free_additional_approval_conditions
-            initial['all_additional_approval_conditions'] = free_approval_conditions + [
-                c.uuid for c in existing_approval_conditions
-            ]
 
         super().__init__(*args, **kwargs)
 
@@ -372,8 +395,10 @@ class FacDecisionApprovalForm(forms.ModelForm):
         self.academic_year = academic_year
         self.data_existing_conditions = set()
         self.data_free_conditions = set()
-        self.conditions_qs = []
+        self.predefined_approval_conditions = []
+        free_approval_conditions = []
 
+        # Initialize additional approval conditions field
         if data:
             for condition in data.getlist(self.add_prefix('all_additional_approval_conditions'), []):
                 if is_uuid(condition):
@@ -382,16 +407,26 @@ class FacDecisionApprovalForm(forms.ModelForm):
                     self.data_free_conditions.add(condition)
 
             free_approval_conditions = self.data_free_conditions
-            existing_approval_conditions = AdditionalApprovalCondition.objects.filter(
-                uuid__in=self.data_existing_conditions
-            )
-            self.conditions_qs = existing_approval_conditions
 
-        current_language = get_language()
-        translated_title = 'name_fr' if current_language == settings.LANGUAGE_CODE_FR else 'name_en'
-        self.fields['all_additional_approval_conditions'].choices = [
-            (c.uuid, getattr(c, translated_title)) for c in existing_approval_conditions
-        ] + [(c, c) for c in free_approval_conditions]
+        elif instance:
+            # Additional conditions
+            existing_approval_conditions = instance.additional_approval_conditions.all()
+            free_approval_conditions = instance.free_additional_approval_conditions
+            self.initial['all_additional_approval_conditions'] = [
+                c.uuid for c in existing_approval_conditions
+            ] + free_approval_conditions
+
+        self.predefined_approval_conditions = AdditionalApprovalCondition.objects.all()
+
+        all_additional_approval_conditions_choices = get_initial_choices_for_additionnal_approval_conditions(
+            predefined_approval_conditions=self.predefined_approval_conditions,
+            free_approval_conditions=itertools.chain(
+                additional_approval_conditions_for_diploma,
+                free_approval_conditions,
+            ),
+        )
+        self.fields['all_additional_approval_conditions'].choices = all_additional_approval_conditions_choices
+        self.fields['all_additional_approval_conditions'].widget.choices = all_additional_approval_conditions_choices
 
         # Initialize other training field
         if self.data.get(self.add_prefix('other_training_accepted_by_fac')):
@@ -438,13 +473,9 @@ class FacDecisionApprovalForm(forms.ModelForm):
         self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
 
     def clean_all_additional_approval_conditions(self):
-        # This field can contain uuids of existing conditions or free condition as strings
+        # This field can contain uuids of existing conditions or free conditions as strings
         cleaned_data = self.cleaned_data.get('all_additional_approval_conditions', [])
 
-        if len(self.conditions_qs) != len(self.data_existing_conditions):
-            self.add_error('all_additional_approval_conditions', _('Not all the conditions have been found.'))
-
-        # Check that the uuids correspond to existing conditions
         self.cleaned_data['additional_approval_conditions'] = list(self.data_existing_conditions)
         self.cleaned_data['free_additional_approval_conditions'] = list(self.data_free_conditions)
 

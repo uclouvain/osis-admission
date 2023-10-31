@@ -47,23 +47,16 @@ class TranslatedAutocompleteMixin:
         return super().get_queryset().order_by(self.model_field_name)
 
 
-class RefusalReasonCategoryAutocomplete(TranslatedAutocompleteMixin, autocomplete.Select2QuerySetView):
+class RefusalReasonCategoryAutocomplete(autocomplete.Select2QuerySetView):
     model = RefusalReasonCategory
     urlpatterns = 'refusal-reason-category'
+    model_field_name = 'name'
 
 
-class RefusalReasonAutocomplete(TranslatedAutocompleteMixin, autocomplete.Select2QuerySetView):
+class RefusalReasonAutocomplete(autocomplete.Select2QuerySetView):
     model = RefusalReason
     urlpatterns = 'refusal-reason'
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-
-        category = self.forwarded.get('category', '')
-        if category:
-            qs = qs.filter(category_id=category) if category != 'OTHER' else []
-
-        return qs
+    model_field_name = 'name'
 
 
 class AdditionalApprovalConditionAutocomplete(TranslatedAutocompleteMixin, autocomplete.Select2QuerySetView):

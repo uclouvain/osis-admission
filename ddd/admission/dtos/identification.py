@@ -28,6 +28,7 @@ from typing import List, Optional
 
 import attr
 
+from admission.ddd import PLUS_5_ISO_CODES, BE_ISO_CODE
 from osis_common.ddd import interface
 
 
@@ -66,3 +67,17 @@ class IdentificationDTO(interface.DTO):
 
     annee_derniere_inscription_ucl: Optional[int]
     noma_derniere_inscription_ucl: str
+
+    @property
+    def est_concerne_par_visa(self):
+        """
+        Retourne si le candidat est concerné par la question du visa.
+        Prérequis: la demande concernée doit être une formation générale.
+        """
+        return bool(
+            self.pays_nationalite
+            and self.pays_nationalite_europeen is False
+            and self.pays_nationalite not in PLUS_5_ISO_CODES
+            and self.pays_residence
+            and self.pays_residence != BE_ISO_CODE
+        )

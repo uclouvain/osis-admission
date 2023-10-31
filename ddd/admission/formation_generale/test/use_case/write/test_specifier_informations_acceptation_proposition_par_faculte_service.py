@@ -33,7 +33,7 @@ from admission.ddd.admission.domain.model.condition_complementaire_approbation i
 )
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    SpecifierInformationsAcceptationFacultairePropositionCommand,
+    SpecifierInformationsAcceptationPropositionParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -54,13 +54,13 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestSpecifierInformationsAcceptationFacultaireProposition(TestCase):
+class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = SpecifierInformationsAcceptationFacultairePropositionCommand
+        cls.command = SpecifierInformationsAcceptationPropositionParFaculteCommand
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(

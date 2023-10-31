@@ -127,12 +127,12 @@ class Proposition(interface.RootEntity):
 
     poste_diplomatique: Optional[PosteDiplomatiqueIdentity] = None
 
-    # Décision facultaire
+    # Décision facultaire & sic
     certificat_approbation_fac: List[str] = attr.Factory(list)
     certificat_refus_fac: List[str] = attr.Factory(list)
 
-    motif_refus_fac: Optional[MotifRefusIdentity] = None
-    autre_motif_refus_fac: str = ''
+    motifs_refus: List[MotifRefusIdentity] = attr.Factory(list)
+    autres_motifs_refus: List[str] = attr.Factory(list)
 
     autre_formation_choisie_fac_id: Optional['FormationIdentity'] = None
     avec_conditions_complementaires: Optional[bool] = None
@@ -162,6 +162,19 @@ class Proposition(interface.RootEntity):
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
 
         self.comptabilite.affiliation_sport = None  # Ce choix dépend du campus de formation
+
+    def modifier_choix_formation_par_gestionnaire(
+        self,
+        bourses_ids: Dict[str, BourseIdentity],
+        bourse_double_diplome: Optional[str],
+        bourse_internationale: Optional[str],
+        bourse_erasmus_mundus: Optional[str],
+        reponses_questions_specifiques: Dict,
+    ):
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
+        self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
+        self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
 
     def modifier_checklist_choix_formation(
         self,
@@ -233,13 +246,13 @@ class Proposition(interface.RootEntity):
             libelle=__('Approval'),
         )
 
-    def specifier_motif_refus_par_fac(self, uuid_motif: str, autre_motif: str):
+    def specifier_motifs_refus_par_fac(self, uuids_motifs: List[str], autres_motifs: List[str]):
         SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
             statut=self.statut,
         ).validate()
         self.specifier_refus_par_fac()
-        self.motif_refus_fac = MotifRefusIdentity(uuid=uuid_motif) if uuid_motif else None
-        self.autre_motif_refus_fac = autre_motif
+        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
+        self.autres_motifs_refus = autres_motifs
 
     def specifier_informations_acceptation_par_fac(
         self,
@@ -297,8 +310,8 @@ class Proposition(interface.RootEntity):
     def refuser_par_fac(self):
         RefuserParFacValidatorList(
             statut=self.statut,
-            motif_refus_fac=self.motif_refus_fac,
-            autre_motif_refus_fac=self.autre_motif_refus_fac,
+            motifs_refus=self.motifs_refus,
+            autres_motifs_refus=self.autres_motifs_refus,
         ).validate()
 
         self.specifier_refus_par_fac()
@@ -491,3 +504,27 @@ class Proposition(interface.RootEntity):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.documents_additionnels = documents_additionnels
         self.poste_diplomatique = poste_diplomatique
+
+    def completer_informations_complementaires_par_gestionnaire(
+        self,
+        reponses_questions_specifiques: Dict,
+        documents_additionnels: List[str],
+        poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+        est_bachelier_belge: Optional[bool],
+        est_reorientation_inscription_externe: Optional[bool],
+        attestation_inscription_reguliere: List[str],
+        est_modification_inscription_externe: Optional[bool],
+        formulaire_modification_inscription: List[str],
+        est_non_resident_au_sens_decret: Optional[bool],
+    ):
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.documents_additionnels = documents_additionnels
+
+        self.poste_diplomatique = poste_diplomatique
+
+        self.est_non_resident_au_sens_decret = est_non_resident_au_sens_decret
+        self.est_bachelier_belge = est_bachelier_belge
+        self.est_reorientation_inscription_externe = est_reorientation_inscription_externe
+        self.attestation_inscription_reguliere = attestation_inscription_reguliere
+        self.est_modification_inscription_externe = est_modification_inscription_externe
+        self.formulaire_modification_inscription = formulaire_modification_inscription

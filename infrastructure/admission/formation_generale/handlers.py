@@ -340,9 +340,11 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
         )
     ),
-    SpecifierMotifRefusFacultairePropositionCommand: lambda msg_bus, cmd: specifier_motif_refus_facultaire(
-        cmd,
-        proposition_repository=PropositionRepository(),
+    SpecifierMotifsRefusPropositionParFaculteCommand: (
+        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_faculte(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
     ),
     RefuserPropositionParFaculteCommand: lambda msg_bus, cmd: refuser_proposition_par_faculte(
         cmd,
@@ -350,16 +352,16 @@ COMMAND_HANDLERS = {
         historique=HistoriqueFormationGenerale(),
         pdf_generation=PDFGeneration(),
     ),
-    RefuserPropositionParFaculteAvecNouveauMotifCommand: (
-        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveau_motif(
+    RefuserPropositionParFaculteAvecNouveauxMotifsCommand: (
+        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveaux_motifs(
             cmd,
             proposition_repository=PropositionRepository(),
             historique=HistoriqueFormationGenerale(),
             pdf_generation=PDFGeneration(),
         )
     ),
-    SpecifierInformationsAcceptationFacultairePropositionCommand: (
-        lambda msg_bus, cmd: specifier_informations_acceptation_facultaire(
+    SpecifierInformationsAcceptationPropositionParFaculteCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
             cmd,
             proposition_repository=PropositionRepository(),
         )
@@ -393,5 +395,17 @@ COMMAND_HANDLERS = {
     RecupererListePaiementsPropositionQuery: lambda msg_bus, cmd: recuperer_liste_paiements_proposition(
         cmd,
         paiement_frais_dossier_service=PaiementFraisDossier(),
+    ),
+    ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        bourse_translator=BourseTranslator(),
+    ),
+    CompleterQuestionsSpecifiquesParGestionnaireCommand: (
+        lambda msg_bus, cmd: completer_questions_specifiques_par_gestionnaire(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            poste_diplomatique_translator=PosteDiplomatiqueTranslator(),
+        )
     ),
 }

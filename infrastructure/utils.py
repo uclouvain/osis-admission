@@ -230,7 +230,7 @@ def get_document_from_identifier(
         if document_uuids:
             from osis_document.api.utils import get_remote_token, get_remote_metadata
 
-            token = get_remote_token(uuid=document_uuids[0])
+            token = get_remote_token(uuid=document_uuids[0], for_modified_upload=True)
             metadata = get_remote_metadata(token=token) or {}
             document_author = metadata.get('author', '')
             document_label = metadata.get('explicit_name', '')
@@ -360,7 +360,7 @@ def get_document_from_identifier(
             if not metadata:
                 from osis_document.api.utils import get_remote_token, get_remote_metadata
 
-                token = get_remote_token(uuid=document_uuids[0])
+                token = get_remote_token(uuid=document_uuids[0], for_modified_upload=True)
                 metadata = get_remote_metadata(token=token)
             if metadata:
                 document_submitted_by = metadata.get('author', '')

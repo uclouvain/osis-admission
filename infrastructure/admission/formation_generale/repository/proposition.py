@@ -29,12 +29,13 @@ from typing import List, Optional, Union
 
 import attrs
 from django.conf import settings
-from django.db.models import OuterRef, Subquery
-from django.utils.translation import get_language, gettext
+from django.db.models import OuterRef, Subquery, Prefetch
+from django.utils.translation import get_language, gettext, pgettext
 from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship, DiplomaticPost
+from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
+from admission.contrib.models.checklist import RefusalReason
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
@@ -121,10 +122,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 GeneralEducationAdmissionProxy.objects.prefetch_related(
                     'additional_approval_conditions',
                     'prerequisite_courses',
+                    'refusal_reasons',
                 )
                 .select_related(
                     'other_training_accepted_by_fac__academic_year',
-                    'fac_refusal_reason',
                 )
                 .get(uuid=entity_id.uuid)
             )
@@ -217,8 +218,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'cycle_pursuit': entity.poursuite_de_cycle.name,
                 'fac_approval_certificate': entity.certificat_approbation_fac,
                 'fac_refusal_certificate': entity.certificat_refus_fac,
-                'fac_refusal_reason_id': entity.motif_refus_fac and entity.motif_refus_fac.uuid,
-                'other_fac_refusal_reason': entity.autre_motif_refus_fac,
+                'other_refusal_reasons': entity.autres_motifs_refus,
                 'other_training_accepted_by_fac': other_training,
                 'with_additional_approval_conditions': entity.avec_conditions_complementaires,
                 'free_additional_approval_conditions': entity.conditions_complementaires_libres,
@@ -238,6 +238,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
         admission.additional_approval_conditions.set([c.uuid for c in entity.conditions_complementaires_existantes])
         admission.prerequisite_courses.set([training.uuid for training in entity.complements_formation])
+        admission.refusal_reasons.set([motif.uuid for motif in entity.motifs_refus])
 
     @classmethod
     def _sauvegarder_comptabilite(cls, admission, entity):
@@ -372,10 +373,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_demandes=admission.requested_documents,
             checklist_initiale=checklist_initiale and StatutsChecklistGenerale.from_dict(checklist_initiale),
             checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
-            motif_refus_fac=MotifRefusIdentity(uuid=admission.fac_refusal_reason.uuid)
-            if admission.fac_refusal_reason
-            else None,
-            autre_motif_refus_fac=admission.other_fac_refusal_reason,
+            motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
+            autres_motifs_refus=admission.other_refusal_reasons,
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
             autre_formation_choisie_fac_id=FormationIdentityBuilder.build(
@@ -533,25 +532,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             )
             if admission.submitted_profile
             else None,
-            motif_refus_fac=(
-                MotifRefusDTO(
-                    motif=getattr(
-                        admission.fac_refusal_reason,
-                        'name_fr' if is_french_language else 'name_en',
-                    ),
-                    categorie=getattr(
-                        admission.fac_refusal_reason.category,
-                        'name_fr' if is_french_language else 'name_en',
-                    ),
-                )
-                if admission.fac_refusal_reason
-                else MotifRefusDTO(
-                    motif=admission.other_fac_refusal_reason,
-                    categorie=gettext('Other'),
-                )
-                if admission.other_fac_refusal_reason
-                else None
-            ),
+            motifs_refus=[
+                MotifRefusDTO(motif=reason.name, categorie=reason.category.name)
+                for reason in admission.refusal_reasons.all()
+            ]
+            + [
+                MotifRefusDTO(motif=reason, categorie=pgettext('admission', 'Other reasons'))
+                for reason in admission.other_refusal_reasons
+            ],
             autre_formation_choisie_fac=BaseFormationDTO(
                 sigle=admission.other_training_accepted_by_fac.acronym,
                 annee=admission.other_training_accepted_by_fac.academic_year.year,
@@ -612,11 +600,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 .select_related(
                     'accounting',
                     'other_training_accepted_by_fac__academic_year',
-                    'fac_refusal_reason',
                 )
                 .prefetch_related(
                     'prerequisite_courses__academic_year',
                     'additional_approval_conditions',
+                    Prefetch(
+                        'refusal_reasons',
+                        queryset=RefusalReason.objects.select_related('category').order_by('category__name', 'name'),
+                    ),
                 )
                 .get(uuid=entity_id.uuid)
             )

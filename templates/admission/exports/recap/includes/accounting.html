@@ -26,7 +26,7 @@
 {% if is_general %}
   {% panel _('Reduced tuition fee') %}
     {% field_data _('Have you applied for a student grant from the French Community of Belgium?') comptabilite.demande_allocation_d_etudes_communaute_francaise_belgique %}
-    {% field_data _('Are you the child of a UCLouvain or Martin V Lycee staff member?') comptabilite.enfant_personnel %}
+    {% field_data _('Are you the child of a UCLouvain or Martin V staff member?') comptabilite.enfant_personnel %}
     {% if comptabilite.enfant_personnel %}
       <div>
         {% field_data _('Certificate for children of staff') comptabilite.attestation_enfant_personnel %}

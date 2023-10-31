@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Tuple
 
 import attr
 
@@ -38,6 +38,9 @@ class QuestionSpecifiqueDTO(interface.DTO):
     configuration: Dict
     onglet: str
     label: str
+    texte: str
+    texte_aide: str
     valeur: Union[str, List[str]]
     valeur_formatee: Union[str, List[str]]
     label_langue_candidat: str
+    valeurs_possibles: List[Tuple[str, str]]
