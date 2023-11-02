@@ -34,6 +34,7 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    DecisionFacultaireEnum,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     SituationPropositionNonFACException,
@@ -93,7 +94,10 @@ class TestSpecifierMotifsRefusPropositionParFaculte(TestCase):
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.TRAITEMENT_FAC)
         self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_BLOCAGE)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.extra, {'decision': '1'})
+        self.assertEqual(
+            proposition.checklist_actuelle.decision_facultaire.extra,
+            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
+        )
         self.assertEqual(proposition.motifs_refus, [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')])
         self.assertEqual(proposition.autres_motifs_refus, [])
 
@@ -115,7 +119,10 @@ class TestSpecifierMotifsRefusPropositionParFaculte(TestCase):
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC)
         self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_BLOCAGE)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.extra, {'decision': '1'})
+        self.assertEqual(
+            proposition.checklist_actuelle.decision_facultaire.extra,
+            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
+        )
         self.assertEqual(proposition.motifs_refus, [])
         self.assertEqual(proposition.autres_motifs_refus, ['Autre motif'])
 

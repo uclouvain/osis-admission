@@ -265,17 +265,19 @@ class FilterFieldWidget(forms.SelectMultiple):
             'admission/AdmissionSelectFilter.css',
         ]
 
-    def __init__(self, with_search=False, with_free_options=False, *args, **kwargs):
+    def __init__(self, with_search=False, with_free_options=False, free_options_placeholder='', *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.with_search = with_search
         self.with_free_options = with_free_options
+        self.free_options_placeholder = free_options_placeholder
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
         context['widget']['attrs']['class'] = 'admissionselectfilter'
         context['widget']['attrs']['data-with-search'] = int(self.with_search)
         context['widget']['attrs']['data-with-free-options'] = int(self.with_free_options)
+        context['widget']['attrs']['data-free-options-placeholder'] = self.free_options_placeholder
         return context
 
 

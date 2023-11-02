@@ -377,14 +377,14 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
 
         # Add dynamic badge for comments
         if parent_tab == Tab('comments'):
-            from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC
+            from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL
 
             roles = _get_roles_assigned_to_user(context['request'].user)
             qs = CommentEntry.objects.filter(object_uuid=context['view'].kwargs['uuid'])
             if {SicManagement, CentralManager} & set(roles):
-                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC]).count()
+                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL]).count()
             elif {ProgramManager} & set(roles):
-                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC]).count()
+                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL]).count()
 
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:

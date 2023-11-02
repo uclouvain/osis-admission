@@ -43,6 +43,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import E
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    DecisionFacultaireEnum,
 )
 from admission.tests.factories.faculty_decision import RefusalReasonFactory, AdditionalApprovalConditionFactory
 from admission.tests.factories.general_education import (
@@ -141,7 +142,7 @@ class FacultyDecisionViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
             {
-                'decision': '1',
+                'decision': DecisionFacultaireEnum.EN_DECISION.value,
             },
         )
 
@@ -225,7 +226,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
 
         self.assertEqual(
             history_entry.message_en,
-            'An e-mail notifying that the dossier had been submitted to the faculty was sent to '
+            'An e-mail notifying that the dossier has been submitted to the faculty was sent to '
             '"mail-inscription-formation-a-developper@uclouvain.be" on 1 Janvier 2022 00:00.',
         )
 
@@ -327,12 +328,6 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.fac_refusal_certificate = []
         self.general_admission.save()
 
-        # Invalid request -> we need to specify that it is a refusal
-        response = self.client.post(self.url, **self.default_headers)
-
-        # Check the response
-        self.assertEqual(response.status_code, 400)
-
         # Invalid request -> We need to specify a reason
         response = self.client.post(self.url + '?refusal=1', **self.default_headers)
         self.assertEqual(response.status_code, 200)
@@ -361,7 +356,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
             {
-                'decision': '1',
+                'decision': DecisionFacultaireEnum.EN_DECISION.value,
             },
         )
 
@@ -403,12 +398,6 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.with_prerequisite_courses = None
         self.general_admission.program_planned_years_number = None
         self.general_admission.save()
-
-        # Invalid request -> we need to specify that it is an approval
-        response = self.client.post(self.url, **self.default_headers)
-
-        # Check the response
-        self.assertEqual(response.status_code, 400)
 
         # Invalid request -> We need to specify the missing data
         response = self.client.post(self.url + '?approval=1', **self.default_headers)
@@ -467,6 +456,60 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertCountEqual(
             history_entry.tags,
             ['proposition', 'fac-decision', 'approval-send-to-sic', 'status-changed'],
+        )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_without_approving_or_refusing(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.checklist['current']['decision_facultaire'][
+            'statut'
+        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.general_admission.save()
+
+        # Invalid request -> We need to be in the right status
+        response = self.client.post(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            gettext('The proposition must be managed by FAC to realized this action.'),
+            [m.message for m in response.context['messages']],
+        )
+
+        # Valid request
+        self.general_admission.checklist['current']['decision_facultaire'][
+            'statut'
+        ] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
+        self.general_admission.save()
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+
+        self.assertEqual(len(history_entries), 1)
+        history_entry = history_entries[0]
+
+        self.assertEqual(
+            history_entry.author,
+            f'{self.fac_manager_user.person.first_name} {self.fac_manager_user.person.last_name}',
+        )
+
+        self.assertEqual(history_entry.message_fr, 'Le dossier a été soumis au SIC par la faculté.')
+
+        self.assertEqual(history_entry.message_en, 'The dossier has been submitted to the SIC by the faculty.')
+
+        self.assertCountEqual(
+            history_entry.tags,
+            ['proposition', 'fac-decision', 'send-to-sic', 'status-changed'],
         )
 
 
@@ -651,7 +694,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         )
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
-            {'decision': '1'},
+            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
 
         # Choose another reason
@@ -710,7 +753,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         )
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
-            {'decision': '1'},
+            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
 
         # A certificate has been generated

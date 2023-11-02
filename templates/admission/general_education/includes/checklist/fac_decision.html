@@ -96,7 +96,7 @@
     <div class="mt-1" style="margin-bottom: 5px;"><strong>{% translate 'Faculty process' %}</strong></div>
     <div class="form-group btn-group status-group" role="group">
       {% if can_change_faculty_decision %}
-        {% if current.statut == 'GEST_REUSSITE' or current.statut == 'GEST_BLOCAGE' and current.extra.decision == '1' %}
+        {% if current.statut == 'GEST_REUSSITE' or current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'EN_DECISION'|enum_display:'DecisionFacultaireEnum' %}
           {% concat '#fac-decision-confirm-modal-INITIAL_CANDIDAT' as fac_initial_confirm_modal %}
           {% concat '#fac-decision-confirm-modal-GEST_EN_COURS' as fac_in_progress_confirm_modal %}
           {% concat '#fac-decision-confirm-modal-GEST_BLOCAGE' as fac_to_be_completed_confirm_modal %}
@@ -108,17 +108,17 @@
         {% url view.base_namespace|add:':fac-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url_initial %}
         {% url view.base_namespace|add:':fac-decision-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS' as change_status_url_in_progress %}
         {% url view.base_namespace|add:':fac-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE' as base_change_status_url_to_be_completed_sic %}
-        {% concat base_change_status_url_to_be_completed_sic '?decision=0' as change_status_url_to_be_completed_sic %}
+        {% concat base_change_status_url_to_be_completed_sic '?decision=' 'HORS_DECISION'|enum_display:'DecisionFacultaireEnum' as change_status_url_to_be_completed_sic %}
       {% endif %}
 
       {% checklist_state_button tab='decision_facultaire' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=cannot_change_faculty_decision htmx_post=change_status_url_initial open_modal=fac_initial_confirm_modal %}
       {% checklist_state_button tab='decision_facultaire' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' class='warning' disabled=cannot_change_faculty_decision htmx_post=change_status_url_in_progress open_modal=fac_in_progress_confirm_modal %}
-      {% checklist_state_button tab='decision_facultaire' label=_("To be completed by SIC") icon='circle-stop' state='GEST_BLOCAGE' decision='0' class='danger' htmx_post=change_status_url_to_be_completed_sic disabled=cannot_change_faculty_decision open_modal=fac_to_be_completed_confirm_modal %}
-      {% checklist_state_button tab='decision_facultaire' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' decision='1' class='danger' disabled=cannot_change_faculty_decision open_modal=fac_to_be_completed_refusal_modal %}
+      {% checklist_state_button tab='decision_facultaire' label=_("To be completed by SIC") icon='circle-stop' state='GEST_BLOCAGE' decision='HORS_DECISION'|enum_display:'DecisionFacultaireEnum' class='danger' htmx_post=change_status_url_to_be_completed_sic disabled=cannot_change_faculty_decision open_modal=fac_to_be_completed_confirm_modal %}
+      {% checklist_state_button tab='decision_facultaire' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' decision='EN_DECISION'|enum_display:'DecisionFacultaireEnum' class='danger' disabled=cannot_change_faculty_decision open_modal=fac_to_be_completed_refusal_modal %}
       {% checklist_state_button tab='decision_facultaire' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' disabled=cannot_change_faculty_decision open_modal=fac_in_progress_approval_modal %}
     </div>
 
-    {% if current.statut == 'GEST_BLOCAGE' and current.extra.decision == '1' %}
+    {% if current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'EN_DECISION'|enum_display:'DecisionFacultaireEnum' %}
       <div class="tab-content">
         <div role="tabpanel" class="tab-pane active panel panel-default" id="fac-decision-refusal-details">
           <div class="panel-heading flex-content align-items-baseline">

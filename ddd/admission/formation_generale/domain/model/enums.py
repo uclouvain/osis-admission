@@ -117,3 +117,8 @@ class PoursuiteDeCycle(ChoiceEnum):
     TO_BE_DETERMINED = _("TO_BE_DETERMINED")
     YES = _("YES")
     NO = _("NO")
+
+
+class DecisionFacultaireEnum(ChoiceEnum):
+    EN_DECISION = '1'
+    HORS_DECISION = '0'
