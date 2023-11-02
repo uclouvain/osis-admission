@@ -24,9 +24,10 @@
 #
 # ##############################################################################
 import datetime
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 
 import freezegun
+import mock
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
@@ -39,6 +40,7 @@ from admission.ddd.admission.domain.service.i_elements_confirmation import IElem
 from admission.ddd.admission.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
+    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
 from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
@@ -213,7 +215,13 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             professional_experience.uuid,
         )
 
-    def test_general_proposition_verification_contingent_non_ouvert(self):
+    @mock.patch(
+        'admission.ddd.admission.domain.service.i_calendrier_inscription.ICalendrierInscription.'
+        'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
+        new_callable=PropertyMock,
+        return_value=False,
+    )
+    def test_general_proposition_verification_contingent_non_ouvert(self, _):
         admission = GeneralEducationAdmissionFactory(
             is_non_resident=True,
             candidate=IncompletePersonForBachelorFactory(),
@@ -227,6 +235,34 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         ret = response.json()
         self.assertIsNotNone(ret['pool_start_date'])
         self.assertIsNotNone(ret['pool_end_date'])
+        admission.refresh_from_db()
+        self.assertNotIn(
+            {
+                'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
+                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message,
+            },
+            admission.detailed_status,
+        )
+
+    def test_general_proposition_verification_contingent_est_interdite(self):
+        admission = GeneralEducationAdmissionFactory(
+            is_non_resident=True,
+            candidate=IncompletePersonForBachelorFactory(),
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__acronym="VETE1BA",
+        )
+        url = resolve_url("admission_api_v1:submit-general-proposition", uuid=admission.uuid)
+        self.client.force_authenticate(user=admission.candidate.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        admission.refresh_from_db()
+        self.assertIn(
+            {
+                'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
+                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message,
+            },
+            admission.detailed_status,
+        )
 
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
