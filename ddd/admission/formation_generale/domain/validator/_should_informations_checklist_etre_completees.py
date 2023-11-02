@@ -38,6 +38,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
     ChoixStatutChecklist,
+    DecisionFacultaireEnum,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
@@ -106,7 +107,8 @@ class ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire(BusinessValidator):
                 ChoixStatutChecklist.GEST_EN_COURS,
                 ChoixStatutChecklist.GEST_BLOCAGE,
             }
-            or self.checklist_actuelle.decision_facultaire.extra.get('decision') == '1'
+            or self.checklist_actuelle.decision_facultaire.extra.get('decision')
+            == DecisionFacultaireEnum.EN_DECISION.value
         ):
             raise SituationPropositionNonFACException
 

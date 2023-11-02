@@ -43,6 +43,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import E
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    DecisionFacultaireEnum,
 )
 from admission.tests.factories.faculty_decision import RefusalReasonFactory, AdditionalApprovalConditionFactory
 from admission.tests.factories.general_education import (
@@ -141,7 +142,7 @@ class FacultyDecisionViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
             {
-                'decision': '1',
+                'decision': DecisionFacultaireEnum.EN_DECISION.value,
             },
         )
 
@@ -355,7 +356,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
             {
-                'decision': '1',
+                'decision': DecisionFacultaireEnum.EN_DECISION.value,
             },
         )
 
@@ -693,7 +694,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         )
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
-            {'decision': '1'},
+            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
 
         # Choose another reason
@@ -752,7 +753,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         )
         self.assertEqual(
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
-            {'decision': '1'},
+            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
 
         # A certificate has been generated

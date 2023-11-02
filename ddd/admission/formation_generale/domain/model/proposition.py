@@ -56,6 +56,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     PoursuiteDeCycle,
+    DecisionFacultaireEnum,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -237,7 +238,7 @@ class Proposition(interface.RootEntity):
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             libelle=__('Refusal'),
             extra={
-                'decision': '1',
+                'decision': DecisionFacultaireEnum.EN_DECISION.value,
             },
         )
 

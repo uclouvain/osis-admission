@@ -1,5 +1,5 @@
 {% extends "admission/modal/modal.html" %}
-{% load i18n %}
+{% load i18n enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -39,7 +39,7 @@
 {% block modal_footer %}
   <button
       class="btn btn-primary"
-      hx-post="{% url view.base_namespace|add:':fac-decision-send-to-sic' uuid=view.kwargs.uuid %}{% if current.statut == 'GEST_REUSSITE' %}?approval=1{% elif current.statut == "GEST_BLOCAGE" and current.extra.decision == '1' %}?refusal=1{% endif %}"
+      hx-post="{% url view.base_namespace|add:':fac-decision-send-to-sic' uuid=view.kwargs.uuid %}{% if current.statut == 'GEST_REUSSITE' %}?approval=1{% elif current.statut == "GEST_BLOCAGE" and current.extra.decision == 'EN_DECISION'|enum_display:'DecisionFacultaireEnum'  %}?refusal=1{% endif %}"
       data-dismiss="modal"
   >
     {% translate 'Confirm' %}

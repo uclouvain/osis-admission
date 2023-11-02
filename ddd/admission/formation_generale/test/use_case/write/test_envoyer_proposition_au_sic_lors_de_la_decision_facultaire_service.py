@@ -32,6 +32,7 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    DecisionFacultaireEnum,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     SituationPropositionNonFACException,
@@ -83,7 +84,9 @@ class TestEnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(TestCase):
         # Proposition: COMPLETEE_POUR_FAC et checklist: GEST_BLOCAGE sans decision
         self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC
         self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.GEST_BLOCAGE
-        self.proposition.checklist_actuelle.decision_facultaire.extra = {'decision': '0'}
+        self.proposition.checklist_actuelle.decision_facultaire.extra = {
+            'decision': DecisionFacultaireEnum.HORS_DECISION.value,
+        }
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
         # Vérifier résultat de la commande
@@ -107,7 +110,9 @@ class TestEnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(TestCase):
         # Statut de la checklist non conforme
         self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC
         self.proposition.checklist_actuelle.decision_facultaire.statut = ChoixStatutChecklist.GEST_BLOCAGE
-        self.proposition.checklist_actuelle.decision_facultaire.extra = {'decision': '1'}
+        self.proposition.checklist_actuelle.decision_facultaire.extra = {
+            'decision': DecisionFacultaireEnum.EN_DECISION.value
+        }
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
