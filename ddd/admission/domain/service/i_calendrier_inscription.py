@@ -45,6 +45,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     PoolOuAnneeDifferentException,
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
+    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
@@ -73,6 +74,10 @@ class ICalendrierInscription(interface.DomainService):
         AdmissionPoolHue5ForeignResidencyCalendar(),
         AdmissionPoolNonResidentQuotaCalendar(),
     ]
+
+    # Les inscriptions pour une formation contingentée pour un candidat non résident au sens du décret via osis
+    # sont interdites pour le moment
+    INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT = True
 
     @classmethod
     def determiner_annee_academique_et_pot(
@@ -236,12 +241,14 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
     def verifier_residence_au_sens_du_decret(cls, sigle: str, proposition: Optional['Proposition']):
         """Si le candidat s'inscrit dans une formation contingentée et n'a pas répondu à la question
         sur la résidence au sens du décret."""
-        if (
-            cls.inscrit_formation_contingentee(sigle)
-            and proposition
-            and proposition.est_non_resident_au_sens_decret is None
-        ):
-            raise ResidenceAuSensDuDecretNonRenseigneeException()
+        if cls.inscrit_formation_contingentee(sigle) and proposition:
+            if proposition.est_non_resident_au_sens_decret is None:
+                raise ResidenceAuSensDuDecretNonRenseigneeException()
+            elif (
+                cls.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT
+                and proposition.est_non_resident_au_sens_decret is True
+            ):
+                raise ResidenceAuSensDuDecretNonDisponiblePourInscriptionException()
 
     @classmethod
     def verifier_formation_contingentee_ouvert(

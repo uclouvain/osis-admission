@@ -23,12 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
 from unittest import TestCase
+from unittest.mock import PropertyMock
 
 import freezegun
+import mock
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,
     IdentificationNonCompleteeException,
@@ -51,7 +51,7 @@ from admission.ddd.admission.formation_continue.test.factory.proposition import 
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
 from admission.ddd.admission.test.factory.formation import FormationFactory, FormationIdentityFactory
-from admission.ddd.admission.test.factory.profil import ProfilCandidatFactory, ExperienceAcademiqueDTOFactory
+from admission.ddd.admission.test.factory.profil import ProfilCandidatFactory
 from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
@@ -72,6 +72,14 @@ class CalendrierInscriptionTestCase(TestCase):
         self.profil_candidat_translator = ProfilCandidatInMemoryTranslator()
         self.formation_translator = FormationGeneraleInMemoryTranslator()
         self.profil_candidat_translator.reset()
+        mock_calendrier_inscription = mock.patch(
+            'admission.ddd.admission.domain.service.i_calendrier_inscription.ICalendrierInscription.'
+            'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
+            new_callable=PropertyMock,
+            return_value=False,
+        )
+        mock_calendrier_inscription.start()
+        self.addCleanup(mock_calendrier_inscription.stop)
 
     def test_verification_calendrier_inscription_doctorat(self):
         proposition = PropositionAdmissionECGE3DPMinimaleFactory()
