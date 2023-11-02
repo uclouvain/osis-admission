@@ -2131,10 +2131,10 @@ msgstr ""
 "E-mail envoyé à la faculté quand le SIC envoie le dossier lors du processus "
 "de décision facultaire."
 
-msgctxt "admission"
-msgid "Emergency contact"
-msgstr "Contact en cas d'urgence"
+msgid "Emergency contact (telephone number)"
+msgstr "Contact en cas d'urgence (numéro de téléphone)"
 
+msgctxt "admission"
 msgid "Emergency contact (telephone number)"
 msgstr "Contact en cas d'urgence (numéro de téléphone)"
 
