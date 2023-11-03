@@ -22,6 +22,20 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% with profil_candidat=admission.profil_soumis_candidat %}
+  {% if profil_candidat|is_profile_coordinates_different:coordonnees %}
+    <p class="alert alert-info" role="alert">
+      <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
+      {% trans "The dossier has been confirmed with the following contact address:" %}
+      {{ profil_candidat.numero_rue }} {{ profil_candidat.rue }},
+      {% if profil_candidat.boite_postale %}{% trans "Postal box" %} {{ profil_candidat.boite_postale }}, {% endif %}
+      {{ profil_candidat.code_postal }} {{ profil_candidat.ville }},
+      {{ profil_candidat.nom_pays }}
+    </p>
+  {% endif %}
+{% endwith %}
+
 {% panel _("Legal domicile") %}
   <div class="row">
     <div class="col-md-4">{% field_data _("Street") coordonnees.domicile_legal.rue %}</div>

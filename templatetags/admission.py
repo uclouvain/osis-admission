@@ -899,3 +899,33 @@ def diplomatic_post_name(diplomatic_post):
             diplomatic_post,
             'nom_francais' if get_language() == settings.LANGUAGE_CODE_FR else 'nom_anglais',
         )
+
+
+@register.filter
+def is_profile_identification_different(profil_candidat, identification):
+    if profil_candidat is None or identification is None:
+        return False
+    return any(
+        (
+            profil_candidat.nom != identification.nom,
+            profil_candidat.prenom != identification.prenom,
+            profil_candidat.genre != identification.genre,
+            profil_candidat.nom_pays_nationalite != identification.nom_pays_nationalite,
+        )
+    )
+
+
+@register.filter
+def is_profile_coordinates_different(profil_candidat, coordonnees):
+    if profil_candidat is None or coordonnees is None or coordonnees.domicile_legal is None:
+        return False
+    return any(
+        (
+            profil_candidat.numero_rue != coordonnees.domicile_legal.numero_rue,
+            profil_candidat.rue != coordonnees.domicile_legal.rue,
+            profil_candidat.boite_postale != coordonnees.domicile_legal.boite_postale,
+            profil_candidat.code_postal != coordonnees.domicile_legal.code_postal,
+            profil_candidat.ville != coordonnees.domicile_legal.ville,
+            profil_candidat.nom_pays != coordonnees.domicile_legal.nom_pays,
+        )
+    )
