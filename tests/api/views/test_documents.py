@@ -32,11 +32,15 @@ import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
+from django.utils.translation import gettext
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.constants import PDF_MIME_TYPE, SUPPORTED_MIME_TYPES, PNG_MIME_TYPE
-from admission.ddd.admission.domain.validator.exceptions import DocumentsCompletesDifferentsDesReclamesException
+from admission.ddd.admission.domain.validator.exceptions import (
+    DocumentsCompletesDifferentsDesReclamesException,
+    DocumentsReclamesImmediatementNonCompletesException,
+)
 from admission.ddd.admission.enums import (
     CleConfigurationItemFormulaire,
     Onglets,
@@ -48,6 +52,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     IdentifiantBaseEmplacementDocument,
     StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -75,8 +80,9 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             'deadline_at': '2023-01-16',
             'reason': 'Ma raison',
             'requested_at': '2023-01-01T00:00:00',
-            'status': 'RECLAME',
-            'type': 'NON_LIBRE',
+            'status': StatutEmplacementDocument.RECLAME.name,
+            'type': TypeEmplacementDocument.NON_LIBRE.name,
+            'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
         }
         cls.file_metadata = {
             'name': 'myfile.myext',
@@ -194,11 +200,18 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         )
 
         self.admission.requested_documents = {
-            'CURRICULUM.CURRICULUM': self.manuel_required_params,
-            f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}': self.manuel_required_params,
+            'CURRICULUM.CURRICULUM': {
+                **self.manuel_required_params,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            },
+            f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}': {
+                **self.manuel_required_params,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
             f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}': {
                 **self.manuel_required_params,
                 'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
             },
         }
 
@@ -215,69 +228,86 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
         response_data = response.json()
 
-        self.assertEqual(len(response_data), 3)
+        immediate_requested_documents = response_data['immediate_requested_documents']
+        later_requested_documents = response_data['later_requested_documents']
+        deadline = response_data['deadline']
+
+        self.assertEqual(len(immediate_requested_documents), 1)
+        self.assertEqual(len(later_requested_documents), 2)
+        self.assertEqual(deadline, '2023-01-16')
 
         # Simulate configurations of specific questions
 
         # Of a non free document based on a specific question
         self.assertEqual(
-            response_data[0]['uuid'],
+            immediate_requested_documents[0]['uuid'],
             f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}',
         )
-        self.assertEqual(response_data[0]['type'], TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(immediate_requested_documents[0]['type'], TypeItemFormulaire.DOCUMENT.name)
         self.assertEqual(
-            response_data[0]['title'][settings.LANGUAGE_CODE_FR],
+            immediate_requested_documents[0]['title'][settings.LANGUAGE_CODE_FR],
             'Champ document',
         )
-        self.assertEqual(response_data[0]['text'][settings.LANGUAGE_CODE_FR], 'Ma raison')
-        self.assertEqual(response_data[0]['help_text'], {})
+        self.assertEqual(immediate_requested_documents[0]['text'][settings.LANGUAGE_CODE_FR], 'Ma raison')
+        self.assertEqual(immediate_requested_documents[0]['help_text'], {})
         self.assertEqual(
-            response_data[0]['configuration'][CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name],
+            immediate_requested_documents[0]['configuration'][CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name],
             [PDF_MIME_TYPE],
         )
-        self.assertEqual(response_data[0]['configuration'][CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name], 4)
-        self.assertEqual(response_data[0]['values'], [])
-        self.assertEqual(response_data[0]['tab'], OngletsDemande.CHOIX_FORMATION.name)
-        self.assertEqual(response_data[0]['tab_name'], OngletsDemande.CHOIX_FORMATION.value)
-        self.assertEqual(response_data[0]['required'], True)
+        self.assertEqual(
+            immediate_requested_documents[0]['configuration'][CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name],
+            4,
+        )
+        self.assertEqual(immediate_requested_documents[0]['values'], [])
+        self.assertEqual(immediate_requested_documents[0]['tab'], OngletsDemande.CHOIX_FORMATION.name)
+        self.assertEqual(immediate_requested_documents[0]['tab_name'], OngletsDemande.CHOIX_FORMATION.value)
+        self.assertEqual(immediate_requested_documents[0]['required'], True)
 
         # Of a non free document based on a model field
-        self.assertEqual(response_data[1]['uuid'], 'CURRICULUM.CURRICULUM')
-        self.assertEqual(response_data[1]['type'], TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(later_requested_documents[0]['uuid'], 'CURRICULUM.CURRICULUM')
+        self.assertEqual(later_requested_documents[0]['type'], TypeItemFormulaire.DOCUMENT.name)
         self.assertEqual(
-            response_data[1]['title'][settings.LANGUAGE_CODE_FR],
+            later_requested_documents[0]['title'][settings.LANGUAGE_CODE_FR],
             'Curriculum vitae détaillé, daté et signé',
         )
-        self.assertEqual(response_data[1]['text'][settings.LANGUAGE_CODE_FR], 'Ma raison')
-        self.assertEqual(response_data[1]['help_text'], {})
+        self.assertEqual(later_requested_documents[0]['text'][settings.LANGUAGE_CODE_FR], 'Ma raison')
+        self.assertEqual(later_requested_documents[0]['help_text'], {})
         self.assertCountEqual(
-            response_data[1]['configuration'][CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name],
+            later_requested_documents[0]['configuration'][CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name],
             list(SUPPORTED_MIME_TYPES),
         )
-        self.assertEqual(response_data[1]['values'], [])
-        self.assertEqual(response_data[1]['tab'], OngletsDemande.CURRICULUM.name)
-        self.assertEqual(response_data[1]['tab_name'], OngletsDemande.CURRICULUM.value)
-        self.assertEqual(response_data[1]['required'], True)
-        self.assertEqual(response_data[1]['configuration'][CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name], 1)
+        self.assertEqual(later_requested_documents[0]['values'], [])
+        self.assertEqual(later_requested_documents[0]['tab'], OngletsDemande.CURRICULUM.name)
+        self.assertEqual(later_requested_documents[0]['tab_name'], OngletsDemande.CURRICULUM.value)
+        self.assertEqual(later_requested_documents[0]['required'], False)
+        self.assertEqual(
+            later_requested_documents[0]['configuration'][CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name],
+            1,
+        )
 
         # Of a free document
-        self.assertEqual(response_data[2]['uuid'], f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}')
-        self.assertEqual(response_data[2]['type'], TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(later_requested_documents[1]['uuid'], f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}')
+        self.assertEqual(later_requested_documents[1]['type'], TypeItemFormulaire.DOCUMENT.name)
         self.assertEqual(
-            response_data[2]['title'][settings.LANGUAGE_CODE_FR],
+            later_requested_documents[1]['title'][settings.LANGUAGE_CODE_FR],
             'Champ document',
         )
-        self.assertEqual(response_data[2]['text'][settings.LANGUAGE_CODE_FR], 'Ma raison')
-        self.assertEqual(response_data[2]['help_text'], {})
+        self.assertEqual(later_requested_documents[1]['text'][settings.LANGUAGE_CODE_FR], 'Ma raison')
+        self.assertEqual(later_requested_documents[1]['help_text'], {})
         self.assertCountEqual(
-            response_data[2]['configuration'][CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name],
+            later_requested_documents[1]['configuration'][CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name],
             list(SUPPORTED_MIME_TYPES),
         )
-        self.assertIsNone(response_data[2]['configuration'][CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name])
-        self.assertEqual(response_data[2]['values'], [])
-        self.assertEqual(response_data[2]['tab'], IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name)
-        self.assertEqual(response_data[2]['tab_name'], IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.value)
-        self.assertEqual(response_data[2]['required'], True)
+        self.assertIsNone(
+            later_requested_documents[1]['configuration'][CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name],
+        )
+        self.assertEqual(later_requested_documents[1]['values'], [])
+        self.assertEqual(later_requested_documents[1]['tab'], IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name)
+        self.assertEqual(
+            later_requested_documents[1]['tab_name'],
+            IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.value,
+        )
+        self.assertEqual(later_requested_documents[1]['required'], False)
 
     def test_retrieve_requested_documents_with_not_candidate_user_is_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -300,24 +330,42 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         ]
         free_file = ['free_file_token']
 
-        json_error = {
-            'non_field_errors': [
-                {
-                    'status_code': DocumentsCompletesDifferentsDesReclamesException.status_code,
-                    'detail': 'Les documents complétés sont différents de ceux qui sont réclamés.',
-                }
-            ]
-        }
-
         # No submitted files
         response = self.client.post(self.url, {})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # No all requested files are specified
+        # No all mandatory requested files are specified
         response = self.client.post(
             self.url,
             {
                 'reponses_documents_a_completer': {
+                    'CURRICULUM.CURRICULUM': [],
+                    f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}': [],
+                    f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}': free_file,
+                },
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        self.assertEqual(
+            response.json(),
+            {
+                'non_field_errors': [
+                    {
+                        'status_code': DocumentsReclamesImmediatementNonCompletesException.status_code,
+                        'detail': gettext("The requested documents immediately are not completed."),
+                    }
+                ]
+            },
+        )
+
+        # Non-requested files are specified
+        response = self.client.post(
+            self.url,
+            {
+                'reponses_documents_a_completer': {
+                    'IDENTIFICATION.PHOTO_IDENTITE': free_file,
                     'CURRICULUM.CURRICULUM': [],
                     f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}': (
                         non_free_specific_question_file
@@ -329,25 +377,17 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        self.assertEqual(response.json(), json_error)
-
-        # All requested files are specified but some are empty
-        response = self.client.post(
-            self.url,
+        self.assertEqual(
+            response.json(),
             {
-                'reponses_documents_a_completer': {
-                    'CURRICULUM.CURRICULUM': [],
-                    f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}': (
-                        non_free_specific_question_file
-                    ),
-                    f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}': free_file,
-                },
+                'non_field_errors': [
+                    {
+                        'status_code': DocumentsCompletesDifferentsDesReclamesException.status_code,
+                        'detail': gettext("The completed documents are different from the ones that are requested."),
+                    }
+                ]
             },
         )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.assertEqual(response.json(), json_error)
 
         # > Some files must be converted
         with mock.patch('osis_document.api.utils.get_several_remote_metadata') as get_several_remote_metadata_patcher:
@@ -365,6 +405,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 self.url,
                 {
                     'reponses_documents_a_completer': {
+                        'IDENTIFICATION.PHOTO_IDENTITE': free_file,
                         'CURRICULUM.CURRICULUM': [],
                         f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}': (
                             non_free_specific_question_file
@@ -395,6 +436,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 self.url,
                 {
                     'reponses_documents_a_completer': {
+                        'IDENTIFICATION.PHOTO_IDENTITE': free_file,
                         'CURRICULUM.CURRICULUM': [],
                         f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}': several_non_free_specific_question_files,
                         f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}': [],
@@ -435,6 +477,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 self.url,
                 {
                     'reponses_documents_a_completer': {
+                        'IDENTIFICATION.PHOTO_IDENTITE': free_file,
                         'CURRICULUM.CURRICULUM': [],
                         f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}': several_non_free_specific_question_files,
                         f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}': [],
@@ -487,6 +530,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             {
                 **self.manuel_required_params,
                 'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
+                'request_status': '',
             },
         )
 
@@ -497,6 +541,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             {
                 **self.manuel_required_params,
                 'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
+                'request_status': '',
             },
         )
 
@@ -506,6 +551,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 **self.manuel_required_params,
                 'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
+                'request_status': '',
             },
         )
 

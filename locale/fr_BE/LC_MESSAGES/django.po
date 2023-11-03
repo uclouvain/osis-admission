@@ -818,6 +818,9 @@ msgstr "Assimilation 7"
 msgid "Assimilation start date"
 msgstr "Date de début d'assimilation"
 
+msgid "At least one document must be selected."
+msgstr "Au-moins un document doit être sélectionné."
+
 msgid "Attachment: PhD training"
 msgstr "Annexe : Formation doctorale"
 
@@ -1439,6 +1442,9 @@ msgstr "Confirmer et envoyer le message"
 msgid "Confirm restoring activity to submitted"
 msgstr "Confirmer la remise au statut soumise de cette activité"
 
+msgid "Confirm the deletion"
+msgstr "Confirmer la suppression"
+
 msgid "Confirm the status change"
 msgstr "Confirmer le changement de statut"
 
@@ -1838,11 +1844,11 @@ msgstr "Date de l'épreuve de confirmation (JJ/MM/AAAA)"
 msgid "Date the application is sent to the supervision group"
 msgstr "Date d’envoi de la demande au comité d’accompagnement"
 
-msgid "Deadline"
-msgstr "Échéance"
-
 msgid "Deadline extended"
 msgstr "Nouvelle échéance"
+
+msgid "Deadline for documents to be requested immediately"
+msgstr "Échéance pour les documents à fournir immédiatement"
 
 msgid "Deadline for the candidate to upload documents"
 msgstr "Date limite de téléversement des documents par le candidat"
@@ -1852,6 +1858,9 @@ msgstr "Date limite pour la confirmation (JJ/MM/AAAA)"
 
 msgid "Deadline on"
 msgstr "Échéance le"
+
+msgid "Deadline type"
+msgstr "Type d'échéance"
 
 msgid "Debug"
 msgstr "Debug"
@@ -2054,9 +2063,6 @@ msgstr ""
 
 msgid "Documents specific to limited-enrolment courses"
 msgstr "Documents spécifiques aux études contingentées"
-
-msgid "Documents to be requested now"
-msgstr "Documents à réclamer maintenant"
 
 msgid "Does not have a doctor title"
 msgstr "N'est pas porteur du titre de docteur"
@@ -3001,6 +3007,9 @@ msgstr ""
 "directement transmettre le dossier à SIC en sélectionnant le bouton "
 "approprié ci-dessous."
 
+msgid "Immediately"
+msgstr "Immédiatement"
+
 msgid "Important information:"
 msgstr "Informations importantes"
 
@@ -3274,6 +3283,12 @@ msgstr "Auteur de la dernière mise à jour"
 msgid "Late enrollment"
 msgstr "Inscription tardive"
 
+msgid "Later > blocking"
+msgstr "Ultérieurement > bloquant"
+
+msgid "Later > non-blocking"
+msgstr "Ultérieurement > non-bloquant"
+
 msgid "Launch"
 msgstr "Lancer"
 
@@ -3354,8 +3369,26 @@ msgstr "Lister un document manquant"
 msgid "List of LUs of the additional module or others"
 msgstr "Liste des UEs du module complémentaire ou autres"
 
-msgid "List of the requested documents with the reason"
-msgstr "Liste des documents réclamés avec la raison associée"
+msgid ""
+"List of the mandatory requested documents that can be submitted later, with "
+"the reason"
+msgstr ""
+"Liste des documents réclamés obligatoires qui peuvent être déposés plus "
+"tard, avec la raison associée"
+
+msgid ""
+"List of the mandatory requested documents that must be submitted "
+"immediately, with the reason"
+msgstr ""
+"Liste des documents réclamés obligatoires qui doivent être déposés "
+"immédiatement, avec la raison associée"
+
+msgid ""
+"List of the not-mandatory requested documents that can be submitted later, "
+"with the reason"
+msgstr ""
+"Liste des documents réclamés non-obligatoires qui peuvent être déposés plus "
+"tard, avec la raison associée"
 
 msgid "List of the values that the Selection elements can take (one per row)."
 msgstr ""
@@ -3391,6 +3424,9 @@ msgstr "Types de fichier MIME"
 
 msgid "Madam"
 msgstr "Madame"
+
+msgid "Mail salutation"
+msgstr "Formule de salutation de l'email"
 
 msgid ""
 "Mail sent to ADRE on first submission of the confirmation paper by the "
@@ -4823,9 +4859,6 @@ msgstr "Remplacer le document"
 msgid "Reporting categories"
 msgstr "Catégories de reporting"
 
-msgid "Request now"
-msgstr "Réclamer maintenant"
-
 msgid "Request of a new deadline for the confirmation paper"
 msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 
@@ -4838,6 +4871,9 @@ msgstr "Réclamé"
 
 msgid "Requested documents"
 msgstr "Documents réclamés"
+
+msgid "Requested documents list"
+msgstr "Liste des documents réclamés"
 
 msgid "Requested on"
 msgstr "Réclamé le"
@@ -5843,6 +5879,12 @@ msgstr "La raison de la demande de mise à jour"
 
 msgid "The reason for refusal"
 msgstr "La raison du refus"
+
+msgid "The request status has been changed"
+msgstr "Le statut de réclamation a bien été modifié"
+
+msgid "The requested documents immediately are not completed."
+msgstr "Les documents réclamés immédiatement ne sont pas complétés."
 
 msgid "The resulting calculated academic year or pool is not consistent."
 msgstr "L'année académique et le pot déterminés ne concordent pas."

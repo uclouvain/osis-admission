@@ -81,6 +81,7 @@ class TestInitialiserEmplacementDocumentLibreNonReclamable(TestCase):
         self.assertEqual(document.derniere_action_le, self.current_datetime)
         self.assertEqual(document.document_soumis_par, '0123456789')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, None)
 
     def test_should_initialiser_emplacement_document_libre_non_reclamable_interne_fac(self):
         identifiant_document_depose = self.message_bus.invoke(
@@ -110,3 +111,4 @@ class TestInitialiserEmplacementDocumentLibreNonReclamable(TestCase):
         self.assertEqual(document.derniere_action_le, self.current_datetime)
         self.assertEqual(document.document_soumis_par, '0123456789')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, None)

@@ -45,6 +45,7 @@ from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmi
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
@@ -240,3 +241,16 @@ class WeasyprintStylesheets:
                 ],
             )
         return getattr(cls, '_stylesheet')
+
+
+def get_salutation(person: Person, language: str) -> str:
+    prefix = ''
+    if language == settings.LANGUAGE_CODE_EN:
+        prefix = 'Dear'
+    elif language == settings.LANGUAGE_CODE_FR:
+        prefix = {
+            ChoixGenre.H.name: 'Cher',
+            ChoixGenre.F.name: 'Chère',
+            ChoixGenre.X.name: 'Chere·ère',
+        }.get(person.gender or 'X')
+    return f'{prefix} {person.first_name} {person.last_name}'

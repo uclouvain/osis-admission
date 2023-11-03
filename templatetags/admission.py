@@ -54,6 +54,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -945,3 +946,12 @@ def access_title_checkbox(context, experience_uuid, experience_type, current_yea
             'checked': access_title.selectionne,
             'experience_uuid': experience_uuid,
         }
+
+
+@register.filter
+def document_request_status_css_class(document_request_status):
+    return {
+        StatutReclamationEmplacementDocument.IMMEDIATEMENT.name: 'text-dark',
+        StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name: 'text-danger',
+        StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name: 'text-orange',
+    }.get(document_request_status, '')

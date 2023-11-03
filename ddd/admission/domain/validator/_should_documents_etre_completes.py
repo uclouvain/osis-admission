@@ -28,7 +28,11 @@ from typing import List, Dict
 import attr
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.domain.validator.exceptions import DocumentsCompletesDifferentsDesReclamesException
+from admission.ddd.admission.domain.validator.exceptions import (
+    DocumentsCompletesDifferentsDesReclamesException,
+    DocumentsReclamesImmediatementNonCompletesException,
+)
+from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from base.ddd.utils.business_validator import BusinessValidator
 
 
@@ -38,9 +42,17 @@ class ShouldCompleterTousLesDocumentsReclames(BusinessValidator):
     reponses_documents_a_completer: Dict[str, List[str]]
 
     def validate(self, *args, **kwargs):
-        if len(self.documents_reclames) != len(self.reponses_documents_a_completer) or any(
-            document
-            for document in self.documents_reclames
-            if not self.reponses_documents_a_completer.get(document.entity_id.identifiant)
-        ):
+        identifiants_documents_reponses = set(self.reponses_documents_a_completer.keys())
+        for document_reclame in self.documents_reclames:
+            if (
+                document_reclame.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT
+                and not self.reponses_documents_a_completer.get(document_reclame.entity_id.identifiant)
+            ):
+                # The user must complete the documents which are requested immediately
+                raise DocumentsReclamesImmediatementNonCompletesException
+
+            identifiants_documents_reponses.discard(document_reclame.entity_id.identifiant)
+
+        if len(identifiants_documents_reponses) > 0:
+            # The user cannot complete documents that are not requested
             raise DocumentsCompletesDifferentsDesReclamesException

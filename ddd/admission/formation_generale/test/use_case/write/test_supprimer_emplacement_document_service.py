@@ -36,6 +36,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.commands import (
     InitialiserEmplacementDocumentLibreAReclamerCommand,
@@ -75,6 +76,7 @@ class TestSupprimerEmplacementDocument(TestCase):
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 libelle='Nom du document',
                 raison='La raison expliquant l\'intérêt de ce nouveau document.',
+                statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
             )
         )
 
@@ -156,6 +158,7 @@ class TestSupprimerEmplacementDocument(TestCase):
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
                 libelle='Nom du document',
                 raison='La raison expliquant l\'intérêt de ce nouveau document.',
+                statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
             )
         )
 

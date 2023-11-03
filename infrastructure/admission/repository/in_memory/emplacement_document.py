@@ -29,7 +29,11 @@ from typing import Optional, List
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
-from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from osis_common.ddd.interface import EntityIdentity, ApplicationService
 
@@ -51,6 +55,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                 uuids_documents=[],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT,
                 justification_gestionnaire='Ma raison 1',
                 requis_automatiquement=False,
                 libelle='Example',
@@ -68,6 +73,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                 uuids_documents=[],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
+                statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT,
                 justification_gestionnaire='Ma raison 2',
                 requis_automatiquement=False,
                 libelle='Example',
