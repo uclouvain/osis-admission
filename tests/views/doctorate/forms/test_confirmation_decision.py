@@ -104,17 +104,18 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
             admitted=True,
             post_enrolment_status=ChoixStatutDoctorat.SUBMITTED_CONFIRMATION.name,
         )
+        cls.file_uuid = uuid.uuid4()
         cls.confirmation_papers = [
             ConfirmationPaperFactory(
                 admission=cls.admission_with_confirmation_papers,
                 confirmation_date=datetime.date(2022, 4, 1),
                 confirmation_deadline=datetime.date(2022, 4, 5),
-                supervisor_panel_report=['f2'],
+                supervisor_panel_report=[cls.file_uuid],
             ),
             ConfirmationPaperFactory(
                 admission=cls.admission_with_incomplete_confirmation_paper,
                 confirmation_deadline=datetime.date(2022, 4, 5),
-                supervisor_panel_report=['f2'],
+                supervisor_panel_report=[cls.file_uuid],
             ),
         ]
 
@@ -149,6 +150,8 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         cls.confirm_remote_upload_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.get_remote_token_patcher.stop()
+        cls.save_raw_content_remotely_patcher.stop()
+        cls.get_mandates_service_patcher.stop()
         super().tearDownClass()
 
     def test_confirmation_success_decision_without_confirmation_paper(self):
