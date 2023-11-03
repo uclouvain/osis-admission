@@ -83,7 +83,7 @@ templates.register(
         Token(
             name='candidate_nationality_country',
             description=_("Candidate's country of nationality"),
-            example="http://dev.studies.uclouvain.be/somewhere",
+            example="Belgique",
         ),
     ],
 )

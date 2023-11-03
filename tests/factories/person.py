@@ -72,6 +72,7 @@ class CompletePersonFactory(PersonFactory):
     graduated_from_high_school = GotDiploma.YES.name
     graduated_from_high_school_year = factory.SubFactory(AcademicYearFactory)
     private_email = factory.Faker('email')
+    phone_mobile = factory.Faker('phone_number')
 
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):

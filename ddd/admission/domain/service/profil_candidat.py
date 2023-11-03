@@ -100,6 +100,7 @@ class ProfilCandidat(interface.DomainService):
 
         CoordonneesValidatorList(
             adresse_email_privee=coordonnees.adresse_email_privee,
+            numero_telephone_mobile=coordonnees.numero_mobile,
             domicile_legal=CandidatAdresse(
                 code_postal=coordonnees.domicile_legal.code_postal,
                 ville=coordonnees.domicile_legal.ville,

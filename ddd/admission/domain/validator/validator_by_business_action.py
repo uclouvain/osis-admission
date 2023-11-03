@@ -99,6 +99,7 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
 @attr.dataclass(frozen=True, slots=True)
 class CoordonneesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     adresse_email_privee: str
+    numero_telephone_mobile: str
     domicile_legal: Optional['CandidatAdresse']
     adresse_correspondance: Optional['CandidatAdresse']
 
@@ -107,6 +108,9 @@ class CoordonneesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
+            ShouldCoordonneesCandidatEtreCompletees(
+                numero_telephone_mobile=self.numero_telephone_mobile,
+            ),
             ShouldAdresseDomicileLegalCandidatEtreCompletee(adresse=self.domicile_legal),
             ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee(adresse=self.adresse_correspondance),
         ]

@@ -56,7 +56,6 @@ class AdmissionCoordonneesForm(forms.ModelForm):
     )
 
     phone_mobile = PhoneField(
-        required=False,
         label=__('admission', 'Telephone (mobile)'),
         widget=forms.TextInput(
             attrs={

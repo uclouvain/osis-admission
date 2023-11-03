@@ -34,6 +34,7 @@ from ._should_coordonnees_candidat_etre_completees import (
     ShouldAdresseCorrespondanceEtreCompleteeSiSpecifiee,
     ShouldAdresseDomicileLegalCandidatEtreCompletee,
     ShouldAdresseEmailPriveeEtreCompletee,
+    ShouldCoordonneesCandidatEtreCompletees,
 )
 from ._should_curriculum_etre_complete import (
     ShouldAnneesCVRequisesCompletees,
@@ -73,4 +74,5 @@ __all__ = [
     "ShouldIBANCarteBancaireRemboursementEtreCompletee",
     "ShouldExperiencesAcademiquesEtreCompletees",
     "ShouldTypeCompteBancaireRemboursementEtreComplete",
+    "ShouldCoordonneesCandidatEtreCompletees",
 ]

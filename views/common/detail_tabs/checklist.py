@@ -312,6 +312,7 @@ class FacultyDecisionView(
             admission_status=self.kwargs['status'],
             extra=extra,
             admission=admission,
+            replace_extra=True,
         )
 
         return super().form_valid(form)
@@ -700,7 +701,7 @@ class ApplicationFeesView(
         return super().form_valid(form)
 
 
-def change_admission_status(tab, admission_status, extra, admission):
+def change_admission_status(tab, admission_status, extra, admission, replace_extra=False):
     """Change the status of the admission of a specific tab"""
 
     serializer = ChangeStatusSerializer(
@@ -720,7 +721,10 @@ def change_admission_status(tab, admission_status, extra, admission):
     tab_data['statut'] = serializer.validated_data['status']
     tab_data['libelle'] = ''
     tab_data.setdefault('extra', {})
-    tab_data['extra'].update(serializer.validated_data['extra'])
+    if replace_extra:
+        tab_data['extra'] = serializer.validated_data['extra']
+    else:
+        tab_data['extra'].update(serializer.validated_data['extra'])
 
     admission.save(update_fields=['checklist'])
 
