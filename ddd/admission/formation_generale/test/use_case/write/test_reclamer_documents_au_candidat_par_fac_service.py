@@ -25,11 +25,11 @@
 # ##############################################################################
 import datetime
 from typing import Dict
-
-import freezegun
 from unittest import TestCase
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+import freezegun
+
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.formation_generale.commands import (
     ReclamerDocumentsAuCandidatParFACCommand,

@@ -28,6 +28,7 @@
 >
   {% csrf_token %}
   {% bootstrap_field form.file_name %}
+  {% bootstrap_field form.request_status %}
   {% bootstrap_field form.reason %}
   <button type="submit" class="btn btn-default">{% translate 'Save' context 'admission' %}</button>
 </form>

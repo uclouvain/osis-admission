@@ -39,6 +39,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.commands import (
     InitialiserEmplacementDocumentLibreAReclamerCommand,
@@ -66,6 +67,7 @@ class TestModifierReclamationEmplacementDocument(TestCase):
                     auteur='0123456789',
                     raison='La nouvelle raison.',
                     identifiant_emplacement='inconnu',
+                    statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 )
             )
 
@@ -79,6 +81,7 @@ class TestModifierReclamationEmplacementDocument(TestCase):
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 libelle='Nom du document',
                 raison='La raison expliquant l\'intérêt de ce nouveau document.',
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             )
         )
 
@@ -91,6 +94,7 @@ class TestModifierReclamationEmplacementDocument(TestCase):
                 auteur='987654321',
                 raison='La nouvelle raison.',
                 identifiant_emplacement=identifiant_emplacement_document_depose.identifiant,
+                statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
             )
         )
 
@@ -114,6 +118,7 @@ class TestModifierReclamationEmplacementDocument(TestCase):
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 3))
         self.assertEqual(document.document_soumis_par, '')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT)
 
     @freezegun.freeze_time('2023-01-01', as_kwarg='freeze_time')
     def test_should_modifier_reclamation_emplacement_document_fac(self, freeze_time):
@@ -125,6 +130,7 @@ class TestModifierReclamationEmplacementDocument(TestCase):
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
                 libelle='Nom du document',
                 raison='La raison expliquant l\'intérêt de ce nouveau document.',
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             )
         )
 
@@ -137,6 +143,7 @@ class TestModifierReclamationEmplacementDocument(TestCase):
                 auteur='987654321',
                 raison='La nouvelle raison.',
                 identifiant_emplacement=identifiant_emplacement_document_depose.identifiant,
+                statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
             )
         )
 
@@ -160,6 +167,7 @@ class TestModifierReclamationEmplacementDocument(TestCase):
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 3))
         self.assertEqual(document.document_soumis_par, '')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT)
 
     @freezegun.freeze_time('2023-01-01', as_kwarg='freeze_time')
     def test_should_modifier_reclamation_emplacement_document_non_libre(self, freeze_time):
@@ -183,6 +191,7 @@ class TestModifierReclamationEmplacementDocument(TestCase):
                 derniere_action_le=None,
                 dernier_acteur='',
                 document_soumis_par='',
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT,
             )
         )
 
@@ -194,6 +203,7 @@ class TestModifierReclamationEmplacementDocument(TestCase):
                 auteur='987654321',
                 raison='La nouvelle raison.',
                 identifiant_emplacement=identifiant_document_non_libre,
+                statut_reclamation='',
             )
         )
 
@@ -215,3 +225,4 @@ class TestModifierReclamationEmplacementDocument(TestCase):
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 3))
         self.assertEqual(document.document_soumis_par, '')
         self.assertEqual(document.requis_automatiquement, True)
+        self.assertEqual(document.statut_reclamation, None)

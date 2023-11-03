@@ -122,6 +122,7 @@ class AdmissionDocument:
     label: str
     document_submitted_by: str
     max_documents_number: Optional[int]
+    request_status: str
 
 
 def get_document_from_identifier(
@@ -383,6 +384,7 @@ def get_document_from_identifier(
             label=document_label,
             document_submitted_by=document_submitted_by,
             max_documents_number=max_documents_number,
+            request_status=requested_document.get('request_status') or '',
         )
 
 

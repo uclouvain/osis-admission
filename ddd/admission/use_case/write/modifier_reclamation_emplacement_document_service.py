@@ -41,7 +41,7 @@ def modifier_reclamation_emplacement_document(
         )
     )
 
-    emplacement_document.specifier_reclamation(raison=cmd.raison, acteur=cmd.auteur)
+    emplacement_document.specifier_reclamation(raison=cmd.raison, acteur=cmd.auteur, statut=cmd.statut_reclamation)
 
     emplacement_document_repository.save(entity=emplacement_document, auteur=cmd.auteur)
 

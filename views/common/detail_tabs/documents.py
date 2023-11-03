@@ -58,6 +58,7 @@ from admission.utils import (
     get_portal_admission_list_url,
     get_backoffice_admission_url,
     get_portal_admission_url,
+    get_salutation,
 )
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.entity_version import EntityVersion
@@ -136,6 +137,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['documents'] = self.requestable_documents
+        kwargs['proposition_uuid'] = self.admission_uuid
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -204,7 +206,11 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             'request_deadline': f'<span id="request_deadline">_</span>',  # Will be updated through JS
             'management_entity_name': management_entity.get('title') if management_entity else '',
             'management_entity_acronym': formation.sigle_entite_gestion,
-            'requested_documents': '<ul id="requested-documents-email-list"></ul>',  # Will be updated through JS
+            'requested_documents': '<ul id="immediate-requested-documents-email-list"></ul>',
+            'later_blocking_requested_documents': '<ul id="later-blocking-requested-documents-email-list"></ul>',
+            'later_non_blocking_requested_documents': (
+                '<ul id="later-non-blocking-requested-documents-email-list"></ul>'
+            ),
             'candidate_first_name': self.proposition.prenom_candidat,
             'candidate_last_name': self.proposition.nom_candidat,
             'training_title': {
@@ -214,6 +220,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             'admissions_link_front': get_portal_admission_list_url(),
             'admission_link_front': get_portal_admission_url('general-education', self.admission_uuid),
             'admission_link_back': get_backoffice_admission_url('general-education', self.admission_uuid),
+            'salutation': get_salutation(self.admission.candidate, self.proposition.langue_contact_candidat),
         }
 
         return mail_template.render_subject(tokens=tokens), mail_template.body_as_html(tokens=tokens)
@@ -225,7 +232,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         message_bus_instance.invoke(
             request_command(
                 uuid_proposition=self.admission_uuid,
-                identifiants_emplacements=form.cleaned_data['documents'],
+                identifiants_emplacements=form.cleaned_data['requested_documents'],
                 auteur=self.request.user.person.global_id,
                 a_echeance_le=form.cleaned_data['deadline'],
                 objet_message=form.cleaned_data['message_object'],

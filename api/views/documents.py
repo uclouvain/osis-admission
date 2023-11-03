@@ -35,7 +35,10 @@ from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION
+from admission.ddd.admission.enums.emplacement_document import (
+    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+    StatutReclamationEmplacementDocument,
+)
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.exceptions import DocumentPostProcessingException
 from admission.utils import get_cached_general_education_admission_perm_obj
@@ -46,18 +49,20 @@ from osis_role.contrib.views import APIPermissionRequiredMixin
 
 class RequestedDocumentsListSchema(ResponseSpecificSchema):
     serializer_mapping = {
-        'GET': serializers.DocumentSpecificQuestionSerializer,
+        'GET': serializers.DocumentSpecificQuestionsListSerializer,
         'POST': (
             serializers.CompleterEmplacementsDocumentsParCandidatCommandSerializer,
             serializers.PropositionIdentityDTOSerializer,
         ),
     }
+    # Force schema to return an object (so that we have the two lists and the date)
+    list_force_object = True
 
 
 class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateAPIView):
     name = "documents"
     schema = RequestedDocumentsListSchema()
-    serializer_class = serializers.DocumentSpecificQuestionSerializer
+    serializer_class = serializers.DocumentSpecificQuestionsListSerializer
     pagination_class = None
     filter_backends = []
     get_documents_command = None
@@ -75,7 +80,23 @@ class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateA
             )
         )
 
-        serializer = self.get_serializer(requested_documents, many=True)
+        immediate_requested_documents = []
+        later_requested_documents = []
+
+        for document in requested_documents:
+            if document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name:
+                immediate_requested_documents.append(document)
+            else:
+                later_requested_documents.append(document)
+
+        serializer = self.get_serializer(
+            {
+                'immediate_requested_documents': immediate_requested_documents,
+                'later_requested_documents': later_requested_documents,
+                'deadline': immediate_requested_documents[0].a_echeance_le if immediate_requested_documents else None,
+            }
+        )
+
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):

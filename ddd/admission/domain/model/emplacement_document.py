@@ -30,7 +30,11 @@ from typing import List, Optional, Union
 import attr
 
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from osis_common.ddd import interface
 
 
@@ -50,6 +54,7 @@ class EmplacementDocument(interface.Entity):
     type: TypeEmplacementDocument
     statut: StatutEmplacementDocument
     justification_gestionnaire: str
+    statut_reclamation: Optional[StatutReclamationEmplacementDocument] = None
     requis_automatiquement: bool = False
     libelle: str = ''
     reclame_le: Optional[datetime] = None
@@ -58,10 +63,11 @@ class EmplacementDocument(interface.Entity):
     dernier_acteur: str = ''
     document_soumis_par: str = ''
 
-    def specifier_reclamation(self, raison: str, acteur: str):
+    def specifier_reclamation(self, raison: str, acteur: str, statut: str):
         self.justification_gestionnaire = raison
         self.derniere_action_le = datetime.now()
         self.statut = StatutEmplacementDocument.A_RECLAMER
+        self.statut_reclamation = getattr(StatutReclamationEmplacementDocument, statut, None)
         self.dernier_acteur = acteur
 
     def reclamer_au_candidat(self, auteur: str, reclame_le: datetime, a_echeance_le: date):
@@ -76,9 +82,14 @@ class EmplacementDocument(interface.Entity):
             return
         self.uuids_documents = [uuid_document]
         self.statut = StatutEmplacementDocument.VALIDE
+        self.statut_reclamation = None
         self.document_soumis_par = auteur
 
     def remplir_par_candidat(self, uuid_documents, auteur: str):
-        self.uuids_documents = uuid_documents
-        self.statut = StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION
-        self.document_soumis_par = auteur
+        if uuid_documents:
+            self.uuids_documents = uuid_documents
+            self.statut = StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION
+            self.statut_reclamation = None
+            self.document_soumis_par = auteur
+        else:
+            self.statut = StatutEmplacementDocument.A_RECLAMER

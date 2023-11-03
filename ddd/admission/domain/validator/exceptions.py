@@ -217,9 +217,16 @@ class ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(BusinessExcep
         super().__init__(self.message, **kwargs)
 
 
-class ExperienceNonTrouveeException(BusinessException):
+class DocumentsReclamesImmediatementNonCompletesException(BusinessException):
     status_code = "ADMISSION-21"
 
     def __init__(self, **kwargs):
-        message = _("Experience not found.")
+        message = _("The requested documents immediately are not completed.")
         super().__init__(message, **kwargs)
+
+
+class ExperienceNonTrouveeException(BusinessException):
+    status_code = "ADMISSION-22"
+
+    def __init__(self, **kwargs):
+        message = _("Experience not found.")
