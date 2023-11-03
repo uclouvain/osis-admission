@@ -142,6 +142,8 @@ class CustomDateInput(forms.DateInput):
 
 class PhoneField(forms.CharField):
     def clean(self, value):
+        value = super().clean(value)
+
         if not value:
             return ''
         try:

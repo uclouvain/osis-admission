@@ -146,6 +146,26 @@ class FacultyDecisionViewTestCase(TestCase):
             },
         )
 
+        # Replace the status and clean the extra data
+        url = resolve_url(
+            'admission:general-education:fac-decision-change-status',
+            uuid=self.general_admission.uuid,
+            status=ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        )
+
+        response = self.client.post(url, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['decision_facultaire']['statut'],
+            ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        )
+        self.assertEqual(self.general_admission.checklist['current']['decision_facultaire']['extra'], {})
+
 
 class FacultyDecisionSendToFacultyViewTestCase(TestCase):
     @classmethod

@@ -407,16 +407,19 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 domicile_legal=cls.adresses_candidats[0],
                 adresse_correspondance=cls.adresses_candidats[1],
                 adresse_email_privee='john.doe@example.be.',
+                numero_mobile='+32412345678',
             ),
             CoordonneesCandidat(
                 personne='0000000001',
                 domicile_legal=cls.adresses_candidats[2],
                 adresse_email_privee='john.doe@example.be.',
+                numero_mobile='+32412345678',
             ),
             CoordonneesCandidat(
                 personne='0000000002',
                 domicile_legal=cls.adresses_candidats[3],
                 adresse_email_privee='john.doe@example.be.',
+                numero_mobile='+32412345678',
             ),
         ]
         cls.langues = [
