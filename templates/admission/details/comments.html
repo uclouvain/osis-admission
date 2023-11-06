@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static dictionnary %}
+{% load i18n static dictionnary admission %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -42,14 +42,37 @@
       data-rich-text-config="{{ ckeditor_config|to_json }}"
       data-panel-class="panel panel-primary"
   ></div>
+  {% url base_namespace|add:':other-comments' view.kwargs.uuid as other_comments_url %}
   {% for checklist_tag, checklist_title in checklist_tags %}
-    <div class="comment-viewer"
-      data-url="{% url base_namespace|add:':other-comments' view.kwargs.uuid %}"
-      data-tags="{{ checklist_tag }}"
-      data-header-title="{{ checklist_title }}"
-      data-rich-text-config="{{ ckeditor_config|to_json }}"
-      data-panel-class="panel panel-info"
-    ></div>
+    {% if checklist_tag in CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS %}
+      <div class="comment-thread panel panel-panel panel-info">
+        <div class="panel-heading clearfix">
+          {{ checklist_title }}
+        </div>
+        <div class="panel-body">
+          <div class="comment-viewer"
+              data-url="{{ other_comments_url }}"
+              data-tags="{{ checklist_tag }},SIC"
+              data-header-title="{% translate 'SIC comment for the faculty' %}"
+              data-rich-text-config="{{ ckeditor_config|to_json }}"
+          ></div>
+          <div class="comment-viewer"
+              data-url="{{ other_comments_url }}"
+              data-tags="{{ checklist_tag }},FAC"
+              data-header-title="{% translate 'Faculty comment for the SIC' %}"
+              data-rich-text-config="{{ ckeditor_config|to_json }}"
+          ></div>
+        </div>
+      </div>
+    {% else %}
+      <div class="comment-viewer"
+          data-url="{{ other_comments_url }}"
+          data-tags="{{ checklist_tag }}"
+          data-header-title="{{ checklist_title }}"
+          data-rich-text-config="{{ ckeditor_config|to_json }}"
+          data-panel-class="panel panel-info"
+      ></div>
+    {% endif %}
   {% endfor %}
   {% csrf_token %}
 {% endblock %}

@@ -408,4 +408,11 @@ COMMAND_HANDLERS = {
             poste_diplomatique_translator=PosteDiplomatiqueTranslator(),
         )
     ),
+    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
+        )
+    ),
 }

@@ -202,3 +202,16 @@ class PosteDiplomatiqueNonTrouveException(BusinessException):
     def __init__(self, **kwargs):
         message = _("No diplomatic post found.")
         super().__init__(message, **kwargs)
+
+
+class ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(BusinessException):
+    status_code = "ADMISSION-20"
+    message = _(
+        'As you are applying for a limited course as a non-resident (as defined by government decree) candidate, '
+        'applications for the 2024-2025 academic year must be submitted via this '
+        '<a href="https://uclouvain.be/fr/etudier/inscriptions/demande-en-ligne" target="_blank">'
+        'specific platform</a>.'
+    )
+
+    def __init__(self, **kwargs):
+        super().__init__(self.message, **kwargs)

@@ -68,6 +68,14 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
+    def historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+    ):
+        pass
+
+    @classmethod
     def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str):
         pass
 

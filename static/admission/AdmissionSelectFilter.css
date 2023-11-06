@@ -46,6 +46,11 @@
   margin-bottom: 0.5em;
 }
 
+.admissionselectfilter-container select {
+  flex: 1;
+  max-height: fit-content;
+}
+
 .admissionselectfilter-selectable-container input {
   margin-bottom: 0.5em;
 }
@@ -84,3 +89,6 @@
   color: inherit;
 }
 
+.admissionselectfilter-container option {
+  white-space: normal;
+}

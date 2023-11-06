@@ -26,7 +26,6 @@
 from typing import Dict, Set
 
 from django.conf import settings
-from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from django.forms import Form
 from django.http import HttpResponse
@@ -66,6 +65,7 @@ from admission.ddd.admission.formation_generale.commands import (
     RefuserPropositionParFaculteCommand,
     ApprouverPropositionParFaculteAvecNouvellesInformationsCommand,
     RecupererListePaiementsPropositionQuery,
+    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -312,6 +312,7 @@ class FacultyDecisionView(
             admission_status=self.kwargs['status'],
             extra=extra,
             admission=admission,
+            replace_extra=True,
         )
 
         return super().form_valid(form)
@@ -360,22 +361,22 @@ class FacultyDecisionSendToSicView(
 
     def form_valid(self, form):
         try:
-            if self.request.GET.get('approval'):
-                message_bus_instance.invoke(
-                    ApprouverPropositionParFaculteCommand(
-                        uuid_proposition=self.admission_uuid,
-                        gestionnaire=self.request.user.person.global_id,
-                    )
+            message_bus_instance.invoke(
+                ApprouverPropositionParFaculteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
                 )
-            elif self.request.GET.get('refusal'):
-                message_bus_instance.invoke(
-                    RefuserPropositionParFaculteCommand(
-                        uuid_proposition=self.admission_uuid,
-                        gestionnaire=self.request.user.person.global_id,
-                    )
+                if self.request.GET.get('approval')
+                else RefuserPropositionParFaculteCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
                 )
-            else:
-                raise BadRequest
+                if self.request.GET.get('refusal')
+                else EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
 
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
@@ -700,7 +701,7 @@ class ApplicationFeesView(
         return super().form_valid(form)
 
 
-def change_admission_status(tab, admission_status, extra, admission):
+def change_admission_status(tab, admission_status, extra, admission, replace_extra=False):
     """Change the status of the admission of a specific tab"""
 
     serializer = ChangeStatusSerializer(
@@ -720,7 +721,10 @@ def change_admission_status(tab, admission_status, extra, admission):
     tab_data['statut'] = serializer.validated_data['status']
     tab_data['libelle'] = ''
     tab_data.setdefault('extra', {})
-    tab_data['extra'].update(serializer.validated_data['extra'])
+    if replace_extra:
+        tab_data['extra'] = serializer.validated_data['extra']
+    else:
+        tab_data['extra'].update(serializer.validated_data['extra'])
 
     admission.save(update_fields=['checklist'])
 

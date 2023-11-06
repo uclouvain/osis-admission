@@ -673,6 +673,13 @@ msgstr ""
 msgid "Are you the child of a UCLouvain or Martin V staff member?"
 msgstr ""
 
+msgid ""
+"As you are applying for a limited course as a non-resident (as defined by "
+"government decree) candidate, applications for the 2024-2025 academic year "
+"must be submitted via this <a href=\"https://uclouvain.be/fr/etudier/"
+"inscriptions/demande-en-ligne\" target=\"_blank\">specific platform</a>."
+msgstr ""
+
 msgid "Assimilated,Non-assimilated"
 msgstr ""
 
@@ -1954,10 +1961,10 @@ msgid ""
 "faculty decision process."
 msgstr ""
 
-msgctxt "admission"
-msgid "Emergency contact"
+msgid "Emergency contact (telephone number)"
 msgstr ""
 
+msgctxt "admission"
 msgid "Emergency contact (telephone number)"
 msgstr ""
 
@@ -3710,9 +3717,6 @@ msgstr ""
 msgid "Page size"
 msgstr ""
 
-msgid "Parcours"
-msgstr ""
-
 msgid "Parent certificate of support from the CPAS"
 msgstr ""
 
@@ -5012,7 +5016,7 @@ msgstr ""
 msgid "The dossier has been confirmed as:"
 msgstr ""
 
-msgid "The dossier has been confirmed with the following address:"
+msgid "The dossier has been confirmed with the following contact address:"
 msgstr ""
 
 msgid "The dossier is currently in SIC"
@@ -5691,9 +5695,9 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Would you like to join the <a href='https://uclouvain.be/fr/etudier/sport/le-"
-"sport-uclouvain.html' target='_blank'>sports activities</a>? If so, the cost "
-"of membership will be added to your tuition fee."
+"Would you like to join the <a href='https://uclouvain.be/en/study/sport' "
+"target='_blank'>sports activities</a>? If so, the cost of membership will be "
+"added to your tuition fee."
 msgstr ""
 
 msgid ""
@@ -5796,7 +5800,8 @@ msgstr ""
 #, python-format
 msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
-"list of acronyms separated by the \"%(separator)s\" character."
+"list of acronyms separated by the \"%(separator)s\" character and ending "
+"with the same character."
 msgstr ""
 
 msgid ""
@@ -5953,6 +5958,9 @@ msgid "Your previous NOMA (matriculation number)"
 msgstr ""
 
 msgid "Your professional email address"
+msgstr ""
+
+msgid "Your training does not cover the useful prerequisites in mathematics."
 msgstr ""
 
 msgid "academic year"

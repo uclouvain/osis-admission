@@ -108,7 +108,8 @@ class CoordonneesFormTestCase(TestCase):
             show_contact=True,
             data={},
         )
-        self.assertTrue(form.is_valid())
+        self.assertFalse(form.is_valid())
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('phone_mobile', []))
 
     def test_country_field_initialization(self):
         # Without country
@@ -361,6 +362,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.post(
             self.general_url,
             {
+                'phone_mobile': '+3223742211',
                 'residential-country': self.belgium_country.pk,
                 'residential-be_postal_code': '1348',
                 'residential-be_city': 'Louvain-la-Neuve',
@@ -387,6 +389,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.post(
             self.general_url,
             {
+                'phone_mobile': '+3223742211',
                 'residential-country': self.france_country.pk,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
@@ -419,6 +422,7 @@ class CoordonneesFormTestCase(TestCase):
             self.general_url,
             {
                 'show_contact': True,
+                'phone_mobile': '+3223742211',
                 'contact-country': self.belgium_country.pk,
                 'contact-be_postal_code': '1348',
                 'contact-be_city': 'Louvain-la-Neuve',
@@ -450,6 +454,7 @@ class CoordonneesFormTestCase(TestCase):
             self.general_url,
             {
                 'show_contact': True,
+                'phone_mobile': '+3223742211',
                 'contact-country': self.france_country.pk,
                 'contact-postal_code': '92000',
                 'contact-city': 'Paris',
@@ -481,6 +486,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.post(
             self.general_url,
             data={
+                'phone_mobile': '+3223742211',
                 'residential-country': self.france_country.pk,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
@@ -531,6 +537,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.post(
             url,
             data={
+                'phone_mobile': '+3223742211',
                 'residential-country': self.france_country.pk,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
@@ -552,6 +559,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.post(
             url,
             data={
+                'phone_mobile': '+3223742211',
                 'residential-country': self.france_country.pk,
                 'residential-postal_code': '92000',
                 'residential-city': 'Paris',
@@ -586,6 +594,7 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.post(
             url,
             {
+                'phone_mobile': '+3223742211',
                 'show_contact': True,
                 'residential-country': self.france_country.pk,
                 'residential-postal_code': '92000',

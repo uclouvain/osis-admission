@@ -41,12 +41,17 @@ __all__ = [
     "AdmissionCommentApiView",
     "COMMENT_TAG_SIC",
     "COMMENT_TAG_FAC",
+    "COMMENT_TAG_GLOBAL",
     "CheckListTagsEnum",
 ]
 __namespace__ = False
 
 COMMENT_TAG_SIC = 'SIC'
 COMMENT_TAG_FAC = 'FAC'
+COMMENT_TAG_GLOBAL = 'GLOBAL'
+CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS = {
+    'decision_facultaire',
+}
 
 
 class CheckListTagsEnum(ChoiceEnum):
@@ -57,6 +62,7 @@ class CheckListTagsEnum(ChoiceEnum):
     parcours_anterieur = _('Previous experience')
     donnees_personnelles = _('Personal data')
     specificites_formation = _('Training specificities')
+    decision_facultaire = _('Decision of the faculty')
 
 
 class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
@@ -64,10 +70,11 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
     permission_required = 'admission.view_enrolment_application'
     template_name = "admission/details/comments.html"
     extra_context = {
-        'COMMENT_TAG_FAC': COMMENT_TAG_FAC,
-        'COMMENT_TAG_SIC': COMMENT_TAG_SIC,
+        'COMMENT_TAG_FAC': f'{COMMENT_TAG_FAC},{COMMENT_TAG_GLOBAL}',
+        'COMMENT_TAG_SIC': f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}',
         'checklist_tags': CheckListTagsEnum.choices(),
         'ckeditor_config': CKEDITOR_CONFIGS['minimal'],
+        'CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS': CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS,
     }
 
 

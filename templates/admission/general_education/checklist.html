@@ -205,10 +205,6 @@
                 </dd>
               </dl>
             {% endif %}
-
-            {% panel _("Parcours") %}
-              {% include "admission/general_education/includes/checklist/parcours.html" %}
-            {% endpanel %}
           </div>
         </div>
       {% endwith %}
@@ -324,7 +320,7 @@
   <script src="{% static 'admission/ckeditor.js' %}"></script>
   <script>
       (function ($) {
-          const defaultTab = '#assimilation';
+          const defaultTab = window.location.hash || '#donnees_personnelles';
 
           function refreshDocuments() {
               const selectedTab = window.location.hash || defaultTab;
@@ -345,9 +341,7 @@
           }
 
           // Activate tab from hash on first load
-          if (window.location.hash) {
-              $('#checklist-menu li[data-toggle="tab"][href="' + window.location.hash + '"]').click();
-          }
+          $(`#checklist-menu li[data-toggle="tab"][href="${defaultTab}"]`).click();
 
           refreshDocuments();
 
@@ -592,7 +586,7 @@
           });
           $('input[name="fac-decision-approval-with_prerequisite_courses"]:checked').change();
 
-          facultyDecisionContainer.on('click', 'button[type="submit"]', function(event){
+          facultyDecisionContainer.on('click', 'button[name^="save"]', function(event){
               // To send the updated data from ckeditor instances
               for (const editor in CKEDITOR.instances) {
                   CKEDITOR.instances[editor].updateElement();

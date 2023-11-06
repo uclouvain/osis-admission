@@ -377,14 +377,14 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
 
         # Add dynamic badge for comments
         if parent_tab == Tab('comments'):
-            from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC
+            from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL
 
             roles = _get_roles_assigned_to_user(context['request'].user)
             qs = CommentEntry.objects.filter(object_uuid=context['view'].kwargs['uuid'])
             if {SicManagement, CentralManager} & set(roles):
-                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC]).count()
+                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL]).count()
             elif {ProgramManager} & set(roles):
-                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC]).count()
+                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL]).count()
 
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
@@ -899,3 +899,33 @@ def diplomatic_post_name(diplomatic_post):
             diplomatic_post,
             'nom_francais' if get_language() == settings.LANGUAGE_CODE_FR else 'nom_anglais',
         )
+
+
+@register.filter
+def is_profile_identification_different(profil_candidat, identification):
+    if profil_candidat is None or identification is None:
+        return False
+    return any(
+        (
+            profil_candidat.nom != identification.nom,
+            profil_candidat.prenom != identification.prenom,
+            profil_candidat.genre != identification.genre,
+            profil_candidat.nom_pays_nationalite != identification.nom_pays_nationalite,
+        )
+    )
+
+
+@register.filter
+def is_profile_coordinates_different(profil_candidat, coordonnees):
+    if profil_candidat is None or coordonnees is None or coordonnees.domicile_legal is None:
+        return False
+    return any(
+        (
+            profil_candidat.numero_rue != coordonnees.domicile_legal.numero_rue,
+            profil_candidat.rue != coordonnees.domicile_legal.rue,
+            profil_candidat.boite_postale != coordonnees.domicile_legal.boite_postale,
+            profil_candidat.code_postal != coordonnees.domicile_legal.code_postal,
+            profil_candidat.ville != coordonnees.domicile_legal.ville,
+            profil_candidat.nom_pays != coordonnees.domicile_legal.nom_pays,
+        )
+    )

@@ -398,6 +398,12 @@ class EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(interface.CommandR
 
 
 @attr.dataclass(frozen=True, slots=True)
+class EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class RefuserPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
