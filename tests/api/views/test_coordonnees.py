@@ -31,6 +31,7 @@ from rest_framework.test import APITestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
@@ -77,6 +78,7 @@ class CoordonneesTestCase(APITestCase):
             candidate=cls.address.person,
             training__management_entity=doctoral_commission,
         )
+        AdmissionAcademicCalendarFactory.produce_all_required()
         cls.admission_url = resolve_url('coordonnees', uuid=admission.uuid)
         # Users
         cls.candidate_user = cls.address.person.user
@@ -165,7 +167,7 @@ class CoordonneesTestCase(APITestCase):
         candidate = DoctorateAdmissionFactory(status=ChoixStatutPropositionDoctorale.CONFIRMEE.name).candidate
         self.client.force_authenticate(candidate.user)
         response = self.client.put(self.agnostic_url, self.updated_data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_coordonnees_update_candidate_with_submitted_proposition(self):
         self.client.force_authenticate(self.candidate_user)

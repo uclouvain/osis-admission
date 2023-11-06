@@ -26,11 +26,12 @@
 
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from osis_signature.enums import SignatureState
 from rules import predicate
 from waffle import switch_is_active
 
 from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmission
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
@@ -53,7 +54,6 @@ from admission.ddd.parcours_doctoral.domain.model.enums import (
 )
 from osis_role.cache import predicate_cache
 from osis_role.errors import predicate_failed_msg
-from osis_signature.enums import SignatureState
 
 
 @predicate(bind=True)
@@ -102,6 +102,12 @@ def is_pre_admission(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("Must be in the process of the enrolment"))
 def is_being_enrolled(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_AVANT_INSCRIPTION
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("Another admission has been submitted."))
+def does_not_have_a_submitted_admission(self, user: User, obj: DoctorateAdmission):
+    return not BaseAdmissionProxy.objects.candidate_has_submission(user.person)
 
 
 @predicate(bind=True)
@@ -180,26 +186,43 @@ def is_invited_to_complete(self, user: User, obj: GeneralEducationAdmission):
     }
 
 
-@predicate(bind=True)
-@predicate_failed_msg(message=_("You must be invited to pay the application fees by the system."))
-def is_invited_to_pay_after_submission(self, user: User, obj: GeneralEducationAdmission):
-    checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
+def payment_needed_after_submission(admission: GeneralEducationAdmission):
+    checklist_info = admission.checklist.get('current', {}).get('frais_dossier', {})
     return (
-        obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
+        admission.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
         and checklist_info.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
         and bool(checklist_info.get('extra', {}).get('initial'))
     )
 
 
-@predicate(bind=True)
-@predicate_failed_msg(message=_("You must be invited to pay the application fees by a manager."))
-def is_invited_to_pay_after_request(self, user: User, obj: GeneralEducationAdmission):
-    checklist_info = obj.checklist.get('current', {}).get('frais_dossier', {})
+def payment_needed_after_manager_request(admission: GeneralEducationAdmission):
+    checklist_info = admission.checklist.get('current', {}).get('frais_dossier', {})
     return (
-        obj.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
+        admission.status == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
         and checklist_info.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
         and not bool(checklist_info.get('extra', {}).get('initial'))
     )
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be invited to pay the application fee by the system."))
+def is_invited_to_pay_after_submission(self, user: User, obj: GeneralEducationAdmission):
+    return payment_needed_after_submission(admission=obj)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be invited to pay the application fee by a manager."))
+def is_invited_to_pay_after_request(self, user: User, obj: GeneralEducationAdmission):
+    return payment_needed_after_manager_request(admission=obj)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(_("You must be invited to pay the application fee or you must have submitted your application."))
+def can_view_payment(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status in {
+        ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+        ChoixStatutPropositionGenerale.CONFIRMEE.name,
+    }
 
 
 @predicate(bind=True)

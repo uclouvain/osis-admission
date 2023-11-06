@@ -22,6 +22,20 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% with profil_candidat=admission.profil_soumis_candidat %}
+  {% if profil_candidat|is_profile_coordinates_different:coordonnees %}
+    <p class="alert alert-info" role="alert">
+      <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
+      {% trans "The dossier has been confirmed with the following contact address:" %}
+      {{ profil_candidat.numero_rue }} {{ profil_candidat.rue }},
+      {% if profil_candidat.boite_postale %}{% trans "Postal box" %} {{ profil_candidat.boite_postale }}, {% endif %}
+      {{ profil_candidat.code_postal }} {{ profil_candidat.ville }},
+      {{ profil_candidat.nom_pays }}
+    </p>
+  {% endif %}
+{% endwith %}
+
 {% panel _("Legal domicile") %}
   <div class="row">
     <div class="col-md-4">{% field_data _("Street") coordonnees.domicile_legal.rue %}</div>
@@ -54,8 +68,10 @@
 {% panel _("Contact") %}
   <div class="row">
     {% trans "Telephone (mobile)" context "admission" as mobile_phone_label %}
-    {% field_data mobile_phone_label coordonnees.numero_mobile "col-md-6" %}
+    {% field_data mobile_phone_label coordonnees.numero_mobile "col-md-4" %}
     {% trans "Personal email" context "admission" as email_label %}
-    {% field_data email_label coordonnees.adresse_email_privee "col-md-6" %}
+    {% field_data email_label coordonnees.adresse_email_privee "col-md-4" %}
+    {% trans "Emergency contact (telephone number)" context "admission" as emergency_contact_label %}
+    {% field_data emergency_contact_label coordonnees.numero_contact_urgence "col-md-4" %}
   </div>
 {% endpanel %}

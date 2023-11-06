@@ -435,6 +435,7 @@ class AdmissionPoolUe5NonBelgianCalendar(PoolCalendar):
         return (
             isinstance(proposition, PropositionGenerale)
             and ue_plus_5
+            and bool(access_diplomas)
             and not any(belgian_diploma in access_diplomas for belgian_diploma in DIPLOMES_ACCES_BELGE)
             and not est_formation_contingentee_et_non_resident(sigle, proposition)
         )
@@ -476,7 +477,7 @@ class AdmissionPoolHue5BelgiumResidencyCalendar(PoolCalendar):
 class AdmissionPoolHue5ForeignResidencyCalendar(PoolCalendar):
     event_reference = AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY.name
     cutover_date = Date(jour=1, mois=5, annee=-1)
-    end_date = Date(jour=30, mois=4, annee=0)
+    end_date = Date(jour=31, mois=3, annee=0)
 
     @classmethod
     def ensure_consistency_until_n_plus_6(cls):

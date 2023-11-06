@@ -55,7 +55,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.validator import exceptions as general_education_exceptions
 from admission.tests import QueriesAssertionsMixin
-from admission.tests.api.views.test_project import DoctorateAdmissionApiTestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import (
@@ -92,6 +91,7 @@ def create_default_propositions_in_progress(candidate):
 
 class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
     @classmethod
+    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
         cls.candidate = PersonFactory()
         root = EntityVersionFactory(parent=None).entity
@@ -110,6 +110,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
             enrollment_campus__name='Mons',
         )
         cls.scholarship = ErasmusMundusScholarshipFactory()
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         cls.create_data = {
             "type_admission": ChoixTypeAdmission.PRE_ADMISSION.name,
@@ -319,6 +320,7 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
                 'fe254203-17c7-47d6-95e4-3c5c532da552': [cls.file_uuid, 'token:abcdef'],
             },
         }
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
@@ -520,7 +522,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/', WAFFLE_CREATE_MISSING_SWITCHES=False)
 class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, APITestCase):
     file_uuid = str(uuid.uuid4())
 
@@ -547,6 +549,7 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
             supervision_group=promoter.process,
             with_answers_to_specific_questions=True,
         )
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Users
         cls.candidate = cls.admission.candidate

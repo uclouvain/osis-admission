@@ -23,25 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.commands import (
-    SpecifierMotifRefusFacultairePropositionCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from django.utils.functional import lazy
+from django.utils.safestring import mark_safe
 
 
-def specifier_motif_refus_facultaire(
-    cmd: SpecifierMotifRefusFacultairePropositionCommand,
-    proposition_repository: 'IPropositionRepository',
-) -> PropositionIdentity:
-    proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
+__all__ = ['mark_safe_lazy']
 
-    proposition.specifier_motif_refus_par_fac(
-        uuid_motif=cmd.uuid_motif,
-        autre_motif=cmd.autre_motif,
-    )
 
-    proposition_repository.save(entity=proposition)
+def _mark_safe(value, **kwargs):
+    """Mark a string as safe and interpolate variables inside if provided."""
+    return mark_safe(value % (kwargs or {}))
 
-    return proposition.entity_id
+
+mark_safe_lazy = lazy(_mark_safe, str)

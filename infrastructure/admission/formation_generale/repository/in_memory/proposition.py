@@ -50,6 +50,9 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
+    PosteDiplomatiqueInMemoryTranslator,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
@@ -210,6 +213,13 @@ class PropositionInMemoryRepository(
             proposition.formation_id.sigle,
             proposition.formation_id.annee,
         )
+        poste_diplomatique = (
+            PosteDiplomatiqueInMemoryTranslator.get_dto(
+                code=proposition.poste_diplomatique.code,
+            )
+            if proposition.poste_diplomatique
+            else None
+        )
 
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,
@@ -257,6 +267,7 @@ class PropositionInMemoryRepository(
             certificat_refus_fac=proposition.certificat_refus_fac,
             certificat_approbation_fac=proposition.certificat_approbation_fac,
             documents_additionnels=proposition.documents_additionnels,
+            poste_diplomatique=poste_diplomatique,
         )
 
     @classmethod
@@ -268,7 +279,7 @@ class PropositionInMemoryRepository(
         proposition = cls.get(entity_id=entity_id)
         propositions = cls.search_dto(matricule_candidat=proposition.matricule_candidat)
         base_proposition = cls._load_dto(proposition)
-        motif_refus = cls.motifs_refus.get(proposition.motif_refus_fac.uuid) if proposition.motif_refus_fac else None
+        motifs_refus = [cls.motifs_refus.get(motif_refus.uuid) for motif_refus in proposition.motifs_refus]
         candidat = ProfilCandidatInMemoryTranslator.get_identification(proposition.matricule_candidat)
         formation_choisie_fac = (
             FormationGeneraleInMemoryTranslator.get_dto(
@@ -318,11 +329,7 @@ class PropositionInMemoryRepository(
             )
             if proposition.profil_soumis_candidat
             else None,
-            motif_refus_fac=motif_refus
-            and MotifRefusDTO(
-                motif=motif_refus.intitule,
-                categorie=motif_refus.categorie,
-            ),
+            motifs_refus=[MotifRefusDTO(motif=motif.intitule, categorie=motif.categorie) for motif in motifs_refus],
             autre_formation_choisie_fac=formation_choisie_fac
             and BaseFormationDTO(
                 sigle=formation_choisie_fac.sigle,

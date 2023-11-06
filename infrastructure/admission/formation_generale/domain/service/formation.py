@@ -36,6 +36,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
@@ -86,6 +87,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
                 type=TrainingType[dto.type],
                 code_domaine=dto.main_domain_code or '',
+                campus=dto.main_teaching_campus_name or '',
             )
 
         raise FormationNonTrouveeException
@@ -110,6 +112,9 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 annee=annee,
                 campus=campus,
                 est_inscriptible=True,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
                 sigle=sigle,
                 intitule=intitule,
                 terme_de_recherche=terme_de_recherche,
@@ -137,6 +142,9 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 sigle=sigle,
                 annee=annee,
                 est_inscriptible=True,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
                 types=list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
             )
         )

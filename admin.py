@@ -27,24 +27,26 @@
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy
+from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext
 from hijack.contrib.admin import HijackUserAdminMixin
+from osis_mail_template.admin import MailTemplateAdmin
 
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.cdd_configurator import CddConfigurator
+from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_reader import DoctorateReader
 from admission.auth.roles.jury_secretary import JurySecretary
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
-from admission.auth.roles.central_manager import CentralManager
 from admission.contrib.models import (
     AdmissionTask,
     AdmissionViewer,
@@ -54,13 +56,17 @@ from admission.contrib.models import (
     GeneralEducationAdmission,
     Scholarship,
     Accounting,
+    DiplomaticPost,
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
+from admission.contrib.models.online_payment import OnlinePayment
+from admission.ddd.admission.enums import CritereItemFormulaireFormation
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
+from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
 from base.models.entity_version import EntityVersion
@@ -69,7 +75,6 @@ from base.models.person import Person
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from osis_document.contrib import FileField
-from osis_mail_template.admin import MailTemplateAdmin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
@@ -183,11 +188,51 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'additional_approval_conditions',
         'other_training_accepted_by_fac',
         'prerequisite_courses',
+        'diplomatic_post',
+        'refusal_reasons',
     ]
+    actions = ['trigger_payment_hook']
 
     @staticmethod
     def view_on_site(obj):
         return resolve_url(f'admission:general-education', uuid=obj.uuid)
+
+    def has_payment_hook_triggering_permission(self, request):
+        return settings.DEBUG and request.user.is_staff
+
+    @admin.action(description=_('Trigger the payment hook'), permissions=['payment_hook_triggering'])
+    def trigger_payment_hook(self, request, queryset):
+        """Manually trigger the payment hook as it's not always possible to do it automatically."""
+        admissions_ids = set(request.POST.getlist('_selected_action'))
+
+        payments = OnlinePayment.objects.filter(admission_id__in=admissions_ids)
+        achieved_admissions_ids = set()
+
+        for payment in payments:
+            result = MollieWebHook.update_from_payment(paiement_id=payment.payment_id)
+            if result:
+                achieved_admissions_ids.add(payment.admission_id)
+
+        if achieved_admissions_ids:
+            info(
+                request,
+                ngettext(
+                    'The following admission has been updated: {}.',
+                    'The following admissions have been updated: {}.',
+                    len(achieved_admissions_ids),
+                ).format(', '.join(map(str, achieved_admissions_ids))),
+            )
+
+        not_achieved_admissions_ids = admissions_ids - achieved_admissions_ids
+        if not_achieved_admissions_ids:
+            warning(
+                request,
+                ngettext(
+                    'The following admission has not been updated: {}.',
+                    'The following admissions have not been updated: {}.',
+                    len(not_achieved_admissions_ids),
+                ).format(', '.join(map(str, not_achieved_admissions_ids))),
+            )
 
 
 class CddMailTemplateAdmin(MailTemplateAdmin):
@@ -212,7 +257,7 @@ class ScholarshipAdmin(admin.ModelAdmin):
         'short_name',
         'long_name',
         'type',
-        'disabled',
+        'enabled',
     ]
     search_fields = [
         'short_name',
@@ -228,6 +273,10 @@ class ScholarshipAdmin(admin.ModelAdmin):
         'long_name',
         'disabled',
     ]
+
+    @admin.display(description=_('Enabled'), boolean=True)
+    def enabled(self, obj):
+        return not obj.disabled
 
 
 FORM_ITEM_MIN_YEAR = 2022
@@ -267,6 +316,53 @@ class AcademicYearListFilter(admin.SimpleListFilter):
         return queryset.filter(academic_year__pk=value) if value else queryset
 
 
+class SimpleListFilterWithDefaultValue(admin.SimpleListFilter):
+    default_value = ''
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.used_parameters.setdefault(self.parameter_name, self.default_value)
+
+    def choices(self, changelist):
+        for lookup, title in [('all', _('All'))] + self.lookup_choices:
+            yield {
+                'selected': self.value() == str(lookup),
+                'query_string': changelist.get_query_string({self.parameter_name: lookup}),
+                'display': title,
+            }
+
+    def filtered_queryset(self, value, request, queryset):
+        raise NotImplementedError(
+            'subclasses of SimpleListFilterWithDefaultValue must provide a filtered_queryset() method'
+        )
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value != 'all':
+            return self.filtered_queryset(value, request, queryset)
+        return queryset
+
+
+class AdmissionFormItemFreeDocumentListFilter(SimpleListFilterWithDefaultValue):
+    title = _("use")
+    parameter_name = "use"
+    default_value = 'without_free_documents'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('without_free_documents', _("Without free documents")),
+            ('free_documents', _("Free documents")),
+        ]
+
+    def filtered_queryset(self, value, request, queryset):
+        filter_by = models.Q(
+            admissionformiteminstantiation__display_according_education=(
+                CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name
+            )
+        )
+        return queryset.filter(filter_by if value == 'free_documents' else ~filter_by)
+
+
 class AdmissionFormItemAdmin(admin.ModelAdmin):
     list_display = [
         'id',
@@ -281,7 +377,17 @@ class AdmissionFormItemAdmin(admin.ModelAdmin):
     list_filter = [
         'type',
         'active',
+        AdmissionFormItemFreeDocumentListFilter,
     ]
+    create_only_fields = {
+        'internal_label',
+    }
+
+    def get_readonly_fields(self, request, obj=None):
+        read_only_fields = super().get_readonly_fields(request, obj)
+        if obj:
+            return [field for field in read_only_fields if field not in self.create_only_fields]
+        return read_only_fields
 
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
@@ -309,6 +415,12 @@ class AdmissionFormItemInstantiationForm(forms.ModelForm):
         fields = '__all__'
 
 
+class AdmissionFormItemInstantiationFreeDocumentListFilter(AdmissionFormItemFreeDocumentListFilter):
+    def filtered_queryset(self, value, request, queryset):
+        filter_by = models.Q(display_according_education=CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name)
+        return queryset.filter(filter_by if value == 'free_documents' else ~filter_by)
+
+
 class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
     list_display = [
         'academic_year',
@@ -320,6 +432,7 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
         'education_group_type',
         'education_group_acronym',
         'candidate_nationality',
+        'diploma_nationality',
         'study_language',
         'vip_candidate',
         'tab',
@@ -332,9 +445,11 @@ class AdmissionFormItemInstantiationAdmin(admin.ModelAdmin):
         EducationGroupTypeListFilter,
         'tab',
         'candidate_nationality',
+        'diploma_nationality',
         'study_language',
         'vip_candidate',
         AcademicYearListFilter,
+        AdmissionFormItemInstantiationFreeDocumentListFilter,
     ]
     raw_id_fields = ['education_group']
     autocomplete_fields = ['form_item', 'admission']
@@ -385,17 +500,36 @@ class DisplayTranslatedNameMixin:
 
 
 class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
-    list_display = ['name_fr', 'name_en']
+    list_display = ['name']
+    search_fields = ['name']
 
 
 class RefusalReasonAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
     autocomplete_fields = ['category']
-    list_display = ['name_fr', 'name_en', 'category']
+    list_display = ['safe_name', 'category']
     list_filter = ['category']
+
+    @admin.display(description=_('Name'))
+    def safe_name(self, obj):
+        return mark_safe(obj.name)
 
 
 class AdditionalApprovalConditionAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
-    list_display = ['name_fr', 'name_en']
+    list_display = ['safe_name_fr', 'safe_name_en']
+
+    @admin.display(description=_('French name'))
+    def safe_name_fr(self, obj):
+        return mark_safe(obj.name_fr)
+
+    @admin.display(description=_('English name'))
+    def safe_name_en(self, obj):
+        return mark_safe(obj.name_en)
+
+
+class DiplomaticPostAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['countries']
+    search_fields = ['name_fr', 'name_en']
+    list_display = ['name_fr', 'name_en', 'email']
 
 
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
@@ -412,6 +546,7 @@ admin.site.register(Accounting, AccountingAdmin)
 admin.site.register(RefusalReasonCategory, RefusalReasonCategoryAdmin)
 admin.site.register(RefusalReason, RefusalReasonAdmin)
 admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
+admin.site.register(DiplomaticPost, DiplomaticPostAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):

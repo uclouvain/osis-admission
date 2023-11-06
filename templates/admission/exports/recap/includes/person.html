@@ -22,6 +22,19 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% with profil_candidat=admission.profil_soumis_candidat %}
+  {% if profil_candidat|is_profile_identification_different:identification %}
+    <p class="alert alert-info" role="alert">
+      <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
+      {% trans "The dossier has been confirmed as:" %}
+      {{ profil_candidat.nom }}, {{ profil_candidat.prenom }}
+      ({{ profil_candidat.genre|enum_display:'ChoixGenre' }}) -
+      {{ profil_candidat.nom_pays_nationalite|default:_('Unknown citizenship') }}
+    </p>
+  {% endif %}
+{% endwith %}
+
 {% panel _("Identification") %}
   <div class="row">
     {% field_data _("Surname") identification.nom "col-md-4" %}
@@ -31,6 +44,7 @@
   <div class="row">
     {% field_data _("Sex") identification.sexe|enum_display:'ChoixSexe' "col-md-4" %}
     {% field_data _("Gender") identification.genre|enum_display:'ChoixGenre' "col-md-4" %}
+    {% field_data _("Civil status") identification.etat_civil|enum_display:'CivilState' "col-md-4" %}
   </div>
   <div class="row">
     {% if identification.date_naissance %}
@@ -42,7 +56,6 @@
     {% field_data _("Place of birth") identification.lieu_naissance "col-md-4" %}
   </div>
   <div class="row">
-    {% field_data _("Civil status") identification.etat_civil|enum_display:'CivilState' "col-md-4" %}
     {% field_data _("Country of citizenship") identification.nom_pays_nationalite "col-md-4" %}
   </div>
   {% field_data _("Identification photo") identification.photo_identite %}
@@ -69,7 +82,7 @@
       {% field_data _('Passport expiry date') identification.date_expiration_passeport "col-md-6" %}
     </div>
   {% else %}
-    {% translate 'Not specified' %}
+    {% translate 'Incomplete field' %}
   {% endif %}
 {% endpanel %}
 
@@ -77,7 +90,7 @@
   {% if identification.annee_derniere_inscription_ucl %}
     {% field_data _('Have you previously enrolled at UCLouvain?') _('Yes') %}
     <div class="row">
-      {% field_data _("Last registration year") identification.annee_derniere_inscription_ucl|get_academic_year "col-md-6" %}
+      {% field_data _("Most recent year of enrolment") identification.annee_derniere_inscription_ucl|get_academic_year "col-md-6" %}
       {% field_data _("Your previous NOMA (matriculation number)") identification.noma_derniere_inscription_ucl "col-md-6" %}
     </div>
   {% else %}

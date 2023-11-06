@@ -30,6 +30,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.tests.factories.entity import EntityFactory
@@ -57,6 +58,7 @@ class PersonTestCase(APITestCase):
         cls.candidate_user = admission.candidate.user
         cls.candidate_user_without_admission = CandidateFactory().person.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

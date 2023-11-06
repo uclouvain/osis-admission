@@ -84,6 +84,7 @@ class CompleterPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RechercherDoctoratQuery(interface.QueryRequest):
     sigle_secteur_entite_gestion: str
+    terme_de_recherche: Optional[str] = ''
     campus: Optional[str] = ''
 
 
@@ -366,3 +367,8 @@ class RecupererElementsConfirmationQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererQuestionsSpecifiquesQuery(commands.RecupererQuestionsSpecifiquesQuery):
     pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererDocumentsPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str

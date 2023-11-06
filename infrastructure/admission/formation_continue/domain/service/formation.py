@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
@@ -89,12 +90,18 @@ class FormationContinueTranslator(IFormationContinueTranslator):
                 entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
                 type=TrainingType[dto.type],
                 code_domaine=dto.main_domain_code or '',
+                campus=dto.main_teaching_campus_name or '',
             )
 
         raise FormationNonTrouveeException
 
     @classmethod
-    def search(cls, annee: Optional[int], intitule: Optional[str], campus: Optional[str]) -> List['FormationDTO']:
+    def search(
+        cls,
+        annee: Optional[int],
+        terme_de_recherche: Optional[str],
+        campus: Optional[str],
+    ) -> List['FormationDTO']:
         from infrastructure.messages_bus import message_bus_instance
 
         if not annee:
@@ -105,7 +112,10 @@ class FormationContinueTranslator(IFormationContinueTranslator):
                 annee=annee,
                 campus=campus,
                 est_inscriptible=True,
-                intitule=intitule,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
+                terme_de_recherche=terme_de_recherche,
                 types=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
                     TypeFormation.FORMATION_CONTINUE.name
                 ),
@@ -128,6 +138,10 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             SearchFormationsCommand(
                 sigle=sigle,
                 annee=annee,
+                est_inscriptible=True,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
                 type=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
                     TypeFormation.FORMATION_CONTINUE.name
                 ),

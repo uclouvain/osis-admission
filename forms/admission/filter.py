@@ -25,7 +25,6 @@
 # ##############################################################################
 import re
 
-from dal import autocomplete
 from django import forms
 from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy
 
@@ -34,13 +33,13 @@ from admission.contrib.models import Scholarship
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION, CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
+from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS, autocomplete
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.forms.widgets import Select2MultipleCheckboxesWidget
-from base.models.academic_year import current_academic_year
 from base.models.entity_version import EntityVersion
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
@@ -185,7 +184,9 @@ class AllAdmissionsFilterForm(forms.Form):
     def __init__(self, user, load_labels=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['annee_academique'].choices = get_academic_year_choices()
-        self.fields['annee_academique'].initial = current_academic_year().year
+        self.fields['annee_academique'].initial = AnneeInscriptionFormationTranslator().recuperer(
+            AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT
+        )
         self.fields['types_formation'].initial = list(
             AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
             | AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES

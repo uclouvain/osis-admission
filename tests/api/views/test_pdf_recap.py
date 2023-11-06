@@ -28,6 +28,7 @@ from unittest import mock
 
 import freezegun
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -41,6 +42,7 @@ from base.models.enums.education_group_types import TrainingType
 
 
 @freezegun.freeze_time('2023-01-01')
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
     @classmethod
     def setUpTestData(cls):
@@ -67,7 +69,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
     def setUp(self):
         patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
         patched = patcher.start()
-        patched.side_effect = lambda uuids: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
+        patched.side_effect = lambda uuids, **kwargs: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')

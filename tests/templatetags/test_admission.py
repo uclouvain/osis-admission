@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import uuid
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, MagicMock
 
 import freezegun
 import mock
@@ -43,6 +43,7 @@ from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.templatetags.admission import (
@@ -71,6 +72,7 @@ from admission.templatetags.admission import (
     document_component,
     get_item_or_none,
     part_of_dict,
+    need_to_display_specific_questions,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -373,7 +375,7 @@ class AdmissionFieldsDataTestCase(TestCase):
             name='My field label',
             data=[],
         )
-        self.assertEqual(result['data'], _('Not specified'))
+        self.assertEqual(result['data'], _('Incomplete field'))
 
 
 class DisplayTagTestCase(TestCase):
@@ -586,6 +588,53 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         self.assertFalse(part_of_dict({'a': 1}, {'b': 1}))
         self.assertTrue(part_of_dict({}, {'a': 1}))
         self.assertFalse(part_of_dict({'a': 1}, {}))
+
+    def test_need_to_display_specific_questions(self):
+        configurations = []
+
+        # With no specific question
+        self.assertFalse(need_to_display_specific_questions(configurations, False))
+        self.assertFalse(need_to_display_specific_questions(configurations, True))
+
+        # With only one document question
+        configurations = [
+            MagicMock(type=TypeItemFormulaire.DOCUMENT.name),
+        ]
+        self.assertTrue(need_to_display_specific_questions(configurations, False))
+        self.assertFalse(need_to_display_specific_questions(configurations, True))
+
+        # With several document questions
+        configurations = [
+            MagicMock(type=TypeItemFormulaire.DOCUMENT.name),
+            MagicMock(type=TypeItemFormulaire.DOCUMENT.name),
+            MagicMock(type=TypeItemFormulaire.DOCUMENT.name),
+        ]
+        self.assertTrue(need_to_display_specific_questions(configurations, False))
+        self.assertFalse(need_to_display_specific_questions(configurations, True))
+
+        # With text question
+        configurations = [
+            MagicMock(type=TypeItemFormulaire.TEXTE.name),
+        ]
+        self.assertTrue(need_to_display_specific_questions(configurations, False))
+        self.assertTrue(need_to_display_specific_questions(configurations, True))
+
+        # With several text questions
+        configurations = [
+            MagicMock(type=TypeItemFormulaire.TEXTE.name),
+            MagicMock(type=TypeItemFormulaire.TEXTE.name),
+            MagicMock(type=TypeItemFormulaire.TEXTE.name),
+        ]
+        self.assertTrue(need_to_display_specific_questions(configurations, False))
+        self.assertTrue(need_to_display_specific_questions(configurations, True))
+
+        # With both document and text questions
+        configurations = [
+            MagicMock(type=TypeItemFormulaire.DOCUMENT.name),
+            MagicMock(type=TypeItemFormulaire.TEXTE.name),
+        ]
+        self.assertTrue(need_to_display_specific_questions(configurations, False))
+        self.assertTrue(need_to_display_specific_questions(configurations, True))
 
 
 class AdmissionTagsTestCase(TestCase):

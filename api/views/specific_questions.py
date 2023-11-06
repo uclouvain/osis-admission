@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from rest_framework import generics, status
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
@@ -37,6 +37,7 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_continue.commands import (
     CompleterQuestionsSpecifiquesCommand as CompleterQuestionsSpecifiquesFormationContinueCommand,
 )
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.utils import (
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
@@ -153,6 +154,37 @@ class GeneralSpecificQuestionAPIView(APIPermissionRequiredMixin, GenericAPIView)
         )
         self.get_permission_object().update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GeneralIdentificationSchema(ResponseSpecificSchema):
+    operation_id_base = '_general_identification'
+    serializer_mapping = {
+        'GET': (
+            serializers.PropositionIdentityDTOSerializer,
+            serializers.IdentificationDTOSerializer,
+        ),
+    }
+
+
+class GeneralIdentificationView(APIPermissionRequiredMixin, RetrieveAPIView):
+    name = "general_identification"
+    permission_mapping = {
+        'GET': 'admission.view_generaleducationadmission_specific_question',
+    }
+    schema = GeneralIdentificationSchema()
+    filter_backends = []
+    pagination_class = None
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
+
+    def get(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
+        identification_dto = ProfilCandidatTranslator.get_identification(
+            matricule=admission.candidate.global_id,
+        )
+        serializer = serializers.IdentificationDTOSerializer(instance=identification_dto)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

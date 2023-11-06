@@ -35,7 +35,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.contrib.models import AdmissionFormItemInstantiation, DoctorateAdmission
+from admission.contrib.models import AdmissionFormItemInstantiation, DoctorateAdmission, AdmissionTask
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -83,6 +83,7 @@ from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
 
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinksMixin, APITestCase):
     @classmethod
     @freezegun.freeze_time('2023-01-01')
@@ -366,6 +367,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -412,6 +414,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         cls.other_promoter_user = PromoterFactory().person.user
         cls.committee_member_user = committee_member.person.user
         cls.other_committee_member_user = CaMemberFactory().person.user
+        AdmissionAcademicCalendarFactory.produce_all_required()
         # Targeted url
         cls.url = resolve_url("admission_api_v1:propositions", uuid=cls.admission.uuid)
 
@@ -1010,7 +1013,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                 'coordinates': {
                     'country': 'BE',
                     'postal_code': '1348',
-                    'city': 'Louvain-La-Neuve',
+                    'city': 'Louvain-la-Neuve',
                     'street': 'University street',
                     'street_number': '2',
                     'postal_box': 'B2',
@@ -1019,6 +1022,11 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         )
         self.assertEqual(WebNotification.objects.count(), 1)
         self.assertEqual(WebNotification.objects.first().person, manager.person)
+
+        admission_tasks = AdmissionTask.objects.filter(admission=admission).order_by('type')
+        self.assertEqual(len(admission_tasks), 2)
+        self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.DOCTORATE_MERGE.name)
+        self.assertEqual(admission_tasks[1].type, AdmissionTask.TaskType.DOCTORATE_RECAP.name)
 
     def test_submit_valid_proposition_using_api_but_too_much_submitted_propositions(self):
         DoctorateAdmissionFactory(

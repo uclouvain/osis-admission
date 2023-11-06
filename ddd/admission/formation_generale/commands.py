@@ -83,6 +83,17 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ModifierChoixFormationParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    bourse_double_diplome: Optional[str] = ''
+    bourse_internationale: Optional[str] = ''
+    bourse_erasmus_mundus: Optional[str] = ''
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
     uuid_proposition: str
 
@@ -220,6 +231,26 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     documents_additionnels: List[str] = attr.Factory(list)
+    poste_diplomatique: Optional[int] = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+    reponses_questions_specifiques: Dict = attr.Factory(dict)
+    documents_additionnels: List[str] = attr.Factory(list)
+
+    poste_diplomatique: Optional[int] = None
+
+    est_bachelier_belge: Optional[bool] = None
+    est_reorientation_inscription_externe: Optional[bool] = None
+    attestation_inscription_reguliere: List[str] = attr.Factory(list)
+
+    est_modification_inscription_externe: Optional[bool] = None
+    formulaire_modification_inscription: List[str] = attr.Factory(list)
+
+    est_non_resident_au_sens_decret: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -351,6 +382,11 @@ class PayerFraisDossierPropositionSuiteSoumissionCommand(interface.CommandReques
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SpecifierPaiementVaEtreOuvertParCandidatCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class PayerFraisDossierPropositionSuiteDemandeCommand(interface.CommandRequest):
     uuid_proposition: str
 
@@ -362,24 +398,30 @@ class EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(interface.CommandR
 
 
 @attr.dataclass(frozen=True, slots=True)
+class EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class RefuserPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RefuserPropositionParFaculteAvecNouveauMotifCommand(interface.CommandRequest):
+class RefuserPropositionParFaculteAvecNouveauxMotifsCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    uuid_motif: str
-    autre_motif: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SpecifierMotifRefusFacultairePropositionCommand(interface.CommandRequest):
+class SpecifierMotifsRefusPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
-    uuid_motif: str
-    autre_motif: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -389,7 +431,7 @@ class ApprouverPropositionParFaculteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SpecifierInformationsAcceptationFacultairePropositionCommand(interface.CommandRequest):
+class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     sigle_autre_formation: str = ''
     uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
@@ -419,3 +461,8 @@ class ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(interface.C
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
     commentaire_programme_conjoint: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererListePaiementsPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str

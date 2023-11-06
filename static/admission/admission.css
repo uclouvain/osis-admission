@@ -367,3 +367,19 @@ select#match + .select2-container {
 #proposal-form .help-block {
   display: none;
 }
+
+@media (min-width: 992px) {
+  .admission-modal-lg {
+    width: 90%;
+    min-width: 900px;
+  }
+}
+
+.debug-content {
+  background-color: #ffb4ff78;
+}
+
+.select2-results hr {
+  padding: 0;
+  margin: 0;
+}

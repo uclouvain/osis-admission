@@ -1,0 +1,117 @@
+{% extends base_template %}
+{% load bootstrap3 admission i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block form %}
+  {% bootstrap_form_errors form %}
+
+  {% if view.is_general and view.display_visa_question %}
+    {% panel _('Visa') %}
+      <p>
+        {% blocktranslate trimmed %}
+          On the basis of the information you have provided, you will need to apply for a student visa if your
+          application to attend our university is accepted (i.e. if UCLouvain sends you an "enrolment
+          authorisation"). Please read the student
+          <a href="https://uclouvain.be/en/study/inscriptions/welcome-to-international-students.html" target="_blank">
+            visa
+          </a> application information.
+        {% endblocktranslate %}
+      </p>
+      <div class="row">
+        <div class="col-md-6 required_field">
+          {% bootstrap_field form.poste_diplomatique %}
+        </div>
+      </div>
+    {% endpanel %}
+  {% endif %}
+
+  {% panel _('Specific aspects') %}
+    {% bootstrap_field form.reponses_questions_specifiques show_label=False error_css_class='' %}
+    {% bootstrap_field form.documents_additionnels %}
+  {% endpanel %}
+
+  {% if view.display_pool_questions %}
+    {% if form.est_non_resident_au_sens_decret %}
+      {% panel _("Enrolment in limited enrolment bachelor's course") %}
+        {% bootstrap_field form.est_non_resident_au_sens_decret form_group_class="form-group required_field" %}
+      {% endpanel %}
+    {% endif %}
+
+    {% panel _("Change of enrolment and course change") id="panel-modification-reorientation" %}
+      {% bootstrap_field form.est_bachelier_belge form_group_class="form-group required_field" %}
+
+      <div id="belgian-bachelor-children">
+        {% bootstrap_field form.est_modification_inscription_externe form_group_class="form-group required_field" %}
+
+        <div id="registration-change-form">
+          {% bootstrap_field form.formulaire_modification_inscription form_group_class="form-group required_field" %}
+        </div>
+
+        <hr>
+
+        {% bootstrap_field form.est_reorientation_inscription_externe form_group_class="form-group required_field" %}
+
+        <div id="regular-registration-proof">
+          {% bootstrap_field form.attestation_inscription_reguliere form_group_class="form-group required_field" %}
+        </div>
+
+      </div>
+    {% endpanel %}
+
+  {% endif %}
+
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+
+  <script>
+      $(function () {
+          {% if view.display_pool_questions %}
+              {% if form.est_non_resident_au_sens_decret %}
+                  {# Whole panel depends on est_non_resident_au_sens_decret question #}
+                  $('#panel-modification-reorientation').dependsOn({
+                      'input[name=est_non_resident_au_sens_decret]': {
+                          values: ['False'],
+                      },
+                  });
+              {% endif %}
+
+              $('#belgian-bachelor-children').dependsOn({
+                  'input[name=est_bachelier_belge]': { values: ['True'] },
+              });
+
+              $('#registration-change-form').dependsOn({
+                  'input[name=est_modification_inscription_externe]': { values: ['True'] },
+              });
+
+              $('#regular-registration-proof').dependsOn({
+                  'input[name=est_reorientation_inscription_externe]': { values: ['True'] },
+              });
+          {% endif %}
+      });
+  </script>
+{% endblock %}

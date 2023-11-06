@@ -23,19 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid as uuid
 from collections import defaultdict
 from os.path import dirname
-
-import uuid as uuid
 from typing import List
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext_lazy
-from osis_document.utils import generate_filename, is_uuid
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE, EN_ISO_CODE
@@ -44,6 +42,7 @@ from admission.ddd.admission.enums.question_specifique import (
     CleConfigurationItemFormulaire,
     TypeChampTexteFormulaire,
     CritereItemFormulaireNationaliteCandidat,
+    CritereItemFormulaireNationaliteDiplome,
     CritereItemFormulaireLangueEtudes,
     CritereItemFormulaireVIP,
     Onglets,
@@ -52,6 +51,7 @@ from admission.ddd.admission.enums.question_specifique import (
 )
 from admission.forms.translation_field import TranslatedValueField, IdentifiedTranslatedListsValueField
 from base.models.person import Person
+from osis_document.utils import generate_filename, is_uuid
 from osis_profile.models import EducationalExperience
 
 TRANSLATION_LANGUAGES = [settings.LANGUAGE_CODE_EN, settings.LANGUAGE_CODE_FR]
@@ -121,6 +121,7 @@ class AdmissionFormItem(models.Model):
     internal_label = models.CharField(
         max_length=255,
         verbose_name=_('Internal label'),
+        unique=True,
     )
     type = models.CharField(
         choices=TypeItemFormulaire.choices(),
@@ -282,7 +283,8 @@ class AdmissionFormItem(models.Model):
 
 
 class AdmissionFormItemInstantiationManager(models.Manager):
-    def get_nationality_criteria_by_candidate(self, candidate: Person):
+    @staticmethod
+    def get_nationality_criteria_by_candidate(candidate: Person):
         criteria = [CritereItemFormulaireNationaliteCandidat.TOUS.name]
 
         if candidate.country_of_citizenship_id:
@@ -298,7 +300,33 @@ class AdmissionFormItemInstantiationManager(models.Manager):
 
         return criteria
 
-    def get_study_language_criteria_by_candidate(self, candidate: Person):
+    @staticmethod
+    def get_diploma_nationality_criteria_by_educational_experiences(
+        educational_experiences: QuerySet[EducationalExperience],
+    ):
+        criteria = [CritereItemFormulaireNationaliteDiplome.TOUS.name]
+
+        experiences_with_diploma = [experience for experience in educational_experiences if experience.obtained_diploma]
+
+        if experiences_with_diploma:
+            criteria.append(
+                CritereItemFormulaireNationaliteDiplome.BELGE.name
+                if any(experience.country.iso_code == BE_ISO_CODE for experience in experiences_with_diploma)
+                else CritereItemFormulaireNationaliteDiplome.NON_BELGE.name
+            )
+            criteria.append(
+                CritereItemFormulaireNationaliteDiplome.UE.name
+                if any(experience.country.european_union for experience in experiences_with_diploma)
+                else CritereItemFormulaireNationaliteDiplome.NON_UE.name
+            )
+
+        return criteria
+
+    @staticmethod
+    def get_study_language_criteria_by_candidate(
+        candidate: Person,
+        educational_experiences: QuerySet[EducationalExperience],
+    ):
         studied_in_french = False
         studied_in_english = False
 
@@ -318,9 +346,10 @@ class AdmissionFormItemInstantiationManager(models.Manager):
 
         # Check higher studies
         if not studied_in_french or not studied_in_english:
-            educational_experiences_languages = set(
-                EducationalExperience.objects.filter(person=candidate).values_list('linguistic_regime__code', flat=True)
-            )
+            educational_experiences_languages = {
+                educational_experience.linguistic_regime.code if educational_experience.linguistic_regime_id else None
+                for educational_experience in educational_experiences
+            }
 
             if FR_ISO_CODE in educational_experiences_languages:
                 studied_in_french = True
@@ -341,7 +370,8 @@ class AdmissionFormItemInstantiationManager(models.Manager):
 
         return criteria
 
-    def get_vip_criteria(self, admission):
+    @staticmethod
+    def get_vip_criteria(admission):
         criteria = [CritereItemFormulaireVIP.TOUS.name]
         if any(
             getattr(admission, scholarship, None)
@@ -378,13 +408,21 @@ class AdmissionFormItemInstantiationManager(models.Manager):
         if required is not None:
             qs = qs.filter(required=required)
 
+        educational_experiences = EducationalExperience.objects.filter(person=candidate).select_related(
+            'linguistic_regime',
+            'country',
+        )
+
         return (
             qs.filter(
                 form_item__active=True,
                 academic_year_id=admission.determined_academic_year_id or admission.training.academic_year_id,
                 candidate_nationality__in=self.get_nationality_criteria_by_candidate(candidate),
-                study_language__in=self.get_study_language_criteria_by_candidate(candidate),
+                study_language__in=self.get_study_language_criteria_by_candidate(candidate, educational_experiences),
                 vip_candidate__in=self.get_vip_criteria(admission),
+                diploma_nationality__in=self.get_diploma_nationality_criteria_by_educational_experiences(
+                    educational_experiences,
+                ),
             )
             .filter(
                 Q(display_according_education=CritereItemFormulaireFormation.TOUTE_FORMATION.name)
@@ -457,6 +495,17 @@ class AdmissionFormItemInstantiation(models.Model):
         default=CritereItemFormulaireNationaliteCandidat.TOUS.name,
         max_length=30,
         verbose_name=_('Candidate nationality'),
+    )
+    diploma_nationality = models.CharField(
+        choices=CritereItemFormulaireNationaliteDiplome.choices(),
+        default=CritereItemFormulaireNationaliteDiplome.TOUS.name,
+        max_length=30,
+        verbose_name=_('Diploma nationality'),
+        help_text=_(
+            "Takes into account the nationality of higher education diplomas. 'Not Belgian' means that "
+            "the candidate hasn't got any Belgian diploma but has a foreign diploma. Similarly, 'Not UE' means that "
+            "the candidate hasn't got any UE diploma but has a non-UE diploma."
+        ),
     )
     study_language = models.CharField(
         choices=CritereItemFormulaireLangueEtudes.choices(),

@@ -89,7 +89,7 @@ class Notification(INotification):
     @classmethod
     def get_admission_link_back(cls, uuid: UUID, tab='project') -> str:
         return "{}{}".format(
-            settings.ADMISSION_BACKEND_LINK_PREFIX.rstrip('/'),
+            settings.ADMISSION_BACKEND_LINK_PREFIX,
             resolve_url('admission:doctorate:{}'.format(tab), uuid=uuid),
         )
 

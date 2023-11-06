@@ -44,7 +44,7 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             "Les frais de dossier de la proposition ont été payés suite à sa soumission.",
-            "The application fees of the proposition have been paid following its submission.",
+            "The application fee of the proposition have been paid following its submission.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
             tags=["proposition", "application-fees-payment", "status-changed", "payment"],
         )
@@ -55,7 +55,7 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             "Les frais de dossier de la proposition ont été payés suite à une demande gestionnaire.",
-            "The application fees of the proposition have been paid following a request from a manager.",
+            "The application fee of the proposition have been paid following a request from a manager.",
             "{candidat.prenom} {candidat.nom}".format(candidat=candidat),
             tags=["proposition", "application-fees-payment", "status-changed", "payment"],
         )
@@ -97,7 +97,7 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             "Un gestionnaire a demandé au candidat de ne pas payer des frais de dossier.",
-            "A manager asked the candidate to not pay any application fees.",
+            "A manager asked the candidate to not pay any application fee.",
             "{gestionnaire.prenom} {gestionnaire.nom}".format(gestionnaire=gestionnaire),
             tags=["proposition", "application-fees-payment", "status-changed", "cancel-request"],
         )
@@ -115,10 +115,25 @@ class Historique(IHistorique):
         add_history_entry(
             proposition.entity_id.uuid,
             f"Un mail informant de la soumission du dossier en faculté a été envoyé à \"{recipient}\" le {now}.",
-            f"An e-mail notifying that the dossier had been submitted to the faculty was sent to "
+            f"An e-mail notifying that the dossier has been submitted to the faculty was sent to "
             f"\"{recipient}\" on {now}.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
             tags=["proposition", "fac-decision", "send-to-fac", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "Le dossier a été soumis au SIC par la faculté.",
+            "The dossier has been submitted to the SIC by the faculty.",
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "fac-decision", "send-to-sic", "status-changed"],
         )
 
     @classmethod

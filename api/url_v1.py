@@ -84,6 +84,7 @@ urlpatterns = [
     # > Every education
     path('dashboard', views.DashboardViewSet),
     path('propositions', views.PropositionListView),
+    path('propositions/permissions', views.PropositionCreatePermissionsView),
     # > Doctorate education
     path('supervised_propositions', views.SupervisedPropositionListView),
     # Creation tabs
@@ -138,6 +139,7 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/coordonnees', views.GeneralCoordonneesView),
     path('propositions/general-education/<uuid:uuid>/secondary-studies', views.GeneralSecondaryStudiesView),
     path('propositions/general-education/<uuid:uuid>/specific-question', views.GeneralSpecificQuestionAPIView),
+    path('propositions/general-education/<uuid:uuid>/identification', views.GeneralIdentificationView),
     path('propositions/general-education/<uuid:uuid>/curriculum', views.GeneralCurriculumView),
     path('propositions/general-education/<uuid:uuid>/pool-questions', views.PoolQuestionsView),
     path(
@@ -149,12 +151,12 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/submit', views.SubmitGeneralEducationPropositionView),
     path('propositions/general-education/<uuid:uuid>/documents', views.GeneralRequestedDocumentListView),
     path(
-        'propositions/general-education/<uuid:uuid>/pay-application-fees',
-        views.PayApplicationFeesAfterSubmissionView,
+        'propositions/general-education/<uuid:uuid>/open-application-fees-payment',
+        views.OpenApplicationFeesPaymentView,
     ),
     path(
-        'propositions/general-education/<uuid:uuid>/pay-application-fees-after-request',
-        views.PayApplicationFeesAfterRequestView,
+        'propositions/general-education/<uuid:uuid>/list-application-fees',
+        views.ApplicationFeesListView,
     ),
     # > Continuing education
     path('propositions/continuing-education', views.ContinuingTrainingChoiceAPIView),
@@ -179,9 +181,11 @@ urlpatterns = [
     path('autocomplete/continuing-education', views.AutocompleteContinuingEducationView),
     path('autocomplete/tutor', views.AutocompleteTutorView),
     path('autocomplete/person', views.AutocompletePersonView),
+    path('autocomplete/diplomatic-post', views.AutocompleteDiplomaticPostView),
     path('autocomplete/<str:scholarship_type>/scholarship', views.AutocompleteScholarshipView),
     # Others
     path('scholarship/<uuid:uuid>', views.RetrieveScholarshipView),
     path('campus', views.ListCampusView),
     path('campus/<uuid:uuid>', views.RetrieveCampusView),
+    path('diplomatic-post/<int:code>', views.RetrieveDiplomaticPostView),
 ]

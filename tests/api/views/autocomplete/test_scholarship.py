@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ from rest_framework.test import APITestCase
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.tests.factories.scholarship import (
     DoubleDegreeScholarshipFactory,
-    DoctorateScholarshipFactory,
     ErasmusMundusScholarshipFactory,
+    InternationalScholarshipFactory,
 )
 from base.tests.factories.user import UserFactory
 
@@ -43,10 +43,11 @@ class ScholarshipAutocompleteTestCase(APITestCase):
         cls.scholarships = [
             DoubleDegreeScholarshipFactory(short_name='DDS-1', long_name='Dual degree scholarship 1'),
             DoubleDegreeScholarshipFactory(short_name='DDS-2', long_name='Dual degree scholarship 2'),
-            DoctorateScholarshipFactory(short_name='DS-1', long_name='Doctorate scholarship 1', disabled=True),
-            DoctorateScholarshipFactory(short_name='DS-1bis', long_name='Doctorate scholarship 1bis'),
-            DoctorateScholarshipFactory(short_name='DS-2', long_name='Doctorate scholarship 2'),
-            DoctorateScholarshipFactory(short_name='DS-2bis', long_name='Doctorate scholarship 2bis'),
+            InternationalScholarshipFactory(short_name='IS-1', long_name='International scholarship 1', disabled=True),
+            InternationalScholarshipFactory(short_name='IS-1bis', long_name='International scholarship 1bis'),
+            InternationalScholarshipFactory(short_name='IS-2', long_name='International scholarship 2'),
+            InternationalScholarshipFactory(short_name='IS-2bis', long_name='International scholarship 2bis'),
+            InternationalScholarshipFactory(short_name='AIS', long_name=''),
             ErasmusMundusScholarshipFactory(short_name='EMS-1', long_name='Erasmus Mundus scholarship 1'),
             ErasmusMundusScholarshipFactory(short_name='EMS-2', long_name='Erasmus Mundus scholarship 2'),
         ]
@@ -55,13 +56,16 @@ class ScholarshipAutocompleteTestCase(APITestCase):
     def test_autocomplete_scholarship_with_specific_type(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(
-            resolve_url('autocomplete-scholarships', scholarship_type=TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name),
+            resolve_url(
+                'autocomplete-scholarships',
+                scholarship_type=TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
+            ),
             format='json',
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(response.json()['count'], 3)
+        self.assertEqual(response.json()['count'], 4)
 
-        self.assertCountEqual(
+        self.assertEqual(
             response.json()['results'],
             [
                 {
@@ -70,14 +74,22 @@ class ScholarshipAutocompleteTestCase(APITestCase):
                     'long_name': scholarship.long_name,
                     'type': scholarship.type,
                 }
-                for scholarship in self.scholarships[3:6]
+                for scholarship in [
+                    self.scholarships[6],
+                    self.scholarships[3],
+                    self.scholarships[4],
+                    self.scholarships[5],
+                ]
             ],
         )
 
     def test_autocomplete_scholarship_with_specific_type_and_search(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(
-            resolve_url('autocomplete-scholarships', scholarship_type=TypeBourse.BOURSE_INTERNATIONALE_DOCTORAT.name),
+            resolve_url(
+                'autocomplete-scholarships',
+                scholarship_type=TypeBourse.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
+            ),
             format='json',
             data={
                 'search': '2',
@@ -86,7 +98,7 @@ class ScholarshipAutocompleteTestCase(APITestCase):
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()['count'], 2)
 
-        self.assertCountEqual(
+        self.assertEqual(
             response.json()['results'],
             [
                 {
@@ -95,6 +107,9 @@ class ScholarshipAutocompleteTestCase(APITestCase):
                     'long_name': scholarship.long_name,
                     'type': scholarship.type,
                 }
-                for scholarship in self.scholarships[4:6]
+                for scholarship in [
+                    self.scholarships[4],
+                    self.scholarships[5],
+                ]
             ],
         )

@@ -24,35 +24,26 @@
 #
 # ##############################################################################
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.commands import (
-    SpecifierInformationsAcceptationFacultairePropositionCommand,
-)
+from admission.ddd.admission.formation_generale.commands import EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def specifier_informations_acceptation_facultaire(
-    cmd: SpecifierInformationsAcceptationFacultairePropositionCommand,
+def envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
+    cmd: EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
     proposition_repository: 'IPropositionRepository',
+    historique: 'IHistorique',
 ) -> PropositionIdentity:
-    # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    # THEN
-    proposition.specifier_informations_acceptation_par_fac(
-        sigle_autre_formation=cmd.sigle_autre_formation,
-        avec_conditions_complementaires=cmd.avec_conditions_complementaires,
-        uuids_conditions_complementaires_existantes=cmd.uuids_conditions_complementaires_existantes,
-        conditions_complementaires_libres=cmd.conditions_complementaires_libres,
-        avec_complements_formation=cmd.avec_complements_formation,
-        uuids_complements_formation=cmd.uuids_complements_formation,
-        commentaire_complements_formation=cmd.commentaire_complements_formation,
-        nombre_annees_prevoir_programme=cmd.nombre_annees_prevoir_programme,
-        nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
-        email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
-        commentaire_programme_conjoint=cmd.commentaire_programme_conjoint,
-    )
+    proposition.soumettre_au_sic_lors_de_la_decision_facultaire()
 
     proposition_repository.save(entity=proposition)
+
+    historique.historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+    )
 
     return proposition.entity_id

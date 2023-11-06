@@ -40,7 +40,11 @@ from admission.contrib.models import DoctorateAdmission, GeneralEducationAdmissi
 from admission.contrib.models.base import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import GetPropositionFusionQuery
-from admission.ddd.admission.doctorat.preparation.commands import GetPropositionCommand, GetCotutelleCommand
+from admission.ddd.admission.doctorat.preparation.commands import (
+    GetPropositionCommand,
+    GetCotutelleCommand,
+    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO, CotutelleDTO
@@ -50,6 +54,15 @@ from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
 from admission.ddd.admission.formation_continue.commands import RecupererPropositionQuery
 from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
+from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.formation_continue.commands import (
+    RecupererPropositionQuery,
+    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionContinueQuery,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererPropositionGestionnaireQuery,
+    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
+)
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
 from admission.ddd.parcours_doctoral.domain.validator.exceptions import DoctoratNonTrouveException
@@ -116,6 +129,8 @@ class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMix
 
 
 class LoadDossierViewMixin(AdmissionViewMixin):
+    specific_questions_tab: Optional[Onglets] = None
+
     @cached_property
     def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO]:
         cmd = {
@@ -154,6 +169,21 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         return message_bus_instance.invoke(GetCotutelleCommand(uuid_proposition=self.admission_uuid))
 
     @cached_property
+    def specific_questions(self):
+        cmd = {
+            CONTEXT_DOCTORATE: RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
+            CONTEXT_CONTINUING: RecupererQuestionsSpecifiquesPropositionContinueQuery,
+            CONTEXT_GENERAL: RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
+        }[self.current_context]
+
+        return message_bus_instance.invoke(
+            cmd(
+                uuid_proposition=self.admission_uuid,
+                onglets=[self.specific_questions_tab.name] if self.specific_questions_tab else None,
+            )
+        )
+
+    @cached_property
     def proposition_fusion(self) -> Optional['PropositionFusionPersonneDTO']:
         return message_bus_instance.invoke(GetPropositionFusionQuery(global_id=self.admission.candidate.global_id))
 
@@ -173,6 +203,9 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['base_template'] = f'admission/{self.formatted_current_context}/tab_layout.html'
         context['original_admission'] = self.admission
         context['next_url'] = self.next_url
+
+        if self.specific_questions_tab:
+            context['specific_questions'] = self.specific_questions
 
         context['proposition_fusion'] = self.proposition_fusion
 

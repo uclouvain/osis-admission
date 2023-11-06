@@ -236,7 +236,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 prenom='John',
                 date_naissance=datetime.date(1990, 1, 1),
                 annee_naissance=1990,
-                lieu_naissance='Louvain-La-Neuve',
+                lieu_naissance='Louvain-la-Neuve',
                 pays_nationalite='BE',
                 pays_nationalite_europeen=True,
                 langue_contact='fr-be',
@@ -267,7 +267,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 prenom='Jane',
                 date_naissance=datetime.date(1990, 1, 1),
                 annee_naissance=None,
-                lieu_naissance='Louvain-La-Neuve',
+                lieu_naissance='Louvain-la-Neuve',
                 pays_nationalite='BE',
                 pays_nationalite_europeen=True,
                 langue_contact='fr-be',
@@ -298,7 +298,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 prenom='Jim',
                 date_naissance=datetime.date(1990, 1, 1),
                 annee_naissance=None,
-                lieu_naissance='Louvain-La-Neuve',
+                lieu_naissance='Louvain-la-Neuve',
                 pays_nationalite_europeen=True,
                 pays_nationalite='BE',
                 langue_contact='fr-be',
@@ -329,7 +329,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 prenom='Individual',
                 date_naissance=datetime.date(1990, 1, 1),
                 annee_naissance=None,
-                lieu_naissance='Louvain-La-Neuve',
+                lieu_naissance='Louvain-la-Neuve',
                 pays_nationalite_europeen=True,
                 pays_nationalite='AR',
                 langue_contact='en',
@@ -359,7 +359,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             AdressePersonnelle(
                 personne=cls.matricule_candidat,
                 code_postal='1348',
-                ville='Louvain-La-Neuve',
+                ville='Louvain-la-Neuve',
                 pays='BE',
                 rue="Boulevard de Wallonie",
                 type='RESIDENTIAL',
@@ -370,7 +370,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             AdressePersonnelle(
                 personne=cls.matricule_candidat,
                 code_postal='1348',
-                ville='Louvain-La-Neuve',
+                ville='Louvain-la-Neuve',
                 pays='BE',
                 rue="Place de l'Université",
                 type='CONTACT',
@@ -381,7 +381,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             AdressePersonnelle(
                 personne="0000000001",
                 code_postal='1348',
-                ville='Louvain-La-Neuve',
+                ville='Louvain-la-Neuve',
                 pays='BE',
                 rue="Place de l'Université",
                 type='RESIDENTIAL',
@@ -392,7 +392,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             AdressePersonnelle(
                 personne="0000000002",
                 code_postal='1348',
-                ville='Louvain-La-Neuve',
+                ville='Louvain-la-Neuve',
                 pays='BE',
                 rue="Place de l'Université",
                 type='RESIDENTIAL',
@@ -407,16 +407,19 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 domicile_legal=cls.adresses_candidats[0],
                 adresse_correspondance=cls.adresses_candidats[1],
                 adresse_email_privee='john.doe@example.be.',
+                numero_mobile='+32412345678',
             ),
             CoordonneesCandidat(
                 personne='0000000001',
                 domicile_legal=cls.adresses_candidats[2],
                 adresse_email_privee='john.doe@example.be.',
+                numero_mobile='+32412345678',
             ),
             CoordonneesCandidat(
                 personne='0000000002',
                 domicile_legal=cls.adresses_candidats[3],
                 adresse_email_privee='john.doe@example.be.',
+                numero_mobile='+32412345678',
             ),
         ]
         cls.langues = [
@@ -500,7 +503,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 grade_obtenu=Grade.GREAT_DISTINCTION.name,
                 systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
                 nom_formation='Formation A',
-                adresse_institut='Louvain-La-Neuve',
+                adresse_institut='Louvain-la-Neuve',
                 code_institut='UCL',
                 communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                 nom_institut='Université Catholique de Louvain',
@@ -538,7 +541,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 grade_obtenu=Grade.GREAT_DISTINCTION.name,
                 systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
                 nom_formation='Formation B',
-                adresse_institut='Louvain-La-Neuve',
+                adresse_institut='Louvain-la-Neuve',
                 code_institut='UCL',
                 communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                 nom_institut='Université Catholique de Louvain',
@@ -592,7 +595,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 grade_obtenu=Grade.GREAT_DISTINCTION.name,
                 systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
                 nom_formation='Formation C',
-                adresse_institut='Louvain-La-Neuve',
+                adresse_institut='Louvain-la-Neuve',
                 code_institut='UCL',
                 communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                 nom_institut='Université Catholique de Louvain',
@@ -630,7 +633,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 grade_obtenu=Grade.GREAT_DISTINCTION.name,
                 systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
                 nom_formation='Formation D',
-                adresse_institut='Louvain-La-Neuve',
+                adresse_institut='Louvain-la-Neuve',
                 code_institut='UCL',
                 communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                 nom_institut='Université Catholique de Louvain',
@@ -700,7 +703,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 grade_obtenu=Grade.GREAT_DISTINCTION.name,
                 systeme_evaluation=EvaluationSystem.NO_CREDIT_SYSTEM.name,
                 nom_formation='Formation E',
-                adresse_institut='Louvain-La-Neuve',
+                adresse_institut='Louvain-la-Neuve',
                 code_institut='UCL',
                 communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                 nom_institut='Université Catholique de Louvain',
@@ -766,7 +769,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         cls.etudes_secondaires = {
             cls.matricule_candidat: _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                    certificat_inscription=['certificat_inscription.pdf'],
                     diplome=['diplome.pdf'],
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
@@ -774,7 +776,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             ),
             "0123456789": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                    certificat_inscription=['certificat_inscription.pdf'],
                     diplome=['diplome.pdf'],
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
@@ -782,7 +783,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             ),
             "0000000001": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                    certificat_inscription=['certificat_inscription.pdf'],
                     diplome=['diplome.pdf'],
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
@@ -790,7 +790,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             ),
             "0000000002": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
-                    certificat_inscription=['certificat_inscription.pdf'],
                     diplome=['diplome.pdf'],
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,

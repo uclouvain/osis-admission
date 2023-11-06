@@ -36,6 +36,7 @@ from django.core.validators import EMPTY_VALUES
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
+from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -51,8 +52,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -64,7 +70,6 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.utils import format_academic_year
-from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
@@ -299,7 +304,6 @@ TAB_TREES = {
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
             Tab('send-mail', _('Send a mail')),
-            Tab('internal-note', _('Internal notes'), 'note-sticky'),
             Tab('debug', _('Debug'), 'bug'),
         ],
         Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
@@ -308,28 +312,29 @@ TAB_TREES = {
         # TODO Documents
     },
     CONTEXT_GENERAL: {
+        Tab('checklist', _('Checklist'), 'list-check'): [
+            Tab('checklist', _('Checklist'), 'list-check'),
+        ],
         Tab('documents', _('Documents'), 'folder-open'): [
             Tab('documents', _('Documents'), 'folder-open'),
         ],
-        Tab('checklist', _('Checklist'), 'list-check'): [
-            Tab('checklist', _('Checklist'), 'list-check'),
+        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        ],
+        Tab('history', pgettext('tab', 'History'), 'history'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
         ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
         ],
-        Tab('education', _('Previous experience'), 'list-alt'): [
-            Tab('education', _('Previous experience'), 'list-alt'),
+        Tab('general-education', _('Course choice'), 'person-chalkboard'): [
+            Tab('training-choice', _('Course choice')),
         ],
-        Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('debug', _('Debug'), 'bug'),
-            Tab('history-all', _('All history')),
-            Tab('history', _('Status changes')),
-            Tab('send-mail', _('Send a mail')),
-            Tab('internal-note', _('Internal notes'), 'note-sticky'),
-        ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
+            Tab('specific-questions', _('Specific aspects')),
+            Tab('accounting', _('Accounting')),
         ],
     },
     CONTEXT_CONTINUING: {
@@ -365,20 +370,21 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
         # Get the accessible sub tabs depending on the user permissions
         valid_sub_tabs = [tab for tab in sub_tabs if can_read_tab(context, tab.name, permission_obj)]
 
-        # Add dynamic badge on parent for internal notes
-        if Tab('internal-note') in valid_sub_tabs:
-            parent_tab.badge = permission_obj.internalnote_set.count()
+        # Checklist is available for submitted admissions only
+        if Tab('checklist') in valid_sub_tabs:
+            if permission_obj.status not in STATUTS_PROPOSITION_GENERALE_SOUMISE:
+                valid_sub_tabs.remove(Tab('checklist'))
 
         # Add dynamic badge for comments
         if parent_tab == Tab('comments'):
-            from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC
+            from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC, COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL
 
             roles = _get_roles_assigned_to_user(context['request'].user)
             qs = CommentEntry.objects.filter(object_uuid=context['view'].kwargs['uuid'])
             if {SicManagement, CentralManager} & set(roles):
-                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC]).count()
+                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL]).count()
             elif {ProgramManager} & set(roles):
-                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC]).count()
+                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL]).count()
 
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
@@ -499,9 +505,9 @@ def field_data(
             data = None
             hide_empty = True
         elif context.get('load_files') is False:
-            data = _('Specified') if data else _('Not specified')
+            data = _('Specified') if data else _('Incomplete field')
         elif data:
-            template_string = "{% load osis_document %}{% document_visualizer files %}"
+            template_string = "{% load osis_document %}{% document_visualizer files for_modified_upload=True %}"
             template_context = {'files': data}
             data = template.Template(template_string).render(template.Context(template_context))
         else:
@@ -531,7 +537,7 @@ def field_data(
 def get_image_file_url(file_uuids):
     """Returns the url of the file whose uuid is the first of the specified ones, if it is an image."""
     if file_uuids:
-        token = get_remote_token(file_uuids[0])
+        token = get_remote_token(file_uuids[0], for_modified_upload=True)
         if token:
             metadata = get_remote_metadata(token)
             if metadata and metadata.get('mimetype') in IMAGE_MIME_TYPES:
@@ -747,6 +753,17 @@ def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], ti
     }
 
 
+@register.simple_tag
+def need_to_display_specific_questions(configurations: List[QuestionSpecifiqueDTO], hide_files=False):
+    return bool(
+        configurations
+        and (
+            not hide_files
+            or any(configuration.type != TypeItemFormulaire.DOCUMENT.name for configuration in configurations)
+        )
+    )
+
+
 @register.filter
 def admission_training_type(osis_training_type: str):
     """Returns the admission training type based on the osis training type."""
@@ -829,6 +846,12 @@ def get_country_name(country: Optional[Country]):
     return getattr(country, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
 
 
+@register.filter
+def get_ordered_checklist_items(checklist_items: dict):
+    """Return the ordered checklist items."""
+    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])
+
+
 @register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
 def checklist_state_button(context, **kwargs):
     expected_attrs = {
@@ -866,6 +889,46 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
             settings.LANGUAGE_CODE_EN: history_entry.message_en,
         }[get_language()]
     return ''
+
+
+@register.filter
+def diplomatic_post_name(diplomatic_post):
+    """Get the name of a diplomatic post"""
+    if diplomatic_post:
+        return getattr(
+            diplomatic_post,
+            'nom_francais' if get_language() == settings.LANGUAGE_CODE_FR else 'nom_anglais',
+        )
+
+
+@register.filter
+def is_profile_identification_different(profil_candidat, identification):
+    if profil_candidat is None or identification is None:
+        return False
+    return any(
+        (
+            profil_candidat.nom != identification.nom,
+            profil_candidat.prenom != identification.prenom,
+            profil_candidat.genre != identification.genre,
+            profil_candidat.nom_pays_nationalite != identification.nom_pays_nationalite,
+        )
+    )
+
+
+@register.filter
+def is_profile_coordinates_different(profil_candidat, coordonnees):
+    if profil_candidat is None or coordonnees is None or coordonnees.domicile_legal is None:
+        return False
+    return any(
+        (
+            profil_candidat.numero_rue != coordonnees.domicile_legal.numero_rue,
+            profil_candidat.rue != coordonnees.domicile_legal.rue,
+            profil_candidat.boite_postale != coordonnees.domicile_legal.boite_postale,
+            profil_candidat.code_postal != coordonnees.domicile_legal.code_postal,
+            profil_candidat.ville != coordonnees.domicile_legal.ville,
+            profil_candidat.nom_pays != coordonnees.domicile_legal.nom_pays,
+        )
+    )
 
 
 @register.filter

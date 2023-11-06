@@ -32,7 +32,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
 )
-from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE
+from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE, PLUS_5_ISO_CODES
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
@@ -41,7 +41,7 @@ from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCand
 from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.enums import Onglets, CHOIX_AFFILIATION_SPORT_SELON_SITE
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande, IdentifiantBaseEmplacementDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 from admission.exports.admission_recap.attachments import (
@@ -59,6 +59,7 @@ from admission.exports.admission_recap.attachments import (
     get_cotutelle_attachments,
     get_supervision_group_attachments,
     get_documents_attachments,
+    get_dynamic_questions_attachments,
 )
 from admission.exports.admission_recap.constants import (
     TRAINING_TYPES_WITH_EQUIVALENCE,
@@ -255,6 +256,27 @@ def get_curriculum_section(
     )
 
 
+def get_curriculum_specific_questions_section(
+    context: ResumePropositionDTO,
+    specific_questions_by_tab: Dict[str, List[QuestionSpecifiqueDTO]],
+    load_content: bool,
+) -> Section:
+    """Returns the curriculum section."""
+    curriculum_extra_context = {
+        'display_equivalence': False,
+        'display_curriculum': False,
+        'specific_questions': specific_questions_by_tab[Onglets.CURRICULUM.name],
+    }
+    return Section(
+        identifier=OngletsDemande.CURRICULUM,
+        content_template='admission/exports/recap/includes/curriculum.html',
+        context=context,
+        extra_context=curriculum_extra_context,
+        attachments=get_dynamic_questions_attachments(specific_questions_by_tab[Onglets.CURRICULUM.name]),
+        load_content=load_content,
+    )
+
+
 def get_educational_experience_section(
     context: ResumePropositionDTO,
     educational_experience: ExperienceAcademiqueDTO,
@@ -358,6 +380,7 @@ def get_specific_questions_section(
         'eligible_for_reorientation': eligible_for_reorientation,
         'eligible_for_modification': eligible_for_modification,
         'enrolled_for_contingent_training': enrolled_for_contingent_training,
+        'display_visa_question': context.est_proposition_generale and context.identification.est_concerne_par_visa,
     }
     return Section(
         identifier=OngletsDemande.INFORMATIONS_ADDITIONNELLES,
@@ -392,6 +415,7 @@ def get_accounting_section(context: ResumePropositionDTO, load_content: bool) ->
             'last_fr_institutes': last_fr_institutes,
             'with_assimilation': with_assimilation,
             'formatted_relationship': formatted_relationship,
+            'sport_affiliation_choices_by_campus': CHOIX_AFFILIATION_SPORT_SELON_SITE,
         },
         attachments=get_accounting_attachments(
             context,
@@ -498,6 +522,7 @@ def get_sections(
     specific_questions: List[QuestionSpecifiqueDTO],
     load_content=False,
     with_free_requestable_documents=False,
+    hide_curriculum=False,
 ):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
@@ -514,13 +539,17 @@ def get_sections(
     if context.est_proposition_doctorale:
         pdf_sections.append(get_languages_section(context, load_content))
 
-    pdf_sections.append(get_curriculum_section(context, specific_questions_by_tab, load_content))
+    if not hide_curriculum:
+        pdf_sections.append(get_curriculum_section(context, specific_questions_by_tab, load_content))
 
     for educational_experience in context.curriculum.experiences_academiques:
         pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
 
     for non_educational_experience in context.curriculum.experiences_non_academiques:
         pdf_sections.append(get_non_educational_experience_section(context, non_educational_experience, load_content))
+
+    if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
+        pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))
 
     if context.est_proposition_generale or context.est_proposition_continue:
         pdf_sections.append(get_specific_questions_section(context, specific_questions_by_tab, load_content))

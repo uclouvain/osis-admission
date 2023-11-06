@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,12 +24,14 @@
 #
 # ##############################################################################
 from datetime import date, timedelta
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
+from admission.ddd import PLUS_5_ISO_CODES
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import get_current_year
 
 
@@ -43,16 +45,20 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
     }
 
     @classmethod
-    def get_annees_academiques_pour_calcul(cls) -> List[int]:
+    def get_annees_academiques_pour_calcul(cls, type_formation: TrainingType) -> List[int]:
+        return cls._get_annees_academiques_pour_calcul()
+
+    @classmethod
+    def _get_annees_academiques_pour_calcul(cls) -> List[int]:
         current_year = get_current_year()
-        return [current_year, current_year - 1, current_year + 1]
+        return [current_year, current_year - 1, current_year + 1, current_year + 2]
 
     @classmethod
     def get_pool_ouverts(cls) -> List[Tuple[str, int]]:
         opened = []
         today = date.today()
         for pool_name, dates in cls.periodes_ouvertes.items():
-            for annee in cls.get_annees_academiques_pour_calcul():
+            for annee in cls._get_annees_academiques_pour_calcul():
                 date_debut, date_fin = cls._get_dates_completes(annee, dates[0], dates[1])
                 if date_debut <= today <= date_fin:
                     opened.append((pool_name, annee))
@@ -79,5 +85,5 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
         situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
         return identification.pays_nationalite in (
-            ProfilCandidatInMemoryTranslator.pays_union_europeenne | cls.PLUS_5_ISO_CODES
+            ProfilCandidatInMemoryTranslator.pays_union_europeenne | PLUS_5_ISO_CODES
         ) or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)

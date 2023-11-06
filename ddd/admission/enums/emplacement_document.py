@@ -130,7 +130,6 @@ DocumentsSysteme = {
 
 DocumentsEtudesSecondaires = {
     'DIPLOME_BELGE_DIPLOME': _('Secondary school diploma'),
-    'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION': _('Certificate of enrolment or school attendance'),
     'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE': _(
         "Copy of both sides of the definitive equivalency decision (accompanied, "
         "where applicable, by the DAES or undergraduate exam, in the case of restrictive equivalency)"
@@ -143,10 +142,6 @@ DocumentsEtudesSecondaires = {
     ),
     'DIPLOME_ETRANGER_DIPLOME': _('Secondary school diploma'),
     'DIPLOME_ETRANGER_TRADUCTION_DIPLOME': _('A translation of your secondary school diploma by a sworn translator'),
-    'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION': _('Certificate of enrolment or school attendance'),
-    'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION': _(
-        'A translation of the enrolment or school attendance certificate by a sworn translator',
-    ),
     'DIPLOME_ETRANGER_RELEVE_NOTES': _('A transcript for your last year of secondary school'),
     'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES': _(
         'A translation of your official transcript of marks for your final year of secondary school by a '
@@ -188,7 +183,7 @@ DocumentsQuestionsSpecifiques = {
     'FORMULAIRE_MODIFICATION_INSCRIPTION': _('Change of enrolment form'),
     'ADDITIONAL_DOCUMENTS': _(
         'You can add any document you feel is relevant to your application '
-        '(supporting documents, proof of language level, etc.)'
+        '(supporting documents, proof of language level, etc.).'
     ),
 }
 
@@ -262,9 +257,9 @@ DocumentsAssimilation = {
 DocumentsComptabilite = {
     'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT': ngettext_lazy(
         'Certificate stating no debts to the institution attended during the academic year '
-        '%(academic_year)s: %(names)s',
+        '%(academic_year)s: %(names)s.',
         'Certificates stating no debts to the institutions attended during the academic year '
-        '%(academic_year)s: %(names)s',
+        '%(academic_year)s: %(names)s.',
         'count',
     ),
     'ATTESTATION_ENFANT_PERSONNEL': _('Certificate for children of staff'),
@@ -291,4 +286,9 @@ DocumentsCotutelle = {
 
 DocumentsSupervision = {
     'APPROBATION_PDF': _('Approbation by pdf'),
+}
+
+
+DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION = {
+    f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
 }

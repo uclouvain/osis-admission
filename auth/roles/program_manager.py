@@ -92,6 +92,12 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.change_admission_project': is_part_of_education_group,
             'admission.view_admission_cotutelle': is_part_of_education_group,
             'admission.change_admission_cotutelle': is_part_of_education_group,
+            'admission.view_admission_training_choice': is_part_of_education_group,
+            'admission.change_admission_training_choice': is_part_of_education_group,
+            'admission.view_admission_accounting': is_part_of_education_group,
+            'admission.change_admission_accounting': is_part_of_education_group,
+            'admission.view_admission_specific_questions': is_part_of_education_group,
+            'admission.change_admission_specific_questions': is_part_of_education_group,
             # Supervision
             'admission.view_admission_supervision': is_part_of_education_group,
             'admission.change_admission_supervision': is_part_of_education_group,
@@ -101,7 +107,7 @@ class ProgramManager(EducationGroupRoleModel):
             # Management
             'admission.add_internalnote': is_part_of_education_group,
             'admission.view_internalnote': is_part_of_education_group,
-            'admission.view_documents_management': is_part_of_education_group,
+            'admission.view_documents_management': is_part_of_education_group & is_submitted,
             'admission.view_checklist': is_part_of_education_group & is_submitted,
             'admission.checklist_change_faculty_decision': is_part_of_education_group & in_fac_status_extended,
             'admission.checklist_faculty_decision_transfer_to_sic': is_part_of_education_group & in_fac_status,

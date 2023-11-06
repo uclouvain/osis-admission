@@ -27,17 +27,12 @@
 from functools import partial
 
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 from django.core.serializers.json import DjangoJSONEncoder
-from django.urls.exceptions import NoReverseMatch
-from django.urls import reverse, resolve
 from django.utils.translation import get_language
-
 from rest_framework import serializers
 
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import INSTITUTE
-from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
 class TranslatedField(serializers.SerializerMethodField):
@@ -55,84 +50,6 @@ class TranslatedField(serializers.SerializerMethodField):
             return getattr(value, self.en_field_name)
         else:
             return getattr(value, self.field_name)
-
-
-class ActionLinksField(serializers.Field):
-    """
-    Returns a dictionary of actions and their related endpoint (url + method type) that depend on user permissions.
-    """
-
-    def __init__(self, actions, **kwargs):
-        kwargs.setdefault('default', {})
-        kwargs.setdefault('source', '*')
-        kwargs.setdefault('read_only', True)
-        self.actions = actions
-        super().__init__(**kwargs)
-
-    def to_representation(self, instance):
-        links = {}
-
-        # Get the mandatory parameters from the context
-        try:
-            request = self.context['request']
-        except KeyError:
-            raise ImproperlyConfigured(
-                "The 'request' property must be added to the serializer context to compute the action links."
-            )
-
-        # Get a dictionary of the available actions with their related endpoint (URL & HTTP method)
-        for action_name, action in self.actions.items():
-
-            # Get the url params
-            if isinstance(action.get('params'), list):
-                try:
-                    url_args = [getattr(instance, param_name) for param_name in action['params']]
-                except AttributeError as error:
-                    raise ImproperlyConfigured(error)
-            else:
-                url_args = []
-
-            # Build the view url
-            try:
-                url = reverse(action.get('path_name'), args=url_args)
-            except NoReverseMatch:
-                raise ImproperlyConfigured(
-                    "Please check the following path exists: '{}'".format(action.get('path_name'))
-                )
-
-            # Find the view related to this url
-            resolver_match = resolve(url)
-            view_class = resolver_match.func.view_class
-
-            if issubclass(view_class, APIPermissionRequiredMixin):
-                view = view_class(args=resolver_match.args, kwargs=resolver_match.kwargs)
-
-                # Check the permissions specified in the view via the 'permission_mapping' property
-                failed_permission_message = view.check_method_permissions(
-                    user=request.user,
-                    method=action.get('method'),
-                    obj=getattr(instance, '_perm_obj', None),
-                )
-
-                if failed_permission_message is None:
-                    # If the user has the rights permissions we return the method type and the related endpoint
-                    links[action_name] = {
-                        'method': action.get('method'),
-                        'url': url,
-                    }
-                else:
-                    # Return the error message as the user hasn't got the right permissions
-                    links[action_name] = {
-                        'error': failed_permission_message,
-                    }
-
-            else:
-                raise ImproperlyConfigured(
-                    "All paths specified in the 'links' property must be related to views that implement "
-                    "the '{}' mixin".format(APIPermissionRequiredMixin.__name__)
-                )
-
-        return links
 
 
 class RelatedInstituteField(serializers.CharField, serializers.SlugRelatedField):
@@ -178,6 +95,15 @@ ACTION_LINKS = {
     'create_training_choice': {
         'path_name': 'admission_api_v1:propositions',
         'method': 'POST',
+    },
+    # Create
+    'update_person': {
+        'path_name': 'admission_api_v1:person',
+        'method': 'PUT',
+    },
+    'update_coordinates': {
+        'path_name': 'admission_api_v1:coordonnees',
+        'method': 'PUT',
     },
     # Supervised
     'list_supervised': {
@@ -418,7 +344,7 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_training_choice': {
-        'path_name': 'admission_api_v1:general_propositions',
+        'path_name': 'admission_api_v1:general_training_choice',
         'method': 'GET',
         'params': ['uuid'],
     },
@@ -506,13 +432,18 @@ GENERAL_EDUCATION_ACTION_LINKS = {
     },
     # Payment
     'pay_after_submission': {
-        'path_name': 'admission_api_v1:pay_after_submission',
+        'path_name': 'admission_api_v1:open_application_fees_payment',
         'method': 'POST',
         'params': ['uuid'],
     },
     'pay_after_request': {
-        'path_name': 'admission_api_v1:pay_after_request',
-        'method': 'POST',
+        'path_name': 'admission_api_v1:open_application_fees_payment',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'view_payment': {
+        'path_name': 'admission_api_v1:view_application_fees',
+        'method': 'GET',
         'params': ['uuid'],
     },
 }
@@ -529,7 +460,7 @@ CONTINUING_EDUCATION_ACTION_LINKS = {
         'params': ['uuid'],
     },
     'retrieve_training_choice': {
-        'path_name': 'admission_api_v1:continuing_propositions',
+        'path_name': 'admission_api_v1:continuing_training_choice',
         'method': 'GET',
         'params': ['uuid'],
     },

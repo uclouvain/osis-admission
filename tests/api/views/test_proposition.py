@@ -50,7 +50,7 @@ from base.tests.factories.person import PersonFactory
 from reference.tests.factories.country import CountryFactory
 
 
-class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
+class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCase):
     @classmethod
     @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
@@ -59,6 +59,48 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             acronym='CMC',
         )
         cls.admission = GeneralEducationAdmissionFactory(training__management_entity=cls.commission.entity)
+        cls.teaching_campus_name = (
+            cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
+        )
+        # Users
+        cls.candidate = cls.admission.candidate
+        cls.other_candidate = CandidateFactory().person
+
+        cls.url = resolve_url("admission_api_v1:proposition_create_permissions")
+
+    def test_get(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        json_response = response.json()
+        self.assertActionLinks(json_response['links'], ['create_person', 'create_coordinates'], [])
+
+    def test_get_with_submitted_admission(self):
+        self.admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.admission.save()
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        json_response = response.json()
+        self.assertActionLinks(json_response['links'], [], ['create_person', 'create_coordinates'])
+
+
+class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
+    @classmethod
+    @freezegun.freeze_time('2023-01-01')
+    def setUpTestData(cls):
+        cls.commission = EntityVersionFactory(
+            entity_type=EntityType.FACULTY.name,
+            acronym='CMC',
+        )
+        cls.admission = GeneralEducationAdmissionFactory(
+            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+            training__management_entity=cls.commission.entity,
+        )
         cls.teaching_campus_name = (
             cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
         )
@@ -142,6 +184,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
                 'update_documents',
                 'pay_after_submission',
                 'pay_after_request',
+                'view_payment',
             ],
         )
 
@@ -211,7 +254,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             billing_address_street_number='1',
             billing_address_postal_box='PB1',
             billing_address_postal_code='1348',
-            billing_address_city='Louvain-La-Neuve',
+            billing_address_city='Louvain-la-Neuve',
             billing_address_country=CountryFactory(iso_code=BE_ISO_CODE),
             training__management_entity=cls.commission.entity,
         )

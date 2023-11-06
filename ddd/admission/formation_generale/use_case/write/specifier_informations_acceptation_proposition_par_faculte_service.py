@@ -25,41 +25,34 @@
 # ##############################################################################
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    RefuserPropositionParFaculteAvecNouveauMotifCommand,
+    SpecifierInformationsAcceptationPropositionParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def refuser_proposition_par_faculte_avec_nouveau_motif(
-    cmd: RefuserPropositionParFaculteAvecNouveauMotifCommand,
+def specifier_informations_acceptation_proposition_par_faculte(
+    cmd: SpecifierInformationsAcceptationPropositionParFaculteCommand,
     proposition_repository: 'IPropositionRepository',
-    historique: 'IHistorique',
-    pdf_generation: 'IPDFGeneration',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    # WHEN
-    proposition.specifier_motif_refus_par_fac(uuid_motif=cmd.uuid_motif, autre_motif=cmd.autre_motif)
-
-    proposition.refuser_par_fac()
-
     # THEN
-    pdf_generation.generer_attestation_refus_facultaire(
-        proposition_repository=proposition_repository,
-        proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
+    proposition.specifier_informations_acceptation_par_fac(
+        sigle_autre_formation=cmd.sigle_autre_formation,
+        avec_conditions_complementaires=cmd.avec_conditions_complementaires,
+        uuids_conditions_complementaires_existantes=cmd.uuids_conditions_complementaires_existantes,
+        conditions_complementaires_libres=cmd.conditions_complementaires_libres,
+        avec_complements_formation=cmd.avec_complements_formation,
+        uuids_complements_formation=cmd.uuids_complements_formation,
+        commentaire_complements_formation=cmd.commentaire_complements_formation,
+        nombre_annees_prevoir_programme=cmd.nombre_annees_prevoir_programme,
+        nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
+        email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
+        commentaire_programme_conjoint=cmd.commentaire_programme_conjoint,
     )
 
     proposition_repository.save(entity=proposition)
-
-    historique.historiser_refus_fac(
-        proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
-    )
 
     return proposition.entity_id

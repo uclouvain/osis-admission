@@ -22,7 +22,9 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% if display_equivalence or display_curriculum or specific_questions %}
+{% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}
+
+{% if display_equivalence and not hide_files or display_curriculum and not hide_files or specific_questions_to_display %}
   {% panel _('Specific aspects') %}
     {% if display_equivalence %}
       {% field_data _("Copy of equivalency decision issued by the French Community of Belgium making your bachelor's diploma (bac+5) equivalent to the academic rank of a corresponding master's degree.") proposition.equivalence_diplome %}

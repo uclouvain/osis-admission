@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat impo
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO
 from admission.ddd.admission.domain.model.formation import FormationIdentity
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
@@ -83,8 +84,9 @@ class DoctoratTranslator(IDoctoratTranslator):
     def search(
         cls,
         sigle_secteur_entite_gestion: str,
-        annee: Optional[int],
-        campus: Optional[str],
+        annee: Optional[int] = None,
+        campus: Optional[str] = '',
+        terme_de_recherche: Optional[str] = '',
     ) -> List['DoctoratDTO']:
         from infrastructure.messages_bus import message_bus_instance
 
@@ -98,6 +100,11 @@ class DoctoratTranslator(IDoctoratTranslator):
                 inclure_entites_gestion_subordonnees=True,
                 type=TrainingType.PHD.name,
                 campus=campus,
+                terme_de_recherche=terme_de_recherche,
+                est_inscriptible=True,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
             )
         )
 
@@ -114,6 +121,14 @@ class DoctoratTranslator(IDoctoratTranslator):
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigle=sigle, annee=annee, type=TrainingType.PHD.name)
+            SearchFormationsCommand(
+                sigle=sigle,
+                annee=annee,
+                type=TrainingType.PHD.name,
+                est_inscriptible=True,
+                uclouvain_est_institution_reference=True,
+                inscription_web=True,
+                statut=ActiveStatusEnum.ACTIVE.name,
+            )
         )
         return bool(dtos)

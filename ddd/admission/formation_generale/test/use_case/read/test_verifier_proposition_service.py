@@ -30,6 +30,7 @@ from unittest import TestCase, mock
 
 import freezegun
 
+from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ReductionDesDroitsInscriptionNonCompleteeException,
     AbsenceDeDetteNonCompleteeException,
@@ -39,9 +40,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AffiliationsNonCompleteesException,
     ExperiencesAcademiquesNonCompleteesException,
     TypeCompteBancaireRemboursementNonCompleteException,
-    CoordonneesNonCompleteesException,
 )
-from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
+from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
@@ -56,7 +56,6 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
 )
-from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
     ChoixAssimilation1,
@@ -67,6 +66,7 @@ from admission.ddd.admission.enums import (
     ChoixAssimilation6,
     ChoixTypeCompteBancaire,
 )
+from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -78,6 +78,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
     EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
+    InformationsVisaNonCompleteesException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import _ComptabiliteFactory
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
@@ -111,6 +112,10 @@ class TestVerifierPropositionService(TestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
             self.fail(msg or f"No instance of '{cls}' has been found")
+
+    def assertHasNoInstance(self, container, cls, msg=None):
+        if any(isinstance(obj, cls) for obj in container):
+            self.fail(msg or f"Instance of '{cls}' has been found")
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -208,6 +213,12 @@ class TestVerifierPropositionService(TestCase):
         self.candidat = self.candidat_translator.profil_candidats[1]
         self.experiences_non_academiques = self.candidat_translator.experiences_non_academiques
 
+        self.adresse_residentielle = next(
+            adresse
+            for adresse in self.candidat_translator.adresses_candidats
+            if adresse.personne == self.candidat.matricule
+        )
+
         self.master_proposition = self.proposition_in_memory.get(
             entity_id=PropositionIdentityBuilder.build_from_uuid(uuid='uuid-MASTER-SCI'),
         )
@@ -239,6 +250,9 @@ class TestVerifierPropositionService(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
         self.cmd = lambda uuid: VerifierPropositionQuery(uuid_proposition=uuid)
+
+    def tearDown(self):
+        mock.patch.stopall()
 
     def _test_should_retourner_erreur_si_assimilation_incomplete(self, comptabilite, exception):
         with mock.patch.object(self.candidat, 'pays_nationalite', 'CA'):
@@ -276,8 +290,7 @@ class TestVerifierPropositionService(TestCase):
     def test_should_retourner_erreur_si_conditions_acces_non_remplies(self):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd('uuid-BACHELIER-ECO2'))
-        self.assertEqual(len(context.exception.exceptions), 1)
-        self.assertIsInstance(context.exception.exceptions.pop(), ConditionsAccessNonRempliesException)
+        self.assertHasInstance(context.exception.exceptions, ConditionsAccessNonRempliesException)
 
     def test_should_retourner_erreur_si_fichier_pdf_cv_non_fourni_master(self):
         with mock.patch.multiple(self.master_proposition, curriculum=[]):
@@ -997,6 +1010,17 @@ class TestVerifierPropositionService(TestCase):
             exception=AffiliationsNonCompleteesException,
         )
 
+        # No exception as the training campus is not concerned by the sport affiliation
+        with mock.patch.multiple(
+            self.master_proposition,
+            formation_id=FormationIdentity(sigle='MASTER-SCI-UNKNOWN-CAMPUS', annee=2021),
+        ):
+            comptabilite = _ComptabiliteFactory(
+                affiliation_sport='',
+            )
+            with mock.patch.object(self.master_proposition, 'comptabilite', comptabilite):
+                self.message_bus.invoke(self.cmd(uuid='uuid-MASTER-SCI'))
+
     def test_should_retourner_erreur_si_etudiant_solidaire_non_renseigne(self):
         comptabilite = _ComptabiliteFactory(
             etudiant_solidaire=None,
@@ -1103,7 +1127,7 @@ class TestVerifierPropositionService(TestCase):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
-            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(certificat_inscription=['certificat.pdf']),
+            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(diplome=[]),
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
@@ -1119,11 +1143,11 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeBelgeException)
 
-    def test_should_etre_ok_si_diplome_belge_etudes_secondaires_en_cours_avec_certificat_pour_bachelier(self):
+    def test_should_etre_ok_si_diplome_belge_etudes_secondaires_en_cours_avec_diplome_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
             annee_diplome_etudes_secondaires=2020,
-            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(certificat_inscription=['certificat.pdf']),
+            diplome_belge=DiplomeBelgeEtudesSecondairesDTO(diplome=['diplome.pdf']),
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
@@ -1208,7 +1232,7 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
-    def test_should_etre_ok_si_diplome_etranger_etudes_secondaires_en_cours_avec_certif_pour_bachelier(self):
+    def test_should_etre_ok_si_diplome_etranger_etudes_secondaires_en_cours_avec_diplome_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
             annee_diplome_etudes_secondaires=2020,
@@ -1218,7 +1242,7 @@ class TestVerifierPropositionService(TestCase):
                 pays_membre_ue=True,
                 pays_iso_code=FR_ISO_CODE,
                 releve_notes=['releve.pdf'],
-                certificat_inscription=['certificat.pdf'],
+                diplome=['diplome.pdf'],
             ),
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
@@ -1469,24 +1493,6 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
-    def test_should_retourner_erreur_si_diplome_etranger_incomplet_traduction_certif_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
-            diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
-            annee_diplome_etudes_secondaires=2020,
-            diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
-                regime_linguistique='SV',
-                type_diplome=ForeignDiplomaTypes.EUROPEAN_BACHELOR.name,
-                pays_membre_ue=True,
-                pays_iso_code=FR_ISO_CODE,
-                releve_notes=['releve.pdf'],
-                traduction_releve_notes=['traduction_releve_notes.pdf'],
-                certificat_inscription=['traduction_diplome.pdf'],
-            ),
-        )
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
-        self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
-
     def test_should_etre_ok_si_diplome_etranger_complet_avec_traductions_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
@@ -1498,8 +1504,6 @@ class TestVerifierPropositionService(TestCase):
                 pays_iso_code=FR_ISO_CODE,
                 releve_notes=['releve.pdf'],
                 traduction_releve_notes=['traduction_releve_notes.pdf'],
-                certificat_inscription=['traduction_diplome.pdf'],
-                traduction_certificat_inscription=['traduction_diplome.pdf'],
                 diplome=['diplome.pdf'],
                 traduction_diplome=['traduction_diplome.pdf'],
             ),
@@ -1672,3 +1676,48 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))
 
         self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
+
+    def test_should_verification_renvoyer_erreur_si_visa_necessaire_et_non_renseigne(self):
+        mock.patch.multiple(self.candidat, pays_nationalite='CA', pays_nationalite_europeen=False).start()
+        mock.patch.multiple(self.adresse_residentielle, pays='FR').start()
+        mock.patch.multiple(self.master_proposition, poste_diplomatique=None).start()
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, InformationsVisaNonCompleteesException)
+
+    def test_should_verification_etre_ok_si_visa_non_renseigne_et_non_necessaire(self):
+        # Visa non renseigné
+        mock.patch.multiple(self.master_proposition, poste_diplomatique=None).start()
+
+        mock.patch.multiple(self.adresse_residentielle, pays='FR').start()
+
+        # Adresse résidentielle à l'étranger + Nationalité non spécifiée
+        mock.patch.multiple(self.candidat, pays_nationalite='', pays_nationalite_europeen=None).start()
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasNoInstance(context.exception.exceptions, InformationsVisaNonCompleteesException)
+
+        # Adresse résidentielle à l'étranger + Nationalité dans UE
+        self.candidat.pays_nationalite = 'FR'
+        self.candidat.pays_nationalite_europeen = True
+        self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+        # Adresse résidentielle à l'étranger + Nationalité dans UE+5
+        self.candidat.pays_nationalite = 'CH'
+        self.candidat.pays_nationalite_europeen = False
+        self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+
+        self.candidat.pays_nationalite = 'CA'
+        self.candidat.pays_nationalite_europeen = False
+
+        # Pas d'adresse de résidence + Nationalité hors UE+5
+        self.adresse_residentielle.pays = ''
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasNoInstance(context.exception.exceptions, InformationsVisaNonCompleteesException)
+
+        # Adresse de résidence en belgique + Nationalité hors UE+5
+        self.adresse_residentielle.pays = 'BE'
+        self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))

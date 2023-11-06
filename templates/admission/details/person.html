@@ -45,7 +45,7 @@
                 <div class="row">
                     {% field_data _("Sex") person.sex|enum_display:'ChoixSexe' "col-md-4" %}
                     {% field_data _("Gender") person.gender|enum_display:'ChoixGenre' "col-md-4" %}
-                </div>
+                {% field_data _("Civil status") person.civil_state|enum_display:'CivilState' "col-md-4" %}</div>
                 <div class="row">
                     {% if person.birth_date %}
                         {% field_data _("Date of birth") person.birth_date|date:'d/m/Y' "col-md-4" %}
@@ -57,7 +57,7 @@
                     {% field_data _("Place of birth") person.birth_place "col-md-4" %}
                 </div>
                 <div class="row">
-                  {% field_data _("Civil status") person.civil_state|enum_display:'CivilState' "col-md-4" %}
+
                   {% get_country_name person.country_of_citizenship as country_of_citizenship %}
                   {% field_data _("Country of citizenship") country_of_citizenship "col-md-4" %}
                 </div>
@@ -101,7 +101,6 @@
             {% endif %}
 
         </div>
-
     {% endpanel %}
 
     {% panel _("Identity document") %}
@@ -141,11 +140,10 @@
                 {% elif proposition_fusion.passport_number %}
                     {% field_data _("Passport number") proposition_fusion.passport_number %}
                 {% else %}
-                    {% translate 'Not specified' %}
+                    {% translate 'Incomplete field' %}
                 {% endif %}
 
             </div>
-
         {% endif %}
 
         </div>
@@ -157,7 +155,7 @@
         {% if person.last_registration_year %}
             {% field_data _('Have you previously enrolled at UCLouvain?') _('Yes') %}
             <div class="row">
-              {% field_data _("Last registration year") person.last_registration_year|get_academic_year "col-md-6" %}
+              {% field_data _("Most recent year of enrolment") person.last_registration_year|get_academic_year "col-md-6" %}
               {% field_data _("Your previous NOMA (matriculation number)") person.last_registration_id "col-md-6" %}
             </div>
         {% else %}

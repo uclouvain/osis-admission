@@ -37,6 +37,7 @@ from admission.ddd.admission.domain.model.condition_complementaire_approbation i
 )
 from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldAbsenceDeDetteEtreCompletee,
@@ -53,6 +54,7 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
 )
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
@@ -68,6 +70,8 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldFacPeutDonnerDecision,
     ShouldSpecifierInformationsAcceptationFacultaire,
     ShouldPeutSpecifierInformationsDecisionFacultaire,
+    ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldVisaEtreComplete,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
@@ -119,6 +123,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
     pays_nationalite_ue: Optional[bool]
     a_frequente_recemment_etablissement_communaute_fr: Optional[bool]
     comptabilite: Comptabilite
+    formation: Formation
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -143,6 +148,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
             ShouldAffiliationsEtreCompletees(
                 affiliation_sport=self.comptabilite.affiliation_sport,
                 etudiant_solidaire=self.comptabilite.etudiant_solidaire,
+                formation=self.formation,
             ),
             ShouldTypeCompteBancaireRemboursementEtreComplete(
                 type_numero_compte=self.comptabilite.type_numero_compte,
@@ -236,10 +242,27 @@ class SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(TwoStepsMultip
 
 
 @attr.dataclass(frozen=True, slots=True)
+class FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+    checklist_actuelle: StatutsChecklistGenerale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire(
+                statut=self.statut,
+                checklist_actuelle=self.checklist_actuelle,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class RefuserParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionGenerale
-    motif_refus_fac: Optional[MotifRefusIdentity]
-    autre_motif_refus_fac: str
+    motifs_refus: List[MotifRefusIdentity]
+    autres_motifs_refus: List[str]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -250,8 +273,8 @@ class RefuserParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
                 statut=self.statut,
             ),
             ShouldSpecifierMotifRefusFacultaire(
-                motif_refus_fac=self.motif_refus_fac,
-                autre_motif_refus_fac=self.autre_motif_refus_fac,
+                motifs_refus=self.motifs_refus,
+                autres_motifs_refus=self.autres_motifs_refus,
             ),
         ]
 
@@ -299,5 +322,27 @@ class SpecifierNouvellesInformationsDecisionFacultaireValidatorList(TwoStepsMult
         return [
             ShouldPeutSpecifierInformationsDecisionFacultaire(
                 statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    pays_nationalite: str
+    pays_nationalite_europeen: Optional[bool]
+    pays_residence: str
+
+    poste_diplomatique: Optional[PosteDiplomatiqueIdentity]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldVisaEtreComplete(
+                pays_nationalite=self.pays_nationalite,
+                pays_nationalite_europeen=self.pays_nationalite_europeen,
+                pays_residence=self.pays_residence,
+                poste_diplomatique=self.poste_diplomatique,
             ),
         ]

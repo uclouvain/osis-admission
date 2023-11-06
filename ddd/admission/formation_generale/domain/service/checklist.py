@@ -30,6 +30,7 @@ from django.utils.translation import gettext_noop as _
 
 from admission.ddd.admission.domain.service.i_digit import IDigitService
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation, Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -71,25 +72,50 @@ class Checklist(interface.DomainService):
         )
 
     @classmethod
+    def _get_specific_questions_number(
+        cls,
+        proposition: Proposition,
+        identification_dto: IdentificationDTO,
+        questions_specifiques_translator: IQuestionSpecifiqueTranslator,
+    ) -> int:
+        """
+        Return the number of specific questions
+        :param proposition: The proposition
+        :param identification_dto: The identification related to the candidate
+        :param questions_specifiques_translator: The translator for specific questions
+        :return: The number of specific questions
+        """
+
+        # Static questions
+        questions_number = 1  # Additional documents
+
+        # Visa question
+        if identification_dto.est_concerne_par_visa:
+            questions_number += 1
+
+        # Dynamic questions
+        questions_number += len(
+            questions_specifiques_translator.search_dto_by_proposition(
+                proposition_uuid=proposition.entity_id.uuid,
+                onglets=[Onglets.INFORMATIONS_ADDITIONNELLES.name],
+            )
+        )
+
+        return questions_number
+
+    @classmethod
     def recuperer_checklist_initiale(
         cls,
         proposition: Proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     ) -> Optional[StatutsChecklistGenerale]:
-        pays_nationalite_europeen = profil_candidat_translator.get_identification(
-            proposition.matricule_candidat
-        ).pays_nationalite_europeen
+        identification_dto = profil_candidat_translator.get_identification(proposition.matricule_candidat)
 
-        # TODO Also count non dynamic questions
-        nombre_questions = (
-            len(
-                questions_specifiques_translator.search_dto_by_proposition(
-                    proposition_uuid=proposition.entity_id.uuid,
-                    onglets=[Onglets.INFORMATIONS_ADDITIONNELLES.name],
-                )
-            )
-            + 1  # Additional documents
+        nombre_questions = cls._get_specific_questions_number(
+            proposition=proposition,
+            identification_dto=identification_dto,
+            questions_specifiques_translator=questions_specifiques_translator,
         )
 
         return StatutsChecklistGenerale(
@@ -99,13 +125,13 @@ class Checklist(interface.DomainService):
             ),
             assimilation=StatutChecklist(
                 libelle=_("Not concerned")
-                if pays_nationalite_europeen
+                if identification_dto.pays_nationalite_europeen
                 else _("Declared not assimilated")
                 if not proposition.comptabilite.type_situation_assimilation
                 or proposition.comptabilite.type_situation_assimilation == TypeSituationAssimilation.AUCUNE_ASSIMILATION
                 else _("Declared assimilated"),
                 statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE
-                if pays_nationalite_europeen
+                if identification_dto.pays_nationalite_europeen
                 else ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
             parcours_anterieur=StatutChecklist(

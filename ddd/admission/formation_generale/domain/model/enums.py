@@ -33,7 +33,7 @@ from base.models.utils.utils import ChoiceEnum
 
 class ChoixStatutPropositionGenerale(ChoiceEnum):
     EN_BROUILLON = _('In draft form')
-    FRAIS_DOSSIER_EN_ATTENTE = _('Pending application fees')
+    FRAIS_DOSSIER_EN_ATTENTE = _('Pending application fee')
     CONFIRMEE = _('Application confirmed (by student)')
     ANNULEE = _('Cancelled application')
     A_COMPLETER_POUR_SIC = _('To be completed (by student) for the Enrolment Office (SIC)')
@@ -117,3 +117,8 @@ class PoursuiteDeCycle(ChoiceEnum):
     TO_BE_DETERMINED = _("TO_BE_DETERMINED")
     YES = _("YES")
     NO = _("NO")
+
+
+class DecisionFacultaireEnum(ChoiceEnum):
+    EN_DECISION = '1'
+    HORS_DECISION = '0'

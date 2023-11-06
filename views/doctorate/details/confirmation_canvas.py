@@ -60,7 +60,7 @@ class DoctorateAdmissionConfirmationCanvasExportView(DoctorateAdmissionLastConfi
             language=self.admission.candidate.language,
             context=self.get_context_data(),
         )
-        reading_token = get_remote_token(file_uuid)
+        reading_token = get_remote_token(file_uuid, for_modified_upload=True)
 
         self.url = get_file_url(reading_token)
 

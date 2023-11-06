@@ -72,6 +72,7 @@ class CompletePersonFactory(PersonFactory):
     graduated_from_high_school = GotDiploma.YES.name
     graduated_from_high_school_year = factory.SubFactory(AcademicYearFactory)
     private_email = factory.Faker('email')
+    phone_mobile = factory.Faker('phone_number')
 
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
@@ -82,7 +83,7 @@ class CompletePersonFactory(PersonFactory):
             street='University street',
             street_number='1',
             postal_code='1348',
-            city='Louvain-La-Neuve',
+            city='Louvain-la-Neuve',
             country=CountryFactory(iso_code="BE"),
             postal_box='B1',
             place='P1',
@@ -93,7 +94,7 @@ class CompletePersonFactory(PersonFactory):
             street='University street',
             street_number='2',
             postal_code='1348',
-            city='Louvain-La-Neuve',
+            city='Louvain-la-Neuve',
             country=CountryFactory(iso_code="BE"),
             postal_box='B2',
             place='P2',
@@ -158,7 +159,7 @@ class CompletePersonForBachelorFactory(CompletePersonFactory):
             street='University street',
             street_number='1',
             postal_code='1348',
-            city='Louvain-La-Neuve',
+            city='Louvain-la-Neuve',
             country=CountryFactory(iso_code="BE"),
         )
         self.graduated_from_high_school_year = academic_year
@@ -178,7 +179,7 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
             street='University street',
             street_number='1',
             postal_code='1348',
-            city='Louvain-La-Neuve',
+            city='Louvain-la-Neuve',
             country=CountryFactory(iso_code="BE"),
         )
         current_year = get_current_year()
@@ -200,6 +201,7 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
 
 class IncompletePersonForBachelorFactory(CompletePersonFactory):
     graduated_from_high_school = GotDiploma.NO.name
+    last_registration_year = None
 
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
@@ -209,12 +211,14 @@ class IncompletePersonForBachelorFactory(CompletePersonFactory):
             street='University street',
             street_number='1',
             postal_code='1348',
-            city='Louvain-La-Neuve',
+            city='Louvain-la-Neuve',
             country=CountryFactory(iso_code="BE"),
         )
 
 
 class IncompletePersonForIUFCFactory(CompletePersonFactory):
+    last_registration_year = None
+
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
         PersonAddressFactory(
@@ -223,6 +227,6 @@ class IncompletePersonForIUFCFactory(CompletePersonFactory):
             street='University street',
             street_number='1',
             postal_code='1348',
-            city='Louvain-La-Neuve',
+            city='Louvain-la-Neuve',
             country=CountryFactory(iso_code="BE"),
         )

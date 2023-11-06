@@ -118,7 +118,7 @@ class StatutPropositionInvalidePourPaiementInscriptionException(BusinessExceptio
     def __init__(self, current_status, **kwargs):
         message = _(
             'The status of the request is currently "{current_status}". Only the status "{from_status}" allows you '
-            'to move to the "{to_status}" status for the application fees.'
+            'to move to the "{to_status}" status for the application fee.'
         ).format(
             current_status=current_status,
             from_status=ChoixStatutPropositionGenerale.CONFIRMEE.value,
@@ -166,4 +166,20 @@ class InformationsAcceptationFacultaireNonSpecifieesException(BusinessException)
         message = _(
             "When accepting a proposition, all the required information in the approval form must be specified.",
         )
+        super().__init__(message, **kwargs)
+
+
+class PaiementDejaRealiseException(BusinessException):
+    status_code = "FORMATION-GENERALE-19"
+
+    def __init__(self, **kwargs):
+        message = _("The payment has already been made.")
+        super().__init__(message, **kwargs)
+
+
+class InformationsVisaNonCompleteesException(BusinessException):
+    status_code = "FORMATION-GENERALE-20"
+
+    def __init__(self, **kwargs):
+        message = _("Mandatory fields are missing in the 'Additional information > Visa' tab.")
         super().__init__(message, **kwargs)

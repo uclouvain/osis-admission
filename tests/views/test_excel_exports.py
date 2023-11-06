@@ -31,7 +31,7 @@ from unittest import mock
 import freezegun
 import mock
 from django.contrib.auth.models import User
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext as _, pgettext
 from openpyxl.workbook import Workbook
@@ -80,6 +80,7 @@ class _DemandeRechercheDTO(UnfrozenDTO, DemandeRechercheDTO):
 
 
 @freezegun.freeze_time('2023-01-01')
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
     @classmethod
     def setUpTestData(cls):

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,15 +26,35 @@
 from rest_framework import serializers
 
 from admission.contrib.models import GeneralEducationAdmission
+from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.validator.exceptions import (
+    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
+)
 
 
 class PoolQuestionsSerializer(serializers.ModelSerializer):
     reorientation_pool_end_date = serializers.DateTimeField(read_only=True, allow_null=True)
     modification_pool_end_date = serializers.DateTimeField(read_only=True, allow_null=True)
+    forbid_enrolment_limited_course_for_non_resident = serializers.SerializerMethodField()
+
+    def get_forbid_enrolment_limited_course_for_non_resident(self, _):
+        return ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message
+
+    def get_field_names(self, *args, **kwargs):
+        field_names = super().get_field_names(*args, **kwargs)
+
+        # Add or remove the forbid enrolment limited course for non resident message depending of what is desired
+        if 'forbid_enrolment_limited_course_for_non_resident' in field_names:
+            if not ICalendrierInscription.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT:
+                field_names.remove('forbid_enrolment_limited_course_for_non_resident')
+        elif ICalendrierInscription.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT:
+            field_names.append('forbid_enrolment_limited_course_for_non_resident')
+
+        return field_names
 
     class Meta:
         model = GeneralEducationAdmission
-        fields = (
+        fields = [
             'is_belgian_bachelor',
             'is_external_reorientation',
             'regular_registration_proof',
@@ -43,4 +63,5 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
             'is_non_resident',
             'reorientation_pool_end_date',
             'modification_pool_end_date',
-        )
+            'forbid_enrolment_limited_course_for_non_resident',
+        ]

@@ -33,7 +33,7 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True, auto_attribs=True)
 class RechercherFormationContinueQuery(interface.QueryRequest):
-    intitule_formation: str
+    terme_de_recherche: str
     campus: Optional[str] = ''
 
 
@@ -151,3 +151,8 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererQuestionsSpecifiquesQuery(commands.RecupererQuestionsSpecifiquesQuery):
     pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererDocumentsPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str

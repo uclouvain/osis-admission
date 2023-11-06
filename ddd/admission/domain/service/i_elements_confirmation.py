@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Union
 import attr
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd import PLUS_5_ISO_CODES, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -60,69 +61,78 @@ class IElementsConfirmation(interface.DomainService):
         'www.uclouvain.be/enrolment-calendar</a>, I confirm that I am applying for the academic year %(year)s.'
     )
     REGLEMENT_GENERAL = _(
-        'In accordance with the information on the link <a target="_blank" href="'
+        'In accordance with the information at <a target="_blank" href="'
         'https://uclouvain.be/en/study/inscriptions/reglementations.html">'
-        'www.uclouvain.be/regulation-enrolment</a>, I declare that I have read the university regulations '
+        'https://uclouvain.be/en/study/inscriptions/reglementations.html</a>, '
+        'I declare that I have read the university regulations '
         'and accept their terms.'
     )
     PROTECTION_DONNEES = _(
-        'In accordance with the information on the link <a target="_blank" href="'
-        'https://uclouvain.be/en/study/inscriptions/vie-privee.html">www.uclouvain.be/privacy-enrolment'
-        '</a>, I declare that I have read the data protection policy of UCLouvain and I accept its terms.'
+        'In accordance with the information at <a target="_blank" href="'
+        'https://uclouvain.be/en/study/inscriptions/vie-privee.html">'
+        'https://uclouvain.be/en/study/inscriptions/vie-privee.html</a>, '
+        'I declare that I have read the data protection policy of the Universite catholique de Louvain and accept '
+        'its terms.'
     )
     PROFESSIONS_REGLEMENTEES = _(
-        'In accordance with the information on the link, <a target="_blank" href="'
+        'In accordance with the information at <a target="_blank" href="'
         'https://uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees.html">'
-        'www.uclouvain.be/regulated-professions</a>, I declare that I have received, if these studies '
-        'concern me, information on the conditions of access to these studies or of access to the '
-        'continuation of these studies and on the particular rules or restrictions of accreditation or '
-        'professional establishment to which the professional or associate title is subject, and I accept '
-        'the terms thereof.'
+        'https://uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees.html</a>, I declare that, if '
+        'the courses listed therein concern me, I have received the information relating to their requirements '
+        'for admission or continuation and to the specific rules or restrictions of accreditation or professional '
+        'establishment to which the professional or accredited title is subject and I accept the terms thereof.'
     )
     FRAIS_DOSSIER = _(
-        'I am aware that as a non-EU, non-assimilated student, I am required to pay a &euro;200 '
-        'application fee via the online payment system. The application fee must be received by '
-        'UCLouvain <strong>within 15 calendar days</strong>. If not, my application will be closed. '
+        'I am aware that as an applicant without a European Union nationality or Belgian student status, '
+        'I am required to pay an application fee of &euro;200 via online payment. The application fee must be '
+        'received by UCLouvain within 15 calendar days. Otherwise, my application will not be considered. '
         'For more information: '
         '<a href="https://uclouvain.be/en/study/inscriptions/tuition-fees-non-eu-students.html" '
-        'target="_blank">www.uclouvain.be/application-fees</a>.'
+        'target="_blank">https://uclouvain.be/en/study/inscriptions/tuition-fees-non-eu-students.html</a>.'
     )
     CONVENTION_CADRE_STAGE = _(
-        'I have taken note of the latest version of the Internship framework agreement between '
-        'UCLouvain and the Host Hospitals established within the framework of bachelor\'s or '
-        'master\'s training in medicine organised by UCLouvain with a view to acquiring the '
-        'corresponding teaching units, and I undertake to respect the terms thereof: '
+        'I have read and understood the latest version of the Internship Framework Agreement between '
+        'UCLouvain and the Host Hospitals drawn up as part of the UCLouvain bachelor\'s or master\'s '
+        'course in medicine with a view to acquiring the corresponding course units, and I undertake '
+        'to comply with its terms: '
         '<a href="https://cdn.uclouvain.be/groups/cms-editors-mede/ConventionStageMed.pdf" '
         'target="_blank">https://cdn.uclouvain.be/groups/cms-editors-mede/ConventionStageMed.pdf</a>'
     )
     COMMUNICATION_HOPITAUX = _(
-        'I authorise the Faculty of Medicine and Dentistry of UCLouvain to provide my personal details '
-        '(surname(s), first name(s), NOMA, date of birth, place of birth, address) to the '
-        'Host Hospitals with a view to establishing the various accesses that will be necessary '
-        'for me in the context of my internship, and this in compliance with the General Data '
-        'Protection Regulation (GDPR) and the law of 30 July 2018 on the protection of individuals '
-        'with regard to the processing of personal data. My data is kept for the time necessary for '
-        'the proper execution of the internship and is never passed on to parties other than those '
-        'mentioned above. Appropriate technical and organisational measures are put in place to '
-        'ensure an adequate level of protection of this data.'
+        'I am aware that the UCLouvain Faculty of Medicine and Dentistry has provided certain personal details'
+        ' (surname(s), first name(s), NOMA, date of birth, place of birth, address) to the Host Hospitals in '
+        'order to establish the various user rights that I will need as part of my internships, in compliance '
+        'with the General Data Protection Regulation (GDPR) and the law of 30 July 2018 on the protection of '
+        'individuals with regard to the processing of personal data. My data is kept for the time necessary '
+        'for the proper performance of the internship and is never transmitted to parties other than '
+        'those mentioned above. Appropriate technical and organisational measures are put in place to ensure an '
+        'adequate level of protection for this data.'
     )
     DOCUMENTS_ETUDES_CONTINGENTEES = _(
-        'I am aware that no additional documents specific to quota studies can be added after my online '
-        'application has been confirmed.'
+        'I am aware that no additional documents specific to limited-enrolment courses can be added once '
+        'my online application has been confirmed.'
+    )
+    VISA = _(
+        'I am aware that the university may verify with third parties all of the application information I provide. '
+        'In this context, I understand UCLouvain reserves the right to send the information or documents in '
+        'my application to the selected diplomatic post (e.g. diplomas, transcripts, enrolment authorisation, etc.) '
+        'in order to ensure their authenticity.'
     )
     COMMUNICATION_ECOLE_SECONDAIRE = _(
-        'UCLouvain to transmit, to the secondary school in which I obtained my CESS, the information '
-        'relating to the successful completion of the 1st annual bachelor\'s degree and any academic '
-        'degree obtained with the possible mention.'
+        'UCLouvain to forward to the secondary school at which I obtained my Belgian secondary school, '
+        'information relating to the successful completion of the first year of the bachelor\'s course, '
+        'and any academic degree obtained with the possible mention of'
     )
     JUSTIFICATIFS = _(
         'I undertake to send any supporting documents requested %(by_service)s <strong>within 15 calendar '
-        'days</strong>. If I fail to do so, I take note and accept that my application will be closed.'
+        'days</strong>. If I fail to do so, I acknowledge and accept that my application will be considered '
+        'inadmissible in accordance with Article 9 of the Academic Regulations and Procedures (RGEE).'
     )
     DECLARATION_SUR_LHONNEUR = _(
-        '<ul><li>the information I have provided in this application is accurate and complete</li>'
+        '<ul><li>the information I have provided is accurate and complete. UCLouvain reserves the right to verify '
+        'the information contained in the application with third parties</li>'
         '<li>I have uploaded all relevant documents confirming the information provided</li>'
-        '<li>I pledge to forward %(to_service)s any changes to the data in my file</li></ul>'
+        '<li>I undertake to inform %(to_service)s of any changes to the information in my application</li></ul>'
     )
     DROITS_INSCRIPTION_IUFC = _(
         'By finalising my application, I undertake to pay the registration fees upon receipt of the invoice '
@@ -130,17 +140,18 @@ class IElementsConfirmation(interface.DomainService):
     )
     TITRE_ELEMENT_CONFIRMATION = {
         'hors_delai': '',
-        'reglement_general': _("General Study Regulations"),
+        'reglement_general': _("Academic Regulations"),
         'protection_donnees': _("Data protection"),
-        'professions_reglementees': _("Access to regulated professions"),
-        'frais_dossier': _("Application fees"),
-        'convention_cadre_stages': _("Internship framework agreement"),
+        'professions_reglementees': _("Admission to regulated professions"),
+        'frais_dossier': _("Application fee"),
+        'convention_cadre_stages': _("Internship Framework Agreement"),
         'communication_hopitaux': _("Communication with Host Hospitals"),
-        'documents_etudes_contingentees': _("Specific documents for quota studies"),
+        'documents_etudes_contingentees': _("Documents specific to limited-enrolment courses"),
         'communication_ecole_secondaire': _("Communication with your secondary school"),
         'justificatifs': _("Supporting documents"),
-        'declaration_sur_lhonneur': _("I declare on my honour that"),
+        'declaration_sur_lhonneur': _("I hereby declare that"),
         'droits_inscription_iufc': _("Registration fees"),
+        'visa': _("Communication with the diplomatic post for your visa application"),
     }
 
     @classmethod
@@ -152,6 +163,12 @@ class IElementsConfirmation(interface.DomainService):
         annee_soumise: int = None,
     ) -> List['ElementConfirmation']:
         elements = []
+        identification_dto = (
+            profil_candidat_translator.get_identification(proposition.matricule_candidat)
+            if isinstance(proposition, PropositionGenerale)
+            else None
+        )
+
         # Confirmation de l'année académique concernée
         annee_a_prendre_en_compte = annee_soumise if annee_soumise is not None else proposition.annee_calculee
         if annee_a_prendre_en_compte and annee_a_prendre_en_compte > proposition.formation_id.annee:
@@ -200,9 +217,7 @@ class IElementsConfirmation(interface.DomainService):
             # excepté master de spécialisation
             and formation_translator.get(proposition.formation_id).type != TrainingType.MASTER_MC
             # et HUE
-            and not profil_candidat_translator.get_identification(
-                proposition.matricule_candidat
-            ).pays_nationalite_europeen
+            and not identification_dto.pays_nationalite_europeen
         ):
             elements.append(
                 ElementConfirmation(
@@ -238,6 +253,16 @@ class IElementsConfirmation(interface.DomainService):
                 )
             )
 
+        # Visa
+        if isinstance(proposition, PropositionGenerale) and identification_dto.est_concerne_par_visa:
+            elements.append(
+                ElementConfirmation(
+                    nom='visa',
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['visa'],
+                    texte=cls.VISA,
+                )
+            )
+
         # Communication avec votre école secondaire
         if (
             cls.est_candidat_avec_etudes_secondaires_belges_francophones(proposition.matricule_candidat)
@@ -259,9 +284,9 @@ class IElementsConfirmation(interface.DomainService):
             else _("by the Enrolment Office")
         )
         to_service = (
-            _("to the University Institute of Continuing Education")
+            _("the University Institute of Continuing Education")
             if isinstance(proposition, PropositionContinue)
-            else _("to the UCLouvain Registration Service")
+            else _("the UCLouvain Registration Service")
         )
         elements += [
             # Justificatifs

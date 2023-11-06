@@ -239,18 +239,19 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
             pre_admission_submission_date=datetime.datetime.now(),
             admitted=True,
         )
+        cls.file_uuid = uuid.uuid4()
         cls.confirmation_papers = [
             ConfirmationPaperFactory(
                 admission=cls.admission_with_confirmation_papers,
                 confirmation_date=datetime.date(2022, 1, 1),
                 confirmation_deadline=datetime.date(2022, 4, 5),
-                research_mandate_renewal_opinion=['avis_renouvellement_mandat_recherche_0'],
+                research_mandate_renewal_opinion=[cls.file_uuid],
             ),
             ConfirmationPaperFactory(
                 admission=cls.admission_with_confirmation_papers,
                 confirmation_date=datetime.date(2022, 4, 1),
                 confirmation_deadline=datetime.date(2022, 4, 5),
-                research_mandate_renewal_opinion=['avis_renouvellement_mandat_recherche_0'],
+                research_mandate_renewal_opinion=[cls.file_uuid],
             ),
         ]
         cls.last_confirmation_paper = cls.confirmation_papers[1]
@@ -261,7 +262,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
         cls.adre_person = AdreSecretaryRoleFactory().person
 
         cls.default_updated_params = {
-            'avis_renouvellement_mandat_recherche_0': 'avis_renouvellement_mandat_recherche_1',
+            'avis_renouvellement_mandat_recherche_0': str(cls.file_uuid),
         }
 
         cls.path = 'admission:doctorate:confirmation:opinion'
@@ -309,7 +310,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
             response.context.get('form').initial,
             {
                 'avis_renouvellement_mandat_recherche': [
-                    uuid.UUID(self.last_confirmation_paper.research_mandate_renewal_opinion[0]),
+                    self.last_confirmation_paper.research_mandate_renewal_opinion[0],
                 ],
             },
         )
@@ -345,9 +346,11 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
         self.client.force_login(user=self.adre_person.user)
 
         confirmation_paper_to_update = ConfirmationPaperFactory(
+            id=ConfirmationPaper.objects.all().first().id + 1,
             admission=self.admission_with_confirmation_papers,
             confirmation_date=datetime.date(2023, 1, 1),
             confirmation_deadline=datetime.date(2023, 4, 5),
+            research_mandate_renewal_opinion=[],
         )
 
         url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])

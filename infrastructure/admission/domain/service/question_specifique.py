@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -87,6 +87,7 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
     ) -> QuestionSpecifiqueDTO:
         question_uuid = str(question.form_item.uuid)
         question_type = question.form_item.type
+        possible_values = []
 
         if question_type in TYPES_ITEMS_LECTURE_SEULE:
             formatted_value = question.form_item.text.get(language, '')
@@ -95,9 +96,17 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
         elif question_type == TypeItemFormulaire.SELECTION.name:
             current_value = answers.get(question_uuid)
             selected_options = set(current_value) if isinstance(current_value, list) else {current_value}
-            formatted_value = ', '.join(
-                [value.get(language) for value in question.form_item.values if value.get('key') in selected_options]
-            )
+            selected_options_labels = []
+            possible_values = []
+            for option in question.form_item.values:
+                option_key = option.get('key')
+                option_label = option.get(language, '')
+                possible_values.append(
+                    (option_key, option_label),
+                )
+                if option_key in selected_options:
+                    selected_options_labels.append(option_label)
+            formatted_value = ', '.join(selected_options_labels)
         else:
             formatted_value = answers.get(question_uuid, '')
 
@@ -111,6 +120,9 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
             valeur=answers.get(question_uuid),
             valeur_formatee=formatted_value,
             label_langue_candidat=question.form_item.title.get(candidate_language, ''),
+            texte=question.form_item.text.get(language, ''),
+            texte_aide=question.form_item.help_text.get(language, ''),
+            valeurs_possibles=possible_values,
         )
 
     @classmethod

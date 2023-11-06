@@ -62,27 +62,18 @@ class StatutChecklist(interface.ValueObject):
 @attr.dataclass
 class StatutsChecklistGenerale:
     donnees_personnelles: StatutChecklist
-    frais_dossier: StatutChecklist
     assimilation: StatutChecklist
-    choix_formation: StatutChecklist
+    frais_dossier: StatutChecklist
     parcours_anterieur: StatutChecklist
     financabilite: StatutChecklist
+    choix_formation: StatutChecklist
     specificites_formation: StatutChecklist
     decision_facultaire: StatutChecklist
 
     @classmethod
     def from_dict(cls, checklist_en_tant_que_dict: Dict[str, Dict[str, any]]):
         checklist_by_tab = {}
-        for key in [
-            'donnees_personnelles',
-            'frais_dossier',
-            'assimilation',
-            'choix_formation',
-            'parcours_anterieur',
-            'financabilite',
-            'specificites_formation',
-            'decision_facultaire',
-        ]:
+        for key in INDEX_ONGLETS_CHECKLIST:
             item = checklist_en_tant_que_dict.get(key, {})
             checklist_by_tab[key] = StatutChecklist(
                 libelle=item.get('libelle', ''),
@@ -91,3 +82,8 @@ class StatutsChecklistGenerale:
                 extra=item.get('extra', {}),
             )
         return cls(**checklist_by_tab)
+
+
+INDEX_ONGLETS_CHECKLIST = {
+    onglet: index for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
+}

@@ -34,6 +34,9 @@ from admission.infrastructure.admission.domain.service.in_memory.annee_inscripti
 from admission.infrastructure.admission.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
@@ -47,6 +50,9 @@ from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
 from ...domain.service.in_memory.calendrier_inscription import CalendrierInscriptionInMemory
 from ...domain.service.in_memory.elements_confirmation import ElementsConfirmationInMemory
 from ...domain.service.in_memory.maximum_propositions import MaximumPropositionsAutoriseesInMemory
+from ...domain.service.in_memory.recuperer_documents_proposition import (
+    EmplacementsDocumentsPropositionInMemoryTranslator,
+)
 from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
 
 _proposition_repository = PropositionInMemoryRepository()
@@ -64,7 +70,8 @@ _membre_ca_translator = MembreCAInMemoryTranslator()
 _comptabilite_translator = ComptabiliteInMemoryTranslator()
 _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 _question_specific_translator = QuestionSpecifiqueInMemoryTranslator()
-
+_emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
+_personne_connue_translator = PersonneConnueUclInMemoryTranslator()
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
@@ -271,5 +278,18 @@ COMMAND_HANDLERS = {
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
         question_specifique_translator=_question_specific_translator,
+    ),
+    RecupererDocumentsPropositionQuery: lambda msg_bus, cmd: recuperer_documents_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        profil_candidat_translator=_profil_candidat_translator,
+        comptabilite_translator=_comptabilite_translator,
+        question_specifique_translator=_question_specific_translator,
+        emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        academic_year_repository=_academic_year_repository,
+        personne_connue_translator=_personne_connue_translator,
+        groupe_supervision_repository=_groupe_supervision_repository,
+        promoteur_translator=_promoteur_translator,
+        membre_ca_translator=_membre_ca_translator,
     ),
 }

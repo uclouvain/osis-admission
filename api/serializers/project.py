@@ -27,7 +27,6 @@ from rest_framework import serializers
 
 from admission.api.serializers.fields import (
     ACTION_LINKS,
-    ActionLinksField,
     AnswerToSpecificQuestionField,
     CONTINUING_EDUCATION_ACTION_LINKS,
     DOCTORATE_ACTION_LINKS,
@@ -49,9 +48,11 @@ from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, Propo
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
+from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.utils.serializers import DTOSerializer
 
 __all__ = [
+    "PropositionCreatePermissionsSerializer",
     "PropositionIdentityDTOSerializer",
     "PropositionSearchSerializer",
     "InitierPropositionCommandSerializer",
@@ -293,6 +294,15 @@ class PropositionSearchSerializer(serializers.Serializer):
     continuing_education_propositions = ContinuingEducationPropositionSearchDTOSerializer(many=True)
 
 
+class PropositionCreatePermissionsSerializer(serializers.Serializer):
+    links = ActionLinksField(
+        actions={
+            'create_person': ACTION_LINKS['update_person'],
+            'create_coordinates': ACTION_LINKS['update_coordinates'],
+        }
+    )
+
+
 class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
@@ -433,6 +443,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
                 'retrieve_documents',
                 'update_documents',
                 # Payment
+                'view_payment',
                 'pay_after_submission',
                 'pay_after_request',
             ]
@@ -472,6 +483,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             'equivalence_diplome',
             'pdf_recapitulatif',
             'documents_additionnels',
+            'poste_diplomatique',
         ]
 
 

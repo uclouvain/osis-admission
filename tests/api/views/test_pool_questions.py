@@ -23,13 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 
 import freezegun
 from django.shortcuts import resolve_url
 from rest_framework.test import APITestCase
 
 from admission.calendar.admission_calendar import *
+from admission.ddd.admission.domain.validator.exceptions import (
+    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
+)
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -39,21 +43,17 @@ class PoolQuestionApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         AcademicYearFactory.produce(number_future=6)
-        for pool in [
-            DoctorateAdmissionCalendar,
-            ContinuingEducationAdmissionCalendar,
-            AdmissionPoolExternalEnrollmentChangeCalendar,
-            AdmissionPoolExternalReorientationCalendar,
-            AdmissionPoolVipCalendar,
-            AdmissionPoolHueUclPathwayChangeCalendar,
-            AdmissionPoolInstituteChangeCalendar,
-            AdmissionPoolUe5BelgianCalendar,
-            AdmissionPoolUe5NonBelgianCalendar,
-            AdmissionPoolHue5BelgiumResidencyCalendar,
-            AdmissionPoolHue5ForeignResidencyCalendar,
-            AdmissionPoolNonResidentQuotaCalendar,
-        ]:
-            pool.ensure_consistency_until_n_plus_6()
+        AdmissionAcademicCalendarFactory.produce_all_required()
+
+    def setUp(self):
+        self.mock_calendrier_inscription = patch(
+            'admission.ddd.admission.domain.service.i_calendrier_inscription.ICalendrierInscription.'
+            'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
+            new_callable=PropertyMock,
+            return_value=False,
+        )
+        self.mock_calendrier_inscription.start()
+        self.addCleanup(self.mock_calendrier_inscription.stop)
 
     @freezegun.freeze_time('2022-08-01')
     def test_pool_question_api_get_with_not_bachelor(self):
@@ -86,6 +86,31 @@ class PoolQuestionApiTestCase(APITestCase):
             'modification_pool_end_date': None,
             'reorientation_pool_end_date': None,
             'is_non_resident': None,
+        }
+        self.assertDictEqual(expected, response.json())
+
+    @freezegun.freeze_time('2022-08-01')
+    @patch(
+        'admission.ddd.admission.domain.service.i_calendrier_inscription.ICalendrierInscription.'
+        'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
+        new_callable=PropertyMock,
+        return_value=True,
+    )
+    def test_pool_question_api_get_with_residency_is_forbidden_is_specified(self, _):
+        admission = GeneralEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__acronym=SIGLES_WITH_QUOTA[0],
+        )
+        self.client.force_authenticate(admission.candidate.user)
+        url = resolve_url('admission_api_v1:pool-questions', uuid=admission.uuid)
+        response = self.client.get(url)
+        expected = {
+            'modification_pool_end_date': None,
+            'reorientation_pool_end_date': None,
+            'is_non_resident': None,
+            'forbid_enrolment_limited_course_for_non_resident': (
+                ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message
+            ),
         }
         self.assertDictEqual(expected, response.json())
 

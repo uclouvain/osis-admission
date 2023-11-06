@@ -54,8 +54,16 @@ from admission.api.views.doctorate import DoctorateAPIView
 from admission.api.views.jury import *
 from admission.api.views.training import *
 from admission.api.views.accounting import DoctorateAccountingView, GeneralAccountingView
-from admission.api.views.payment import PayApplicationFeesAfterRequestView, PayApplicationFeesAfterSubmissionView
-from admission.api.views.references import RetrieveScholarshipView, RetrieveCampusView, ListCampusView
+from admission.api.views.payment import (
+    OpenApplicationFeesPaymentView,
+    ApplicationFeesListView,
+)
+from admission.api.views.references import (
+    ListCampusView,
+    RetrieveCampusView,
+    RetrieveDiplomaticPostView,
+    RetrieveScholarshipView,
+)
 from admission.api.views.training_choice import (
     ContinuingTrainingChoiceAPIView,
     ContinuingUpdateTrainingChoiceAPIView,
@@ -71,4 +79,5 @@ from admission.api.views.specific_questions import (
     ContinuingSpecificQuestionListView,
     GeneralSpecificQuestionAPIView,
     ContinuingSpecificQuestionAPIView,
+    GeneralIdentificationView,
 )

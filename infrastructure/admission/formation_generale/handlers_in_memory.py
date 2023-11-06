@@ -24,6 +24,9 @@
 #
 ##############################################################################
 from admission.ddd.admission.formation_generale.commands import *
+from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
+    PaiementFraisDossierInMemoryRepositoryFactory,
+)
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
 from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
@@ -58,6 +61,9 @@ from admission.infrastructure.admission.domain.service.in_memory.historique impo
 from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
+    PosteDiplomatiqueInMemoryFactory,
+)
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
@@ -80,9 +86,6 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.notification import (
     NotificationInMemory,
-)
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.paiement_frais_dossier import (
-    PaiementFraisDossierInMemory,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.pdf_generation import (
     PDFGenerationInMemory,
@@ -116,10 +119,11 @@ _historique_formation_generale = HistoriqueFormationGeneraleInMemory()
 _emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
-_paiement_frais_dossier = PaiementFraisDossierInMemory()
+_paiement_frais_dossier = PaiementFraisDossierInMemoryRepositoryFactory()
 _notification = NotificationInMemory()
 _pdf_generation = PDFGenerationInMemory()
 _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
+_poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
 
 
 COMMAND_HANDLERS = {
@@ -385,9 +389,11 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
         )
     ),
-    SpecifierMotifRefusFacultairePropositionCommand: lambda msg_bus, cmd: specifier_motif_refus_facultaire(
-        cmd,
-        proposition_repository=_proposition_repository,
+    SpecifierMotifsRefusPropositionParFaculteCommand: (
+        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_faculte(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
     ),
     RefuserPropositionParFaculteCommand: lambda msg_bus, cmd: refuser_proposition_par_faculte(
         cmd,
@@ -395,16 +401,16 @@ COMMAND_HANDLERS = {
         historique=_historique_formation_generale,
         pdf_generation=_pdf_generation,
     ),
-    RefuserPropositionParFaculteAvecNouveauMotifCommand: (
-        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveau_motif(
+    RefuserPropositionParFaculteAvecNouveauxMotifsCommand: (
+        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveaux_motifs(
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
             pdf_generation=_pdf_generation,
         )
     ),
-    SpecifierInformationsAcceptationFacultairePropositionCommand: (
-        lambda msg_bus, cmd: specifier_informations_acceptation_facultaire(
+    SpecifierInformationsAcceptationPropositionParFaculteCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
             cmd,
             proposition_repository=_proposition_repository,
         )
@@ -426,5 +432,36 @@ COMMAND_HANDLERS = {
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
         proposition_repository=_proposition_repository,
+        poste_diplomatique_translator=_poste_diplomatique_translator,
+    ),
+    SpecifierPaiementVaEtreOuvertParCandidatCommand: (
+        lambda msg_bus, cmd: specifier_paiement_va_etre_ouvert_par_candidat(
+            cmd,
+            proposition_repository=_proposition_repository,
+            paiement_frais_dossier_service=_paiement_frais_dossier,
+        )
+    ),
+    RecupererListePaiementsPropositionQuery: lambda msg_bus, cmd: recuperer_liste_paiements_proposition(
+        cmd,
+        paiement_frais_dossier_service=_paiement_frais_dossier,
+    ),
+    ModifierChoixFormationParGestionnaireCommand: lambda msg_bus, cmd: modifier_choix_formation_par_gestionnaire(
+        cmd,
+        proposition_repository=_proposition_repository,
+        bourse_translator=_bourse_translator,
+    ),
+    CompleterQuestionsSpecifiquesParGestionnaireCommand: (
+        lambda msg_bus, cmd: completer_questions_specifiques_par_gestionnaire(
+            cmd,
+            proposition_repository=_proposition_repository,
+            poste_diplomatique_translator=_poste_diplomatique_translator,
+        )
+    ),
+    EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand: (
+        lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
+            cmd,
+            proposition_repository=_proposition_repository,
+            historique=_historique_formation_generale,
+        )
     ),
 }

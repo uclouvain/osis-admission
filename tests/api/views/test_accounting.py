@@ -50,6 +50,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import ChoixS
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.accounting import AccountingFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.community import CommunityEnum
@@ -141,6 +142,8 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
             training__management_entity=commission,
             supervision_group=other_promoter.process,
         )
+
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Users
         cls.student = cls.admission.candidate
@@ -424,6 +427,8 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         other_admission = GeneralEducationAdmissionFactory(
             status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
         )
+
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Users
         cls.student = cls.admission.candidate

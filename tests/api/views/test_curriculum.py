@@ -727,6 +727,8 @@ class ProfessionalExperienceTestCase(APITestCase):
         cls.today_date = datetime.date(2020, 11, 1)
         cls.today_datetime = datetime.datetime(2020, 11, 1)
 
+        AdmissionAcademicCalendarFactory.produce_all_required()
+
         # Targeted urls
         cls.agnostic_url = resolve_url('cv_professional_experiences-list')
         cls.admission_url = resolve_url('cv_professional_experiences-list', uuid=cls.admission.uuid)
@@ -967,6 +969,8 @@ class EducationalExperienceTestCase(APITestCase):
 
         cls.country = CountryFactory()
 
+        AdmissionAcademicCalendarFactory.produce_all_required()
+
         cls.educational_experience_data = {
             'program': cls.diploma.uuid,
             'education_name': 'Biology',
@@ -1171,7 +1175,7 @@ class EducationalExperienceTestCase(APITestCase):
                 'institute_name': 'Second institute',
                 'country': self.country.iso_code,
                 'institute': None,
-                'institute_address': 'Louvain-La-Neuve',
+                'institute_address': 'Louvain-la-Neuve',
                 'study_system': '',
                 'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
                 'linguistic_regime': self.linguistic_regime.code,
@@ -1210,7 +1214,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(json_response.get('institute_name'), 'Second institute')
         self.assertEqual(json_response.get('country'), self.country.iso_code)
         self.assertEqual(json_response.get('institute'), None)
-        self.assertEqual(json_response.get('institute_address'), 'Louvain-La-Neuve')
+        self.assertEqual(json_response.get('institute_address'), 'Louvain-la-Neuve')
         self.assertEqual(json_response.get('study_system'), '')
         self.assertEqual(json_response.get('evaluation_type'), EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(json_response.get('linguistic_regime'), self.linguistic_regime.code)
@@ -1249,7 +1253,7 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(experience.institute_name, 'Second institute')
         self.assertEqual(experience.country, self.country)
         self.assertEqual(experience.institute, None)
-        self.assertEqual(experience.institute_address, 'Louvain-La-Neuve')
+        self.assertEqual(experience.institute_address, 'Louvain-la-Neuve')
         self.assertEqual(experience.study_system, '')
         self.assertEqual(experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)
         self.assertEqual(experience.linguistic_regime, self.linguistic_regime)

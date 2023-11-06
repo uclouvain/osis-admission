@@ -43,13 +43,13 @@
       {% field_data institute_label belgian_institute %}
     {% endpanel %}
 
-    {% panel _('Attachments') %}
-      {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' %}
-        {% field_data _('Secondary school diploma') etudes_secondaires.diplome_belge.diplome %}
-      {% elif etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
-        {% field_data _('Certificate of enrolment or school attendance') etudes_secondaires.diplome_belge.certificat_inscription %}
-      {% endif %}
-    {% endpanel %}
+    {% if not hide_files %}
+      {% panel _('Attachments') %}
+        {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' or etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
+          {% field_data _('Secondary school diploma') etudes_secondaires.diplome_belge.diplome %}
+        {% endif %}
+      {% endpanel %}
+    {% endif %}
 
   {% elif formation.type == 'BACHELOR' and etudes_secondaires.diplome_etranger %}
 
@@ -75,37 +75,32 @@
         {% endif %}
       {% endif %}
 
-      {% field_data _('What result did you achieve?') etudes_secondaires.diplome_etranger.resultat|enum_display:'DiplomaResults' %}
-
     {% endpanel %}
 
-    {% panel _('Attachments') %}
-      {% field_data _('Secondary school diploma') etudes_secondaires.diplome_etranger.diplome %}
+    {% if not hide_files %}
+      {% panel _('Attachments') %}
+        {% field_data _('Secondary school diploma') etudes_secondaires.diplome_etranger.diplome %}
 
-      {% if need_translations %}
-        {% field_data _('A translation of your secondary school diploma by a sworn translator') etudes_secondaires.diplome_etranger.traduction_diplome %}
-      {% endif %}
-
-      {% if etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' and ue_or_assimilated %}
-        {% field_data _('Certificate of enrolment or school attendance') etudes_secondaires.diplome_etranger.certificat_inscription %}
         {% if need_translations %}
-          {% field_data _('A translation of the enrolment or school attendance certificate by a sworn translator') etudes_secondaires.diplome_etranger.traduction_certificat_inscription %}
+          {% field_data _('A translation of your secondary school diploma by a sworn translator') etudes_secondaires.diplome_etranger.traduction_diplome %}
         {% endif %}
-      {% endif %}
 
-      {% field_data _('A transcript for your last year of secondary school') etudes_secondaires.diplome_etranger.releve_notes %}
-      {% if need_translations %}
-        {% field_data _('A translation of your official transcript of marks for your final year of secondary school by a sworn translator') etudes_secondaires.diplome_etranger.traduction_releve_notes %}
-      {% endif %}
-    {% endpanel %}
+        {% field_data _('A transcript for your last year of secondary school') etudes_secondaires.diplome_etranger.releve_notes %}
+        {% if need_translations %}
+          {% field_data _('A translation of your official transcript of marks for your final year of secondary school by a sworn translator') etudes_secondaires.diplome_etranger.traduction_releve_notes %}
+        {% endif %}
+      {% endpanel %}
+    {% endif %}
 
   {% elif formation.type == 'BACHELOR' and etudes_secondaires.alternative_secondaires %}
     {% panel _('Secondary studies') %}
       {% field_data _('Do you have a secondary school diploma?') _('No') %}
     {% endpanel %}
-    {% panel _('Attachments') %}
-      {% field_data _("Certificate of passing the bachelor's course entrance exam") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle %}
-    {% endpanel %}
+    {% if not hide_files %}
+      {% panel _('Attachments') %}
+        {% field_data _("Certificate of passing the bachelor's course entrance exam") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle %}
+      {% endpanel %}
+    {% endif %}
 
   {% else %}
     {% panel _('Secondary studies') %}
@@ -124,4 +119,7 @@
     {% endpanel %}
   {% endif %}
 
-  {% multiple_field_data specific_questions %}
+  {% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}
+  {% if specific_questions_to_display %}
+    {% multiple_field_data specific_questions %}
+  {% endif %}

@@ -26,12 +26,15 @@
 from django.db import models
 from rest_framework import serializers
 
+from admission.ddd.admission.dtos import IdentificationDTO
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.person import Person
+from base.utils.serializers import DTOSerializer
 from reference.api.serializers.country import RelatedCountryField
 
 __all__ = [
     "PersonIdentificationSerializer",
+    "IdentificationDTOSerializer",
 ]
 
 from reference.services.belgian_niss_validator import BelgianNISSValidatorService
@@ -95,3 +98,8 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
                 data['birth_year'],
             ).validate()
         return data
+
+
+class IdentificationDTOSerializer(DTOSerializer):
+    class Meta:
+        source = IdentificationDTO

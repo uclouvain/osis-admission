@@ -131,7 +131,7 @@ class DocumentViewTestCase(TestCase):
 
         patcher = patch('osis_document.api.utils.get_remote_tokens')
         patched = patcher.start()
-        patched.side_effect = lambda uuids: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
+        patched.side_effect = lambda uuids, **kwargs: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
         patcher = patch('osis_document.api.utils.get_several_remote_metadata')
@@ -145,6 +145,7 @@ class DocumentViewTestCase(TestCase):
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             curriculum=[uuid.uuid4()],
             pdf_recap=[uuid.uuid4()],
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
     def _create_a_free_document(self, user: User, document_type: str, url='', data=None, with_file=False):

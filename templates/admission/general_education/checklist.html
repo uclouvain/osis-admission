@@ -46,7 +46,7 @@
     {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
     {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
     {% url base_namespace|add:":update:accounting" view.kwargs.uuid as accounting_url %}
-    {% url base_namespace|add:":update:training_choice" view.kwargs.uuid as training_choice_url %}
+    {% url base_namespace|add:":update:training-choice" view.kwargs.uuid as training_choice_url %}
 
     <div
         id="tabs-content"
@@ -118,6 +118,35 @@
           {% bootstrap_form comment_forms.frais_dossier %}
 
           <div class="info-part">
+            <table class="table table-bordered table-condensed admission-scrollable-table">
+              <caption>
+                {% translate 'Online payment history' %}
+              </caption>
+              <thead>
+                <tr>
+                  <th>{% translate 'Amount' %}</th>
+                  <th>{% translate 'Mollie ID' %}</th>
+                  <th>{% translate 'Status' %}</th>
+                  <th>{% translate 'Creation date' %}</th>
+                  <th>{% translate 'Update date' %}</th>
+                  <th>{% translate 'Payment method' %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for payment in payments %}
+                  <tr>
+                    <td>{{ payment.montant }}</td>
+                    <td>{{ payment.identifiant_paiement }}</td>
+                    <td>{{ payment_status_translations|get_item:payment.statut }}</td>
+                    <td>{{ payment.date_creation|date:'d/m/Y H:i' }}</td>
+                    <td>{{ payment.date_mise_a_jour|date:'d/m/Y H:i' }}</td>
+                    <td>{{ payment_method_translations|get_item:payment.methode }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+
             {% firstof person_url|add:next_url as contextual_person_url %}
             {% display _("Citizenship") ''|edit_button:contextual_person_url as button %}
             {% field_data button resume_proposition.identification.nom_pays_nationalite %}
@@ -180,10 +209,6 @@
                 </dd>
               </dl>
             {% endif %}
-
-            {% panel _("Parcours") %}
-            {% include "admission/general_education/includes/checklist/parcours.html" %}
-            {% endpanel %}
           </div>
         </div>
       {% endwith %}
@@ -210,6 +235,11 @@
           {% bootstrap_form comment_forms.specificites_formation %}
 
           <div class="info-part">
+            {% if resume_proposition.identification.est_concerne_par_visa %}
+              {% panel _("Visa") edit_button="#" %}
+                {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
+              {% endpanel %}
+            {% endif %}
             {% multiple_field_data questions_specifiques title=_('Dynamic questions about "Specific aspects" sub-tab') %}
           </div>
 
@@ -294,7 +324,7 @@
   <script src="{% static 'admission/ckeditor.js' %}"></script>
   <script>
       (function ($) {
-          const defaultTab = '#assimilation';
+          const defaultTab = window.location.hash || '#donnees_personnelles';
 
           function refreshDocuments() {
               const selectedTab = window.location.hash || defaultTab;
@@ -315,9 +345,7 @@
           }
 
           // Activate tab from hash on first load
-          if (window.location.hash) {
-              $('#checklist-menu li[data-toggle="tab"][href="' + window.location.hash + '"]').click();
-          }
+          $(`#checklist-menu li[data-toggle="tab"][href="${defaultTab}"]`).click();
 
           refreshDocuments();
 
@@ -543,14 +571,6 @@
 
           // Faculty decision
           const facultyDecisionContainer = $('#decision_facultaire');
-          facultyDecisionContainer.on('change', '#id_fac-decision-refusal-category', function(event){
-              const currentCategory = $(this).val();
-              const reasonContainer = $('#fac-decision-refusal-reason-container');
-              const otherReasonContainer = $('#fac-decision-refusal-other-reason-container');
-              currentCategory === 'OTHER' ? otherReasonContainer.removeClass('hidden'): otherReasonContainer.addClass('hidden');
-              reasonContainer.find('select').val('').change();
-              currentCategory !== 'OTHER' ? reasonContainer.removeClass('hidden') : reasonContainer.addClass('hidden');
-          })
 
           facultyDecisionContainer.on('change', '#id_fac-decision-approval-another_training', function(event){
               const container = $('#fac-decision-other-training-container');
@@ -570,17 +590,10 @@
           });
           $('input[name="fac-decision-approval-with_prerequisite_courses"]:checked').change();
 
-          facultyDecisionContainer.on('click', 'button[type="submit"]', function(event){
+          facultyDecisionContainer.on('click', 'button[name^="save"]', function(event){
               // To send the updated data from ckeditor instances
               for (const editor in CKEDITOR.instances) {
                   CKEDITOR.instances[editor].updateElement();
-              }
-          });
-
-          {# Django autocomplete overrides the option value with the option label when the tags are used so we revert this process here. #}
-          facultyDecisionContainer.on('select2:selecting', '#id_fac-decision-approval-prerequisite_courses', function (event) {
-              if(event.params.args.data.original_id) {
-                  event.params.args.data.id = event.params.args.data.original_id;
               }
           });
       })(jQuery)
@@ -593,6 +606,7 @@
   {{ fac_decision_refusal_form.media.css }}
   {{ fac_decision_approval_form.media.css }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
+  <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
   <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
   <style>
     #three-pane-checklist {
@@ -603,7 +617,7 @@
     #tabs-content, #info-viewer-tab, #document-viewer-tab {
       height: max(60vh, 100px);
       overflow-y: auto;
-      overflow-x: hidden;
+      overflow-x: auto;
     }
 
 
@@ -803,16 +817,25 @@
       margin: 0 0 0 5px
     }
 
-    .select2-selection--multiple .select2-selection__choice {
-      display: block !important;
-      width: fit-content;
+    .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {
+      word-wrap: break-word;
+      text-overflow: inherit;
+      white-space: normal;
     }
 
-    #fac-decision-approval-form {
+    .fac-decision-modal .select2-selection--multiple .select2-selection__choice {
+      background-color: rgba(200, 200, 200, 0.1);
+      width: 100%;
+      display: flex;
+      padding: 5px;
+      align-items: center;
+    }
+
+    .fac-decision-modal {
       overflow: auto;
     }
 
-    #fac-decision-approval-form .modal-footer {
+    .fac-decision-modal .modal-footer {
       position: sticky;
       bottom: 0;
       background: white;

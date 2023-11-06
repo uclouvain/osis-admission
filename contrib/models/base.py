@@ -31,7 +31,7 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count
+from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count, Exists
 from django.db.models.fields.json import KeyTextTransform, KeyTransform
 from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
@@ -164,6 +164,13 @@ class BaseAdmissionQuerySet(models.QuerySet):
             )
         )
 
+    def filter_submitted_only(self):
+        return self.exclude(
+            Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE)
+            | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
+            | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE),
+        )
+
     def annotate_several_admissions_in_progress(self):
         return self.alias(
             admissions_in_progress_nb=Subquery(
@@ -253,6 +260,16 @@ class BaseAdmissionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate_campus()
         )
 
+    def candidate_has_submission(self, candidate: Person):
+        return (
+            self.get_queryset()
+            .filter(
+                candidate=candidate,
+            )
+            .filter_submitted_only()
+            .exists()
+        )
+
 
 class BaseAdmission(CommentDeleteMixin, models.Model):
     uuid = models.UUIDField(
@@ -333,6 +350,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
         upload_to=admission_directory_path,
         verbose_name=_('Curriculum'),
+        max_files=1,
     )
     valuated_secondary_studies_person = models.OneToOneField(
         to='base.Person',

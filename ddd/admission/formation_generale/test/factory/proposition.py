@@ -58,6 +58,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.test.factory.bourse import BourseIdentityFactory
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.test.factory.poste_diplomatique import PosteDiplomatiqueIdentityFactory
 from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
 
 
@@ -208,6 +209,10 @@ class PropositionFactory(factory.Factory):
     est_modification_inscription_externe = False
     checklist_initiale = None
     checklist_actuelle = None
+    poste_diplomatique = factory.SubFactory(
+        PosteDiplomatiqueIdentityFactory,
+        code=1,
+    )
 
     class Params:
         est_bachelier_en_reorientation = factory.Trait(
@@ -226,11 +231,11 @@ class PropositionFactory(factory.Factory):
             checklist_actuelle=factory.SubFactory(StatutsChecklistGeneraleFactory),
         )
         est_refusee_par_fac_raison_libre = factory.Trait(
-            autre_motif_refus_fac='Ma raison',
+            autres_motifs_refus=['Ma raison'],
             certificat_refus_fac=['uuid-certificat_refus_fac'],
         )
         est_refusee_par_fac_raison_connue = factory.Trait(
-            motif_refus_fac=factory.SubFactory(MotifRefusIdentityFactory),
+            motifs_refus=[factory.SubFactory(MotifRefusIdentityFactory)],
             certificat_refus_fac=['uuid-certificat_refus_fac'],
         )
         est_approuvee_par_fac = factory.Trait(

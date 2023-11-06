@@ -118,7 +118,7 @@ class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
         return {
             'data': {
                 'file_name': _('Analysis folder'),
-                'file_0': admission_pdf_recap(self.admission, get_language()),
+                'file_0': admission_pdf_recap(self.admission, get_language(), with_annotated_documents=True),
             }
         }
 
@@ -215,7 +215,11 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
 
         if document.uuids:
             context['document_uuid'] = document.uuids[0]
-            context['document_write_token'] = get_remote_token(uuid=context['document_uuid'], write_token=True)
+            context['document_write_token'] = get_remote_token(
+                uuid=context['document_uuid'],
+                write_token=True,
+                for_modified_upload=True,
+            )
             context['document_metadata'] = get_remote_metadata(context['document_write_token'])
 
         # Request form
@@ -244,6 +248,11 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
     }
     permission_required = 'admission.view_documents_management'
     name = 'document-action'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['document_identifier'] = self.document_identifier
+        return context
 
     @property
     def document_identifier(self):

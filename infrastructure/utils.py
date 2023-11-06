@@ -121,6 +121,7 @@ class AdmissionDocument:
     mimetypes: List[str]
     label: str
     document_submitted_by: str
+    max_documents_number: Optional[int]
 
 
 def get_document_from_identifier(
@@ -151,6 +152,7 @@ def get_document_from_identifier(
     document_label: str = ''
     document_submitted_by: str = ''
     metadata: dict = {}
+    max_documents_number = None
 
     if identifiers_nb < 2:
         return
@@ -198,6 +200,9 @@ def get_document_from_identifier(
             [],
         )
         document_label = specific_question.title.get(admission.candidate.language, '')
+        max_documents_number = specific_question.configuration.get(
+            CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name,
+        )
 
     elif base_identifier == IdentifiantBaseEmplacementDocument.LIBRE_GESTIONNAIRE.name:
         # Free documents uploaded by the manager
@@ -220,11 +225,12 @@ def get_document_from_identifier(
 
         document_uuids = [document_uuid]
         document_type = FREE_MANAGER_DOCUMENT_TYPE_BY_MODEL_FIELD[field]
+        max_documents_number = 1
 
         if document_uuids:
             from osis_document.api.utils import get_remote_token, get_remote_metadata
 
-            token = get_remote_token(uuid=document_uuids[0])
+            token = get_remote_token(uuid=document_uuids[0], for_modified_upload=True)
             metadata = get_remote_metadata(token=token) or {}
             document_author = metadata.get('author', '')
             document_label = metadata.get('explicit_name', '')
@@ -247,6 +253,7 @@ def get_document_from_identifier(
             document_uuids = getattr(obj, field, [])
             model_attribute = type(obj)._meta.get_field(field)
             document_mimetypes = model_attribute.mimetypes
+            max_documents_number = model_attribute.max_files
 
     # Categorized documents
     else:
@@ -346,13 +353,14 @@ def get_document_from_identifier(
             document_uuids = getattr(obj, field, [])
             model_attribute = type(obj)._meta.get_field(field)
             document_mimetypes = model_attribute.mimetypes
+            max_documents_number = model_attribute.max_files
 
     if obj and field and document_type:
         if document_uuids:
             if not metadata:
                 from osis_document.api.utils import get_remote_token, get_remote_metadata
 
-                token = get_remote_token(uuid=document_uuids[0])
+                token = get_remote_token(uuid=document_uuids[0], for_modified_upload=True)
                 metadata = get_remote_metadata(token=token)
             if metadata:
                 document_submitted_by = metadata.get('author', '')
@@ -374,6 +382,7 @@ def get_document_from_identifier(
             mimetypes=document_mimetypes or list(SUPPORTED_MIME_TYPES),
             label=document_label,
             document_submitted_by=document_submitted_by,
+            max_documents_number=max_documents_number,
         )
 
 
@@ -385,7 +394,6 @@ CORRESPONDANCE_CHAMPS_IDENTIFICATION = {
 
 CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_BELGES = {
     'DIPLOME_BELGE_DIPLOME': 'high_school_diploma',
-    'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION': 'enrolment_certificate',
 }
 
 CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ETRANGERES = {
@@ -394,8 +402,6 @@ CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ETRANGERES = {
     'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE': 'final_equivalence_decision_not_ue',
     'DIPLOME_ETRANGER_DIPLOME': 'high_school_diploma',
     'DIPLOME_ETRANGER_TRADUCTION_DIPLOME': 'high_school_diploma_translation',
-    'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION': 'enrolment_certificate',
-    'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION': 'enrolment_certificate_translation',
     'DIPLOME_ETRANGER_RELEVE_NOTES': 'high_school_transcript',
     'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES': 'high_school_transcript_translation',
 }

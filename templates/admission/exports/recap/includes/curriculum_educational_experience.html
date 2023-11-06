@@ -131,10 +131,10 @@
                   </td>
                 {% endif %}
                 <td>
-                  {{ experience_year.resultat|enum_display:'Result'|default:_('Not specified') }}
+                  {{ experience_year.resultat|enum_display:'Result'|default:_('Incomplete field') }}
                 </td>
               </tr>
-              {% if experience.type_releve_notes == 'ONE_A_YEAR' %}
+              {% if experience.type_releve_notes == 'ONE_A_YEAR' and not hide_files %}
                 <tr>
                   <td {% if evaluation_system_with_credits %}colspan="3"{% endif %}>
                     <div class="flex-container-no-wrap">

@@ -233,7 +233,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             else None,
             diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
                 diplome=belgian_high_school_diploma.high_school_diploma,
-                certificat_inscription=belgian_high_school_diploma.enrolment_certificate,
                 type_enseignement=belgian_high_school_diploma.educational_type,
                 autre_type_enseignement=belgian_high_school_diploma.educational_other,
                 nom_institut=belgian_high_school_diploma.institute.name
@@ -264,13 +263,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 traduction_releve_notes=foreign_high_school_diploma.high_school_transcript_translation,
                 diplome=foreign_high_school_diploma.high_school_diploma,
                 traduction_diplome=foreign_high_school_diploma.high_school_diploma_translation,
-                certificat_inscription=foreign_high_school_diploma.enrolment_certificate,
-                traduction_certificat_inscription=foreign_high_school_diploma.enrolment_certificate_translation,
                 equivalence=foreign_high_school_diploma.equivalence,
                 decision_final_equivalence_ue=foreign_high_school_diploma.final_equivalence_decision_ue,
                 decision_final_equivalence_hors_ue=foreign_high_school_diploma.final_equivalence_decision_not_ue,
                 preuve_decision_equivalence=foreign_high_school_diploma.equivalence_decision_proof,
-                resultat=foreign_high_school_diploma.result or '',
             )
             if foreign_high_school_diploma
             else None,

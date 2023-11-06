@@ -35,8 +35,9 @@ from admission.ddd.admission.domain.model.complement_formation import Complement
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
-from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
@@ -55,6 +56,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     PoursuiteDeCycle,
+    DecisionFacultaireEnum,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -65,6 +67,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     RefuserParFacValidatorList,
     ApprouverParFacValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
+    FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
@@ -124,12 +127,14 @@ class Proposition(interface.RootEntity):
     poursuite_de_cycle_a_specifier: bool = False
     poursuite_de_cycle: PoursuiteDeCycle = PoursuiteDeCycle.TO_BE_DETERMINED
 
-    # Décision facultaire
+    poste_diplomatique: Optional[PosteDiplomatiqueIdentity] = None
+
+    # Décision facultaire & sic
     certificat_approbation_fac: List[str] = attr.Factory(list)
     certificat_refus_fac: List[str] = attr.Factory(list)
 
-    motif_refus_fac: Optional[MotifRefusIdentity] = None
-    autre_motif_refus_fac: str = ''
+    motifs_refus: List[MotifRefusIdentity] = attr.Factory(list)
+    autres_motifs_refus: List[str] = attr.Factory(list)
 
     autre_formation_choisie_fac_id: Optional['FormationIdentity'] = None
     avec_conditions_complementaires: Optional[bool] = None
@@ -155,6 +160,21 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
     ):
         self.formation_id = formation_id
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
+        self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
+        self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
+
+        self.comptabilite.affiliation_sport = None  # Ce choix dépend du campus de formation
+
+    def modifier_choix_formation_par_gestionnaire(
+        self,
+        bourses_ids: Dict[str, BourseIdentity],
+        bourse_double_diplome: Optional[str],
+        bourse_internationale: Optional[str],
+        bourse_erasmus_mundus: Optional[str],
+        reponses_questions_specifiques: Dict,
+    ):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
         self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
@@ -220,7 +240,7 @@ class Proposition(interface.RootEntity):
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             libelle=__('Refusal'),
             extra={
-                'decision': '1',
+                'decision': DecisionFacultaireEnum.EN_DECISION.value,
             },
         )
 
@@ -230,13 +250,13 @@ class Proposition(interface.RootEntity):
             libelle=__('Approval'),
         )
 
-    def specifier_motif_refus_par_fac(self, uuid_motif: str, autre_motif: str):
+    def specifier_motifs_refus_par_fac(self, uuids_motifs: List[str], autres_motifs: List[str]):
         SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
             statut=self.statut,
         ).validate()
         self.specifier_refus_par_fac()
-        self.motif_refus_fac = MotifRefusIdentity(uuid=uuid_motif) if uuid_motif else None
-        self.autre_motif_refus_fac = autre_motif
+        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
+        self.autres_motifs_refus = autres_motifs
 
     def specifier_informations_acceptation_par_fac(
         self,
@@ -294,8 +314,8 @@ class Proposition(interface.RootEntity):
     def refuser_par_fac(self):
         RefuserParFacValidatorList(
             statut=self.statut,
-            motif_refus_fac=self.motif_refus_fac,
-            autre_motif_refus_fac=self.autre_motif_refus_fac,
+            motifs_refus=self.motifs_refus,
+            autres_motifs_refus=self.autres_motifs_refus,
         ).validate()
 
         self.specifier_refus_par_fac()
@@ -322,6 +342,13 @@ class Proposition(interface.RootEntity):
             statut=self.statut,
         ).validate()
         self.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+
+    def soumettre_au_sic_lors_de_la_decision_facultaire(self):
+        FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(
+            statut=self.statut,
+            checklist_actuelle=self.checklist_actuelle,
+        ).validate()
+        self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
 
     def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self):
         self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -483,6 +510,32 @@ class Proposition(interface.RootEntity):
         self,
         reponses_questions_specifiques: Dict,
         documents_additionnels: List[str],
+        poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
     ):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.documents_additionnels = documents_additionnels
+        self.poste_diplomatique = poste_diplomatique
+
+    def completer_informations_complementaires_par_gestionnaire(
+        self,
+        reponses_questions_specifiques: Dict,
+        documents_additionnels: List[str],
+        poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+        est_bachelier_belge: Optional[bool],
+        est_reorientation_inscription_externe: Optional[bool],
+        attestation_inscription_reguliere: List[str],
+        est_modification_inscription_externe: Optional[bool],
+        formulaire_modification_inscription: List[str],
+        est_non_resident_au_sens_decret: Optional[bool],
+    ):
+        self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.documents_additionnels = documents_additionnels
+
+        self.poste_diplomatique = poste_diplomatique
+
+        self.est_non_resident_au_sens_decret = est_non_resident_au_sens_decret
+        self.est_bachelier_belge = est_bachelier_belge
+        self.est_reorientation_inscription_externe = est_reorientation_inscription_externe
+        self.attestation_inscription_reguliere = attestation_inscription_reguliere
+        self.est_modification_inscription_externe = est_modification_inscription_externe
+        self.formulaire_modification_inscription = formulaire_modification_inscription

@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -35,6 +36,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 )
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
@@ -46,6 +48,7 @@ from osis_signature.models import StateHistory
 from reference.tests.factories.country import CountryFactory
 
 
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -76,6 +79,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
             'langue': '',
         }
         CountryFactory(iso_code='FR')
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

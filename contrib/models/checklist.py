@@ -25,6 +25,7 @@
 # ##############################################################################
 import uuid
 
+from ckeditor.fields import RichTextField
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -38,25 +39,18 @@ class RefusalReasonCategory(models.Model):
         primary_key=True,
     )
 
-    name_fr = models.CharField(
+    name = models.CharField(
         max_length=255,
-        verbose_name=_('French name'),
-    )
-
-    name_en = models.CharField(
-        max_length=255,
-        verbose_name=_('English name'),
+        verbose_name=_('Name'),
     )
 
     def __str__(self):
-        return {
-            settings.LANGUAGE_CODE_FR: self.name_fr,
-            settings.LANGUAGE_CODE_EN: self.name_en,
-        }[settings.LANGUAGE_CODE]
+        return self.name
 
     class Meta:
         verbose_name = _('Refusal reason category')
         verbose_name_plural = _('Refusal reason categories')
+        ordering = ['name']
 
 
 class RefusalReason(models.Model):
@@ -67,14 +61,9 @@ class RefusalReason(models.Model):
         primary_key=True,
     )
 
-    name_fr = models.CharField(
-        max_length=255,
-        verbose_name=_('French name'),
-    )
-
-    name_en = models.CharField(
-        max_length=255,
-        verbose_name=_('English name'),
+    name = RichTextField(
+        verbose_name=_('Name'),
+        config_name='link_only',
     )
 
     category = models.ForeignKey(
@@ -84,14 +73,12 @@ class RefusalReason(models.Model):
     )
 
     def __str__(self):
-        return {
-            settings.LANGUAGE_CODE_FR: self.name_fr,
-            settings.LANGUAGE_CODE_EN: self.name_en,
-        }[settings.LANGUAGE_CODE]
+        return self.name
 
     class Meta:
         verbose_name = _('Refusal reason')
         verbose_name_plural = _('Refusal reasons')
+        ordering = ['name']
 
 
 class AdditionalApprovalCondition(models.Model):
@@ -102,14 +89,19 @@ class AdditionalApprovalCondition(models.Model):
         primary_key=True,
     )
 
-    name_fr = models.CharField(
-        max_length=255,
+    name_fr = RichTextField(
         verbose_name=_('French name'),
+        config_name='link_only',
     )
 
-    name_en = models.CharField(
-        max_length=255,
+    name_en = RichTextField(
         verbose_name=_('English name'),
+        config_name='link_only',
+    )
+
+    order = models.FloatField(
+        default=0,
+        verbose_name=_('Order'),
     )
 
     def __str__(self):
@@ -121,3 +113,4 @@ class AdditionalApprovalCondition(models.Model):
     class Meta:
         verbose_name = _('Additional approval condition')
         verbose_name_plural = _('Additional approval conditions')
+        ordering = ['order']

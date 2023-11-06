@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -90,6 +91,7 @@ class ChoixFormationDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
 
 
+@freezegun.freeze_time('2023-01-01')
 class ChoixFormationFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):

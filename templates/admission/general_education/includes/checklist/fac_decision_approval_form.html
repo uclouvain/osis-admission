@@ -1,4 +1,4 @@
-{% load i18n bootstrap3 admission %}
+{% load i18n bootstrap3 admission static %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -28,6 +28,7 @@
     hx-target="this"
     hx-swap="outerHTML"
     id="fac-decision-approval-form"
+    style="overflow: auto;"
 >
   <div class="modal-body">
 
@@ -60,7 +61,14 @@
         id="fac-decision-additional-approval-conditions-container"
         class="required_field hidden"
     >
-      {% bootstrap_field fac_decision_approval_form.all_additional_approval_conditions %}
+      <div class="form-group">
+        <label class="control-label">
+          {{ fac_decision_approval_form.all_additional_approval_conditions.field.label }}
+          <strong>({% translate 'contact language'%} </strong>
+          <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
+        </label>
+       {{ fac_decision_approval_form.all_additional_approval_conditions }}
+      </div>
     </div>
 
     {% bootstrap_field fac_decision_approval_form.with_prerequisite_courses %}
@@ -135,6 +143,7 @@
       {# Update the content of the tab #}
       {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
     {% endif %}
+    <script src="{% static "ckeditor/ckeditor-init.js" %}"></script>
     <script>
         $(document).ready(function(){
             {# Show / Hide fields depending on other field values #}
@@ -142,9 +151,8 @@
             $('input[name="fac-decision-approval-with_additional_approval_conditions"]:checked').change();
             $('input[name="fac-decision-approval-with_prerequisite_courses"]:checked').change();
 
-            {# Initialize rich editors #}
-            initializeCKEditor('id_fac-decision-approval-join_program_fac_comment');
-            initializeCKEditor('id_fac-decision-approval-prerequisite_courses_fac_comment');
+            {# Initialize the custom select2 component #}
+            window.__dal__initialize($('select[data-autocomplete-light-function=select2_tag]'))
 
             {% if fac_decision_approval_form.is_valid %}
                 $('#fac-decision-approval-modal').modal('hide');

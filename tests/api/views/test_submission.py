@@ -24,19 +24,23 @@
 #
 # ##############################################################################
 import datetime
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 
 import freezegun
+import mock
 from django.shortcuts import resolve_url
+from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 from osis_history.models import HistoryEntry
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
+    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
 from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
@@ -61,7 +65,6 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.person import (
     IncompletePersonForBachelorFactory,
     IncompletePersonForIUFCFactory,
-    CompletePersonForBachelorFactory,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -70,6 +73,7 @@ from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
 @freezegun.freeze_time("1980-02-25")
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -151,7 +155,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_general_proposition_verification_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        with self.assertNumQueriesLessThan(67):
+        with self.assertNumQueriesLessThan(72):
             response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ret = response.json()
@@ -211,7 +215,13 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             professional_experience.uuid,
         )
 
-    def test_general_proposition_verification_contingent_non_ouvert(self):
+    @mock.patch(
+        'admission.ddd.admission.domain.service.i_calendrier_inscription.ICalendrierInscription.'
+        'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
+        new_callable=PropertyMock,
+        return_value=False,
+    )
+    def test_general_proposition_verification_contingent_non_ouvert(self, _):
         admission = GeneralEducationAdmissionFactory(
             is_non_resident=True,
             candidate=IncompletePersonForBachelorFactory(),
@@ -225,6 +235,34 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         ret = response.json()
         self.assertIsNotNone(ret['pool_start_date'])
         self.assertIsNotNone(ret['pool_end_date'])
+        admission.refresh_from_db()
+        self.assertNotIn(
+            {
+                'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
+                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message,
+            },
+            admission.detailed_status,
+        )
+
+    def test_general_proposition_verification_contingent_est_interdite(self):
+        admission = GeneralEducationAdmissionFactory(
+            is_non_resident=True,
+            candidate=IncompletePersonForBachelorFactory(),
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__acronym="VETE1BA",
+        )
+        url = resolve_url("admission_api_v1:submit-general-proposition", uuid=admission.uuid)
+        self.client.force_authenticate(user=admission.candidate.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        admission.refresh_from_db()
+        self.assertIn(
+            {
+                'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
+                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message,
+            },
+            admission.detailed_status,
+        )
 
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
@@ -242,6 +280,11 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         ).last()
         self.assertIsNotNone(history_entry)
         self.assertEqual(history_entry.message_fr, 'La proposition a été soumise.')
+
+        admission_tasks = AdmissionTask.objects.filter(admission=self.admission_ok).order_by('type')
+        self.assertEqual(len(admission_tasks), 2)
+        self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.GENERAL_MERGE.name)
+        self.assertEqual(admission_tasks[1].type, AdmissionTask.TaskType.GENERAL_RECAP.name)
 
     @freezegun.freeze_time("1980-10-22")
     def test_general_proposition_submission_with_late_enrollment(self):
@@ -373,7 +416,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS
                 % {'by_service': _("by the University Institute for Continuing Education (IUFC)")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
-                % {'to_service': _("to the University Institute of Continuing Education")},
+                % {'to_service': _("the University Institute of Continuing Education")},
                 'droits_inscription_iufc': IElementsConfirmation.DROITS_INSCRIPTION_IUFC,
             },
         }
@@ -420,6 +463,9 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
+        admission_tasks = AdmissionTask.objects.filter(admission=self.admission_ok).order_by('type')
+        self.assertEqual(len(admission_tasks), 2)
+        self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.CONTINUING_MERGE.name)
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()
