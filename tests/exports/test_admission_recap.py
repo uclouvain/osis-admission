@@ -2302,7 +2302,14 @@ class SectionsAttachmentsTestCase(TestCase):
         experience = self.general_bachelor_context.curriculum.experiences_non_academiques[0]
         with mock.patch.multiple(experience, type=ActivityType.OTHER.name):
             section = get_non_educational_experience_section(self.general_bachelor_context, experience, False)
-            self.assertEqual(len(section.attachments), 0)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'CERTIFICAT_EXPERIENCE')
+            self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.OTHER.name))
+            self.assertEqual(attachments[0].uuids, experience.certificat)
+            self.assertFalse(attachments[0].required)
 
     def test_curriculum_non_academic_experience_attachments_with_doctorate_proposition_and_travel_activity(self):
         experience = self.doctorate_context.curriculum.experiences_non_academiques[0]
