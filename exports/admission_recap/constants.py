@@ -42,12 +42,13 @@ FORMATTED_RELATIONSHIPS = {
 }
 CURRICULUM_ACTIVITY_LABEL = {
     ActivityType.LANGUAGE_TRAVEL.name: _(
-        'Certificate justifying and mentioning your activity for the period concerned'
+        'Certificate of participation in a language study abroad for the period concerned'
     ),
     ActivityType.INTERNSHIP.name: _('Internship certificate, with dates, justifying the period concerned'),
     ActivityType.UNEMPLOYMENT.name: _(
         'Unemployment certificate issued by the relevant body, justifying the period concerned'
     ),
-    ActivityType.VOLUNTEERING.name: _('Certificate, with dates, justifying the period concerned'),
+    ActivityType.VOLUNTEERING.name: _('Certificate, with dates, justifying your volunteering activities'),
     ActivityType.WORK.name: _('Proof of employment from the employer, with dates, justifying the period in question'),
+    ActivityType.OTHER.name: _('Certificate justifying and mentioning your activity for the period concerned'),
 }

@@ -708,9 +708,6 @@ msgstr "Y a-t-il des compléments de formation ?"
 msgid "Are you a dual degree student?"
 msgstr "Êtes-vous en double diplomation ?"
 
-msgid "Are you a non-resident (as defined by government decree)?"
-msgstr "Êtes-vous non-résident (au sens du décret) ?"
-
 msgid "Are you an Erasmus Mundus student?"
 msgstr "Êtes-vous Erasmus Mundus ?"
 
@@ -1196,7 +1193,7 @@ msgid ""
 "Certificate justifying and mentioning your activity for the period concerned"
 msgstr ""
 "Attestation justifiant votre activité, mentionnant cette activité, pour la "
-"période concernée"
+"période concernée "
 
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
@@ -1212,6 +1209,13 @@ msgstr "Certificat de connaissance des langues"
 
 msgid "Certificate of legal cohabitation"
 msgstr "Attestation de cohabitation légale"
+
+msgid ""
+"Certificate of participation in a language study abroad for the period "
+"concerned"
+msgstr ""
+"Attestation de participation à un séjour linguistique pour la période "
+"concernée"
 
 msgid "Certificate of participation in the presentation"
 msgstr "Attestation de participation à l'exposé"
@@ -1251,8 +1255,9 @@ msgstr[1] ""
 "Attestations stipulant l'absence de dettes vis-à-vis des établissements "
 "fréquentés durant l'année académique %(academic_year)s : %(names)s."
 
-msgid "Certificate, with dates, justifying the period concerned"
-msgstr "Attestation, avec mention des dates, justifiant la période concernée"
+msgid "Certificate, with dates, justifying your volunteering activities"
+msgstr ""
+"Attestation, avec mention des dates, justifiant vos activités de volontariat"
 
 #, python-format
 msgid "Change <em>%(name)s</em> configuration"
@@ -3903,6 +3908,9 @@ msgstr "Noma"
 msgid "Non doctor reason"
 msgstr "Justification"
 
+msgid "Non-resident (as defined by government decree)"
+msgstr "Non-résident (au sens du Décret)"
+
 msgid "Non-retrievable attachment"
 msgstr "Pièce jointe non récupérable"
 
@@ -4810,6 +4818,9 @@ msgid "Residence permit valid for more than 3 months with replacement income"
 msgstr ""
 "Titre de séjour d’une validité supérieure à 3 mois avec des revenus de "
 "remplacement"
+
+msgid "Resident (as defined by government decree)"
+msgstr "Résident (au sens du Décret)"
 
 msgid "Restore activity to submitted"
 msgstr "Remettre cette activité au statut soumise"
@@ -6427,6 +6438,15 @@ msgstr ""
 "Vous êtes sur le point de soumettre le dossier en Faculté. Cette action "
 "enverra un mail à l'adresse %(recipient)s."
 
+msgid "You are applying as ..."
+msgstr "Postulez-vous en tant que ..."
+
+msgid "You are applying as non-resident (as defined by government decree)."
+msgstr "Vous postulez en tant que non-résident (au sens du Décret)."
+
+msgid "You are applying as resident (as defined by government decree)."
+msgstr "Vous postulez en tant que résident (au sens du Décret)."
+
 msgid ""
 "You are considered a long-term resident if you hold a residence permit valid "
 "for at least 5 years."
@@ -6512,6 +6532,13 @@ msgstr[0] ""
 msgstr[1] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation générale car "
 "vous en avez déjà envoyé %(maximum_number)s."
+
+msgid ""
+"You do not specify if you are applying as resident or non-resident (as "
+"defined by government decree)."
+msgstr ""
+"Vous n'avez pas indiqué si vous postulez en tant que résident ou non-"
+"résident (au sens du Décret)."
 
 msgid ""
 "You haven't answered to the question about your bank account in the "

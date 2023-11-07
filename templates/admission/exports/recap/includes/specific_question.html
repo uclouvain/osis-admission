@@ -85,7 +85,13 @@
 
 {% if enrolled_for_contingent_training %}
   {% panel _("Enrolment in limited enrolment bachelor's course") %}
-    {% field_data _("Are you a non-resident (as defined by government decree)?") proposition.est_non_resident_au_sens_decret %}
+    {% if proposition.est_non_resident_au_sens_decret %}
+      {% translate 'You are applying as non-resident (as defined by government decree).' %}
+    {% elif proposition.est_non_resident_au_sens_decret is False %}
+      {% translate 'You are applying as resident (as defined by government decree).' %}
+    {% else %}
+      {% translate 'You do not specify if you are applying as resident or non-resident (as defined by government decree).' %}
+    {% endif %}
   {% endpanel %}
 {% endif %}
 

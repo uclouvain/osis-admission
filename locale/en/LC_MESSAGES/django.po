@@ -628,9 +628,6 @@ msgstr ""
 msgid "Are you a dual degree student?"
 msgstr ""
 
-msgid "Are you a non-resident (as defined by government decree)?"
-msgstr ""
-
 msgid "Are you an Erasmus Mundus student?"
 msgstr ""
 
@@ -1115,6 +1112,11 @@ msgstr ""
 msgid "Certificate of legal cohabitation"
 msgstr ""
 
+msgid ""
+"Certificate of participation in a language study abroad for the period "
+"concerned"
+msgstr ""
+
 msgid "Certificate of participation in the presentation"
 msgstr ""
 
@@ -1145,7 +1147,7 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "Certificate, with dates, justifying the period concerned"
+msgid "Certificate, with dates, justifying your volunteering activities"
 msgstr ""
 
 #, python-format
@@ -3490,6 +3492,9 @@ msgstr ""
 msgid "Non doctor reason"
 msgstr ""
 
+msgid "Non-resident (as defined by government decree)"
+msgstr ""
+
 msgid "Non-retrievable attachment"
 msgstr ""
 
@@ -4325,6 +4330,9 @@ msgid "Residence permit valid for more than 3 months with professional income"
 msgstr ""
 
 msgid "Residence permit valid for more than 3 months with replacement income"
+msgstr ""
+
+msgid "Resident (as defined by government decree)"
 msgstr ""
 
 msgid "Restore activity to submitted"
@@ -5784,6 +5792,15 @@ msgid ""
 "send an email to %(recipient)s."
 msgstr ""
 
+msgid "You are applying as ..."
+msgstr ""
+
+msgid "You are applying as non-resident (as defined by government decree)."
+msgstr ""
+
+msgid "You are applying as resident (as defined by government decree)."
+msgstr ""
+
 msgid ""
 "You are considered a long-term resident if you hold a residence permit valid "
 "for at least 5 years."
@@ -5845,6 +5862,11 @@ msgid_plural ""
 "submitted %(maximum_number)s of them."
 msgstr[0] ""
 msgstr[1] ""
+
+msgid ""
+"You do not specify if you are applying as resident or non-resident (as "
+"defined by government decree)."
+msgstr ""
 
 msgid ""
 "You haven't answered to the question about your bank account in the "

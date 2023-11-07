@@ -346,9 +346,11 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
         self.client.force_login(user=self.adre_person.user)
 
         confirmation_paper_to_update = ConfirmationPaperFactory(
+            id=ConfirmationPaper.objects.all().first().id + 1,
             admission=self.admission_with_confirmation_papers,
             confirmation_date=datetime.date(2023, 1, 1),
             confirmation_deadline=datetime.date(2023, 4, 5),
+            research_mandate_renewal_opinion=[],
         )
 
         url = reverse(self.path, args=[self.admission_with_confirmation_papers.uuid])

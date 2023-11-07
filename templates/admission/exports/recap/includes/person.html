@@ -24,7 +24,7 @@
 {% endcomment %}
 
 {% with profil_candidat=admission.profil_soumis_candidat %}
-  {% if profil_candidat|is_profile_identification_different:identification %}
+  {% if admission.profil_soumis_candidat|is_profile_identification_different:identification %}
     <p class="alert alert-info" role="alert">
       <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
       {% trans "The dossier has been confirmed as:" %}
