@@ -56,7 +56,7 @@
       </div>
     </div>
   {% endif %}
-  {% if experience.type != 'OTHER' and not is_continuing %}
+  {% if not is_continuing %}
     {% field_data CURRICULUM_ACTIVITY_LABEL|get_item:experience.type experience.certificat %}
   {% endif %}
 {% endpanel %}

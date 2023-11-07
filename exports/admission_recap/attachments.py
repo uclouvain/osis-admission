@@ -418,15 +418,14 @@ def get_curriculum_non_academic_experience_attachments(
     """Returns the non academic experience attachments."""
     attachments = []
     if context.est_proposition_doctorale or context.est_proposition_generale:
-        if experience.type != ActivityType.OTHER.name:
-            attachments.append(
-                Attachment(
-                    identifier='CERTIFICAT_EXPERIENCE',
-                    label=CURRICULUM_ACTIVITY_LABEL[experience.type],
-                    uuids=experience.certificat,
-                    candidate_language=context.identification.langue_contact,
-                )
+        attachments.append(
+            Attachment(
+                identifier='CERTIFICAT_EXPERIENCE',
+                label=CURRICULUM_ACTIVITY_LABEL[experience.type],
+                uuids=experience.certificat,
+                candidate_language=context.identification.langue_contact,
             )
+        )
         return attachments
 
 

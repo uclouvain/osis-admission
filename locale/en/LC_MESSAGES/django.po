@@ -1115,6 +1115,11 @@ msgstr ""
 msgid "Certificate of legal cohabitation"
 msgstr ""
 
+msgid ""
+"Certificate of participation in a language study abroad for the period "
+"concerned"
+msgstr ""
+
 msgid "Certificate of participation in the presentation"
 msgstr ""
 
@@ -1145,7 +1150,7 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-msgid "Certificate, with dates, justifying the period concerned"
+msgid "Certificate, with dates, justifying your volunteering activities"
 msgstr ""
 
 #, python-format
