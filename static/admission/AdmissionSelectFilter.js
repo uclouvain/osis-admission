@@ -33,6 +33,11 @@
 
             // Original field
             const originalSelectField = document.getElementById(field_id);
+            const isInitialized = originalSelectField.dataset.isAdmissionSelectFilterInitialized;
+            if (!!isInitialized) {
+                return ;
+            }
+
             originalSelectField.classList.add('form-control')
             originalSelectField.size = 10;
 
@@ -260,7 +265,9 @@
                         option.selected = true;
                     }
                 })
-            })
+            });
+
+            originalSelectField.dataset.isAdmissionSelectFilterInitialized = true;
         },
     };
 

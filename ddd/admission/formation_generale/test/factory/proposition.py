@@ -86,6 +86,7 @@ class StatutsChecklistGeneraleFactory(factory.Factory):
     financabilite = factory.SubFactory(StatutChecklistFactory)
     specificites_formation = factory.SubFactory(StatutChecklistFactory)
     decision_facultaire = factory.SubFactory(StatutChecklistFactory)
+    decision_sic = factory.SubFactory(StatutChecklistFactory)
 
 
 class _ComptabiliteFactory(factory.Factory):

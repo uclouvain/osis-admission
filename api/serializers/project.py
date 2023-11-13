@@ -217,6 +217,7 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
     reponses_questions_specifiques = None
     elements_confirmation = None
     documents_demandes = None
+    droits_inscription_montant_autre = None
 
     class Meta:
         source = FormationGeneralePropositionDTO
@@ -453,6 +454,7 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
     erreurs = serializers.JSONField()
     elements_confirmation = None
     documents_demandes = None
+    droits_inscription_montant_autre = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

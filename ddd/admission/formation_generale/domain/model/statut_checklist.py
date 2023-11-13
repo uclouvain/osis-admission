@@ -69,6 +69,7 @@ class StatutsChecklistGenerale:
     choix_formation: StatutChecklist
     specificites_formation: StatutChecklist
     decision_facultaire: StatutChecklist
+    decision_sic: StatutChecklist
 
     @classmethod
     def from_dict(cls, checklist_en_tant_que_dict: Dict[str, Dict[str, any]]):

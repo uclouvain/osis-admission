@@ -339,6 +339,7 @@ class PropositionInMemoryRepository(
             )
             if proposition.profil_soumis_candidat
             else None,
+            type_de_refus=proposition.type_de_refus,
             motifs_refus=[MotifRefusDTO(motif=motif.intitule, categorie=motif.categorie) for motif in motifs_refus],
             autre_formation_choisie_fac=formation_choisie_fac
             and BaseFormationDTO(
@@ -369,4 +370,15 @@ class PropositionInMemoryRepository(
             if proposition.etat_equivalence_titre_acces
             else '',
             date_prise_effet_equivalence_titre_acces=proposition.date_prise_effet_equivalence_titre_acces,
+            besoin_de_derogation=proposition.besoin_de_derogation,
+            droits_inscription_montant=proposition.droits_inscription_montant,
+            droits_inscription_montant_autre=proposition.droits_inscription_montant_autre,
+            dispense_ou_droits_majores=proposition.dispense_ou_droits_majores,
+            tarif_particulier=proposition.tarif_particulier,
+            refacturation_ou_tiers_payant=proposition.refacturation_ou_tiers_payant,
+            annee_de_premiere_inscription_et_statut=proposition.annee_de_premiere_inscription_et_statut,
+            est_mobilite=proposition.est_mobilite,
+            nombre_de_mois_de_mobilite=proposition.nombre_de_mois_de_mobilite,
+            doit_se_presenter_en_sic=proposition.doit_se_presenter_en_sic,
+            communication_au_candidat=proposition.communication_au_candidat,
         )

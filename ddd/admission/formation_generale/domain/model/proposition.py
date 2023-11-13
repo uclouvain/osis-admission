@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from decimal import Decimal
 from typing import Dict, Optional, List
 
 import attr
@@ -63,9 +64,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     PoursuiteDeCycle,
-    DecisionFacultaireEnum,
     RegleCalculeResultatAvecFinancable,
     RegleDeFinancement,
+    DecisionFacultaireEnum, BesoinDeDerogation, TypeDeRefus,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -149,6 +150,7 @@ class Proposition(interface.RootEntity):
     certificat_approbation_fac: List[str] = attr.Factory(list)
     certificat_refus_fac: List[str] = attr.Factory(list)
 
+    type_de_refus: Optional['TypeDeRefus'] = ''
     motifs_refus: List[MotifRefusIdentity] = attr.Factory(list)
     autres_motifs_refus: List[str] = attr.Factory(list)
 
@@ -163,6 +165,18 @@ class Proposition(interface.RootEntity):
     nom_personne_contact_programme_annuel_annuel: str = ''
     email_personne_contact_programme_annuel_annuel: str = ''
     commentaire_programme_conjoint: str = ''
+    besoin_de_derogation: Optional['BesoinDeDerogation'] = ''
+
+    droits_inscription_montant: Optional['DroitsInscriptionMontant'] = ''
+    droits_inscription_montant_autre: Optional[Decimal] = None
+    dispense_ou_droits_majores: Optional['DispenseOuDroitsMajores'] = ''
+    tarif_particulier: str = ''
+    refacturation_ou_tiers_payant: str = ''
+    annee_de_premiere_inscription_et_statut: str = ''
+    est_mobilite: Optional[bool] = None
+    nombre_de_mois_de_mobilite: Optional['MobiliteNombreDeMois'] = ''
+    doit_se_presenter_en_sic: Optional[bool] = None
+    communication_au_candidat: str = ''
 
     condition_acces: Optional[ConditionAcces] = None
     millesime_condition_acces: Optional[int] = None
@@ -628,3 +642,84 @@ class Proposition(interface.RootEntity):
             libelle=__('Approval'),
             extra={},
         )
+
+    def specifier_besoin_de_derogation(
+        self,
+        besoin_de_derogation: BesoinDeDerogation,
+    ):
+        self.besoin_de_derogation = besoin_de_derogation
+
+    def specifier_informations_acceptation_par_sic(
+        self,
+        avec_conditions_complementaires: Optional[bool],
+        uuids_conditions_complementaires_existantes: Optional[List[str]],
+        conditions_complementaires_libres: Optional[List[str]],
+        avec_complements_formation: Optional[bool],
+        uuids_complements_formation: Optional[List[str]],
+        commentaire_complements_formation: str,
+        nombre_annees_prevoir_programme: Optional[int],
+        nom_personne_contact_programme_annuel: str,
+        email_personne_contact_programme_annuel: str,
+        droits_inscription_montant: str,
+        droits_inscription_montant_autre: Optional[float],
+        dispense_ou_droits_majores: str,
+        tarif_particulier: str,
+        refacturation_ou_tiers_payant: str,
+        annee_de_premiere_inscription_et_statut: str,
+        est_mobilite: Optional[bool],
+        nombre_de_mois_de_mobilite: str,
+        doit_se_presenter_en_sic: Optional[bool],
+        communication_au_candidat: str,
+    ):
+        self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('Approval'),
+            extra={'en_cours': "approval"},
+        )
+
+        self.avec_conditions_complementaires = avec_conditions_complementaires
+        self.conditions_complementaires_existantes = (
+            [
+                ConditionComplementaireApprobationIdentity(uuid=uuid_condition)
+                for uuid_condition in uuids_conditions_complementaires_existantes
+            ]
+            if uuids_conditions_complementaires_existantes
+            else []
+        )
+        self.conditions_complementaires_libres = conditions_complementaires_libres
+
+        self.avec_complements_formation = avec_complements_formation
+        self.complements_formation = (
+            [ComplementFormationIdentity(uuid=uuid_complement) for uuid_complement in uuids_complements_formation]
+            if uuids_complements_formation
+            else []
+        )
+        self.commentaire_complements_formation = commentaire_complements_formation
+
+        self.nombre_annees_prevoir_programme = nombre_annees_prevoir_programme
+
+        self.nom_personne_contact_programme_annuel_annuel = nom_personne_contact_programme_annuel
+        self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
+
+        self.droits_inscription_montant = droits_inscription_montant
+        self.droits_inscription_montant_autre = droits_inscription_montant_autre
+        self.dispense_ou_droits_majores = dispense_ou_droits_majores
+        self.tarif_particulier = tarif_particulier
+        self.refacturation_ou_tiers_payant = refacturation_ou_tiers_payant
+        self.annee_de_premiere_inscription_et_statut = annee_de_premiere_inscription_et_statut
+        self.est_mobilite = est_mobilite
+        self.nombre_de_mois_de_mobilite = nombre_de_mois_de_mobilite
+        self.doit_se_presenter_en_sic = doit_se_presenter_en_sic
+        self.communication_au_candidat = communication_au_candidat
+        
+    def specifier_motifs_refus_par_sic(self, type_de_refus: TypeDeRefus, uuids_motifs: List[str], autres_motifs: List[str]):
+        self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('Refusal'),
+            extra={'en_cours': "refusal"},
+        )
+        self.type_de_refus = type_de_refus
+        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
+        self.autres_motifs_refus = autres_motifs

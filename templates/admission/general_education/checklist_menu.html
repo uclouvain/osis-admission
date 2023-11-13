@@ -55,3 +55,8 @@
     {% endwith %}
   {% endfor %}
 </ul>
+
+{% if request.htmx %}
+  {# Update the status  #}
+  {% include "admission/includes/admission_status.html" %}
+{% endif %}

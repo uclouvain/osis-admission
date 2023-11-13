@@ -36,17 +36,21 @@ from django.db.models import (
     Prefetch,
     Q,
     Value,
-    When,
+    When, Exists, OuterRef,
 )
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
 from admission.contrib.models import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.views import PaginatedList
+from base.models.enums.education_group_types import TrainingType
+from osis_profile.models import EducationalExperienceYear
+from osis_profile.models.enums.curriculum import Result
 
 
 class ListerToutesDemandes(IListerToutesDemandes):
@@ -99,6 +103,21 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     | Q(generaleducationadmission__erasmus_mundus_scholarship_id__isnull=False)
                     | Q(generaleducationadmission__double_degree_scholarship_id__isnull=False),
                     output_field=BooleanField(),
+                ),
+                cycle_pursuit=Case(
+                    When(
+                        Q(training__education_group_type__name=TrainingType.BACHELOR.name)
+                        & Exists(
+                            EducationalExperienceYear.objects.filter(
+                                Q(result=Result.SUCCESS.name)
+                                | Q(result=Result.SUCCESS_WITH_RESIDUAL_CREDITS.name),
+                                educational_experience__person=OuterRef('candidate'),
+                                educational_experience__country__iso_code=BE_ISO_CODE,
+                            )
+                        ),
+                        then=F('generaleducationadmission__cycle_pursuit')
+                    ),
+                    default=Value(''),
                 ),
             )
             .select_related(
@@ -238,4 +257,5 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 for viewer in admission.other_admission_viewers
             ],
             date_confirmation=admission.submitted_at,
+            poursuite_de_cycle=admission.cycle_pursuit,
         )

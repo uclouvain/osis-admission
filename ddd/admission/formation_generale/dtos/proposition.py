@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from decimal import Decimal
 from typing import Dict, List, Optional, Union
 
 import attr
@@ -132,6 +133,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
     profil_soumis_candidat: Optional[ProfilCandidatDTO]
 
     # Décision fac & sic
+    type_de_refus: str
     motifs_refus: List[MotifRefusDTO]
 
     autre_formation_choisie_fac: Optional['BaseFormationDTO']
@@ -144,6 +146,18 @@ class PropositionGestionnaireDTO(PropositionDTO):
     nom_personne_contact_programme_annuel_annuel: str
     email_personne_contact_programme_annuel_annuel: str
     commentaire_programme_conjoint: str
+    besoin_de_derogation: str
+
+    droits_inscription_montant: str
+    droits_inscription_montant_autre: Decimal
+    dispense_ou_droits_majores: str
+    tarif_particulier: str
+    refacturation_ou_tiers_payant: str
+    annee_de_premiere_inscription_et_statut: str
+    est_mobilite: Optional[bool]
+    nombre_de_mois_de_mobilite: str
+    doit_se_presenter_en_sic: Optional[bool]
+    communication_au_candidat: str
 
     # Titres et condition d'accès
     condition_acces: str

@@ -3,19 +3,20 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-04-29 16:31+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2023-11-14 17:41+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr_BE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.0.1\n"
 
 #, python-brace-format
 msgid " (last update by {author} on {date} at {time}):"
@@ -82,6 +83,12 @@ msgstr "(il y a %(minutes)s)"
 
 msgid ", on"
 msgstr ", le"
+
+msgid "12"
+msgstr "12"
+
+msgid "6"
+msgstr "6"
 
 #, python-format
 msgid ""
@@ -288,6 +295,9 @@ msgstr "Accepté"
 msgid "ACCEPTEE"
 msgstr "Acceptée"
 
+msgid "ACCORD_DIRECTION"
+msgstr "Accord dérogation direction"
+
 msgid "ACKNOWLEDGED"
 msgstr "Réceptionné"
 
@@ -308,6 +318,15 @@ msgstr "Admis"
 
 msgid "A_CLARIFIER"
 msgstr "À clarifier"
+
+msgid "AGREGATION"
+msgstr "279 € - Agrégation"
+
+msgid "AUTRE"
+msgstr "Autre"
+
+msgid "AVIS_DIRECTION_DEMANDE"
+msgstr "Avis direction demandé"
 
 msgid "Absence of debt"
 msgstr "Absence de dettes"
@@ -588,6 +607,9 @@ msgstr "Déjà membre."
 msgid "Amount"
 msgstr "Montant"
 
+msgid "Amount (without EUR/)"
+msgstr "Montant (sans EUR/€)"
+
 msgid "An education type"
 msgstr "Un type de formation"
 
@@ -707,6 +729,9 @@ msgstr "Attestation d'accord facultaire"
 
 msgid "Approval for another training"
 msgstr "Accord pour une autre formation "
+
+msgid "Approval to validate"
+msgstr "Autorisation à valider"
 
 msgid "Approvals"
 msgstr "Approbations"
@@ -871,6 +896,9 @@ msgstr "En révision"
 msgid "Awaiting management approval"
 msgstr "En attente de validation de la direction"
 
+msgid "BESOIN_DE_COMPLEMENT"
+msgstr "Besoin de complément"
+
 msgid "BIC/SWIFT code identifying the bank from which the account originates"
 msgstr "Code BIC/SWIFT identifiant la banque dont provient le compte"
 
@@ -992,6 +1020,9 @@ msgstr "CESS"
 
 msgid "CESS equivalence"
 msgstr "Equivalence au CESS"
+
+msgid "CERTIFICAT_60_CREDITS"
+msgstr "1065 € - Certificat 60 crédits"
 
 msgid "CFWB scholarship decision"
 msgstr "Décision de la bourse de la CFWB"
@@ -1391,6 +1422,9 @@ msgstr "Clôturée"
 msgid "Comment"
 msgstr "Commentaire"
 
+msgid "Comment about dispensation"
+msgstr "Commentaire sur la dérogation"
+
 msgid "Comment about jury"
 msgstr "Commentaire sur le jury"
 
@@ -1412,6 +1446,9 @@ msgstr "Engagement et déclaration"
 
 msgid "Communication attestation"
 msgstr "Attestation de communication"
+
+msgid "Communication to the candidate"
+msgstr "Communication au candidat"
 
 #, python-brace-format
 msgid ""
@@ -1854,8 +1891,38 @@ msgstr "Poursuite de cycle"
 msgid "DD/scholarship/EM?"
 msgstr "DD/boursier/EM ?"
 
+msgid "DISPENSE_BOURSE"
+msgstr "Dispense bourse"
+
+msgid "DISPENSE_CESS_FWB"
+msgstr "Dispense CESS FWB"
+
+msgid "DISPENSE_DUREE"
+msgstr "Dispense durée"
+
+msgid "DISPENSE_LDC"
+msgstr "Dispense LDC"
+
+msgid "DISPENSE_OFFRE"
+msgstr "Dispense offre"
+
+msgid "DISPENSE_REUSSITE"
+msgstr "Dispense réussite"
+
+msgid "DISPENSE_UNIV"
+msgstr "Dispense UNIV"
+
+msgid "DISPENSE_VCRC"
+msgstr "Dispense VCRC"
+
 msgid "DOCTORAL_TRAINING"
 msgstr "Formation doctorale"
+
+msgid "DROITS_MAJORES"
+msgstr "4175 € - Droits majorés"
+
+msgid "DROITS_MAJORES_DEMANDES"
+msgstr "Droits majorés demandés"
 
 msgid "Data protection"
 msgstr "Protection des données"
@@ -1910,6 +1977,9 @@ msgstr "Décision confirmant l'octroi de la protection subsidiaire"
 
 msgid "Decision confirming the granting of temporary protection"
 msgstr "Décision confirmant l'octroi de la protection temporaire"
+
+msgid "Decision of SIC"
+msgstr "Décision en SIC"
 
 msgid "Decision of the faculty"
 msgstr "Décision de la faculté"
@@ -2010,6 +2080,12 @@ msgstr "Code poste diplomatique"
 
 msgid "Disabled"
 msgstr "Désactivé"
+
+msgid "Dispensation needed"
+msgstr "Besoin dérogation"
+
+msgid "Dispensation or increased fees"
+msgstr "Dispense ou droits majorés"
 
 msgid "Dispensed"
 msgstr "Dispensé"
@@ -2498,6 +2574,9 @@ msgstr "Prénom et nom"
 msgid "First year of"
 msgstr "Première année de"
 
+msgid "First year of inscription + status"
+msgstr "Année de première inscription + statut"
+
 msgctxt "female gender"
 msgid ""
 "Following the presentation of the state of the research and the subsequent "
@@ -2602,6 +2681,12 @@ msgstr "Fraudeur"
 
 msgid "Fraudster (ARES)"
 msgstr "Fraudeur (ARES)"
+
+msgid "Fraudster status from ARES"
+msgstr "Statut fraudeur d'après l'ARES"
+
+msgid "Fraudster status from SIC"
+msgstr "Statut fraudeur d'après SIC"
 
 msgid "Free additional approval conditions"
 msgstr "Conditions complémentaires d'acceptation libres"
@@ -3011,6 +3096,12 @@ msgstr "Initial non concerné(e)"
 
 msgid "INSCRIPTION"
 msgstr "Inscription"
+
+msgid "INSCRIPTION_AU_ROLE"
+msgstr "66 € - Inscription au rôle (pré-admission doctorat, ...)"
+
+msgid "INSCRIPTION_REGULIERE"
+msgstr "835 € - Inscription régulière"
 
 msgid "INVALID"
 msgstr "Invalide"
@@ -3488,6 +3579,9 @@ msgstr "Rechercher une personne"
 msgid "MANAGEMENT"
 msgstr "Gestion"
 
+msgid "MASTER_DE_SPECIALISATION_SANTE"
+msgstr "485 € - Master de spécialisation santé"
+
 msgid "MATHEMATICS"
 msgstr "Mathématiques"
 
@@ -3885,6 +3979,9 @@ msgstr ""
 msgid "Missing"
 msgstr "Manquants"
 
+msgid "Mobility months amount"
+msgstr "Nombre de mois de mobilité"
+
 msgid "Modification asked by the candidate"
 msgstr "Modification demandée par le candidat"
 
@@ -3981,6 +4078,9 @@ msgstr "Non autorisé à poursuivre"
 msgid "NOT_INVITED"
 msgstr "Pas encore invité à signer"
 
+msgid "NOUVEAUX_DROITS_MAJORES"
+msgstr "2505 € - Nouveaux droits majorés"
+
 msgid "Name"
 msgstr "Nom"
 
@@ -4050,6 +4150,9 @@ msgstr ""
 
 msgid "No enrolment application"
 msgstr "Aucune demande d'inscription n'a été trouvée"
+
+msgid "No fraud identified"
+msgstr "Pas de fraude identifiée"
 
 msgid "No general enrolment"
 msgstr "Aucune inscription en formation générale n'a été trouvée"
@@ -4265,6 +4368,9 @@ msgstr "Autre formation"
 msgid "Other course accepted by the faculty"
 msgstr "Autre formation acceptée par la facultée"
 
+msgid "Other demand(s) by the candidate."
+msgstr "Autre(s) demande(s) du candidat."
+
 msgid "Other documents relating to joint supervision"
 msgstr "Autres documents relatifs à la cotutelle"
 
@@ -4302,6 +4408,9 @@ msgstr "Partiel"
 
 msgid "PASSED_CONFIRMATION"
 msgstr "Epreuve de confirmation réussie"
+
+msgid "PAS_DE_DROITS_D_INSCRIPTION"
+msgstr "0 € - Pas de droits d'inscription"
 
 msgid "PDF Export"
 msgstr "Export PDF"
@@ -4384,6 +4493,9 @@ msgstr "Certificat de participation"
 
 msgid "Participation to symposium/conference"
 msgstr "Participation à des colloques/conférences"
+
+msgid "Particular cost"
+msgstr "Tarif particulier"
 
 msgid "Partner institution"
 msgstr "Institution partenaire"
@@ -4821,8 +4933,44 @@ msgstr ""
 "Document, Sélection et Texte. Contenu du message à afficher pour les "
 "éléments de type Message."
 
+msgid "REDUCTION_VCRC"
+msgstr "Réduction VCRC"
+
 msgid "REFUSEE"
 msgstr "Refusée"
+
+msgid "REFUS_AGREGATION"
+msgstr "Refus agrégation"
+
+msgid "REFUS_ARTICLE_95_JURY"
+msgstr "Refus article 95 Jury"
+
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS"
+msgstr "Refus 95 SIC - conditions publiées"
+
+msgid "REFUS_ARTICLE_96_HUE_CONDITIONS_NON_PUBLIEES"
+msgstr "Refus 96 HUE - conditions non publiées"
+
+msgid "REFUS_ARTICLE_96_HUE_RAISON_ACADEMIQUE"
+msgstr "Refus 96 (NF) HUE - raison académique"
+
+msgid "REFUS_ARTICLE_96_UE"
+msgstr "Refus 96 (NF) UE"
+
+msgid "REFUS_BAC_HUE_ACADEMIQUE"
+msgstr "Refus BAC HUE académique"
+
+msgid "REFUS_COMPLEMENT_TARDIF"
+msgstr "Refus complément tardif"
+
+msgid "REFUS_DIRECTION"
+msgstr "Refus dérogation direction"
+
+msgid "REFUS_DOSSIER_TARDIF"
+msgstr "Refus dossier tardif"
+
+msgid "REFUS_EQUIVALENCE"
+msgstr "Refus équivalence"
 
 msgid "REJECTED"
 msgstr "Rejeté"
@@ -4857,6 +5005,9 @@ msgstr "Raisons"
 msgctxt "admission"
 msgid "Reasons"
 msgstr "Raisons"
+
+msgid "Rebilling or third-party payer"
+msgstr "Refacturation ou tiers-payant"
 
 #, python-format
 msgid "Recap of the proposition %(reference)s"
@@ -4921,6 +5072,12 @@ msgstr "Catégorie d'un motif de refus"
 
 msgid "Refusal reasons"
 msgstr "Motifs de refus"
+
+msgid "Refusal to validate"
+msgstr "Refus à valider"
+
+msgid "Refusal type"
+msgstr "Type de refus"
 
 msgid "Refuse activity"
 msgstr "Refuser l'activité"
@@ -5232,6 +5389,9 @@ msgstr "Date de fin de la bourse"
 
 msgid "Scholarship start date"
 msgstr "Date de démarrage de la bourse"
+
+msgid "Scholarship-DD-Erasmus"
+msgstr "Bourse-DD-Erasmus"
 
 msgid "Scientific residencies"
 msgstr "Séjours scientifiques"
@@ -5725,6 +5885,12 @@ msgstr "Le candidat est boursier"
 
 msgid "The candidate has several enrolment applications in progress"
 msgstr "Le candidat a plusieurs demandes d'inscription en cours"
+
+msgid "The candidate is doing a mobility"
+msgstr "Le candidat effectue une mobilité"
+
+msgid "The candidate must report to SIC"
+msgstr "Le candidat doit se présenter en SIC"
 
 msgid "The certificate of achievement is being generated."
 msgstr "L'attestation de réussite est en cours de génération."
@@ -6345,6 +6511,9 @@ msgstr "Type de relevé de notes"
 
 msgid "Trigger the payment hook"
 msgstr "Déclencher le webhook de paiement"
+
+msgid "Tuition fees amount"
+msgstr "Montant des droits d'inscriptions"
 
 msgid "Tutorship act"
 msgstr "Acte de tutelle"
@@ -7111,3 +7280,7 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
+
+#~| msgid "Creation date"
+#~ msgid "Derogation needed"
+#~ msgstr "Besoin dérogation"

@@ -73,6 +73,12 @@ msgstr ""
 msgid ", on"
 msgstr ""
 
+msgid "12"
+msgstr ""
+
+msgid "6"
+msgstr ""
+
 #, python-format
 msgid ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
@@ -228,6 +234,9 @@ msgstr "Accepted"
 msgid "ACCEPTEE"
 msgstr "Accepted"
 
+msgid "ACCORD_DIRECTION"
+msgstr ""
+
 msgid "ACKNOWLEDGED"
 msgstr "Acknowledged"
 
@@ -248,6 +257,15 @@ msgstr "Admitted"
 
 msgid "A_CLARIFIER"
 msgstr "To be clarified"
+
+msgid "AGREGATION"
+msgstr ""
+
+msgid "AUTRE"
+msgstr ""
+
+msgid "AVIS_DIRECTION_DEMANDE"
+msgstr ""
 
 msgid "Absence of debt"
 msgstr ""
@@ -520,6 +538,9 @@ msgstr "Already a member of the supervisory panel."
 msgid "Amount"
 msgstr ""
 
+msgid "Amount (without EUR/)"
+msgstr ""
+
 msgid "An education type"
 msgstr ""
 
@@ -626,6 +647,9 @@ msgid "Approval certificate of faculty"
 msgstr ""
 
 msgid "Approval for another training"
+msgstr ""
+
+msgid "Approval to validate"
 msgstr ""
 
 msgid "Approvals"
@@ -782,6 +806,11 @@ msgstr ""
 msgid "Awaiting management approval"
 msgstr ""
 
+#, fuzzy
+#| msgid "TO_BE_COMPLETED"
+msgid "BESOIN_DE_COMPLEMENT"
+msgstr "To be completed"
+
 msgid "BIC/SWIFT code identifying the bank from which the account originates"
 msgstr ""
 
@@ -897,6 +926,9 @@ msgid "CESS"
 msgstr ""
 
 msgid "CESS equivalence"
+msgstr ""
+
+msgid "CERTIFICAT_60_CREDITS"
 msgstr ""
 
 msgid "CFWB scholarship decision"
@@ -1280,6 +1312,9 @@ msgstr ""
 msgid "Comment"
 msgstr ""
 
+msgid "Comment about dispensation"
+msgstr ""
+
 msgid "Comment about jury"
 msgstr ""
 
@@ -1300,6 +1335,9 @@ msgid "Commitment and declaration"
 msgstr ""
 
 msgid "Communication attestation"
+msgstr ""
+
+msgid "Communication to the candidate"
 msgstr ""
 
 #, python-brace-format
@@ -1683,8 +1721,42 @@ msgstr ""
 msgid "DD/scholarship/EM?"
 msgstr ""
 
+#, fuzzy
+#| msgid "FREE_COURSE"
+msgid "DISPENSE_BOURSE"
+msgstr "Open course"
+
+msgid "DISPENSE_CESS_FWB"
+msgstr ""
+
+msgid "DISPENSE_DUREE"
+msgstr ""
+
+msgid "DISPENSE_LDC"
+msgstr ""
+
+msgid "DISPENSE_OFFRE"
+msgstr ""
+
+#, fuzzy
+#| msgid "GEST_REUSSITE"
+msgid "DISPENSE_REUSSITE"
+msgstr "Management success"
+
+msgid "DISPENSE_UNIV"
+msgstr ""
+
+msgid "DISPENSE_VCRC"
+msgstr ""
+
 msgid "DOCTORAL_TRAINING"
 msgstr "PhD training"
+
+msgid "DROITS_MAJORES"
+msgstr ""
+
+msgid "DROITS_MAJORES_DEMANDES"
+msgstr ""
 
 msgid "Data protection"
 msgstr ""
@@ -1738,6 +1810,9 @@ msgid "Decision confirming the granting of subsidiary protection"
 msgstr ""
 
 msgid "Decision confirming the granting of temporary protection"
+msgstr ""
+
+msgid "Decision of SIC"
 msgstr ""
 
 msgid "Decision of the faculty"
@@ -1838,6 +1913,12 @@ msgid "Diplomatic post code"
 msgstr ""
 
 msgid "Disabled"
+msgstr ""
+
+msgid "Dispensation needed"
+msgstr ""
+
+msgid "Dispensation or increased fees"
 msgstr ""
 
 msgid "Dispensed"
@@ -2308,6 +2389,9 @@ msgstr ""
 msgid "First year of"
 msgstr ""
 
+msgid "First year of inscription + status"
+msgstr ""
+
 msgctxt "female gender"
 msgid ""
 "Following the presentation of the state of the research and the subsequent "
@@ -2385,6 +2469,12 @@ msgid "Fraudster"
 msgstr ""
 
 msgid "Fraudster (ARES)"
+msgstr ""
+
+msgid "Fraudster status from ARES"
+msgstr ""
+
+msgid "Fraudster status from SIC"
 msgstr ""
 
 msgid "Free additional approval conditions"
@@ -2721,6 +2811,16 @@ msgid "INITIAL_NON_CONCERNE"
 msgstr "Initial not concerned"
 
 msgid "INSCRIPTION"
+msgstr "Enrollment"
+
+#, fuzzy
+#| msgid "INSCRIPTION"
+msgid "INSCRIPTION_AU_ROLE"
+msgstr "Enrollment"
+
+#, fuzzy
+#| msgid "INSCRIPTION"
+msgid "INSCRIPTION_REGULIERE"
 msgstr "Enrollment"
 
 msgid "INVALID"
@@ -3154,6 +3254,9 @@ msgstr ""
 msgid "MANAGEMENT"
 msgstr "Management"
 
+msgid "MASTER_DE_SPECIALISATION_SANTE"
+msgstr ""
+
 msgid "MATHEMATICS"
 msgstr "Mathematics"
 
@@ -3467,6 +3570,9 @@ msgstr ""
 msgid "Missing"
 msgstr ""
 
+msgid "Mobility months amount"
+msgstr ""
+
 msgid "Modification asked by the candidate"
 msgstr ""
 
@@ -3551,6 +3657,9 @@ msgstr "Not concerned"
 msgid "NON_FINANCABLE"
 msgstr "Not financeable"
 
+msgid "NON_CONCERNE"
+msgstr "Not concerned"
+
 msgid "NON_SOUMISE"
 msgstr ""
 
@@ -3559,6 +3668,9 @@ msgstr "Not allowed to continue"
 
 msgid "NOT_INVITED"
 msgstr "Not invited to sign"
+
+msgid "NOUVEAUX_DROITS_MAJORES"
+msgstr ""
 
 msgid "Name"
 msgstr ""
@@ -3625,6 +3737,9 @@ msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 
 msgid "No enrolment application"
+msgstr ""
+
+msgid "No fraud identified"
 msgstr ""
 
 msgid "No general enrolment"
@@ -3829,6 +3944,9 @@ msgstr ""
 msgid "Other course accepted by the faculty"
 msgstr ""
 
+msgid "Other demand(s) by the candidate."
+msgstr ""
+
 msgid "Other documents relating to joint supervision"
 msgstr ""
 
@@ -3866,6 +3984,9 @@ msgstr "Partially"
 
 msgid "PASSED_CONFIRMATION"
 msgstr "Passed confirmation exam"
+
+msgid "PAS_DE_DROITS_D_INSCRIPTION"
+msgstr ""
 
 msgid "PDF Export"
 msgstr ""
@@ -3947,6 +4068,9 @@ msgid "Participation certification"
 msgstr ""
 
 msgid "Participation to symposium/conference"
+msgstr ""
+
+msgid "Particular cost"
 msgstr ""
 
 msgid "Partner institution"
@@ -4336,8 +4460,46 @@ msgid ""
 "Content of the message to be displayed for Message elements."
 msgstr ""
 
+msgid "REDUCTION_VCRC"
+msgstr ""
+
 msgid "REFUSEE"
 msgstr "Denied"
+
+msgid "REFUS_AGREGATION"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_JURY"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS"
+msgstr ""
+
+msgid "REFUS_ARTICLE_96_HUE_CONDITIONS_NON_PUBLIEES"
+msgstr ""
+
+msgid "REFUS_ARTICLE_96_HUE_RAISON_ACADEMIQUE"
+msgstr ""
+
+msgid "REFUS_ARTICLE_96_UE"
+msgstr ""
+
+msgid "REFUS_BAC_HUE_ACADEMIQUE"
+msgstr ""
+
+#, fuzzy
+#| msgid "COMPLEMENTARY_TRAINING"
+msgid "REFUS_COMPLEMENT_TARDIF"
+msgstr "Further training"
+
+msgid "REFUS_DIRECTION"
+msgstr ""
+
+msgid "REFUS_DOSSIER_TARDIF"
+msgstr ""
+
+msgid "REFUS_EQUIVALENCE"
+msgstr ""
 
 msgid "REJECTED"
 msgstr "Rejected"
@@ -4370,6 +4532,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Reasons"
+msgstr ""
+
+msgid "Rebilling or third-party payer"
 msgstr ""
 
 #, python-format
@@ -4431,6 +4596,12 @@ msgid "Refusal reason category"
 msgstr ""
 
 msgid "Refusal reasons"
+msgstr ""
+
+msgid "Refusal to validate"
+msgstr ""
+
+msgid "Refusal type"
 msgstr ""
 
 msgid "Refuse activity"
@@ -4734,6 +4905,9 @@ msgid "Scholarship end date"
 msgstr ""
 
 msgid "Scholarship start date"
+msgstr ""
+
+msgid "Scholarship-DD-Erasmus"
 msgstr ""
 
 msgid "Scientific residencies"
@@ -5176,6 +5350,12 @@ msgid "The candidate has a scholarship"
 msgstr ""
 
 msgid "The candidate has several enrolment applications in progress"
+msgstr ""
+
+msgid "The candidate is doing a mobility"
+msgstr ""
+
+msgid "The candidate must report to SIC"
 msgstr ""
 
 msgid "The certificate of achievement is being generated."
@@ -5720,6 +5900,9 @@ msgid "Transcript type"
 msgstr ""
 
 msgid "Trigger the payment hook"
+msgstr ""
+
+msgid "Tuition fees amount"
 msgstr ""
 
 msgid "Tutorship act"

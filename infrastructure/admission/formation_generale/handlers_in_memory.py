@@ -38,6 +38,12 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import \
+    specifier_besoin_de_derogation
+from admission.ddd.admission.formation_generale.use_case.write.specifier_informations_acceptation_proposition_par_sic_service import \
+    specifier_informations_acceptation_proposition_par_sic
+from admission.ddd.admission.formation_generale.use_case.write.specifier_motifs_refus_proposition_par_sic_service import \
+    specifier_motifs_refus_proposition_par_sic
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
@@ -490,6 +496,12 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
         )
     ),
+    SpecifierBesoinDeDerogationSicCommand: (
+        lambda msg_bus, cmd: specifier_besoin_de_derogation(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
         cmd,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
@@ -507,5 +519,17 @@ COMMAND_HANDLERS = {
     SpecifierFinancabiliteRegleCommand: lambda msg_bus, cmd: specifier_financabilite_regle(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    SpecifierInformationsAcceptationPropositionParSicCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
+    SpecifierMotifsRefusPropositionParSicCommand: (
+        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_sic(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
     ),
 }

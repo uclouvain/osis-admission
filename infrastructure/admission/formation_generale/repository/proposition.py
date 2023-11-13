@@ -265,6 +265,18 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if entity.etat_equivalence_titre_acces
                 else '',
                 'foreign_access_title_equivalency_effective_date': entity.date_prise_effet_equivalence_titre_acces,
+                'dispensation_needed': entity.besoin_de_derogation,
+                'tuition_fees_amount': entity.droits_inscription_montant,
+                'tuition_fees_amount_other': entity.droits_inscription_montant_autre,
+                'tuition_fees_dispensation': entity.dispense_ou_droits_majores,
+                'particular_cost': entity.tarif_particulier,
+                'rebilling_or_third_party_payer': entity.refacturation_ou_tiers_payant,
+                'first_year_inscription_and_status': entity.annee_de_premiere_inscription_et_statut,
+                'is_mobility': entity.est_mobilite,
+                'mobility_months_amount': entity.nombre_de_mois_de_mobilite,
+                'must_report_to_sic': entity.doit_se_presenter_en_sic,
+                'communication_to_the_candidate': entity.communication_au_candidat,
+                'refusal_type': entity.type_de_refus,
             },
         )
 
@@ -409,6 +421,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_demandes=admission.requested_documents,
             checklist_initiale=checklist_initiale and StatutsChecklistGenerale.from_dict(checklist_initiale),
             checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
+            type_de_refus=admission.refusal_type,
             motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
             autres_motifs_refus=admission.other_refusal_reasons,
             financabilite_regle_calcule=admission.financability_computed_rule,
@@ -462,6 +475,17 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.foreign_access_title_equivalency_state
             else None,
             date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
+            besoin_de_derogation=admission.dispensation_needed,
+            droits_inscription_montant=admission.tuition_fees_amount,
+            droits_inscription_montant_autre=admission.tuition_fees_amount_other,
+            dispense_ou_droits_majores=admission.tuition_fees_dispensation,
+            tarif_particulier=admission.particular_cost,
+            refacturation_ou_tiers_payant=admission.rebilling_or_third_party_payer,
+            annee_de_premiere_inscription_et_statut=admission.first_year_inscription_and_status,
+            est_mobilite=admission.is_mobility,
+            nombre_de_mois_de_mobilite=admission.mobility_months_amount,
+            doit_se_presenter_en_sic=admission.must_report_to_sic,
+            communication_au_candidat=admission.communication_to_the_candidate,
         )
 
     @classmethod
@@ -597,6 +621,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             )
             if admission.submitted_profile
             else None,
+            type_de_refus=admission.refusal_type,
             motifs_refus=[
                 MotifRefusDTO(motif=mark_safe(reason.name), categorie=reason.category.name)
                 for reason in admission.refusal_reasons.all()
@@ -644,6 +669,17 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             statut_equivalence_titre_acces=admission.foreign_access_title_equivalency_status,
             etat_equivalence_titre_acces=admission.foreign_access_title_equivalency_state,
             date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
+            besoin_de_derogation=admission.dispensation_needed,
+            droits_inscription_montant=admission.tuition_fees_amount,
+            droits_inscription_montant_autre=admission.tuition_fees_amount_other,
+            dispense_ou_droits_majores=admission.tuition_fees_dispensation,
+            tarif_particulier=admission.particular_cost,
+            refacturation_ou_tiers_payant=admission.rebilling_or_third_party_payer,
+            annee_de_premiere_inscription_et_statut=admission.first_year_inscription_and_status,
+            est_mobilite=admission.is_mobility,
+            nombre_de_mois_de_mobilite=admission.mobility_months_amount,
+            doit_se_presenter_en_sic=admission.must_report_to_sic,
+            communication_au_candidat=admission.communication_to_the_candidate,
         )
 
     @classmethod
