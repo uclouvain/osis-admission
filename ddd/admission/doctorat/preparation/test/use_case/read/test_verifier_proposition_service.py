@@ -993,6 +993,7 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             date_prevue_delivrance_diplome=datetime.date(2020, 9, 1),
             uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee6',
             grade_obtenu=Grade.GREAT_DISTINCTION.name,
+            autre_grade_obtenu='',
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
             nom_formation='Formation AA',
             nom_pays='Belgique',
@@ -1373,6 +1374,18 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
+        self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_aucun_grade_renseigne_quand_diplome_obtenu(self):
+        self.experience_academiques_complete.a_obtenu_diplome = True
+        self.experience_academiques_complete.grade_obtenu = None
+        self.experience_academiques_complete.autre_grade_obtenu = ''
+
+        self.candidat_translator.experiences_academiques.append(self.experience_academiques_complete)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
         self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
 
     def test_should_verification_renvoyer_erreur_si_releve_notes_annuel_non_renseigne(self):

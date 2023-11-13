@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.90
+  version: 1.0.91
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -6775,6 +6775,9 @@ components:
           type: boolean
         obtained_grade:
           $ref: '#/components/schemas/Grade'
+        other_obtained_grade:
+          type: string
+          maxLength: 255
         graduate_degree:
           type: array
           items:

@@ -369,6 +369,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                         'name' if has_default_language else 'name_en',
                     ),
                     a_obtenu_diplome=experience_year.educational_experience.obtained_diploma,
+                    autre_grade_obtenu=experience_year.educational_experience.other_obtained_grade,
                     rang_diplome=experience_year.educational_experience.rank_in_diploma,
                     date_prevue_delivrance_diplome=experience_year.educational_experience.expected_graduation_date,
                     titre_memoire=experience_year.educational_experience.dissertation_title,

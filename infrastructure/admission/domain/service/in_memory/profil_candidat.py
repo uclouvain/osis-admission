@@ -164,6 +164,7 @@ class ExperienceAcademique:
     nom_pays: str
     nom_regime_linguistique: str
     type_enseignement: str
+    autre_grade_obtenu: str
 
 
 @dataclass
@@ -510,6 +511,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                autre_grade_obtenu='',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
@@ -548,6 +550,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                autre_grade_obtenu='',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee3',
@@ -602,6 +605,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                autre_grade_obtenu='',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee4',
@@ -640,6 +644,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                autre_grade_obtenu='',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee5',
@@ -710,6 +715,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                autre_grade_obtenu='',
             ),
         ]
 
@@ -938,6 +944,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             note_memoire=experience.note_memoire,
                             resume_memoire=experience.resume_memoire,
                             grade_obtenu=experience.grade_obtenu,
+                            autre_grade_obtenu=experience.autre_grade_obtenu,
                             systeme_evaluation=experience.systeme_evaluation,
                             nom_formation=experience.nom_formation,
                             adresse_institut=experience.adresse_institut,

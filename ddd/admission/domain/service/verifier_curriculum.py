@@ -32,7 +32,7 @@ from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSyste
 
 
 class VerifierCurriculum(interface.DomainService):
-    CHAMPS_REQUIS_SI_DIPLOME_OBTENU = ['diplome', 'grade_obtenu']
+    CHAMPS_REQUIS_SI_DIPLOME_OBTENU = ['diplome']
     SYSTEMES_EVALUATION_AVEC_CREDITS = {
         EvaluationSystem.ECTS_CREDITS.name,
         EvaluationSystem.NON_EUROPEAN_CREDITS.name,
@@ -67,6 +67,8 @@ class VerifierCurriculum(interface.DomainService):
                     not all(getattr(experience, champ_requis) for champ_requis in cls.CHAMPS_REQUIS_SI_DIPLOME_OBTENU)
                     or traduction_necessaire
                     and not experience.traduction_diplome
+                    or not experience.grade_obtenu
+                    and not experience.autre_grade_obtenu
                 )
             ):
                 experiences_incompletes[experience.uuid] = str(experience)

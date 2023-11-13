@@ -188,6 +188,7 @@ class TestVerifierPropositionService(TestCase):
             nom_pays='',
             nom_regime_linguistique='',
             type_enseignement='',
+            autre_grade_obtenu='',
         )
 
         cls.params_defaut_experience_non_academique = {
@@ -352,6 +353,7 @@ class TestVerifierPropositionService(TestCase):
                 nom_pays='',
                 nom_regime_linguistique='',
                 type_enseignement='',
+                autre_grade_obtenu='',
             ),
         )
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):
@@ -1568,6 +1570,18 @@ class TestVerifierPropositionService(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
 
+            self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verification_renvoyer_erreur_si_aucun_grade_renseigne_quand_diplome_obtenu(self):
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            a_obtenu_diplome=True,
+            grade_obtenu=None,
+            autre_grade_obtenu='',
+        ):
+            self.experiences_academiques.append(self.experience_academiques_complete)
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
             self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
 
     def test_should_verification_renvoyer_erreur_si_releve_notes_annuel_non_renseigne(self):

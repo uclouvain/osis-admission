@@ -151,6 +151,7 @@ class ExperienceAcademiqueDTOFactory(factory.Factory):
     systeme_evaluation = ''
     nom_formation = ''
     type_enseignement = ''
+    autre_grade_obtenu = ''
 
 
 class ExperienceNonAcademiqueDTOFactory(factory.Factory):

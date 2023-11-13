@@ -58,6 +58,7 @@ class ProfilCandidatTestCase(TestCase):
             'note_memoire': '15',
             'resume_memoire': ['uuid-resume-memoire'],
             'grade_obtenu': Grade.GREAT_DISTINCTION.name,
+            'autre_grade_obtenu': '',
             'systeme_evaluation': EvaluationSystem.ECTS_CREDITS.name,
             'nom_formation': 'Computer science',
             'type_enseignement': TeachingTypeEnum.FULL_TIME.name,

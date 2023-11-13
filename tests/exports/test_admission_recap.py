@@ -793,6 +793,7 @@ class SectionsAttachmentsTestCase(TestCase):
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
             nom_formation='Computer science',
             type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+            autre_grade_obtenu='',
         )
         cls.foreign_academic_curriculum_experience = _ExperienceAcademiqueDTO(
             uuid='uuid-1',
@@ -829,6 +830,7 @@ class SectionsAttachmentsTestCase(TestCase):
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
             nom_formation='Computer science',
             type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+            autre_grade_obtenu='',
         )
         curriculum_dto = _CurriculumDTO(
             experiences_non_academiques=[
