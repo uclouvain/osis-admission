@@ -1862,6 +1862,18 @@ msgstr "Échéance le"
 msgid "Deadline type"
 msgstr "Type d'échéance"
 
+msgctxt "female gender"
+msgid "Dear"
+msgstr "Chère"
+
+msgctxt "male gender"
+msgid "Dear"
+msgstr "Cher"
+
+msgctxt "other gender"
+msgid "Dear"
+msgstr "Chere·ère"
+
 msgid "Debug"
 msgstr "Debug"
 

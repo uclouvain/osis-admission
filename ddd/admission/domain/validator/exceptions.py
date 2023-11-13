@@ -227,6 +227,7 @@ class DocumentsReclamesImmediatementNonCompletesException(BusinessException):
 
 class ExperienceNonTrouveeException(BusinessException):
     status_code = "ADMISSION-22"
+    message = _("Experience not found.")
 
     def __init__(self, **kwargs):
-        message = _("Experience not found.")
+        super().__init__(self.message, **kwargs)

@@ -84,7 +84,7 @@ class TestGeneralEducationAdmissionDocuments(TestCase):
 
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
-            side_effect=lambda token,  *args, **kwargs: token,
+            side_effect=lambda token, *args, **kwargs: token,
         )
         patcher.start()
         self.addCleanup(patcher.stop)

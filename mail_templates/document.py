@@ -97,7 +97,7 @@ DOCUMENT_TOKENS = admission_common_tokens + [
     Token(
         name='salutation',
         description=_('Mail salutation'),
-        example='Chère Jane Doe',
+        example='Chère',
     ),
 ]
 

@@ -58,7 +58,7 @@ from admission.utils import (
     get_portal_admission_list_url,
     get_backoffice_admission_url,
     get_portal_admission_url,
-    get_salutation,
+    get_salutation_prefix,
 )
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.entity_version import EntityVersion
@@ -220,7 +220,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             'admissions_link_front': get_portal_admission_list_url(),
             'admission_link_front': get_portal_admission_url('general-education', self.admission_uuid),
             'admission_link_back': get_backoffice_admission_url('general-education', self.admission_uuid),
-            'salutation': get_salutation(self.admission.candidate, self.proposition.langue_contact_candidat),
+            'salutation': get_salutation_prefix(self.admission.candidate, self.proposition.langue_contact_candidat),
         }
 
         return mail_template.render_subject(tokens=tokens), mail_template.body_as_html(tokens=tokens)
