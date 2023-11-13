@@ -215,7 +215,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
                 )
             )
 
-    def test_should_lever_exception_si_documents_reclames_immediatement_non_completes(self):
+    def test_should_lever_exception_si_documents_non_reclames_sont_completes(self):
         self.proposition.documents_demandes = {'ID1': {}, 'ID2': {}, 'ID3': {}, 'ID4': {}}
         self.proposition_repository.save(self.proposition)
 
@@ -245,7 +245,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
             exception = context.exception.exceptions.pop()
             self.assertIsInstance(exception, DocumentsCompletesDifferentsDesReclamesException)
 
-    def test_should_lever_exception_si_documents_non_reclames_est_complete(self):
+    def test_should_lever_exception_si_documents_reclames_immediatement_ne_non_pas_completes(self):
         self.proposition.documents_demandes = {'ID1': {}, 'ID2': {}, 'ID3': {}, 'ID4': {}}
         self.proposition_repository.save(self.proposition)
 

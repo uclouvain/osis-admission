@@ -74,8 +74,8 @@ class UploadFreeDocumentForm(forms.Form):
     )
 
 
-request_status_choices = StatutReclamationEmplacementDocument.choices()
-optional_request_status_choices = (BLANK_CHOICE[0],) + StatutReclamationEmplacementDocument.choices()
+REQUEST_STATUS_CHOICES = StatutReclamationEmplacementDocument.choices()
+REQUEST_STATUS_CHOICES_WITH_OPTIONAL = (BLANK_CHOICE[0],) + StatutReclamationEmplacementDocument.choices()
 
 
 class RequestFreeDocumentForm(forms.Form):
@@ -91,7 +91,7 @@ class RequestFreeDocumentForm(forms.Form):
 
     request_status = forms.ChoiceField(
         label=_('Document to be requested'),
-        choices=optional_request_status_choices,
+        choices=REQUEST_STATUS_CHOICES_WITH_OPTIONAL,
     )
 
 
@@ -112,7 +112,7 @@ class ChangeRequestDocumentForm(forms.Form):
         document_field = forms.ChoiceField(
             label=label,
             required=automatically_required,
-            choices=request_status_choices if automatically_required else optional_request_status_choices,
+            choices=REQUEST_STATUS_CHOICES if automatically_required else REQUEST_STATUS_CHOICES_WITH_OPTIONAL,
             initial=request_status,
         )
         document_field.widget.attrs['hx-trigger'] = 'change changed delay:2s, confirmStatusChange'
@@ -140,7 +140,7 @@ class RequestDocumentForm(forms.Form):
     request_status = forms.ChoiceField(
         label=_('Document to be requested'),
         required=False,
-        choices=request_status_choices,
+        choices=REQUEST_STATUS_CHOICES,
     )
 
     reason = forms.CharField(

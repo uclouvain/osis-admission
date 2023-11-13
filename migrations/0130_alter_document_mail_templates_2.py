@@ -15,7 +15,7 @@ from osis_mail_template import MailTemplateMigration
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('admission', '0125_checklist_faculty_decision_mail_templates_updates'),
+        ('admission', '0129_valuated_experiences_evolutions_4'),
     ]
 
     SIC_OBJECT_TEMPLATE = {
