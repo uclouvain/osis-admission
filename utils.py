@@ -36,6 +36,7 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
+from django.utils.translation import pgettext, override
 from rest_framework.generics import get_object_or_404
 
 from admission.auth.roles.central_manager import CentralManager
@@ -243,14 +244,10 @@ class WeasyprintStylesheets:
         return getattr(cls, '_stylesheet')
 
 
-def get_salutation(person: Person, language: str) -> str:
-    prefix = ''
-    if language == settings.LANGUAGE_CODE_EN:
-        prefix = 'Dear'
-    elif language == settings.LANGUAGE_CODE_FR:
-        prefix = {
-            ChoixGenre.H.name: 'Cher',
-            ChoixGenre.F.name: 'Chère',
-            ChoixGenre.X.name: 'Chere·ère',
-        }.get(person.gender or 'X')
-    return f'{prefix} {person.first_name} {person.last_name}'
+def get_salutation_prefix(person: Person, language: str) -> str:
+    with override(language=language):
+        return {
+            ChoixGenre.H.name: pgettext('male gender', 'Dear'),
+            ChoixGenre.F.name: pgettext('female gender', 'Dear'),
+            ChoixGenre.X.name: pgettext('other gender', 'Dear'),
+        }.get(person.gender or ChoixGenre.X.name)

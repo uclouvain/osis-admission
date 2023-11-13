@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
     }
 
     SIC_CONTENT_TEMPLATE = {
-        'en': '''<p>{salutation},</p>
+        'en': '''<p>{salutation} {candidate_first_name} {candidate_last_name},</p>
 
                 <p>
                     We have received your application for training {training_title} ({training_campus}) - 
@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                 <p>
                     The registration service.
                 </p>        ''',
-        'fr-be': '''<p>{salutation},</p>
+        'fr-be': '''<p>{salutation} {candidate_first_name} {candidate_last_name},</p>
 
         <p>
             Votre demande d'inscription au programme {training_title} ({training_campus}) - {training_acronym} pour

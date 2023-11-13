@@ -1691,6 +1691,18 @@ msgstr ""
 msgid "Deadline type"
 msgstr ""
 
+msgctxt "female gender"
+msgid "Dear"
+msgstr ""
+
+msgctxt "male gender"
+msgid "Dear"
+msgstr ""
+
+msgctxt "other gender"
+msgid "Dear"
+msgstr ""
+
 msgid "Debug"
 msgstr ""
 
