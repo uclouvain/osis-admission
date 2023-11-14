@@ -22,7 +22,18 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-app_name = "admission"
+# ##############################################################################
+from django.conf import settings
 
-urlpatterns = ()
+from osis_common.utils.file_router import FileRouter
+
+app_name = 'admission'
+
+file_router = FileRouter()
+urlpatterns = file_router('admission/views')
+
+if settings.DEBUG:
+    import logging
+
+    logger = logging.getLogger(__name__)
+    logger.debug("\n" + file_router.debug(urlpatterns))

@@ -1,0 +1,66 @@
+{% load i18n admission %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+{% if proposition.soumise_le %}
+  <p>
+    {% trans "When you have submitted your application, you have agreed to the following:" %}
+  </p>
+
+  {% if proposition.elements_confirmation.hors_delai %}
+    {% panel _("Academic year") %}
+      {{ proposition.elements_confirmation.hors_delai|safe }}
+    {% endpanel %}
+  {% endif %}
+
+  {% panel _("Approvals") additional_class="breakable-panel" %}
+    {% for name, content in proposition.elements_confirmation.items %}
+      {% if name != 'hors_delai' and name not in undertake_declaration_fields %}
+        <dl>
+          <dt>{{ element_confirmation_title|get_item:name }}</dt>
+          <dd>{{ content|safe }}</dd>
+        </dl>
+      {% endif %}
+    {% endfor %}
+  {% endpanel %}
+
+  {% has_value proposition.elements_confirmation undertake_declaration_fields as has_undertake_declaration_fields %}
+  {% if has_undertake_declaration_fields %}
+    {% panel _("Commitment and declaration") %}
+      {% for field in undertake_declaration_fields %}
+        {% get_item_or_default proposition.elements_confirmation field as field_value %}
+        {% if field_value %}
+          <dl>
+            <dt>{{ element_confirmation_title|get_item:field }}</dt>
+            <dd>{{ field_value|safe }}</dd>
+          </dl>
+        {% endif %}
+      {% endfor %}
+    {% endpanel %}
+  {% endif %}
+
+{% else %}
+  <p>
+    {% trans "You haven't yet submitted your application." %}
+  </p>
+{% endif %}

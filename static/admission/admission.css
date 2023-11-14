@@ -1,0 +1,286 @@
+/*
+ *
+ *   OSIS stands for Open Student Information System. It's an application
+ *   designed to manage the core business of higher education institutions,
+ *   such as universities, faculties, institutes and professional schools.
+ *   The core business involves the administration of students, teachers,
+ *   courses, programs and so on.
+ *
+ *   Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   A copy of this license - GNU General Public License - is available
+ *   at the root of the source code of this program.  If not,
+ *   see http://www.gnu.org/licenses/.
+ *
+ */
+
+.nav-pills.nav-grey > li.active > a,
+.nav-pills.nav-grey > li.active > a:focus,
+.nav-pills.nav-grey > li.active > a:hover {
+  background-color: #aaa;
+}
+
+blockquote {
+  padding: 5px 10px;
+  font-size: 1em;
+  font-style: italic;
+  white-space: pre-line;
+}
+
+.media-list {
+  margin: 0;
+}
+
+dl .media-list {
+    margin-top: 0.5em;
+}
+
+.media {
+  border: 1px solid #ddd;
+  padding: 1em;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.flex-content {
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.flex-content-no-wrap {
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+  gap: 1em;
+}
+
+.align-items-baseline {
+  align-items: baseline;
+}
+
+.border-right {
+  border-right: 1px solid #ddd;
+}
+
+.inline-field-data {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.required_field .control-label:after {
+  color: #a94442;
+}
+
+.min_field {
+  width: max-content;
+}
+
+/* To override the bootstrap fieldset style */
+fieldset.custom-fieldset {
+  border: 1px solid #ddd;
+  padding: inherit;
+}
+
+fieldset.custom-fieldset > legend {
+  font-size: 1em;
+  width: fit-content;
+  border: none;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+@media (min-width: 990px) {
+  .tabsbar-collapse {
+    width: auto;
+    border-top: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none
+  }
+
+  .tabsbar-collapse.collapse {
+    display: block !important;
+    height: auto !important;
+    padding-bottom: 0;
+    overflow: visible !important
+  }
+
+  .tabsbar-collapse.in {
+    overflow-y: visible
+  }
+
+  .tabsbar-toggle {
+    display: none
+  }
+}
+
+@media (max-width: 990px) {
+  .navbar-toggle.tabsbar-toggle {
+    display: block;
+  }
+
+  .tabsbar-collapse > .navbar-nav {
+    float: none;
+    margin: 0;
+    clear: both;
+  }
+
+  .tabsbar-collapse > .navbar-nav > li {
+    float: none;
+    clear: both;
+  }
+}
+
+.tabsbar-collapse.collapsing {
+  width: 100%;
+}
+
+.tabsbar-collapse {
+  border-top: 1px solid #e7e7e7;
+  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
+}
+
+#id_is_online .radio {
+  display: inline-block;
+  margin-right: 1em;
+}
+
+.popover-buttons {
+  text-decoration: none !important;
+  margin-left: 5px;
+}
+
+
+.field-with-tooltip .label-container {
+  max-width: 100%;
+  margin-bottom: 5px;
+}
+
+.field-with-tooltip label {
+  display: initial;
+}
+
+.tooltip .tooltip-inner {
+  width: auto;
+}
+
+@media print {
+  .inline-field-data {
+    display: block;
+  }
+
+  .inline-field-data dd, .inline-field-data dt {
+    display: inline;
+  }
+}
+
+.mt-1 {
+  margin-top: 1em;
+}
+
+.bold-text {
+  font-weight: bold;
+}
+
+.default-cursor {
+  cursor: default;
+}
+
+.copy-button {
+  position: relative;
+  display: inline-block;
+}
+
+.copy-button > .copy-tooltip {
+  visibility: hidden;
+  width: 140px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -75px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.copy-button .copy-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.copy-button:hover .copy-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.label-admission-primary {
+  background-color: #269abc;
+}
+
+.min-width {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.auto-width {
+  width: auto;
+}
+
+.flag-icon {
+  height: 1em;
+}
+
+#parcours .tab-pane {
+  overflow-x: auto;
+}
+
+.toast-messages-container {
+  z-index: 2000;
+  top: 0;
+}
+
+.comment-content {
+  white-space: pre-wrap;
+}
+
+@media (min-width: 992px) {
+  .admission-modal-lg {
+    width: 90%;
+    min-width: 900px;
+  }
+}
+
+.debug-content {
+  background-color: #ffb4ff78;
+}
+
+.select2-results hr {
+  padding: 0;
+  margin: 0;
+}

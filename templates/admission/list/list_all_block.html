@@ -1,0 +1,124 @@
+{% extends "admission/list/base_block.html" %}
+{% load bootstrap3 i18n admission enums %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block exports_list %}
+  <li>
+    <a
+        class="scroll-to-top"
+        href="#"
+        hx-get="{% url 'admission:admission-list-excel-export' %}?{{ view.query_params.urlencode }}"
+        hx-indicator="#htmx-overlay"
+        hx-swap="none"
+    >
+      {% translate "Admission applications" %}
+    </a>
+  </li>
+{% endblock %}
+
+{% block list_block_header %}
+  {% translate 'Course' context 'admission' as course_label %}
+  {% sortable_header_div 'numero_demande' _('Application no.') %}
+  {% sortable_header_div 'nom_candidat' _('Name') %}
+  {% sortable_header_div 'formation' course_label %}
+  {% sortable_header_div 'nationalite_candidat' _('Nationality') %}
+  {% sortable_header_div 'vip' _('VIP') %}
+  {% sortable_header_div 'type_demande' _('Application status') %}
+  {% sortable_header_div 'derniere_modification_le' _('Last modif.') %}
+  {% sortable_header_div 'derniere_modification_par' _('Modification author') %}
+  {% sortable_header_div 'date_confirmation' _('Confirmation date') %}
+{% endblock %}
+
+{% block list_block_row_result %}
+  {% admission_url admission.uuid admission.type_formation as admission_url %}
+  <td>
+    <div class="flex-content-no-wrap">
+      <a href="{{ admission_url }}">
+        {{ admission.type_demande|enum_display:'TypeDemande' }}<br>
+        {{ admission.numero_demande }}
+      </a>
+      {% if admission.dernieres_vues_par %}
+        <span
+            class="fa fa-gears popover-buttons"
+            data-content="
+            <table class='table table-bordered'>
+            <caption>{% translate "Last hour views:" %}</caption>
+              <tbody>
+                {% for vue in admission.dernieres_vues_par %}
+                  <tr>
+                    <td>
+                      {{ vue.prenom }} {{ vue.nom }}
+                      {% blocktranslate trimmed with minutes=vue.date|timesince:now %}
+                        ({{ minutes }} ago)
+                      {% endblocktranslate %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>"
+        ></span>
+      </div>
+    {% endif %}
+  </td>
+  <td>
+    <div class="flex-content-no-wrap">
+      {% display admission.nom_candidat ',' admission.prenom_candidat ' ' '(' admission.noma_candidat ')' as candidate_complete_name %}
+      {{ candidate_complete_name }}
+      {% if admission.plusieurs_demandes %}
+        <span class="fa-solid fa-list-ol" title="{% translate "The candidate has several enrolment applications in progress" %}"></span>
+      {% endif %}
+    </div>
+  </td>
+  <td>
+    {% display admission.sigle_formation '-' admission.intitule_formation ' ' '(' admission.lieu_formation ')' as training_complete_name %}
+    {{ training_complete_name }}
+  </td>
+  <td>
+    <div class="flex-content-no-wrap">
+      {{ admission.nationalite_candidat }}
+      {% if admission.nationalite_ue_candidat %}
+        <span class="default-cursor" title="{% translate "European Union country" %}"> 🇪🇺</span>
+      {% endif %}
+    </div>
+  <td>
+    {% if admission.vip %}
+      <span class="fa-solid fa-star" title="{% translate "The candidate has a scholarship" %}"></span>
+    {% endif %}
+  </td>
+  <td>
+    {% admission_status admission.etat_demande admission.type_formation as type_demande %}
+    {{ type_demande }}
+  </td>
+  <td>{{ admission.derniere_modification_le|date:'d/m/Y H:i' }}</td>
+  {% if admission.derniere_modification_par_candidat %}
+    <td class="bold-text">
+      {% translate 'candidate' %}
+    </td>
+  {% else %}
+    <td>{{ admission.derniere_modification_par }}</td>
+  {% endif %}
+  <td>{{ admission.date_confirmation|date:'d/m/Y H:i' }}</td>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% load i18n admission enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% with profil_candidat=admission.profil_soumis_candidat %}
+  {% if admission.profil_soumis_candidat|is_profile_coordinates_different:coordonnees %}
+    <p class="alert alert-info" role="alert">
+      <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
+      {% trans "The dossier has been confirmed with the following contact address:" %}
+      {{ profil_candidat.numero_rue }} {{ profil_candidat.rue }},
+      {% if profil_candidat.boite_postale %}{% trans "Postal box" %} {{ profil_candidat.boite_postale }}, {% endif %}
+      {{ profil_candidat.code_postal }} {{ profil_candidat.ville }},
+      {{ profil_candidat.nom_pays }}
+    </p>
+  {% endif %}
+{% endwith %}
+
+{% panel _("Legal domicile") %}
+  <div class="row">
+    <div class="col-md-4">{% field_data _("Street") coordonnees.domicile_legal.rue %}</div>
+    {% trans "Number" context "address" as address_number_label %}
+    <div class="col-md-4">{% field_data address_number_label coordonnees.domicile_legal.numero_rue %}</div>
+    <div class="col-md-4">{% field_data _("Box") coordonnees.domicile_legal.boite_postale hide_empty=True %} </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4">{% field_data _("Country") coordonnees.domicile_legal.nom_pays %}</div>
+    <div class="col-md-4">{% field_data _("Postcode") coordonnees.domicile_legal.code_postal %}</div>
+    <div class="col-md-4">{% field_data _("City") coordonnees.domicile_legal.ville %}</div>
+  </div>
+{% endpanel %}
+{% if coordonnees.adresse_correspondance %}
+  {% trans "Postal address" context "admission" as contact_address_label %}
+  {% panel contact_address_label %}
+    <div class="row">
+      <div class="col-md-4">{% field_data _("Street") coordonnees.adresse_correspondance.rue %}</div>
+      {% trans "Number" context "address" as address_number_label %}
+      <div class="col-md-4">{% field_data address_number_label coordonnees.adresse_correspondance.numero_rue %}</div>
+      <div class="col-md-4">{% field_data _("Box") coordonnees.adresse_correspondance.boite_postale hide_empty=True %}</div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">{% field_data _("Country") coordonnees.adresse_correspondance.nom_pays %}</div>
+      <div class="col-md-4">{% field_data _("Postcode") coordonnees.adresse_correspondance.code_postal %}</div>
+      <div class="col-md-4">{% field_data _("City") coordonnees.adresse_correspondance.ville %}</div>
+    </div>
+  {% endpanel %}
+{% endif %}
+{% panel _("Contact") %}
+  <div class="row">
+    {% trans "Telephone (mobile)" context "admission" as mobile_phone_label %}
+    {% field_data mobile_phone_label coordonnees.numero_mobile "col-md-4" %}
+    {% trans "Personal email" context "admission" as email_label %}
+    {% field_data email_label coordonnees.adresse_email_privee "col-md-4" %}
+    {% trans "Emergency contact (telephone number)" context "admission" as emergency_contact_label %}
+    {% field_data emergency_contact_label coordonnees.numero_contact_urgence "col-md-4" %}
+  </div>
+{% endpanel %}

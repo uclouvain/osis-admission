@@ -1,0 +1,106 @@
+{% load i18n osis_document admission enums %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% display activity.ects|default:""|floatformat:"-2" " ECTS" as ects %}
+
+<div
+  class="subpanel panel-{{ activity|status_as_class }}"
+  data-status="{{ activity.status }}"
+  data-type="{{ activity.category }}"
+>
+  <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
+    <h3 class="panel-title">
+      {% include "admission/doctorate/details/training/_panel_title.html" %}
+      {% include "admission/doctorate/details/training/_activity_title.html" %}
+      <div class="clearfix"></div>
+    </h3>
+  </div>
+  <div
+    id="a-{{ activity.uuid }}"
+    class="panel-collapse collapse"
+    role="tabpanel"
+    aria-labelledby="h-{{ activity.uuid }}"
+  >
+    <div class="panel-body">
+      <div>
+        <strong class="d-block">{% trans "Description" %}</strong>
+        {% display activity.role "," activity.authors '<br/>'|safe %}
+        {% display activity.title '<br/>'|safe activity.start_date|date:'d/m/Y' '<br/>'|safe %}
+        {% display activity.journal %}
+        {% if activity.publication_status %}
+          <p>
+            <strong>{% trans "Publication status" %} :</strong>
+            {{ activity.publication_status|enum_display:'ChoixStatutPublication' }}
+          </p>
+        {% endif %}
+      </div>
+      {% if activity.committee %}
+        <p>
+          <strong class="d-block">{% trans "Selection committee" %}</strong>
+          {{ activity.committee|enum_display:'ChoixComiteSelection' }}
+        </p>
+      {% endif %}
+      {% if activity.summary %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Summary" context "paper summary" %}</strong>
+          {% document_visualizer activity.summary for_modified_upload=True %}
+        </div>
+      {% endif %}
+      <div class="row">
+        {% if activity.keywords %}
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "Keywords" context 'admission' %}</strong>
+            {{ activity.keywords }}
+          </p>
+        {% endif %}
+        {% if activity.ects %}
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "ECTS" %}</strong>
+            {{ activity.ects|floatformat:"-2" }}
+          </p>
+        {% endif %}
+        {% if activity.dial_reference %}
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "Reference DIAL.Pr" %}</strong>
+            {{ activity.dial_reference }}
+          </p>
+        {% endif %}
+      </div>
+      {% if activity.acceptation_proof %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Proof of acceptance or publication" %}</strong>
+          {% document_visualizer activity.acceptation_proof for_modified_upload=True %}
+        </div>
+      {% endif %}
+      {% if activity.comment %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Comments" %}</strong>
+          {{ activity.comment|linebreaks }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

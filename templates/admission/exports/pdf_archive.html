@@ -1,0 +1,179 @@
+{% extends 'admission/exports/base_pdf.html' %}
+{% load admission i18n enums static %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block extra_head %}
+  <style>
+    @media print {
+      h1 {
+        text-align: center;
+        font-size: 1.3em;
+      }
+
+      h2 {
+        font-size: 1.15em;
+      }
+
+      h1, h2 {
+        text-transform: uppercase;
+      }
+
+      p, p strong, p u {
+        color: #003366 !important;
+      }
+
+      .table th {
+        background: #8ac3df !important;
+      }
+    }
+  </style>
+{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <h1>{% trans "Application form" %}</h1>
+
+    {# -------- #}
+    <h2>{% trans "General data" %}</h2>
+
+    <p>
+      {% trans "Doctorate candidate" context 'inclusive' %} :
+      {{ admission.candidate.last_name|upper }}
+      {{ admission.candidate.first_name }}
+    </p>
+
+    <p>Noma : {{ noma }}</p>
+
+    <p>
+      {% trans "PhD" %} :
+      {% if LANGUAGE_CODE == 'en' %}
+        {{ admission.doctorate.title_english }}
+      {% else %}
+        {{ admission.doctorate.title }}
+      {% endif %}
+    </p>
+
+    <p>
+      {% trans "Sector" %} :
+      {{ admission.intitule_secteur_formation }}
+    </p>
+
+    <p>
+      {{ admission.doctorate.management_entity.most_recent_entity_version.title }}
+    </p>
+
+    {% if admission.proximity_commission %}
+      <p>
+        {{ admission.get_proximity_commission_display }}
+      </p>
+    {% endif %}
+
+    {# -------- #}
+    <h2>{% trans "Diploma" %}</h2>
+
+    {% for experience in experiences %}
+      <p><strong>
+        {{ experience.first_year }} - {{ experience.last_year|add:1 }}
+        {{ experience.education_name|default:experience.program }}
+        {{ experience.institute_name|default:experience.institute }}
+      </strong></p>
+
+      {% if experience.expected_graduation_date %}
+        <p>
+          {% trans "Expected date of graduation" context 'admission' %} :
+          {{ experience.expected_graduation_date }}
+        </p>
+      {% endif %}
+
+      <p>{% trans "Obtained grade" %} : {{ experience.educationalexperienceyear_set.last.get_result_display }}</p>
+
+      <p>{% trans "Acquired credit number" %} : {{ experience.credits }}</p>
+    {% endfor %}
+
+    {# -------- #}
+    <h2>{% trans "Thesis-related data" %}</h2>
+
+    <p>
+      {% trans "Thesis project title" %} :
+      {{ admission.project_title }}
+    </p>
+
+    <p>
+      {% trans "Abstract" %} :
+      {{ admission.project_abstract }}
+    </p>
+
+    <p>
+      {% trans "Thesis language" %} :
+      {{ admission.get_thesis_language_display }}
+    </p>
+    <p>
+      {{ allocated_time_label }} :
+      {{ admission.dedicated_time }}
+    </p>
+
+    <p>
+      {% trans "Date the application is sent to the supervision group" %} :
+      {{ date_envoi_supervision|date:'d/m/Y H:i' }}
+    </p>
+
+    <p>
+      {% trans "Estimated time to complete the PhD (in months)" %} :
+      {{ admission.planned_duration }}
+    </p>
+
+    <p>
+      {% trans "Thesis with cotutelle" %} :
+      {{ admission.cotutelle|yesno }}
+    </p>
+    {% if admission.cotutelle %}
+      <p>
+        {% trans "Partner institution" %} :
+        {{ admission.cotutelle_institution }}
+      </p>
+    {% endif %}
+
+    {# -------- #}
+    <h2>{% trans "Supervisory panel proposition" %}</h2>
+    {% for actor in actors %}
+      {% ifchanged actor.type %}
+        <p><u>
+          {% if actor.type == 'PROMOTER' %}
+            {% trans "Promotion" %} :
+          {% else %}
+            {% trans "Other members of the supervisory panel" %} :
+          {% endif %}
+        </u></p>
+      {% endifchanged %}
+
+      <p>
+        {% if actor.supervisionactor.is_doctor %}{% trans "Dr" %} {% endif %}
+        {% display actor.first_name ' ' actor.last_name '-' actor.institute '-' actor.city '-' actor.country %}
+      </p>
+    {% endfor %}
+  </div>
+{% endblock %}

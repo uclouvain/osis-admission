@@ -1,0 +1,53 @@
+{% extends "admission/list/base_block.html" %}
+{% load bootstrap3 i18n admission enums %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block list_block_header %}
+  {% translate 'Course' context 'admission' as course_label %}
+  {% sortable_header_div 'numero_demande' _('Dossier numero') %}
+  {% sortable_header_div 'nom_candidat' _('Name') %}
+  {% sortable_header_div 'formation' course_label %}
+  {% sortable_header_div 'nationalite' _('Nationality') %}
+  {% sortable_header_div 'code_bourse' _('Scholarship') %}
+  {% sortable_header_div 'statut_demande' _('Dossier status') %}
+  {% sortable_header_div 'statut_cdd' _('CDD status') %}
+  {% sortable_header_div 'statut_sic' _('SIC status') %}
+  {% sortable_header_div 'derniere_modification' _('Last modification') %}
+  {% sortable_header_div 'date_confirmation' _('Dossier confirmation') %}
+{% endblock %}
+
+{% block list_block_row_result %}
+  <td><a href="{% url 'admission:doctorate' admission.uuid %}">{{ admission.numero_demande }}</a></td>
+  <td>{{ admission.nom_candidat }}</td>
+  <td>{{ admission.formation }}</td>
+  <td>{{ admission.nationalite|default_if_none:'' }}</td>
+  <td>{{ admission.code_bourse }}</td>
+  <td>{{ admission.statut_demande|enum_display:'ChoixStatutPropositionDoctorale' }}</td>
+  <td>{{ admission.statut_cdd|enum_display:'ChoixStatutCDD' }}</td>
+  <td>{{ admission.statut_sic|enum_display:'ChoixStatutSIC' }}</td>
+  <td>{{ admission.derniere_modification }}</td>
+  <td>{{ admission.date_confirmation|default_if_none:'' }}</td>
+{% endblock %}

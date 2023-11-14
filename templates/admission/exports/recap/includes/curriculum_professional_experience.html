@@ -1,0 +1,62 @@
+{% load i18n admission enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+{% panel %}
+  <div class="row">
+    <div class="col-md-6">
+      {% field_data _('Start date') experience.date_debut|date:"YEAR_MONTH_FORMAT"|capfirst %}
+    </div>
+    <div class="col-md-6">
+      {% field_data _('End date') experience.date_fin|date:"YEAR_MONTH_FORMAT"|capfirst %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      {% field_data _('Type') experience.type|enum_display:'ActivityType' %}
+    </div>
+    {% if experience.type == 'WORK' %}
+      <div class="col-md-6">
+        {% field_data _('Sector') experience.secteur|enum_display:'ActivitySector' %}
+      </div>
+    {% elif experience.type == 'OTHER' %}
+      <div class="col-md-6">
+        {% field_data _('Activity') experience.autre_activite %}
+      </div>
+    {% endif %}
+  </div>
+  {% if experience.type == 'WORK' %}
+    <div class="row">
+      <div class="col-md-6">
+        {% field_data _('Employer') experience.employeur %}
+      </div>
+      <div class="col-md-6">
+        {% trans "Function" context "curriculum" as role_label %}
+        {% field_data role_label experience.fonction %}
+      </div>
+    </div>
+  {% endif %}
+  {% if not is_continuing %}
+    {% field_data CURRICULUM_ACTIVITY_LABEL|get_item:experience.type experience.certificat %}
+  {% endif %}
+{% endpanel %}

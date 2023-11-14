@@ -1,0 +1,125 @@
+{% load i18n admission enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+  {% if formation.type == 'BACHELOR' and etudes_secondaires.diplome_belge %}
+
+    {% panel _('Belgian diploma') %}
+
+      {% field_data _('Secondary school graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
+
+      {% field_data _('Belgian education community') etudes_secondaires.diplome_belge.communaute|enum_display:'BelgianCommunitiesOfEducation' %}
+
+      {% if etudes_secondaires.diplome_belge.communaute == 'FRENCH_SPEAKING' %}
+        {% if etudes_secondaires.diplome_belge.type_enseignement %}
+          {% field_data _('Secondary education type') etudes_secondaires.diplome_belge.type_enseignement|enum_display:'EducationalType' %}
+        {% else %}
+          {% field_data _('Secondary education type') etudes_secondaires.diplome_belge.autre_type_enseignement %}
+        {% endif %}
+      {% endif %}
+
+      {% display etudes_secondaires.diplome_belge.nom_institut ' ' '(' etudes_secondaires.diplome_belge.adresse_institut ')' as belgian_institute %}
+      {% translate 'Institute' context 'admission' as institute_label %}
+      {% field_data institute_label belgian_institute %}
+    {% endpanel %}
+
+    {% if not hide_files %}
+      {% panel _('Attachments') %}
+        {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' or etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
+          {% field_data _('Secondary school diploma') etudes_secondaires.diplome_belge.diplome %}
+        {% endif %}
+      {% endpanel %}
+    {% endif %}
+
+  {% elif formation.type == 'BACHELOR' and etudes_secondaires.diplome_etranger %}
+
+    {% panel _('Foreign diploma') %}
+
+      {% field_data _('Secondary school graduation year') etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year %}
+
+      {% field_data _('What diploma have you obtained (or will obtain)?') etudes_secondaires.diplome_etranger.type_diplome|enum_display:'ForeignDiplomaTypes' %}
+
+      {% field_data _('Organising country') etudes_secondaires.diplome_etranger.pays_nom %}
+
+      {% field_data _('Language regime') etudes_secondaires.diplome_etranger.pays_regime_linguistique %}
+      {% if etudes_secondaires.diplome_etranger.type_diplome == 'NATIONAL_BACHELOR' %}
+        {% if ue_or_assimilated %}
+          {% field_data _('Has this diploma been recognised as equivalent by the French Community of Belgium?') etudes_secondaires.diplome_etranger.equivalence|enum_display:'Equivalence' %}
+          {% if etudes_secondaires.diplome_etranger.equivalence == 'YES' %}
+            {% field_data _("Copy of both sides of the definitive equivalency decision (accompanied, where applicable, by the DAES or undergraduate exam, in the case of restrictive equivalency)") etudes_secondaires.diplome_etranger.decision_final_equivalence_ue %}
+          {% elif etudes_secondaires.diplome_etranger.equivalence == 'PENDING' %}
+            {% field_data _('Proof of equivalency request') etudes_secondaires.diplome_etranger.preuve_decision_equivalence %}
+          {% endif %}
+        {% else %}
+          {% field_data _("Copy of both sides of the definitive equivalency decision by the Ministry of the French-speaking Community of Belgium (possibly accompanied by the DAES or the undergraduate studies exam, if your equivalency does not confer eligibility for the desired programme)") etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue %}
+        {% endif %}
+      {% endif %}
+
+    {% endpanel %}
+
+    {% if not hide_files %}
+      {% panel _('Attachments') %}
+        {% field_data _('Secondary school diploma') etudes_secondaires.diplome_etranger.diplome %}
+
+        {% if need_translations %}
+          {% field_data _('A translation of your secondary school diploma by a sworn translator') etudes_secondaires.diplome_etranger.traduction_diplome %}
+        {% endif %}
+
+        {% field_data _('A transcript for your last year of secondary school') etudes_secondaires.diplome_etranger.releve_notes %}
+        {% if need_translations %}
+          {% field_data _('A translation of your official transcript of marks for your final year of secondary school by a sworn translator') etudes_secondaires.diplome_etranger.traduction_releve_notes %}
+        {% endif %}
+      {% endpanel %}
+    {% endif %}
+
+  {% elif formation.type == 'BACHELOR' and etudes_secondaires.alternative_secondaires %}
+    {% panel _('Secondary studies') %}
+      {% field_data _('Do you have a secondary school diploma?') _('No') %}
+    {% endpanel %}
+    {% if not hide_files %}
+      {% panel _('Attachments') %}
+        {% field_data _("Certificate of passing the bachelor's course entrance exam") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle %}
+      {% endpanel %}
+    {% endif %}
+
+  {% else %}
+    {% panel _('Secondary studies') %}
+      {% if etudes_secondaires.diplome_etudes_secondaires == 'YES' %}
+        {% blocktranslate trimmed with year=etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year asvar graduation_text %}
+          Yes, in {{ year }}.
+        {% endblocktranslate %}
+      {% elif etudes_secondaires.diplome_etudes_secondaires == 'THIS_YEAR' %}
+        {% blocktranslate trimmed with year=etudes_secondaires.annee_diplome_etudes_secondaires|get_academic_year asvar graduation_text %}
+          You indicated that you will obtain it in {{ year }}.
+        {% endblocktranslate %}
+      {% elif etudes_secondaires.diplome_etudes_secondaires == 'NO' %}
+        {% blocktranslate asvar graduation_text %}No.{% endblocktranslate %}
+      {% endif %}
+      {% field_data _('Do you have a secondary school diploma?') graduation_text %}
+    {% endpanel %}
+  {% endif %}
+
+  {% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}
+  {% if specific_questions_to_display %}
+    {% multiple_field_data specific_questions %}
+  {% endif %}

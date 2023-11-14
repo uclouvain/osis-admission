@@ -1,0 +1,92 @@
+{% load i18n osis_document admission enums %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% if activity.start_date and activity.end_date %}
+  {% blocktrans with start=activity.start_date|date:"d/m/Y" end=activity.end_date|date:"d/m/Y" asvar period trimmed %}
+    from {{ start }} to {{ end }}
+  {% endblocktrans %}
+{% endif %}
+{% if activity.website %}
+  {% firstof '<a href="'|safe|add:activity.website|add:'" target="_blank">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
+{% endif %}
+
+
+{#  We cannot use {% panel %} as the title contains HTML #}
+<div
+    class="panel panel-{{ activity|status_as_class }}"
+    data-status="{{ activity|status_list }}"
+    data-type="{{ activity.category }}"
+>
+  <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
+    <h3 class="panel-title">
+      {% include "admission/doctorate/details/training/_panel_title.html" %}
+      {% include "admission/doctorate/details/training/_activity_title.html" %}
+      <div class="clearfix"></div>
+    </h3>
+  </div>
+  <div
+      id="a-{{ activity.uuid }}"
+      class="panel-collapse collapse"
+      role="tabpanel"
+      aria-labelledby="h-{{ activity.uuid }}"
+  >
+    <div class="panel-body">
+      <p>
+        <strong class="d-block">{% trans "Event description" %}</strong>
+        {% display activity.title "-" period "-" activity.is_online|format_is_online "-" website %}
+        <br/>
+        {% display activity.organizing_institution "," activity.city "," activity.country %}
+      </p>
+      <div class="row">
+        {% if activity.participating_days %}
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "Number of days participating" %}</strong>
+            {{ activity.participating_days|floatformat }}
+          </p>
+        {% endif %}
+        {% if activity.ects %}
+          <p class="col-md-4">
+            <strong class="d-block">{% trans "ECTS for participating" %}</strong>
+            {{ activity.ects|floatformat:"-2" }}
+          </p>
+        {% endif %}
+      </div>
+      {% if activity.participating_proof %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Participation certification" %}</strong>
+          {% document_visualizer activity.participating_proof for_modified_upload=True %}
+        </div>
+      {% endif %}
+      {% if activity.comment %}
+        <strong class="d-block">{% trans "Comments" %}</strong>
+        {{ activity.comment|linebreaks }}
+      {% endif %}
+    </div>
+  </div>
+  {% for activity in activity.children.all %}
+    {% include "admission/doctorate/details/training/conference_"|add:activity.category|lower|add:'.html' %}
+  {% endfor %}
+</div>

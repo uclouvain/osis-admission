@@ -1,0 +1,21 @@
+[run]
+branch = True
+source = admission
+omit =
+    */migrations/*
+    venv/*
+    */tests/*
+    */management/*
+    */admin.py
+    */api/schema.py
+    */ddd/*/test/*
+
+[report]
+skip_covered = True
+show_missing = True
+sort = Miss
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    class \w+Schema\(\w+Schema\):
+    if TYPE_CHECKING:

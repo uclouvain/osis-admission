@@ -1,0 +1,146 @@
+{% extends base_template %}
+{% load bootstrap3 i18n static admission %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block form %}
+    {% bootstrap_form_errors main_form %}
+    {% bootstrap_form_errors residential %}
+    {% bootstrap_form_errors contact %}
+
+    {% panel _("Legal domicile") %}
+        <div class="row">
+            <div class="col-md-4 required_field formatted-field">{% bootstrap_field residential.street %}</div>
+            <div class="col-md-4 required_field">{% bootstrap_field residential.street_number placeholder="" %}</div>
+            <div class="col-md-4">{% bootstrap_field residential.postal_box placeholder="" %}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 required_field">{% bootstrap_field residential.country %}</div>
+            <div id="not-be-residential-address">
+                <div class="col-md-4 required_field">{% bootstrap_field residential.postal_code placeholder="" %}</div>
+                <div class="col-md-4 required_field formatted-field">{% bootstrap_field_with_tooltip residential.city %}</div>
+            </div>
+            <div id="be-residential-address">
+                <div class="col-md-4 required_field">{% bootstrap_field residential.be_postal_code placeholder="" %}</div>
+                <div class="col-md-4 required_field">{% bootstrap_field residential.be_city placeholder="" %}</div>
+            </div>
+        </div>
+        <div>{% bootstrap_field main_form.show_contact %}</div>
+    {% endpanel %}
+
+    {% translate "Postal address" context "admission" as contact_address_label %}
+    {% panel contact_address_label id="contact_address" %}
+        <div class="row">
+            <div class="col-md-4 required_field formatted-field">{% bootstrap_field contact.street %}</div>
+            <div class="col-md-4 required_field">{% bootstrap_field contact.street_number placeholder="" %}</div>
+            <div class="col-md-4">{% bootstrap_field contact.postal_box placeholder="" %}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 required_field">{% bootstrap_field contact.country %}</div>
+            <div id="not-be-contact-address">
+                <div class="col-md-4 required_field">{% bootstrap_field contact.postal_code placeholder="" %}</div>
+                <div class="col-md-4 required_field formatted-field">{% bootstrap_field_with_tooltip contact.city %}</div>
+            </div>
+            <div id="be-contact-address">
+                <div class="col-md-4 required_field">{% bootstrap_field contact.be_postal_code placeholder="" %}</div>
+                <div class="col-md-4 required_field">{% bootstrap_field contact.be_city placeholder="" %}</div>
+            </div>
+        </div>
+    {% endpanel %}
+
+    {% panel _("Contact") %}
+        <div class="row">
+            <div class="col-md-6 required_field">{% bootstrap_field main_form.phone_mobile %}</div>
+            <div class="col-md-6">{% bootstrap_field main_form.private_email placeholder="" %}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">{% bootstrap_field main_form.emergency_contact_phone %}</div>
+        </div>
+    {% endpanel %}
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+    {{ main_form.media }}
+    {{ residential.media }}
+    <script type="application/javascript">
+    $(function () {
+        //-------------------------------------------------------------------------------
+        // Activate belgian or not belgian fields for postal code and city autocompletion
+        //-------------------------------------------------------------------------------
+        var beIsoCode = '{{BE_ISO_CODE}}';
+        $('#be-residential-address').dependsOn({
+            '#id_residential-country': { values: [beIsoCode] },
+        });
+        $('#not-be-residential-address').dependsOn({
+            '#id_residential-country': { not: [beIsoCode] },
+        });
+        $('#be-contact-address').dependsOn({
+            '#id_contact-country': { values: [beIsoCode] },
+        });
+        $('#not-be-contact-address').dependsOn({
+            '#id_contact-country': { not: [beIsoCode] },
+        });
+
+        // Residential = BE city depends on postal code
+        var cityResidentialCheck = $('#id_residential-be_city').dependsOn({
+            '#id_residential-country': { values: [beIsoCode] },
+            '#id_residential-be_postal_code': { not: [''] },
+        }, { valueOnDisable: '', hide: false });
+        $('#id_residential-be_postal_code').on('keydown', function () {
+            cityResidentialCheck.check()
+            $('#id_residential-be_city').val('').trigger('change');
+        });
+
+        // Contact = BE city depends on postal code
+        var cityContactCheck = $('#id_contact-be_city').dependsOn({
+            '#id_contact-country': { values: [beIsoCode] },
+            '#id_contact-be_postal_code': { not: [''] },
+        }, { valueOnDisable: '', hide: false });
+        $('#id_contact-be_postal_code').on('keydown', function () {
+            cityContactCheck.check()
+            $('#id_contact-be_city').val('').trigger('change');
+        });
+        //-------------------------------------------------------------------------------
+
+        // "city" and "postal code" depends on "country" for residential
+        $('#id_residential-city, #id_residential-postal_code').dependsOn({
+            '#id_residential-country': { not: [null] },
+        }, { valueOnDisable: '', hide: false });
+
+        // Activate the contact form if the 'show_contact' box is checked
+        $('#contact_address').dependsOn({
+            '#id_show_contact': { checked: true },
+        });
+
+        // "city" and "postal code" depends on "country" for contact
+        $('#id_contact-city, #id_contact-postal_code').dependsOn({
+            '#id_contact-country': { not: [null] },
+        }, { valueOnDisable: '', hide: false });
+
+        document.dispatchEvent(new Event('refreshFormInitial'));
+    });
+    </script>
+{% endblock %}

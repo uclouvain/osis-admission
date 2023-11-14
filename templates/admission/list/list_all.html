@@ -1,0 +1,73 @@
+{% extends "admission/list/base.html" %}
+{% load bootstrap3 i18n static %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block form_fields %}
+  <div class="row">
+    {% bootstrap_field filter_form.annee_academique form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.numero form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.noma form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.matricule_candidat form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.etats form_group_class="form-group col-md-3" %}
+  </div>
+  <div class="row">
+    {% bootstrap_field filter_form.type form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.site_inscription form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.entites form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.types_formation form_group_class="form-group col-md-3" %}
+    {% bootstrap_field filter_form.formation form_group_class="form-group col-md-3" %}
+  </div>
+  <div>
+    <details>
+      <summary>{% translate "Advanced filters" %}</summary>
+      <div id="additional-filters" class="row">
+        {% bootstrap_field filter_form.bourse_internationale form_group_class="form-group col-md-2" %}
+        {% bootstrap_field filter_form.bourse_erasmus_mundus form_group_class="form-group col-md-2" %}
+        {% bootstrap_field filter_form.bourse_double_diplomation form_group_class="form-group col-md-2" %}
+      </div>
+    </details>
+  </div>
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+
+  <script>
+      $(document).ready(function () {
+          initializePopover({ trigger: 'hover' })
+
+          const $reference = $('#id_numero');
+          $reference.mask(getReferenceMask($reference.val()), {
+              translation: {
+                  'S': { pattern: /[a-zA-Z]/, optional: true },
+              },
+              onKeyPress: function (cep, e, field, options) {
+                  $reference.mask(getReferenceMask(cep), options);
+              },
+          });
+      });
+  </script>
+{% endblock %}

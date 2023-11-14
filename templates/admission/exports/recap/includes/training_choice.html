@@ -1,0 +1,60 @@
+{% load i18n admission enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+{% panel _('Choose your course') %}
+  {% if is_doctorate %}
+      {% field_data _("Admission type") proposition.type_admission|enum_display:'ChoixTypeAdmission' %}
+      {% if proposition.justification %}
+        {% field_data _("Brief justification") proposition.justification|linebreaks %}
+      {% endif %}
+      {% field_data _("Sector") proposition.intitule_secteur_formation %}
+  {% endif %}
+  {% translate 'Course name' context 'admission' as education_name_label %}
+  {% field_data education_name_label formation.intitule %}
+  {% field_data _('Campus') formation.campus %}
+  {% if is_doctorate %}
+    {% if proposition.commission_proximite %}
+      {% field_data _("Proximity commission / Subdomain") proposition.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
+    {% endif %}
+  {% endif %}
+{% endpanel %}
+
+{% if formation.type|admission_training_type == 'MASTER' %}
+  {% panel _('Specific profile') %}
+    {% with proposition.bourse_double_diplome.nom_court|default:_('No') as short_name %}
+      {% field_data _('Dual degree scholarship') proposition.bourse_double_diplome.nom_long|default:short_name %}
+    {% endwith %}
+    {% with proposition.bourse_internationale.nom_court|default:_('No') as short_name %}
+      {% field_data _('International scholarship') proposition.bourse_internationale.nom_long|default:short_name %}
+    {% endwith %}
+    {% with proposition.bourse_erasmus_mundus.nom_court|default:_('No') as short_name %}
+      {% field_data _('Erasmus Mundus') proposition.bourse_erasmus_mundus.nom_long|default:short_name %}
+    {% endwith %}
+  {% endpanel %}
+{% endif %}
+
+{% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}
+{% if specific_questions_to_display %}
+  {% multiple_field_data specific_questions %}
+{% endif %}
