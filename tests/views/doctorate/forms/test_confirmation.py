@@ -202,7 +202,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
     def setUpTestData(cls):
         cls.confirm_remote_upload_patcher = patch('osis_document.api.utils.confirm_remote_upload')
         patched = cls.confirm_remote_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        patched.side_effect = lambda token, upload_to: token
 
         cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = cls.get_remote_metadata_patcher.start()
@@ -281,7 +281,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
 
         response = self.client.get(url)
 
-        response.status_code = HTTP_403_FORBIDDEN
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
     def test_get_confirmation_form_cdd_user_without_confirmation_paper(self):
         self.client.force_login(user=self.adre_person.user)
@@ -361,7 +361,4 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
 
         updated_confirmation_paper = ConfirmationPaper.objects.get(pk=confirmation_paper_to_update.pk)
 
-        self.assertEqual(
-            updated_confirmation_paper.research_mandate_renewal_opinion,
-            [uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')],
-        )
+        self.assertEqual(updated_confirmation_paper.research_mandate_renewal_opinion, [self.file_uuid])
