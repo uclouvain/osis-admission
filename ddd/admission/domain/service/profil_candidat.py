@@ -136,7 +136,7 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         formation: Formation,
     ) -> None:
-        etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule, formation.type)
+        etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule)
 
         if etudes_secondaires.valorisees:
             # Des études secondaires valorisées par une admission sont considérées valides pour les futures admissions

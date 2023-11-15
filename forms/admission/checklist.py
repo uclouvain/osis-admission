@@ -42,6 +42,7 @@ from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import RefusalReason, AdditionalApprovalCondition
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.domain.model.enums.condition_acces import recuperer_conditions_acces_par_formation
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
@@ -127,6 +128,15 @@ class StatusForm(forms.Form):
     status = forms.ChoiceField(
         choices=ChoixStatutChecklist.choices(),
         required=True,
+    )
+
+
+class ExperienceStatusForm(StatusForm):
+    authentification = forms.TypedChoiceField(
+        required=False,
+        coerce=lambda val: val == '1',
+        empty_value=None,
+        choices=(('0', 'No'), ('1', _('Yes'))),
     )
 
 
@@ -633,3 +643,38 @@ class FinancabiliteApprovalForm(forms.ModelForm):
         fields = [
             'financability_rule',
         ]
+
+
+class SinglePastExperienceAuthenticationForm(forms.Form):
+    state = forms.ChoiceField(
+        label=_('Past experiences authentication'),
+        choices=EtatAuthentificationParcours.choices(),
+        required=False,
+        widget=forms.RadioSelect,
+    )
+    comment = forms.CharField(
+        label=_('Comment about the authentication'),
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 2}),
+    )
+
+    def __init__(self, checklist_experience_data, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        checklist_experience_data = checklist_experience_data or {}
+
+        extra = checklist_experience_data.get('extra', {})
+
+        self.initial['state'] = extra.get('etat_authentification')
+        self.initial['comment'] = extra.get('commentaire_authentification')
+
+        can_edit = (
+            checklist_experience_data.get('statut') == ChoixStatutChecklist.GEST_EN_COURS.name
+            and extra.get('authentification') == '1'
+        )
+
+        self.prefix = extra.get('identifiant', '')
+
+        for field in self.fields.values():
+            field.disabled = not can_edit

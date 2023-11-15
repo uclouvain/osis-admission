@@ -508,4 +508,16 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
+    ModifierStatutChecklistExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
+    ModifierAuthentificationExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
 }

@@ -48,6 +48,7 @@ from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.teaching_type import TeachingTypeEnum
@@ -59,6 +60,7 @@ from osis_profile.models.enums.curriculum import (
     ActivityType,
     ActivitySector,
 )
+from reference.models.enums.cycle import Cycle
 
 
 class UnfrozenDTO:
@@ -133,6 +135,12 @@ class AnneeExperienceAcademique:
     traduction_releve_notes: List[str]
     credits_inscrits: Optional[float]
     credits_acquis: Optional[float]
+    avec_bloc_1: Optional[bool] = None
+    avec_complement: Optional[bool] = None
+    credits_inscrits_communaute_fr: Optional[float] = None
+    credits_acquis_communaute_fr: Optional[float] = None
+    avec_allegement: Optional[bool] = None
+    est_reorientation_102: Optional[bool] = None
 
 
 @dataclass
@@ -164,6 +172,9 @@ class ExperienceAcademique:
     nom_pays: str
     nom_regime_linguistique: str
     type_enseignement: str
+    type_institut: str
+    cycle_formation: str
+    nom_formation_equivalente_communaute_fr: str
 
 
 @dataclass
@@ -510,6 +521,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+                nom_formation_equivalente_communaute_fr='Formation B',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
@@ -548,6 +562,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+                nom_formation_equivalente_communaute_fr='Formation B',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee3',
@@ -602,6 +619,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+                nom_formation_equivalente_communaute_fr='Formation B',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee4',
@@ -640,6 +660,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+                nom_formation_equivalente_communaute_fr='Formation B',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee5',
@@ -710,6 +733,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays='Belgique',
                 nom_regime_linguistique='Français',
                 type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+                type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+                nom_formation_equivalente_communaute_fr='Formation B',
             ),
         ]
 
@@ -754,7 +780,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 personne='0000000001',
                 date_debut=datetime.date(2018, 7, 1),
                 date_fin=datetime.date(2019, 4, 30),
-                uuid='1cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
+                uuid='1cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                 employeur='',
                 type=ActivityType.LANGUAGE_TRAVEL.name,
                 certificat=['uuid-certificate'],
@@ -783,6 +809,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             ),
             "0000000001": _EtudesSecondairesDTO(
                 diplome_belge=DiplomeBelgeEtudesSecondairesDTO(
+                    uuid='5cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                     diplome=['diplome.pdf'],
                 ),
                 diplome_etudes_secondaires=GotDiploma.YES.name,
@@ -899,7 +926,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         return [c.langue.code_langue for c in cls.connaissances_langues if c.personne == matricule]
 
     @classmethod
-    def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
         return cls.etudes_secondaires.get(matricule) or EtudesSecondairesDTO()
 
     @classmethod
@@ -922,6 +949,12 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                                     traduction_releve_notes=annee.traduction_releve_notes,
                                     credits_acquis=annee.credits_inscrits,
                                     credits_inscrits=annee.credits_acquis,
+                                    avec_bloc_1=annee.avec_bloc_1,
+                                    avec_complement=annee.avec_complement,
+                                    credits_acquis_communaute_fr=annee.credits_inscrits_communaute_fr,
+                                    credits_inscrits_communaute_fr=annee.credits_acquis_communaute_fr,
+                                    avec_allegement=annee.avec_allegement,
+                                    est_reorientation_102=annee.est_reorientation_102,
                                 )
                                 for annee in experience.annees
                             ],
@@ -940,9 +973,12 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             grade_obtenu=experience.grade_obtenu,
                             systeme_evaluation=experience.systeme_evaluation,
                             nom_formation=experience.nom_formation,
+                            nom_formation_equivalente_communaute_fr=experience.nom_formation,
                             adresse_institut=experience.adresse_institut,
                             code_institut=experience.code_institut,
                             communaute_institut=experience.communaute_institut,
+                            type_institut=experience.type_institut,
+                            cycle_formation=experience.cycle_formation,
                             nom_institut=experience.nom_institut,
                             nom_pays=experience.nom_pays,
                             nom_regime_linguistique=experience.nom_regime_linguistique,
@@ -1056,6 +1092,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             identification=cls.get_identification(matricule),
             coordonnees=cls.get_coordonnees(matricule),
             curriculum=cls.get_curriculum(matricule, annee_courante),
-            etudes_secondaires=cls.get_etudes_secondaires(matricule, TrainingType[formation]),
+            etudes_secondaires=cls.get_etudes_secondaires(matricule),
             connaissances_langues=cls.get_connaissances_langues(matricule),
         )
