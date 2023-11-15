@@ -145,12 +145,12 @@
                       {% endif %}
                       <li>{{ reason.categorie }}<ul>
                     {% endifchanged %}
-                    <li>{{ reason.motif }}</li>
-                    {% if forloop.last %}
+                  <li>{{ reason.motif }}</li>
+                  {% if forloop.last %}
                     </ul></li>
-                    {% endif %}
+                  {% endif %}
                   {% endfor %}
-                  </ul>
+                </ul>
               </dd>
             </dl>
           </div>
@@ -228,9 +228,9 @@
       {% include 'admission/general_education/includes/checklist/fac_decision_confirm_modal.html' with target_status="GEST_BLOCAGE" target_url=change_status_url_to_be_completed_sic %}
     {% endif %}
   </div>
-{% endwith %}
 
-{% if request.htmx %}
-  {# Update the checklist menu  #}
-  {% include "admission/general_education/checklist_menu.html" with current_item='decision_facultaire' %}
-{% endif %}
+  {% if request.htmx %}
+    {# Update the checklist menu item status #}
+    {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='decision_facultaire' %}
+  {% endif %}
+{% endwith %}

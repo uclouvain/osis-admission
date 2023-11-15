@@ -24,11 +24,13 @@
 #
 # ##############################################################################
 import copy
+import itertools
 from typing import Optional
 
 from django.utils.translation import gettext_noop as _
 
 from admission.ddd.admission.domain.model.formation import Formation
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation, Onglets
@@ -72,12 +74,14 @@ class Checklist(interface.DomainService):
         formation: Formation,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
+        annee_courante: int,
     ):
         checklist_initiale = cls.recuperer_checklist_initiale(
             proposition=proposition,
             formation=formation,
             profil_candidat_translator=profil_candidat_translator,
             questions_specifiques_translator=questions_specifiques_translator,
+            annee_courante=annee_courante,
         )
         proposition.checklist_initiale = checklist_initiale
         proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
@@ -121,8 +125,11 @@ class Checklist(interface.DomainService):
         formation: Formation,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
+        annee_courante: int = None,
     ) -> Optional[StatutsChecklistGenerale]:
         identification_dto = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+        curriculum_dto = profil_candidat_translator.get_curriculum(proposition.matricule_candidat, annee_courante)
+        secondary_studies_dto = profil_candidat_translator.get_etudes_secondaires(proposition.matricule_candidat)
 
         nombre_questions = cls._get_specific_questions_number(
             proposition=proposition,
@@ -149,7 +156,15 @@ class Checklist(interface.DomainService):
             parcours_anterieur=StatutChecklist(
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-                enfants=[],
+                enfants=[
+                    cls.initialiser_checklist_experience(experience.uuid)
+                    for experience in itertools.chain(
+                        curriculum_dto.experiences_academiques,
+                        curriculum_dto.experiences_non_academiques,
+                        [secondary_studies_dto.experience],
+                    )
+                    if experience
+                ],
             ),
             financabilite=StatutChecklist(
                 libelle=_("Not concerned"),
@@ -187,4 +202,16 @@ class Checklist(interface.DomainService):
                 libelle=_('To be processed'),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
+        )
+
+    @classmethod
+    def initialiser_checklist_experience(cls, experience_uuid):
+        return StatutChecklist(
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+            extra={
+                'identifiant': experience_uuid,
+                'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
+                'commentaire_authentification': '',
+            },
         )
