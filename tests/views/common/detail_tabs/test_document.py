@@ -124,7 +124,7 @@ class DocumentViewTestCase(TestCase):
 
         patcher = patch(
             'osis_document.api.utils.confirm_remote_upload',
-            side_effect=lambda token, upload_to: uuid.uuid4(),
+            return_value=uuid.uuid4(),
         )
         patcher.start()
         self.addCleanup(patcher.stop)
