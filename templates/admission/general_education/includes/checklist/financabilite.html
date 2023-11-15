@@ -99,9 +99,9 @@
     {% endif %}
     {% include 'admission/general_education/includes/checklist/financabilite_approval_modal.html' %}
   </div>
-{% endwith %}
 
-{% if request.htmx %}
-  {# Update the checklist menu  #}
-  {% include "admission/general_education/checklist_menu.html" with current_item='financabilite' %}
-{% endif %}
+  {% if request.htmx %}
+    {# Update the checklist menu item status #}
+    {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='financabilite' %}
+  {% endif %}
+{% endwith %}

@@ -22,25 +22,29 @@
 * at the root of the source code of this program.  If not,
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
-<div
-    id="container_{{ field.name }}"
-    class="field-with-tooltip form-group {{ classes }} {% if field.errors %}has-error{% elif field.form.is_bound %}{% endif %}"
->
-  <div class="label-container">
-    <label class="control-label" for="{{ field.id_for_label }}">
-      {{ field.label }}
-    </label>
-    <a
-        tabindex="0"
-        class="fa fa-question-circle popover-buttons"
-        data-content="<p>{{ field.help_text }}</p>"
-        data-html="true"
-        data-placement="auto top"
-        data-toggle="popover"
-        data-trigger="focus"
-        role="button"
-        title="{{ title }}"
-    ></a>
+{% if field.is_hidden %}
+  {% bootstrap_field field %}
+{% else %}
+  <div
+      id="container_{{ field.name }}"
+      class="field-with-tooltip form-group {{ classes }} {% if field.errors %}has-error{% elif field.form.is_bound %}{% endif %}"
+  >
+    <div class="label-container">
+      <label class="control-label" for="{{ field.id_for_label }}">
+        {{ field.label }}
+      </label>
+      <a
+          tabindex="0"
+          class="fa fa-question-circle popover-buttons"
+          data-content="<p>{{ field.help_text }}</p>"
+          data-html="true"
+          data-placement="auto top"
+          data-toggle="popover"
+          data-trigger="focus"
+          role="button"
+          title="{{ title }}"
+      ></a>
+    </div>
+    {% bootstrap_field field show_help=False label='' %}
   </div>
-  {% bootstrap_field field show_help=False label='' %}
-</div>
+{% endif %}

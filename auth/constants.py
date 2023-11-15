@@ -34,6 +34,8 @@ READ_ACTIONS_BY_TAB = {
     'training-choice': 'admission.view_admission_training_choice',
     # Previous experience
     'curriculum': 'admission.view_admission_curriculum',
+    'educational': '',
+    'educational_create': '',
     'education': 'admission.view_admission_secondary_studies',
     'languages': 'admission.view_admission_languages',
     # Project
@@ -77,6 +79,8 @@ UPDATE_ACTIONS_BY_TAB = {
     'training-choice': 'admission.change_admission_training_choice',
     # Previous experience
     'curriculum': 'admission.change_admission_curriculum',
+    'educational': '',
+    'educational_create': '',
     'education': 'admission.change_admission_secondary_studies',
     'languages': 'admission.change_admission_languages',
     # Project

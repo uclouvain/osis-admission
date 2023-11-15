@@ -1,0 +1,55 @@
+{% load i18n static enums admission bootstrap3 %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div
+    id="previous-experience-container-{{ current.extra.identifiant }}"
+    hx-target="this"
+>
+  {% concat 'parcours_anterieur__' current.extra.identifiant as checklist_item_name %}
+  <div class="form-group btn-group status-group" role="group">
+    {% url view.base_namespace|add:':single-past-experience-change-status' uuid=view.kwargs.uuid experience_uuid=current.extra.identifiant as change_status_url %}
+    {% checklist_state_button tab=checklist_item_name label=_('To be processed') icon='xmark' state='INITIAL_CANDIDAT' class='muted' htmx_post=change_status_url %}
+    {% checklist_state_button tab=checklist_item_name label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' htmx_post=change_status_url %}
+    {% checklist_state_button tab=checklist_item_name label=_("Authentication") icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=change_status_url authentification='1' %}
+    {% checklist_state_button tab=checklist_item_name label=_("Expert advice") icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=change_status_url authentification='0' %}
+    {% checklist_state_button tab=checklist_item_name label=_("To complete after enrolment") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' htmx_post=change_status_url %}
+    {% checklist_state_button tab=checklist_item_name label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' htmx_post=change_status_url %}
+  </div>
+
+  <div id="comment-{{ current.extra.identifiant }}" hx-preserve="true">
+    {% if comment_forms %}
+      {% bootstrap_form comment_forms|get_item:checklist_item_name %}
+    {% endif %}
+  </div>
+
+  {% include "admission/general_education/includes/checklist/previous_experience_single_authentication_form.html" with current=current item_name=checklist_item_name authentication_form=authentication_form %}
+</div>
+
+{% if request.htmx %}
+  {# Update the checklist menu item status #}
+  {% concat 'parcours_anterieur__' current.extra.identifiant as checklist_item_name %}
+  {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name=checklist_item_name %}
+{% endif %}

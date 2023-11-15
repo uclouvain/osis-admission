@@ -1,0 +1,50 @@
+{% load i18n static enums admission bootstrap3 %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% if current.statut == 'GEST_EN_COURS' and current.extra.authentification == '1' or current.extra.etat_authentification and current.extra.etat_authentification != 'NON_CONCERNE' %}
+  <form
+      id="authentication-form-{{ current.extra.identifiant }}"
+      class="osis-form"
+      method="post"
+      action="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid experience_uuid=current.extra.identifiant %}"
+      hx-post="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid experience_uuid=current.extra.identifiant %}"
+      hx-trigger='keyup changed delay:2s from:textarea[name="{{ current.extra.identifiant }}-comment"], change delay:2s from:input[name="{{ current.extra.identifiant }}-state"]'
+      hx-swap="outerHTML"
+      hx-target="this"
+  >
+    {% csrf_token %}
+    {% bootstrap_form_errors authentication_form %}
+    {% bootstrap_field authentication_form.state %}
+    {% bootstrap_field authentication_form.comment %}
+
+    {% if request.htmx %}
+      {# Update the checklist menu item authentication #}
+      {% concat 'parcours_anterieur__' current.extra.identifiant as item_name %}
+      {% include "admission/general_education/checklist_menu_item_additional_icon.html" with additional_icon=current.extra.etat_authentification|authentication_css_class item_name=item_name %}
+    {% endif %}
+  </form>
+{% endif %}
+

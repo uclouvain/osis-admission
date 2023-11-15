@@ -39,13 +39,21 @@ from django.utils import translation
 from django.utils.translation import gettext as _, pgettext
 from django.views import View
 
+import admission.templatetags.admission
 from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
+from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
+from admission.ddd.admission.test.factory.profil import (
+    ExperienceAcademiqueDTOFactory,
+    ExperienceNonAcademiqueDTOFactory,
+)
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -73,6 +81,8 @@ from admission.templatetags.admission import (
     get_item_or_none,
     part_of_dict,
     need_to_display_specific_questions,
+    authentication_css_class,
+    experience_details_template,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -80,6 +90,7 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
+from osis_profile.models.enums.curriculum import EvaluationSystem
 from reference.tests.factories.country import CountryFactory
 
 
@@ -497,6 +508,53 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(get_item_or_none(dictionary, 'a'), 1)
         self.assertEqual(get_item_or_none(dictionary, 'b'), None)
 
+    def test_experience_details_template_with_an_educational_experience(self):
+        experience = ExperienceAcademiqueDTOFactory(
+            pays=BE_ISO_CODE,
+            regime_linguistique=FR_ISO_CODE,
+            systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
+        )
+        template_params = experience_details_template(
+            resume_proposition=MagicMock(
+                est_proposition_generale=True,
+                est_proposition_continue=False,
+                est_proposition_doctorale=False,
+                proposition=MagicMock(
+                    uuid=uuid.uuid4(),
+                    formation=MagicMock(),
+                ),
+            ),
+            experience=experience,
+        )
+        self.assertEqual(
+            template_params['custom_base_template'],
+            'admission/exports/recap/includes/curriculum_educational_experience.html',
+        )
+        self.assertEqual(template_params['experience'], experience)
+        self.assertEqual(template_params['is_foreign_experience'], False)
+        self.assertEqual(template_params['is_belgian_experience'], True)
+        self.assertEqual(template_params['translation_required'], False)
+        self.assertEqual(template_params['evaluation_system_with_credits'], True)
+
+    def test_experience_details_with_a_non_educational_experience(self):
+        experience = ExperienceNonAcademiqueDTOFactory()
+        template_params = experience_details_template(
+            resume_proposition=MagicMock(
+                est_proposition_generale=True,
+                est_proposition_continue=False,
+                est_proposition_doctorale=False,
+                proposition=MagicMock(
+                    uuid=uuid.uuid4(),
+                    formation=MagicMock(),
+                ),
+            ),
+            experience=experience,
+        )
+        self.assertEqual(
+            template_params['custom_base_template'],
+            'admission/exports/recap/includes/curriculum_professional_experience.html',
+        )
+
 
 class SimpleAdmissionTemplateTagsTestCase(TestCase):
     def test_get_first_truthy_value_with_no_arg_returns_none(self):
@@ -635,6 +693,28 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         ]
         self.assertTrue(need_to_display_specific_questions(configurations, False))
         self.assertTrue(need_to_display_specific_questions(configurations, True))
+
+    def test_authentication_css_class(self):
+        self.assertEqual(
+            '',
+            authentication_css_class(EtatAuthentificationParcours.NON_CONCERNE.name),
+        )
+        self.assertEqual(
+            'fa-solid fa-file-circle-question text-orange',
+            authentication_css_class(EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name),
+        )
+        self.assertEqual(
+            'fa-solid fa-file-circle-question text-orange',
+            authentication_css_class(EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name),
+        )
+        self.assertEqual(
+            'fa-solid fa-file-circle-check text-success',
+            authentication_css_class(EtatAuthentificationParcours.FAUX.name),
+        )
+        self.assertEqual(
+            'fa-solid fa-file-circle-check text-danger',
+            authentication_css_class(EtatAuthentificationParcours.VRAI.name),
+        )
 
 
 class AdmissionTagsTestCase(TestCase):

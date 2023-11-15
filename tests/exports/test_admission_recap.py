@@ -143,6 +143,7 @@ from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
@@ -162,6 +163,7 @@ from osis_profile.models.enums.education import (
     Equivalence,
     ForeignDiplomaTypes,
 )
+from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 
 
@@ -780,6 +782,12 @@ class SectionsAttachmentsTestCase(TestCase):
                     traduction_releve_notes=['uuid-traduction-releve-notes'],
                     credits_inscrits=220,
                     credits_acquis=220,
+                    avec_bloc_1=None,
+                    avec_complement=None,
+                    avec_allegement=None,
+                    est_reorientation_102=None,
+                    credits_inscrits_communaute_fr=None,
+                    credits_acquis_communaute_fr=None,
                 )
             ],
             a_obtenu_diplome=True,
@@ -794,6 +802,9 @@ class SectionsAttachmentsTestCase(TestCase):
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
             nom_formation='Computer science',
             type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+            cycle_formation=Cycle.FIRST_CYCLE.name,
+            type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
+            nom_formation_equivalente_communaute_fr='',
         )
         cls.foreign_academic_curriculum_experience = _ExperienceAcademiqueDTO(
             uuid='uuid-1',
@@ -816,6 +827,12 @@ class SectionsAttachmentsTestCase(TestCase):
                     traduction_releve_notes=['uuid-traduction-releve-notes'],
                     credits_inscrits=220,
                     credits_acquis=220,
+                    avec_bloc_1=None,
+                    avec_complement=None,
+                    avec_allegement=None,
+                    est_reorientation_102=None,
+                    credits_inscrits_communaute_fr=None,
+                    credits_acquis_communaute_fr=None,
                 )
             ],
             a_obtenu_diplome=True,
@@ -830,6 +847,9 @@ class SectionsAttachmentsTestCase(TestCase):
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
             nom_formation='Computer science',
             type_enseignement=TeachingTypeEnum.FULL_TIME.name,
+            cycle_formation=Cycle.FIRST_CYCLE.name,
+            type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
+            nom_formation_equivalente_communaute_fr='',
         )
         curriculum_dto = _CurriculumDTO(
             experiences_non_academiques=[

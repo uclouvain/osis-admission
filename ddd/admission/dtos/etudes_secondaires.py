@@ -26,8 +26,10 @@
 from typing import Optional, List
 
 import attr
+from django.utils.translation import gettext as _
 
 from osis_common.ddd import interface
+from osis_profile.models.enums.education import ForeignDiplomaTypes
 
 
 @attr.dataclass(slots=True, frozen=True)
@@ -39,6 +41,9 @@ class DiplomeBelgeEtudesSecondairesDTO(interface.DTO):
     nom_institut: str = ''
     adresse_institut: str = ''
     communaute: str = ''
+
+    def __str__(self):
+        return _('CESS')
 
 
 @attr.dataclass(slots=True, frozen=True)
@@ -59,11 +64,17 @@ class DiplomeEtrangerEtudesSecondairesDTO(interface.DTO):
     decision_final_equivalence_hors_ue: List = attr.Factory(list)
     preuve_decision_equivalence: List = attr.Factory(list)
 
+    def __str__(self):
+        return str(ForeignDiplomaTypes.get_value(self.type_diplome))
+
 
 @attr.dataclass(slots=True, frozen=True)
 class AlternativeSecondairesDTO(interface.DTO):
     uuid: str = ''
     examen_admission_premier_cycle: List = attr.Factory(list)
+
+    def __str__(self):
+        return _("Bachelor's course entrance exam")
 
 
 @attr.dataclass(slots=True, frozen=True)
@@ -74,3 +85,26 @@ class EtudesSecondairesDTO(interface.DTO):
     diplome_etudes_secondaires: str = ''
     annee_diplome_etudes_secondaires: Optional[int] = None
     valorisees: Optional[bool] = False
+
+    @property
+    def experience(self):
+        if self.diplome_belge:
+            return self.diplome_belge
+        if self.diplome_etranger:
+            return self.diplome_etranger
+        if self.alternative_secondaires:
+            return self.alternative_secondaires
+
+    @property
+    def uuid(self):
+        experience = self.experience
+        return experience.uuid if experience else ''
+
+    @property
+    def titre_formate(self):
+        titre = _('Secondary school or alternative')
+        return (
+            f"{self.annee_diplome_etudes_secondaires}-{self.annee_diplome_etudes_secondaires + 1} : {titre}"
+            if self.annee_diplome_etudes_secondaires
+            else titre
+        )

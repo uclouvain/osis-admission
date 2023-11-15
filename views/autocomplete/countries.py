@@ -65,3 +65,14 @@ class CountriesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView
 
     def get_result_value(self, result):
         return getattr(result, self.id_field)
+
+    def get_results(self, context):
+        return [
+            {
+                'id': getattr(result, self.id_field),
+                'text': getattr(result, self.name_field),
+                'selected_text': getattr(result, self.name_field),
+                'european_union': result.european_union,
+            }
+            for result in context['object_list']
+        ]

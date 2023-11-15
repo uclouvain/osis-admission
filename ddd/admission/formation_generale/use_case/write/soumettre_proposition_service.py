@@ -151,6 +151,7 @@ def soumettre_proposition(
         formation=formation,
         profil_candidat_translator=profil_candidat_translator,
         questions_specifiques_translator=questions_specifiques_translator,
+        annee_courante=annee_courante,
     )
     proposition_repository.save(proposition)
     notification.confirmer_soumission(proposition)

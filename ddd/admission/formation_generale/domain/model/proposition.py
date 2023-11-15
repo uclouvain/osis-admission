@@ -46,6 +46,7 @@ from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiploma
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
+from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
     ChoixAssimilation1,
@@ -541,6 +542,37 @@ class Proposition(interface.RootEntity):
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
+
+    def specifier_statut_checklist_experience_parcours_anterieur(
+        self,
+        statut_checklist_cible: str,
+        statut_checklist_authentification: Optional[bool],
+        uuid_experience: str,
+    ):
+        try:
+            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
+        except StopIteration:
+            raise ExperienceNonTrouveeException
+        experience.statut = ChoixStatutChecklist[statut_checklist_cible]
+
+        if statut_checklist_authentification is None:
+            experience.extra.pop('authentification', None)
+        else:
+            experience.extra['authentification'] = '1' if statut_checklist_authentification else '0'
+
+    def specifier_authentification_experience_parcours_anterieur(
+        self,
+        uuid_experience: str,
+        etat_authentification: str,
+        commentaire_authentification: str,
+    ):
+        try:
+            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
+        except StopIteration:
+            raise ExperienceNonTrouveeException
+
+        experience.extra['etat_authentification'] = etat_authentification
+        experience.extra['commentaire_authentification'] = commentaire_authentification
 
     def specifier_condition_acces(
         self,

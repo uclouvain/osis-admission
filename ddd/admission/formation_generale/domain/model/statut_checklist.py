@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from enum import Enum
 from typing import List, Optional, Dict
 
 import attr
@@ -57,6 +58,23 @@ class StatutChecklist(interface.ValueObject):
     #             if any(c.statut == statut for c in self.enfants):
     #                 return statut
     #     return self.statut
+    @classmethod
+    def from_dict(cls, item: Dict[str, any]):
+        return cls(
+            libelle=item.get('libelle', ''),
+            statut=ChoixStatutChecklist[item['statut']] if item.get('statut') else None,
+            enfants=[cls.from_dict(enfant) for enfant in item.get('enfants', [])],
+            extra=item.get('extra', {}),
+        )
+
+    def to_dict(self):
+        return attr.asdict(self, value_serializer=self._serialize)
+
+    def _serialize(cls, inst, field, value):
+        if isinstance(value, Enum):
+            return value.name
+
+        return value
 
 
 @attr.dataclass
@@ -75,13 +93,13 @@ class StatutsChecklistGenerale:
         checklist_by_tab = {}
         for key in INDEX_ONGLETS_CHECKLIST:
             item = checklist_en_tant_que_dict.get(key, {})
-            checklist_by_tab[key] = StatutChecklist(
-                libelle=item.get('libelle', ''),
-                statut=ChoixStatutChecklist[item['statut']] if item.get('statut') else None,
-                enfants=item.get('enfants', []),
-                extra=item.get('extra', {}),
-            )
+            checklist_by_tab[key] = StatutChecklist.from_dict(item=item)
         return cls(**checklist_by_tab)
+
+    def recuperer_enfant(self, onglet, identifiant_enfant) -> StatutChecklist:
+        return next(
+            enfant for enfant in getattr(self, onglet).enfants if enfant.extra.get('identifiant') == identifiant_enfant
+        )
 
 
 INDEX_ONGLETS_CHECKLIST = {
