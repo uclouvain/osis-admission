@@ -1442,9 +1442,6 @@ msgstr "Confirmer et envoyer le message"
 msgid "Confirm restoring activity to submitted"
 msgstr "Confirmer la remise au statut soumise de cette activité"
 
-msgid "Confirm the deletion"
-msgstr "Confirmer la suppression"
-
 msgid "Confirm the status change"
 msgstr "Confirmer le changement de statut"
 

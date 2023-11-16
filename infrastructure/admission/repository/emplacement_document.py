@@ -129,20 +129,12 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                             form_item=form_item,
                             academic_year_id=admission.determined_academic_year_id,
                             weight=1,
-                            required=entity.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT,
+                            required=False,
                             display_according_education=CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
                             admission=admission,
                             tab=Onglets.DOCUMENTS.name,
                         )
                         form_item_instantiation.save()
-                    else:
-                        # Update the specific question if desired
-                        AdmissionFormItemInstantiation.objects.filter(
-                            admission=admission,
-                            form_item__uuid=uuid_value,
-                        ).update(
-                            required=entity.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT,
-                        )
 
                 admission.requested_documents[entity.entity_id.identifiant] = cls.entity_to_dict(entity)
 

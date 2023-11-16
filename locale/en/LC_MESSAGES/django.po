@@ -1329,9 +1329,6 @@ msgstr ""
 msgid "Confirm restoring activity to submitted"
 msgstr ""
 
-msgid "Confirm the deletion"
-msgstr ""
-
 msgid "Confirm the status change"
 msgstr ""
 
