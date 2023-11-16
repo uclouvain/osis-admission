@@ -582,6 +582,9 @@ msgstr ""
 msgid "Application fee: <strong>&euro;%(amount)s</strong>"
 msgstr ""
 
+msgid "Application fees where also received."
+msgstr ""
+
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 
@@ -3008,6 +3011,10 @@ msgstr ""
 msgid "Level equivalence"
 msgstr ""
 
+msgid ""
+"Link to download a copy of the file related to the admission (frontoffice)."
+msgstr ""
+
 msgid "Link to the admission (back-office)"
 msgstr ""
 
@@ -4712,6 +4719,12 @@ msgstr ""
 msgid "Sender"
 msgstr ""
 
+msgid "Sentence indicating the late enrolment (if applicable)."
+msgstr ""
+
+msgid "Sentence indicating the payment of the application fee (if applicable)."
+msgstr ""
+
 msgid "Services"
 msgstr ""
 
@@ -5753,6 +5766,12 @@ msgstr ""
 msgid ""
 "We congratulate you on your successful completion of the paper and wish you "
 "every success in your doctoral training."
+msgstr ""
+
+msgid ""
+"We would like to draw your attention to the fact that you have submitted a "
+"late application. The admission panel reserves the right to accept or refuse "
+"this application on the basis of educational requirements."
 msgstr ""
 
 msgctxt "admission"

@@ -661,6 +661,9 @@ msgstr "Message de demande de paiement des frais de dossier"
 msgid "Application fee: <strong>&euro;%(amount)s</strong>"
 msgstr "Montant des frais de dossier : <strong>%(amount)s €</strong>"
 
+msgid "Application fees where also received."
+msgstr "Le payement des frais de dossier a bien été réceptionné."
+
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 "Demande d'allocation d'études auprès de la Communauté française de Belgique"
@@ -3332,6 +3335,10 @@ msgstr "Lettres de recommandation"
 msgid "Level equivalence"
 msgstr "Equivalence de niveau"
 
+msgid ""
+"Link to download a copy of the file related to the admission (frontoffice)."
+msgstr "Lien pour télécharger une copie du dossier (back-office)."
+
 msgid "Link to the admission (back-office)"
 msgstr "Lien vers l'admission (back-office)"
 
@@ -5209,6 +5216,12 @@ msgstr "Envoyer en faculté"
 msgid "Sender"
 msgstr "Expéditeur"
 
+msgid "Sentence indicating the late enrolment (if applicable)."
+msgstr "Phrase indiquant que l'inscripton est tardive (si applicable)."
+
+msgid "Sentence indicating the payment of the application fee (if applicable)."
+msgstr "Phrase indiquant le payement des frais de dossier (si applicable)."
+
 msgid "Services"
 msgstr "Services"
 
@@ -6386,6 +6399,15 @@ msgid ""
 msgstr ""
 "Nous vous félicitons pour la réussite de votre épreuve et vous souhaitons un "
 "franc succès dans la poursuite de votre parcours doctoral."
+
+msgid ""
+"We would like to draw your attention to the fact that you have submitted a "
+"late application. The admission panel reserves the right to accept or refuse "
+"this application on the basis of educational requirements."
+msgstr ""
+"Nous attirons votre attention sur le fait que vous avez introduit une "
+"demande d'inscription tardive. Le jury d'admission se réserve le droit "
+"d'accepter ou de refuser cette demande en raison des impératifs pédagogiques."
 
 msgctxt "admission"
 msgid "Website"
