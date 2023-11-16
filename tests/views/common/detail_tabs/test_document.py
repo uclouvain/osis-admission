@@ -495,7 +495,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
         self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
         self.assertEqual(
             form_item_instantiation.display_according_education,
             CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
@@ -663,7 +663,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
         self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
         self.assertEqual(
             form_item_instantiation.display_according_education,
             CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
@@ -884,7 +884,7 @@ class DocumentViewTestCase(TestCase):
             form_item__uuid=document_identifier.split('.')[-1],
         )
 
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
 
         self.client.force_login(user=self.second_sic_manager_user)
 
@@ -1002,7 +1002,7 @@ class DocumentViewTestCase(TestCase):
             form_item__uuid=document_identifier.split('.')[-1],
         )
 
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
 
         self.client.force_login(user=self.second_fac_manager_user)
 
@@ -2973,7 +2973,7 @@ class DocumentViewTestCase(TestCase):
             form_item__uuid=document_identifier.split('.')[-1],
         )
 
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
 
         self.client.force_login(user=self.second_sic_manager_user)
 
@@ -3089,7 +3089,7 @@ class DocumentViewTestCase(TestCase):
             form_item__uuid=document_identifier.split('.')[-1],
         )
 
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
 
         self.client.force_login(user=self.second_fac_manager_user)
 

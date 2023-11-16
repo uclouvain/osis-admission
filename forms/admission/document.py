@@ -140,7 +140,7 @@ class RequestDocumentForm(forms.Form):
     request_status = forms.ChoiceField(
         label=_('Document to be requested'),
         required=False,
-        choices=REQUEST_STATUS_CHOICES,
+        choices=[],
     )
 
     reason = forms.CharField(
@@ -165,6 +165,9 @@ class RequestDocumentForm(forms.Form):
             )
 
         self.auto_requested = auto_requested
+        self.fields['request_status'].choices = (
+            REQUEST_STATUS_CHOICES if auto_requested else REQUEST_STATUS_CHOICES_WITH_OPTIONAL
+        )
         if auto_requested:
             # If the document is automatically requested, it must be requested to specify a reason
             self.fields['request_status'].required = True
