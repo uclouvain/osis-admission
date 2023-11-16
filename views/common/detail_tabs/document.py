@@ -36,7 +36,6 @@ from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
-    StatutEmplacementDocument,
     EMPLACEMENTS_FAC,
     EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
     EMPLACEMENTS_SIC,
@@ -51,6 +50,7 @@ from admission.forms.admission.document import (
     ReplaceDocumentForm,
     UploadDocumentForm,
     RequestFreeDocumentWithDefaultFileForm,
+    ChangeRequestDocumentForm,
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
@@ -72,6 +72,7 @@ __all__ = [
     'RequestFreeCandidateDocumentWithDefaultFileView',
     'UploadDocumentByManagerView',
     'UploadFreeInternalDocumentView',
+    'RequestStatusChangeDocumentView',
 ]
 
 
@@ -161,8 +162,9 @@ class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequire
                     else TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name
                 ),
                 libelle=form.cleaned_data['file_name'],
-                raison=form.cleaned_data['reason'],
+                raison=form.cleaned_data.get('reason', ''),
                 uuid_document=form.cleaned_data['file'][0] if form.cleaned_data.get('file') else '',
+                statut_reclamation=form.cleaned_data.get('request_status', ''),
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
@@ -224,7 +226,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
 
         # Request form
         request_initial = {
-            'is_requested': document.status == StatutEmplacementDocument.A_RECLAMER.name,
+            'request_status': document.request_status,
             'reason': document.reason,
         }
         context['request_reason'] = document.reason
@@ -308,13 +310,14 @@ class RequestCandidateDocumentView(DocumentFormView):
         return kwargs
 
     def form_valid(self, form):
-        if form.cleaned_data['is_requested']:
+        if form.cleaned_data['request_status']:
             message_bus_instance.invoke(
                 general_education_commands.ModifierReclamationEmplacementDocumentCommand(
                     uuid_proposition=self.admission_uuid,
                     identifiant_emplacement=self.document_identifier,
                     raison=form.cleaned_data['reason'],
                     auteur=self.request.user.person.global_id,
+                    statut_reclamation=form.cleaned_data['request_status'],
                 )
             )
             self.message_on_success = _('The document has been designated as to be requested')
@@ -358,6 +361,55 @@ class DeleteDocumentView(DocumentFormView):
         self.htmx_trigger_form(is_valid=True)
 
         return HttpResponse(status=HTTP_204_NO_CONTENT)
+
+
+class RequestStatusChangeDocumentView(DocumentFormView):
+    form_class = ChangeRequestDocumentForm
+    urlpatterns = {'candidate-request-status': 'candidate-request-status/<str:identifier>'}
+    template_name = 'admission/forms/default_form.html'
+    htmx_template_name = 'admission/forms/default_form.html'
+    default_htmx_trigger_form_extra = {
+        'refresh_list': False,
+        'keep_modal_open': True,
+    }
+
+    @cached_property
+    def editable_document(self):
+        return can_edit_document(self.request.user.person, self.document)
+
+    def has_permission(self):
+        return super().has_permission() and self.document.requestable is True
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['document_identifier'] = self.document_identifier
+        kwargs['proposition_uuid'] = self.admission_uuid
+        kwargs['automatically_required'] = self.document.automatically_required
+        return kwargs
+
+    def form_valid(self, form):
+        if form.cleaned_data[self.document_identifier]:
+            message_bus_instance.invoke(
+                general_education_commands.ModifierReclamationEmplacementDocumentCommand(
+                    uuid_proposition=self.admission_uuid,
+                    identifiant_emplacement=self.document_identifier,
+                    raison=self.document.reason,
+                    auteur=self.request.user.person.global_id,
+                    statut_reclamation=form.cleaned_data[self.document_identifier],
+                )
+            )
+            self.message_on_success = _('The request status has been changed')
+        else:
+            message_bus_instance.invoke(
+                general_education_commands.AnnulerReclamationEmplacementDocumentCommand(
+                    uuid_proposition=self.admission_uuid,
+                    identifiant_emplacement=self.document_identifier,
+                    auteur=self.request.user.person.global_id,
+                )
+            )
+            self.message_on_success = _('The document is no longer designated as to be requested')
+
+        return super().form_valid(form)
 
 
 class ReplaceDocumentView(DocumentFormView):

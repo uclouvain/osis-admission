@@ -308,6 +308,9 @@ msgstr "Résumé"
 msgid "Academic Regulations"
 msgstr "Règlement général des études"
 
+msgid "Academic experience"
+msgstr "Expérience académique"
+
 msgid "Academic year"
 msgstr "Année académique"
 
@@ -524,6 +527,12 @@ msgstr "Instantiations des éléments de formulaire pour admission"
 msgid "Admission form items"
 msgstr "Éléments de formulaire pour admission"
 
+msgid "Admission requirement"
+msgstr "Condition d'accès"
+
+msgid "Admission requirement year"
+msgstr "Millésime de la condition d'accès"
+
 msgid "Admission to regulated professions"
 msgstr "Accès aux professions réglementées"
 
@@ -699,6 +708,10 @@ msgstr "Date approximative d'achèvement de la thèse :"
 msgid "Archived record when signatures were sent"
 msgstr "Fiche archivée lors de l'envoi des signatures"
 
+msgid "Are the secondary studies the access title for this admission?"
+msgstr ""
+"Les études secondaires sont-elles le titre d'accès de cette proposition ?"
+
 msgid "Are there any additional conditions (subject to ...)?"
 msgstr "Y a-t-il des conditions complémentaires (\"sous réserve de ...\") ?"
 
@@ -805,6 +818,9 @@ msgstr "Assimilation 7"
 msgid "Assimilation start date"
 msgstr "Date de début d'assimilation"
 
+msgid "At least one document must be selected."
+msgstr "Au-moins un document doit être sélectionné."
+
 msgid "Attachment: PhD training"
 msgstr "Annexe : Formation doctorale"
 
@@ -850,6 +866,10 @@ msgstr "Biologie"
 
 msgid "Bachelor"
 msgstr "Bachelier"
+
+msgid "Bachelor's course entrance exam"
+msgstr ""
+"Examen d'admission aux études de premier cycle de l'enseignement supérieur"
 
 msgid "Back to the list"
 msgstr "Retour à la liste"
@@ -950,6 +970,12 @@ msgstr "CDD :"
 
 msgid "CDDs"
 msgstr "CDDs"
+
+msgid "CESS"
+msgstr "CESS"
+
+msgid "CESS equivalence"
+msgstr "Equivalence au CESS"
 
 msgid "CFWB scholarship decision"
 msgstr "Décision de la bourse de la CFWB"
@@ -1315,6 +1341,9 @@ msgstr "Ville"
 msgid "Civil status"
 msgstr "État civil"
 
+msgid "Cleaned"
+msgstr "Toiletté"
+
 msgid "Clinical Research Fund (FRC)"
 msgstr "FRC - Fonds de recherche clinique"
 
@@ -1381,6 +1410,9 @@ msgstr "Formation complémentaire non activée"
 
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
+
+msgid "Completed"
+msgstr "Complète"
 
 msgid "Completed (by student) for Fac"
 msgstr "Complétée (par étudiant) pour Fac"
@@ -1809,11 +1841,11 @@ msgstr "Date de l'épreuve de confirmation (JJ/MM/AAAA)"
 msgid "Date the application is sent to the supervision group"
 msgstr "Date d’envoi de la demande au comité d’accompagnement"
 
-msgid "Deadline"
-msgstr "Échéance"
-
 msgid "Deadline extended"
 msgstr "Nouvelle échéance"
+
+msgid "Deadline for documents to be requested immediately"
+msgstr "Échéance pour les documents à fournir immédiatement"
 
 msgid "Deadline for the candidate to upload documents"
 msgstr "Date limite de téléversement des documents par le candidat"
@@ -1823,6 +1855,21 @@ msgstr "Date limite pour la confirmation (JJ/MM/AAAA)"
 
 msgid "Deadline on"
 msgstr "Échéance le"
+
+msgid "Deadline type"
+msgstr "Type d'échéance"
+
+msgctxt "female gender"
+msgid "Dear"
+msgstr "Chère"
+
+msgctxt "male gender"
+msgid "Dear"
+msgstr "Cher"
+
+msgctxt "other gender"
+msgid "Dear"
+msgstr "Chere·ère"
 
 msgid "Debug"
 msgstr "Debug"
@@ -1867,6 +1914,9 @@ msgstr "Formule de défense"
 msgctxt "admission tab"
 msgid "Defense method"
 msgstr "Modalités de défense"
+
+msgid "Definitive"
+msgstr "Définitive"
 
 msgid "Definitive admission date to doctorate"
 msgstr "Date de l'admission définitive au doctorat"
@@ -2023,9 +2073,6 @@ msgstr ""
 msgid "Documents specific to limited-enrolment courses"
 msgstr "Documents spécifiques aux études contingentées"
 
-msgid "Documents to be requested now"
-msgstr "Documents à réclamer maintenant"
-
 msgid "Does not have a doctor title"
 msgstr "N'est pas porteur du titre de docteur"
 
@@ -2117,6 +2164,12 @@ msgstr "Modifier la communication de cette conférence"
 msgctxt "admission"
 msgid "Education"
 msgstr "Formation"
+
+msgid "Educational experiences"
+msgstr "Expérience académiques"
+
+msgid "Effective date"
+msgstr "Date de prise d'effet"
 
 msgctxt "admission"
 msgid "Email"
@@ -2211,6 +2264,9 @@ msgctxt "admission"
 msgid "Entity"
 msgstr "Entité"
 
+msgid "Equivalency of the foreign access title"
+msgstr "Équivalence du titre d'accès étranger"
+
 msgid "Erasmus Mundus"
 msgstr "Erasmus Mundus"
 
@@ -2273,6 +2329,9 @@ msgstr "Date (prévue) de délivrance du diplôme"
 msgid "Expected graduation date (signed diploma)"
 msgstr "Date (prévue) de délivrance du diplôme (document signé)"
 
+msgid "Experience not found."
+msgstr "Expérience non trouvée."
+
 msgid "Experiences"
 msgstr "Expériences"
 
@@ -2318,6 +2377,9 @@ msgstr "FRESH"
 
 msgid "FRIA"
 msgstr "FRIA"
+
+msgid "FWB academic degree equivalence"
+msgstr "Equivalence de grade académique FWB"
 
 msgid "Faculty approval certificate"
 msgstr "Attestation d'accord facultaire"
@@ -2446,6 +2508,18 @@ msgstr ""
 "boutons radios (\"BOUTONS_RADIOS\") en utilisant la propriété "
 "\"TYPE_SELECTION\".<br>Exemple complet : <code>{\"TYPE_SELECTION\": "
 "\"CASES_A_COCHER\"}</code>."
+
+msgid "Foreign access title equivalence effective date"
+msgstr "Date de prise d'effet de l'équivalence du titre d'accès étranger"
+
+msgid "Foreign access title equivalence state"
+msgstr "État de l'équivalence du titre d'accès étranger"
+
+msgid "Foreign access title equivalence status"
+msgstr "Statut de l'équivalence du titre d'accès étranger"
+
+msgid "Foreign access title equivalence type"
+msgstr "Type d'équivalence du titre d'accès étranger"
 
 msgid "Foreign diploma"
 msgstr "Diplôme étranger"
@@ -2942,6 +3016,9 @@ msgstr ""
 "directement transmettre le dossier à SIC en sélectionnant le bouton "
 "approprié ci-dessous."
 
+msgid "Immediately"
+msgstr "Immédiatement"
+
 msgid "Important information:"
 msgstr "Informations importantes"
 
@@ -3112,6 +3189,9 @@ msgstr "Les invitations n'ont pas été envoyées"
 msgid "Invitations must have been sent"
 msgstr "Les invitations doivent avoir été envoyées"
 
+msgid "Is access title of the proposition?"
+msgstr "Est-ce que c'est un titre d'accès de la proposition ?"
+
 msgid "Is active?"
 msgstr "Actif ?"
 
@@ -3212,6 +3292,12 @@ msgstr "Auteur de la dernière mise à jour"
 msgid "Late enrollment"
 msgstr "Inscription tardive"
 
+msgid "Later > blocking"
+msgstr "Ultérieurement > bloquant"
+
+msgid "Later > non-blocking"
+msgstr "Ultérieurement > non-bloquant"
+
 msgid "Launch"
 msgstr "Lancer"
 
@@ -3242,6 +3328,9 @@ msgstr "Domicile légal"
 
 msgid "Letters of recommendation"
 msgstr "Lettres de recommandation"
+
+msgid "Level equivalence"
+msgstr "Equivalence de niveau"
 
 msgid "Link to the admission (back-office)"
 msgstr "Lien vers l'admission (back-office)"
@@ -3289,8 +3378,26 @@ msgstr "Lister un document manquant"
 msgid "List of LUs of the additional module or others"
 msgstr "Liste des UEs du module complémentaire ou autres"
 
-msgid "List of the requested documents with the reason"
-msgstr "Liste des documents réclamés avec la raison associée"
+msgid ""
+"List of the mandatory requested documents that can be submitted later, with "
+"the reason"
+msgstr ""
+"Liste des documents réclamés obligatoires qui peuvent être déposés plus "
+"tard, avec la raison associée"
+
+msgid ""
+"List of the mandatory requested documents that must be submitted "
+"immediately, with the reason"
+msgstr ""
+"Liste des documents réclamés obligatoires qui doivent être déposés "
+"immédiatement, avec la raison associée"
+
+msgid ""
+"List of the not-mandatory requested documents that can be submitted later, "
+"with the reason"
+msgstr ""
+"Liste des documents réclamés non-obligatoires qui peuvent être déposés plus "
+"tard, avec la raison associée"
 
 msgid "List of the values that the Selection elements can take (one per row)."
 msgstr ""
@@ -3326,6 +3433,9 @@ msgstr "Types de fichier MIME"
 
 msgid "Madam"
 msgstr "Madame"
+
+msgid "Mail salutation"
+msgstr "Formule de salutation de l'email"
 
 msgid ""
 "Mail sent to ADRE on first submission of the confirmation paper by the "
@@ -3908,6 +4018,9 @@ msgstr "Noma"
 msgid "Non doctor reason"
 msgstr "Justification"
 
+msgid "Non-academic experience"
+msgstr "Expérience non-académique"
+
 msgid "Non-resident (as defined by government decree)"
 msgstr "Non-résident (au sens du Décret)"
 
@@ -3947,6 +4060,9 @@ msgstr "Non libre"
 
 msgid "Not fundable"
 msgstr "Non-finançable"
+
+msgid "Not specified"
+msgstr "Non renseigné"
 
 msgctxt "admission-header"
 msgid "Not specified"
@@ -4446,6 +4562,9 @@ msgstr "Professionnel"
 msgid "Professional email"
 msgstr "Adresse e-mail professionnelle"
 
+msgid "Professional experiences"
+msgstr "Expériences professionnelles"
+
 msgid "Professor"
 msgstr "Professeur"
 
@@ -4533,6 +4652,9 @@ msgstr "Soumission de la demande"
 
 msgid "Proposition type"
 msgstr "Type de la demande"
+
+msgid "Provisional"
+msgstr "Provisoire"
 
 msgid "Proximity Commission for Dental Sciences (DENT)"
 msgstr "Commission de proximité de sciences dentaires (DENT)"
@@ -4746,9 +4868,6 @@ msgstr "Remplacer le document"
 msgid "Reporting categories"
 msgstr "Catégories de reporting"
 
-msgid "Request now"
-msgstr "Réclamer maintenant"
-
 msgid "Request of a new deadline for the confirmation paper"
 msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 
@@ -4761,6 +4880,9 @@ msgstr "Réclamé"
 
 msgid "Requested documents"
 msgstr "Documents réclamés"
+
+msgid "Requested documents list"
+msgstr "Liste des documents réclamés"
 
 msgid "Requested on"
 msgstr "Réclamé le"
@@ -4824,6 +4946,9 @@ msgstr "Résident (au sens du Décret)"
 
 msgid "Restore activity to submitted"
 msgstr "Remettre cette activité au statut soumise"
+
+msgid "Restricted"
+msgstr "Restrictive"
 
 msgid "Result"
 msgstr "Résultat"
@@ -4962,6 +5087,9 @@ msgstr "Système réussite"
 
 msgid "Salary slips"
 msgstr "Fiches de rémunération"
+
+msgid "Save"
+msgstr "Enregistrer"
 
 msgctxt "admission"
 msgid "Save"
@@ -5218,6 +5346,9 @@ msgstr "Début"
 
 msgid "Start date"
 msgstr "Date de début"
+
+msgid "State"
+msgstr "État"
 
 msgid "Status"
 msgstr "Statut"
@@ -5758,6 +5889,12 @@ msgstr "La raison de la demande de mise à jour"
 msgid "The reason for refusal"
 msgstr "La raison du refus"
 
+msgid "The request status has been changed"
+msgstr "Le statut de réclamation a bien été modifié"
+
+msgid "The requested documents immediately are not completed."
+msgstr "Les documents réclamés immédiatement ne sont pas complétés."
+
 msgid "The resulting calculated academic year or pool is not consistent."
 msgstr "L'année académique et le pot déterminés ne concordent pas."
 
@@ -6026,6 +6163,14 @@ msgstr ""
 "confirme."
 
 msgid ""
+"To move to this state, an admission requirement must have been selected and "
+"at least one access title line must be selected in the past experience views."
+msgstr ""
+"Pour transitionner vers cet état, il faut qu'une condition d'accès ait été "
+"sélectionnée et qu'au moins une ligne de titre d'accès soit cochée dans les "
+"vues du parcours."
+
+msgid ""
 "To visualize and edit a document, please select it in the list opposite."
 msgstr ""
 "Pour visualiser et éditer un document, merci d'en sélectionner un dans la "
@@ -6225,6 +6370,9 @@ msgstr "Visualiser"
 
 msgid "WORK_CONTRACT"
 msgstr "Contrat de travail"
+
+msgid "Waiting"
+msgstr "En attente"
 
 msgid "Waiting for signature"
 msgstr "En attente de signature"
@@ -6622,6 +6770,16 @@ msgstr "Vous devez être l'auteur de la demande pour accéder à cette admission
 msgid "You must be the request promoter to access this admission"
 msgstr ""
 "Vous devez être le promoteur de la demande pour accéder à cette admission"
+
+msgid ""
+"You must choose a title of access among the previous experiences of the "
+"candidate."
+msgstr ""
+"Vous devez choisir un titre d'accès parmi les expériences du parcours "
+"antérieur du candidat."
+
+msgid "You must choose an admission requirement."
+msgstr "Vous devez choisir une condition d'accès."
 
 msgid ""
 "You must have worked in Belgium and your monthly salary must be at least "

@@ -71,6 +71,7 @@ class InitialiserEmplacementDocumentLibreAReclamerCommand(interface.CommandReque
     uuid_proposition: str
     type_emplacement: str
     libelle: str
+    statut_reclamation: str
     raison: str
     auteur: str
     uuid_document: str = ''
@@ -83,6 +84,7 @@ class InitialiserEmplacementDocumentAReclamerCommand(interface.CommandRequest):
     type_emplacement: str
     raison: str
     auteur: str
+    statut_reclamation: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -91,6 +93,7 @@ class ModifierReclamationEmplacementDocumentCommand(interface.CommandRequest):
     identifiant_emplacement: str
     raison: str
     auteur: str
+    statut_reclamation: str
 
 
 @attr.dataclass(frozen=True, slots=True)

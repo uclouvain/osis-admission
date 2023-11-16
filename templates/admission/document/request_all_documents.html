@@ -26,46 +26,49 @@
   {% bootstrap_form_errors form %}
   {% csrf_token %}
   {% bootstrap_field form.deadline %}
-  {% with field=form.documents %}
-    <div class="form-group {% if field.errors %}has-error{% elif form.is_bound %}has-success{% endif %} required_field">
-      <table class="table table-condensed">
-        <thead>
+  <div id="requested-documents-selects" class="form-group {% if field.errors %}has-error{% elif form.is_bound %}has-success{% endif %} required_field">
+    <table class="table table-condensed">
+      <thead>
+        <tr>
+          <th class="control-label">
+            {% translate 'Requested documents list' %}
+          </th>
+          <th class="min-width control-label">
+            {% translate 'Deadline type' %}
+          </th>
+        </tr>
+      </thead>
+      {% for field in form %}
+        {% with current_document=requested_documents|get_item_or_none:field.name %}
+          {% if current_document %}
+            {% ifchanged current_document|get_item:'tab' %}
+              {% if not forloop.first %}</tbody>{% endif %}
+              <tbody>
+              <tr class="tab-name">
+                <td colspan="2">> {{ current_document|get_item:'tab_label' }}</td>
+              </tr>
+            {% endifchanged %}
           <tr>
-            <th class="control-label">
-              {% translate 'Documents' %}
-            </th>
-            <th class="min-width control-label">
-              {% translate 'Request now' %}
-            </th>
+            <td>{{ field.label|safe }}</td>
+            <td>
+              {% bootstrap_field field show_label=False form_group_class="form-group relative-position" %}
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {% for radio in form.documents %}
-            {% with current_document=requested_documents|get_item:radio.data.value %}
-              {% ifchanged current_document|get_item:'tab' %}
-                <tr class="tab-name">
-                  <td colspan="2">> {{ current_document|get_item:'tab_label' }}</td>
-                </tr>
-              {% endifchanged %}
-            {% endwith %}
-            <tr>
-              <td>{{ radio.choice_label }}</td>
-              <td>{{ radio.tag }}</td>
-            </tr>
-          {% empty %}
-            <tr class="tab-name">
-              <td colspan="2">
-                {% translate 'No document is defined as requestable. At least one is required.' %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <div class="help-block">
-        {% for error in field.errors %}{{ error }}{% endfor %}
-      </div>
+          {% if forloop.last %}</tbody>{% endif %}
+          {% endif %}
+        {% endwith %}
+      {% empty %}
+        <tr class="tab-name">
+          <td colspan="2">
+            {% translate 'No document is defined as requestable. At least one is required.' %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+    <div class="help-block">
+      {% for error in field.errors %}{{ error }}{% endfor %}
     </div>
-  {% endwith %}
+  </div>
   <p>
     <strong>{% translate 'Contact language'%} </strong>
     <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>
@@ -87,6 +90,10 @@
   </button>
   {% bootstrap_field form.message_content %}
   <div id="hidden-message-content" class="hidden"></div>
+  <div id="delete-confirm-element" class="hidden delete-confirm-element">
+    <button type="button" class="btn btn-danger delete-confirm-button">{% translate 'Confirm' %}</button>
+    <button type="button" class="btn btn-default delete-cancel-button">{% translate 'Cancel' %}</button>
+  </div>
   {% include 'admission/document/message_content_reset_confirm_modal.html' %}
   {% include 'admission/document/message_object_reset_confirm_modal.html' %}
   <script>
@@ -96,11 +103,12 @@
           const defaultObject = `{{ form.initial.message_object|safe }}`;
           const deadlineInput = $('#id_deadline');
           let instance;
+          let changesInRequestedDocuments = false;
+          const selectsContainer = $('#requested-documents-selects');
 
+          const requestedDocumentsSelects = $('#requested-documents-selects select');
           const defaultMessageElement = $('#hidden-message-content');
           defaultMessageElement.html(defaultMessage);
-          const contentToUpdate = defaultMessageElement.find('#requested-documents-email-list');
-          const dateToUpdate = defaultMessageElement.find('#request_deadline');
 
           {# Manage the request all documents form #}
           deadlineInput.mask(deadlineInput.attr('data-mask'));
@@ -123,6 +131,37 @@
               {% endif %}
           });
 
+          function resetListOfDocuments(containerSelector, optionValue) {
+              const contentToUpdate = defaultMessageElement.find(containerSelector);
+              const contentToUpdateParent = contentToUpdate.parent();
+
+              event.preventDefault();
+
+              if (!instance) return;
+
+              {# Update the lists of documents #}
+              let htmlDocumentsList = '';
+              let previousTab = '';
+              requestedDocumentsSelects.each(function(){
+                  if ($(this).val() === optionValue) {
+                      const selectedDocument = requestedDocuments[$(this).attr('name')];
+                      if(previousTab !== selectedDocument['tab']) {
+                          if (previousTab !== '') htmlDocumentsList += '</ul></li>'
+                          htmlDocumentsList += `<li>${selectedDocument['candidate_language_tab_label']}<ul>`;
+                          previousTab = selectedDocument['tab'];
+                      }
+                      htmlDocumentsList += `<li>${selectedDocument['label']}. ${selectedDocument['reason']}</li>`;
+                  }
+              })
+
+              if (htmlDocumentsList) {
+                  htmlDocumentsList += '</ul>'
+                  contentToUpdate.html(htmlDocumentsList);
+              } else {
+                  contentToUpdateParent.remove();
+              }
+          }
+
           {# Reset the content of the message #}
           $('#content-reset-confirm-button').click(function(event) {
               event.preventDefault();
@@ -130,28 +169,19 @@
               if (!instance) return;
 
               {# Update the list of documents #}
-              let html_documents_list = '';
-              let previousTab = '';
-              $('input:checkbox[name=documents]:checked').each(function(){
-                  const selected_document = requestedDocuments[$(this).val()];
-                  if(previousTab !== selected_document['tab']) {
-                      if (previousTab !== '') html_documents_list += '</ul></li>'
-                      html_documents_list += `<li>${selected_document['candidate_language_tab_label']}<ul>`;
-                      previousTab = selected_document['tab'];
-                  }
-                  html_documents_list += `<li>${selected_document['label']}. ${selected_document['reason']}</li>`;
-              })
-              html_documents_list += '</ul>'
-              contentToUpdate.html(html_documents_list);
+              resetListOfDocuments('#immediate-requested-documents-email-list', 'IMMEDIATEMENT');
+              resetListOfDocuments('#later-blocking-requested-documents-email-list', 'ULTERIEUREMENT_BLOQUANT');
+              resetListOfDocuments('#later-non-blocking-requested-documents-email-list', 'ULTERIEUREMENT_NON_BLOQUANT');
 
               {# Update the deadline #}
               const currentDate = moment($('#id_deadline').val(), "DD-MM-YYYY");
-              dateToUpdate.html(currentDate.isValid()
+              defaultMessageElement.find('#request_deadline').html(currentDate.isValid()
                   ? moment(currentDate).format('D MMMM YYYY')
                   : '<span style="background-color: #f2dede">[{% translate 'Invalid date' %}]</span>'
               );
 
               instance.setData(defaultMessageElement.html());
+              defaultMessageElement.html(defaultMessage);
           });
 
           {# Reset the content of the object #}
@@ -183,11 +213,92 @@
               messageObjectResetConfirmModal.modal('hide');
           })
 
+          const confirmElement = $('#delete-confirm-element');
+
+          {# Manage the update of the request status #}
+
+          {# Save the default value of each select #}
+          requestedDocumentsSelects.each(function(){
+              $(this).data('previous', $(this).val());
+          })
+
+          let confirmEvents = new Set();
+
+          selectsContainer.on('htmx:beforeRequest', 'select', function(event) {
+              const value = $(this).val();
+
+              const elementIsConfirmed = confirmEvents.delete(this.id);
+
+              if (value === '' && !elementIsConfirmed) {
+                  {# A confirmation is required #}
+                  event.preventDefault();
+              } else {
+                  changesInRequestedDocuments = true;
+              }
+          });
+
+          {# Display a confirmation element it the document is not requested anymore #}
+          selectsContainer.on('change', 'select', function(event) {
+              if ($(this).val() === '') {
+                  const clonedConfirmElement = confirmElement.clone();
+                  clonedConfirmElement.removeClass('hidden');
+                  clonedConfirmElement[0].id += '-' + $(this).attr('name');
+                  $(this).closest('.form-group').append(clonedConfirmElement);
+                  clonedConfirmElement.children('button:first').focus();
+              }
+          });
+
+          {# Confirm that the document is not requested anymore #}
+          selectsContainer.on('click', '.delete-confirm-button', function(event) {
+              const row = $(this).closest('tr');
+              const select = row.find('select');
+              confirmEvents.add(select[0].id);
+              select[0].dispatchEvent(new CustomEvent('confirmStatusChange'));
+          });
+
+          {# Cancel the cancellation of the request of the document #}
+          selectsContainer.on('click', '.delete-cancel-button', function(event) {
+              const select = $(this).closest('div.form-group').children('select');
+              select[0].value = select.data('previous');
+              $(this).closest('div').remove();
+          });
+
+          selectsContainer.on('formValidation', 'select', function(event) {
+              if (event.originalEvent.detail.is_valid) {
+                  const value = $(this).val();
+
+                  if (value === '') {
+                      {# Remove the row as the document is not requested anymore #}
+                      const row = $(this).closest('tr');
+                      const parentBody = row.closest('tbody');
+                      if (parentBody.find('tr').length === 2) {
+                          {# Also remove the tab name as the removed document was the only one inside it #}
+                          parentBody.remove();
+                      } else {
+                          row.remove();
+                      }
+                  }
+                  $(this).data('previous',value);
+              }
+          });
+
+          {# Reset the document list and the document detail if some updates were made #}
+          $('#request-all-form-modal [data-dismiss="modal"]').on('click', function (event) {
+              if (changesInRequestedDocuments) {
+                  $('#document-container').trigger('formValidation', [
+                      {
+                          is_valid: true,
+                          refresh_details: true,
+                          refresh_list: true,
+                      }
+                  ]);
+              }
+          });
       });
   </script>
 </div>
 
 {% if request.htmx %}
   {# Update the admission status in the header #}
-  {% include 'admission/includes/admission_status.html' with display_on_load=False %}
+  {% include 'admission/includes/admission_status.html' %}
 {% endif %}

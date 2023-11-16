@@ -348,6 +348,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             requis_automatiquement=document.required,
             types_documents=types_documents,
             noms_documents_televerses=noms_documents_televerses,
+            statut_reclamation=document_demande.get('request_status', ''),
         )
 
     @classmethod
@@ -387,6 +388,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             requis_automatiquement=False,
             types_documents={uuid_document: metadonnees_document.get('mimetype') or ''},
             noms_documents_televerses={uuid_document: metadonnees_document.get('name') or ''},
+            statut_reclamation='',
         )
 
     @classmethod
@@ -431,6 +433,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             requis_automatiquement=False,
             types_documents=types_documents,
             noms_documents_televerses=noms_documents_televerses,
+            statut_reclamation='',
         )
 
     @classmethod

@@ -29,7 +29,6 @@ from typing import Optional, List, Union
 
 from django.db import transaction
 from django.utils.dateparse import parse_datetime, parse_date
-from django.utils.text import slugify
 
 from admission.contrib.models import (
     AdmissionFormItem,
@@ -58,6 +57,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
@@ -114,29 +114,27 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 if entity.type.name not in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
                     raise NotImplementedError
 
-                # Create a specific question for each new free document
-                elif (
-                    entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES
-                    and entity.entity_id.identifiant not in admission.requested_documents
-                ):
+                elif entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
                     uuid_value = entity.entity_id.identifiant.split('.')[-1]
-                    form_item = AdmissionFormItem(
-                        internal_label=f'{admission.reference}.{uuid_value}',
-                        type=TypeItemFormulaire.DOCUMENT.name,
-                        title={language: entity.libelle for language in TRANSLATION_LANGUAGES},
-                        uuid=uuid_value,
-                    )
-                    form_item.save()
-                    form_item_instantiation = AdmissionFormItemInstantiation(
-                        form_item=form_item,
-                        academic_year_id=admission.determined_academic_year_id,
-                        weight=1,
-                        required=True,
-                        display_according_education=CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
-                        admission=admission,
-                        tab=Onglets.DOCUMENTS.name,
-                    )
-                    form_item_instantiation.save()
+                    if entity.entity_id.identifiant not in admission.requested_documents:
+                        # Create a specific question for each new free document
+                        form_item = AdmissionFormItem(
+                            internal_label=f'{admission.reference}.{uuid_value}',
+                            type=TypeItemFormulaire.DOCUMENT.name,
+                            title={language: entity.libelle for language in TRANSLATION_LANGUAGES},
+                            uuid=uuid_value,
+                        )
+                        form_item.save()
+                        form_item_instantiation = AdmissionFormItemInstantiation(
+                            form_item=form_item,
+                            academic_year_id=admission.determined_academic_year_id,
+                            weight=1,
+                            required=False,
+                            display_according_education=CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+                            admission=admission,
+                            tab=Onglets.DOCUMENTS.name,
+                        )
+                        form_item_instantiation.save()
 
                 admission.requested_documents[entity.entity_id.identifiant] = cls.entity_to_dict(entity)
 
@@ -187,6 +185,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             'requested_at': entity.reclame_le or '',
             'deadline_at': entity.a_echeance_le or '',
             'automatically_required': entity.requis_automatiquement,
+            'request_status': entity.statut_reclamation.name if entity.statut_reclamation else '',
         }
 
     @classmethod
@@ -280,6 +279,9 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             dernier_acteur=emplacement_document.last_actor,
             requis_automatiquement=emplacement_document.automatically_required,
             document_soumis_par=emplacement_document.document_submitted_by,
+            statut_reclamation=StatutReclamationEmplacementDocument[emplacement_document.request_status]
+            if emplacement_document.request_status
+            else None,
         )
 
     @classmethod

@@ -266,10 +266,17 @@ class GeneralAccountingFormViewTestCase(TestCase):
         # Check form initialization
         form = response.context['form']
 
-        self.assertEqual(
+        common_sentence = (
+            "Attestations stipulant l'absence de dettes vis-à-vis des établissements fréquentés durant "
+            "l'année académique 2022-2023 : "
+        )
+
+        self.assertIn(
             form.fields['attestation_absence_dette_etablissement'].label,
-            "Attestations stipulant l'absence de dettes vis-à-vis des établissements "
-            "fréquentés durant l'année académique 2022-2023 : First institute, Third institute.",
+            {
+                common_sentence + 'First institute, Third institute.',
+                common_sentence + 'Third institute, First institute.',
+            },
         )
 
     def test_general_accounting_form_initialization_with_other_campus(self):

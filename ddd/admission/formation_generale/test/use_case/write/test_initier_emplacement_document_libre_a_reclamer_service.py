@@ -34,6 +34,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutEmplacementDocument,
     IdentifiantBaseEmplacementDocument,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.commands import InitialiserEmplacementDocumentLibreAReclamerCommand
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
@@ -60,6 +61,7 @@ class TestInitialiserEmplacementDocumentLibreAReclamer(TestCase):
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 libelle='Nom du document',
                 raison='La raison expliquant l\'intérêt de ce nouveau document.',
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             )
         )
 
@@ -80,6 +82,7 @@ class TestInitialiserEmplacementDocumentLibreAReclamer(TestCase):
         self.assertEqual(document.derniere_action_le, self.current_datetime)
         self.assertEqual(document.document_soumis_par, '')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, StatutReclamationEmplacementDocument.IMMEDIATEMENT)
 
     def test_should_initialiser_emplacement_document_libre_reclamable_fac(self):
         identifiant_document_depose = self.message_bus.invoke(
@@ -89,6 +92,7 @@ class TestInitialiserEmplacementDocumentLibreAReclamer(TestCase):
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
                 libelle='Nom du document',
                 raison='La raison expliquant l\'intérêt de ce nouveau document.',
+                statut_reclamation='',
             )
         )
 
@@ -109,3 +113,4 @@ class TestInitialiserEmplacementDocumentLibreAReclamer(TestCase):
         self.assertEqual(document.derniere_action_le, self.current_datetime)
         self.assertEqual(document.document_soumis_par, '')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, None)

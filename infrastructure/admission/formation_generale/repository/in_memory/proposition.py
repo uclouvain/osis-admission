@@ -33,7 +33,11 @@ from admission.ddd.admission.domain.service.i_unites_enseignement_translator imp
 from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
@@ -149,6 +153,7 @@ class PropositionInMemoryRepository(
                         'requested_at': '2023-01-02T00:00:00',
                         'deadline_at': '2023-01-19',
                         'automatically_required': False,
+                        'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
                     },
                     'LIBRE_CANDIDAT.16de0c3d-3c06-4c93-8eb4-c8648f04f146': {
                         'last_actor': '00987890',
@@ -159,6 +164,7 @@ class PropositionInMemoryRepository(
                         'requested_at': '2023-01-03T00:00:00',
                         'deadline_at': '2023-01-19',
                         'automatically_required': False,
+                        'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
                     },
                 },
             ),
@@ -307,7 +313,7 @@ class PropositionInMemoryRepository(
             candidat_a_plusieurs_demandes=any(
                 proposition.statut == ChoixStatutPropositionGenerale.EN_BROUILLON for proposition in propositions
             ),
-            titre_access='',
+            titre_acces='',
             candidat_assimile=proposition.comptabilite.type_situation_assimilation
             and proposition.comptabilite.type_situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION,
             fraudeur_ares=False,
@@ -347,4 +353,16 @@ class PropositionInMemoryRepository(
             nom_personne_contact_programme_annuel_annuel=proposition.nom_personne_contact_programme_annuel_annuel,
             email_personne_contact_programme_annuel_annuel=proposition.email_personne_contact_programme_annuel_annuel,
             commentaire_programme_conjoint=proposition.commentaire_programme_conjoint,
+            condition_acces=proposition.condition_acces.name if proposition.condition_acces else '',
+            millesime_condition_acces=proposition.millesime_condition_acces,
+            type_equivalence_titre_acces=proposition.type_equivalence_titre_acces
+            if proposition.type_equivalence_titre_acces
+            else '',
+            statut_equivalence_titre_acces=proposition.statut_equivalence_titre_acces
+            if proposition.statut_equivalence_titre_acces
+            else '',
+            etat_equivalence_titre_acces=proposition.etat_equivalence_titre_acces
+            if proposition.etat_equivalence_titre_acces
+            else '',
+            date_prise_effet_equivalence_titre_acces=proposition.date_prise_effet_equivalence_titre_acces,
         )

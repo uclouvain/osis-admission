@@ -44,9 +44,9 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
+    StatutReclamationEmplacementDocument,
 )
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
-    EmplacementDocumentInMemoryRepository,
     emplacement_document_in_memory_repository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
@@ -86,6 +86,7 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 libelle='Nom du document',
                 raison='La raison.',
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             )
         )
 
@@ -121,6 +122,7 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 1))
         self.assertEqual(document.document_soumis_par, '987654321')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, None)
 
     @freezegun.freeze_time('2023-01-01', as_kwarg='freeze_time')
     def test_should_remplir_emplacement_document_sic_non_reclamable_interne(self, freeze_time):
@@ -167,6 +169,7 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 1))
         self.assertEqual(document.document_soumis_par, '987654321')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, None)
 
     @freezegun.freeze_time('2023-01-01', as_kwarg='freeze_time')
     def test_should_remplir_emplacement_document_fac_reclamable(self, freeze_time):
@@ -178,6 +181,7 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 libelle='Nom du document',
                 raison='La raison.',
+                statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
             )
         )
 
@@ -213,6 +217,7 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 1))
         self.assertEqual(document.document_soumis_par, '987654321')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, None)
 
     @freezegun.freeze_time('2023-01-01', as_kwarg='freeze_time')
     def test_should_remplir_emplacement_document_fac_non_reclamable_interne(self, freeze_time):
@@ -259,6 +264,7 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 1))
         self.assertEqual(document.document_soumis_par, '987654321')
         self.assertEqual(document.requis_automatiquement, False)
+        self.assertEqual(document.statut_reclamation, None)
 
     @freezegun.freeze_time('2023-01-01', as_kwarg='freeze_time')
     def test_should_remplir_emplacement_document_non_libre(self, freeze_time):
@@ -282,6 +288,7 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
                 derniere_action_le=None,
                 dernier_acteur='',
                 document_soumis_par='',
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT,
             )
         )
 
@@ -314,3 +321,4 @@ class TestRemplirEmplacementDocumentParGestionnaire(TestCase):
         self.assertEqual(document.derniere_action_le, None)
         self.assertEqual(document.document_soumis_par, '987654321')
         self.assertEqual(document.requis_automatiquement, True)
+        self.assertEqual(document.statut_reclamation, None)

@@ -25,19 +25,19 @@
 
 <ul class="nav nav-tabs" role="tablist">
   <li role="presentation" class="active">
-    <a href="#parcours-complete" aria-controls="parcours-complete" role="tab" data-toggle="tab">{% trans "Whole view" %}</a>
+    <a href="#{{ tab }}-parcours-complete" aria-controls="parcours-complete" role="tab" data-toggle="tab">{% trans "Whole view" %}</a>
   </li>
   <li role="presentation">
-    <a href="#parcours-formations" aria-controls="parcours-formations" role="tab" data-toggle="tab">{% trans "Academics trainings view" %}</a>
+    <a href="#{{ tab }}-parcours-formations" aria-controls="parcours-formations" role="tab" data-toggle="tab">{% trans "Academics trainings view" %}</a>
   </li>
   <li role="presentation">
-    <a href="#parcours-financabilite" aria-controls="parcours-financabilite" role="tab" data-toggle="tab">{% trans "Financeability view" %}</a>
+    <a href="#{{ tab }}-parcours-financabilite" aria-controls="parcours-financabilite" role="tab" data-toggle="tab">{% trans "Financeability view" %}</a>
   </li>
 </ul>
 
-<div id="parcours" class="tab-content">
+<div id="{{ tab }}-parcours" class="tab-content parcours">
   {# Vue complète #}
-  <div role="tabpanel" class="tab-pane active" id="parcours-complete">
+  <div role="tabpanel" class="tab-pane active" id="{{ tab }}-parcours-complete">
     <table class="table">
       <thead>
         <tr>
@@ -55,7 +55,7 @@
       <tbody>
         {% for year, year_experiences in experiences.items %}
           {% for experience in year_experiences %}
-            {% include "admission/general_education/includes/checklist/parcours_row.html" with avec_titre_acces=True %}
+            {% include "admission/general_education/includes/checklist/parcours_row.html" %}
           {% endfor %}
         {% endfor %}
       </tbody>
@@ -63,7 +63,7 @@
   </div>
 
   {# Vue formations académiques #}
-  <div role="tabpanel" class="tab-pane" id="parcours-formations">
+  <div role="tabpanel" class="tab-pane" id="{{ tab }}-parcours-formations">
     <table class="table">
       <thead>
         <tr>
@@ -82,7 +82,7 @@
         {% with experiences_formations=experiences|filter_experiences_trainings %}
           {% for year, year_experiences in experiences_formations.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" with avec_titre_acces=True %}
+              {% include "admission/general_education/includes/checklist/parcours_row.html" %}
             {% empty %}
               {% ifchanged %}
               <tr class="bg-primary">
@@ -97,13 +97,14 @@
   </div>
 
   {# Vue finançabilité #}
-  <div role="tabpanel" class="tab-pane" id="parcours-financabilite">
+  <div role="tabpanel" class="tab-pane" id="{{ tab }}-parcours-financabilite">
     <table class="table">
       <thead>
         <tr>
           <th>{% trans "Years" %}</th>
           <th>{# Diplomant #}</th>
           <th>{% trans "Experiences" %}</th>
+          <th>{% trans "Access title" %}</th>
           <th>{% trans "Registered credits" %}</th>
           <th>{% trans "Credits earned" %}</th>
           <th>{% trans "Reduction" %}</th>
@@ -115,7 +116,7 @@
         {% with experiences_financabilite=experiences|filter_experiences_financability %}
           {% for year, year_experiences in experiences_financabilite.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" with avec_titre_acces=False %}
+              {% include "admission/general_education/includes/checklist/parcours_row.html" %}
             {% endfor %}
           {% endfor %}
         {% endwith %}

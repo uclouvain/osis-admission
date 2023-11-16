@@ -129,7 +129,7 @@ class InjectionEPC:
             'prenom_suivant': candidat.middle_name,
             'date_de_naissance': candidat.birth_date.strftime("%d/%m/%Y") if candidat.birth_date else '',
             'lieu_de_naissance': candidat.birth_place,
-            'pays_de_naissance': candidat.birth_country.iso_code,
+            'pays_de_naissance': candidat.birth_country.iso_code if candidat.birth_country else '',
             'annee_de_naissance': candidat.birth_year or '',
             'sexe': candidat.sex,
             'etat_civil': candidat.civil_state,
@@ -217,13 +217,19 @@ class InjectionEPC:
             'pays': pays_etablissement
         }
         if etablissement and etablissement.establishment_type == EstablishmentTypeEnum.UNIVERSITY.name:
-            code_pays, code_uni = etablissement.external_id.split('_')[2:] if etablissement else ('', '')
+            external_id_parts = etablissement.external_id.split('_')[1:] if etablissement else []
+            code_pays, code_uni, universite_id = '', '', ''
+            if len(external_id_parts) > 1:
+                code_pays, code_uni = external_id_parts[1:]
+            elif len(external_id_parts) == 1:
+                universite_id = external_id_parts[0]
             return {
                 **donnees_annuelles,
                 'code_etude': etudes.code_etude if etudes else CODE_ETUDE_UNIV_INCONNU,
                 'type_etude': 'UNIV_BELGE' if pays_etablissement == BELGIQUE_ISO_CODE else 'UNIV_ETRG',
                 'code_uni': code_uni,
                 'code_pays': code_pays,
+                'universite_id': universite_id,
                 'grade': GRADE_MAP.get(experience_educative.obtained_grade),
 
             }

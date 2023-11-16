@@ -31,7 +31,11 @@ from django.test import SimpleTestCase
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity as SuperPropositionIdentity
 from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
-from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from admission.ddd.admission.formation_generale.commands import (
     RecupererDocumentsPropositionQuery,
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
@@ -70,7 +74,6 @@ class RecalculerEmplacementsDocumentsNonLibresPropositionTestCase(SimpleTestCase
         self.emplacement_document_repository = emplacement_document_in_memory_repository
         self.addCleanup(self.emplacement_document_repository.reset)
 
-    # @freezegun.freeze_time('2023-01-01')
     def test_recalculer_emplacements_documents_non_libres_proposition(self):
         self.assertEqual(len(self.emplacement_document_repository.entities), 4)
 
@@ -91,6 +94,7 @@ class RecalculerEmplacementsDocumentsNonLibresPropositionTestCase(SimpleTestCase
             self.assertEqual(emplacement.uuids_documents, [])
             self.assertEqual(emplacement.type, TypeEmplacementDocument.NON_LIBRE)
             self.assertEqual(emplacement.statut, StatutEmplacementDocument.A_RECLAMER)
+            self.assertEqual(emplacement.statut_reclamation, StatutReclamationEmplacementDocument.IMMEDIATEMENT)
             self.assertEqual(emplacement.justification_gestionnaire, '')
             self.assertEqual(emplacement.requis_automatiquement, True)
             self.assertEqual(emplacement.libelle, '')
