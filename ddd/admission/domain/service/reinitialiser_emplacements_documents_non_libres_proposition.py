@@ -28,6 +28,7 @@ from typing import List
 from admission.ddd.admission.domain.builder.emplacement_document_builder import EmplacementDocumentBuilder
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from admission.exports.admission_recap.section import get_sections
@@ -63,6 +64,7 @@ class ReinitialiserEmplacementsDocumentsNonLibresPropositionService(interface.Do
                             uuid_proposition=proposition_identity.uuid,
                             auteur='',
                             raison='',
+                            statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                         )
                     )
 

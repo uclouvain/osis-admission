@@ -28,14 +28,19 @@ from typing import List
 
 from django import forms
 from django.conf import settings
+from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument, TypeEmplacementDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    StatutEmplacementDocument,
+    TypeEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from admission.forms import AdmissionFileUploadField, CustomDateInput
-from admission.templatetags.admission import formatted_language
+from admission.templatetags.admission import formatted_language, document_request_status_css_class
+from base.forms.utils.choice_field import BLANK_CHOICE
 
 
 class UploadDocumentFormMixin(forms.Form):
@@ -69,6 +74,10 @@ class UploadFreeDocumentForm(forms.Form):
     )
 
 
+REQUEST_STATUS_CHOICES = StatutReclamationEmplacementDocument.choices()
+REQUEST_STATUS_CHOICES_WITH_OPTIONAL = (BLANK_CHOICE[0],) + StatutReclamationEmplacementDocument.choices()
+
+
 class RequestFreeDocumentForm(forms.Form):
     file_name = forms.CharField(
         label=pgettext_lazy('admission', 'File name'),
@@ -77,21 +86,61 @@ class RequestFreeDocumentForm(forms.Form):
     reason = forms.CharField(
         label=pgettext_lazy('admission', 'Reason'),
         widget=forms.Textarea,
+        required=False,
+    )
+
+    request_status = forms.ChoiceField(
+        label=_('Document to be requested'),
+        choices=REQUEST_STATUS_CHOICES_WITH_OPTIONAL,
     )
 
 
-class RequestFreeDocumentWithDefaultFileForm(RequestFreeDocumentForm):
-    file = AdmissionFileUploadField(
-        label=_('File'),
-        max_files=1,
-        min_files=1,
-    )
+class RequestFreeDocumentWithDefaultFileForm(UploadFreeDocumentForm):
+    pass
+
+
+class ChangeRequestDocumentForm(forms.Form):
+    @classmethod
+    def create_change_request_document_field(
+        cls,
+        label,
+        request_status,
+        document_identifier,
+        proposition_uuid,
+        automatically_required,
+    ):
+        document_field = forms.ChoiceField(
+            label=label,
+            required=automatically_required,
+            choices=REQUEST_STATUS_CHOICES if automatically_required else REQUEST_STATUS_CHOICES_WITH_OPTIONAL,
+            initial=request_status,
+        )
+        document_field.widget.attrs['hx-trigger'] = 'change changed delay:2s, confirmStatusChange'
+        document_field.widget.attrs['hx-swap'] = 'none'
+        document_field.widget.attrs['hx-target'] = 'this'
+        document_field.widget.attrs['hx-post'] = resolve_url(
+            'admission:general-education:document:candidate-request-status',
+            uuid=proposition_uuid,
+            identifier=document_identifier,
+        )
+        return document_field
+
+    def __init__(self, document_identifier, proposition_uuid, automatically_required, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields[document_identifier] = self.create_change_request_document_field(
+            label='',
+            request_status='',
+            document_identifier=document_identifier,
+            proposition_uuid=proposition_uuid,
+            automatically_required=automatically_required,
+        )
 
 
 class RequestDocumentForm(forms.Form):
-    is_requested = forms.BooleanField(
+    request_status = forms.ChoiceField(
         label=_('Document to be requested'),
         required=False,
+        choices=REQUEST_STATUS_CHOICES,
     )
 
     reason = forms.CharField(
@@ -108,39 +157,36 @@ class RequestDocumentForm(forms.Form):
             ).format(language_code=formatted_language(candidate_language))
         )
 
+        request_status = self.data.get('request_status', self.initial.get('request_status'))
+        if request_status:
+            self.fields['request_status'].label = mark_safe(
+                f'{self.fields["request_status"].label} '
+                f'<span class="fa-solid fa-file {document_request_status_css_class(request_status)}"></span>'
+            )
+
         self.auto_requested = auto_requested
         if auto_requested:
             # If the document is automatically requested, it must be requested to specify a reason
-            self.fields['is_requested'].required = True
-            self.fields['is_requested'].widget.attrs['title'] = _('Automatically required')
-            if self.data.get('is_requested', self.initial.get('is_requested')):
-                self.fields['is_requested'].widget.attrs['onclick'] = 'return false'
+            self.fields['request_status'].required = True
+            self.fields['request_status'].widget.attrs['title'] = _('Automatically required')
 
         if not editable_document:
-            self.fields['is_requested'].disabled = True
+            self.fields['request_status'].disabled = True
             self.fields['reason'].disabled = True
 
     def clean(self):
         cleaned_data = super().clean()
 
-        if not cleaned_data.get('is_requested'):
+        if not cleaned_data.get('request_status'):
             cleaned_data['reason'] = ''
-
-        elif not cleaned_data.get('reason'):
-            self.add_error('reason', FIELD_REQUIRED_MESSAGE)
 
         return cleaned_data
 
 
 class RequestAllDocumentsForm(forms.Form):
     deadline = forms.DateField(
-        label=_('Deadline'),
+        label=_('Deadline for documents to be requested immediately'),
         widget=CustomDateInput(),
-    )
-
-    documents = forms.MultipleChoiceField(
-        label=_('Documents to be requested now'),
-        widget=forms.CheckboxSelectMultiple,
     )
 
     message_object = forms.CharField(
@@ -152,7 +198,7 @@ class RequestAllDocumentsForm(forms.Form):
         widget=forms.Textarea(),
     )
 
-    def __init__(self, documents: List[EmplacementDocumentDTO], *args, **kwargs):
+    def __init__(self, documents: List[EmplacementDocumentDTO], proposition_uuid, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         documents_choices = []
@@ -166,6 +212,8 @@ class RequestAllDocumentsForm(forms.Form):
             }
         )
 
+        self.documents = {}
+
         for document in documents:
             if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
                 if document.document_uuids:
@@ -176,14 +224,39 @@ class RequestAllDocumentsForm(forms.Form):
                     label += '<span class="fa-solid fa-building-columns"></span> '
                 label += document.libelle
 
+                document_field = ChangeRequestDocumentForm.create_change_request_document_field(
+                    label=label,
+                    document_identifier=document.identifiant,
+                    request_status=document.statut_reclamation,
+                    proposition_uuid=proposition_uuid,
+                    automatically_required=document.requis_automatiquement,
+                )
+
+                self.fields[document.identifiant] = document_field
+                self.documents[document.identifiant] = document_field
+
                 initial_document_choices.append(document.identifiant)
                 documents_choices.append((document.identifiant, mark_safe(label)))
-
-        self.fields['documents'].choices = documents_choices
-        self.fields['documents'].initial = initial_document_choices
 
     class Media:
         js = [
             'js/moment.min.js',
             'js/locales/moment-fr.js',
         ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Merge the contents of the documents fields
+        requested_documents = []
+
+        for field_name in self.documents:
+            if self.cleaned_data.get(field_name):
+                requested_documents.append(field_name)
+
+        if not requested_documents:
+            self.add_error(None, _('At least one document must be selected.'))
+
+        cleaned_data['requested_documents'] = requested_documents
+
+        return cleaned_data

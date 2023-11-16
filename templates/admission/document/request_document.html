@@ -30,8 +30,8 @@
 >
   {% bootstrap_form_errors request_form %}
   {% csrf_token %}
-  {% bootstrap_field request_form.is_requested %}
-  {% if request_form.is_requested.value %}
+  {% bootstrap_field request_form.request_status %}
+  {% if request_form.request_status.value %}
     <div id="reason-container" class="flex-content-no-wrap">
       <div id="reason-message-container">
         {% field_data request_form.reason.label request_reason|linebreaks %}
@@ -52,35 +52,41 @@
 </form>
 
 <script>
-  $(function () {
-    const isRequested = $('#id_is_requested').prop('checked');
+    $(function () {
+        const requestStatusInput = $('#id_request_status');
+        const defaultRequestStatus = requestStatusInput.val();
+        const requestSubmitButton = $('#request-form-modal button[type="submit"]')[0];
 
-    $('#id_is_requested').change(function() {
-      if (this.checked) {
-        $('#request-form-modal').modal('show');
-      } else {
-        {% if document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES %}
-          $('#cancel-request-form-modal').modal('show');
-        {% else %}
-          $('#cancel-request-form-modal button[type="submit"]').click();
+        requestStatusInput.change(function() {
+            if (this.value) {
+                $('#request-form-modal').modal('show');
+            } else {
+                {% if document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES %}
+                    $('#cancel-request-form-modal').modal('show');
+                {% else %}
+                    $('#cancel-request-form-modal button[type="submit"]').click();
+                {% endif %}
+            }
+        });
+
+        $('#request-form-modal').on('shown.bs.modal', function () {
+            $('#request-form-modal textarea').focus();
+        });
+
+        $('#request-form-modal').on('hide.bs.modal', function (event) {
+            {# Reset the request status as the form has not been submitted #}
+            if (document.activeElement !== requestSubmitButton) {
+              requestStatusInput.val(defaultRequestStatus);
+            }
+        });
+
+        $('#request-form').on('htmx:beforeSend', function (evt) {
+            {# Hide the modal when submitting the form #}
+            $('.modal').modal('hide');
+        });
+
+        {% if request_form.is_bound and not request_form.is_valid %}
+            $('#request-form-modal').modal('show');
         {% endif %}
-      }
     });
-
-    $('#request-form-modal').on('shown.bs.modal', function () {
-      $('#request-form-modal textarea').focus();
-    });
-
-    $('.cancel-button').on('click', function () {
-      $('#id_is_requested').prop('checked', isRequested);
-    });
-
-    $('#request-form').on('htmx:beforeSend', function (evt) {
-      $('.modal').modal('hide');
-    });
-
-    {% if request_form.is_bound and not request_form.is_valid %}
-      $('#request-form-modal').modal('show');
-    {% endif %}
-  });
 </script>

@@ -30,6 +30,7 @@ import freezegun
 from django.test import override_settings
 
 from admission.contrib.models import GeneralEducationAdmission
+from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.tests import TestCase
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
@@ -54,6 +55,7 @@ class TestGeneralEducationAdmissionDocuments(TestCase):
             'requested_at': '',
             'status': 'A_RECLAMER',
             'type': 'NON_LIBRE',
+            'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
         }
         cls.manuel_required_params = {
             'automatically_required': False,
@@ -64,6 +66,7 @@ class TestGeneralEducationAdmissionDocuments(TestCase):
             'requested_at': '',
             'status': 'A_RECLAMER',
             'type': 'NON_LIBRE',
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
         }
 
     def setUp(self) -> None:
@@ -81,7 +84,7 @@ class TestGeneralEducationAdmissionDocuments(TestCase):
 
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
-            side_effect=lambda token,  *args, **kwargs: token,
+            side_effect=lambda token, *args, **kwargs: token,
         )
         patcher.start()
         self.addCleanup(patcher.stop)

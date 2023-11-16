@@ -30,7 +30,11 @@ from admission.ddd.admission.domain.builder.emplacement_document_identity_builde
 )
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument, StatutEmplacementDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from osis_common.ddd import interface
 from osis_common.ddd.interface import CommandRequest
 
@@ -52,6 +56,7 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
         type_emplacement: str,
         libelle: str,
         raison: str = '',
+        statut_reclamation: str = '',
     ) -> 'EmplacementDocument':
         heure_initialisation = datetime.datetime.now()
         return EmplacementDocument(
@@ -66,6 +71,7 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
             statut=StatutEmplacementDocument.A_RECLAMER,
             justification_gestionnaire=raison,
             derniere_action_le=heure_initialisation,
+            statut_reclamation=StatutReclamationEmplacementDocument[statut_reclamation] if statut_reclamation else None,
         )
 
     @classmethod
@@ -75,6 +81,7 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
         uuid_proposition: str,
         auteur: str,
         raison: str,
+        statut_reclamation: str,
     ) -> 'EmplacementDocument':
         heure_initialisation = datetime.datetime.now()
         return EmplacementDocument(
@@ -89,4 +96,5 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
             justification_gestionnaire=raison,
             derniere_action_le=heure_initialisation,
             requis_automatiquement=True,
+            statut_reclamation=StatutReclamationEmplacementDocument[statut_reclamation],
         )

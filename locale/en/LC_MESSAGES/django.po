@@ -731,6 +731,9 @@ msgstr ""
 msgid "Assimilation start date"
 msgstr ""
 
+msgid "At least one document must be selected."
+msgstr ""
+
 msgid "Attachment: PhD training"
 msgstr ""
 
@@ -1326,6 +1329,9 @@ msgstr ""
 msgid "Confirm restoring activity to submitted"
 msgstr ""
 
+msgid "Confirm the deletion"
+msgstr ""
+
 msgid "Confirm the status change"
 msgstr ""
 
@@ -1667,10 +1673,10 @@ msgstr ""
 msgid "Date the application is sent to the supervision group"
 msgstr ""
 
-msgid "Deadline"
+msgid "Deadline extended"
 msgstr ""
 
-msgid "Deadline extended"
+msgid "Deadline for documents to be requested immediately"
 msgstr ""
 
 msgid "Deadline for the candidate to upload documents"
@@ -1680,6 +1686,21 @@ msgid "Deadline of the confirmation paper (DD/MM/YYYY)"
 msgstr ""
 
 msgid "Deadline on"
+msgstr ""
+
+msgid "Deadline type"
+msgstr ""
+
+msgctxt "female gender"
+msgid "Dear"
+msgstr ""
+
+msgctxt "male gender"
+msgid "Dear"
+msgstr ""
+
+msgctxt "other gender"
+msgid "Dear"
 msgstr ""
 
 msgid "Debug"
@@ -1876,9 +1897,6 @@ msgid ""
 msgstr ""
 
 msgid "Documents specific to limited-enrolment courses"
-msgstr ""
-
-msgid "Documents to be requested now"
 msgstr ""
 
 msgid "Does not have a doctor title"
@@ -2702,6 +2720,9 @@ msgid ""
 "application to the SIC by selecting the appropriate button below."
 msgstr ""
 
+msgid "Immediately"
+msgstr ""
+
 msgid "Important information:"
 msgstr ""
 
@@ -2950,6 +2971,12 @@ msgstr ""
 msgid "Late enrollment"
 msgstr ""
 
+msgid "Later > blocking"
+msgstr ""
+
+msgid "Later > non-blocking"
+msgstr ""
+
 msgid "Launch"
 msgstr ""
 
@@ -3028,7 +3055,19 @@ msgstr ""
 msgid "List of LUs of the additional module or others"
 msgstr ""
 
-msgid "List of the requested documents with the reason"
+msgid ""
+"List of the mandatory requested documents that can be submitted later, with "
+"the reason"
+msgstr ""
+
+msgid ""
+"List of the mandatory requested documents that must be submitted "
+"immediately, with the reason"
+msgstr ""
+
+msgid ""
+"List of the not-mandatory requested documents that can be submitted later, "
+"with the reason"
 msgstr ""
 
 msgid "List of the values that the Selection elements can take (one per row)."
@@ -3062,6 +3101,9 @@ msgid "MIME file types"
 msgstr ""
 
 msgid "Madam"
+msgstr ""
+
+msgid "Mail salutation"
 msgstr ""
 
 msgid ""
@@ -4340,9 +4382,6 @@ msgstr ""
 msgid "Reporting categories"
 msgstr ""
 
-msgid "Request now"
-msgstr ""
-
 msgid "Request of a new deadline for the confirmation paper"
 msgstr ""
 
@@ -4354,6 +4393,9 @@ msgid "Requested"
 msgstr ""
 
 msgid "Requested documents"
+msgstr ""
+
+msgid "Requested documents list"
 msgstr ""
 
 msgid "Requested on"
@@ -5264,6 +5306,12 @@ msgid "The reason for needing update"
 msgstr ""
 
 msgid "The reason for refusal"
+msgstr ""
+
+msgid "The request status has been changed"
+msgstr ""
+
+msgid "The requested documents immediately are not completed."
 msgstr ""
 
 msgid "The resulting calculated academic year or pool is not consistent."
