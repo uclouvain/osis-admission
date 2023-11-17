@@ -27,10 +27,12 @@ import rules
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from admission.auth.predicates import (
+from admission.auth.predicates.common import (
     has_education_group_of_types,
     is_part_of_education_group,
     is_debug,
+)
+from admission.auth.predicates.general import (
     in_fac_status,
     in_fac_status_extended,
     is_submitted,

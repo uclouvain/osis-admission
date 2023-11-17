@@ -29,21 +29,8 @@ from unittest import mock
 from django.test import TestCase
 from osis_signature.enums import SignatureState
 
-from admission.auth import predicates
-from admission.auth.predicates import (
-    unconfirmed_proposition,
-    is_enrolled,
-    is_being_enrolled,
-    confirmation_paper_in_progress,
-    is_invited_to_complete,
-    is_invited_to_pay_after_submission,
-    is_invited_to_pay_after_request,
-    in_fac_status,
-    in_fac_status_extended,
-    in_sic_status,
-    in_sic_status_extended,
-    is_submitted,
-)
+from admission.auth.predicates import common, doctorate, general
+from admission.auth.predicates.general import is_invited_to_pay_after_request
 from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -71,8 +58,8 @@ class PredicatesTestCase(TestCase):
         candidate1 = CandidateFactory().person
         candidate2 = CandidateFactory().person
         request = DoctorateAdmissionFactory(candidate=candidate1)
-        self.assertTrue(predicates.is_admission_request_author(candidate1.user, request))
-        self.assertFalse(predicates.is_admission_request_author(candidate2.user, request))
+        self.assertTrue(common.is_admission_request_author(candidate1.user, request))
+        self.assertFalse(common.is_admission_request_author(candidate2.user, request))
 
     def test_is_main_promoter(self):
         author = CandidateFactory().person
@@ -81,9 +68,9 @@ class PredicatesTestCase(TestCase):
         process = _ProcessFactory()
         PromoterActorFactory(actor_ptr__person_id=promoter2.person_id, actor_ptr__process=process)
         request = DoctorateAdmissionFactory(supervision_group=process)
-        self.assertFalse(predicates.is_admission_request_promoter(author.user, request))
-        self.assertFalse(predicates.is_admission_request_promoter(promoter1.person.user, request))
-        self.assertTrue(predicates.is_admission_request_promoter(promoter2.person.user, request))
+        self.assertFalse(doctorate.is_admission_request_promoter(author.user, request))
+        self.assertFalse(doctorate.is_admission_request_promoter(promoter1.person.user, request))
+        self.assertTrue(doctorate.is_admission_request_promoter(promoter2.person.user, request))
 
     def test_is_part_of_committee_and_invited(self):
         # Create process
@@ -100,9 +87,9 @@ class PredicatesTestCase(TestCase):
         request = DoctorateAdmissionFactory(supervision_group=process)
 
         # Check predicate
-        self.assertTrue(predicates.is_part_of_committee_and_invited(invited_promoter.person.user, request))
-        self.assertFalse(predicates.is_part_of_committee_and_invited(approved_promoter.person.user, request))
-        self.assertFalse(predicates.is_part_of_committee_and_invited(unknown_promoter.person.user, request))
+        self.assertTrue(doctorate.is_part_of_committee_and_invited(invited_promoter.person.user, request))
+        self.assertFalse(doctorate.is_part_of_committee_and_invited(approved_promoter.person.user, request))
+        self.assertFalse(doctorate.is_part_of_committee_and_invited(unknown_promoter.person.user, request))
 
     def test_is_part_of_doctoral_commission(self):
         doctoral_commission = EntityFactory()
@@ -113,18 +100,18 @@ class PredicatesTestCase(TestCase):
         self.predicate_context_patcher.target.context['role_qs'] = CddConfigurator.objects.filter(
             person=manager1.person
         )
-        self.assertTrue(predicates.is_part_of_doctoral_commission(manager1.person.user, request))
+        self.assertTrue(doctorate.is_part_of_doctoral_commission(manager1.person.user, request))
 
         self.predicate_context_patcher.target.context['role_qs'] = CddConfigurator.objects.filter(
             person=manager2.person
         )
-        self.assertFalse(predicates.is_part_of_doctoral_commission(manager2.person.user, request))
+        self.assertFalse(doctorate.is_part_of_doctoral_commission(manager2.person.user, request))
 
     def test_is_part_of_committee(self):
         # Promoter is part of the supervision group
         promoter = PromoterActorFactory()
         request = DoctorateAdmissionFactory(supervision_group=promoter.process)
-        self.assertTrue(predicates.is_part_of_committee(promoter.person.user, request))
+        self.assertTrue(doctorate.is_part_of_committee(promoter.person.user, request))
 
     def test_unconfirmed_proposition(self):
         admission = DoctorateAdmissionFactory()
@@ -142,14 +129,14 @@ class PredicatesTestCase(TestCase):
         for status in valid_status:
             admission.status = status
             self.assertTrue(
-                unconfirmed_proposition(admission.candidate.user, admission),
+                doctorate.unconfirmed_proposition(admission.candidate.user, admission),
                 'This status must be accepted: {}'.format(status),
             )
 
         for status in invalid_status:
             admission.status = status
             self.assertFalse(
-                unconfirmed_proposition(admission.candidate.user, admission),
+                doctorate.unconfirmed_proposition(admission.candidate.user, admission),
                 'This status must not be accepted: {}'.format(status),
             )
 
@@ -169,13 +156,15 @@ class PredicatesTestCase(TestCase):
         for status in valid_status:
             admission.status = status
             self.assertTrue(
-                is_enrolled(admission.candidate.user, admission), 'This status must be accepted: {}'.format(status)
+                doctorate.is_enrolled(admission.candidate.user, admission),
+                'This status must be accepted: {}'.format(status),
             )
 
         for status in invalid_status:
             admission.status = status
             self.assertFalse(
-                is_enrolled(admission.candidate.user, admission), 'This status must not be accepted: {}'.format(status)
+                doctorate.is_enrolled(admission.candidate.user, admission),
+                'This status must not be accepted: {}'.format(status),
             )
 
     def test_is_being_enrolled(self):
@@ -194,14 +183,14 @@ class PredicatesTestCase(TestCase):
         for status in valid_status:
             admission.status = status
             self.assertTrue(
-                is_being_enrolled(admission.candidate.user, admission),
+                doctorate.is_being_enrolled(admission.candidate.user, admission),
                 'This status must be accepted: {}'.format(status),
             )
 
         for status in invalid_status:
             admission.status = status
             self.assertFalse(
-                is_being_enrolled(admission.candidate.user, admission),
+                doctorate.is_being_enrolled(admission.candidate.user, admission),
                 'This status must not be accepted: {}'.format(status),
             )
 
@@ -222,14 +211,14 @@ class PredicatesTestCase(TestCase):
         for status in valid_status:
             admission.post_enrolment_status = status
             self.assertTrue(
-                confirmation_paper_in_progress(admission.candidate.user, admission),
+                doctorate.confirmation_paper_in_progress(admission.candidate.user, admission),
                 'This status must be accepted: {}'.format(status),
             )
 
         for status in invalid_status:
             admission.post_enrolment_status = status
             self.assertFalse(
-                confirmation_paper_in_progress(admission.candidate.user, admission),
+                doctorate.confirmation_paper_in_progress(admission.candidate.user, admission),
                 'This status must not be accepted: {}'.format(status),
             )
 
@@ -243,7 +232,10 @@ class PredicatesTestCase(TestCase):
 
         for status in ChoixStatutPropositionGenerale.get_names():
             admission.status = status
-            self.assertEqual(is_invited_to_complete(admission.candidate.user, admission), status in valid_statuses)
+            self.assertEqual(
+                general.is_invited_to_complete(admission.candidate.user, admission),
+                status in valid_statuses,
+            )
 
     def test_is_invited_to_pay_after_submission(self):
         admission_without_checklist = GeneralEducationAdmissionFactory(checklist={})
@@ -265,7 +257,7 @@ class PredicatesTestCase(TestCase):
             admission_with_checklist.status = status
             status_is_valid = status in valid_statuses
             self.assertEqual(
-                is_invited_to_pay_after_submission(
+                general.is_invited_to_pay_after_submission(
                     admission_with_checklist.candidate.user,
                     admission_with_checklist,
                 ),
@@ -275,7 +267,7 @@ class PredicatesTestCase(TestCase):
 
             admission_without_checklist.status = status
             self.assertFalse(
-                is_invited_to_pay_after_submission(
+                general.is_invited_to_pay_after_submission(
                     admission_without_checklist.candidate.user,
                     admission_without_checklist,
                 ),
@@ -307,7 +299,7 @@ class PredicatesTestCase(TestCase):
             admission_with_checklist.status = status
             status_is_valid = status in valid_statuses
             self.assertEqual(
-                is_invited_to_pay_after_request(
+                general.is_invited_to_pay_after_request(
                     admission_with_checklist.candidate.user,
                     admission_with_checklist,
                 ),
@@ -317,7 +309,7 @@ class PredicatesTestCase(TestCase):
 
             admission_without_checklist.status = status
             self.assertFalse(
-                is_invited_to_pay_after_request(
+                general.is_invited_to_pay_after_request(
                     admission_without_checklist.candidate.user,
                     admission_without_checklist,
                 ),
@@ -343,7 +335,7 @@ class PredicatesTestCase(TestCase):
         for status in ChoixStatutPropositionGenerale.get_names():
             admission.status = status
             self.assertEqual(
-                in_fac_status(admission.candidate.user, admission),
+                general.in_fac_status(admission.candidate.user, admission),
                 status in valid_statuses,
             )
 
@@ -359,7 +351,7 @@ class PredicatesTestCase(TestCase):
         for status in ChoixStatutPropositionGenerale.get_names():
             admission.status = status
             self.assertEqual(
-                in_fac_status_extended(admission.candidate.user, admission),
+                general.in_fac_status_extended(admission.candidate.user, admission),
                 status in valid_statuses,
             )
 
@@ -375,7 +367,7 @@ class PredicatesTestCase(TestCase):
         for status in ChoixStatutPropositionGenerale.get_names():
             admission.status = status
             self.assertEqual(
-                in_sic_status(admission.candidate.user, admission),
+                general.in_sic_status(admission.candidate.user, admission),
                 status in valid_statuses,
             )
 
@@ -393,7 +385,7 @@ class PredicatesTestCase(TestCase):
         for status in ChoixStatutPropositionGenerale.get_names():
             admission.status = status
             self.assertEqual(
-                in_sic_status_extended(admission.candidate.user, admission),
+                general.in_sic_status_extended(admission.candidate.user, admission),
                 status in valid_statuses,
             )
 
@@ -403,7 +395,7 @@ class PredicatesTestCase(TestCase):
         for status in ChoixStatutPropositionGenerale.get_names():
             admission.status = status
             self.assertEqual(
-                is_submitted(admission.candidate.user, admission),
+                general.is_submitted(admission.candidate.user, admission),
                 status in STATUTS_PROPOSITION_GENERALE_SOUMISE,
                 status,
             )

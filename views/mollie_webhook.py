@@ -30,7 +30,7 @@ from rest_framework.views import APIView
 
 from admission.contrib.models import GeneralEducationAdmission
 
-from admission.auth.predicates import (
+from admission.auth.predicates.general import (
     payment_needed_after_submission,
     payment_needed_after_manager_request,
 )

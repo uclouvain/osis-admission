@@ -5297,6 +5297,9 @@ msgstr ""
 msgid "The proposition must be concerned by the payment."
 msgstr ""
 
+msgid "The proposition must be in draft form to realize this action."
+msgstr ""
+
 msgid "The proposition must be managed by FAC to realized this action."
 msgstr ""
 
