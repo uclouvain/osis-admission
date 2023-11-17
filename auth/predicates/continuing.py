@@ -24,36 +24,16 @@
 #
 # ##############################################################################
 
-import rules
+from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
-from rules import RuleSet
+from rules import predicate
 
-from admission.auth.predicates.common import is_entity_manager
-from admission.auth.roles.central_manager import CentralManager
-from osis_role.contrib.models import EntityRoleModel
+from admission.contrib.models import ContinuingEducationAdmission
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from osis_role.errors import predicate_failed_msg
 
 
-class SicManagement(EntityRoleModel):
-    """
-    Direction SIC
-
-    L'assistant à la direction SIC intervient dans l'admission pour valider l'autorisation d'inscription.
-    Il a un peu plus de pouvoir que le gestionnaire central d'admission.
-    """
-
-    class Meta:
-        verbose_name = _("Role: SIC management")
-        verbose_name_plural = _("Role: SIC management")
-        group_name = "admission_sic_management"
-
-    @classmethod
-    def rule_set(cls):
-        ruleset = {
-            **CentralManager.rule_set(),
-            # Listings
-            'admission.view_enrolment_applications': rules.always_allow,
-            'admission.view_doctorate_enrolment_applications': rules.always_allow,
-            'admission.view_continuing_enrolment_applications': rules.always_allow,
-            'admission.validate_registration': is_entity_manager,
-        }
-        return RuleSet(ruleset)
+@predicate(bind=True)
+@predicate_failed_msg(message=_('The proposition must be in draft form to realize this action.'))
+def in_progress(self, user: User, obj: ContinuingEducationAdmission):
+    return obj.status == ChoixStatutPropositionContinue.EN_BROUILLON.name

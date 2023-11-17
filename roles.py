@@ -23,13 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.auth.predicates import (
+from admission.auth.predicates.doctorate import (
     complementary_training_enabled,
     is_enrolled,
-    is_part_of_education_group,
     is_pre_admission,
-    submitted_confirmation_paper, is_jury_in_progress,
+    submitted_confirmation_paper,
+    is_jury_in_progress,
 )
+from admission.auth.predicates.common import is_part_of_education_group
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate

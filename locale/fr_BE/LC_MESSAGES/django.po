@@ -5881,6 +5881,9 @@ msgstr "La proposition a déjà été confirmée ou est annulée"
 msgid "The proposition must be concerned by the payment."
 msgstr "La proposition doit être concernée par le paiement."
 
+msgid "The proposition must be in draft form to realize this action."
+msgstr "La proposition doit être en brouillon pour réaliser cette action."
+
 msgid "The proposition must be managed by FAC to realized this action."
 msgstr "La proposition doit être gérée par FAC pour réaliser cette action."
 
