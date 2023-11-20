@@ -26,6 +26,7 @@
 
 import re
 
+from dal import forward
 from django import forms
 from django.conf import settings
 from django.db.models import Q
@@ -109,6 +110,7 @@ class DoctorateListFilterForm(forms.Form):
                 'data-placeholder': _('Country'),
                 **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
             },
+            forward=[forward.Const('iso_code', 'id_field')],
         ),
     )
     type = forms.ChoiceField(

@@ -2100,9 +2100,6 @@ msgstr "Statut dossier"
 msgid "Double degree:"
 msgstr "Bourse double diplomation:"
 
-msgid "Double diplomation"
-msgstr "Double diplomation"
-
 msgid "Download the document"
 msgstr "Télécharger un document"
 
