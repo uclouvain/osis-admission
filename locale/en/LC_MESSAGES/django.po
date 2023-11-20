@@ -1951,9 +1951,6 @@ msgstr ""
 msgid "Double degree:"
 msgstr ""
 
-msgid "Double diplomation"
-msgstr ""
-
 msgid "Download the document"
 msgstr ""
 

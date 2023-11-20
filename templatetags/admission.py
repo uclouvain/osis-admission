@@ -887,6 +887,14 @@ def edit_button(string, url):
 
 
 @register.filter
+def tab_edit_button(string, tab_hash):
+    return (
+        str(string)
+        + f'<a class="btn btn-default" data-toggle="checklist-tab" href="{tab_hash}"><i class="fas fa-edit"></i></a>'
+    )
+
+
+@register.filter
 def history_entry_message(history_entry: Optional[HistoryEntry]):
     if history_entry:
         return {
