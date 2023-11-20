@@ -1,0 +1,103 @@
+/*
+ *
+ * OSIS stands for Open Student Information System. It's an application
+ * designed to manage the core business of higher education institutions,
+ * such as universities, faculties, institutes and professional schools.
+ * The core business involves the administration of students, teachers,
+ * courses, programs and so on.
+ *
+ * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * A copy of this license - GNU General Public License - is available
+ * at the root of the source code of this program.  If not,
+ * see http://www.gnu.org/licenses/.
+ *
+ */
+
+@page {
+  size: A4 portrait;
+  margin: 170px 1cm 20px 1cm;
+  padding: 1em 0;
+
+  @top-left {
+    content: element(header);
+    width: 100%;
+    height: 170px;
+  }
+}
+
+@media print {
+
+  header {
+    position: running(header);
+  }
+
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 1em;
+    overflow: hidden;
+  }
+
+  .header-container > * {
+    flex: 1;
+  }
+
+  .header-container p {
+    margin: 0 0 0.25em 0;
+  }
+
+  header img {
+    height: 1.5cm;
+    width: auto;
+  }
+
+  body {
+    font-family: Calibri, Arial, sans-serif;
+    font-size: 11pt;
+  }
+
+  dl {
+    margin: 0 0 0.5em 0;
+    break-inside: avoid;
+  }
+
+  .panel {
+    box-decoration-break: clone;
+    break-inside: avoid;
+  }
+
+  .breakable-panel {
+    break-inside: auto;
+  }
+
+  .raw {
+    display: flex !important;
+  }
+
+  #table-container thead {
+    background: #eee;
+  }
+
+  #table-container td, th {
+    text-align: center;
+    vertical-align: middle !important;
+  }
+
+  .table caption {
+    font-weight: bold;
+    color: inherit;
+  }
+}

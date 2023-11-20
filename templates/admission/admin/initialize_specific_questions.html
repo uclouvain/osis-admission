@@ -1,0 +1,48 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls bootstrap3 %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+
+{% block bodyclass %}{{ block.super }} delete-confirmation delete-selected-confirmation{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='admission' %}">{% translate 'Admission' %}</a>
+    &rsaquo; <a href="{% url 'admin:admission_admissionformitem_changelist' %}">{% translate 'Admission form items' %}</a>
+    &rsaquo; {% translate 'Initialization of the predefined specific questions' %}
+  </div>
+{% endblock %}
+
+{% block content %}
+  <h1>{% translate 'Initialization of the predefined specific questions for an academic year' %}</h1>
+  <form method="post" action="">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <input type="submit" value="{% translate 'Launch' %}">
+    <a href="{% url 'admin:admission_admissionformitem_changelist' %}" class="button cancel-link">{% translate "Cancel" %}</a>
+  </form>
+{% endblock %}

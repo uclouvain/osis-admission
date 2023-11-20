@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% load bootstrap3 %}
+{% load i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block breadcrumb %}
+  <li><a href="{% url 'admission:config:cdd-mail-template:list' %}">{% trans 'Custom mail templates' %}</a></li>
+  <li class="active">{{ instances.0.name }}</li>
+{% endblock %}
+
+{% block content %}
+  <div class="page-header">
+    <h1 class="h3">
+      {% blocktrans with name=instances.0.name trimmed %}
+        Preview <em>{{ name }}</em> custom mail template
+      {% endblocktrans %}
+    </h1>
+  </div>
+  {% for instance in instances %}
+    <h2>{{ instance.get_language_display }}</h2>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">{% trans "Subject" %}</h3>
+      </div>
+      <div class="panel-body">
+        {{ instance.render_subject }}
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">{% trans "HTML" %}</h3>
+      </div>
+      <div class="panel-body">
+        {{ instance.body_as_html|safe }}
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">{% trans "Plain text" %}</h3>
+      </div>
+      <div class="panel-body">
+        <samp>
+          {{ instance.body_as_plain|linebreaks }}
+        </samp>
+      </div>
+    </div>
+  {% endfor %}
+
+  {% url 'admission:config:cdd-mail-template:edit' identifier=instances.0.identifier pk=instances.0.pk as change_url %}
+  <a href="{{ change_url }}" class="btn btn-default"><span class="fa fa-edit"></span> {% trans "Edit" %}</a>
+{% endblock %}

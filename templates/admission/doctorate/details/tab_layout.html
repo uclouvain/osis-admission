@@ -1,0 +1,61 @@
+{% extends "admission/doctorate/tab_layout.html" %}
+{% load i18n admission %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block actions-group %}
+  {% default_tab_context as tab_context %}
+  {% can_update_tab tab_context.active_tab as can_update_tab %}
+  {% update_tab_path_from_detail view.kwargs.uuid as update_url %}
+  {% url base_namespace|add:':pdf-recap' view.kwargs.uuid as pdf_recap_url %}
+  {% if can_update_tab and update_url %}
+    <div class="btn-group">
+      <button
+          type="button"
+          class="btn btn-default"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+      >
+        {% trans "Actions" %}
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu pull-right">
+        {% block actions %}
+          <li>
+            <a href="{{ update_url }}">
+              {% trans "Update" context 'verb' %}
+            </a>
+          </li>
+          <li>
+            <a href="{{ pdf_recap_url }}" target="_blank" >
+              {% translate "Generate the PDF recap" %}
+            </a>
+          </li>
+        {% endblock %}
+      </ul>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,71 @@
+{% load i18n osis_document admission enums %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% if activity.website %}
+  {% firstof '<a href="'|safe|add:activity.website|add:'" target="_blank">'|safe|add:activity.website|add:'</a>'|safe "" as website %}
+{% endif %}
+
+{% display activity.city "," activity.country as location %}
+{% display activity.start_date|date:"d/m/Y" as period %}
+
+<div
+  class="subpanel panel-{{ activity|status_as_class }}"
+  data-status="{{ activity.status }}"
+  data-type="{{ activity.category }}"
+>
+  <div class="panel-heading" role="tab" id="h-{{ activity.uuid }}">
+    <h3 class="panel-title">
+      {% include "admission/doctorate/details/training/_panel_title.html" with remove_batch_action=True %}
+      {% include "admission/doctorate/details/training/_activity_title.html" %}
+      <div class="clearfix"></div>
+    </h3>
+  </div>
+  <div
+    id="a-{{ activity.uuid }}"
+    class="panel-collapse collapse"
+    role="tabpanel"
+    aria-labelledby="h-{{ activity.uuid }}"
+  >
+    <div class="panel-body">
+      <p>
+        {% display activity.authors "<br/>"|safe activity.title "<br/>"|safe location "<br/>"|safe period "<br/>"|safe %}
+        {% display activity.is_online|format_is_online "-" website "<br/>"|safe activity.organizing_institution %}
+      </p>
+      {% if activity.participating_proof %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Certificate of participation in the presentation" %}</strong>
+          {% document_visualizer activity.participating_proof for_modified_upload=True %}
+        </div>
+      {% endif %}
+      {% if activity.comment %}
+        <div class="form-group">
+          <strong class="d-block">{% trans "Comments" %}</strong>
+          {{ activity.comment|linebreaks }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

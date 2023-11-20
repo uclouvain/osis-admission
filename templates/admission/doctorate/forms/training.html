@@ -1,0 +1,59 @@
+{% extends "admission/doctorate/details/tab_layout.html" %}
+{% load i18n static admission bootstrap3 %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+
+{% block actions-group %}{% endblock %}
+
+{% block tab_content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    {% include form.template_name %}
+    <div class="text-right">
+      <a href="{% url request.resolver_match.namespace uuid=view.kwargs.uuid %}" class="text-danger">
+        {% trans "Cancel" %}
+      </a>
+      <button type="submit" class="btn btn-primary">
+        {% trans "Save" context 'admission' %}
+      </button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  <script type="application/javascript">
+      $(function () {
+          // Tooltips
+          $('[data-toggle="popover"]').popover();
+
+          $('body').on('mousedown', '.popover', function(e) {
+            e.preventDefault();
+            return false;
+          });
+      });
+  </script>
+{% endblock %}

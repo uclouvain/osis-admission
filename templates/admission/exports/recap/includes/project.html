@@ -1,0 +1,90 @@
+{% load i18n admission enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+{% panel _("Course choice") %}
+  {% field_data _("Admission type") proposition.type_admission|enum_display:'ChoixTypeAdmission' %}
+  {% if proposition.justification %}
+    {% field_data _("Brief justification") proposition.justification|linebreaks %}
+  {% endif %}
+  {% field_data _("Sector") proposition.intitule_secteur_formation %}
+  {% display proposition.doctorat.intitule " (" proposition.doctorat.campus ")" as doctorate_title %}
+  {% field_data _("PhD") doctorate_title %}
+  {% if proposition.commission_proximite %}
+    {% field_data _("Proximity commission / Subdomain") proposition.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
+  {% endif %}
+{% endpanel %}
+
+{% translate 'Funding' context "admission" as funding_title %}
+{% panel funding_title %}
+  {% if proposition.type_financement %}
+    {% field_data _("Funding type") proposition.type_financement|enum_display:'ChoixTypeFinancement' %}
+    {% if proposition.type_financement == "WORK_CONTRACT" %}
+      {% field_data _("Work contract") proposition.type_contrat_travail|enum_display:'ChoixTypeContratTravail' %}
+      {% field_data fte_label proposition.eft|default_if_none:'' %}
+    {% elif proposition.type_financement == "SEARCH_SCHOLARSHIP" %}
+      {% if proposition.bourse_recherche %}
+        {% display proposition.bourse_recherche.nom_court '-' proposition.bourse_recherche.nom_long as nom_bourse %}
+      {% else %}
+        {% display proposition.autre_bourse_recherche as nom_bourse %}
+      {% endif %}
+      {% field_data _("Research scholarship") nom_bourse %}
+      {% field_data _("Scholarship start date") proposition.bourse_date_debut %}
+      {% field_data _("Scholarship end date") proposition.bourse_date_fin %}
+      {% field_data _("Proof of scholarship") proposition.bourse_preuve %}
+    {% endif %}
+    {% field_data _("Estimated time to complete the PhD (in months)") proposition.duree_prevue|default_if_none:'' %}
+    {% field_data allocated_time_label proposition.temps_consacre|default_if_none:'' %}
+  {% endif %}
+{% endpanel %}
+
+{% panel _("Research project") %}
+  {% field_data _("Project title") proposition.titre_projet %}
+  {% field_data _("Project resume") proposition.resume_projet|linebreaks %}
+  {% field_data _("Thesis language") proposition.langue_redaction_these|enum_display:'ChoixLangueRedactionThese' %}
+  {% if proposition.institut_these %}
+    {% display proposition.nom_institut_these ' ' '(' proposition.sigle_institut_these ')' as institut_these %}
+  {% endif %}
+  {% field_data _("Research institute") institut_these|default_if_none:'' %}
+  {% field_data _("Thesis location") proposition.lieu_these %}
+
+  {% field_data _("PhD research project") proposition.documents_projet %}
+  {% field_data _("PhD proposal") proposition.proposition_programme_doctoral %}
+  {% field_data _("Complementary training proposition") proposition.projet_formation_complementaire %}
+  {% field_data _("Gantt chart") proposition.graphe_gantt %}
+  {% field_data _("Letters of recommendation") proposition.lettres_recommandation %}
+
+{% endpanel %}
+
+{% panel _("Previous research experience") %}
+  {% field_data _("Have you previously enrolled for a PhD?") proposition.doctorat_deja_realise|enum_display:'ChoixDoctoratDejaRealise' %}
+  {% if proposition.doctorat_deja_realise != "NO" %}
+    {% field_data _("Institution") proposition.institution %}
+    {% field_data _("Thesis field") proposition.domaine_these %}
+    {% if proposition.date_soutenance %}
+      {% field_data _("Defence date") proposition.date_soutenance %}
+    {% elif proposition.raison_non_soutenue %}
+      {% field_data _("No defense reason") proposition.raison_non_soutenue|linebreaks %}
+    {% endif %}
+  {% endif %}
+{% endpanel %}

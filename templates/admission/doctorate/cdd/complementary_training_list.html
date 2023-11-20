@@ -1,0 +1,159 @@
+{% extends "admission/doctorate/details/tab_layout.html" %}
+{% load i18n static admission enums bootstrap3 %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+
+{% block actions-group %}
+  {% url "admission:doctorate:complementary-training:add" uuid=view.kwargs.uuid category='COURSE' as add_url %}
+  <a href="{{ add_url }}" class="btn btn-default">
+    {% trans "Add a course unit" %}
+  </a>
+{% endblock %}
+
+
+{% block tab_content %}
+  {% url "admission:doctorate:complementary-training:add" uuid=view.kwargs.uuid category='COURSE' as add_url %}
+  <h3>{% trans "Complementary training" %}</h3>
+
+  <p>{% lorem %}</p>
+
+  <h4>{% trans "Course units" context 'admission' %}</h4>
+  {% if activities %}
+    <div class="filter-status form-group">
+      <strong>{% trans "Status" context 'admission' %}</strong>
+      <div class="btn-group btn-group-sm" role="radiogroup">
+        <button type="button" class="btn btn-default active" data-status="all">
+          {% trans "All" context "filters" %}
+        </button>
+        {% for status_name, status_label in statuses %}
+          <button type="button"
+                  class="btn btn-default btn-{{ status_name|status_as_class }}"
+                  data-status="{{ status_name }}"
+          >{{ status_label }}</button>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Special error handling #}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger alert-dismissable alert-link">
+        {{ form.non_field_errors.0 }}
+      </div>
+    {% endif %}
+
+    <form id="activities" action="{% url 'admission:doctorate:complementary-training' uuid=view.kwargs.uuid %}"
+          method="post">
+      {% csrf_token %}
+      {% for activity in activities %}
+        {% firstof 0 activity.category|lower|add:'.html' as template_name %}
+        {% if not activity.parent_id %}
+          {% include "admission/doctorate/details/training/"|add:template_name %}
+        {% endif %}
+      {% endfor %}
+      <button class="btn btn-default" type="submit" name="_submit">{% trans "Submit selected courses" %}</button>
+      <button class="btn btn-default" type="submit" name="_accept">{% trans "Accept selected courses" %}</button>
+    </form>
+  {% else %}
+    {% trans "This candidate has not created any course yet." %}
+    {% url 'admission:doctorate:course-enrollment' uuid=view.kwargs.uuid as enrollment_url %}
+    {% blocktrans  trimmed %}
+      <a href="{{ enrollment_url }}">Go to course enrolment</a> or <a href="{{ add_url }}">add a course</a>
+    {% endblocktrans %}
+  {% endif %}
+{% endblock %}
+
+
+
+{% block style %}
+  {{ block.super }}
+  <style>
+    .panel {
+      margin-bottom: 2em;
+    }
+
+    .panel-heading .panel-title {
+      line-height: 1.3em;
+    }
+
+    .panel-heading .panel-title > a {
+      float: left;
+      font-size: 1.5em;
+      padding-right: .3em;
+    }
+
+    .panel-heading .panel-title > a:focus,
+    .panel-heading .panel-title > a:hover {
+      text-decoration: none;
+    }
+
+    .panel-heading .panel-title > a:after {
+      font-family: 'Glyphicons Halflings';
+      content: "\e114";
+    }
+
+    .panel-heading .panel-title > a.collapsed:after {
+      content: "\e080";
+    }
+  </style>
+{% endblock %}
+
+
+{% block script %}
+  <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
+  <script>
+    $(function () {
+      $('[data-toggle="popover"]').popover();
+
+      // Open the right panel depending on location hash
+      if (document.location.hash) {
+        const uuid = document.location.hash.slice(1);
+        $('#a-' + uuid).one('shown.bs.collapse', function () {
+          document.getElementById('h-' + uuid).scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }).collapse('show');
+      }
+
+      // Filters
+      const ALL_VALUES = 'all';
+      let current_filter_status = ALL_VALUES;
+      $('.filter-status button').on('click', function () {
+        current_filter_status = $(this).data('status');
+        $('.filter-status button').removeClass('active');
+        $(this).addClass('active');
+        apply_filters();
+      });
+
+      function apply_filters () {
+        const reStatus = new RegExp(`\\b${current_filter_status}\\b`);
+        $('#activities .panel').each(function () {
+          $(this).show();
+          if ((current_filter_status !== ALL_VALUES && !$(this).data('status').match(reStatus))) {
+            $(this).hide();
+          }
+        });
+      }
+    });
+  </script>
+{% endblock %}

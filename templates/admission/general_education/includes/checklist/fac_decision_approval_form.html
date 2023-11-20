@@ -1,0 +1,164 @@
+{% load i18n bootstrap3 admission static %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<form
+    hx-post="{% url view.base_namespace|add:':fac-decision-approval' uuid=view.kwargs.uuid %}"
+    hx-target="this"
+    hx-swap="outerHTML"
+    id="fac-decision-approval-form"
+    style="overflow: auto;"
+>
+  <div class="modal-body">
+
+    {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic' as can_transfer_to_sic %}
+    {% has_perm 'admission.checklist_change_faculty_decision' as can_change_faculty_decision %}
+
+    {% bootstrap_form_errors fac_decision_approval_form %}
+
+    <dl>
+      <dd>
+        {{ fac_decision_approval_form.another_training.label_tag }}
+      </dd>
+      <dt>
+        <label class="switch">
+          {{ fac_decision_approval_form.another_training }}
+          <span class="slider round"></span>
+        </label>
+      </dt>
+    </dl>
+
+    <div
+        id="fac-decision-other-training-container"
+        class="required_field hidden"
+    >
+      {% bootstrap_field fac_decision_approval_form.other_training_accepted_by_fac %}
+    </div>
+
+    {% bootstrap_field fac_decision_approval_form.with_additional_approval_conditions %}
+    <div
+        id="fac-decision-additional-approval-conditions-container"
+        class="required_field hidden"
+    >
+      <div class="form-group">
+        <label class="control-label">
+          {{ fac_decision_approval_form.all_additional_approval_conditions.field.label }}
+          <strong>({% translate 'contact language'%} </strong>
+          <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
+        </label>
+       {{ fac_decision_approval_form.all_additional_approval_conditions }}
+      </div>
+    </div>
+
+    {% bootstrap_field fac_decision_approval_form.with_prerequisite_courses %}
+    <div
+        id="fac-decision-additional-trainings-container"
+        class="hidden"
+    >
+      {% bootstrap_field fac_decision_approval_form.prerequisite_courses classes='required_field' %}
+      {% bootstrap_field fac_decision_approval_form.prerequisite_courses_fac_comment %}
+    </div>
+
+    <div class="required_field">
+      {% bootstrap_field fac_decision_approval_form.program_planned_years_number %}
+    </div>
+
+    <fieldset class="custom-fieldset">
+      <legend>
+        <strong>
+          {% translate 'Contact person for the design of the annual program' %}
+        </strong>
+      </legend>
+      <div class="row">
+        <div class="col-md-6">
+          {% bootstrap_field fac_decision_approval_form.annual_program_contact_person_name %}
+        </div>
+        <div class="col-md-6">
+          {% bootstrap_field fac_decision_approval_form.annual_program_contact_person_email %}
+        </div>
+      </div>
+    </fieldset>
+
+    {% bootstrap_field fac_decision_approval_form.join_program_fac_comment %}
+
+    <p>
+      {% if can_transfer_to_sic %}
+        {% translate 'If you want, you can save these information and directly send the application to the SIC by selecting the appropriate button below.' %}
+      {% elif original_admission.status == 'A_COMPLETER_POUR_FAC' %}
+        {% blocktranslate trimmed %}
+          Documents requested by the faculty are still expected from the candidate. The application will be sent to the SIC
+          once they have been received.
+        {% endblocktranslate %}
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="modal-footer">
+    <button
+        class="btn btn-default"
+        data-dismiss="modal"
+    >
+      {% translate 'Cancel' %}
+    </button>
+    <button
+        class="btn btn-primary"
+        name="save"
+        {% if not can_change_faculty_decision %}disabled{% endif %}
+    >
+      {% translate 'Save' context 'admission' %}
+    </button>
+    {% if can_transfer_to_sic %}
+      <button
+          class="btn btn-danger"
+          name="save-transfer"
+      >
+        {% translate 'Save and transfer to SIC' %}
+      </button>
+    {% endif %}
+  </div>
+
+  {% if request.htmx %}
+    {% if fac_decision_approval_form.is_valid %}
+      {# Update the content of the tab #}
+      {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
+    {% endif %}
+    <script src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script>
+        $(document).ready(function(){
+            {# Show / Hide fields depending on other field values #}
+            $('#id_fac-decision-approval-another_training').change();
+            $('input[name="fac-decision-approval-with_additional_approval_conditions"]:checked').change();
+            $('input[name="fac-decision-approval-with_prerequisite_courses"]:checked').change();
+
+            {# Initialize the custom select2 component #}
+            window.__dal__initialize($('select[data-autocomplete-light-function=select2_tag]'))
+
+            {% if fac_decision_approval_form.is_valid %}
+                $('#fac-decision-approval-modal').modal('hide');
+            {% endif %}
+        });
+    </script>
+  {% endif %}
+
+</form>

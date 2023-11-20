@@ -1,0 +1,96 @@
+{% load i18n static enums admission %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% with initial=original_admission.checklist.initial.frais_dossier current=original_admission.checklist.current.frais_dossier %}
+  <div
+      id="request-application-fees-container"
+      hx-target="this"
+  >
+    <div class="form-group btn-group status-group" role="group">
+      {% if current.statut == 'GEST_BLOCAGE' %}
+        {% translate 'Not concerned' context 'checklist' as not_concerned_label %}
+        {% checklist_state_button tab='frais_dossier' label=not_concerned_label icon='xmark' state='INITIAL_NON_CONCERNE' class='info' disabled=fees_already_payed open_modal='#application-fees-request-cancel-modal-INITIAL_NON_CONCERNE' %}
+      {% else %}
+        {% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status='INITIAL_NON_CONCERNE' as application_fees_url %}
+        {% checklist_state_button tab='frais_dossier' label=_("Not concerned") icon='xmark' state='INITIAL_NON_CONCERNE' class='info' disabled=fees_already_payed htmx_post=application_fees_url %}
+      {% endif %}
+      {% checklist_state_button tab='frais_dossier' label=_("Must pay") icon='circle-stop' state='GEST_BLOCAGE' class='danger' disabled=fees_already_payed open_modal='#request-application-fees-modal' %}
+      {% if current.statut == 'GEST_BLOCAGE' %}
+        {% checklist_state_button tab='frais_dossier' label=_("Dispensed") icon='check' state='GEST_REUSSITE' class='success' disabled=fees_already_payed open_modal='#application-fees-request-cancel-modal-GEST_REUSSITE' %}
+      {% else %}
+        {% url view.base_namespace|add:':application-fees' uuid=view.kwargs.uuid status='GEST_REUSSITE' as application_fees_url %}
+        {% checklist_state_button tab='frais_dossier' label=_("Dispensed") icon='check' state='GEST_REUSSITE' class='success' disabled=fees_already_payed htmx_post=application_fees_url %}
+      {% endif %}
+      {% checklist_state_button tab='frais_dossier' label=_("Payed") icon='check' state='SYST_REUSSITE' class='success' disabled=True %}
+    </div>
+
+    {% if last_request %}
+      <p>
+        {% blocktranslate with amount=application_fees_amount %}Application fee: <strong>&euro;{{ amount }}</strong>{% endblocktranslate %}
+      </p>
+      <p class="bg-success">
+        {% blocktranslate trimmed with date=last_request.created|date:'DATETIME_FORMAT' author=last_request.author %}
+          Email requesting the application fee sent to the candidate on {{ date }} by {{ author }}.
+        {% endblocktranslate %}
+      </p>
+
+      {% if current.statut == 'GEST_BLOCAGE' %}
+        <p>
+          <button
+              class="btn btn-default"
+              data-toggle="modal"
+              data-target="#application-fees-request-email-modal"
+          >
+            <i class="fa-solid fa-magnifying-glass"></i>
+            {% translate 'Visualize' %}
+          </button>
+          <button
+              class="btn btn-primary"
+              data-toggle="modal"
+              data-target="#remind-request-application-fees-modal"
+          >
+            <i class="fa-solid fa-envelope"></i>
+            {% translate 'Remind the applicant' %}
+          </button>
+        </p>
+      {% endif %}
+    {% endif %}
+
+    {% include 'admission/general_education/includes/checklist/application_fees_request_modal.html' %}
+    {% include 'admission/general_education/includes/checklist/application_fees_request_modal.html' with remind='1' %}
+    {% include 'admission/general_education/includes/checklist/application_fees_request_email_modal.html' %}
+    {% include 'admission/general_education/includes/checklist/application_fees_request_cancel_modal.html' with target_status='INITIAL_NON_CONCERNE' %}
+    {% include 'admission/general_education/includes/checklist/application_fees_request_cancel_modal.html' with target_status='GEST_REUSSITE' %}
+
+  </div>
+{% endwith %}
+
+{% if request.htmx %}
+  {# Update the admission status in the header #}
+  {% include 'admission/includes/admission_status.html' with display_on_load=False %}
+  {# Update the checklist menu  #}
+  {% include "admission/general_education/checklist_menu.html" with current_item='frais_dossier' %}
+{% endif %}

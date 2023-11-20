@@ -1,0 +1,113 @@
+{% extends base_template %}
+{% load bootstrap3 i18n static admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block form %}
+  {% bootstrap_form_errors form %}
+
+  {% panel _('Choose your course') %}
+
+    <div class="row">
+      <div class="col-md-6">
+        {% bootstrap_field form.training_type %}
+      </div>
+      <div class="col-md-6">
+        {% bootstrap_field form.campus %}
+      </div>
+    </div>
+
+    <div id="training-container">
+      <div id="general-education-training-container">
+        {% bootstrap_field form.general_education_training %}
+      </div>
+    </div>
+  {% endpanel %}
+
+  {% if admission.formation.type|admission_training_type == 'MASTER' %}
+    {% translate 'Specific profile' context 'admission' as specific_profile_title %}
+    {% panel specific_profile_title id="student-profile" %}
+      <div class="required_field">
+        {% bootstrap_field_with_tooltip form.has_double_degree_scholarship %}
+        <div id="double-degree-scholarship-field">
+          {% bootstrap_field form.double_degree_scholarship show_label=False %}
+        </div>
+      </div>
+      <div class="required_field">
+        {% bootstrap_field_with_tooltip form.has_international_scholarship %}
+        <div id="international-scholarship-field">
+          {% bootstrap_field form.international_scholarship show_label=False %}
+        </div>
+      </div>
+      <div class="required_field">
+        {% bootstrap_field_with_tooltip form.has_erasmus_mundus_scholarship %}
+        <div id="erasmus-scholarship-field">
+          {% bootstrap_field form.erasmus_mundus_scholarship show_label=False %}
+        </div>
+      </div>
+    {% endpanel %}
+  {% endif %}
+
+  {% if form.specific_question_answers.field.fields %}
+    {% panel _('Specific aspects') %}
+      {% bootstrap_field form.specific_question_answers show_label=False error_css_class='' %}
+    {% endpanel %}
+  {% endif %}
+
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  <script type="application/javascript">
+      $(function () {
+          const defaultOptions = {
+              duration: 0,
+          };
+
+          {% if admission.formation.type|admission_training_type == 'MASTER' %}
+              // Display scholarship search fields when it's required
+              $('#double-degree-scholarship-field').dependsOn({
+                  'input[name="has_double_degree_scholarship"]': {
+                      values: ['True'],
+                  },
+              }, defaultOptions);
+
+              $('#international-scholarship-field').dependsOn({
+                  'input[name="has_international_scholarship"]': {
+                      values: ['True'],
+                  },
+              }, defaultOptions);
+
+              $('#erasmus-scholarship-field').dependsOn({
+                  'input[name="has_erasmus_mundus_scholarship"]': {
+                      values: ['True'],
+                  },
+              }, defaultOptions);
+          {% endif %}
+
+          document.dispatchEvent(new Event('refreshFormInitial'));
+      });
+  </script>
+{% endblock %}
