@@ -32,6 +32,12 @@ from admission.ddd.admission.formation_generale.use_case.write import *
 from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
     modifier_checklist_choix_formation,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
+    specifier_financabilite_regle,
+)
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
+    specifier_financabilite_resultat_calcul,
+)
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
@@ -493,5 +499,13 @@ COMMAND_HANDLERS = {
             cmd,
             titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
         )
+    ),
+    SpecifierFinancabiliteResultatCalculCommand: lambda msg_bus, cmd: specifier_financabilite_resultat_calcul(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    SpecifierFinancabiliteRegleCommand: lambda msg_bus, cmd: specifier_financabilite_regle(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
 }

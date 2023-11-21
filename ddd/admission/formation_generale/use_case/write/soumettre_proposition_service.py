@@ -148,6 +148,7 @@ def soumettre_proposition(
     )
     Checklist.initialiser(
         proposition=proposition,
+        formation=formation,
         profil_candidat_translator=profil_candidat_translator,
         questions_specifiques_translator=questions_specifiques_translator,
     )

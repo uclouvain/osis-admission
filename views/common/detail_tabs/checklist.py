@@ -29,12 +29,13 @@ from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
 from django.http import HttpResponse
-from django.shortcuts import resolve_url, redirect
+from django.shortcuts import resolve_url, redirect, render
 from django.urls import reverse
 from django.utils import translation
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, gettext
 from django.views.generic import TemplateView, FormView
+from django.views.generic.base import ContextMixin
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 from osis_mail_template.models import MailTemplate
@@ -71,6 +72,7 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
     SpecifierExperienceEnTantQueTitreAccesCommand,
     RecupererTitresAccesSelectionnablesPropositionQuery,
+    SpecifierFinancabiliteRegleCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -86,6 +88,7 @@ from admission.forms.admission.checklist import (
     PastExperiencesAdmissionRequirementForm,
     PastExperiencesAdmissionAccessTitleForm,
 )
+from admission.forms.admission.checklist import ChoixFormationForm, FinancabiliteApprovalForm
 from admission.forms.admission.checklist import (
     CommentForm,
     AssimilationForm,
@@ -124,6 +127,9 @@ __all__ = [
     'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleEquivalencyView',
     'PastExperiencesAccessTitleView',
+    'FinancabiliteChangeStatusView',
+    'FinancabiliteApprovalView',
+    'FinancabiliteComputeRuleView',
 ]
 
 
@@ -554,7 +560,29 @@ class ChecklistView(
 
         return {
             'assimilation': assimilation_documents,
-            'financabilite': set(),
+            'financabilite': {
+                'RELEVE_NOTES',
+                'TRADUCTION_RELEVE_NOTES',
+                'RELEVE_NOTES_ANNUEL',
+                'TRADUCTION_RELEVE_NOTES_ANNUEL',
+                'DIPLOME',
+                'TRADUCTION_DIPLOME',
+                'DIPLOME_EQUIVALENCE',
+                'DIPLOME_BELGE_DIPLOME',
+                'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
+                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE',
+                'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE',
+                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE',
+                'DIPLOME_ETRANGER_DIPLOME',
+                'DIPLOME_ETRANGER_TRADUCTION_DIPLOME',
+                'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
+                'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
+                'DIPLOME_ETRANGER_RELEVE_NOTES',
+                'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES',
+                'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE',
+                'CURRICULUM',
+                'CERTIFICAT_EXPERIENCE',
+            },
             'frais_dossier': assimilation_documents,
             'choix_formation': {
                 'ATTESTATION_INSCRIPTION_REGULIERE',
@@ -631,6 +659,11 @@ class ChecklistView(
                 ),
             )
 
+            context['financabilite_approval_form'] = FinancabiliteApprovalForm(
+                instance=self.admission,
+                prefix='financabilite',
+            )
+
             # Documents
             admission_documents = command_result.emplacements_documents
             question_specifiques_documents_uuids = [
@@ -666,6 +699,9 @@ class ChecklistView(
             context[
                 'past_experiences_admission_access_title_equivalency_form'
             ] = self.past_experiences_admission_access_title_equivalency_form
+
+            # Financabilité
+            context['financabilite'] = self._get_financabilite()
 
         return context
 
@@ -716,11 +752,12 @@ class ChecklistView(
 
         return experiences
 
-
-class ChangeStatusSerializer(serializers.Serializer):
-    tab_name = serializers.CharField()
-    status = serializers.ChoiceField(choices=ChoixStatutChecklist.choices(), required=False)
-    extra = serializers.DictField(default={}, required=False)
+    def _get_financabilite(self):
+        # TODO
+        return {
+            'inscription_precedentes': 2,
+            'inscription_supplementaire': 1,
+        }
 
 
 class ApplicationFeesView(
@@ -950,6 +987,12 @@ class PastExperiencesAccessTitleEquivalencyView(
         return super().form_valid(form)
 
 
+class ChangeStatusSerializer(serializers.Serializer):
+    tab_name = serializers.CharField()
+    status = serializers.ChoiceField(choices=ChoixStatutChecklist.choices(), required=False)
+    extra = serializers.DictField(default={}, required=False)
+
+
 def change_admission_status(tab, admission_status, extra, admission, replace_extra=False):
     """Change the status of the admission of a specific tab"""
 
@@ -1080,7 +1123,7 @@ class SaveCommentView(AdmissionFormMixin, FormView):
 class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     urlpatterns = 'choix-formation-update'
     permission_required = 'admission.view_checklist'
-    template_name = 'admission/general_education/checklist/choix_formation_form.html'
+    template_name = 'admission/general_education/includes/checklist/choix_formation_form.html'
     form_class = ChoixFormationForm
 
     def dispatch(self, request, *args, **kwargs):
@@ -1126,7 +1169,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
 class ChoixFormationDetailView(LoadDossierViewMixin, TemplateView):
     urlpatterns = 'choix-formation-detail'
     permission_required = 'admission.view_checklist'
-    template_name = 'admission/general_education/checklist/choix_formation_detail.html'
+    template_name = 'admission/general_education/includes/checklist/choix_formation_detail.html'
 
     def dispatch(self, request, *args, **kwargs):
         if not request.htmx:
@@ -1135,3 +1178,91 @@ class ChoixFormationDetailView(LoadDossierViewMixin, TemplateView):
                 + '#choix_formation'
             )
         return super().dispatch(request, *args, **kwargs)
+
+
+class FinancabiliteContextMixin(CheckListDefaultContextMixin):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__contains=['financabilite']).first()
+
+        context['comment_forms'] = {
+            'financabilite': CommentForm(
+                comment=comment,
+                form_url=resolve_url(
+                    f'{self.base_namespace}:save-comment',
+                    uuid=self.admission_uuid,
+                    tab='financabilite',
+                ),
+                prefix='financabilite',
+                user_is_sic=self.is_sic,
+                user_is_fac=self.is_fac,
+            )
+        }
+
+        context['financabilite_approval_form'] = FinancabiliteApprovalForm(
+            instance=self.admission,
+            prefix='financabilite',
+        )
+
+        return context
+
+
+class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-change-status': 'financability-change-checklist-status/<str:status>'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.view_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
+
+        change_admission_status(
+            tab='financabilite',
+            admission_status=self.kwargs['status'],
+            extra={},
+            admission=admission,
+        )
+
+        return self.render_to_response(self.get_context_data())
+
+
+class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, FormView):
+    urlpatterns = {'financability-approval': 'financability-checklist-approval'}
+    template_name = 'admission/general_education/includes/checklist/financabilite_approval_form.html'
+    permission_required = 'admission.view_checklist'
+    http_method_names = ['post']
+
+    def get_form(self, form_class=None):
+        return FinancabiliteApprovalForm(
+            instance=self.admission if self.request.method != 'POST' else None,
+            data=self.request.POST if self.request.method == 'POST' else None,
+            prefix='financabilite',
+        )
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteRegleCommand(
+                uuid_proposition=self.admission_uuid,
+                financabilite_regle=form.cleaned_data['financability_rule'],
+                etabli_par=self.request.user.person.uuid,
+            )
+        )
+
+        return render(
+            self.request,
+            'admission/general_education/includes/checklist/financabilite.html',
+            context=self.get_context_data(),
+        )
+
+
+class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
+    urlpatterns = {'financability-compute-rule': 'financability-compute-rule'}
+    template_name = 'admission/general_education/includes/checklist/financabilite.html'
+    permission_required = 'admission.view_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
+        admission.update_financability_computed_rule()
+        return self.render_to_response(self.get_context_data())

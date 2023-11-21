@@ -28,6 +28,7 @@ from contextlib import suppress
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework.settings import api_settings
 
@@ -43,6 +44,8 @@ from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     PoursuiteDeCycle,
+    RegleDeFinancement,
+    RegleCalculeResultatAvecFinancable,
 )
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
@@ -133,6 +136,34 @@ class GeneralEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         verbose_name=_('Additional documents'),
         max_files=10,
+    )
+
+    # Financability
+    financability_computed_rule = models.CharField(
+        verbose_name=_('Financability computed rule'),
+        choices=RegleCalculeResultatAvecFinancable.choices(),
+        max_length=100,
+        default='',
+        editable=False,
+    )
+    financability_computed_rule_on = models.DateTimeField(
+        verbose_name=_('Financability computed rule on'),
+        null=True,
+        editable=False,
+    )
+    financability_rule = models.CharField(
+        verbose_name=_('Financability rule'),
+        choices=RegleDeFinancement.choices(),
+        max_length=100,
+        default='',
+    )
+    financability_rule_established_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_('Financability rule established by'),
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        editable=False,
     )
 
     # FAC & SIC approval
@@ -319,6 +350,23 @@ class GeneralEducationAdmission(BaseAdmission):
         from infrastructure.messages_bus import message_bus_instance
 
         message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
+
+    def update_financability_computed_rule(self):
+        from admission.ddd.admission.formation_generale.commands import (
+            SpecifierFinancabiliteResultatCalculCommand,
+        )
+        from infrastructure.messages_bus import message_bus_instance
+
+        # TODO à faire dans le DDD ? + Calculer à la soumission
+        financabilite_regle_calcule = 'INDISPONIBLE'
+
+        message_bus_instance.invoke(
+            SpecifierFinancabiliteResultatCalculCommand(
+                uuid_proposition=self.uuid,
+                financabilite_regle_calcule=financabilite_regle_calcule,
+                financabilite_regle_calcule_le=timezone.now(),
+            )
+        )
 
 
 class AdmissionPrerequisiteCourses(models.Model):
