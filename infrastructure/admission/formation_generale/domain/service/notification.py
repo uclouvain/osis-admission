@@ -141,7 +141,7 @@ class Notification(INotification):
                     context='general-education',
                     admission_uuid=proposition.entity_id.uuid,
                 )
-                + 'pdf-recap/'
+                + 'pdf-recap'
             )
 
         email_message = generate_email(
