@@ -69,6 +69,10 @@ msgstr ""
 "ou désigné par le CPAS."
 
 #, python-format
+msgid "%(rule)s (Established by %(established_by)s)"
+msgstr "%(rule)s (Établi par %(established_by)s)"
+
+#, python-format
 msgid "%(state)s on %(date)s"
 msgstr "%(state)s le %(date)s"
 
@@ -287,6 +291,9 @@ msgstr "Acceptée"
 msgid "ACKNOWLEDGED"
 msgstr "Réceptionné"
 
+msgid "ACQUIS_75_POURCENTS_CREDITS"
+msgstr "Acquis 75 pourcents crédits du PAE de l'année précédente"
+
 msgid "ADMISSIBLE"
 msgstr "Recevable"
 
@@ -298,6 +305,9 @@ msgstr "Admission en cours"
 
 msgid "ADMITTED"
 msgstr "Admis"
+
+msgid "A_CLARIFIER"
+msgstr "À clarifier"
 
 msgid "Absence of debt"
 msgstr "Absence de dettes"
@@ -661,6 +671,9 @@ msgstr "Message de demande de paiement des frais de dossier"
 msgid "Application fee: <strong>&euro;%(amount)s</strong>"
 msgstr "Montant des frais de dossier : <strong>%(amount)s €</strong>"
 
+msgid "Application fees where also received."
+msgstr "Le payement des frais de dossier a bien été réceptionné."
+
 msgid "Application for a study allowance from the French Community of Belgium"
 msgstr ""
 "Demande d'allocation d'études auprès de la Communauté française de Belgique"
@@ -971,6 +984,9 @@ msgstr "CDD :"
 msgid "CDDs"
 msgstr "CDDs"
 
+msgid "CENT_VINGT_CREDITS_NON_ENCORE_ACQUIS"
+msgstr "120 crédits non encore acquis"
+
 msgid "CESS"
 msgstr "CESS"
 
@@ -982,6 +998,15 @@ msgstr "Décision de la bourse de la CFWB"
 
 msgid "CHEMISTRY"
 msgstr "Chimie"
+
+msgid "CINQ_G_1ERE_INSCRIPTION_MEME_CYCLE"
+msgstr "5G 1ère inscription au même cycle"
+
+msgid "CINQ_G_2EME_INSCRIPTION_AVEC_REORIENTATION"
+msgstr "5G 2ème inscription avec réorientation"
+
+msgid "CINQ_G_2EME_INSCRIPTION_MEME_CYCLE"
+msgstr "5G 2ème inscription au même cycle"
 
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr "Carte CIRE, séjour illimité ou d'étranger"
@@ -1302,6 +1327,9 @@ msgstr "Modification d'inscription et réorientation"
 msgid "Change of enrolment form"
 msgstr "Formulaire de modification d'inscription"
 
+msgid "Change rule"
+msgstr "Changer la règle"
+
 msgid "Change the paper for this residency"
 msgstr "Modifier la communication de ce séjour"
 
@@ -1325,6 +1353,9 @@ msgstr "Le choix de la cotutelle n'est pas encore défini"
 
 msgid "Choose from the following"
 msgstr "Choisissez parmi les propositions suivantes"
+
+msgid "Choose the financing rule"
+msgstr "Choix de la règle de financement"
 
 msgid "Choose your course"
 msgstr "Formation souhaitée"
@@ -2424,11 +2455,39 @@ msgctxt "tab"
 msgid "Finalization"
 msgstr "Finalisation"
 
+msgid "Financability computed rule"
+msgstr "Règle calculé de financabilité"
+
+msgid "Financability computed rule on"
+msgstr "Règle calculé de financabilité le"
+
+msgid "Financability rule"
+msgstr "Règle de financabilité"
+
+msgid "Financability rule established by"
+msgstr "Règle de financabilité établi par"
+
+msgid "Financable"
+msgstr "Finançable"
+
 msgid "Financeability"
 msgstr "Financabilité"
 
 msgid "Financeability view"
 msgstr "Vue financabilité"
+
+msgid "Financeabilty algorithm proposition not computed yet."
+msgstr "Proposition de l'algorithme de financabilité non calculée."
+
+#, python-format
+msgid "Financeabilty algorithm proposition on the %(date)s : %(result)s"
+msgstr "Proposition de l'algorithme de financabilité le %(date)s : %(result)s"
+
+msgid "Financeable"
+msgstr "Financable"
+
+msgid "Financing rule"
+msgstr "Règle de financement"
 
 msgid "First name"
 msgstr "Prénom"
@@ -2941,6 +3000,9 @@ msgstr ""
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
 
+msgid "INDISPONIBLE"
+msgstr "Indisponible"
+
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"
 
@@ -3331,6 +3393,10 @@ msgstr "Lettres de recommandation"
 
 msgid "Level equivalence"
 msgstr "Equivalence de niveau"
+
+msgid ""
+"Link to download a copy of the file related to the admission (frontoffice)."
+msgstr "Lien pour télécharger une copie du dossier (back-office)."
 
 msgid "Link to the admission (back-office)"
 msgstr "Lien vers l'admission (back-office)"
@@ -3900,6 +3966,12 @@ msgstr "Sans objet"
 msgid "NO"
 msgstr "Non"
 
+msgid "NON_CONCERNE"
+msgstr "Non concerné(e)"
+
+msgid "NON_FINANCABLE"
+msgstr "Non finançable"
+
 msgid "NON_SOUMISE"
 msgstr "Non soumise"
 
@@ -4055,6 +4127,9 @@ msgctxt "checklist"
 msgid "Not concerned"
 msgstr "Non concerné·e"
 
+msgid "Not financeable"
+msgstr "Non-finançable"
+
 msgid "Not free"
 msgstr "Non libre"
 
@@ -4072,8 +4147,16 @@ msgctxt "address"
 msgid "Number"
 msgstr "Numéro"
 
+msgctxt "admission"
+msgid "Number of additional years the candidate can have"
+msgstr "Nombre d'années supplémentaires auxquelles le candidat a droit"
+
 msgid "Number of days participating"
 msgstr "Nombre de jours de participation"
+
+msgctxt "admission"
+msgid "Number of previous registration"
+msgstr "Nombre d'inscriptions précédemment réalisées"
 
 msgid "Number of values mismatch"
 msgstr "Le nombre de valeurs ne correspond pas"
@@ -4241,6 +4324,12 @@ msgstr "PDF récapitulatif de la proposition"
 msgid "PHYSICS"
 msgstr "Physique"
 
+msgid "PREMIERE_INSCRIPTION_MEME_CYCLE"
+msgstr "1ère inscription au même cycle"
+
+msgid "PREMIERE_REORIENTATION_SUR_5_ANS"
+msgstr "Première réorientation sur 5 ans"
+
 msgid "PRESIDENT"
 msgstr "PRESIDENT"
 
@@ -4265,6 +4354,9 @@ msgstr "Page"
 
 msgid "Page size"
 msgstr "Taille de la page"
+
+msgid "Parcours"
+msgstr "Parcours"
 
 msgid "Parent certificate of support from the CPAS"
 msgstr "Attestation de prise en charge du parent par le CPAS"
@@ -4784,6 +4876,9 @@ msgstr ""
 msgid "Recipient"
 msgstr "Destinataire"
 
+msgid "Recompute"
+msgstr "Recalculer"
+
 msgid "Reduced tuition fee"
 msgstr "Réduction des droits d’inscription"
 
@@ -5039,6 +5134,9 @@ msgstr "Rôle: Direction SIC"
 msgid "SEARCH_SCHOLARSHIP"
 msgstr "Bourse de recherche"
 
+msgid "SECONDE_INSCRIPTION_MEME_CYCLE"
+msgstr "2ème inscription au même cycle"
+
 msgid "SECRETAIRE"
 msgstr "SECRETAIRE"
 
@@ -5081,6 +5179,24 @@ msgstr "Statistiques"
 
 msgid "SUBMITTED_CONFIRMATION"
 msgstr "Confirmation soumise"
+
+msgid "SUR_2_ANS_45_CREDITS_11BA"
+msgstr "Sur 2 ans, 45 crédits et 1/2 crédits inscrits 11BA sauf 1ère année"
+
+msgid "SUR_2_ANS_45_CREDITS_MEME_CYCLE"
+msgstr "Sur 2 ans, 45 crédits et 1/2 crédits inscrits même cycle"
+
+msgid "SUR_2_ANS_MOITIE_CREDITS"
+msgstr "Sur 2 ans, 1/2 crédits inscrits même cycle car allègement"
+
+msgid "SUR_3_ANS_45_CREDITS_11BA"
+msgstr "Sur 3 ans, 45 crédits et 1/2 crédits inscrits 11BA sauf 1ère année"
+
+msgid "SUR_3_ANS_45_CREDITS_MEME_CYCLE"
+msgstr "Sur 3 ans, 45 crédits et 1/2 crédits inscrits même cycle"
+
+msgid "SUR_3_ANS_MOITIE_CREDITS"
+msgstr "Sur 3 ans, 1/2 crédits inscrits même cycle car allègement"
 
 msgid "SYST_REUSSITE"
 msgstr "Système réussite"
@@ -5208,6 +5324,12 @@ msgstr "Envoyer en faculté"
 
 msgid "Sender"
 msgstr "Expéditeur"
+
+msgid "Sentence indicating the late enrolment (if applicable)."
+msgstr "Phrase indiquant que l'inscripton est tardive (si applicable)."
+
+msgid "Sentence indicating the payment of the application fee (if applicable)."
+msgstr "Phrase indiquant le payement des frais de dossier (si applicable)."
 
 msgid "Services"
 msgstr "Services"
@@ -5471,6 +5593,9 @@ msgstr "Pour validation"
 
 msgid "TO_BE_VERIFIED"
 msgstr "Pour vérification"
+
+msgid "TROISIEME_INSCRIPTION_PREMIER_CYCLE_AVEC_REORIENTATION"
+msgstr "3ème inscription au 1er cycle avec réorientation"
 
 msgid "Tab"
 msgstr "Onglet"
@@ -5867,6 +5992,9 @@ msgstr "La proposition a déjà été confirmée ou est annulée"
 
 msgid "The proposition must be concerned by the payment."
 msgstr "La proposition doit être concernée par le paiement."
+
+msgid "The proposition must be in draft form to realize this action."
+msgstr "La proposition doit être en brouillon pour réaliser cette action."
 
 msgid "The proposition must be managed by FAC to realized this action."
 msgstr "La proposition doit être gérée par FAC pour réaliser cette action."
@@ -6386,6 +6514,15 @@ msgid ""
 msgstr ""
 "Nous vous félicitons pour la réussite de votre épreuve et vous souhaitons un "
 "franc succès dans la poursuite de votre parcours doctoral."
+
+msgid ""
+"We would like to draw your attention to the fact that you have submitted a "
+"late application. The admission panel reserves the right to accept or refuse "
+"this application on the basis of educational requirements."
+msgstr ""
+"Nous attirons votre attention sur le fait que vous avez introduit une "
+"demande d'inscription tardive. Le jury d'admission se réserve le droit "
+"d'accepter ou de refuser cette demande en raison des impératifs pédagogiques."
 
 msgctxt "admission"
 msgid "Website"

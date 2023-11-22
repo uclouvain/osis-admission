@@ -501,3 +501,17 @@ class SpecifierExperienceEnTantQueTitreAccesCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererTitresAccesSelectionnablesPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
+    uuid_proposition: str
+    financabilite_regle_calcule: str
+    financabilite_regle_calcule_le: datetime.datetime
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
+    uuid_proposition: str
+    financabilite_regle: str
+    etabli_par: str

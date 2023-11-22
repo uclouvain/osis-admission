@@ -23,37 +23,26 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-import rules
-from django.utils.translation import gettext_lazy as _
-from rules import RuleSet
-
-from admission.auth.predicates.common import is_entity_manager
-from admission.auth.roles.central_manager import CentralManager
-from osis_role.contrib.models import EntityRoleModel
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-class SicManagement(EntityRoleModel):
-    """
-    Direction SIC
+def specifier_financabilite_resultat_calcul(
+    cmd: 'SpecifierFinancabiliteResultatCalculCommand',
+    proposition_repository: 'IPropositionRepository',
+) -> 'PropositionIdentity':
+    # GIVEN
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
 
-    L'assistant à la direction SIC intervient dans l'admission pour valider l'autorisation d'inscription.
-    Il a un peu plus de pouvoir que le gestionnaire central d'admission.
-    """
+    # THEN
+    proposition.specifier_financabilite_resultat_calcul(
+        cmd.financabilite_regle_calcule,
+        cmd.financabilite_regle_calcule_le,
+    )
+    proposition_repository.save(proposition)
 
-    class Meta:
-        verbose_name = _("Role: SIC management")
-        verbose_name_plural = _("Role: SIC management")
-        group_name = "admission_sic_management"
-
-    @classmethod
-    def rule_set(cls):
-        ruleset = {
-            **CentralManager.rule_set(),
-            # Listings
-            'admission.view_enrolment_applications': rules.always_allow,
-            'admission.view_doctorate_enrolment_applications': rules.always_allow,
-            'admission.view_continuing_enrolment_applications': rules.always_allow,
-            'admission.validate_registration': is_entity_manager,
-        }
-        return RuleSet(ruleset)
+    return proposition_id

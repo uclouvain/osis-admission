@@ -625,3 +625,11 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
                 cleaned_data[field] = self.default_values[field]
 
         return cleaned_data
+
+
+class FinancabiliteApprovalForm(forms.ModelForm):
+    class Meta:
+        model = GeneralEducationAdmission
+        fields = [
+            'financability_rule',
+        ]

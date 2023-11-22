@@ -64,6 +64,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     PoursuiteDeCycle,
     DecisionFacultaireEnum,
+    RegleCalculeResultatAvecFinancable,
+    RegleDeFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -128,6 +130,11 @@ class Proposition(interface.RootEntity):
     checklist_actuelle: Optional[StatutsChecklistGenerale] = None
 
     profil_soumis_candidat: ProfilCandidat = None
+
+    financabilite_regle_calcule: RegleCalculeResultatAvecFinancable = ''
+    financabilite_regle_calcule_le: Optional[datetime.datetime] = None
+    financabilite_regle: RegleDeFinancement = ''
+    financabilite_regle_etabli_par: str = ''
 
     documents_additionnels: List[str] = attr.Factory(list)
 
@@ -603,3 +610,21 @@ class Proposition(interface.RootEntity):
         self.attestation_inscription_reguliere = attestation_inscription_reguliere
         self.est_modification_inscription_externe = est_modification_inscription_externe
         self.formulaire_modification_inscription = formulaire_modification_inscription
+
+    def specifier_financabilite_resultat_calcul(
+        self,
+        financabilite_regle_calcule: RegleCalculeResultatAvecFinancable,
+        financabilite_regle_calcule_le: datetime.datetime,
+    ):
+        self.financabilite_regle_calcule = financabilite_regle_calcule
+        self.financabilite_regle_calcule_le = financabilite_regle_calcule_le
+
+    def specifier_financabilite_regle(self, financabilite_regle: RegleCalculeResultatAvecFinancable, etabli_par: str):
+        self.financabilite_regle = financabilite_regle
+        self.financabilite_regle_etabli_par = etabli_par
+
+        self.checklist_actuelle.financabilite = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+            libelle=__('Approval'),
+            extra={},
+        )

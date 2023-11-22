@@ -80,6 +80,11 @@ class PropositionDTO(interface.DTO):
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
 
+    financabilite_regle_calcule: str
+    financabilite_regle_calcule_le: Optional[datetime.datetime]
+    financabilite_regle: str
+    financabilite_regle_etabli_par: str
+
     documents_demandes: Dict
     documents_libres_fac_uclouvain: List[str]
     documents_libres_sic_uclouvain: List[str]

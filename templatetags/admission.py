@@ -59,6 +59,8 @@ from admission.ddd.admission.formation_continue.domain.model.enums import ChoixS
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
+    RegleDeFinancement,
+    RegleCalculeResultatAvecFinancable,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
 from admission.ddd.admission.repository.i_proposition import formater_reference
@@ -955,3 +957,10 @@ def document_request_status_css_class(document_request_status):
         StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name: 'text-danger',
         StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name: 'text-orange',
     }.get(document_request_status, '')
+
+
+@register.filter
+def financability_enum_display(value):
+    if value in RegleDeFinancement.get_names():
+        return '{} - {}'.format(_('Financable'), RegleDeFinancement[value].value)
+    return RegleCalculeResultatAvecFinancable[value].value
