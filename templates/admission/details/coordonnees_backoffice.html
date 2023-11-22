@@ -27,7 +27,7 @@
 {% block tab_content %}
   {% if profil_candidat %}
     <p class="alert alert-info" role="alert">
-      <i class="fa fa-info-circle" style="margin-right: 0.5em"></i>
+      <i class="fa fa-question-circle" style="margin-right: 0.5em"></i>
       {% trans "The dossier has been confirmed with the following contact address:" %}
       {{ profil_candidat.numero_rue }} {{ profil_candidat.rue }},
       {% if profil_candidat.boite_postale %}{% trans "Postal box" %} {{ profil_candidat.boite_postale }}, {% endif %}

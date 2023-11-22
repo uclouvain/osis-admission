@@ -48,11 +48,6 @@
     {% endpanel %}
   {% endif %}
 
-  {% panel _('Specific aspects') %}
-    {% bootstrap_field form.reponses_questions_specifiques show_label=False error_css_class='' %}
-    {% bootstrap_field form.documents_additionnels %}
-  {% endpanel %}
-
   {% if view.display_pool_questions %}
     {% if form.est_non_resident_au_sens_decret %}
       {% panel _("Enrolment in limited enrolment bachelor's course") %}
@@ -82,6 +77,11 @@
     {% endpanel %}
 
   {% endif %}
+
+  {% panel _('Specific aspects') %}
+    {% bootstrap_field form.reponses_questions_specifiques show_label=False error_css_class='' %}
+    {% bootstrap_field form.documents_additionnels %}
+  {% endpanel %}
 
 {% endblock %}
 

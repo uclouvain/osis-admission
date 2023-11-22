@@ -223,6 +223,8 @@ class AdmissionPersonForm(AdmissionModelForm):
         label=_('Identification photo'),
         max_files=1,
         mimetypes=IMAGE_MIME_TYPES,
+        with_cropping=True,
+        cropping_options={'aspectRatio': 0.766},
     )
 
     # Already registered

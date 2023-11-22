@@ -75,7 +75,11 @@ class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCas
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         json_response = response.json()
-        self.assertActionLinks(json_response['links'], ['create_person', 'create_coordinates'], [])
+        self.assertActionLinks(
+            json_response['links'],
+            ['create_person', 'create_coordinates', 'create_training_choice'],
+            [],
+        )
 
     def test_get_with_submitted_admission(self):
         self.admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
@@ -86,7 +90,11 @@ class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCas
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         json_response = response.json()
-        self.assertActionLinks(json_response['links'], [], ['create_person', 'create_coordinates'])
+        self.assertActionLinks(
+            json_response['links'],
+            ['create_training_choice'],
+            ['create_person', 'create_coordinates'],
+        )
 
 
 class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
