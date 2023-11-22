@@ -435,9 +435,11 @@ def current_subtabs(context):
     tab_context = default_tab_context(context)
     permission_obj = context['view'].get_permission_object()
     tab_tree = TAB_TREES[get_current_context(admission=permission_obj)]
-    tab_context['subtabs'] = [
-        tab for tab in tab_tree[tab_context['active_parent']] if can_read_tab(context, tab.name, permission_obj)
-    ]
+    tab_context['subtabs'] = (
+        [tab for tab in tab_tree[tab_context['active_parent']] if can_read_tab(context, tab.name, permission_obj)]
+        if tab_context['active_parent']
+        else []
+    )
     return tab_context
 
 
