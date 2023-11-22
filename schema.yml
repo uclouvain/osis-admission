@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.90
+  version: 1.0.91
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -5903,6 +5903,8 @@ components:
                 properties:
                   retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
+                  update_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_person:
                     $ref: '#/components/schemas/ActionLink'
                   update_person:
@@ -6194,6 +6196,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             create_coordinates:
               $ref: '#/components/schemas/ActionLink'
+            create_training_choice:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
     DoctoratePropositionSearchDTO:
@@ -6251,6 +6255,8 @@ components:
           type: object
           properties:
             retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
               $ref: '#/components/schemas/ActionLink'
             retrieve_person:
               $ref: '#/components/schemas/ActionLink'

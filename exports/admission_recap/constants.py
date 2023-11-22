@@ -50,5 +50,5 @@ CURRICULUM_ACTIVITY_LABEL = {
     ),
     ActivityType.VOLUNTEERING.name: _('Certificate, with dates, justifying your volunteering activities'),
     ActivityType.WORK.name: _('Proof of employment from the employer, with dates, justifying the period in question'),
-    ActivityType.OTHER.name: _('Certificate justifying and mentioning your activity for the period concerned'),
+    ActivityType.OTHER.name: _('Post-dated certificate justifying your activity mentioned above'),
 }
