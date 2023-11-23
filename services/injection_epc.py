@@ -24,8 +24,9 @@
 #
 # ##############################################################################
 import json
-from typing import Dict, List
+from typing import Dict, List, Union
 
+import osis_document.contrib.fields
 import pika
 from django.conf import settings
 from django.db.models import QuerySet
@@ -103,26 +104,30 @@ class InjectionEPC:
         )
         return donnees
 
-    def recuperer_donnees(self, admission: BaseAdmission):
+    @classmethod
+    def recuperer_donnees(cls, admission: BaseAdmission):
         candidat = admission.candidate  # Person
         comptabilite = admission.accounting
         adresses = candidat.personaddress_set.select_related('country')
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
+        documents = cls._recuperer_documents(admission)
         return {
             'dossier_uuid': str(admission.uuid),
-            'signaletique': self._get_signaletique(candidat=candidat, adresse_domicile=adresse_domicile),
-            'comptabilite': self._get_comptabilite(comptabilite=comptabilite),
-            'etudes_secondaires': self._get_etudes_secondaires(candidat=candidat),
-            'curriculum_academique': self._get_curriculum_academique(candidat=candidat),
-            'curriculum_autres': self._get_curriculum_autres_activites(candidat=candidat),
-            'inscription_annee_academique': self._get_inscription_annee_academique(admission=admission),
-            'inscription_offre': self._get_inscription_offre(admission=admission),
-            'donnees_comptables': self._get_donnees_comptables(admission=admission),
-            'adresses': self._get_adresses(adresses=adresses),
+            'signaletique': cls._get_signaletique(candidat=candidat, adresse_domicile=adresse_domicile),
+            'comptabilite': cls._get_comptabilite(comptabilite=comptabilite),
+            'etudes_secondaires': cls._get_etudes_secondaires(candidat=candidat),
+            'curriculum_academique': cls._get_curriculum_academique(candidat=candidat),
+            'curriculum_autres': cls._get_curriculum_autres_activites(candidat=candidat),
+            'inscription_annee_academique': cls._get_inscription_annee_academique(admission=admission),
+            'inscription_offre': cls._get_inscription_offre(admission=admission),
+            'donnees_comptables': cls._get_donnees_comptables(admission=admission),
+            'adresses': cls._get_adresses(adresses=adresses),
+            'documents': documents
         }
 
-    @staticmethod
-    def _get_signaletique(candidat: Person, adresse_domicile: PersonAddress) -> Dict:
+    @classmethod
+    def _get_signaletique(cls, candidat: Person, adresse_domicile: PersonAddress) -> Dict:
+        documents = cls._recuperer_documents(candidat)
         return {
             'nom': candidat.last_name,
             'prenom': candidat.first_name,
@@ -139,25 +144,42 @@ class InjectionEPC:
             'pays_domicile': adresse_domicile.country.iso_code if adresse_domicile else '',
             'num_carte_identite': candidat.id_card_number,
             'num_passeport': candidat.passport_number,
+            'documents': documents
         }
 
     @staticmethod
-    def _get_comptabilite(comptabilite: Accounting) -> Dict:
+    def _recuperer_documents(db_object) -> List[Dict[str, Union[List[str], str]]]:
+        documents = []
+        for field in db_object._meta.fields:
+            if isinstance(field, osis_document.contrib.fields.FileField):
+                files = getattr(db_object, field.name, None)
+                if files:
+                    documents.append({
+                        'documents': [str(file) for file in files],
+                        'type': field.name
+                    })
+        return documents
+
+    @classmethod
+    def _get_comptabilite(cls, comptabilite: Accounting) -> Dict:
         if comptabilite:
+            documents = cls._recuperer_documents(comptabilite)
             return {
                 'iban': comptabilite.iban_account_number,
                 'bic': comptabilite.bic_swift_code,
                 'nom_titulaire': comptabilite.account_holder_last_name,
-                'prenom_titulaire': comptabilite.account_holder_first_name
+                'prenom_titulaire': comptabilite.account_holder_first_name,
+                'documents': documents
             }
         return {}
 
-    @staticmethod
-    def _get_etudes_secondaires(candidat: Person) -> Dict:
+    @classmethod
+    def _get_etudes_secondaires(cls, candidat: Person) -> Dict:
         diplome_belge = getattr(candidat, 'belgianhighschooldiploma', None)  # type: BelgianHighSchoolDiploma
         diplome_etranger = getattr(candidat, 'foreignhighschooldiploma', None)  # type: ForeignHighSchoolDiploma
         if diplome_belge or diplome_etranger:
             diplome = diplome_belge or diplome_etranger
+            documents = cls._recuperer_documents(diplome)
             type_etude = diplome_belge.educational_type if diplome_belge else diplome_etranger.foreign_diploma_type
             return {
                 'type_etude': TYPE_DIPLOME_MAP.get(type_etude),
@@ -168,10 +190,12 @@ class InjectionEPC:
                     if diplome_belge and diplome_belge.other_institute_name
                     else ''
                 ),
+                'documents': documents
             }
         return {}
 
-    def _get_curriculum_academique(self, candidat: Person) -> List[List[Dict]]:
+    @classmethod
+    def _get_curriculum_academique(cls, candidat: Person) -> List[List[Dict]]:
         experiences_educatives = candidat.educationalexperience_set.all().select_related(
             'institute',
             'country',
@@ -190,18 +214,21 @@ class InjectionEPC:
             experiences_annuelles = []
 
             for experience_educative_annualisee in experiences_educatives_annualisees:
-                data_annuelle = self.__build_data_annuelle(experience_educative, experience_educative_annualisee)
+                data_annuelle = cls.__build_data_annuelle(experience_educative, experience_educative_annualisee)
                 experiences_annuelles.append(data_annuelle)
             experiences.append(experiences_annuelles)
 
         return experiences
 
-    @staticmethod
-    def __build_data_annuelle(experience_educative, experience_educative_annualisee) -> Dict:
+    @classmethod
+    def __build_data_annuelle(cls, experience_educative, experience_educative_annualisee) -> Dict:
         etablissement = experience_educative.institute  # type: Organization
         etudes = experience_educative.program  # type: DiplomaTitle
         pays_etablissement = experience_educative.country.iso_code
         communaute = etablissement.community if pays_etablissement == BELGIQUE_ISO_CODE else ''
+        documents = (
+            cls._recuperer_documents(experience_educative) + cls._recuperer_documents(experience_educative_annualisee)
+        )
 
         donnees_annuelles = {
             'annee_debut': experience_educative_annualisee.academic_year.year,
@@ -214,7 +241,8 @@ class InjectionEPC:
             'adresse_etablissement': experience_educative.institute_address,
             'credits_inscrits': experience_educative_annualisee.registered_credit_number or '',
             'credits_acquis': experience_educative_annualisee.acquired_credit_number or '',
-            'pays': pays_etablissement
+            'pays': pays_etablissement,
+            'documents': documents
         }
         if etablissement and etablissement.establishment_type == EstablishmentTypeEnum.UNIVERSITY.name:
             external_id_parts = etablissement.external_id.split('_')[1:] if etablissement else []
@@ -241,10 +269,11 @@ class InjectionEPC:
             'type_enseignement': etablissement.teaching_type if etablissement else ''
         }
 
-    @staticmethod
-    def _get_curriculum_autres_activites(candidat: Person) -> List[Dict]:
+    @classmethod
+    def _get_curriculum_autres_activites(cls, candidat: Person) -> List[Dict]:
         experiences_professionnelles = candidat.professionalexperience_set.all(
         ).order_by('start_date')  # type: QuerySet[ProfessionalExperience]
+
         return [
             {
                 'type_occupation': experience_pro.type,
@@ -253,7 +282,7 @@ class InjectionEPC:
                 'type_experience_professionnel': experience_pro.type,
                 'intitule_autre_activite': experience_pro.activity,
                 'etablissement_autre': experience_pro.institute_name,
-
+                'documents': cls._recuperer_documents(experience_pro)
             }
             for experience_pro in experiences_professionnelles
         ]
