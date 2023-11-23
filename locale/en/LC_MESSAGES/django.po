@@ -1360,6 +1360,9 @@ msgstr ""
 msgid "Confirm restoring activity to submitted"
 msgstr ""
 
+msgid "Confirm the state change"
+msgstr ""
+
 msgid "Confirm the status change"
 msgstr ""
 
@@ -4025,6 +4028,9 @@ msgstr ""
 msgid "Please complete this field: {}"
 msgstr ""
 
+msgid "Please confirm the change to this new state."
+msgstr ""
+
 msgid "Please confirm the change to this new status."
 msgstr ""
 
@@ -5764,6 +5770,9 @@ msgid "UE"
 msgstr ""
 
 msgid "UUID"
+msgstr ""
+
+msgid "Unavailable"
 msgstr ""
 
 msgid "Undecided"

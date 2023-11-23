@@ -29,18 +29,26 @@
        hx-target="this" hx-swap-oob="true">
     <div class="form-group btn-group status-group" role="group">
       {% translate initial.libelle as initial_state_label %}
-      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE' as change_status_url_blocage %}
+      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-0' as change_status_url_blocage %}
 
-      {% if current.statut == 'GEST_BLOCAGE' or current.statut == 'GEST_REUSSITE' %}
-        {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
+      {% if current.extra.to_be_completed == '0' or current.statut == 'GEST_REUSSITE' %}
+        {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='xmark' state=initial.statut class='primary' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
+        {% else %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='primary' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
+        {% endif %}
         {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' open_modal='#financabilite-confirm-modal-GEST_EN_COURS' %}
-        {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE_ULTERIEUR' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE_ULTERIEUR' %}
-        {% checklist_state_button tab='financabilite' label=_("Not financeable") icon='circle-stop' state='GEST_BLOCAGE' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE' %}
+        {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='1' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE-1' %}
+        {% checklist_state_button tab='financabilite' label=_("Not financeable") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='0' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE-0' %}
       {% else %}
-        {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='muted' %}
+        {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='xmark' state=initial.statut class='primary' %}
+        {% else %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='primary' %}
+        {% endif %}
         {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}
-        {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE_ULTERIEUR' class='danger' %}
-        {% checklist_state_button tab='financabilite' label=_("Not financeable") icon='circle-stop' state='GEST_BLOCAGE' class='danger' htmx_post=change_status_url_blocage %}
+        {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='1' class='danger' %}
+        {% checklist_state_button tab='financabilite' label=_("Not financeable") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='0' class='danger' htmx_post=change_status_url_blocage %}
       {% endif %}
       {% checklist_state_button tab='financabilite' label=_("Financeable") icon='check' state='GEST_REUSSITE' class='success' open_modal='#financabilite-approval-modal' %}
     </div>
@@ -49,8 +57,8 @@
 
     <div class="panel panel-default">
       <div class="panel-heading">{% trans "Financing rule" %}</div>
-      <div class="panel-body {% if current.statut == 'GEST_BLOCAGE' %}bg-danger{% elif current.statut == 'GEST_REUSSITE' %}bg-success{% endif %}">
-        {% if current.statut == 'GEST_BLOCAGE' %}
+      <div class="panel-body {% if current.statut == 'GEST_BLOCAGE' and current.extra.to_be_completed == '0' %}bg-danger{% elif current.statut == 'GEST_REUSSITE' %}bg-success{% endif %}">
+        {% if current.statut == 'GEST_BLOCAGE' and current.extra.to_be_completed == '0' %}
           {% blocktrans trimmed with rule='NON_FINANCABLE'|financability_enum_display established_by=original_admission.financability_rule_established_by %}
             {{ rule }} (Established by {{ established_by }})
           {% endblocktrans %}
@@ -79,15 +87,15 @@
       </div>
     </div>
 
-    {% if current.statut == 'GEST_BLOCAGE' or current.statut == 'GEST_REUSSITE' %}
+    {% if current.extra.to_be_completed == '0' or current.statut == 'GEST_REUSSITE' %}
       {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status=initial.statut as change_status_url_initial %}
       {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS' as change_status_url_en_cours %}
-      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE_ULTERIEUR' as change_status_url_blocage_ulterieur %}
+      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-1' as change_status_url_blocage_ulterieur %}
 
       {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status=initial.statut target_url=change_status_url_initial %}
       {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_EN_COURS" target_url=change_status_url_en_cours %}
-      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_BLOCAGE_ULTERIEUR" target_url=change_status_url_blocage_ulterieur %}
-      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_BLOCAGE" target_url=change_status_url_blocage %}
+      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_BLOCAGE-1" target_url=change_status_url_blocage_ulterieur %}
+      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_BLOCAGE-0" target_url=change_status_url_blocage %}
     {% endif %}
     {% include 'admission/general_education/includes/checklist/financabilite_approval_modal.html' %}
   </div>

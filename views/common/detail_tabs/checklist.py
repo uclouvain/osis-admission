@@ -1217,12 +1217,25 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
     def post(self, request, *args, **kwargs):
         admission = self.get_permission_object()
 
+        try:
+            status, extra = self.kwargs['status'].split('-')
+            if status == 'GEST_BLOCAGE':
+                extra = {'to_be_completed': extra}
+        except ValueError:
+            status = self.kwargs['status']
+            extra = {}
+
         change_admission_status(
             tab='financabilite',
-            admission_status=self.kwargs['status'],
-            extra={},
+            admission_status=status,
+            extra=extra,
             admission=admission,
+            replace_extra=True,
         )
+
+        if status == 'GEST_BLOCAGE' and extra.get('to_be_completed') == '0':
+            admission.financability_rule_established_by = request.user.person
+            admission.save(update_fields=['financability_rule_established_by'])
 
         return self.render_to_response(self.get_context_data())
 

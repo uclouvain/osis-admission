@@ -111,7 +111,7 @@
 
           <div class="info-part">
             <dl>
-              <dt>{% trans "Course" context 'admission' %}</dt>
+              <dt>{% trans "Course choice" %} {{ ''|tab_edit_button:'#choix_formation'|safe }}</dt>
               <dd>
                 {% with formation=admission.formation %}
                   {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
@@ -123,10 +123,10 @@
               </dd>
 
               <dt>{% trans "Number of previous registration" context 'admission' %}</dt>
-              <dd>{{ financabilite.inscription_precedentes }}</dd>
+              <dd>{% trans "Unavailable" %}</dd>
 
               <dt>{% trans "Number of additional years the candidate can have" context 'admission' %}</dt>
-              <dd>{{ financabilite.inscription_supplementaire }}</dd>
+              <dd>{% trans "Unavailable" %}</dd>
             </dl>
 
             {% panel _("Parcours") %}
