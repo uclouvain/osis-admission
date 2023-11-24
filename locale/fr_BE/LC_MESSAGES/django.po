@@ -1467,6 +1467,9 @@ msgstr "Confirmer et envoyer le message"
 msgid "Confirm restoring activity to submitted"
 msgstr "Confirmer la remise au statut soumise de cette activité"
 
+msgid "Confirm the state change"
+msgstr "Confirmer le passage à un nouvel état"
+
 msgid "Confirm the status change"
 msgstr "Confirmer le changement de statut"
 
@@ -4463,6 +4466,9 @@ msgstr ""
 msgid "Please complete this field: {}"
 msgstr "Merci de spécifier une valeur pour le champ suivant : {}"
 
+msgid "Please confirm the change to this new state."
+msgstr "Veuillez confirmer le passage à ce nouvel état."
+
 msgid "Please confirm the change to this new status."
 msgstr "Merci de confirmer le changement vers ce nouveau statut."
 
@@ -6390,6 +6396,9 @@ msgstr "UE"
 
 msgid "UUID"
 msgstr "UUID"
+
+msgid "Unavailable"
+msgstr "Non disponible"
 
 msgid "Undecided"
 msgstr "Non décidé"
