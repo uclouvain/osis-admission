@@ -49,8 +49,10 @@
     {% concat '?next=' checklist_url '&next_hash_url=' as next_base_url %}
     {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
     {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
-    {% url base_namespace|add:":update:accounting" view.kwargs.uuid as accounting_url %}
+    {% url base_namespace|add:":update:accounting" view.kwargs.uuid as comptabilite_url %}
     {% url base_namespace|add:":update:training-choice" view.kwargs.uuid as training_choice_url %}
+    {% url base_namespace|add:":update:specific-questions" view.kwargs.uuid as specific_questions_url %}
+    {% concat "#choix_formation" as checklist_training_choice_url %}
 
     <div
         id="tabs-content"
@@ -96,8 +98,8 @@
           {% bootstrap_form comment_forms.donnees_personnelles %}
 
           <div class="info-part">
-            {% include 'admission/exports/recap/includes/person.html' with identification=resume_proposition.identification edit_button=person_url|add:next_url %}
-            {% include 'admission/exports/recap/includes/coordonnees.html' with coordonnees=resume_proposition.coordonnees edit_button=coordonnees_url|add:next_url %}
+            {% include 'admission/exports/recap/includes/person.html' with identification=resume_proposition.identification edit_link_button=person_url|add:next_url %}
+            {% include 'admission/exports/recap/includes/coordonnees.html' with coordonnees=resume_proposition.coordonnees edit_link_button=coordonnees_url|add:next_url %}
           </div>
         </div>
       {% endwith %}
@@ -109,7 +111,7 @@
 
           <div class="info-part">
             <dl>
-              <dt>{% trans "Course" context 'admission' %}</dt>
+              <dt>{% trans "Course choice" %} {{ ''|tab_edit_button:'#choix_formation'|safe }}</dt>
               <dd>
                 {% with formation=admission.formation %}
                   {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
@@ -121,10 +123,10 @@
               </dd>
 
               <dt>{% trans "Number of previous registration" context 'admission' %}</dt>
-              <dd>{{ financabilite.inscription_precedentes }}</dd>
+              <dd>{% trans "Unavailable" %}</dd>
 
               <dt>{% trans "Number of additional years the candidate can have" context 'admission' %}</dt>
-              <dd>{{ financabilite.inscription_supplementaire }}</dd>
+              <dd>{% trans "Unavailable" %}</dd>
             </dl>
 
             {% panel _("Parcours") %}
@@ -180,7 +182,7 @@
 
             {% firstof training_choice_url|add:next_url as contextual_training_choice %}
             {% translate "Course" context 'admission' as course_label %}
-            {% display course_label ''|edit_button:contextual_training_choice as button %}
+            {% display course_label ''|tab_edit_button:'#choix_formation' as button %}
             {% field_data button resume_proposition.proposition.formation %}
 
             {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}
@@ -197,7 +199,7 @@
           </div>
         </div>
       {% endwith %}
-      {% with initial=original_admission.checklist.initial.choix_formation current=original_admission.checklist.current.choix_formation %}
+      {% with initial=original_admission.checklist.initial.choix_formation current=original_admission.checklist.current.choix_formation next_url=next_base_url|add:'choix_formation' %}
         <div role="tabpanel" class="tab-pane" id="choix_formation">
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
@@ -218,21 +220,8 @@
               {% field_data _("External reorientation/modification") _("Modification asked by the candidate") %}
             {% endif %}
 
-            {% if admission.bourse_erasmus_mundus or admission.bourse_double_diplome or admission.bourse_internationale %}
-              <dl>
-                <dt>{% trans "Specific profile" %}</dt>
-                <dd>
-                  {% if admission.bourse_erasmus_mundus %}
-                    <p>{% trans "Erasmus Mundus" %} : {{ admission.bourse_erasmus_mundus.nom_court }}</p>
-                  {% endif %}
-                  {% if admission.bourse_double_diplome %}
-                    <p>{% trans "Double diplomation" %} : {{ admission.bourse_double_diplome.nom_court }}</p>
-                  {% endif %}
-                  {% if admission.bourse_internationale %}
-                    <p>{% trans "International scholarship" %} : {{ admission.bourse_internationale.nom_court }}</p>
-                  {% endif %}
-                </dd>
-              </dl>
+            {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}
+              {% include 'admission/general_education/includes/checklist/vip_profile.html' with url=training_choice_url|add:next_url %}
             {% endif %}
           </div>
         </div>
@@ -251,7 +240,7 @@
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
         </div>
       {% endwith %}
-      {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation %}
+      {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation next_url=next_base_url|add:'specificites_formation' %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
           <div class="form-group btn-group status-group" role="group">
             {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
@@ -268,7 +257,7 @@
 
           <div class="info-part">
             {% if resume_proposition.identification.est_concerne_par_visa %}
-              {% panel _("Visa") edit_link_button="#" %}
+              {% panel _("Visa") edit_link_button=specific_questions_url|add:next_url %}
                 {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
               {% endpanel %}
             {% endif %}
@@ -414,6 +403,11 @@
                   const currentTabPanel = $(tabPaneId).find('.info-part');
                   currentTabPanel.children().detach().appendTo($info);
               }
+          });
+
+          // Activate a specific tab from link click inside the checklist
+          $('a[data-toggle="checklist-tab"]').on('click', function () {
+              $(`#checklist-menu li[href="${$(this).attr('href')}"] `).click();
           });
 
           // TODO find a way to genericly save extra and status

@@ -1142,10 +1142,6 @@ msgstr ""
 msgid "Certificate for children of staff"
 msgstr ""
 
-msgid ""
-"Certificate justifying and mentioning your activity for the period concerned"
-msgstr ""
-
 msgid "Certificate of achievement"
 msgstr ""
 
@@ -1358,6 +1354,9 @@ msgid "Confirm and send the message"
 msgstr ""
 
 msgid "Confirm restoring activity to submitted"
+msgstr ""
+
+msgid "Confirm the state change"
 msgstr ""
 
 msgid "Confirm the status change"
@@ -1949,9 +1948,6 @@ msgid "Dossier status"
 msgstr ""
 
 msgid "Double degree:"
-msgstr ""
-
-msgid "Double diplomation"
 msgstr ""
 
 msgid "Download the document"
@@ -4028,6 +4024,9 @@ msgstr ""
 msgid "Please complete this field: {}"
 msgstr ""
 
+msgid "Please confirm the change to this new state."
+msgstr ""
+
 msgid "Please confirm the change to this new status."
 msgstr ""
 
@@ -4109,6 +4108,9 @@ msgid "Please specify your Belgian national register number."
 msgstr ""
 
 msgid "Please specify your old NOMA (matriculation number)."
+msgstr ""
+
+msgid "Post-dated certificate justifying your activity mentioned above"
 msgstr ""
 
 msgid "Post-enrolment status"
@@ -5767,6 +5769,9 @@ msgid "UE"
 msgstr ""
 
 msgid "UUID"
+msgstr ""
+
+msgid "Unavailable"
 msgstr ""
 
 msgid "Undecided"

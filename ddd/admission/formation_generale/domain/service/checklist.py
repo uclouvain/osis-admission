@@ -155,7 +155,7 @@ class Checklist(interface.DomainService):
                 libelle=_("Not concerned"),
                 statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
             )
-            if formation.type in FINANCABILITE_FORMATIONS_NON_CONCERNEES
+            if formation.type.name in FINANCABILITE_FORMATIONS_NON_CONCERNEES
             else StatutChecklist(
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,

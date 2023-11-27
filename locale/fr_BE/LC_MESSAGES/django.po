@@ -1240,12 +1240,6 @@ msgstr "Attestation"
 msgid "Certificate for children of staff"
 msgstr "Attestation enfant du personnel"
 
-msgid ""
-"Certificate justifying and mentioning your activity for the period concerned"
-msgstr ""
-"Attestation justifiant votre activité, mentionnant cette activité, pour la "
-"période concernée "
-
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
@@ -1472,6 +1466,9 @@ msgstr "Confirmer et envoyer le message"
 
 msgid "Confirm restoring activity to submitted"
 msgstr "Confirmer la remise au statut soumise de cette activité"
+
+msgid "Confirm the state change"
+msgstr "Confirmer le passage à un nouvel état"
 
 msgid "Confirm the status change"
 msgstr "Confirmer le changement de statut"
@@ -2128,9 +2125,6 @@ msgstr "Statut dossier"
 msgid "Double degree:"
 msgstr "Bourse double diplomation:"
 
-msgid "Double diplomation"
-msgstr "Double diplomation"
-
 msgid "Download the document"
 msgstr "Télécharger un document"
 
@@ -2595,7 +2589,7 @@ msgid "Formation is not available for this year."
 msgstr "La formation n'est pas disponible pour cette année."
 
 msgid "Former UCLouvain student"
-msgstr "Ancien étudiant UCLouvain"
+msgstr "Ancien·ne étudiant·e UCLouvain"
 
 msgid "Fraudster"
 msgstr "Fraudeur"
@@ -2748,7 +2742,7 @@ msgstr ""
 "française de Belgique ?"
 
 msgid "Have you previously enrolled at UCLouvain?"
-msgstr "Avez-vous déjà été inscrit à l'UCLouvain antérieurement ?"
+msgstr "Avez-vous déjà été inscrit·e à l'UCLouvain antérieurement ?"
 
 msgid "Have you previously enrolled for a PhD?"
 msgstr ""
@@ -4472,6 +4466,9 @@ msgstr ""
 msgid "Please complete this field: {}"
 msgstr "Merci de spécifier une valeur pour le champ suivant : {}"
 
+msgid "Please confirm the change to this new state."
+msgstr "Veuillez confirmer le passage à ce nouvel état."
+
 msgid "Please confirm the change to this new status."
 msgstr "Merci de confirmer le changement vers ce nouveau statut."
 
@@ -4580,6 +4577,9 @@ msgstr "Merci de spécifier votre numéro de registre national belge."
 
 msgid "Please specify your old NOMA (matriculation number)."
 msgstr "Merci de spécifier votre ancien NOMA (numéro de matricule)."
+
+msgid "Post-dated certificate justifying your activity mentioned above"
+msgstr "Attestation postdatée justifiant votre activité mentionnée ci-dessus"
 
 msgid "Post-enrolment status"
 msgstr "Statut après inscription"
@@ -6396,6 +6396,9 @@ msgstr "UE"
 
 msgid "UUID"
 msgstr "UUID"
+
+msgid "Unavailable"
+msgstr "Non disponible"
 
 msgid "Undecided"
 msgstr "Non décidé"

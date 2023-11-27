@@ -338,8 +338,8 @@ TAB_TREES = {
             Tab('training-choice', _('Course choice')),
         ],
         Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
-            Tab('specific-questions', _('Specific aspects')),
             Tab('accounting', _('Accounting')),
+            Tab('specific-questions', _('Specific aspects')),
         ],
     },
     CONTEXT_CONTINUING: {
@@ -435,9 +435,11 @@ def current_subtabs(context):
     tab_context = default_tab_context(context)
     permission_obj = context['view'].get_permission_object()
     tab_tree = TAB_TREES[get_current_context(admission=permission_obj)]
-    tab_context['subtabs'] = [
-        tab for tab in tab_tree[tab_context['active_parent']] if can_read_tab(context, tab.name, permission_obj)
-    ]
+    tab_context['subtabs'] = (
+        [tab for tab in tab_tree[tab_context['active_parent']] if can_read_tab(context, tab.name, permission_obj)]
+        if tab_context['active_parent']
+        else []
+    )
     return tab_context
 
 
@@ -884,6 +886,14 @@ def checklist_state_button(context, **kwargs):
 @register.filter
 def edit_button(string, url):
     return str(string) + f'<a class="btn btn-default" href="{url}"><i class="fas fa-edit"></i></a>'
+
+
+@register.filter
+def tab_edit_button(string, tab_hash):
+    return (
+        str(string)
+        + f'<a class="btn btn-default" data-toggle="checklist-tab" href="{tab_hash}"><i class="fas fa-edit"></i></a>'
+    )
 
 
 @register.filter

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 # ##############################################################################
 from dal import autocomplete
 from django.conf import settings
+from django.utils.functional import cached_property
 from django.utils.translation import get_language
 from rules.contrib.views import LoginRequiredMixin
 
@@ -36,24 +37,31 @@ __all__ = [
 
 
 class CountriesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.name_field = 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
+    """
+    Return a list of countries based on the search term and the active flag. The returned ids are the model pks.
+    """
+
+    @cached_property
+    def id_field(self):
+        return self.forwarded.get('id_field', 'pk')
+
+    @cached_property
+    def name_field(self):
+        return 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en'
 
     def get_queryset(self):
         search_term = self.request.GET.get('q', '')
-        return (
-            Country.objects.filter(**{'{}__icontains'.format(self.name_field): search_term})
-            .values(self.name_field, 'iso_code')
-            .order_by(self.name_field)
-        )
 
-    def get_results(self, context):
-        """Return data for the 'results' key of the response."""
-        return [
-            {
-                'id': country.get('iso_code'),
-                'text': country.get(self.name_field),
-            }
-            for country in context['object_list']
-        ]
+        qs = Country.objects.filter(**{'{}__icontains'.format(self.name_field): search_term})
+
+        active = self.forwarded.get('active', None)
+        if active is not None:
+            qs = qs.filter(active=active)
+
+        return qs.order_by(self.name_field)
+
+    def get_result_label(self, result):
+        return getattr(result, self.name_field)
+
+    def get_result_value(self, result):
+        return getattr(result, self.id_field)

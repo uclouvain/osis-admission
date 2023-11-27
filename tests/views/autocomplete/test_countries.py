@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
+
 from django.utils import translation
 
 from django.contrib.auth.models import User, AnonymousUser
@@ -39,15 +41,23 @@ class CountriesAutocompleteTestCase(TestCase):
         cls.factory = RequestFactory()
 
         # Mocked data
-        CountryFactory(
+        cls.be_country = CountryFactory(
             iso_code='BE',
             name='Belgique',
             name_en='Belgium',
+            active=True,
         )
-        CountryFactory(
+        cls.fr_country = CountryFactory(
             iso_code='FR',
             name='France',
             name_en='France',
+            active=True,
+        )
+        cls.former_country = CountryFactory(
+            iso_code='FC',
+            name='Ancien pays',
+            name_en='Former country',
+            active=False,
         )
 
         cls.user = User.objects.create_user(
@@ -62,7 +72,6 @@ class CountriesAutocompleteTestCase(TestCase):
         response = CountriesAutocomplete.as_view()(request)
         self.assertEqual(response.status_code, 302)
 
-
     def test_countries_without_query(self):
         request = self.factory.get(reverse('admission:autocomplete:countries'))
         request.user = self.user
@@ -74,8 +83,75 @@ class CountriesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'BE', 'text': 'Belgique'},
-                    {'id': 'FR', 'text': 'France'},
+                    {'id': self.former_country.pk, 'text': 'Ancien pays', 'selected_text': 'Ancien pays'},
+                    {'id': self.be_country.pk, 'text': 'Belgique', 'selected_text': 'Belgique'},
+                    {'id': self.fr_country.pk, 'text': 'France', 'selected_text': 'France'},
+                ],
+            },
+        )
+
+    def test_countries_with_iso_code(self):
+        request = self.factory.get(
+            reverse('admission:autocomplete:countries'),
+            data={
+                'forward': json.dumps({'id_field': 'iso_code'}),
+            },
+        )
+        request.user = self.user
+
+        response = CountriesAutocomplete.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    {'id': self.former_country.iso_code, 'text': 'Ancien pays', 'selected_text': 'Ancien pays'},
+                    {'id': self.be_country.iso_code, 'text': 'Belgique', 'selected_text': 'Belgique'},
+                    {'id': self.fr_country.iso_code, 'text': 'France', 'selected_text': 'France'},
+                ],
+            },
+        )
+
+    def test_countries_only_active(self):
+        request = self.factory.get(
+            reverse('admission:autocomplete:countries'),
+            data={
+                'forward': json.dumps({'active': True}),
+            },
+        )
+        request.user = self.user
+
+        response = CountriesAutocomplete.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    {'id': self.be_country.pk, 'text': 'Belgique', 'selected_text': 'Belgique'},
+                    {'id': self.fr_country.pk, 'text': 'France', 'selected_text': 'France'},
+                ],
+            },
+        )
+
+    def test_countries_only_inactive(self):
+        request = self.factory.get(
+            reverse('admission:autocomplete:countries'),
+            data={
+                'forward': json.dumps({'active': False}),
+            },
+        )
+        request.user = self.user
+
+        response = CountriesAutocomplete.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {
+                'pagination': {'more': False},
+                'results': [
+                    {'id': self.former_country.pk, 'text': 'Ancien pays', 'selected_text': 'Ancien pays'},
                 ],
             },
         )
@@ -96,7 +172,7 @@ class CountriesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': 'BE', 'text': 'Belgique'},
+                    {'id': self.be_country.pk, 'text': 'Belgique', 'selected_text': 'Belgique'},
                 ],
             },
         )
@@ -120,7 +196,7 @@ class CountriesAutocompleteTestCase(TestCase):
                 {
                     'pagination': {'more': False},
                     'results': [
-                        {'id': 'BE', 'text': 'Belgium'},
+                        {'id': self.be_country.pk, 'text': 'Belgium', 'selected_text': 'Belgium'},
                     ],
                 },
             )

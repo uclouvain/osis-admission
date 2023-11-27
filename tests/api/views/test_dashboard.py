@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ class DashboardTestCase(APITestCase):
         admission = DoctorateAdmissionFactory()
         cls.candidate_user = admission.candidate.user
         cls.no_role_user = PersonFactory(first_name="Joe").user
+        cls.base_url = 'http://testserver'
 
     def test_dashboard_as_anonymous(self):
         response = self.client.get(self.url)
@@ -53,7 +54,7 @@ class DashboardTestCase(APITestCase):
             response.json(),
             {
                 'links': {
-                    'list_propositions': {'method': 'GET', 'url': '/api/v1/admission/propositions'},
+                    'list_propositions': {'method': 'GET', 'url': f'{self.base_url}/api/v1/admission/propositions'},
                     'list_supervised': {'error': "Method 'GET' not allowed"},
                 }
             },
@@ -66,7 +67,7 @@ class DashboardTestCase(APITestCase):
             response.json(),
             {
                 'links': {
-                    'list_propositions': {'method': 'GET', 'url': '/api/v1/admission/propositions'},
+                    'list_propositions': {'method': 'GET', 'url': f'{self.base_url}/api/v1/admission/propositions'},
                     'list_supervised': {'error': "Method 'GET' not allowed"},
                 }
             },
@@ -79,8 +80,11 @@ class DashboardTestCase(APITestCase):
             response.json(),
             {
                 'links': {
-                    'list_propositions': {'method': 'GET', 'url': '/api/v1/admission/propositions'},
-                    'list_supervised': {'method': 'GET', 'url': '/api/v1/admission/supervised_propositions'},
+                    'list_propositions': {'method': 'GET', 'url': f'{self.base_url}/api/v1/admission/propositions'},
+                    'list_supervised': {
+                        'method': 'GET',
+                        'url': f'{self.base_url}/api/v1/admission/supervised_propositions',
+                    },
                 }
             },
         )
