@@ -35,9 +35,16 @@ from admission.ddd.admission.domain.model.complement_formation import Complement
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
-from admission.ddd.admission.domain.model.formation import FormationIdentity, Formation
+from admission.ddd.admission.domain.model.enums.equivalence import (
+    TypeEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    EtatEquivalenceTitreAcces,
+)
+from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
@@ -57,6 +64,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     PoursuiteDeCycle,
     DecisionFacultaireEnum,
+    RegleCalculeResultatAvecFinancable,
+    RegleDeFinancement,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutsChecklistGenerale,
@@ -68,8 +77,10 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     ApprouverParFacValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
     FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
+    ModifierStatutChecklistParcoursAnterieurValidatorList,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
 
@@ -120,6 +131,11 @@ class Proposition(interface.RootEntity):
 
     profil_soumis_candidat: ProfilCandidat = None
 
+    financabilite_regle_calcule: RegleCalculeResultatAvecFinancable = ''
+    financabilite_regle_calcule_le: Optional[datetime.datetime] = None
+    financabilite_regle: RegleDeFinancement = ''
+    financabilite_regle_etabli_par: str = ''
+
     documents_additionnels: List[str] = attr.Factory(list)
 
     documents_demandes: Dict = attr.Factory(dict)
@@ -147,6 +163,14 @@ class Proposition(interface.RootEntity):
     nom_personne_contact_programme_annuel_annuel: str = ''
     email_personne_contact_programme_annuel_annuel: str = ''
     commentaire_programme_conjoint: str = ''
+
+    condition_acces: Optional[ConditionAcces] = None
+    millesime_condition_acces: Optional[int] = None
+
+    type_equivalence_titre_acces: Optional[TypeEquivalenceTitreAcces] = None
+    statut_equivalence_titre_acces: Optional[StatutEquivalenceTitreAcces] = None
+    etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
+    date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
     def modifier_choix_formation(
         self,
@@ -504,6 +528,55 @@ class Proposition(interface.RootEntity):
             nom_titulaire_compte=nom_titulaire_compte,
         )
 
+    def specifier_statut_checklist_parcours_anterieur(
+        self,
+        statut_checklist_cible: str,
+        titres_acces_selectionnes: List[TitreAccesSelectionnable],
+    ):
+        ModifierStatutChecklistParcoursAnterieurValidatorList(
+            statut=ChoixStatutChecklist[statut_checklist_cible],
+            titres_acces_selectionnes=titres_acces_selectionnes,
+            condition_acces=self.condition_acces,
+            millesime_condition_acces=self.millesime_condition_acces,
+        ).validate()
+
+        self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
+
+    def specifier_condition_acces(
+        self,
+        condition_acces: str,
+        millesime_condition_acces: Optional[int],
+        titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+    ):
+        nouveau_millesime_condition_acces = millesime_condition_acces
+        nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
+
+        # Si la condition d'accès a changé, et qu'un seul titre d'accès a été sélectionné,
+        # le millésime correspond à l'année de ce titre
+        if nouvelle_condition_acces and nouvelle_condition_acces != self.condition_acces:
+            titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
+                proposition_identity=self.entity_id,
+                seulement_selectionnes=True,
+            )
+
+            if len(titres_selectionnes) == 1:
+                nouveau_millesime_condition_acces = titres_selectionnes[0].annee
+
+        self.condition_acces = nouvelle_condition_acces
+        self.millesime_condition_acces = nouveau_millesime_condition_acces
+
+    def specifier_equivalence_titre_acces(
+        self,
+        type_equivalence_titre_acces: str,
+        statut_equivalence_titre_acces: str,
+        etat_equivalence_titre_acces: str,
+        date_prise_effet_equivalence_titre_acces: Optional[datetime.date],
+    ):
+        self.type_equivalence_titre_acces = getattr(TypeEquivalenceTitreAcces, type_equivalence_titre_acces, None)
+        self.statut_equivalence_titre_acces = getattr(StatutEquivalenceTitreAcces, statut_equivalence_titre_acces, None)
+        self.etat_equivalence_titre_acces = getattr(EtatEquivalenceTitreAcces, etat_equivalence_titre_acces, None)
+        self.date_prise_effet_equivalence_titre_acces = date_prise_effet_equivalence_titre_acces
+
     def completer_informations_complementaires(
         self,
         reponses_questions_specifiques: Dict,
@@ -537,3 +610,21 @@ class Proposition(interface.RootEntity):
         self.attestation_inscription_reguliere = attestation_inscription_reguliere
         self.est_modification_inscription_externe = est_modification_inscription_externe
         self.formulaire_modification_inscription = formulaire_modification_inscription
+
+    def specifier_financabilite_resultat_calcul(
+        self,
+        financabilite_regle_calcule: RegleCalculeResultatAvecFinancable,
+        financabilite_regle_calcule_le: datetime.datetime,
+    ):
+        self.financabilite_regle_calcule = financabilite_regle_calcule
+        self.financabilite_regle_calcule_le = financabilite_regle_calcule_le
+
+    def specifier_financabilite_regle(self, financabilite_regle: RegleCalculeResultatAvecFinancable, etabli_par: str):
+        self.financabilite_regle = financabilite_regle
+        self.financabilite_regle_etabli_par = etabli_par
+
+        self.checklist_actuelle.financabilite = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+            libelle=__('Approval'),
+            extra={},
+        )

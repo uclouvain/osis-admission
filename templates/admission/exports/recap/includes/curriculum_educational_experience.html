@@ -119,7 +119,7 @@
           {% for experience_year in experience.annees %}
             {% if experience_year.resultat %}
               <tr>
-                <td class="academic-year-container" {% if experience.type_releve_notes == 'ONE_A_YEAR' %}rowspan="2"{% endif %}>
+                <td class="academic-year-container" {% if experience.type_releve_notes == 'ONE_A_YEAR' and not hide_files %}rowspan="2"{% endif %}>
                   {{ experience_year.annee|get_academic_year }}
                 </td>
                 {% if evaluation_system_with_credits %}

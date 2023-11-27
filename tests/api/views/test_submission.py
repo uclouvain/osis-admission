@@ -32,6 +32,7 @@ from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 from osis_history.models import HistoryEntry
+from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -286,6 +287,12 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.GENERAL_MERGE.name)
         self.assertEqual(admission_tasks[1].type, AdmissionTask.TaskType.GENERAL_RECAP.name)
 
+        notifications = EmailNotification.objects.filter(person=self.admission_ok.candidate)
+        self.assertEqual(len(notifications), 1)
+
+        self.assertNotIn('inscription tardive', notifications[0].payload)
+        self.assertNotIn('payement des frais de dossier', notifications[0].payload)
+
     @freezegun.freeze_time("1980-10-22")
     def test_general_proposition_submission_with_late_enrollment(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
@@ -303,6 +310,11 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
         self.assertEqual(self.admission_ok.late_enrollment, True)
+
+        notifications = EmailNotification.objects.filter(person=self.admission_ok.candidate)
+        self.assertEqual(len(notifications), 1)
+
+        self.assertIn('inscription tardive', notifications[0].payload)
 
     @freezegun.freeze_time("1980-11-25")
     def test_general_proposition_submission_ok_hors_delai(self):

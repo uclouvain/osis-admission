@@ -36,6 +36,7 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
+from django.utils.translation import pgettext, override
 from rest_framework.generics import get_object_or_404
 
 from admission.auth.roles.central_manager import CentralManager
@@ -45,6 +46,7 @@ from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmi
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
@@ -240,3 +242,12 @@ class WeasyprintStylesheets:
                 ],
             )
         return getattr(cls, '_stylesheet')
+
+
+def get_salutation_prefix(person: Person, language: str) -> str:
+    with override(language=language):
+        return {
+            ChoixGenre.H.name: pgettext('male gender', 'Dear'),
+            ChoixGenre.F.name: pgettext('female gender', 'Dear'),
+            ChoixGenre.X.name: pgettext('other gender', 'Dear'),
+        }.get(person.gender or ChoixGenre.X.name)

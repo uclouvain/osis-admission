@@ -31,10 +31,10 @@
       {% endif %}
     </td>
     <td>{{ experience.nom_formation }}</td>
-    {% if avec_titre_acces %}<td>{# TODO Titre d'accès #}</td>{% endif %}
+    <td>{% access_title_checkbox experience.uuid 'EXPERIENCE_ACADEMIQUE' year %}</td>
     {% with experience_annee=experience|get_experience_year:year %}
-    <td>{{ experience_annee.credits_inscrits|floatformat }}</td>
-    <td>{{ experience_annee.credits_acquis|floatformat }}</td>
+      <td>{{ experience_annee.credits_inscrits|floatformat }}</td>
+      <td>{{ experience_annee.credits_acquis|floatformat }}</td>
     {% endwith %}
     <td>{# TODO Allègement #}</td>
     <td>{# TODO Réorientation #}</td>
@@ -45,7 +45,7 @@
   {% elif experience|est_experience_non_academique %}
     <td></td>
     <td>{{ experience.type|enum_display:'ActivityType' }} {% blocktrans with start=experience.date_debut end=experience.date_fin %}from {{ start }} to {{ end }}{% endblocktrans %}</td>
-    {% if avec_titre_acces %}<td></td>{% endif %}
+    <td>{% access_title_checkbox experience.uuid 'EXPERIENCE_NON_ACADEMIQUE' year %}</td>
     <td></td>
     <td></td>
     <td></td>
@@ -54,14 +54,23 @@
   {% elif experience|est_etudes_secondaires %}
     <td>{% if experience.diplome_etudes_secondaires == 'YES' %}<i class="fa fa-graduation-cap"></i>{% endif %}</td>
     <td>
-      {% trans "Secondary studies" %} >
       {% if experience.diplome_belge %}
-        {{ experience.diplome_belge.communaute|enum_display:'CommunityEnum' }} > {{ experience.diplome_belge.type_enseignement|enum_display:'EducationalType' }}
+        {% translate "CESS" %}
       {% elif experience.diplome_etranger %}
         {{ experience.diplome_etranger.type_diplome|enum_display:'ForeignDiplomaTypes' }}
+      {% elif experience.alternative_secondaires %}
+        {% translate "Bachelor's course entrance exam" %}
       {% endif %}
     </td>
-    {% if avec_titre_acces %}<td></td>{% endif %}
+    <td>
+      {% if experience.diplome_belge %}
+        {% access_title_checkbox experience.diplome_belge.uuid 'ETUDES_SECONDAIRES' year %}
+      {% elif experience.diplome_etranger %}
+        {% access_title_checkbox experience.diplome_etranger.uuid 'ETUDES_SECONDAIRES' year %}
+      {% elif experience.alternative_secondaires %}
+        {% access_title_checkbox experience.alternative_secondaires.uuid 'ETUDES_SECONDAIRES' None %}
+      {% endif %}
+    </td>
     <td></td>
     <td></td>
     <td></td>

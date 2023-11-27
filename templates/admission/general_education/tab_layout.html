@@ -127,7 +127,7 @@
     <br>
     <span>
       {% translate 'Not specified' context "admission-header" as not_specified %}
-      {% translate 'Access condition:' %} <span class="label label-success">{{ admission.titre_access|default:not_specified }}</span>
+      {% translate 'Access condition:' %} <span class="label label-success">{{ admission.titre_acces|default:not_specified }}</span>
     </span>
   </div>
   <div id="admission-badges" class="min-width">

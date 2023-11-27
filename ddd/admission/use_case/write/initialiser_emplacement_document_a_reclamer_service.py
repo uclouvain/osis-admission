@@ -38,6 +38,7 @@ def initialiser_emplacement_document_a_reclamer(
         auteur=cmd.auteur,
         identifiant_emplacement=cmd.identifiant_emplacement,
         raison=cmd.raison,
+        statut_reclamation=cmd.statut_reclamation,
     )
 
     emplacement_document_repository.save(entity=emplacement_document, auteur=cmd.auteur)

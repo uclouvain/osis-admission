@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,7 +55,41 @@ templates.register(
         "Mail sent to the candidate to confirm that his application for general education has been taken "
         "into account by UCLouvain"
     ),
-    tokens=admission_common_tokens,
+    tokens=admission_common_tokens
+    + [
+        Token(
+            name='salutation',
+            description=_('Mail salutation'),
+            example='Chère',
+        ),
+        Token(
+            name='payment_sentence',
+            description=_('Sentence indicating the payment of the application fee (if applicable).'),
+            example='Le payement des frais de dossier a bien été réceptionné.',
+        ),
+        Token(
+            name='late_enrolment_sentence',
+            description=_('Sentence indicating the late enrolment (if applicable).'),
+            example="Nous attirons votre attention sur le fait que vous avez introduit une demande d'inscription "
+            "tardive. Le jury d'admission se réserve le droit d'accepter ou de refuser cette demande en raison "
+            "des impératifs pédagogiques.",
+        ),
+        Token(
+            name='recap_link',
+            description=_("Link to download a copy of the file related to the admission (frontoffice)."),
+            example="https://dev.studies.uclouvain.be/somewhere",
+        ),
+        Token(
+            name='admission_reference',
+            description=_('Reference of the admission'),
+            example='L-ESPO24-100.102',
+        ),
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+    ],
     tag=GENERAL_ADMISSION_TAG,
 )
 

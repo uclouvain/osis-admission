@@ -27,7 +27,7 @@
 import rules
 from rules import RuleSet
 
-from admission.auth.predicates import is_enrolled
+from admission.auth.predicates.doctorate import is_enrolled
 from osis_role.contrib.models import RoleModel
 from django.utils.translation import gettext_lazy as _
 
