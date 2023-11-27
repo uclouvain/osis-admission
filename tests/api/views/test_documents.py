@@ -138,7 +138,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
-            side_effect=lambda token, upload_to: self.uuid_documents_by_token[token],
+            side_effect=lambda token, *args, **kwargs: self.uuid_documents_by_token[token],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
