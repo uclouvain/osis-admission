@@ -32,6 +32,9 @@ from admission.ddd.admission.domain.model.condition_complementaire_approbation i
     ConditionComplementaireApprobationIdentity,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
@@ -46,8 +49,11 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     InformationsAcceptationFacultaireNonSpecifieesException,
     SituationPropositionNonSICException,
     SituationPropositionNonFACException,
+    TitreAccesEtreSelectionneException,
+    ConditionAccesEtreSelectionneException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
+from epc.models.enums.condition_acces import ConditionAcces
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -129,3 +135,26 @@ class ShouldPeutSpecifierInformationsDecisionFacultaire(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS:
             raise SituationPropositionNonFACException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldTitreAccesEtreSelectionne(BusinessValidator):
+    statut: ChoixStatutChecklist
+    titres_acces_selectionnes: List[TitreAccesSelectionnable]
+
+    def validate(self, *args, **kwargs):
+        if self.statut == ChoixStatutChecklist.GEST_REUSSITE and not self.titres_acces_selectionnes:
+            raise TitreAccesEtreSelectionneException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldConditionAccesEtreSelectionne(BusinessValidator):
+    statut: ChoixStatutChecklist
+    condition_acces: Optional[ConditionAcces]
+    millesime_condition_acces: Optional[int]
+
+    def validate(self, *args, **kwargs):
+        if self.statut == ChoixStatutChecklist.GEST_REUSSITE and not (
+            self.condition_acces and self.millesime_condition_acces
+        ):
+            raise ConditionAccesEtreSelectionneException

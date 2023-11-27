@@ -44,6 +44,42 @@
   {% endpanel %}
 {% endif %}
 
+{% if enrolled_for_contingent_training %}
+  {% panel _("Enrolment in limited enrolment bachelor's course") %}
+    {% if proposition.est_non_resident_au_sens_decret %}
+      {% translate 'You are applying as non-resident (as defined by government decree).' %}
+    {% elif proposition.est_non_resident_au_sens_decret is False %}
+      {% translate 'You are applying as resident (as defined by government decree).' %}
+    {% else %}
+      {% translate 'You do not specify if you are applying as resident or non-resident (as defined by government decree).' %}
+    {% endif %}
+  {% endpanel %}
+{% endif %}
+
+{% if eligible_for_modification %}
+  {% panel _("Change of enrolment") %}
+    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a French Community of Belgium haute ecole or university?") proposition.est_bachelier_belge %}
+    {% if proposition.est_bachelier_belge %}
+      {% field_data _('Would you like to change your UCLouvain enrolment for this academic year?') proposition.est_modification_inscription_externe %}
+      {% if proposition.est_modification_inscription_externe %}
+        {% field_data _("Change of enrolment form") proposition.formulaire_modification_inscription %}
+      {% endif %}
+    {% endif %}
+  {% endpanel %}
+{% endif %}
+
+{% if eligible_for_reorientation %}
+  {% panel _("Course change") %}
+    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a French Community of Belgium haute ecole or university?") proposition.est_bachelier_belge %}
+    {% if proposition.est_bachelier_belge %}
+      {% field_data _('Would you like to switch courses this academic year at UCLouvain?') proposition.est_reorientation_inscription_externe %}
+      {% if proposition.est_reorientation_inscription_externe %}
+        {% field_data _("Certificate of regular enrolment") proposition.attestation_inscription_reguliere %}
+      {% endif %}
+    {% endif %}
+  {% endpanel %}
+{% endif %}
+
 {% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}
 {% if is_continuing or not hide_files or hide_files and specific_questions_to_display %}
   {% panel _('Specific aspects') %}
@@ -80,41 +116,5 @@
     {% endif %}
     {% multiple_field_data specific_questions title='' %}
     {% field_data _("You can add any document you feel is relevant to your application (supporting documents, proof of language level, etc.).") proposition.documents_additionnels %}
-  {% endpanel %}
-{% endif %}
-
-{% if enrolled_for_contingent_training %}
-  {% panel _("Enrolment in limited enrolment bachelor's course") %}
-    {% if proposition.est_non_resident_au_sens_decret %}
-      {% translate 'You are applying as non-resident (as defined by government decree).' %}
-    {% elif proposition.est_non_resident_au_sens_decret is False %}
-      {% translate 'You are applying as resident (as defined by government decree).' %}
-    {% else %}
-      {% translate 'You do not specify if you are applying as resident or non-resident (as defined by government decree).' %}
-    {% endif %}
-  {% endpanel %}
-{% endif %}
-
-{% if eligible_for_modification %}
-  {% panel _("Change of enrolment") %}
-    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a French Community of Belgium haute ecole or university?") proposition.est_bachelier_belge %}
-    {% if proposition.est_bachelier_belge %}
-      {% field_data _('Would you like to change your UCLouvain enrolment for this academic year?') proposition.est_modification_inscription_externe %}
-      {% if proposition.est_modification_inscription_externe %}
-        {% field_data _("Change of enrolment form") proposition.formulaire_modification_inscription %}
-      {% endif %}
-    {% endif %}
-  {% endpanel %}
-{% endif %}
-
-{% if eligible_for_reorientation %}
-  {% panel _("Course change") %}
-    {% field_data _("Are you currently enrolled in the first year of a bachelor's degree at a French Community of Belgium haute ecole or university?") proposition.est_bachelier_belge %}
-    {% if proposition.est_bachelier_belge %}
-      {% field_data _('Would you like to switch courses this academic year at UCLouvain?') proposition.est_reorientation_inscription_externe %}
-      {% if proposition.est_reorientation_inscription_externe %}
-        {% field_data _("Certificate of regular enrolment") proposition.attestation_inscription_reguliere %}
-      {% endif %}
-    {% endif %}
   {% endpanel %}
 {% endif %}

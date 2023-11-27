@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import copy
 import datetime
 import uuid
 from decimal import Decimal
@@ -33,7 +32,7 @@ import freezegun
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
-from django.utils.translation import gettext
+from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
@@ -45,7 +44,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    PaiementNonRealiseException,
     PaiementDejaRealiseException,
     PropositionPourPaiementInvalideException,
 )
@@ -462,6 +460,13 @@ class MollieWebHookTestCase(APITestCase):
             ChoixStatutChecklist.SYST_REUSSITE.name,
         )
         self.assertEqual(self.admission.checklist['current']['frais_dossier']['libelle'], 'Payed')
+
+        # Check the notification
+        notifications = EmailNotification.objects.filter(person=self.admission.candidate)
+        self.assertEqual(len(notifications), 1)
+
+        self.assertNotIn('inscription tardive', notifications[0].payload)
+        self.assertIn('payement des frais de dossier', notifications[0].payload)
 
     def test_pay_application_fees_after_manager_request(self):
         self.client.force_authenticate(user=self.admission.candidate.user)

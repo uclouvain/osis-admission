@@ -28,6 +28,7 @@ from functools import partial
 from typing import List, Optional
 
 import phonenumbers
+from dal import forward
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -228,12 +229,16 @@ class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
         kwargs.setdefault(
             'widget',
             autocomplete.ListSelect2(
-                url="country-autocomplete",
+                url="admission:autocomplete:countries",
                 attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+                forward=[forward.Const(True, 'active')],
             ),
         )
         kwargs.setdefault('queryset', Country.objects.none())
         super().__init__(*args, **kwargs)
+
+    def label_from_instance(self, obj):
+        return getattr(obj, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
 
 
 class AdmissionModelForm(forms.ModelForm):

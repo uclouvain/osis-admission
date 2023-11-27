@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from contextlib import suppress
 from enum import Enum
 from typing import List, Optional, Union
 
@@ -31,7 +32,7 @@ import attrs
 from django.conf import settings
 from django.db.models import OuterRef, Subquery, Prefetch
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language, gettext, pgettext
+from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
@@ -45,6 +46,11 @@ from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
+)
+from admission.ddd.admission.domain.model.enums.equivalence import (
+    TypeEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    EtatEquivalenceTitreAcces,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
@@ -85,6 +91,7 @@ from base.models.student import Student
 from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO, PartimSearchDTO
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from osis_common.ddd.interface import ApplicationService
 from osis_profile.models.enums.curriculum import Result
@@ -127,6 +134,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 )
                 .select_related(
                     'other_training_accepted_by_fac__academic_year',
+                    'admission_requirement_year',
                 )
                 .get(uuid=entity_id.uuid)
             )
@@ -160,6 +168,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
         candidate = Person.objects.get(global_id=entity.matricule_candidat)
 
+        financabilite_regle_etabli_par_person = None
+        if entity.financabilite_regle_etabli_par:
+            with suppress(Person.DoesNotExist):
+                financabilite_regle_etabli_par_person = Person.objects.get(uuid=entity.financabilite_regle_etabli_par)
+
         scholarships_uuids = list(
             scholarship.uuid
             for scholarship in [
@@ -180,14 +193,18 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         else:
             scholarships = {}
 
+        years = [year for year in [entity.annee_calculee, entity.millesime_condition_acces] if year]
+        academic_years = {}
+
+        if years:
+            academic_years = {year.year: year for year in AcademicYear.objects.filter(year__in=years)}
+
         admission, _ = GeneralEducationAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
                 'candidate': candidate,
                 'training': training,
-                'determined_academic_year': (
-                    entity.annee_calculee and AcademicYear.objects.get(year=entity.annee_calculee)
-                ),
+                'determined_academic_year': entity.annee_calculee and academic_years[entity.annee_calculee],
                 'determined_pool': entity.pot_calcule and entity.pot_calcule.name,
                 'reference': entity.reference,
                 'type_demande': entity.type_demande.name,
@@ -217,6 +234,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     or {},
                 },
                 'cycle_pursuit': entity.poursuite_de_cycle.name,
+                'financability_computed_rule': entity.financabilite_regle_calcule,
+                'financability_computed_rule_on': entity.financabilite_regle_calcule_le,
+                'financability_rule': entity.financabilite_regle,
+                'financability_rule_established_by': financabilite_regle_etabli_par_person,
                 'fac_approval_certificate': entity.certificat_approbation_fac,
                 'fac_refusal_certificate': entity.certificat_refus_fac,
                 'other_refusal_reasons': entity.autres_motifs_refus,
@@ -231,6 +252,19 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'join_program_fac_comment': entity.commentaire_programme_conjoint,
                 'additional_documents': entity.documents_additionnels,
                 'diplomatic_post_id': entity.poste_diplomatique.code if entity.poste_diplomatique else None,
+                'admission_requirement': entity.condition_acces.name if entity.condition_acces else '',
+                'admission_requirement_year': entity.millesime_condition_acces
+                and academic_years[entity.millesime_condition_acces],
+                'foreign_access_title_equivalency_type': entity.type_equivalence_titre_acces.name
+                if entity.type_equivalence_titre_acces
+                else '',
+                'foreign_access_title_equivalency_status': entity.statut_equivalence_titre_acces.name
+                if entity.statut_equivalence_titre_acces
+                else '',
+                'foreign_access_title_equivalency_state': entity.etat_equivalence_titre_acces.name
+                if entity.etat_equivalence_titre_acces
+                else '',
+                'foreign_access_title_equivalency_effective_date': entity.date_prise_effet_equivalence_titre_acces,
             },
         )
 
@@ -332,6 +366,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     def _load(cls, admission: 'GeneralEducationAdmission') -> 'Proposition':
         checklist_initiale = admission.checklist.get('initial')
         checklist_actuelle = admission.checklist.get('current')
+
         return Proposition(
             entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
             matricule_candidat=admission.candidate.global_id,
@@ -376,6 +411,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
             motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
             autres_motifs_refus=admission.other_refusal_reasons,
+            financabilite_regle_calcule=admission.financability_computed_rule,
+            financabilite_regle_calcule_le=admission.financability_computed_rule_on,
+            financabilite_regle=admission.financability_rule,
+            financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
+            if admission.financability_rule_established_by
+            else None,
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
             autre_formation_choisie_fac_id=FormationIdentityBuilder.build(
@@ -404,6 +445,23 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             poste_diplomatique=PosteDiplomatiqueIdentity(code=admission.diplomatic_post.code)
             if admission.diplomatic_post
             else None,
+            condition_acces=ConditionAcces[admission.admission_requirement]
+            if admission.admission_requirement
+            else None,
+            millesime_condition_acces=admission.admission_requirement_year
+            and admission.admission_requirement_year.year,
+            type_equivalence_titre_acces=TypeEquivalenceTitreAcces[admission.foreign_access_title_equivalency_type]
+            if admission.foreign_access_title_equivalency_type
+            else None,
+            statut_equivalence_titre_acces=StatutEquivalenceTitreAcces[
+                admission.foreign_access_title_equivalency_status
+            ]
+            if admission.foreign_access_title_equivalency_status
+            else None,
+            etat_equivalence_titre_acces=EtatEquivalenceTitreAcces[admission.foreign_access_title_equivalency_state]
+            if admission.foreign_access_title_equivalency_state
+            else None,
+            date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
         )
 
     @classmethod
@@ -459,6 +517,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_demandes=admission.requested_documents,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
+            financabilite_regle_calcule=admission.financability_computed_rule,
+            financabilite_regle_calcule_le=admission.financability_computed_rule_on,
+            financabilite_regle=admission.financability_rule,
+            financabilite_regle_etabli_par=admission.financability_rule_established_by.uuid
+            if admission.financability_rule_established_by
+            else None,
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
             documents_additionnels=admission.additional_documents,
@@ -519,7 +583,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             poursuite_de_cycle_a_specifier=poursuite_de_cycle_a_specifier,
             poursuite_de_cycle=admission.cycle_pursuit if poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
-            titre_access='',  # TODO
+            titre_acces='',  # TODO
             candidat_assimile=admission.accounting
             and admission.accounting.assimilation_situation
             and admission.accounting.assimilation_situation != TypeSituationAssimilation.AUCUNE_ASSIMILATION.name,
@@ -572,6 +636,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,
             candidat_a_reussi_experience_academique_belge=candidat_a_reussi_experience_academique_belge,
+            condition_acces=admission.admission_requirement,
+            millesime_condition_acces=admission.admission_requirement_year.year
+            if admission.admission_requirement_year
+            else None,
+            type_equivalence_titre_acces=admission.foreign_access_title_equivalency_type,
+            statut_equivalence_titre_acces=admission.foreign_access_title_equivalency_status,
+            etat_equivalence_titre_acces=admission.foreign_access_title_equivalency_state,
+            date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
         )
 
     @classmethod
@@ -601,6 +673,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 .select_related(
                     'accounting',
                     'other_training_accepted_by_fac__academic_year',
+                    'admission_requirement_year',
                 )
                 .prefetch_related(
                     'prerequisite_courses__academic_year',

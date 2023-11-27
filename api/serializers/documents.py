@@ -29,6 +29,7 @@ from rest_framework import serializers
 from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import TypeItemFormulaire, CleConfigurationItemFormulaire
+from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_generale.commands import CompleterEmplacementsDocumentsParCandidatCommand
 from admission.infrastructure.utils import get_document_from_identifier
 from base.utils.serializers import DTOSerializer
@@ -36,6 +37,7 @@ from base.utils.serializers import DTOSerializer
 __all__ = [
     'DocumentSpecificQuestionSerializer',
     'CompleterEmplacementsDocumentsParCandidatCommandSerializer',
+    'DocumentSpecificQuestionsListSerializer',
 ]
 
 
@@ -80,8 +82,14 @@ class DocumentSpecificQuestionSerializer(serializers.Serializer):
             'values': [],
             'tab': instance.onglet,
             'tab_name': instance.nom_onglet_langue_candidat,
-            'required': True,
+            'required': instance.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
         }
+
+
+class DocumentSpecificQuestionsListSerializer(serializers.Serializer):
+    immediate_requested_documents = DocumentSpecificQuestionSerializer(many=True)
+    later_requested_documents = DocumentSpecificQuestionSerializer(many=True)
+    deadline = serializers.DateField(allow_null=True)
 
 
 class CompleterEmplacementsDocumentsParCandidatCommandSerializer(DTOSerializer):

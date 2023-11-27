@@ -42,8 +42,15 @@ from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import RefusalReason, AdditionalApprovalCondition
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd.admission.domain.model.enums.condition_acces import recuperer_conditions_acces_par_formation
+from admission.ddd.admission.domain.model.enums.equivalence import (
+    TypeEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    EtatEquivalenceTitreAcces,
+)
+
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
+from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle, ChoixStatutChecklist
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     FilterFieldWidget,
@@ -51,11 +58,14 @@ from admission.forms import (
     autocomplete,
     get_example_text,
     EMPTY_CHOICE_AS_LIST,
+    CustomDateInput,
 )
 from admission.forms import get_academic_year_choices
 from admission.forms.autocomplete import Select2MultipleWithTagWhenNoResultWidget
+from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
+from base.forms.utils.choice_field import BLANK_CHOICE
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
@@ -111,6 +121,13 @@ class CommentForm(forms.Form):
 
 class DateInput(forms.DateInput):
     input_type = 'date'
+
+
+class StatusForm(forms.Form):
+    status = forms.ChoiceField(
+        choices=ChoixStatutChecklist.choices(),
+        required=True,
+    )
 
 
 class AssimilationForm(forms.Form):
@@ -518,3 +535,101 @@ class FacDecisionApprovalForm(forms.ModelForm):
             cleaned_data['prerequisite_courses_fac_comment'] = ''
 
         return cleaned_data
+
+
+class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
+    admission_requirement_year = AcademicYearField(
+        past_only=True,
+        required=False,
+        label=_('Admission requirement'),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['admission_requirement'].choices = BLANK_CHOICE + recuperer_conditions_acces_par_formation(
+            type_formation=self.instance.training.education_group_type.name,
+        )
+
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'past-experiences-admission-requirement-field'
+
+    class Meta:
+        model = GeneralEducationAdmission
+        fields = [
+            'admission_requirement',
+            'admission_requirement_year',
+        ]
+
+
+class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
+    default_values = {
+        'foreign_access_title_equivalency_type': '',
+        'foreign_access_title_equivalency_status': '',
+        'foreign_access_title_equivalency_state': '',
+        'foreign_access_title_equivalency_effective_date': None,
+    }
+
+    class Meta:
+        model = GeneralEducationAdmission
+        fields = [
+            'foreign_access_title_equivalency_type',
+            'foreign_access_title_equivalency_status',
+            'foreign_access_title_equivalency_state',
+            'foreign_access_title_equivalency_effective_date',
+        ]
+        widgets = {
+            'foreign_access_title_equivalency_effective_date': CustomDateInput,
+        }
+
+    class Media:
+        js = [
+            'js/dependsOn.min.js',
+        ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        equivalency_type = cleaned_data.get('foreign_access_title_equivalency_type')
+        equivalency_status = cleaned_data.get('foreign_access_title_equivalency_status')
+        equivalency_state = cleaned_data.get('foreign_access_title_equivalency_state')
+
+        displayed_fields = {
+            'foreign_access_title_equivalency_type',
+        }
+
+        if equivalency_type in {
+            TypeEquivalenceTitreAcces.EQUIVALENCE_CESS.name,
+            TypeEquivalenceTitreAcces.EQUIVALENCE_GRADE_ACADEMIQUE_FWB.name,
+            TypeEquivalenceTitreAcces.EQUIVALENCE_DE_NIVEAU.name,
+        }:
+            displayed_fields.add('foreign_access_title_equivalency_status')
+
+            if equivalency_status in {
+                StatutEquivalenceTitreAcces.COMPLETE.name,
+                StatutEquivalenceTitreAcces.RESTRICTIVE.name,
+            }:
+                displayed_fields.add('foreign_access_title_equivalency_state')
+
+                if equivalency_state in {
+                    EtatEquivalenceTitreAcces.PROVISOIRE.name,
+                    EtatEquivalenceTitreAcces.DEFINITIVE.name,
+                }:
+                    displayed_fields.add('foreign_access_title_equivalency_effective_date')
+
+        for field in self.fields:
+            if field in displayed_fields:
+                if not cleaned_data.get(field):
+                    self.add_error(field, FIELD_REQUIRED_MESSAGE)
+            else:
+                cleaned_data[field] = self.default_values[field]
+
+        return cleaned_data
+
+
+class FinancabiliteApprovalForm(forms.ModelForm):
+    class Meta:
+        model = GeneralEducationAdmission
+        fields = [
+            'financability_rule',
+        ]

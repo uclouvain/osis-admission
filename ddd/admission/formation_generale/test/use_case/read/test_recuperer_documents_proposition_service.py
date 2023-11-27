@@ -40,6 +40,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsIdentification,
     IdentifiantBaseEmplacementDocument,
     DocumentsSysteme,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererDocumentsPropositionQuery,
@@ -104,6 +105,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(photo_identite.document_uuids, ['uuid11'])
         self.assertEqual(photo_identite.type, TypeEmplacementDocument.NON_LIBRE.name)
         self.assertEqual(photo_identite.statut, StatutEmplacementDocument.NON_ANALYSE.name)
+        self.assertEqual(photo_identite.statut_reclamation, '')
         self.assertEqual(photo_identite.justification_gestionnaire, '')
         self.assertEqual(photo_identite.document_soumis_par, None)
         self.assertEqual(photo_identite.document_soumis_le, None)
@@ -128,6 +130,10 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(curriculum.document_uuids, ['file1.pdf'])
         self.assertEqual(curriculum.type, TypeEmplacementDocument.NON_LIBRE.name)
         self.assertEqual(curriculum.statut, StatutEmplacementDocument.RECLAME.name)
+        self.assertEqual(
+            curriculum.statut_reclamation,
+            StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+        )
         self.assertEqual(curriculum.justification_gestionnaire, 'Le document est à mettre à jour.')
         self.assertEqual(curriculum.document_soumis_par, None)
         self.assertEqual(curriculum.document_soumis_le, datetime.datetime(2023, 1, 1))
@@ -163,6 +169,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(document.document_uuids, [])
         self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name)
         self.assertEqual(document.statut, StatutEmplacementDocument.RECLAME.name)
+        self.assertEqual(document.statut_reclamation, StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name)
         self.assertEqual(document.justification_gestionnaire, 'Ce nouveau document pourrait être intéressant.')
         self.assertEqual(document.document_soumis_par, None)
         self.assertEqual(document.document_soumis_le, None)
@@ -197,6 +204,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(document.document_uuids, ['24de0c3d-3c06-4c93-8eb4-c8648f04f142'])
         self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_INTERNE_SIC.name)
         self.assertEqual(document.statut, StatutEmplacementDocument.VALIDE.name)
+        self.assertEqual(document.statut_reclamation, '')
         self.assertEqual(document.justification_gestionnaire, '')
         self.assertEqual(
             document.document_soumis_par,
@@ -233,6 +241,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(document.document_uuids, ['24de0c3d-3c06-4c93-8eb4-c8648f04f143'])
         self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_INTERNE_FAC.name)
         self.assertEqual(document.statut, StatutEmplacementDocument.VALIDE.name)
+        self.assertEqual(document.statut_reclamation, '')
         self.assertEqual(document.justification_gestionnaire, '')
         self.assertEqual(
             document.document_soumis_par,
@@ -271,6 +280,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(document.document_uuids, ['recap.pdf'])
         self.assertEqual(document.type, TypeEmplacementDocument.SYSTEME.name)
         self.assertEqual(document.statut, StatutEmplacementDocument.VALIDE.name)
+        self.assertEqual(document.statut_reclamation, '')
         self.assertEqual(document.justification_gestionnaire, '')
         self.assertEqual(document.document_soumis_par, None)
         self.assertEqual(document.document_soumis_le, None)

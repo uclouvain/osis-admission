@@ -39,6 +39,7 @@ from osis_notification.models import EmailNotification
 
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.person import CompletePersonFactory
+from base.forms.utils.choice_field import BLANK_CHOICE
 from osis_document.contrib.forms import FileUploadField
 
 from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE, IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
@@ -53,6 +54,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
     OngletsDemande,
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
+    StatutReclamationEmplacementDocument,
 )
 from admission.forms import AdmissionFileUploadField
 from admission.infrastructure.utils import MODEL_FIELD_BY_FREE_MANAGER_DOCUMENT_TYPE
@@ -124,7 +126,7 @@ class DocumentViewTestCase(TestCase):
 
         patcher = patch(
             'osis_document.api.utils.confirm_remote_upload',
-            side_effect=lambda token, upload_to: uuid.uuid4(),
+            side_effect=lambda **kwargs: uuid.uuid4(),
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -157,6 +159,7 @@ class DocumentViewTestCase(TestCase):
                 'author': user.person.global_id,
                 'file_name': 'My file name',
                 'reason': 'My reason',
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             }
             if with_file:
                 default_data['file_0'] = ['file_0-token']
@@ -457,7 +460,6 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
 
         # Submit a valid form
         response = self.client.post(
@@ -465,6 +467,7 @@ class DocumentViewTestCase(TestCase):
             data={
                 'file_name': 'My file name',
                 'reason': 'My reason',
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
             **self.default_headers,
         )
@@ -492,7 +495,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
         self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
         self.assertEqual(
             form_item_instantiation.display_according_education,
             CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
@@ -509,6 +512,7 @@ class DocumentViewTestCase(TestCase):
                 'deadline_at': '',
                 'requested_at': '',
                 'status': StatutEmplacementDocument.A_RECLAMER.name,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'automatically_required': False,
             }
         }
@@ -535,14 +539,12 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
 
         # Submit a valid form
         response = self.client.post(
             url,
             data={
                 'file_name': 'My file name',
-                'reason': 'My reason',
                 'file_0': ['file_0-token'],
             },
             **self.default_headers,
@@ -571,7 +573,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
         self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
         self.assertEqual(
             form_item_instantiation.display_according_education,
             CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
@@ -582,13 +584,14 @@ class DocumentViewTestCase(TestCase):
         desired_result = {
             f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
                 'last_actor': self.sic_manager_user.person.global_id,
-                'reason': 'My reason',
+                'reason': '',
                 'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 'last_action_at': '2022-01-01T00:00:00',
                 'deadline_at': '',
                 'requested_at': '',
                 'status': StatutEmplacementDocument.VALIDE.name,
                 'automatically_required': False,
+                'request_status': '',
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
@@ -608,7 +611,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form_item_instantiation.admission.last_update_author, self.sic_manager_user.person)
 
     @freezegun.freeze_time('2022-01-01')
-    def test_general_fac_manager_requests_a_free_document(self):
+    def test_general_fac_manager_requests_a_free_document_immediately(self):
         self.client.force_login(user=self.fac_manager_user)
 
         url = resolve_url(
@@ -624,7 +627,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('request_status', []))
 
         # Submit a valid form
         response = self.client.post(
@@ -632,6 +635,7 @@ class DocumentViewTestCase(TestCase):
             data={
                 'file_name': 'My file name',
                 'reason': 'My reason',
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
             **self.default_headers,
         )
@@ -659,7 +663,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
         self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
         self.assertEqual(
             form_item_instantiation.display_according_education,
             CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
@@ -677,6 +681,7 @@ class DocumentViewTestCase(TestCase):
                 'requested_at': '',
                 'status': StatutEmplacementDocument.A_RECLAMER.name,
                 'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
@@ -684,6 +689,55 @@ class DocumentViewTestCase(TestCase):
         # Check last modification data
         self.assertEqual(form_item_instantiation.admission.modified_at, datetime.datetime.now())
         self.assertEqual(form_item_instantiation.admission.last_update_author, self.fac_manager_user.person)
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_fac_manager_requests_a_free_document_for_later(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request',
+            uuid=self.general_admission.uuid,
+        )
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            data={
+                'file_name': 'My file name',
+                'reason': 'My reason',
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Create a specific question linked to the admission
+        form_item_instantiation: AdmissionFormItemInstantiation = (
+            AdmissionFormItemInstantiation.objects.select_related('form_item', 'admission')
+            .filter(
+                admission=self.general_admission,
+            )
+            .first()
+        )
+        self.assertIsNotNone(form_item_instantiation)
+        self.assertEqual(form_item_instantiation.required, False)
+
+        # Save information about the request into the admission
+        desired_result = {
+            f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
+                'last_actor': self.fac_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+                'last_action_at': '2022-01-01T00:00:00',
+                'deadline_at': '',
+                'requested_at': '',
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+                'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            }
+        }
+        self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_requests_a_free_document_with_a_default_file(self):
@@ -702,14 +756,12 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('reason', []))
 
         # Submit a valid form
         response = self.client.post(
             url,
             data={
                 'file_name': 'My file name',
-                'reason': 'My reason',
                 'file_0': ['file_0-token'],
             },
             **self.default_headers,
@@ -738,7 +790,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
         self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
-        self.assertEqual(form_item_instantiation.required, True)
+        self.assertEqual(form_item_instantiation.required, False)
         self.assertEqual(
             form_item_instantiation.display_according_education,
             CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
@@ -749,12 +801,13 @@ class DocumentViewTestCase(TestCase):
         desired_result = {
             f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
                 'last_actor': self.fac_manager_user.person.global_id,
-                'reason': 'My reason',
+                'reason': '',
                 'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
                 'last_action_at': '2022-01-01T00:00:00',
                 'deadline_at': '',
                 'requested_at': '',
                 'status': StatutEmplacementDocument.VALIDE.name,
+                'request_status': '',
                 'automatically_required': False,
             }
         }
@@ -826,6 +879,13 @@ class DocumentViewTestCase(TestCase):
             TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
         )
 
+        form_item_instantiation = AdmissionFormItemInstantiation.objects.get(
+            admission=self.general_admission,
+            form_item__uuid=document_identifier.split('.')[-1],
+        )
+
+        self.assertEqual(form_item_instantiation.required, False)
+
         self.client.force_login(user=self.second_sic_manager_user)
 
         frozen_time.move_to('2022-01-03')
@@ -843,25 +903,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], 'My reason')
         form = response.context['form']
-        self.assertEqual(form.fields['is_requested'].required, False)
-
-        # Post an invalid form
-        response = self.client.post(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=document_identifier,
-            ),
-            data={
-                'is_requested': True,
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('reason', []))
+        self.assertEqual(form.fields['request_status'].required, False)
 
         # Post a valid form
         response = self.client.post(
@@ -871,7 +913,7 @@ class DocumentViewTestCase(TestCase):
                 identifier=document_identifier,
             ),
             data={
-                'is_requested': True,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
                 'reason': 'My new reason',
             },
             **self.default_headers,
@@ -891,9 +933,14 @@ class DocumentViewTestCase(TestCase):
             'requested_at': '',
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
+
+        # Check the specific question
+        form_item_instantiation.refresh_from_db()
+        self.assertEqual(form_item_instantiation.required, False)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -950,6 +997,13 @@ class DocumentViewTestCase(TestCase):
             TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
         )
 
+        form_item_instantiation = AdmissionFormItemInstantiation.objects.get(
+            admission=self.general_admission,
+            form_item__uuid=document_identifier.split('.')[-1],
+        )
+
+        self.assertEqual(form_item_instantiation.required, False)
+
         self.client.force_login(user=self.second_fac_manager_user)
 
         frozen_time.move_to('2022-01-03')
@@ -967,25 +1021,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], 'My reason')
         form = response.context['form']
-        self.assertEqual(form.fields['is_requested'].required, False)
-
-        # Post an invalid form
-        response = self.client.post(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=document_identifier,
-            ),
-            data={
-                'is_requested': True,
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('reason', []))
+        self.assertEqual(form.fields['request_status'].required, False)
 
         # Post a valid form
         response = self.client.post(
@@ -995,7 +1031,7 @@ class DocumentViewTestCase(TestCase):
                 identifier=document_identifier,
             ),
             data={
-                'is_requested': True,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
                 'reason': 'My new reason',
             },
             **self.default_headers,
@@ -1015,9 +1051,14 @@ class DocumentViewTestCase(TestCase):
             'requested_at': '',
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
+
+        # Check the specific question
+        form_item_instantiation.refresh_from_db()
+        self.assertEqual(form_item_instantiation.required, False)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -1057,7 +1098,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], '')
         form = response.context['form']
-        self.assertEqual(form.fields['is_requested'].required, False)
+        self.assertEqual(form.fields['request_status'].required, False)
 
         # Post a valid form
         response = self.client.post(
@@ -1067,7 +1108,7 @@ class DocumentViewTestCase(TestCase):
                 identifier=self.non_free_document_identifier,
             ),
             data={
-                'is_requested': True,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'reason': 'My reason',
             },
             **self.default_headers,
@@ -1087,6 +1128,7 @@ class DocumentViewTestCase(TestCase):
             'requested_at': '',
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
+            'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(
@@ -1109,7 +1151,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], 'My reason')
         form = response.context['form']
-        self.assertEqual(form.fields['is_requested'].required, False)
+        self.assertEqual(form.fields['request_status'].required, False)
 
         frozen_time.move_to('2022-01-02')
 
@@ -1121,7 +1163,7 @@ class DocumentViewTestCase(TestCase):
                 identifier=self.non_free_document_identifier,
             ),
             data={
-                'is_requested': True,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
                 'reason': 'My new reason',
             },
             **self.default_headers,
@@ -1141,6 +1183,7 @@ class DocumentViewTestCase(TestCase):
             'requested_at': '',
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(
@@ -1164,7 +1207,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], 'My new reason')
         form = response.context['form']
-        self.assertEqual(form.fields['is_requested'].required, True)
+        self.assertEqual(form.fields['request_status'].required, True)
 
         frozen_time.move_to('2022-01-03')
 
@@ -1176,7 +1219,7 @@ class DocumentViewTestCase(TestCase):
                 identifier=self.non_free_document_identifier,
             ),
             data={
-                'is_requested': False,
+                'request_status': '',
                 'reason': '',
             },
             **self.default_headers,
@@ -1185,25 +1228,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
         self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('is_requested', []))
-
-        response = self.client.post(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=self.non_free_document_identifier,
-            ),
-            data={
-                'is_requested': True,
-                'reason': '',
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('reason', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('request_status', []))
 
         # Post a valid form
         response = self.client.post(
@@ -1213,7 +1238,7 @@ class DocumentViewTestCase(TestCase):
                 identifier=self.non_free_document_identifier,
             ),
             data={
-                'is_requested': True,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
                 'reason': 'My new reason 3',
             },
             **self.default_headers,
@@ -1233,6 +1258,7 @@ class DocumentViewTestCase(TestCase):
             'requested_at': '',
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': True,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(
@@ -1322,7 +1348,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], 'My reason')
         form = response.context['form']
-        self.assertEqual(form.fields['is_requested'].required, False)
+        self.assertEqual(form.fields['request_status'].required, False)
 
         # Post a valid form
         response = self.client.post(
@@ -1331,7 +1357,9 @@ class DocumentViewTestCase(TestCase):
                 uuid=self.general_admission.uuid,
                 identifier=document_identifier,
             ),
-            data={},
+            data={
+                'request_status': '',
+            },
             **self.default_headers,
         )
 
@@ -1431,7 +1459,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], 'My reason')
         form = response.context['form']
-        self.assertEqual(form.fields['is_requested'].required, False)
+        self.assertEqual(form.fields['request_status'].required, False)
 
         # Post a valid form
         response = self.client.post(
@@ -1497,7 +1525,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], '')
         form = response.context['form']
-        self.assertEqual(form.fields['is_requested'].required, False)
+        self.assertEqual(form.fields['request_status'].required, False)
 
         # Request the document
         response = self.client.post(
@@ -1507,7 +1535,7 @@ class DocumentViewTestCase(TestCase):
                 identifier=self.non_free_document_identifier,
             ),
             data={
-                'is_requested': True,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'reason': 'My reason',
             },
             **self.default_headers,
@@ -1531,7 +1559,9 @@ class DocumentViewTestCase(TestCase):
                 uuid=self.general_admission.uuid,
                 identifier=self.non_free_document_identifier,
             ),
-            data={},
+            data={
+                'request_status': '',
+            },
             **self.default_headers,
         )
 
@@ -1551,7 +1581,7 @@ class DocumentViewTestCase(TestCase):
                 identifier=self.non_free_document_identifier,
             ),
             data={
-                'is_requested': True,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
                 'reason': 'My reason',
             },
             **self.default_headers,
@@ -1584,7 +1614,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], 'My reason')
         form = response.context['form']
-        self.assertEqual(form.fields['is_requested'].required, True)
+        self.assertEqual(form.fields['request_status'].required, True)
 
         # Post an invalid form
         response = self.client.post(
@@ -1600,7 +1630,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
         self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('is_requested', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('request_status', []))
 
     # The manager deletes a document
     @freezegun.freeze_time('2022-01-01')
@@ -2554,23 +2584,21 @@ class DocumentViewTestCase(TestCase):
             f"({response.context['admission'].reference})",
         )
 
-        self.assertCountEqual(
-            form.fields['documents'].choices,
-            [
-                (
-                    self.sic_free_requestable_candidate_document_with_default_file,
-                    '<span class="fa-solid fa-link-slash"></span> My file name with default file',
-                ),
-                (self.sic_free_requestable_document, '<span class="fa-solid fa-link-slash"></span> My file name'),
-            ],
+        first_field = form.fields.get(self.sic_free_requestable_candidate_document_with_default_file)
+        self.assertIsNotNone(first_field)
+        self.assertEqual(
+            first_field.label,
+            '<span class="fa-solid fa-link-slash"></span> My file name with default file',
         )
-        self.assertCountEqual(
-            form['documents'].value(),
-            [
-                self.sic_free_requestable_document,
-                self.sic_free_requestable_candidate_document_with_default_file,
-            ],
+        self.assertEqual(first_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
+
+        second_field = form.fields.get(self.sic_free_requestable_document)
+        self.assertIsNotNone(second_field)
+        self.assertEqual(
+            second_field.label,
+            '<span class="fa-solid fa-link-slash"></span> My file name',
         )
+        self.assertEqual(second_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
 
         # Post an invalid form -> missing fields
         response = self.client.post(
@@ -2585,7 +2613,7 @@ class DocumentViewTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('deadline', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('message_object', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('message_content', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('documents', []))
+        self.assertIn(gettext('At least one document must be selected.'), form.errors.get('__all__', []))
 
         # Post an invalid form -> invalid identifiers
         response = self.client.post(
@@ -2594,7 +2622,7 @@ class DocumentViewTestCase(TestCase):
                 'deadline': '2022-01-15',
                 'message_object': 'Objects',
                 'message_content': 'Content',
-                'documents': self.fac_free_requestable_document,
+                self.fac_free_requestable_document: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
             **self.default_headers,
         )
@@ -2602,7 +2630,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
         self.assertFalse(form.is_valid())
-        self.assertTrue(len(form.errors.get('documents', [])) > 0)
+        self.assertIn(gettext('At least one document must be selected.'), form.errors.get('__all__', []))
 
         # Post a valid form
         response = self.client.post(
@@ -2611,7 +2639,8 @@ class DocumentViewTestCase(TestCase):
                 'deadline': '2022-01-15',
                 'message_object': 'Objects',
                 'message_content': 'Content',
-                'documents': self.sic_free_requestable_document,
+                self.sic_free_requestable_document: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                self.sic_free_requestable_candidate_document_with_default_file: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
             **self.default_headers,
         )
@@ -2634,6 +2663,7 @@ class DocumentViewTestCase(TestCase):
                 'requested_at': '2022-01-01T00:00:00',
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
         )
 
@@ -2689,30 +2719,25 @@ class DocumentViewTestCase(TestCase):
             f"({response.context['admission'].reference})",
         )
 
-        self.assertCountEqual(
-            form.fields['documents'].choices,
-            [
-                (
-                    self.fac_free_requestable_candidate_document_with_default_file,
-                    '<span class="fa-solid fa-link-slash"></span> '
-                    '<span class="fa-solid fa-building-columns"></span> '
-                    'My file name with default file',
-                ),
-                (
-                    self.fac_free_requestable_document,
-                    '<span class="fa-solid fa-link-slash"></span> '
-                    '<span class="fa-solid fa-building-columns"></span> '
-                    'My file name',
-                ),
-            ],
+        first_field = form.fields.get(self.fac_free_requestable_candidate_document_with_default_file)
+        self.assertIsNotNone(first_field)
+        self.assertEqual(
+            first_field.label,
+            '<span class="fa-solid fa-link-slash"></span> '
+            '<span class="fa-solid fa-building-columns"></span> '
+            'My file name with default file',
         )
-        self.assertCountEqual(
-            form['documents'].value(),
-            [
-                self.fac_free_requestable_document,
-                self.fac_free_requestable_candidate_document_with_default_file,
-            ],
+        self.assertEqual(first_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
+
+        second_field = form.fields.get(self.fac_free_requestable_document)
+        self.assertIsNotNone(second_field)
+        self.assertEqual(
+            second_field.label,
+            '<span class="fa-solid fa-link-slash"></span> '
+            '<span class="fa-solid fa-building-columns"></span> '
+            'My file name',
         )
+        self.assertEqual(second_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
 
         # Simulate that the field is not missing but still requested
         self.general_admission.refresh_from_db()
@@ -2723,22 +2748,24 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
-        self.assertCountEqual(
-            form.fields['documents'].choices,
-            [
-                (
-                    self.fac_free_requestable_candidate_document_with_default_file,
-                    '<span class="fa-solid fa-link-slash"></span> '
-                    '<span class="fa-solid fa-building-columns"></span> '
-                    'My file name with default file',
-                ),
-                (
-                    self.fac_free_requestable_document,
-                    '<span class="fa-solid fa-paperclip"></span> '
-                    '<span class="fa-solid fa-building-columns"></span> '
-                    'My file name',
-                ),
-            ],
+
+        first_field = form.fields.get(self.fac_free_requestable_candidate_document_with_default_file)
+        self.assertIsNotNone(first_field)
+        self.assertEqual(
+            first_field.label,
+            '<span class="fa-solid fa-link-slash"></span> '
+            '<span class="fa-solid fa-building-columns"></span> '
+            'My file name with default file',
+        )
+        self.assertEqual(first_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
+
+        second_field = form.fields.get(self.fac_free_requestable_document)
+        self.assertIsNotNone(second_field)
+        self.assertEqual(
+            second_field.label,
+            '<span class="fa-solid fa-paperclip"></span> '
+            '<span class="fa-solid fa-building-columns"></span> '
+            'My file name',
         )
 
         self.general_admission.specific_question_answers.pop(specific_question_uuid)
@@ -2757,7 +2784,7 @@ class DocumentViewTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('deadline', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('message_object', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('message_content', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('documents', []))
+        self.assertIn(gettext('At least one document must be selected.'), form.errors.get('__all__', []))
 
         # Post an invalid form -> invalid identifiers
         response = self.client.post(
@@ -2766,7 +2793,7 @@ class DocumentViewTestCase(TestCase):
                 'deadline': '2022-01-15',
                 'message_object': 'Objects',
                 'message_content': 'Content',
-                'documents': self.sic_free_requestable_document,
+                self.sic_free_requestable_document: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
             **self.default_headers,
         )
@@ -2774,7 +2801,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
         self.assertFalse(form.is_valid())
-        self.assertTrue(len(form.errors.get('documents', [])) > 0)
+        self.assertIn(gettext('At least one document must be selected.'), form.errors.get('__all__', []))
 
         # Post a valid form
         response = self.client.post(
@@ -2783,7 +2810,8 @@ class DocumentViewTestCase(TestCase):
                 'deadline': '2022-01-15',
                 'message_object': 'Objects',
                 'message_content': 'Content',
-                'documents': self.fac_free_requestable_document,
+                self.fac_free_requestable_document: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                self.fac_free_requestable_candidate_document_with_default_file: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
             **self.default_headers,
         )
@@ -2806,6 +2834,7 @@ class DocumentViewTestCase(TestCase):
                 'requested_at': '2022-01-01T00:00:00',
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
         )
 
@@ -2862,8 +2891,11 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(context['request_reason'], 'My reason')
 
         # Check that the forms are well initialized
-        self.assertEqual(context['request_form'].fields['is_requested'].required, False)
-        self.assertEqual(context['request_form']['is_requested'].value(), True)
+        self.assertEqual(context['request_form'].fields['request_status'].required, False)
+        self.assertEqual(
+            context['request_form']['request_status'].value(),
+            StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+        )
         self.assertEqual(context['request_form']['reason'].value(), 'My reason')
         self.assertEqual(context['replace_form'].fields['file'].mimetypes, list(SUPPORTED_MIME_TYPES))
         self.assertEqual(context['replace_form']['file'].value(), [])
@@ -2883,3 +2915,792 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(context['document_uuid'], str(file_uuid))
         self.assertEqual(context['document_write_token'], 'foobar')
         self.assertEqual(context['document_metadata'], self.file_metadata)
+
+    # The manager updates the reason of a free document that the candidate must upload
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_sic_manager_updates_the_request_status_of_a_free_document(self, frozen_time):
+        self.init_documents()
+
+        self.client.force_login(user=self.sic_manager_user)
+        base_url = 'admission:general-education:document:candidate-request-status'
+
+        # Unknown document
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier='UNKNOWN',
+            ),
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Some documents cannot be requested
+        for index, identifier in enumerate(
+            [
+                # Because they are read only
+                self.sic_free_non_requestable_internal_document,
+                # Or created by a fac manager
+                self.fac_free_non_requestable_internal_document,
+                self.fac_free_requestable_candidate_document_with_default_file,
+                self.fac_free_requestable_document,
+                # Or created by the system
+                f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
+            ]
+        ):
+            response = self.client.get(
+                resolve_url(
+                    base_url,
+                    uuid=self.general_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(
+                response.status_code,
+                403,
+                'A SIC user cannot update the document n°%s' % index,
+            )
+
+        # Create a requested document
+        document_identifier = self._create_a_free_document(
+            self.sic_manager_user,
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+        )
+
+        form_item_instantiation = AdmissionFormItemInstantiation.objects.get(
+            admission=self.general_admission,
+            form_item__uuid=document_identifier.split('.')[-1],
+        )
+
+        self.assertEqual(form_item_instantiation.required, False)
+
+        self.client.force_login(user=self.second_sic_manager_user)
+
+        frozen_time.move_to('2022-01-03')
+
+        # Get the editing form
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.fields[document_identifier].required, False)
+
+        # Post a valid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=document_identifier,
+            ),
+            data={
+                document_identifier: StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+
+        # Update the information about the request into the admission
+        desired_result = {
+            'last_actor': self.second_sic_manager_user.person.global_id,
+            'reason': 'My reason',
+            'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+            'last_action_at': '2022-01-03T00:00:00',
+            'deadline_at': '',
+            'requested_at': '',
+            'status': StatutEmplacementDocument.A_RECLAMER.name,
+            'automatically_required': False,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+        }
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
+
+        # Check the specific question
+        form_item_instantiation.refresh_from_db()
+        self.assertEqual(form_item_instantiation.required, False)
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.second_sic_manager_user.person)
+
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_fac_manager_updates_the_request_status_of_a_free_document(self, frozen_time):
+        self.init_documents()
+
+        self.client.force_login(user=self.fac_manager_user)
+        base_url = 'admission:general-education:document:candidate-request-status'
+
+        # Unknown document
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier='UNKNOWN',
+            ),
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Some documents cannot be requested
+        for index, identifier in enumerate(
+            [
+                # Because they are read only
+                self.fac_free_non_requestable_internal_document,
+                # Or created by a sic manager
+                self.sic_free_non_requestable_internal_document,
+                self.sic_free_requestable_candidate_document_with_default_file,
+                self.sic_free_requestable_document,
+                # Or created by the system
+                f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
+            ]
+        ):
+            response = self.client.get(
+                resolve_url(
+                    base_url,
+                    uuid=self.general_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(
+                response.status_code,
+                403,
+                'A FAC user cannot update the document n°%s' % index,
+            )
+
+        # Create a requested document
+        document_identifier = self._create_a_free_document(
+            self.fac_manager_user,
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+        )
+
+        form_item_instantiation = AdmissionFormItemInstantiation.objects.get(
+            admission=self.general_admission,
+            form_item__uuid=document_identifier.split('.')[-1],
+        )
+
+        self.assertEqual(form_item_instantiation.required, False)
+
+        self.client.force_login(user=self.second_fac_manager_user)
+
+        frozen_time.move_to('2022-01-03')
+
+        # Get the editing form
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.fields[document_identifier].required, False)
+
+        # Post a valid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=document_identifier,
+            ),
+            data={
+                document_identifier: StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+
+        # Update the information about the request into the admission
+        desired_result = {
+            'last_actor': self.second_fac_manager_user.person.global_id,
+            'reason': 'My reason',
+            'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+            'last_action_at': '2022-01-03T00:00:00',
+            'deadline_at': '',
+            'requested_at': '',
+            'status': StatutEmplacementDocument.A_RECLAMER.name,
+            'automatically_required': False,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+        }
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
+
+        # Check the specific question
+        form_item_instantiation.refresh_from_db()
+        self.assertEqual(form_item_instantiation.required, False)
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.second_fac_manager_user.person)
+
+    # The manager requests a non free document
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_manager_updates_the_request_status_of_a_non_free_document(self, frozen_time):
+        base_url = 'admission:general-education:document:candidate-request-status'
+
+        # A FAC user cannot request a categorized document
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        # A SIC user can request a categorized document
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.fields[self.non_free_document_identifier].required, False)
+
+        # Post a valid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={
+                self.non_free_document_identifier: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+
+        # Update the information about the request into the admission
+        desired_result = {
+            'last_actor': self.sic_manager_user.person.global_id,
+            'reason': '',
+            'type': TypeEmplacementDocument.NON_LIBRE.name,
+            'last_action_at': '2022-01-01T00:00:00',
+            'deadline_at': '',
+            'requested_at': '',
+            'status': StatutEmplacementDocument.A_RECLAMER.name,
+            'automatically_required': False,
+            'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+        }
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.requested_documents.get(self.non_free_document_identifier),
+            desired_result,
+        )
+
+        # A second SIC user can update a categorized document
+        self.client.force_login(user=self.second_sic_manager_user)
+
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.fields[self.non_free_document_identifier].required, False)
+
+        frozen_time.move_to('2022-01-02')
+
+        # Post a valid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={
+                self.non_free_document_identifier: StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+                'reason': 'My reason',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+
+        # Update the information about the request into the admission
+        desired_result = {
+            'last_actor': self.second_sic_manager_user.person.global_id,
+            'reason': '',
+            'type': TypeEmplacementDocument.NON_LIBRE.name,
+            'last_action_at': '2022-01-02T00:00:00',
+            'deadline_at': '',
+            'requested_at': '',
+            'status': StatutEmplacementDocument.A_RECLAMER.name,
+            'automatically_required': False,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+        }
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.requested_documents.get(self.non_free_document_identifier),
+            desired_result,
+        )
+
+        # We indicate that a field has been automatically required by the system
+        self.general_admission.requested_documents[self.non_free_document_identifier]['automatically_required'] = True
+        self.general_admission.save()
+
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.fields[self.non_free_document_identifier].required, True)
+
+        frozen_time.move_to('2022-01-03')
+
+        # Post an invalid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={
+                self.non_free_document_identifier: '',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertFalse(form.is_valid())
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get(self.non_free_document_identifier, []))
+
+        # Post a valid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={
+                self.non_free_document_identifier: StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+
+        # Update the information about the request into the admission
+        desired_result = {
+            'last_actor': self.second_sic_manager_user.person.global_id,
+            'reason': '',
+            'type': TypeEmplacementDocument.NON_LIBRE.name,
+            'last_action_at': '2022-01-03T00:00:00',
+            'deadline_at': '',
+            'requested_at': '',
+            'status': StatutEmplacementDocument.A_RECLAMER.name,
+            'automatically_required': True,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+        }
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.requested_documents.get(self.non_free_document_identifier),
+            desired_result,
+        )
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.second_sic_manager_user.person)
+
+    # The manager cancels the request of a document
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_sic_manager_cancels_the_request_status_of_a_free_document(self):
+        self.init_documents()
+
+        self.client.force_login(user=self.sic_manager_user)
+        base_url = 'admission:general-education:document:candidate-request-status'
+
+        # Unknown document
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier='UNKNOWN',
+            ),
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Some documents cannot be requested
+        for index, identifier in enumerate(
+            [
+                # Because they are read only
+                self.sic_free_non_requestable_internal_document,
+                # Or created by a fac manager
+                self.fac_free_non_requestable_internal_document,
+                self.fac_free_requestable_candidate_document_with_default_file,
+                self.fac_free_requestable_document,
+                # Or created by the system
+                f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
+            ]
+        ):
+            response = self.client.get(
+                resolve_url(
+                    base_url,
+                    uuid=self.general_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(
+                response.status_code,
+                403,
+                'A SIC user cannot update the document n°%s' % index,
+            )
+
+        # Create a requested document
+        document_identifier = self._create_a_free_document(
+            self.sic_manager_user,
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+        )
+
+        # The admission contains the information about this request
+        self.general_admission.refresh_from_db()
+        self.assertIsNotNone(self.general_admission.requested_documents.get(document_identifier))
+
+        # A specific question has been created
+        related_specific_question_exists = AdmissionFormItemInstantiation.objects.filter(
+            admission=self.general_admission,
+            form_item__uuid=document_identifier.split('.')[-1],
+        ).exists()
+        self.assertTrue(related_specific_question_exists)
+
+        self.client.force_login(user=self.second_sic_manager_user)
+
+        # Get the editing form
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.fields[document_identifier].required, False)
+
+        # Post a valid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=document_identifier,
+            ),
+            data={
+                document_identifier: '',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+
+        # Remove the information about the request into the admission
+        self.general_admission.refresh_from_db()
+        self.assertIsNone(self.general_admission.requested_documents.get(document_identifier))
+
+        # Remove the related specific question
+        related_specific_question_exists = AdmissionFormItemInstantiation.objects.filter(
+            admission=self.general_admission,
+            form_item__uuid=document_identifier.split('.')[-1],
+        ).exists()
+        self.assertFalse(related_specific_question_exists)
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.second_sic_manager_user.person)
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_fac_manager_cancels_the_request_status_of_a_free_document(self):
+        self.init_documents()
+
+        self.client.force_login(user=self.fac_manager_user)
+        base_url = 'admission:general-education:document:candidate-request-status'
+
+        # Unknown document
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier='UNKNOWN',
+            ),
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, 404)
+
+        # Some documents cannot be requested
+        for index, identifier in enumerate(
+            [
+                # Because they are read only
+                self.fac_free_non_requestable_internal_document,
+                # Or created by a fac manager
+                self.sic_free_non_requestable_internal_document,
+                self.sic_free_requestable_candidate_document_with_default_file,
+                self.sic_free_requestable_document,
+                # Or created by the system
+                f'{IdentifiantBaseEmplacementDocument.SYSTEME.name}.DOSSIER_ANALYSE',
+            ]
+        ):
+            response = self.client.get(
+                resolve_url(
+                    base_url,
+                    uuid=self.general_admission.uuid,
+                    identifier=identifier,
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(
+                response.status_code,
+                403,
+                'A FAC user cannot update the document n°%s' % index,
+            )
+
+        # Create a requested document
+        document_identifier = self._create_a_free_document(
+            self.fac_manager_user,
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+        )
+
+        # The admission contains the information about this request
+        self.general_admission.refresh_from_db()
+        self.assertIsNotNone(self.general_admission.requested_documents.get(document_identifier))
+
+        # A specific question has been created
+        related_specific_question_exists = AdmissionFormItemInstantiation.objects.filter(
+            admission=self.general_admission,
+            form_item__uuid=document_identifier.split('.')[-1],
+        ).exists()
+        self.assertTrue(related_specific_question_exists)
+
+        self.client.force_login(user=self.second_fac_manager_user)
+
+        # Get the editing form
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.fields[document_identifier].required, False)
+
+        # Post a valid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=document_identifier,
+            ),
+            data={},
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+
+        # Remove the information about the request into the admission
+        self.general_admission.refresh_from_db()
+        self.assertIsNone(self.general_admission.requested_documents.get(document_identifier))
+
+        # Remove the related specific question
+        related_specific_question_exists = AdmissionFormItemInstantiation.objects.filter(
+            admission=self.general_admission,
+            form_item__uuid=document_identifier.split('.')[-1],
+        ).exists()
+        self.assertFalse(related_specific_question_exists)
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.second_fac_manager_user.person)
+
+    # The manager cancel the requests of a non free document
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_manager_cancels_the_request_status_of_a_non_free_document(self, frozen_time):
+        base_url = 'admission:general-education:document:candidate-request-status'
+
+        # A FAC user cannot request a categorized document
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        # A SIC user can request a categorized document
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.fields[self.non_free_document_identifier].required, False)
+
+        # Request the document
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={
+                self.non_free_document_identifier: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+
+        self.general_admission.refresh_from_db()
+        self.assertIsNotNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+        # A SIC manager can cancel the request
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={
+                self.non_free_document_identifier: '',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(form.is_valid())
+
+        # Remove the information about the request into the admission
+        self.general_admission.refresh_from_db()
+        self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
+
+        # Request the document
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={
+                self.non_free_document_identifier: StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+
+        self.general_admission.refresh_from_db()
+        self.assertIsNotNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+        # We indicate that a field has been automatically required by the system
+        self.general_admission.requested_documents[self.non_free_document_identifier]['automatically_required'] = True
+        self.general_admission.save()
+
+        response = self.client.get(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(form.fields[self.non_free_document_identifier].required, True)
+        self.assertNotIn(BLANK_CHOICE[0], form.fields[self.non_free_document_identifier].choices)
+
+        # Post an invalid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={},
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertFalse(form.is_valid())
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get(self.non_free_document_identifier, []))

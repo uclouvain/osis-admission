@@ -40,6 +40,7 @@ def initialiser_emplacement_document_libre_a_reclamer(
         type_emplacement=cmd.type_emplacement,
         libelle=cmd.libelle,
         raison=cmd.raison,
+        statut_reclamation=cmd.statut_reclamation,
     )
 
     emplacement_document.remplir_par_gestionnaire(uuid_document=cmd.uuid_document, auteur=cmd.auteur)

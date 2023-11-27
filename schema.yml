@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.89
+  version: 1.0.92
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -3511,9 +3511,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DocumentSpecificQuestion'
+                $ref: '#/components/schemas/DocumentSpecificQuestionsList'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -5905,6 +5903,8 @@ components:
                 properties:
                   retrieve_training_choice:
                     $ref: '#/components/schemas/ActionLink'
+                  update_training_choice:
+                    $ref: '#/components/schemas/ActionLink'
                   retrieve_person:
                     $ref: '#/components/schemas/ActionLink'
                   update_person:
@@ -6196,6 +6196,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             create_coordinates:
               $ref: '#/components/schemas/ActionLink'
+            create_training_choice:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
     DoctoratePropositionSearchDTO:
@@ -6253,6 +6255,8 @@ components:
           type: object
           properties:
             retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
               $ref: '#/components/schemas/ActionLink'
             retrieve_person:
               $ref: '#/components/schemas/ActionLink'
@@ -6543,7 +6547,7 @@ components:
               nullable: true
             educational_other:
               type: string
-              maxLength: 60
+              maxLength: 75
             institute:
               type: string
               nullable: true
@@ -9965,42 +9969,93 @@ components:
       - attestation_boursier
       - titre_identite_sejour_longue_duree_ue
       - titre_sejour_belgique
-    DocumentSpecificQuestion:
+    DocumentSpecificQuestionsList:
       type: object
       properties:
-        uuid:
-          type: string
-        type:
-          type: string
-        title:
-          type: object
-        text:
-          type: object
-        help_text:
-          type: object
-        configuration:
-          type: object
-        values:
+        immediate_requested_documents:
           type: array
           items:
             type: object
-        tab:
+            properties:
+              uuid:
+                type: string
+              type:
+                type: string
+              title:
+                type: object
+              text:
+                type: object
+              help_text:
+                type: object
+              configuration:
+                type: object
+              values:
+                type: array
+                items:
+                  type: object
+              tab:
+                type: string
+              tab_name:
+                type: string
+              required:
+                type: boolean
+            required:
+            - uuid
+            - type
+            - title
+            - text
+            - help_text
+            - configuration
+            - values
+            - tab
+            - tab_name
+            - required
+        later_requested_documents:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              type:
+                type: string
+              title:
+                type: object
+              text:
+                type: object
+              help_text:
+                type: object
+              configuration:
+                type: object
+              values:
+                type: array
+                items:
+                  type: object
+              tab:
+                type: string
+              tab_name:
+                type: string
+              required:
+                type: boolean
+            required:
+            - uuid
+            - type
+            - title
+            - text
+            - help_text
+            - configuration
+            - values
+            - tab
+            - tab_name
+            - required
+        deadline:
           type: string
-        tab_name:
-          type: string
-        required:
-          type: boolean
+          format: date
+          nullable: true
       required:
-      - uuid
-      - type
-      - title
-      - text
-      - help_text
-      - configuration
-      - values
-      - tab
-      - tab_name
-      - required
+      - immediate_requested_documents
+      - later_requested_documents
+      - deadline
     PaiementDTO:
       type: object
       properties:

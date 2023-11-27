@@ -29,7 +29,16 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import has_scope, is_debug, is_entity_manager, in_sic_status, is_submitted
+from admission.auth.predicates.general import (
+    in_sic_status,
+    is_submitted,
+    in_sic_status_extended,
+)
+from admission.auth.predicates.common import (
+    has_scope,
+    is_debug,
+    is_entity_manager,
+)
 from education_group.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
 
@@ -97,5 +106,7 @@ class CentralManager(EntityRoleModel):
             'admission.view_documents_management': is_entity_manager & is_submitted,
             'admission.view_checklist': is_entity_manager & is_submitted,
             'admission.checklist_faculty_decision_transfer_to_fac': is_entity_manager & in_sic_status,
+            'admission.checklist_change_past_experiences': is_entity_manager & in_sic_status_extended,
+            'admission.checklist_select_access_title': is_entity_manager & in_sic_status_extended,
         }
         return RuleSet(ruleset)

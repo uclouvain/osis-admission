@@ -197,7 +197,10 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document.api.utils.confirm_remote_upload", side_effect=lambda token, upload_to: token)
+        patcher = patch(
+            "osis_document.api.utils.confirm_remote_upload",
+            side_effect=lambda token, *args, **kwargs: token,
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -483,7 +486,10 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document.api.utils.confirm_remote_upload", side_effect=lambda token, upload_to: token)
+        patcher = patch(
+            "osis_document.api.utils.confirm_remote_upload",
+            side_effect=lambda token, *args, **kwargs: token,
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 

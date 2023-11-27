@@ -24,20 +24,20 @@
 {% endcomment %}
 
 <ul class="nav nav-tabs" role="tablist">
-  <li role="presentation" class="active">
-    <a href="#parcours-complete" aria-controls="parcours-complete" role="tab" data-toggle="tab">{% trans "Whole view" %}</a>
+  <li role="presentation" {% if not default_tab or default_tab == 'complete' %}class="active"{% endif %}>
+    <a href="#{{ prefix }}-parcours-complete" aria-controls="{{ prefix }}-parcours-complete" role="tab" data-toggle="tab">{% trans "Whole view" %}</a>
   </li>
-  <li role="presentation">
-    <a href="#parcours-formations" aria-controls="parcours-formations" role="tab" data-toggle="tab">{% trans "Academics trainings view" %}</a>
+  <li role="presentation" {% if default_tab == 'formations' %}class="active"{% endif %}>
+    <a href="#{{ prefix }}-parcours-formations" aria-controls="{{ prefix }}-parcours-formations" role="tab" data-toggle="tab">{% trans "Academics trainings view" %}</a>
   </li>
-  <li role="presentation">
-    <a href="#parcours-financabilite" aria-controls="parcours-financabilite" role="tab" data-toggle="tab">{% trans "Financeability view" %}</a>
+  <li role="presentation" {% if default_tab == 'financabilite' %}class="active"{% endif %}>
+    <a href="#{{ prefix }}-parcours-financabilite" aria-controls="{{ prefix }}-parcours-financabilite" role="tab" data-toggle="tab">{% trans "Financeability view" %}</a>
   </li>
 </ul>
 
-<div id="parcours" class="tab-content">
+<div id="{{ prefix }}-parcours" class="tab-content">
   {# Vue complète #}
-  <div role="tabpanel" class="tab-pane active" id="parcours-complete">
+  <div role="tabpanel" class="tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ prefix }}-parcours-complete">
     <table class="table">
       <thead>
         <tr>
@@ -55,7 +55,7 @@
       <tbody>
         {% for year, year_experiences in experiences.items %}
           {% for experience in year_experiences %}
-            {% include "admission/general_education/includes/checklist/parcours_row.html" with avec_titre_acces=True %}
+            {% include "admission/general_education/includes/checklist/parcours_row.html" %}
           {% endfor %}
         {% endfor %}
       </tbody>
@@ -63,7 +63,7 @@
   </div>
 
   {# Vue formations académiques #}
-  <div role="tabpanel" class="tab-pane" id="parcours-formations">
+  <div role="tabpanel" class="tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
     <table class="table">
       <thead>
         <tr>
@@ -82,7 +82,7 @@
         {% with experiences_formations=experiences|filter_experiences_trainings %}
           {% for year, year_experiences in experiences_formations.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" with avec_titre_acces=True %}
+              {% include "admission/general_education/includes/checklist/parcours_row.html" %}
             {% empty %}
               {% ifchanged %}
               <tr class="bg-primary">
@@ -97,13 +97,14 @@
   </div>
 
   {# Vue finançabilité #}
-  <div role="tabpanel" class="tab-pane" id="parcours-financabilite">
+  <div role="tabpanel" class="tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ prefix }}-parcours-financabilite">
     <table class="table">
       <thead>
         <tr>
           <th>{% trans "Years" %}</th>
           <th>{# Diplomant #}</th>
           <th>{% trans "Experiences" %}</th>
+          <th>{% trans "Access title" %}</th>
           <th>{% trans "Registered credits" %}</th>
           <th>{% trans "Credits earned" %}</th>
           <th>{% trans "Reduction" %}</th>
@@ -115,7 +116,7 @@
         {% with experiences_financabilite=experiences|filter_experiences_financability %}
           {% for year, year_experiences in experiences_financabilite.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" with avec_titre_acces=False %}
+              {% include "admission/general_education/includes/checklist/parcours_row.html" %}
             {% endfor %}
           {% endfor %}
         {% endwith %}

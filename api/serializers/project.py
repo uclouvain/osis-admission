@@ -119,6 +119,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
     links = ActionLinksField(
         actions={
             'retrieve_training_choice': DOCTORATE_ACTION_LINKS['retrieve_doctorate_training_choice'],
+            'update_training_choice': DOCTORATE_ACTION_LINKS['update_doctorate_training_choice'],
             **{
                 action: DOCTORATE_ACTION_LINKS[action]
                 for action in [
@@ -299,6 +300,7 @@ class PropositionCreatePermissionsSerializer(serializers.Serializer):
         actions={
             'create_person': ACTION_LINKS['update_person'],
             'create_coordinates': ACTION_LINKS['update_coordinates'],
+            'create_training_choice': ACTION_LINKS['create_training_choice'],
         }
     )
 

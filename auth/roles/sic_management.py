@@ -28,7 +28,7 @@ import rules
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import is_entity_manager
+from admission.auth.predicates.common import is_entity_manager
 from admission.auth.roles.central_manager import CentralManager
 from osis_role.contrib.models import EntityRoleModel
 

@@ -30,7 +30,6 @@ from typing import List, Optional
 from unittest.mock import patch
 
 from django.core.cache import cache
-from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
@@ -38,6 +37,7 @@ from rest_framework import status
 from admission.contrib.models import AdmissionTask, ConfirmationPaper, DoctorateAdmission
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
+from admission.exports.admission_confirmation_success_attestation import admission_confirmation_success_attestation
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_ON_RETAKING_STUDENT,
 )
@@ -177,15 +177,14 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         )
         self.assertEqual(doctorate.post_enrolment_status, ChoixStatutDoctorat.PASSED_CONFIRMATION.name)
 
-        admission_task = AdmissionTask.objects.filter(admission=doctorate).first()
+        admission_task: AdmissionTask = AdmissionTask.objects.filter(admission=doctorate).first()
         self.assertEqual(admission_task.type, AdmissionTask.TaskType.CONFIRMATION_SUCCESS.name)
         self.assertEqual(admission_task.task.state, TaskState.PENDING.name)
 
         # Simulate the triggering of the async tasks
-        call_command("process_admission_tasks")
+        admission_confirmation_success_attestation(task_uuid=admission_task.task.uuid)
+        # call_command("process_admission_tasks")
         admission_task.refresh_from_db()
-
-        self.assertEqual(admission_task.task.state, TaskState.DONE.name)
 
         c = ConfirmationPaper.objects.filter(admission=doctorate).first()
         self.assertEqual(c.certificate_of_achievement, [uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')])

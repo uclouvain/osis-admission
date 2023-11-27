@@ -28,7 +28,11 @@
 {% block actions %}{% endblock %}
 
 {% block tab_content %}
-  <div id="three-pane-checklist">
+  <div
+      id="three-pane-checklist"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-push-url="false"
+  >
     <div id="shortcuts" class="btn-group" data-toggle="buttons">
       <label class="btn btn-default active">
         <input id="documents-shortcut" type="radio" name="shortcut" autocomplete="off" checked>
@@ -45,13 +49,14 @@
     {% concat '?next=' checklist_url '&next_hash_url=' as next_base_url %}
     {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
     {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
-    {% url base_namespace|add:":update:accounting" view.kwargs.uuid as accounting_url %}
+    {% url base_namespace|add:":update:accounting" view.kwargs.uuid as comptabilite_url %}
     {% url base_namespace|add:":update:training-choice" view.kwargs.uuid as training_choice_url %}
+    {% url base_namespace|add:":update:specific-questions" view.kwargs.uuid as specific_questions_url %}
+    {% concat "#choix_formation" as checklist_training_choice_url %}
 
     <div
         id="tabs-content"
         class="tab-content"
-        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
     >
       {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation next_url=next_base_url|add:'assimilation' %}
         <div role="tabpanel" class="tab-pane in active" id="assimilation">
@@ -93,18 +98,44 @@
           {% bootstrap_form comment_forms.donnees_personnelles %}
 
           <div class="info-part">
-            {% include 'admission/exports/recap/includes/person.html' with identification=resume_proposition.identification edit_button=person_url|add:next_url %}
-            {% include 'admission/exports/recap/includes/coordonnees.html' with coordonnees=resume_proposition.coordonnees edit_button=coordonnees_url|add:next_url %}
+            {% include 'admission/exports/recap/includes/person.html' with identification=resume_proposition.identification edit_link_button=person_url|add:next_url %}
+            {% include 'admission/exports/recap/includes/coordonnees.html' with coordonnees=resume_proposition.coordonnees edit_link_button=coordonnees_url|add:next_url %}
           </div>
         </div>
       {% endwith %}
 
       {% with initial=original_admission.checklist.initial.financabilite current=original_admission.checklist.current.financabilite %}
         <div role="tabpanel" class="tab-pane" id="financabilite">
-          <p>{% trans "This page is currently under construction." %}</p>
+
+          {% include "admission/general_education/includes/checklist/financabilite.html" %}
+
           <div class="info-part">
+            <dl>
+              <dt>{% trans "Course choice" %} {{ ''|tab_edit_button:'#choix_formation'|safe }}</dt>
+              <dd>
+                {% with formation=admission.formation %}
+                  {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
+                    {{ formation.sigle }}-1 - {% trans "First year of" %} {{ formation.intitule|lower }} ({{ formation.campus }})
+                  {% else %}
+                    {{ formation.sigle }} - {{ formation.intitule }} ({{ formation.campus }})
+                  {% endif %}
+                {% endwith %}
+              </dd>
+
+              <dt>{% trans "Number of previous registration" context 'admission' %}</dt>
+              <dd>{% trans "Unavailable" %}</dd>
+
+              <dt>{% trans "Number of additional years the candidate can have" context 'admission' %}</dt>
+              <dd>{% trans "Unavailable" %}</dd>
+            </dl>
+
+            {% panel _("Parcours") %}
+            {% include "admission/general_education/includes/checklist/parcours.html" with prefix="financabilite" default_tab="financabilite" %}
+            {% endpanel %}
           </div>
         </div>
+
+        {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' %}
       {% endwith %}
 
       {% with next_url=next_base_url|add:'frais_dossier' %}
@@ -151,7 +182,7 @@
 
             {% firstof training_choice_url|add:next_url as contextual_training_choice %}
             {% translate "Course" context 'admission' as course_label %}
-            {% display course_label ''|edit_button:contextual_training_choice as button %}
+            {% display course_label ''|tab_edit_button:'#choix_formation' as button %}
             {% field_data button resume_proposition.proposition.formation %}
 
             {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}
@@ -168,7 +199,7 @@
           </div>
         </div>
       {% endwith %}
-      {% with initial=original_admission.checklist.initial.choix_formation current=original_admission.checklist.current.choix_formation %}
+      {% with initial=original_admission.checklist.initial.choix_formation current=original_admission.checklist.current.choix_formation next_url=next_base_url|add:'choix_formation' %}
         <div role="tabpanel" class="tab-pane" id="choix_formation">
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
@@ -177,7 +208,7 @@
           </div>
 
           {% bootstrap_form comment_forms.choix_formation %}
-          {% include "admission/general_education/checklist/choix_formation_detail.html" %}
+          {% include "admission/general_education/includes/checklist/choix_formation_detail.html" %}
 
           <div class="info-part">
             {% field_data _("Proposition submission") admission.soumise_le %}
@@ -189,33 +220,27 @@
               {% field_data _("External reorientation/modification") _("Modification asked by the candidate") %}
             {% endif %}
 
-            {% if admission.bourse_erasmus_mundus or admission.bourse_double_diplome or admission.bourse_internationale %}
-              <dl>
-                <dt>{% trans "Specific profile" %}</dt>
-                <dd>
-                  {% if admission.bourse_erasmus_mundus %}
-                    <p>{% trans "Erasmus Mundus" %} : {{ admission.bourse_erasmus_mundus.nom_court }}</p>
-                  {% endif %}
-                  {% if admission.bourse_double_diplome %}
-                    <p>{% trans "Double diplomation" %} : {{ admission.bourse_double_diplome.nom_court }}</p>
-                  {% endif %}
-                  {% if admission.bourse_internationale %}
-                    <p>{% trans "International scholarship" %} : {{ admission.bourse_internationale.nom_court }}</p>
-                  {% endif %}
-                </dd>
-              </dl>
+            {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}
+              {% include 'admission/general_education/includes/checklist/vip_profile.html' with url=training_choice_url|add:next_url %}
             {% endif %}
           </div>
         </div>
       {% endwith %}
       {% with initial=original_admission.checklist.initial.parcours_anterieur current=original_admission.checklist.current.parcours_anterieur %}
         <div role="tabpanel" class="tab-pane" id="parcours_anterieur">
-          <p>{% trans "This page is currently under construction." %}</p>
+          {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
+          {% bootstrap_form comment_forms.parcours_anterieur %}
+          {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' %}
+          {% panel _("Previous experience") %}
+            {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' %}
+          {% endpanel %}
           <div class="info-part">
+            {# TODO add here the financeability part when available #}
           </div>
+          {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
         </div>
       {% endwith %}
-      {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation %}
+      {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation next_url=next_base_url|add:'specificites_formation' %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
           <div class="form-group btn-group status-group" role="group">
             {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
@@ -232,7 +257,7 @@
 
           <div class="info-part">
             {% if resume_proposition.identification.est_concerne_par_visa %}
-              {% panel _("Visa") edit_button="#" %}
+              {% panel _("Visa") edit_link_button=specific_questions_url|add:next_url %}
                 {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
               {% endpanel %}
             {% endif %}
@@ -319,6 +344,10 @@
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
   <script src="{% static 'admission/ckeditor.js' %}"></script>
   <script>
+      // Prevent to save the DOM in cache when using htmx requests
+      htmx.config.refreshOnHistoryMiss = true;
+      htmx.config.historyCacheSize = 0;
+
       (function ($) {
           const defaultTab = window.location.hash || '#donnees_personnelles';
 
@@ -366,13 +395,19 @@
 
               // refresh info viewer (e.target = active && e.relatedTarget = previous)
               if (configurationCache.getItem('side-tab', 'documents') === 'info') {
-                  // move old info to old tab
-                  const oldTabPaneId = $(e.relatedTarget).parent().attr('href');
                   const $info = $('#info-viewer-tab .info-content');
-                  $(oldTabPaneId).find(' .info-part').html($info.html());
-                  $info.html($(tabPaneId).find('.info-part').html());
-                  $(tabPaneId).find('.info-part').html('');
+                  // move old info from info viewer to old tab
+                  const oldTabPanel = $($(e.relatedTarget).parent().attr('href')).find('.info-part');
+                  $info.children().detach().appendTo(oldTabPanel);
+                  // move new info from current tab to info viewer
+                  const currentTabPanel = $(tabPaneId).find('.info-part');
+                  currentTabPanel.children().detach().appendTo($info);
               }
+          });
+
+          // Activate a specific tab from link click inside the checklist
+          $('a[data-toggle="checklist-tab"]').on('click', function () {
+              $(`#checklist-menu li[href="${$(this).attr('href')}"] `).click();
           });
 
           // TODO find a way to genericly save extra and status
@@ -423,17 +458,15 @@
               // move the current tab's info-part to the side
               configurationCache.setItem('side-tab', 'info');
               const $tabInfo = $('#tabs-content .tab-pane.active .info-part');
-              $info.html($tabInfo.html());
+              $tabInfo.children().detach().appendTo($info);
               $('#info-viewer-tab').show();
-              $tabInfo.empty();
               $('#document-viewer-tab').hide();
           });
           $('#documents-shortcut').change(function () {
               // move back the current tab's info-part
               configurationCache.setItem('side-tab', 'documents');
-              $('#tabs-content .tab-pane.active .info-part').html($info.html());
+              $info.children().detach().appendTo($('#tabs-content .tab-pane.active .info-part'));
               $('#info-viewer-tab').hide();
-              $info.empty();
               $('#document-viewer-tab').show();
               $('.osis-document-editor .editor-container').each(function () {
                   this.dispatchEvent(new CustomEvent('setScale', { detail: 'auto' }));
@@ -592,6 +625,23 @@
                   CKEDITOR.instances[editor].updateElement();
               }
           });
+
+          {# Access title events #}
+          $('.parcours').on('formValidation', function(event) {
+              {# As the list of the past experiences appears in different places, when we select an experience in one #}
+              {# list, we have to update the checkboxes related to this same experience in the other lists #}
+              if (event.originalEvent.detail.is_valid) {
+                  const elt = event.target;
+
+                  if (!elt) return;
+
+                  const accessTitleClass = Array.from(elt.classList).find(c => c.startsWith('access-title-'));
+                  if (accessTitleClass) {
+                      $('.' + accessTitleClass).prop('checked', elt.checked);
+                  }
+              }
+          })
+
       })(jQuery);
   </script>
 {% endblock script %}

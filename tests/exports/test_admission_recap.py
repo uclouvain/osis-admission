@@ -658,7 +658,8 @@ class SectionsAttachmentsTestCase(TestCase):
         cls.get_remote_metadata_patcher.start()
 
         cls.confirm_remote_upload_patcher = mock.patch(
-            "osis_document.api.utils.confirm_remote_upload", side_effect=lambda token, upload_to: token
+            "osis_document.api.utils.confirm_remote_upload",
+            side_effect=lambda token, *args, **kwargs: token,
         )
         cls.confirm_remote_upload_patcher.start()
 
@@ -1036,6 +1037,10 @@ class SectionsAttachmentsTestCase(TestCase):
             certificat_approbation_fac=[],
             documents_additionnels=[],
             poste_diplomatique=None,
+            financabilite_regle_calcule="",
+            financabilite_regle_calcule_le=None,
+            financabilite_regle="",
+            financabilite_regle_etabli_par="",
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
