@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from infrastructure.utils import AbstractMessageBusCommands, MessageBusInMemory
+from infrastructure.utils import AbstractMessageBusCommands, MessageBus
 from .admission import handlers_in_memory as admission_handlers
 from .admission.doctorat.preparation import handlers_in_memory as preparation_handlers
 from .admission.doctorat.validation import handlers_in_memory as validation_handlers
@@ -51,4 +51,4 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
     }
 
 
-message_bus_in_memory_instance = MessageBusInMemory(MessageBusInMemoryCommands.get_command_handlers())
+message_bus_in_memory_instance = MessageBus(MessageBusInMemoryCommands.get_command_handlers())
