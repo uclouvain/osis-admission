@@ -27,6 +27,7 @@ from typing import List
 
 from django import forms
 from django.core.exceptions import ValidationError, ImproperlyConfigured
+from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.constants import DEFAULT_MIME_TYPES
@@ -115,7 +116,7 @@ def _get_default_field_params(configuration: QuestionSpecifiqueDTO):
     """Return the default field params based on the field configuration and a specific language."""
     return {
         'required': configuration.requis,
-        'label': configuration.label,
+        'label': mark_safe(configuration.label),
         'help_text': configuration.texte,
         'error_messages': {
             'incomplete': _('Please complete this field: {}').format(configuration.label),
