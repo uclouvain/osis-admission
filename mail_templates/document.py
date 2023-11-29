@@ -61,7 +61,17 @@ DOCUMENT_TOKENS = admission_common_tokens + [
     ),
     Token(
         name='requested_documents',
-        description=_('List of the requested documents with the reason'),
+        description=_('List of the mandatory requested documents that must be submitted immediately, with the reason'),
+        example='Identity card. The format is unknown.',
+    ),
+    Token(
+        name='later_blocking_requested_documents',
+        description=_('List of the mandatory requested documents that can be submitted later, with the reason'),
+        example='Identity card. The format is unknown.',
+    ),
+    Token(
+        name='later_non_blocking_requested_documents',
+        description=_('List of the not-mandatory requested documents that can be submitted later, with the reason'),
         example='Identity card. The format is unknown.',
     ),
     Token(
@@ -83,6 +93,11 @@ DOCUMENT_TOKENS = admission_common_tokens + [
         name='admissions_link_front',
         description=_("Link to the admissions (front-office)"),
         example="http://dev.studies.uclouvain.be/somewhere",
+    ),
+    Token(
+        name='salutation',
+        description=_('Mail salutation'),
+        example='Chère',
     ),
 ]
 

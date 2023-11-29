@@ -26,7 +26,7 @@
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
-from admission.auth.predicates import (
+from admission.auth.predicates.doctorate import (
     complementary_training_enabled,
     confirmation_paper_in_progress,
     is_admission_reference_promoter,

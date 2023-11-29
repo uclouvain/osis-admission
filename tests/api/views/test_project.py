@@ -312,6 +312,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'update_proposition',
             'update_cotutelle',
             'update_curriculum',
+            'update_training_choice',
             'retrieve_accounting',
             'update_accounting',
             'submit_proposition',

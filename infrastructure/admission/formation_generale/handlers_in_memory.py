@@ -32,6 +32,12 @@ from admission.ddd.admission.formation_generale.use_case.write import *
 from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
     modifier_checklist_choix_formation,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
+    specifier_financabilite_regle,
+)
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
+    specifier_financabilite_resultat_calcul,
+)
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
@@ -99,6 +105,9 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
+from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
+    TitreAccesSelectionnableInMemoryRepositoryFactory,
+)
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -124,6 +133,7 @@ _notification = NotificationInMemory()
 _pdf_generation = PDFGenerationInMemory()
 _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
 _poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
+_titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
 
 
 COMMAND_HANDLERS = {
@@ -463,5 +473,39 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
         )
+    ),
+    ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
+        cmd,
+        proposition_repository=_proposition_repository,
+        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+    ),
+    SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+    ),
+    SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
+        lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
+    SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        cmd,
+        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+    ),
+    RecupererTitresAccesSelectionnablesPropositionQuery: (
+        lambda msg_bus, cmd: recuperer_titres_acces_selectionnables_proposition(
+            cmd,
+            titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        )
+    ),
+    SpecifierFinancabiliteResultatCalculCommand: lambda msg_bus, cmd: specifier_financabilite_resultat_calcul(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    SpecifierFinancabiliteRegleCommand: lambda msg_bus, cmd: specifier_financabilite_regle(
+        cmd,
+        proposition_repository=_proposition_repository,
     ),
 }

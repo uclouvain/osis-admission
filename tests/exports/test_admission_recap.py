@@ -658,7 +658,8 @@ class SectionsAttachmentsTestCase(TestCase):
         cls.get_remote_metadata_patcher.start()
 
         cls.confirm_remote_upload_patcher = mock.patch(
-            "osis_document.api.utils.confirm_remote_upload", side_effect=lambda token, upload_to: token
+            "osis_document.api.utils.confirm_remote_upload",
+            side_effect=lambda token, *args, **kwargs: token,
         )
         cls.confirm_remote_upload_patcher.start()
 
@@ -1036,6 +1037,10 @@ class SectionsAttachmentsTestCase(TestCase):
             certificat_approbation_fac=[],
             documents_additionnels=[],
             poste_diplomatique=None,
+            financabilite_regle_calcule="",
+            financabilite_regle_calcule_le=None,
+            financabilite_regle="",
+            financabilite_regle_etabli_par="",
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
@@ -2302,7 +2307,14 @@ class SectionsAttachmentsTestCase(TestCase):
         experience = self.general_bachelor_context.curriculum.experiences_non_academiques[0]
         with mock.patch.multiple(experience, type=ActivityType.OTHER.name):
             section = get_non_educational_experience_section(self.general_bachelor_context, experience, False)
-            self.assertEqual(len(section.attachments), 0)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'CERTIFICAT_EXPERIENCE')
+            self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.OTHER.name))
+            self.assertEqual(attachments[0].uuids, experience.certificat)
+            self.assertFalse(attachments[0].required)
 
     def test_curriculum_non_academic_experience_attachments_with_doctorate_proposition_and_travel_activity(self):
         experience = self.doctorate_context.curriculum.experiences_non_academiques[0]

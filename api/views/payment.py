@@ -31,8 +31,6 @@ from rest_framework.views import APIView
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
 from admission.ddd.admission.formation_generale.commands import (
-    PayerFraisDossierPropositionSuiteDemandeCommand,
-    PayerFraisDossierPropositionSuiteSoumissionCommand,
     SpecifierPaiementVaEtreOuvertParCandidatCommand,
     RecupererListePaiementsPropositionQuery,
 )

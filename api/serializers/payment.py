@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework import serializers
 
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteDemandeCommand,

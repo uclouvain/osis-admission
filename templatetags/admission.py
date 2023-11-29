@@ -53,10 +53,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
+    RegleDeFinancement,
+    RegleCalculeResultatAvecFinancable,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
 from admission.ddd.admission.repository.i_proposition import formater_reference
@@ -177,19 +181,20 @@ def reduce_list_separated(arg1, arg2, separator=", "):
 
 
 @register_panel('panel.html', takes_context=True)
-def panel(context, title='', title_level=4, additional_class='', edit_button='', **kwargs):
+def panel(context, title='', title_level=4, additional_class='', edit_link_button='', **kwargs):
     """
     Template tag for panel
     :param title: the panel title
     :param title_level: the title level
     :param additional_class: css class to add
+    :param edit_link_button: url of the edit button
     :type context: django.template.context.RequestContext
     """
     context['title'] = title
     context['title_level'] = title_level
     context['additional_class'] = additional_class
-    if edit_button:
-        context['edit_button'] = edit_button
+    if edit_link_button:
+        context['edit_link_button'] = edit_link_button
     context['attributes'] = {k.replace('_', '-'): v for k, v in kwargs.items()}
     return context
 
@@ -333,8 +338,8 @@ TAB_TREES = {
             Tab('training-choice', _('Course choice')),
         ],
         Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
-            Tab('specific-questions', _('Specific aspects')),
             Tab('accounting', _('Accounting')),
+            Tab('specific-questions', _('Specific aspects')),
         ],
     },
     CONTEXT_CONTINUING: {
@@ -430,9 +435,11 @@ def current_subtabs(context):
     tab_context = default_tab_context(context)
     permission_obj = context['view'].get_permission_object()
     tab_tree = TAB_TREES[get_current_context(admission=permission_obj)]
-    tab_context['subtabs'] = [
-        tab for tab in tab_tree[tab_context['active_parent']] if can_read_tab(context, tab.name, permission_obj)
-    ]
+    tab_context['subtabs'] = (
+        [tab for tab in tab_tree[tab_context['active_parent']] if can_read_tab(context, tab.name, permission_obj)]
+        if tab_context['active_parent']
+        else []
+    )
     return tab_context
 
 
@@ -882,6 +889,14 @@ def edit_button(string, url):
 
 
 @register.filter
+def tab_edit_button(string, tab_hash):
+    return (
+        str(string)
+        + f'<a class="btn btn-default" data-toggle="checklist-tab" href="{tab_hash}"><i class="fas fa-edit"></i></a>'
+    )
+
+
+@register.filter
 def history_entry_message(history_entry: Optional[HistoryEntry]):
     if history_entry:
         return {
@@ -987,3 +1002,33 @@ def input_field_data(label, value, editable=True, mask=None):
         'editable': editable,
         'mask': mask,
     }
+
+
+@register.inclusion_tag(
+    'admission/general_education/includes/checklist/parcours_row_access_title.html',
+    takes_context=True,
+)
+def access_title_checkbox(context, experience_uuid, experience_type, current_year):
+    access_title: Optional[TitreAccesSelectionnableDTO] = context['access_titles'].get(experience_uuid)
+    if access_title and access_title.annee == current_year:
+        return {
+            'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
+            'checked': access_title.selectionne,
+            'experience_uuid': experience_uuid,
+        }
+
+
+@register.filter
+def document_request_status_css_class(document_request_status):
+    return {
+        StatutReclamationEmplacementDocument.IMMEDIATEMENT.name: 'text-dark',
+        StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name: 'text-danger',
+        StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name: 'text-orange',
+    }.get(document_request_status, '')
+
+
+@register.filter
+def financability_enum_display(value):
+    if value in RegleDeFinancement.get_names():
+        return '{} - {}'.format(_('Financable'), RegleDeFinancement[value].value)
+    return RegleCalculeResultatAvecFinancable[value].value

@@ -466,3 +466,52 @@ class ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(interface.C
 @attr.dataclass(frozen=True, slots=True)
 class RecupererListePaiementsPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    statut: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    condition_acces: str = ''
+    millesime_condition_acces: Optional[int] = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    type_equivalence_titre_acces: str = ''
+    statut_equivalence_titre_acces: str = ''
+    etat_equivalence_titre_acces: str = ''
+    date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierExperienceEnTantQueTitreAccesCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    type_experience: str
+    selectionne: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererTitresAccesSelectionnablesPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
+    uuid_proposition: str
+    financabilite_regle_calcule: str
+    financabilite_regle_calcule_le: datetime.datetime
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
+    uuid_proposition: str
+    financabilite_regle: str
+    etabli_par: str

@@ -28,6 +28,7 @@ from typing import Optional
 
 from django.utils.translation import gettext_noop as _
 
+from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.service.i_digit import IDigitService
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import IdentificationDTO
@@ -44,7 +45,23 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
+from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
+
+FINANCABILITE_FORMATIONS_NON_CONCERNEES = {
+    TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
+    TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.name,
+    TrainingType.CERTIFICATE_OF_SUCCESS.name,
+    TrainingType.CERTIFICATE_OF_PARTICIPATION.name,
+    TrainingType.CERTIFICATE_OF_HOLDING_CREDITS.name,
+    TrainingType.ACCESS_CONTEST.name,
+    TrainingType.CERTIFICATE.name,
+    TrainingType.RESEARCH_CERTIFICATE.name,
+    TrainingType.ISOLATED_CLASS.name,
+    TrainingType.LANGUAGE_CLASS.name,
+    TrainingType.JUNIOR_YEAR.name,
+    TrainingType.INTERNSHIP.name,
+}
 
 
 class Checklist(interface.DomainService):
@@ -52,12 +69,14 @@ class Checklist(interface.DomainService):
     def initialiser(
         cls,
         proposition: Proposition,
+        formation: Formation,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
         digit_service: 'IDigitService',
     ):
         checklist_initiale = cls.recuperer_checklist_initiale(
             proposition=proposition,
+            formation=formation,
             profil_candidat_translator=profil_candidat_translator,
             questions_specifiques_translator=questions_specifiques_translator,
         )
@@ -107,6 +126,7 @@ class Checklist(interface.DomainService):
     def recuperer_checklist_initiale(
         cls,
         proposition: Proposition,
+        formation: Formation,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     ) -> Optional[StatutsChecklistGenerale]:
@@ -135,16 +155,16 @@ class Checklist(interface.DomainService):
                 else ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
             parcours_anterieur=StatutChecklist(
-                libelle=_("Previous experience"),
-                enfants=[
-                    StatutChecklist(
-                        libelle=cls._format_exeperience(exp),
-                        statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-                    )
-                    for exp in []  # TODO profil_candidat_translator.get_curriculum() ?
-                ],
+                libelle=_("To be processed"),
+                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+                enfants=[],
             ),
             financabilite=StatutChecklist(
+                libelle=_("Not concerned"),
+                statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+            )
+            if formation.type.name in FINANCABILITE_FORMATIONS_NON_CONCERNEES
+            else StatutChecklist(
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),

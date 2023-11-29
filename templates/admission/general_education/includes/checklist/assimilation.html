@@ -45,7 +45,7 @@
   {% endif %}
 
   {% if in_panel %}
-    {% panel _("Belgian student status") edit_button=contextual_comptabilite_url %}
+    {% panel _("Belgian student status") edit_link_button=contextual_comptabilite_url %}
       {% if resume_proposition.identification.pays_nationalite_europeen is False %}
         {{ chosen_assimilation }}
       {% else %}

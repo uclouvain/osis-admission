@@ -36,6 +36,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.commands import (
     InitialiserEmplacementDocumentAReclamerCommand,
@@ -65,6 +66,7 @@ class TestInitialiserEmplacementDocumentAReclamer(TestCase):
                 raison='La raison.',
                 identifiant_emplacement=identifiant_document_non_libre,
                 type_emplacement=TypeEmplacementDocument.NON_LIBRE.name,
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             )
         )
 
@@ -86,3 +88,4 @@ class TestInitialiserEmplacementDocumentAReclamer(TestCase):
         self.assertEqual(document.derniere_action_le, datetime.datetime(2023, 1, 1))
         self.assertEqual(document.document_soumis_par, '')
         self.assertEqual(document.requis_automatiquement, True)
+        self.assertEqual(document.statut_reclamation, StatutReclamationEmplacementDocument.IMMEDIATEMENT)

@@ -23,10 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Dict
 
 from django import forms
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -84,14 +86,21 @@ from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
 
 class AdmissionAdminForm(forms.ModelForm):
+    educational_valuated_experiences = forms.ModelMultipleChoiceField(
+        queryset=EducationalExperience.objects.none(),
+        required=False,
+        widget=FilteredSelectMultiple(verbose_name=_('Educational experiences'), is_stacked=False),
+    )
+    professional_valuated_experiences = forms.ModelMultipleChoiceField(
+        queryset=ProfessionalExperience.objects.none(),
+        required=False,
+        widget=FilteredSelectMultiple(verbose_name=_('Professional experiences'), is_stacked=False),
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['educational_valuated_experiences'].queryset = EducationalExperience.objects.filter(
-            person=self.instance.candidate
-        )
-        self.fields['professional_valuated_experiences'].queryset = ProfessionalExperience.objects.filter(
-            person=self.instance.candidate
-        )
+        self.fields['educational_valuated_experiences'].queryset = self.instance.candidate.educationalexperience_set
+        self.fields['professional_valuated_experiences'].queryset = self.instance.candidate.professionalexperience_set
         self.fields['valuated_secondary_studies_person'].queryset = Person.objects.filter(pk=self.instance.candidate.pk)
 
 
@@ -125,10 +134,6 @@ class AdmissionAdminMixin(ReadOnlyFilesMixin, admin.ModelAdmin):
         "submitted_at",
         "last_update_author",
         "submitted_profile",
-    ]
-    filter_horizontal = [
-        "professional_valuated_experiences",
-        "educational_valuated_experiences",
     ]
     list_select_related = [
         'candidate',
@@ -752,6 +757,11 @@ class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
 
     def get_hijack_user(self, obj):
         return obj.person.user
+
+    def _build_model_from_csv_row(self, csv_row: Dict):
+        central_manager = super()._build_model_from_csv_row(csv_row)
+        central_manager.scopes = csv_row.get('SCOPES', 'ALL').split("|")
+        return central_manager
 
 
 class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):

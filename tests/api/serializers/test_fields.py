@@ -33,7 +33,7 @@ from django.test.utils import override_settings
 from django.urls.base import reverse
 from django.urls.conf import path
 from django.utils import translation
-from django.utils.translation import get_language, gettext as _
+from django.utils.translation import gettext as _
 from rest_framework.serializers import Serializer
 from rest_framework.test import APIRequestFactory, APITestCase
 from rest_framework.views import APIView
@@ -98,6 +98,7 @@ class SerializerFieldsTestCase(APITestCase):
         cls.second_doctorate_admission = DoctorateAdmissionFactory()
         cls.first_user = cls.first_doctorate_admission.candidate.user
         cls.creation_user = PersonFactory().user
+        cls.base_url = 'http://testserver'
 
         # Request
         factory = APIRequestFactory()
@@ -180,7 +181,7 @@ class SerializerFieldsTestCase(APITestCase):
         self.assertTrue('links' in serializer.data)
         self.assertEqual(
             serializer.data['links'],
-            {'add_doctorateadmission': {'method': 'POST', 'url': reverse('api_view_with_permissions')}},
+            {'add_doctorateadmission': {'method': 'POST', 'url': self.base_url + reverse('api_view_with_permissions')}},
         )
 
     def test_serializer_with_action_and_valid_permission_and_param(self):
@@ -208,7 +209,8 @@ class SerializerFieldsTestCase(APITestCase):
             {
                 'get_doctorateadmission': {
                     'method': 'GET',
-                    'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid]),
+                    'url': self.base_url
+                    + reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid]),
                 }
             },
         )
@@ -340,7 +342,8 @@ class SerializerFieldsTestCase(APITestCase):
             {
                 'get_doctorateadmission': {
                     'method': 'GET',
-                    'url': reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid]),
+                    'url': self.base_url
+                    + reverse('api_view_with_permissions_detail', args=[self.first_doctorate_admission.uuid]),
                 }
             },
         )

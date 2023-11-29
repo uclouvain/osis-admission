@@ -68,7 +68,11 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
 
     # Pool questions
     est_non_resident_au_sens_decret = RadioBooleanField(
-        label=_("Are you a non-resident (as defined by government decree)?"),
+        label=_("You are applying as ..."),
+        choices=(
+            (False, _("Resident (as defined by government decree)")),
+            (True, _("Non-resident (as defined by government decree)")),
+        ),
         required=False,
     )
 

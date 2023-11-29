@@ -27,6 +27,7 @@ from typing import Iterable
 
 from django.utils.translation import gettext_lazy as _
 
+from admission.enum_utils import build_enum_from_choices
 from base.models.enums.got_diploma import GotDiploma
 from base.models.utils.utils import ChoiceEnum
 
@@ -122,3 +123,34 @@ class PoursuiteDeCycle(ChoiceEnum):
 class DecisionFacultaireEnum(ChoiceEnum):
     EN_DECISION = '1'
     HORS_DECISION = '0'
+
+
+class RegleDeFinancement(ChoiceEnum):
+    PREMIERE_INSCRIPTION_MEME_CYCLE = _('PREMIERE_INSCRIPTION_MEME_CYCLE')
+    SECONDE_INSCRIPTION_MEME_CYCLE = _('SECONDE_INSCRIPTION_MEME_CYCLE')
+    TROISIEME_INSCRIPTION_PREMIER_CYCLE_AVEC_REORIENTATION = _('TROISIEME_INSCRIPTION_PREMIER_CYCLE_AVEC_REORIENTATION')
+    SUR_3_ANS_45_CREDITS_MEME_CYCLE = _('SUR_3_ANS_45_CREDITS_MEME_CYCLE')
+    SUR_2_ANS_45_CREDITS_MEME_CYCLE = _('SUR_2_ANS_45_CREDITS_MEME_CYCLE')
+    ACQUIS_75_POURCENTS_CREDITS = _('ACQUIS_75_POURCENTS_CREDITS')
+    SUR_3_ANS_MOITIE_CREDITS = _('SUR_3_ANS_MOITIE_CREDITS')
+    SUR_2_ANS_MOITIE_CREDITS = _('SUR_2_ANS_MOITIE_CREDITS')
+    SUR_3_ANS_45_CREDITS_11BA = _('SUR_3_ANS_45_CREDITS_11BA')
+    SUR_2_ANS_45_CREDITS_11BA = _('SUR_2_ANS_45_CREDITS_11BA')
+    CENT_VINGT_CREDITS_NON_ENCORE_ACQUIS = _('CENT_VINGT_CREDITS_NON_ENCORE_ACQUIS')
+    PREMIERE_REORIENTATION_SUR_5_ANS = _('PREMIERE_REORIENTATION_SUR_5_ANS')
+    CINQ_G_1ERE_INSCRIPTION_MEME_CYCLE = _('CINQ_G_1ERE_INSCRIPTION_MEME_CYCLE')
+    CINQ_G_2EME_INSCRIPTION_MEME_CYCLE = _('CINQ_G_2EME_INSCRIPTION_MEME_CYCLE')
+    CINQ_G_2EME_INSCRIPTION_AVEC_REORIENTATION = _('CINQ_G_2EME_INSCRIPTION_AVEC_REORIENTATION')
+
+
+class RegleCalculeResultat(ChoiceEnum):
+    INDISPONIBLE = _('INDISPONIBLE')
+    NON_CONCERNE = _('NON_CONCERNE')
+    NON_FINANCABLE = _('NON_FINANCABLE')
+    A_CLARIFIER = _('A_CLARIFIER')
+
+
+RegleCalculeResultatAvecFinancable = build_enum_from_choices(
+    'RegleCalculeResultatAvecFinancable',
+    RegleDeFinancement.choices() + RegleCalculeResultat.choices(),
+)

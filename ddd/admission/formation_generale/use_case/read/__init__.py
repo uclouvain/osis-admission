@@ -37,5 +37,8 @@ from .recuperer_resume_et_emplacements_document_non_libres_proposition_service i
     recuperer_resume_et_emplacements_documents_non_libres_proposition,
 )
 from .recuperer_resume_proposition_service import recuperer_resume_proposition
+from .recuperer_titres_acces_selectionnables_proposition_service import (
+    recuperer_titres_acces_selectionnables_proposition,
+)
 from .verifier_curriculum_service import verifier_curriculum
 from .verifier_proposition_service import verifier_proposition

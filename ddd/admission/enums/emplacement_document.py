@@ -79,6 +79,12 @@ class StatutEmplacementDocument(ChoiceEnum):
     COMPLETE_APRES_RECLAMATION = _('Completed after the request')
 
 
+class StatutReclamationEmplacementDocument(ChoiceEnum):
+    IMMEDIATEMENT = _('Immediately')
+    ULTERIEUREMENT_BLOQUANT = _('Later > blocking')
+    ULTERIEUREMENT_NON_BLOQUANT = _('Later > non-blocking')
+
+
 class OngletsDemande(ChoiceEnum):
     IDENTIFICATION = _('Identification')
     COORDONNEES = _('Coordinates')

@@ -37,7 +37,10 @@ from osis_notification.contrib.notification import EmailNotification
 
 from admission.contrib.models import AdmissionTask
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    ChoixStatutChecklist,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
@@ -49,7 +52,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
 )
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
-from admission.utils import get_portal_admission_url, get_backoffice_admission_url
+from admission.utils import get_portal_admission_url, get_backoffice_admission_url, get_salutation_prefix
 from base.models.person import Person
 
 
@@ -78,7 +81,11 @@ class Notification(INotification):
         if proposition.statut != ChoixStatutPropositionGenerale.CONFIRMEE:
             return
 
-        admission = BaseAdmission.objects.select_related('candidate').get(uuid=proposition.entity_id.uuid)
+        admission = (
+            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            .select_related('candidate')
+            .get(uuid=proposition.entity_id.uuid)
+        )
 
         # Create the async task to generate the pdf recap
         task = AsyncTask.objects.create(
@@ -107,6 +114,36 @@ class Notification(INotification):
         # Notifier le candidat via mail
         with translation.override(admission.candidate.language):
             common_tokens = cls.get_common_tokens(proposition, admission.candidate)
+            common_tokens['admission_reference'] = admission.formatted_reference
+            common_tokens['salutation'] = get_salutation_prefix(
+                person=admission.candidate,
+                language=admission.candidate.language,
+            )
+            common_tokens['payment_sentence'] = (
+                "<p>{}</p>".format(_('Application fees where also received.'))
+                if proposition.checklist_actuelle.frais_dossier.statut == ChoixStatutChecklist.SYST_REUSSITE
+                else ''
+            )
+            common_tokens['late_enrolment_sentence'] = (
+                "<p><strong>{}</strong></p>".format(
+                    _(
+                        'We would like to draw your attention to the fact that you have submitted a late application. '
+                        'The admission panel reserves the right to accept or refuse this application on the basis of '
+                        'educational requirements.'
+                    )
+                )
+                if proposition.est_inscription_tardive
+                else ''
+            )
+            common_tokens['training_acronym'] = proposition.formation_id.sigle
+            common_tokens['recap_link'] = (
+                get_portal_admission_url(
+                    context='general-education',
+                    admission_uuid=proposition.entity_id.uuid,
+                )
+                + 'pdf-recap'
+            )
+
         email_message = generate_email(
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL,
             admission.candidate.language,

@@ -59,6 +59,7 @@ class EmplacementDocumentDTO(interface.Entity):
     requis_automatiquement: bool
     types_documents: Dict[str, str]
     noms_documents_televerses: Dict[str, str]
+    statut_reclamation: str
 
     def est_emplacement_systeme_fac(self):
         return (

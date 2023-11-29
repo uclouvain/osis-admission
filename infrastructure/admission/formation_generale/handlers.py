@@ -23,13 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.admission.commands import RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand
+from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand, RechercherCompteExistantQuery
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import \
+    specifier_financabilite_regle
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import \
+    specifier_financabilite_resultat_calcul
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
+from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -40,7 +45,6 @@ from admission.ddd.admission.use_case.write import (
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
 )
-from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
 from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import \
     initialiser_proposition_fusion_personne
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -81,6 +85,7 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from admission.infrastructure.admission.repository.proposition_fusion_personne import \
     PropositionPersonneFusionRepository
+from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
@@ -430,4 +435,38 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository()
     )
+    ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+    ),
+    SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+    ),
+    SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
+        lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        cmd,
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+    ),
+    RecupererTitresAccesSelectionnablesPropositionQuery: (
+        lambda msg_bus, cmd: recuperer_titres_acces_selectionnables_proposition(
+            cmd,
+            titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        )
+    ),
+    SpecifierFinancabiliteResultatCalculCommand: lambda msg_bus, cmd: specifier_financabilite_resultat_calcul(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    SpecifierFinancabiliteRegleCommand: lambda msg_bus, cmd: specifier_financabilite_regle(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
 }

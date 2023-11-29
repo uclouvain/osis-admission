@@ -1,0 +1,107 @@
+{% load i18n static enums admission bootstrap3 %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% with initial=original_admission.checklist.initial.financabilite current=original_admission.checklist.current.financabilite %}
+  <div role="tabpanel" class="tab-pane" id="financabilite-content"
+       hx-target="this" hx-swap-oob="true">
+    <div class="form-group btn-group status-group" role="group">
+      {% translate initial.libelle as initial_state_label %}
+      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-0' as change_status_url_blocage %}
+
+      {% if current.extra.to_be_completed == '0' or current.statut == 'GEST_REUSSITE' %}
+        {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='xmark' state=initial.statut class='primary' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
+        {% else %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='primary' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
+        {% endif %}
+        {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' open_modal='#financabilite-confirm-modal-GEST_EN_COURS' %}
+        {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='1' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE-1' %}
+        {% checklist_state_button tab='financabilite' label=_("Not financeable") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='0' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE-0' %}
+      {% else %}
+        {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='xmark' state=initial.statut class='primary' %}
+        {% else %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='primary' %}
+        {% endif %}
+        {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}
+        {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='1' class='danger' %}
+        {% checklist_state_button tab='financabilite' label=_("Not financeable") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='0' class='danger' htmx_post=change_status_url_blocage %}
+      {% endif %}
+      {% checklist_state_button tab='financabilite' label=_("Financeable") icon='check' state='GEST_REUSSITE' class='success' open_modal='#financabilite-approval-modal' %}
+    </div>
+
+    {% bootstrap_form comment_forms.financabilite %}
+
+    <div class="panel panel-default">
+      <div class="panel-heading">{% trans "Financing rule" %}</div>
+      <div class="panel-body {% if current.statut == 'GEST_BLOCAGE' and current.extra.to_be_completed == '0' %}bg-danger{% elif current.statut == 'GEST_REUSSITE' %}bg-success{% endif %}">
+        {% if current.statut == 'GEST_BLOCAGE' and current.extra.to_be_completed == '0' %}
+          {% blocktrans trimmed with rule='NON_FINANCABLE'|financability_enum_display established_by=original_admission.financability_rule_established_by %}
+            {{ rule }} (Established by {{ established_by }})
+          {% endblocktrans %}
+          <br>
+        {% elif current.statut == 'GEST_REUSSITE' %}
+          {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_rule_established_by %}
+            {{ rule }} (Established by {{ established_by }})
+          {% endblocktrans %}
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#financabilite-approval-modal">
+            <i class="fa fa-pencil"></i> {% translate "Change rule" %}
+          </button>
+          <br>
+        {% endif %}
+        <em>
+        {% if original_admission.financability_computed_rule == '' %}
+          {% trans "Financeabilty algorithm proposition not computed yet." %}
+        {% else %}
+          {% blocktrans trimmed with date=original_admission.financability_computed_rule_on result=original_admission.financability_computed_rule|financability_enum_display %}
+            Financeabilty algorithm proposition on the {{ date }} : {{ result }}
+          {% endblocktrans %}
+        {% endif %}
+        </em>
+        <a class="btn btn-primary" href="#" hx-post="{% url view.base_namespace|add:':financability-compute-rule' uuid=view.kwargs.uuid %}">
+          <i class="fa fa-rotate-right"></i> {% trans "Recompute" %}
+        </a>
+      </div>
+    </div>
+
+    {% if current.extra.to_be_completed == '0' or current.statut == 'GEST_REUSSITE' %}
+      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status=initial.statut as change_status_url_initial %}
+      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS' as change_status_url_en_cours %}
+      {% url view.base_namespace|add:':financability-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-1' as change_status_url_blocage_ulterieur %}
+
+      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status=initial.statut target_url=change_status_url_initial %}
+      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_EN_COURS" target_url=change_status_url_en_cours %}
+      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_BLOCAGE-1" target_url=change_status_url_blocage_ulterieur %}
+      {% include 'admission/general_education/includes/checklist/financabilite_confirm_modal.html' with target_status="GEST_BLOCAGE-0" target_url=change_status_url_blocage %}
+    {% endif %}
+    {% include 'admission/general_education/includes/checklist/financabilite_approval_modal.html' %}
+  </div>
+{% endwith %}
+
+{% if request.htmx %}
+  {# Update the checklist menu  #}
+  {% include "admission/general_education/checklist_menu.html" with current_item='financabilite' %}
+{% endif %}
