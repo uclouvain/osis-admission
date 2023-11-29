@@ -26,6 +26,7 @@
 
 from copy import deepcopy
 from datetime import datetime
+from typing import Optional
 
 from dal import autocomplete
 from django import forms
@@ -47,7 +48,7 @@ from admission.forms import (
 from admission.forms.doctorate.training.activity import AcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
-from osis_profile.models import EducationalExperience
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_profile.models.enums.curriculum import (
     ActivityType,
     ActivitySector,
@@ -71,7 +72,7 @@ def month_choices():
     return [EMPTY_CHOICE[0]] + [(index, month) for index, month in MONTHS_ALT.items()]
 
 
-class AdmissionCurriculumProfessionalExperienceForm(forms.Form):
+class AdmissionCurriculumProfessionalExperienceForm(forms.ModelForm):
     start_date_month = forms.ChoiceField(
         choices=month_choices,
         label=_('Month'),
@@ -124,11 +125,37 @@ class AdmissionCurriculumProfessionalExperienceForm(forms.Form):
     )
 
     def __init__(self, is_continuing, *args, **kwargs):
+        instance: Optional[ProfessionalExperience] = kwargs.get('instance')
+
+        if instance:
+            kwargs['initial'] = {
+                'start_date_month': instance.start_date.month,
+                'start_date_year': instance.start_date.year,
+                'end_date_month': instance.end_date.month,
+                'end_date_year': instance.end_date.year,
+            }
+
         super().__init__(*args, **kwargs)
+
+        self.fields['start_date_year'].choices = year_choices()
+        self.fields['end_date_year'].choices = self.fields['start_date_year'].choices
+
         self.is_continuing = is_continuing
+
         if self.is_continuing:
             self.fields['certificate'].disabled = True
             self.fields['certificate'].widget = forms.MultipleHiddenInput()
+
+    class Meta:
+        model = ProfessionalExperience
+        fields = [
+            'institute_name',
+            'type',
+            'certificate',
+            'role',
+            'sector',
+            'activity',
+        ]
 
     class Media:
         js = ('js/dependsOn.min.js',)

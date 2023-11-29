@@ -36,6 +36,8 @@ READ_ACTIONS_BY_TAB = {
     'curriculum': 'admission.view_admission_curriculum',
     'educational': '',
     'educational_create': '',
+    'non_educational': '',
+    'non_educational_create': '',
     'education': 'admission.view_admission_secondary_studies',
     'languages': 'admission.view_admission_languages',
     # Project
@@ -81,6 +83,8 @@ UPDATE_ACTIONS_BY_TAB = {
     'curriculum': 'admission.change_admission_curriculum',
     'educational': '',
     'educational_create': '',
+    'non_educational': '',
+    'non_educational_create': '',
     'education': 'admission.change_admission_secondary_studies',
     'languages': 'admission.change_admission_languages',
     # Project

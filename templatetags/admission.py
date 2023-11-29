@@ -1037,6 +1037,10 @@ def experience_details_template(resume_proposition: ResumePropositionDTO, experi
     elif experience.__class__ == ExperienceNonAcademiqueDTO:
         context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
         context['title'] = _('Non-academic experience')
+        context['edit_link_button'] = reverse(
+            'admission:general-education:update:curriculum:non_educational',
+            args=[resume_proposition.proposition.uuid, experience.uuid],
+        )
         context.update(get_non_educational_experience_context(experience))
 
     elif experience.__class__ == EtudesSecondairesDTO:
