@@ -450,6 +450,9 @@ msgstr "Ajouter un template d'email personnalisé pour <em>%(description)s</em>"
 msgid "Add a new member"
 msgstr "Ajouter un nouveau membre."
 
+msgid "Add a non-academic activity"
+msgstr "Ajout d'une activité non-académique"
+
 msgid "Add a paper"
 msgstr "Ajouter une épreuve"
 
@@ -3968,6 +3971,9 @@ msgstr "Auteur modif."
 msgid "Modification date"
 msgstr "Date modif."
 
+msgid "Modification of a non-academic activity"
+msgstr "Modification d'une activité non-académique"
+
 msgid "Modification of an academic activity"
 msgstr "Modification d'une formation académique"
 
@@ -4175,6 +4181,9 @@ msgstr "Justification"
 
 msgid "Non-academic experience"
 msgstr "Expérience non-académique"
+
+msgid "Non-educational experience not found."
+msgstr "Expérience non-académique non trouvée."
 
 msgid "Non-resident (as defined by government decree)"
 msgstr "Non-résident (au sens du Décret)"

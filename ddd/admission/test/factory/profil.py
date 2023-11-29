@@ -168,7 +168,7 @@ class ExperienceNonAcademiqueDTOFactory(factory.Factory):
         model = ExperienceNonAcademiqueDTO
         abstract = False
 
-    uuid = ''
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
     employeur = ''
     date_debut = datetime.date(2020, 9, 1)
     date_fin = datetime.date(2020, 10, 15)

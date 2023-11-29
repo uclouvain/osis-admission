@@ -386,6 +386,9 @@ msgstr ""
 msgid "Add a new member"
 msgstr ""
 
+msgid "Add a non-academic activity"
+msgstr ""
+
 msgid "Add a paper"
 msgstr ""
 
@@ -3552,6 +3555,9 @@ msgstr ""
 msgid "Modification date"
 msgstr ""
 
+msgid "Modification of a non-academic activity"
+msgstr ""
+
 msgid "Modification of an academic activity"
 msgstr ""
 
@@ -3753,6 +3759,11 @@ msgstr ""
 
 msgid "Non-academic experience"
 msgstr ""
+
+#, fuzzy
+#| msgid "Experience not found."
+msgid "Non-educational experience not found."
+msgstr "Expérience non trouvée."
 
 msgid "Non-resident (as defined by government decree)"
 msgstr ""
