@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import calendar
+import datetime
 from decimal import Decimal
 
 from django.contrib import messages
@@ -36,10 +38,15 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, DeleteView
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences, BaseAdmission
+from admission.contrib.models.base import (
+    AdmissionEducationalValuatedExperiences,
+    BaseAdmission,
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.forms import (
     FOLLOWING_FORM_SET_PREFIX,
     OSIS_DOCUMENT_UPLOADER_CLASS,
@@ -50,17 +57,20 @@ from admission.forms.admission.curriculum import (
     AdmissionCurriculumAcademicExperienceForm,
     MINIMUM_CREDIT_NUMBER,
     AdmissionCurriculumEducationalExperienceYearFormSet,
+    AdmissionCurriculumProfessionalExperienceForm,
 )
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
-from osis_profile.models import EducationalExperience, EducationalExperienceYear
+from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
 from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result
 from reference.models.enums.cycle import Cycle
 
 __all__ = [
     'CurriculumEducationalExperienceFormView',
     'CurriculumEducationalExperienceDeleteView',
+    'CurriculumNonEducationalExperienceFormView',
+    'CurriculumNonEducationalExperienceDeleteView',
 ]
 
 
@@ -479,6 +489,118 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         }
 
 
+class CurriculumNonEducationalExperienceFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
+    urlpatterns = {
+        'non_educational': 'non_educational/<uuid:experience_uuid>',
+        'non_educational_create': 'non_educational/create',
+    }
+    template_name = 'admission/forms/curriculum_non_educational_experience.html'
+    permission_required = 'admission.change_admission_curriculum'
+    form_class = AdmissionCurriculumProfessionalExperienceForm
+    extra_context = {
+        'without_menu': True,
+    }
+    update_requested_documents = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.existing_experience = False
+        self._experience_id = None
+
+    @property
+    def experience_id(self):
+        return self._experience_id or self.kwargs.get('experience_uuid', None)
+
+    @cached_property
+    def non_educational_experience(self) -> EducationalExperience:
+        if self.experience_id:
+            try:
+                experience = ProfessionalExperience.objects.get(
+                    uuid=self.experience_id,
+                    person=self.admission.candidate,
+                )
+                self.existing_experience = True
+                return experience
+            except ProfessionalExperience.DoesNotExist:
+                messages.error(self.request, _('Non-educational experience not found.'))
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.non_educational_experience
+        kwargs['is_continuing'] = self.is_continuing
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['CURRICULUM_ACTIVITY_LABEL'] = CURRICULUM_ACTIVITY_LABEL
+        context['existing_experience'] = self.existing_experience
+        return context
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        cleaned_data = form.cleaned_data
+
+        # The start date is the first day of the specified month
+        cleaned_data['start_date'] = datetime.date(
+            int(cleaned_data.pop('start_date_year')),
+            int(cleaned_data.pop('start_date_month')),
+            1,
+        )
+        # The end date is the last day of the specified month
+        end_date_year = int(cleaned_data.pop('end_date_year'))
+        end_date_month = int(cleaned_data.pop('end_date_month'))
+        cleaned_data['end_date'] = datetime.date(
+            end_date_year,
+            end_date_month,
+            calendar.monthrange(end_date_year, end_date_month)[1],
+        )
+
+        if self.existing_experience:
+            # On update
+            experience = self.non_educational_experience
+
+            for field, field_value in cleaned_data.items():
+                setattr(experience, field, field_value)
+
+            experience.save()
+
+        else:
+            # On create
+            with transaction.atomic():
+                instance = ProfessionalExperience.objects.create(
+                    person=self.admission.candidate,
+                    **cleaned_data,
+                )
+
+                self._experience_id = instance.uuid
+
+                # Consider the experience as valuated
+                AdmissionProfessionalValuatedExperiences.objects.create(
+                    baseadmission_id=self.admission.uuid,
+                    professionalexperience_id=instance.uuid,
+                )
+
+                # Add the experience to the checklist
+                if 'current' in self.admission.checklist:
+                    admission = self.admission
+                    experience_checklist = Checklist.initialiser_checklist_experience(instance.uuid).to_dict()
+                    admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
+                    admission.save()
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse(
+            self.base_namespace + ':update:curriculum:non_educational',
+            kwargs={
+                'uuid': self.admission_uuid,
+                'experience_uuid': self.experience_id,
+            },
+        )
+
+
 class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
     permission_required = 'admission.change_admission_curriculum'
     slug_field = 'uuid'
@@ -516,3 +638,10 @@ class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView):
 
     def get_queryset(self):
         return EducationalExperience.objects.filter(person=self.admission.candidate)
+
+
+class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView):
+    urlpatterns = {'non_educational_delete': 'non_educational/<uuid:experience_uuid>/delete'}
+
+    def get_queryset(self):
+        return ProfessionalExperience.objects.filter(person=self.admission.candidate)

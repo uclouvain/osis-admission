@@ -255,10 +255,18 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     @patch('osis_document.api.utils.get_remote_token')
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_remove_proof_if_not_needed(self, confirm_remote_upload, get_remote_metadata, get_remote_token):
+    @patch('osis_document.contrib.fields.FileField._confirm_upload')
+    def test_remove_proof_if_not_needed(
+        self,
+        file_confirm_upload,
+        confirm_remote_upload,
+        get_remote_metadata,
+        get_remote_token,
+    ):
         get_remote_metadata.return_value = {"name": "test.pdf"}
         get_remote_token.return_value = "test"
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        file_confirm_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
 
         # Communication
         activity = ActivityFactory(
@@ -380,10 +388,19 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     @patch('osis_document.api.utils.get_remote_token')
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_submit_parent_seminar(self, confirm_remote_upload, get_remote_metadata, get_remote_token):
+    @patch('osis_document.contrib.fields.FileField._confirm_upload')
+    def test_submit_parent_seminar(
+        self,
+        file_confirm_upload,
+        confirm_remote_upload,
+        get_remote_metadata,
+        get_remote_token,
+    ):
         get_remote_metadata.return_value = {"name": "test.pdf"}
         get_remote_token.return_value = "test"
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        file_confirm_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+
         activity = SeminarCommunicationFactory(doctorate=self.doctorate)
         self.assertEqual(Activity.objects.filter(status='SOUMISE').count(), 0)
         response = self.client.post(self.url, {'activity_ids': [activity.parent.uuid]}, follow=True)
@@ -394,10 +411,18 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     @patch('osis_document.api.utils.get_remote_token')
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_submit_activities_with_error(self, confirm_remote_upload, get_remote_metadata, get_remote_token):
+    @patch('osis_document.contrib.fields.FileField._confirm_upload')
+    def test_submit_activities_with_error(
+        self,
+        file_confirm_upload,
+        confirm_remote_upload,
+        get_remote_metadata,
+        get_remote_token,
+    ):
         get_remote_metadata.return_value = {"name": "test.pdf"}
         get_remote_token.return_value = "test"
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        file_confirm_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
 
         self.service.title = ""
         self.service.save()
