@@ -29,11 +29,12 @@ from typing import Optional
 
 from django.utils.translation import gettext_noop as _
 
-from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation, Onglets
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
@@ -48,7 +49,6 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
 )
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
-
 
 FINANCABILITE_FORMATIONS_NON_CONCERNEES = {
     TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
@@ -161,10 +161,9 @@ class Checklist(interface.DomainService):
                     for experience in itertools.chain(
                         curriculum_dto.experiences_academiques,
                         curriculum_dto.experiences_non_academiques,
-                        [secondary_studies_dto.experience],
                     )
-                    if experience
-                ],
+                ]
+                + [cls.initialiser_checklist_experience(OngletsDemande.ETUDES_SECONDAIRES.name)],
             ),
             financabilite=StatutChecklist(
                 libelle=_("Not concerned"),

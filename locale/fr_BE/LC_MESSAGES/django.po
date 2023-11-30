@@ -2632,6 +2632,17 @@ msgstr ""
 "\"TYPE_SELECTION\".<br>Exemple complet : <code>{\"TYPE_SELECTION\": "
 "\"CASES_A_COCHER\"}</code>."
 
+msgid ""
+"For any secondary school diploma from a country outside the European Union, "
+"the application for admission <strong>must contain the equivalency</strong> "
+"of your diploma issued by the <a href=\"http://www.equivalences.cfwb.be/\" "
+"target=\"_blank\">French Community</a> of Belgium."
+msgstr ""
+"Pour tout diplôme d’études secondaires issu d’un pays hors Union européenne, "
+"la demande d’admission <strong>doit contenir l'équivalence</strong> de votre "
+"diplôme délivrée par la <a href=\"http://www.equivalences.cfwb.be/\" "
+"target=\"_blank\">Communauté française</a> de Belgique."
+
 msgid "Foreign access title equivalence effective date"
 msgstr "Date de prise d'effet de l'équivalence du titre d'accès étranger"
 
@@ -3056,6 +3067,12 @@ msgstr ""
 "prends bonne note et accepte que ma demande sera considérée comme "
 "irrecevable conformément à l’article 9 du RGEE et dès lors clôturée."
 
+#, python-format
+msgid "I will be graduating from secondary school during the %s academic year"
+msgstr ""
+"Je vais obtenir mon diplôme d'études secondaires lors de l'année académique "
+"%s"
+
 msgid ""
 "I would like to receive my mail at an address other than my legal address"
 msgstr ""
@@ -3127,8 +3144,46 @@ msgstr ""
 "doctorale et compléter les modalités de défenses ci-dessous avant de "
 "soumettre la proposition de jury"
 
+msgid "If other language regime, specify"
+msgstr "Si autre régime linguistique, précisez"
+
 msgid "If other, specify"
 msgstr "Si autre, préciser"
+
+msgid ""
+"If you do not have an equivalency certificate, you must apply for one in "
+"strict accordance with the instructions of the <a href='http://www."
+"equivalences.cfwb.be' target='_blank'> French Community of Belgium.</a>."
+msgstr ""
+"Si vous ne possédez pas une décision d’équivalence, vous devrez introduire "
+"une demande d'équivalence en respectant strictement les consignes indiquées "
+"par la <a href='http://www.equivalences.cfwb.be' target='_blank'>Communauté "
+"française de Belgique.</a>"
+
+msgid ""
+"If you do not yet have a final equivalency decision from the <a "
+"href=\"http://www.equivalences.cfwb.be/\" target=\"_blank\">French "
+"Community</a> of Belgium, provide a copy of both sides of it as soon as you "
+"receive it. In the meantime, you will be asked to provide proof that you "
+"have indeed requested it: postal receipt and proof of payment, "
+"acknowledgement of receipt of the application, etc."
+msgstr ""
+"Si vous ne possédez pas encore une décision d’équivalence définitive "
+"délivrée par la <a href=\"http://www.equivalences.cfwb.be/\" "
+"target=\"_blank\">Communauté française</a> de Belgique, vous devrez fournir "
+"une copie recto-verso de ce document dès que possible. Il vous est demandé "
+"de fournir la preuve de la demande de celle-ci entre temps : récépissé de "
+"l'envoi et preuve de payement, accusé de réception du dossier, ..."
+
+msgid ""
+"If you have a final equivalence decision issued by the <a href=\"http://www."
+"equivalences.cfwb.be/\" target=\"_blank\">French Community</a> of Belgium, "
+"you must provide a double-sided copy of this document."
+msgstr ""
+"Si vous possédez une décision d’équivalence définitive délivrée par la <a "
+"href=\"http://www.equivalences.cfwb.be/\" target=\"_blank\"> Communauté "
+"française</a> de Belgique, vous devrez fournir une copie recto-verso de ce "
+"document."
 
 msgid ""
 "If you have not attended your course for one or more years, please indicate "
@@ -3354,6 +3409,10 @@ msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
+
+msgctxt "diploma_type"
+msgid "It is a diploma"
+msgstr "Il s'agit d'un diplôme"
 
 msgid "JURY_APPROUVE_ADRE"
 msgstr "JURY_APPROUVE_ADRE"
@@ -3996,6 +4055,9 @@ msgstr "Modification d'une activité non-académique"
 msgid "Modification of an academic activity"
 msgstr "Modification d'une formation académique"
 
+msgid "Modification of the secondary studies"
+msgstr "Modification des études secondaires"
+
 msgid "Modification requested"
 msgstr "Modification demandée"
 
@@ -4053,6 +4115,9 @@ msgstr ""
 "nationalité d’un pays d’un état membre de l’Union européenne, ou remplit les "
 "conditions visées par l’une des assimilations de 1 à 4 (assimilation 5)"
 
+msgid "My institute is not on this list"
+msgstr "Je ne trouve pas mon établissement dans cette liste"
+
 msgid "My legal cohabitant"
 msgstr "Mon cohabitant légal"
 
@@ -4100,6 +4165,9 @@ msgstr "Nom dans la langue de la manifestation"
 
 msgid "Name of the contact person for the design of the annual program"
 msgstr "Nom de la personne de contact pour la composition du programme annuel"
+
+msgid "Name of the education type"
+msgstr "Intitulé du type d'enseignement"
 
 msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
@@ -4382,6 +4450,9 @@ msgstr "Autre formation acceptée par la facultée"
 msgid "Other documents relating to joint supervision"
 msgstr "Autres documents relatifs à la cotutelle"
 
+msgid "Other education type"
+msgstr "Autre type d'enseignement"
+
 msgid "Other given names"
 msgstr "Autres prénoms"
 
@@ -4393,6 +4464,12 @@ msgstr "Autre institution"
 
 msgid "Other institute (if necessary)"
 msgstr "Autre institution (le cas échéant)"
+
+msgid "Other institute address"
+msgstr "Adresse autre établissement"
+
+msgid "Other institute name"
+msgstr "Nom autre établissement"
 
 msgid "Other international scholarship"
 msgstr "Autre bourse internationale"
@@ -4589,6 +4666,12 @@ msgstr ""
 "Veuillez vérifier le détail de l’activité pour renseigner tous les champs "
 "obligatoires"
 
+msgid "Please choose the institute or specify another institute"
+msgstr "Veuillez définir l'établissement ou précisez un autre établissement"
+
+msgid "Please choose the language regime or specify another regime."
+msgstr "Veuillez définir le régime linguistique ou précisez un autre régime."
+
 msgid "Please complete this field: {}"
 msgstr "Merci de spécifier une valeur pour le champ suivant : {}"
 
@@ -4630,6 +4713,9 @@ msgstr ""
 
 msgid "Please fill in at least your last or first name."
 msgstr "Merci de spécifier au-moins votre nom ou votre prénom."
+
+msgid "Please indicate the academic year in which you obtained your degree"
+msgstr "Veuillez indiquer l'année académique d'obtention"
 
 msgid ""
 "Please indicate your other given names in accordance with your identity "
@@ -5375,11 +5461,25 @@ msgstr "Rechercher un code UE (hors UE du formulaire)"
 msgid "Search on portal"
 msgstr "Voir sur le portail"
 
+msgid ""
+"Secondary education in Belgium is the level of education between the end of "
+"primary school and the beginning of higher education."
+msgstr ""
+"L'enseignement secondaire en Belgique est le niveau d’enseignement situé "
+"entre la fin de l’école primaire et le début de l’enseignement supérieur."
+
 msgid "Secondary education type"
 msgstr "Type d'enseignement"
 
 msgid "Secondary school diploma"
 msgstr "Diplôme d'études secondaires"
+
+msgid ""
+"Secondary school diploma or, if not available, a certificate of enrolment or "
+"school attendance."
+msgstr ""
+"Diplôme d'études secondaires, ou à défaut un certificat d'inscription ou de "
+"fréquentation scolaire."
 
 msgid "Secondary school graduation year"
 msgstr "Année d'obtention du diplôme d'études secondaires"
@@ -6171,6 +6271,15 @@ msgstr "Les documents réclamés immédiatement ne sont pas complétés."
 msgid "The resulting calculated academic year or pool is not consistent."
 msgstr "L'année académique et le pot déterminés ne concordent pas."
 
+msgid ""
+"The secondary school diploma is the Certificat d'Enseignement Secondaire "
+"Superieur (CESS, Certificate of Higher Secondary Education). It is commonly "
+"referred to in many countries as the baccalaureat."
+msgstr ""
+"Le diplôme de fin d'études secondaires correspond au Certificat "
+"d'Enseignement Secondaire Supérieur (CESS). Il est couramment nommé "
+"baccalauréat dans de nombreux pays."
+
 #, python-format
 msgid "The selection type must be one of the following values: %(values)s."
 msgstr ""
@@ -6943,6 +7052,10 @@ msgstr ""
 "Vous pouvez rechercher un complément de formation par son nom ou son code, "
 "ou bien coller une liste de codes séparés par le caractère \"%(separator)s\" "
 "et terminant par ce même caractère."
+
+msgid "You can specify the locality or postcode in your search."
+msgstr ""
+"Vous pouvez inclure la localité ou le code postal dans votre recherche."
 
 msgid ""
 "You cannot ask for both modification and reorientation at the same time."
