@@ -551,7 +551,7 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
     admission_requirement_year = AcademicYearField(
         past_only=True,
         required=False,
-        label=_('Admission requirement'),
+        label=_('Admission requirement year'),
     )
 
     def __init__(self, *args, **kwargs):

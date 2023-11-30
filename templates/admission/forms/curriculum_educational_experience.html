@@ -43,7 +43,7 @@
     {% include 'admission/includes/curriculum_experience_header.html' with title=header_title delete_url=delete_url existing_experience=existing_experience %}
 
     <div class="panel-body">
-      <form id="admission-form" class="osis-form" method="post" action="">
+      <form id="admission-form" method="post" action="">
         {% csrf_token %}
         {{ year_formset.management_form }}
         <div class="row">

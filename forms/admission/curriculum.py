@@ -28,7 +28,6 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Optional
 
-from dal import autocomplete
 from django import forms
 from django.forms import BaseFormSet
 from django.utils.dates import MONTHS_ALT
@@ -37,6 +36,7 @@ from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pge
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.forms import (
+    autocomplete,
     EMPTY_CHOICE,
     AdmissionFileUploadField as FileUploadField,
     RadioBooleanField,

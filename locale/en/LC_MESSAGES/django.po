@@ -2419,6 +2419,13 @@ msgid ""
 "\"CASES_A_COCHER\"}</code>."
 msgstr ""
 
+msgid ""
+"For any secondary school diploma from a country outside the European Union, "
+"the application for admission <strong>must contain the equivalency</strong> "
+"of your diploma issued by the <a href=\"http://www.equivalences.cfwb.be/\" "
+"target=\"_blank\">French Community</a> of Belgium."
+msgstr ""
+
 msgid "Foreign access title equivalence effective date"
 msgstr ""
 
@@ -2770,6 +2777,10 @@ msgid ""
 "with Article 9 of the Academic Regulations and Procedures (RGEE)."
 msgstr ""
 
+#, python-format
+msgid "I will be graduating from secondary school during the %s academic year"
+msgstr ""
+
 msgid ""
 "I would like to receive my mail at an address other than my legal address"
 msgstr ""
@@ -2835,7 +2846,31 @@ msgid ""
 "defense preparation below before submitting the jury proposition."
 msgstr ""
 
+msgid "If other language regime, specify"
+msgstr ""
+
 msgid "If other, specify"
+msgstr ""
+
+msgid ""
+"If you do not have an equivalency certificate, you must apply for one in "
+"strict accordance with the instructions of the <a href='http://www."
+"equivalences.cfwb.be' target='_blank'> French Community of Belgium.</a>."
+msgstr ""
+
+msgid ""
+"If you do not yet have a final equivalency decision from the <a "
+"href=\"http://www.equivalences.cfwb.be/\" target=\"_blank\">French "
+"Community</a> of Belgium, provide a copy of both sides of it as soon as you "
+"receive it. In the meantime, you will be asked to provide proof that you "
+"have indeed requested it: postal receipt and proof of payment, "
+"acknowledgement of receipt of the application, etc."
+msgstr ""
+
+msgid ""
+"If you have a final equivalence decision issued by the <a href=\"http://www."
+"equivalences.cfwb.be/\" target=\"_blank\">French Community</a> of Belgium, "
+"you must provide a double-sided copy of this document."
 msgstr ""
 
 msgid ""
@@ -3029,6 +3064,10 @@ msgid "Is it a Wallonia-Brussels Federation institution?"
 msgstr ""
 
 msgid "Is non-resident (as defined in decree)"
+msgstr ""
+
+msgctxt "diploma_type"
+msgid "It is a diploma"
 msgstr ""
 
 msgid "JURY_APPROUVE_ADRE"
@@ -3575,6 +3614,9 @@ msgstr ""
 msgid "Modification of an academic activity"
 msgstr ""
 
+msgid "Modification of the secondary studies"
+msgstr ""
+
 msgid "Modification requested"
 msgstr ""
 
@@ -3629,6 +3671,9 @@ msgid ""
 "(Belgian student status 5)"
 msgstr ""
 
+msgid "My institute is not on this list"
+msgstr ""
+
 msgid "My legal cohabitant"
 msgstr ""
 
@@ -3675,6 +3720,9 @@ msgid "Name in the language of the manifestation"
 msgstr ""
 
 msgid "Name of the contact person for the design of the annual program"
+msgstr ""
+
+msgid "Name of the education type"
 msgstr ""
 
 msgid "Name of the management entity"
@@ -3943,6 +3991,9 @@ msgstr ""
 msgid "Other documents relating to joint supervision"
 msgstr ""
 
+msgid "Other education type"
+msgstr ""
+
 msgid "Other given names"
 msgstr ""
 
@@ -3953,6 +4004,12 @@ msgid "Other institute"
 msgstr ""
 
 msgid "Other institute (if necessary)"
+msgstr ""
+
+msgid "Other institute address"
+msgstr ""
+
+msgid "Other institute name"
 msgstr ""
 
 msgid "Other international scholarship"
@@ -4142,6 +4199,12 @@ msgid ""
 "Please check the details of the activity to fill in all mandatory fields"
 msgstr ""
 
+msgid "Please choose the institute or specify another institute"
+msgstr ""
+
+msgid "Please choose the language regime or specify another regime."
+msgstr ""
+
 msgid "Please complete this field: {}"
 msgstr ""
 
@@ -4174,6 +4237,9 @@ msgid ""
 msgstr ""
 
 msgid "Please fill in at least your last or first name."
+msgstr ""
+
+msgid "Please indicate the academic year in which you obtained your degree"
 msgstr ""
 
 msgid ""
@@ -4875,10 +4941,20 @@ msgstr ""
 msgid "Search on portal"
 msgstr ""
 
+msgid ""
+"Secondary education in Belgium is the level of education between the end of "
+"primary school and the beginning of higher education."
+msgstr ""
+
 msgid "Secondary education type"
 msgstr ""
 
 msgid "Secondary school diploma"
+msgstr ""
+
+msgid ""
+"Secondary school diploma or, if not available, a certificate of enrolment or "
+"school attendance."
 msgstr ""
 
 msgid "Secondary school graduation year"
@@ -5582,6 +5658,12 @@ msgstr ""
 msgid "The resulting calculated academic year or pool is not consistent."
 msgstr ""
 
+msgid ""
+"The secondary school diploma is the Certificat d'Enseignement Secondaire "
+"Superieur (CESS, Certificate of Higher Secondary Education). It is commonly "
+"referred to in many countries as the baccalaureat."
+msgstr ""
+
 #, python-format
 msgid "The selection type must be one of the following values: %(values)s."
 msgstr ""
@@ -6270,6 +6352,9 @@ msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
 "list of acronyms separated by the \"%(separator)s\" character and ending "
 "with the same character."
+msgstr ""
+
+msgid "You can specify the locality or postcode in your search."
 msgstr ""
 
 msgid ""

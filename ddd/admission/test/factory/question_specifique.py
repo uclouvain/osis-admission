@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifiqueIdentity, QuestionSpecifique
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums.question_specifique import TypeItemFormulaire, Onglets
 from admission.ddd.admission.formation_continue.test.factory.proposition import (
     PropositionFactory as PropositionContinueFactory,
@@ -75,7 +76,7 @@ class QuestionSpecifiqueEtendue(QuestionSpecifique):
 class QuestionSpecifiqueFactory(factory.Factory):
     uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
     type = factory.Iterator(TypeItemFormulaire.get_names())
-    poids = factory.Faker('number')
+    poids = factory.Faker('pyint', min_value=1, max_value=10)
     label_interne = factory.Faker('sentence')
     requis = False
     titre = attr.Factory(dict)
@@ -86,3 +87,21 @@ class QuestionSpecifiqueFactory(factory.Factory):
 
     class Meta:
         model = QuestionSpecifiqueEtendue
+
+
+class QuestionSpecifiqueDTOFactory(factory.Factory):
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+    type = factory.Iterator(TypeItemFormulaire.get_names())
+    requis = False
+    configuration = attr.Factory(dict)
+    onglet = factory.Iterator(Onglets.get_names())
+    label = attr.Factory(dict)
+    texte = attr.Factory(dict)
+    texte_aide = attr.Factory(dict)
+    valeur = ''
+    valeur_formatee = ''
+    label_langue_candidat = factory.Faker('sentence')
+    valeurs_possibles = attr.Factory(list)
+
+    class Meta:
+        model = QuestionSpecifiqueDTO

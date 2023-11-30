@@ -1,0 +1,96 @@
+{% extends base_template %}
+{% load bootstrap3 i18n static admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block actions-group %}
+{% endblock %}
+
+{% block tab_content %}
+  <div class="panel panel-default">
+    <div class="panel-heading flex-content-no-wrap">
+      <div class="panel-title">{% translate "Modification of the secondary studies" %}</div>
+      <a
+          class="prevent-quitting-link"
+          href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur__ETUDES_SECONDAIRES"
+      >
+        <i class="fa fa-stream"></i>
+        {% translate "Back to checklist" %}
+      </a>
+
+    </div>
+    <div class="panel-body">
+
+      {% bootstrap_form_errors form %}
+
+      <form id="admission-form" method="post" action="">
+        {% csrf_token %}
+
+        {% panel _('Secondary studies') %}
+          <div class="row">
+            <div class="col-md-12 required_field">
+              {% bootstrap_field_with_tooltip form.graduated_from_high_school %}
+            </div>
+          </div>
+          <div class="row">
+            <div id="graduation-year-container" class="col-md-12 required_field">
+              {% bootstrap_field form.graduated_from_high_school_year %}
+            </div>
+          </div>
+        {% endpanel %}
+
+        {% if form.specific_question_answers.field.fields %}
+          {% panel _('Specific aspects') %}
+            {% bootstrap_field form.specific_question_answers show_label=False error_css_class='' %}
+          {% endpanel %}
+        {% endif %}
+        <div class="text-right">
+          <button class="btn btn-primary" type="submit" form="admission-form">
+            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
+            {% translate 'Save' context 'admission' %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  <script>
+      $(function () {
+          const defaultOptions = {
+              duration: 0,
+          };
+
+          $('#graduation-year-container').dependsOn({
+              'input[name=graduated_from_high_school]': { values: ['YES'] },
+          }, defaultOptions);
+
+          document.dispatchEvent(new Event('refreshFormInitial'));
+      });
+
+  </script>
+{% endblock %}

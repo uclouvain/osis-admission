@@ -56,6 +56,10 @@ class TagSelect2(Select2WithoutMediaMixin, autocomplete.TagSelect2):
     pass
 
 
+class ModelSelect2(Select2WithoutMediaMixin, autocomplete.ModelSelect2):
+    pass
+
+
 class Select2MultipleWithTagWhenNoResultWidget(autocomplete.Select2Multiple):
     """
     We override the default widget:

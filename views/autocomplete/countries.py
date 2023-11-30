@@ -52,7 +52,7 @@ class CountriesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView
     def get_queryset(self):
         search_term = self.request.GET.get('q', '')
 
-        qs = Country.objects.filter(**{'{}__icontains'.format(self.name_field): search_term})
+        qs = Country.objects.filter(**{'{}__unaccent__icontains'.format(self.name_field): search_term})
 
         active = self.forwarded.get('active', None)
         if active is not None:
