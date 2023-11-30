@@ -39,21 +39,23 @@ from django.utils import translation
 from django.utils.translation import gettext as _, pgettext
 from django.views import View
 
-import admission.templatetags.admission
 from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
 from admission.ddd.admission.test.factory.profil import (
     ExperienceAcademiqueDTOFactory,
     ExperienceNonAcademiqueDTOFactory,
+    EtudesSecondairesDTOFactory,
 )
+from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
+from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -509,6 +511,7 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(get_item_or_none(dictionary, 'b'), None)
 
     def test_experience_details_template_with_an_educational_experience(self):
+        proposition_uuid = uuid.uuid4()
         experience = ExperienceAcademiqueDTOFactory(
             pays=BE_ISO_CODE,
             regime_linguistique=FR_ISO_CODE,
@@ -520,7 +523,7 @@ class DisplayTagTestCase(TestCase):
                 est_proposition_continue=False,
                 est_proposition_doctorale=False,
                 proposition=MagicMock(
-                    uuid=uuid.uuid4(),
+                    uuid=proposition_uuid,
                     formation=MagicMock(),
                 ),
             ),
@@ -530,6 +533,14 @@ class DisplayTagTestCase(TestCase):
             template_params['custom_base_template'],
             'admission/exports/recap/includes/curriculum_educational_experience.html',
         )
+        self.assertEqual(template_params['title'], _('Academic experience'))
+        self.assertEqual(
+            template_params['edit_link_button'],
+            '/admissions/general-education/{}/update/curriculum/educational/{}'.format(
+                proposition_uuid,
+                experience.uuid,
+            ),
+        )
         self.assertEqual(template_params['experience'], experience)
         self.assertEqual(template_params['is_foreign_experience'], False)
         self.assertEqual(template_params['is_belgian_experience'], True)
@@ -537,6 +548,7 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['evaluation_system_with_credits'], True)
 
     def test_experience_details_with_a_non_educational_experience(self):
+        proposition_uuid = uuid.uuid4()
         experience = ExperienceNonAcademiqueDTOFactory()
         template_params = experience_details_template(
             resume_proposition=MagicMock(
@@ -544,7 +556,7 @@ class DisplayTagTestCase(TestCase):
                 est_proposition_continue=False,
                 est_proposition_doctorale=False,
                 proposition=MagicMock(
-                    uuid=uuid.uuid4(),
+                    uuid=proposition_uuid,
                     formation=MagicMock(),
                 ),
             ),
@@ -554,6 +566,40 @@ class DisplayTagTestCase(TestCase):
             template_params['custom_base_template'],
             'admission/exports/recap/includes/curriculum_professional_experience.html',
         )
+        self.assertEqual(template_params['title'], _('Non-academic experience'))
+        self.assertEqual(
+            template_params['edit_link_button'],
+            '/admissions/general-education/{}/update/curriculum/non_educational/{}'.format(
+                proposition_uuid,
+                experience.uuid,
+            ),
+        )
+        self.assertEqual(template_params['experience'], experience)
+        self.assertEqual(template_params['CURRICULUM_ACTIVITY_LABEL'], CURRICULUM_ACTIVITY_LABEL)
+
+    def test_experience_details_with_secondary_studies(self):
+        proposition_uuid = uuid.uuid4()
+        experience = EtudesSecondairesDTOFactory()
+        specific_questions = [QuestionSpecifiqueDTOFactory()]
+        template_params = experience_details_template(
+            resume_proposition=MagicMock(
+                est_proposition_generale=True,
+                est_proposition_continue=False,
+                est_proposition_doctorale=False,
+                proposition=MagicMock(
+                    uuid=proposition_uuid,
+                    formation=MagicMock(),
+                ),
+            ),
+            experience=experience,
+            specific_questions=specific_questions,
+        )
+        self.assertEqual(template_params['custom_base_template'], 'admission/exports/recap/includes/education.html')
+        self.assertEqual(
+            template_params['edit_link_button'],
+            '/admissions/general-education/{}/update/education'.format(proposition_uuid),
+        )
+        self.assertEqual(template_params['specific_questions'], specific_questions)
 
 
 class SimpleAdmissionTemplateTagsTestCase(TestCase):

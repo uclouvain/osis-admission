@@ -1010,11 +1010,16 @@ def authentication_css_class(authentication_status):
 
 
 @register.inclusion_tag('admission/includes/custom_base_template.html')
-def experience_details_template(resume_proposition: ResumePropositionDTO, experience):
+def experience_details_template(
+    resume_proposition: ResumePropositionDTO,
+    experience,
+    specific_questions: List[QuestionSpecifiqueDTO] = None,
+):
     """
     Return the template used to render the experience details.
     :param resume_proposition: The proposition resume
     :param experience: The experience
+    :param specific_questions: The specific questions related to the experience (only used for secondary studies)
     :return: The rendered template
     """
     context = {
@@ -1045,12 +1050,11 @@ def experience_details_template(resume_proposition: ResumePropositionDTO, experi
 
     elif experience.__class__ == EtudesSecondairesDTO:
         context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
-        context['etudes_secondaires'] = resume_proposition.etudes_secondaires
-        context.update(
-            get_secondary_studies_context(
-                resume_proposition,
-                {Onglets.ETUDES_SECONDAIRES.name: []},  # TODO
-            )
+        context['etudes_secondaires'] = experience
+        context['edit_link_button'] = reverse(
+            'admission:general-education:update:education',
+            args=[resume_proposition.proposition.uuid],
         )
+        context.update(get_secondary_studies_context(resume_proposition, specific_questions))
 
     return context

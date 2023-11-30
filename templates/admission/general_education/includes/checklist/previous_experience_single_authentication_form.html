@@ -27,10 +27,9 @@
 {% if current.statut == 'GEST_EN_COURS' and current.extra.authentification == '1' or current.extra.etat_authentification and current.extra.etat_authentification != 'NON_CONCERNE' %}
   <form
       id="authentication-form-{{ current.extra.identifiant }}"
-      class="osis-form"
       method="post"
-      action="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid experience_uuid=current.extra.identifiant %}"
-      hx-post="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid experience_uuid=current.extra.identifiant %}"
+      action="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid %}?identifier={{ current.extra.identifiant }}"
+      hx-post="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid %}?identifier={{ current.extra.identifiant }}"
       hx-trigger='keyup changed delay:2s from:textarea[name="{{ current.extra.identifiant }}-comment"], change delay:2s from:input[name="{{ current.extra.identifiant }}-state"]'
       hx-swap="outerHTML"
       hx-target="this"

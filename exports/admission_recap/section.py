@@ -181,11 +181,9 @@ def get_training_choice_section(
 
 def get_secondary_studies_context(
     resume_proposition: ResumePropositionDTO,
-    specific_questions_by_tab: Dict[str, List[QuestionSpecifiqueDTO]],
+    specific_questions: List[QuestionSpecifiqueDTO],
 ) -> dict:
-    secondary_studies_context = {
-        'specific_questions': specific_questions_by_tab[Onglets.ETUDES_SECONDAIRES.name],
-    }
+    secondary_studies_context = {'specific_questions': specific_questions}
     if resume_proposition.etudes_secondaires.diplome_etranger:
         secondary_studies_context['need_translations'] = (
             resume_proposition.etudes_secondaires.diplome_etranger.regime_linguistique
@@ -204,7 +202,10 @@ def get_secondary_studies_section(
     load_content: bool,
 ) -> Section:
     """Returns the secondary studies section."""
-    education_extra_context = get_secondary_studies_context(context, specific_questions_by_tab)
+    education_extra_context = get_secondary_studies_context(
+        context,
+        specific_questions_by_tab[Onglets.ETUDES_SECONDAIRES.name],
+    )
     return Section(
         identifier=OngletsDemande.ETUDES_SECONDAIRES,
         content_template='admission/exports/recap/includes/education.html',
