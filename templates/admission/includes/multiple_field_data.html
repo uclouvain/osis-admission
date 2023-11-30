@@ -35,7 +35,7 @@
     <div class="row">
       <div class="col-md-12">
         {% if field.type == 'MESSAGE' %}
-          <p class="plain-text-widget {{ field.configuration.CLASSE_CSS }}">{{ field.valeur_formatee }}</p>
+          <p class="plain-text-widget {{ field.configuration.CLASSE_CSS }}">{{ field.valeur_formatee|safe }}</p>
         {% elif field.configuration.TAILLE_TEXTE == 'LONG' and field.valeur_formatee %}
           {% field_data field.label field.valeur_formatee|linebreaks %}
         {% else %}
