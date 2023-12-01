@@ -2321,6 +2321,9 @@ msgstr "Demandes d'inscription"
 msgid "Enrolment campus"
 msgstr "Site d'inscription"
 
+msgid "Enrolment campus email"
+msgstr "Adresse e-mail du site d'inscription"
+
 msgid "Enrolment in limited enrolment bachelor's course"
 msgstr "Inscription à un bachelier contingenté"
 
@@ -3094,6 +3097,9 @@ msgstr "Photo d'identité du candidat"
 msgid "Identifier"
 msgstr "Identifiant"
 
+msgid "Identity card"
+msgstr "Carte d'identité"
+
 msgid "Identity card (both sides)"
 msgstr "Carte d'identité (recto/verso)"
 
@@ -3522,13 +3528,6 @@ msgid "List of LUs of the additional module or others"
 msgstr "Liste des UEs du module complémentaire ou autres"
 
 msgid ""
-"List of the mandatory requested documents that can be submitted later, with "
-"the reason"
-msgstr ""
-"Liste des documents réclamés obligatoires qui peuvent être déposés plus "
-"tard, avec la raison associée"
-
-msgid ""
 "List of the mandatory requested documents that must be submitted "
 "immediately, with the reason"
 msgstr ""
@@ -3536,11 +3535,16 @@ msgstr ""
 "immédiatement, avec la raison associée"
 
 msgid ""
-"List of the not-mandatory requested documents that can be submitted later, "
-"with the reason"
+"List of the requested documents that can be submitted later, with the reason"
 msgstr ""
-"Liste des documents réclamés non-obligatoires qui peuvent être déposés plus "
-"tard, avec la raison associée"
+"Liste des documents réclamés qui peuvent être déposés plus tard, avec la "
+"raison associée"
+
+msgid "List of the requested documents that have been submitted"
+msgstr "Liste des documents réclamés qui ont été déposés."
+
+msgid "List of the requested documents that haven't been submitted"
+msgstr "Liste des documents réclamés qui n'ont pas été déposés."
 
 msgid "List of the values that the Selection elements can take (one per row)."
 msgstr ""
@@ -3700,6 +3704,13 @@ msgstr ""
 "demande par l'UCLouvain"
 
 msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
+"been received for general education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que tous les documents réclamés "
+"ont été reçus pour sa demande en formation générale"
+
+msgid ""
 "Mail sent to the candidate to inform him that some FAC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
@@ -3733,6 +3744,14 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que des documents SIC sont "
 "manquants ou invalides dans sa demande en formation générale"
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for general education"
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que certains documents réclamés "
+"ont été reçus et que d'autres sont encore manquants pour sa demande en "
+"formation générale"
 
 msgid ""
 "Mail sent to the candidate to inform of the refusal of complementary "
