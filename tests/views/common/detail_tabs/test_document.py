@@ -2580,8 +2580,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form['deadline'].value(), datetime.date(2022, 1, 16))
         self.assertEqual(
             form['message_object'].value(),
-            "[OSIS] Documents demandés pour votre candidature à l'UCLouvain "
-            f"({response.context['admission'].reference})",
+            "Inscription UCLouvain – compléter votre dossier " f"({response.context['admission'].reference})",
         )
 
         first_field = form.fields.get(self.sic_free_requestable_candidate_document_with_default_file)
@@ -2715,8 +2714,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form['deadline'].value(), datetime.date(2022, 1, 16))
         self.assertEqual(
             form['message_object'].value(),
-            "[OSIS] Documents demandés pour votre candidature à l'UCLouvain "
-            f"({response.context['admission'].reference})",
+            "Inscription UCLouvain – compléter votre dossier " f"({response.context['admission'].reference})",
         )
 
         first_field = form.fields.get(self.fac_free_requestable_candidate_document_with_default_file)

@@ -2058,10 +2058,8 @@ msgctxt "admission"
 msgid "Education"
 msgstr ""
 
-#, fuzzy
-#| msgid "Experience not found."
 msgid "Educational experience not found."
-msgstr "Expérience non trouvée."
+msgstr ""
 
 msgid "Educational experiences"
 msgstr ""
@@ -2137,6 +2135,9 @@ msgid "Enrolment applications"
 msgstr ""
 
 msgid "Enrolment campus"
+msgstr ""
+
+msgid "Enrolment campus email"
 msgstr ""
 
 msgid "Enrolment in limited enrolment bachelor's course"
@@ -2809,6 +2810,9 @@ msgstr ""
 msgid "Identifier"
 msgstr ""
 
+msgid "Identity card"
+msgstr ""
+
 msgid "Identity card (both sides)"
 msgstr ""
 
@@ -3198,18 +3202,18 @@ msgid "List of LUs of the additional module or others"
 msgstr ""
 
 msgid ""
-"List of the mandatory requested documents that can be submitted later, with "
-"the reason"
-msgstr ""
-
-msgid ""
 "List of the mandatory requested documents that must be submitted "
 "immediately, with the reason"
 msgstr ""
 
 msgid ""
-"List of the not-mandatory requested documents that can be submitted later, "
-"with the reason"
+"List of the requested documents that can be submitted later, with the reason"
+msgstr ""
+
+msgid "List of the requested documents that have been submitted"
+msgstr ""
+
+msgid "List of the requested documents that haven't been submitted"
 msgstr ""
 
 msgid "List of the values that the Selection elements can take (one per row)."
@@ -3334,6 +3338,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
+"been received for general education"
+msgstr ""
+
+msgid ""
 "Mail sent to the candidate to inform him that some FAC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
@@ -3356,6 +3365,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to inform him that some SIC documents are missing "
 "or invalid in his application for general education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for general education"
 msgstr ""
 
 msgid ""
@@ -3760,10 +3774,8 @@ msgstr ""
 msgid "Non-academic experience"
 msgstr ""
 
-#, fuzzy
-#| msgid "Experience not found."
 msgid "Non-educational experience not found."
-msgstr "Expérience non trouvée."
+msgstr ""
 
 msgid "Non-resident (as defined by government decree)"
 msgstr ""
