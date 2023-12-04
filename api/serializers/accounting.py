@@ -111,18 +111,42 @@ class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
 
     class Meta:
         source = DoctorateAccountingDTO
+        extra_kwargs = {
+            'numero_compte_autre_format': {'max_length': 255},
+            'numero_compte_iban': {'max_length': 34},
+            'prenom_titulaire_compte': {'max_length': 128},
+            'nom_titulaire_compte': {'max_length': 128},
+        }
 
 
 class GeneralEducationAccountingDTOSerializer(DoctorateEducationAccountingDTOSerializer):
     class Meta:
         source = GeneralAccountingDTO
+        extra_kwargs = {
+            'numero_compte_autre_format': {'max_length': 255},
+            'numero_compte_iban': {'max_length': 34},
+            'prenom_titulaire_compte': {'max_length': 128},
+            'nom_titulaire_compte': {'max_length': 128},
+        }
 
 
 class CompleterComptabilitePropositionDoctoraleCommandSerializer(DTOSerializer):
     class Meta:
         source = doctorate_education_commands.CompleterComptabilitePropositionCommand
+        extra_kwargs = {
+            'numero_compte_autre_format': {'max_length': 255},
+            'numero_compte_iban': {'max_length': 34},
+            'prenom_titulaire_compte': {'max_length': 128},
+            'nom_titulaire_compte': {'max_length': 128},
+        }
 
 
 class CompleterComptabilitePropositionGeneraleCommandSerializer(DTOSerializer):
     class Meta:
         source = general_education_commands.CompleterComptabilitePropositionCommand
+        extra_kwargs = {
+            'numero_compte_autre_format': {'max_length': 255},
+            'numero_compte_iban': {'max_length': 34},
+            'prenom_titulaire_compte': {'max_length': 128},
+            'nom_titulaire_compte': {'max_length': 128},
+        }
