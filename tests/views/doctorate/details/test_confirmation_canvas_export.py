@@ -78,6 +78,10 @@ class DoctorateConfirmationCanvasExportViewTestCase(TestCase):
         patched = cls.confirm_remote_upload_patcher.start()
         patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
 
+        cls.file_confirm_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_upload')
+        patched = cls.file_confirm_upload_patcher.start()
+        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+
         cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = cls.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
@@ -96,6 +100,7 @@ class DoctorateConfirmationCanvasExportViewTestCase(TestCase):
         cls.get_remote_metadata_patcher.stop()
         cls.get_remote_token_patcher.stop()
         cls.save_raw_content_remotely_patcher.stop()
+        cls.file_confirm_upload_patcher.stop()
         super().tearDownClass()
 
     def setUp(self):

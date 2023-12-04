@@ -25,7 +25,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% panel %}
+{% panel title=title edit_link_button=edit_link_button %}
   <div class="row">
     <div class="col-md-6">
       {% with experience.annees|last as first_year %}
@@ -46,6 +46,11 @@
     </div>
   </div>
   <div class="row">
+    {% if checklist_display %}
+      <div class="col-md-6">
+        {% field_data _("Institute type") experience.type_institut|enum_display:'EstablishmentTypeEnum' %}
+      </div>
+    {% endif %}
     <div class="col-md-6">
       {% field_data _("Country") experience.nom_pays %}
     </div>
@@ -59,6 +64,16 @@
       {% field_data _('System of education') experience.type_enseignement|enum_display:'TeachingTypeEnum' hide_empty=True %}
     </div>
   </div>
+  {% if checklist_display %}
+    <div class="row">
+      <div class="col-md-6">
+        {% field_data _('FWB equivalent course') experience.nom_formation_equivalente_communaute_fr hide_empty=True %}
+      </div>
+      <div class="col-md-6">
+        {% field_data _("Course cycle") experience.cycle_formation|enum_display:'Cycle' %}
+      </div>
+    </div>
+  {% endif %}
   {% if is_continuing %}
     <div class="row">
       <div class="col-md-6">
@@ -113,6 +128,19 @@
               <th>{% translate 'Credits earned' %}</th>
             {% endif %}
             <th>{% translate 'Result' %}</th>
+            {% if checklist_display %}
+              {% if experience.est_formation_bachelier_fwb %}
+                <th>{% translate 'Block 1' %}</th>
+                <th>{% translate 'FWB - Registered credits' %}</th>
+                <th>{% translate 'FWB - Credits earned' %}</th>
+                <th>{% translate '102 change of course' %}</th>
+              {% elif experience.est_formation_master_fwb %}
+                <th>{% translate 'Complement' %}</th>
+                <th>{% translate 'FWB - Registered credits' %}</th>
+                <th>{% translate 'FWB - Credits earned' %}</th>
+              {% endif %}
+                <th>{% translate 'Reduction' %}</th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
@@ -133,6 +161,29 @@
                 <td>
                   {{ experience_year.resultat|enum_display:'Result'|default:_('Incomplete field') }}
                 </td>
+                {% if checklist_display %}
+                  {% if experience.est_formation_bachelier_fwb %}
+                    <td>{{ experience_year.avec_bloc_1|yesno:_('Yes,No,Incomplete field') }}</td>
+                    {% if experience_year.avec_bloc_1 %}
+                      <td>{{ experience_year.credits_inscrits_communaute_fr|default:_('Incomplete field') }}</td>
+                      <td>{{ experience_year.credits_acquis_communaute_fr|default:_('Incomplete field') }}</td>
+                    {% else %}
+                      <td></td>
+                      <td></td>
+                    {% endif %}
+                    <td>{{ experience_year.est_reorientation_102|yesno:_('Yes,No,Incomplete field') }}</td>
+                  {% elif experience.est_formation_master_fwb %}
+                    <td>{{ experience_year.avec_complement|yesno:_('Yes,No,Incomplete field') }}</td>
+                    {% if experience_year.avec_complement %}
+                      <td>{{ experience_year.credits_inscrits_communaute_fr|default:_('Incomplete field') }}</td>
+                      <td>{{ experience_year.credits_acquis_communaute_fr|default:_('Incomplete field') }}</td>
+                    {% else %}
+                      <td></td>
+                      <td></td>
+                    {% endif %}
+                  {% endif %}
+                    <td>{{ experience_year.avec_allegement|yesno:_('Yes,No,Incomplete field') }}</td>
+                {% endif %}
               </tr>
               {% if experience.type_releve_notes == 'ONE_A_YEAR' and not hide_files %}
                 <tr>
@@ -204,6 +255,5 @@
           {% endif %}
         </div>
       {% endif %}
-    </div>
   {% endif %}
 {% endpanel %}

@@ -188,6 +188,9 @@ class TestVerifierPropositionService(TestCase):
             nom_pays='',
             nom_regime_linguistique='',
             type_enseignement='',
+            type_institut='',
+            nom_formation_equivalente_communaute_fr='',
+            cycle_formation='',
         )
 
         cls.params_defaut_experience_non_academique = {
@@ -352,6 +355,9 @@ class TestVerifierPropositionService(TestCase):
                 nom_pays='',
                 nom_regime_linguistique='',
                 type_enseignement='',
+                type_institut='',
+                nom_formation_equivalente_communaute_fr='',
+                cycle_formation='',
             ),
         )
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):

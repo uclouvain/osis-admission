@@ -51,9 +51,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
+from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.dtos import EtudesSecondairesDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -68,6 +73,11 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
     ChoixTypeEpreuve,
     StatutActivite,
+)
+from admission.exports.admission_recap.section import (
+    get_educational_experience_context,
+    get_secondary_studies_context,
+    get_non_educational_experience_context,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
@@ -880,6 +890,10 @@ def checklist_state_button(context, **kwargs):
         **expected_attrs,
         'extra': kwargs,
         'view': context['view'],
+        'submitted_extra': {
+            **kwargs,
+            'status': expected_attrs['state'],
+        },
     }
 
 
@@ -974,3 +988,69 @@ def financability_enum_display(value):
     if value in RegleDeFinancement.get_names():
         return '{} - {}'.format(_('Financable'), RegleDeFinancement[value].value)
     return RegleCalculeResultatAvecFinancable[value].value
+
+
+@register.filter
+def authentication_css_class(authentication_status):
+    """
+    Return the CSS classes to apply to the authentication icon
+    :param authentication_status: The authentication status
+    :return: A string containing the CSS classes
+    """
+    return (
+        {
+            EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name: 'fa-solid fa-file-circle-question text-orange',
+            EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name: 'fa-solid fa-file-circle-question text-orange',
+            EtatAuthentificationParcours.FAUX.name: 'fa-solid fa-file-circle-check text-success',
+            EtatAuthentificationParcours.VRAI.name: 'fa-solid fa-file-circle-check text-danger',
+        }.get(authentication_status, '')
+        if authentication_status
+        else ''
+    )
+
+
+@register.inclusion_tag('admission/includes/custom_base_template.html')
+def experience_details_template(resume_proposition: ResumePropositionDTO, experience):
+    """
+    Return the template used to render the experience details.
+    :param resume_proposition: The proposition resume
+    :param experience: The experience
+    :return: The rendered template
+    """
+    context = {
+        'is_general': resume_proposition.est_proposition_generale,
+        'is_continuing': resume_proposition.est_proposition_continue,
+        'is_doctorate': resume_proposition.est_proposition_doctorale,
+        'formation': resume_proposition.proposition.formation,
+        'hide_files': True,
+        'checklist_display': True,
+    }
+    if experience.__class__ == ExperienceAcademiqueDTO:
+        context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
+        context['title'] = _('Academic experience')
+        context['edit_link_button'] = reverse(
+            'admission:general-education:update:curriculum:educational',
+            args=[resume_proposition.proposition.uuid, experience.uuid],
+        )
+        context.update(get_educational_experience_context(resume_proposition, experience))
+
+    elif experience.__class__ == ExperienceNonAcademiqueDTO:
+        context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
+        context['title'] = _('Non-academic experience')
+        context['edit_link_button'] = reverse(
+            'admission:general-education:update:curriculum:non_educational',
+            args=[resume_proposition.proposition.uuid, experience.uuid],
+        )
+        context.update(get_non_educational_experience_context(experience))
+
+    elif experience.__class__ == EtudesSecondairesDTO:
+        context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
+        context['etudes_secondaires'] = resume_proposition.etudes_secondaires
+        context.update(
+            get_secondary_studies_context(
+                resume_proposition,
+                {Onglets.ETUDES_SECONDAIRES.name: []},  # TODO
+            )
+        )
+
+    return context
