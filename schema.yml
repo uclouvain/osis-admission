@@ -6512,8 +6512,10 @@ components:
           format: email
         phone_mobile:
           type: string
+          maxLength: 30
         emergency_contact_phone:
           type: string
+          maxLength: 30
       required:
       - contact
       - residential
@@ -7081,6 +7083,7 @@ components:
           nullable: true
         autre_bourse_recherche:
           type: string
+          maxLength: 255
         bourse_date_debut:
           type: string
           format: date
@@ -7101,6 +7104,7 @@ components:
           nullable: true
         titre_projet:
           type: string
+          maxLength: 255
         resume_projet:
           type: string
         documents_projet:
@@ -7135,18 +7139,22 @@ components:
           type: string
         lieu_these:
           type: string
+          maxLength: 255
         doctorat_deja_realise:
           type: string
         institution:
           type: string
+          maxLength: 255
         domaine_these:
           type: string
+          maxLength: 255
         date_soutenance:
           type: string
           format: date
           nullable: true
         raison_non_soutenue:
           type: string
+          maxLength: 255
         fiche_archive_signatures_envoyees:
           type: array
           items:
@@ -7331,11 +7339,13 @@ components:
           nullable: true
         motivation:
           type: string
+          maxLength: 255
         institution_fwb:
           type: boolean
           nullable: true
         institution:
           type: string
+          maxLength: 255
         demande_ouverture:
           type: array
           items:
@@ -7504,17 +7514,21 @@ components:
           type: string
         numero_compte_iban:
           type: string
+          maxLength: 34
         iban_valide:
           type: boolean
           nullable: true
         numero_compte_autre_format:
           type: string
+          maxLength: 255
         code_bic_swift_banque:
           type: string
         prenom_titulaire_compte:
           type: string
+          maxLength: 128
         nom_titulaire_compte:
           type: string
+          maxLength: 128
         derniers_etablissements_superieurs_communaute_fr_frequentes:
           type: object
           properties:
@@ -9909,17 +9923,21 @@ components:
           type: string
         numero_compte_iban:
           type: string
+          maxLength: 34
         iban_valide:
           type: boolean
           nullable: true
         numero_compte_autre_format:
           type: string
+          maxLength: 255
         code_bic_swift_banque:
           type: string
         prenom_titulaire_compte:
           type: string
+          maxLength: 128
         nom_titulaire_compte:
           type: string
+          maxLength: 128
         derniers_etablissements_superieurs_communaute_fr_frequentes:
           type: object
           properties:
@@ -10205,10 +10223,13 @@ components:
           type: string
         nom_siege_social:
           type: string
+          maxLength: 255
         numero_unique_entreprise:
           type: string
+          maxLength: 255
         numero_tva_entreprise:
           type: string
+          maxLength: 255
         adresse_mail_professionnelle:
           type: string
         type_adresse_facturation:
@@ -11057,17 +11078,21 @@ components:
           type: string
         numero_compte_iban:
           type: string
+          maxLength: 34
         iban_valide:
           type: boolean
           nullable: true
         numero_compte_autre_format:
           type: string
+          maxLength: 255
         code_bic_swift_banque:
           type: string
         prenom_titulaire_compte:
           type: string
+          maxLength: 128
         nom_titulaire_compte:
           type: string
+          maxLength: 128
       required:
       - uuid_proposition
       - attestation_absence_dette_etablissement
@@ -11131,17 +11156,22 @@ components:
           type: string
         prenom:
           type: string
+          maxLength: 50
         nom:
           type: string
+          maxLength: 50
         email:
           type: string
+          maxLength: 255
         est_docteur:
           type: boolean
           nullable: true
         institution:
           type: string
+          maxLength: 255
         ville:
           type: string
+          maxLength: 255
         pays:
           type: string
         langue:
@@ -11461,17 +11491,21 @@ components:
           type: string
         numero_compte_iban:
           type: string
+          maxLength: 34
         iban_valide:
           type: boolean
           nullable: true
         numero_compte_autre_format:
           type: string
+          maxLength: 255
         code_bic_swift_banque:
           type: string
         prenom_titulaire_compte:
           type: string
+          maxLength: 128
         nom_titulaire_compte:
           type: string
+          maxLength: 128
       required:
       - uuid_proposition
       - attestation_absence_dette_etablissement

@@ -107,11 +107,25 @@ class SupervisionActorReferenceSerializer(serializers.Serializer):
 class IdentifierPromoteurCommandSerializer(DTOSerializer):
     class Meta:
         source = IdentifierPromoteurCommand
+        extra_kwargs = {
+            'prenom': {'max_length': 50},
+            'nom': {'max_length': 50},
+            'email': {'max_length': 255},
+            'institution': {'max_length': 255},
+            'ville': {'max_length': 255},
+        }
 
 
 class IdentifierMembreCACommandSerializer(DTOSerializer):
     class Meta:
         source = IdentifierMembreCACommand
+        extra_kwargs = {
+            'prenom': {'max_length': 50},
+            'nom': {'max_length': 50},
+            'email': {'max_length': 255},
+            'institution': {'max_length': 255},
+            'ville': {'max_length': 255},
+        }
 
 
 class IdentifierSupervisionActorSerializer(IdentifierMembreCACommandSerializer):
