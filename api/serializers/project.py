@@ -416,6 +416,14 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
             'curriculum',
             'pdf_recapitulatif',
         ]
+        extra_kwargs = {
+            'autre_bourse_recherche': {'max_length': 255},
+            'lieu_these': {'max_length': 255},
+            'titre_projet': {'max_length': 255},
+            'institution': {'max_length': 255},
+            'domaine_these': {'max_length': 255},
+            'raison_non_soutenue': {'max_length': 255},
+        }
 
 
 class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
@@ -554,6 +562,12 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'pdf_recapitulatif',
             'documents_additionnels',
         ]
+        extra_kwargs = {
+            'nom_siege_social': {'max_length': 255},
+            'numero_unique_entreprise': {'max_length': 255},
+            'numero_tva_entreprise': {'max_length': 255},
+            'adresse_facturation_destinataire': {'max_length': 255},
+        }
 
 
 class InitierPropositionCommandSerializer(DTOSerializer):
