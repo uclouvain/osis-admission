@@ -33,7 +33,8 @@ from typing import Union, Optional, List
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
-from django.urls import NoReverseMatch, reverse
+from django.shortcuts import resolve_url
+from django.urls import NoReverseMatch, reverse, resolve
 from django.utils.safestring import SafeString
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from osis_comment.models import CommentEntry
@@ -54,6 +55,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.dtos import EtudesSecondairesDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -905,8 +907,8 @@ def edit_button(string, url):
 @register.filter
 def tab_edit_button(string, tab_hash):
     return (
-        str(string)
-        + f'<a class="btn btn-default" data-toggle="checklist-tab" href="{tab_hash}"><i class="fas fa-edit"></i></a>'
+        str(string) + f'<a class="btn btn-default tab-edit-button" data-toggle="checklist-tab" href="{tab_hash}">'
+        f'<i class="fas fa-edit"></i></a>'
     )
 
 
@@ -1001,12 +1003,20 @@ def authentication_css_class(authentication_status):
         {
             EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name: 'fa-solid fa-file-circle-question text-orange',
             EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name: 'fa-solid fa-file-circle-question text-orange',
-            EtatAuthentificationParcours.FAUX.name: 'fa-solid fa-file-circle-check text-success',
-            EtatAuthentificationParcours.VRAI.name: 'fa-solid fa-file-circle-check text-danger',
+            EtatAuthentificationParcours.FAUX.name: 'fa-solid fa-file-circle-check text-danger',
+            EtatAuthentificationParcours.VRAI.name: 'fa-solid fa-file-circle-check text-success',
         }.get(authentication_status, '')
         if authentication_status
         else ''
     )
+
+
+@register.filter
+def bg_class_by_checklist_experience(experience):
+    return {
+        ExperienceAcademiqueDTO: 'bg-info',
+        EtudesSecondairesDTO: 'bg-warning',
+    }.get(experience.__class__, '')
 
 
 @register.inclusion_tag('admission/includes/custom_base_template.html')
@@ -1014,6 +1024,8 @@ def experience_details_template(
     resume_proposition: ResumePropositionDTO,
     experience,
     specific_questions: List[QuestionSpecifiqueDTO] = None,
+    hide_files=True,
+    with_edit_link_button=True,
 ):
     """
     Return the template used to render the experience details.
@@ -1027,34 +1039,84 @@ def experience_details_template(
         'is_continuing': resume_proposition.est_proposition_continue,
         'is_doctorate': resume_proposition.est_proposition_doctorale,
         'formation': resume_proposition.proposition.formation,
-        'hide_files': True,
+        'hide_files': hide_files,
         'checklist_display': True,
     }
     if experience.__class__ == ExperienceAcademiqueDTO:
         context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
         context['title'] = _('Academic experience')
-        context['edit_link_button'] = reverse(
-            'admission:general-education:update:curriculum:educational',
-            args=[resume_proposition.proposition.uuid, experience.uuid],
+        context['edit_link_button'] = (
+            reverse(
+                'admission:general-education:update:curriculum:educational',
+                args=[resume_proposition.proposition.uuid, experience.uuid],
+            )
+            if with_edit_link_button
+            else None
         )
         context.update(get_educational_experience_context(resume_proposition, experience))
 
     elif experience.__class__ == ExperienceNonAcademiqueDTO:
         context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
         context['title'] = _('Non-academic experience')
-        context['edit_link_button'] = reverse(
-            'admission:general-education:update:curriculum:non_educational',
-            args=[resume_proposition.proposition.uuid, experience.uuid],
+        context['edit_link_button'] = (
+            reverse(
+                'admission:general-education:update:curriculum:non_educational',
+                args=[resume_proposition.proposition.uuid, experience.uuid],
+            )
+            if with_edit_link_button
+            else None
         )
         context.update(get_non_educational_experience_context(experience))
 
     elif experience.__class__ == EtudesSecondairesDTO:
         context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
         context['etudes_secondaires'] = experience
-        context['edit_link_button'] = reverse(
-            'admission:general-education:update:education',
-            args=[resume_proposition.proposition.uuid],
+        context['edit_link_button'] = (
+            reverse(
+                'admission:general-education:update:education',
+                args=[resume_proposition.proposition.uuid],
+            )
+            if with_edit_link_button
+            else None
         )
         context.update(get_secondary_studies_context(resume_proposition, specific_questions))
 
     return context
+
+
+@register.inclusion_tag(
+    'admission/general_education/includes/checklist/parcours_row_actions_links.html',
+    takes_context=True,
+)
+def checklist_experience_action_links(
+    context,
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
+    current_year,
+):
+    base_namespace = context['view'].base_namespace
+    proposition_uuid = context['view'].kwargs['uuid']
+    proposition_uuid_str = str(proposition_uuid)
+    if experience.__class__ == EtudesSecondairesDTO:
+        return {
+            'update_url': resolve_url(
+                f'{base_namespace}:update:education',
+                uuid=proposition_uuid_str,
+            ),
+        }
+    elif proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year:
+        if experience.__class__ == ExperienceAcademiqueDTO:
+            return {
+                'update_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:educational',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+            }
+        elif experience.__class__ == ExperienceNonAcademiqueDTO:
+            return {
+                'update_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:non_educational',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+            }

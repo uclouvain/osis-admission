@@ -23,13 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db import models
+from base.models.utils.utils import ChoiceEnum
 
 
-class ToChar(models.Func):
-    function = 'TO_CHAR'
-    output_field = models.CharField()
+class ExperiencesCVRecuperees(ChoiceEnum):
+    TOUTES = 'TOUTES'
+    SEULEMENT_VALORISEES = 'SEULEMENT_VALORISEES'
+    SEULEMENT_VALORISEES_PAR_ADMISSION = 'SEULEMENT_VALORISEES_PAR_ADMISSION'
 
 
-class ArrayLength(models.Func):
-    function = 'CARDINALITY'
+EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES = {
+    ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
+    ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+}

@@ -37,6 +37,7 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
@@ -78,6 +79,9 @@ def recuperer_resume_proposition(
         comptabilite_dto=comptabilite_dto,
         groupe_supervision_dto=groupe_supervision_dto,
         annee_courante=annee_courante,
+        experiences_cv_recuperees=ExperiencesCVRecuperees.TOUTES
+        if proposition_dto.est_non_soumise
+        else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
     )
 
     # THEN

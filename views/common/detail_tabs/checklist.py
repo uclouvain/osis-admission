@@ -45,9 +45,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
-from admission.ddd import MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd import MONTANT_FRAIS_DOSSIER, MOIS_DEBUT_ANNEE_ACADEMIQUE
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -94,6 +92,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
 )
+from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms.admission.checklist import ChoixFormationForm, FinancabiliteApprovalForm, ExperienceStatusForm
 from admission.forms.admission.checklist import (
@@ -109,7 +108,7 @@ from admission.forms.admission.checklist import (
     SinglePastExperienceAuthenticationForm,
 )
 from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
-from admission.templatetags.admission import authentication_css_class
+from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
     get_portal_admission_list_url,
     get_backoffice_admission_url,
@@ -733,33 +732,47 @@ class ChecklistView(
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
 
+            context['bg_classes'] = {}
+
             children = (
                 context['original_admission']
                 .checklist.get('current', {})
                 .get('parcours_anterieur', {})
                 .get('enfants', [])
             )
-            for child in children:
-                identifier = child['extra']['identifiant']
-                tab_identifier = f'parcours_anterieur__{identifier}'
-                context['authentication_forms'][identifier] = SinglePastExperienceAuthenticationForm(child)
+
+            children_by_identifier = {
+                child['extra']['identifiant']: child for child in children if child.get('extra', {}).get('identifiant')
+            }
+
+            for experience_uuid, current_experience in experiences_by_uuid.items():
+                tab_identifier = f'parcours_anterieur__{experience_uuid}'
+
+                if experience_uuid in children_by_identifier:
+                    experience_checklist_info = children_by_identifier.get(experience_uuid, {})
+                else:
+                    experience_checklist_info = Checklist.initialiser_checklist_experience(experience_uuid).to_dict()
+                    children.append(experience_checklist_info)
+
                 context['checklist_additional_icons'][tab_identifier] = authentication_css_class(
-                    authentication_status=child['extra'].get('etat_authentification'),
+                    authentication_status=experience_checklist_info['extra'].get('etat_authentification'),
                 )
-                current_experience = experiences_by_uuid.get(identifier)
-                if current_experience:
-                    context['checklist_tabs'][tab_identifier] = current_experience.titre_formate
-                    context['comment_forms'][tab_identifier] = CommentForm(
-                        comment=comments.get(tab_identifier, None),
-                        form_url=resolve_url(
-                            f'{self.base_namespace}:save-comment',
-                            uuid=self.admission_uuid,
-                            tab=tab_identifier,
-                        ),
-                        prefix=tab_identifier,
-                        user_is_sic=self.is_sic,
-                        user_is_fac=self.is_fac,
-                    )
+                context['authentication_forms'][experience_uuid] = SinglePastExperienceAuthenticationForm(
+                    experience_checklist_info,
+                )
+                context['bg_classes'][tab_identifier] = bg_class_by_checklist_experience(current_experience)
+                context['checklist_tabs'][tab_identifier] = current_experience.titre_formate
+                context['comment_forms'][tab_identifier] = CommentForm(
+                    comment=comments.get(tab_identifier, None),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        tab=tab_identifier,
+                    ),
+                    prefix=tab_identifier,
+                    user_is_sic=self.is_sic,
+                    user_is_fac=self.is_fac,
+                )
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
@@ -805,9 +818,7 @@ class ChecklistView(
             date_courante = experience_non_academique.date_debut
             while True:
                 annee = (
-                    date_courante.year
-                    if date_courante.month >= IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE
-                    else date_courante.year - 1
+                    date_courante.year if date_courante.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE else date_courante.year - 1
                 )
                 if experience_non_academique not in experiences_non_academiques.get(annee, []):
                     experiences_non_academiques.setdefault(annee, []).append(experience_non_academique)

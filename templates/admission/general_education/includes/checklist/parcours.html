@@ -35,9 +35,9 @@
   </li>
 </ul>
 
-<div id="{{ prefix }}-parcours" class="tab-content">
+<div id="{{ prefix }}-parcours" class="tab-content parcours">
   {# Vue complète #}
-  <div role="tabpanel" class="tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ prefix }}-parcours-complete">
+  <div role="tabpanel" class="table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ prefix }}-parcours-complete">
     <table class="table">
       <thead>
         <tr>
@@ -50,6 +50,7 @@
           <th>{% trans "Reduction" %}</th>
           <th>{% trans "Course change" %}</th>
           <th>{% trans "Institute" context "admission" %}</th>
+          <th>{% trans "Action" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -63,7 +64,7 @@
   </div>
 
   {# Vue formations académiques #}
-  <div role="tabpanel" class="tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
+  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
     <table class="table">
       <thead>
         <tr>
@@ -76,6 +77,7 @@
           <th>{% trans "Reduction" %}</th>
           <th>{% trans "Course change" %}</th>
           <th>{% trans "Institute" context "admission" %}</th>
+          <th>{% trans "Action" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -97,7 +99,7 @@
   </div>
 
   {# Vue finançabilité #}
-  <div role="tabpanel" class="tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ prefix }}-parcours-financabilite">
+  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ prefix }}-parcours-financabilite">
     <table class="table">
       <thead>
         <tr>
@@ -110,6 +112,7 @@
           <th>{% trans "Reduction" %}</th>
           <th>{% trans "Course change" %}</th>
           <th>{% trans "Institute" context "admission" %}</th>
+          <th>{% trans "Action" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -124,4 +127,18 @@
     </table>
   </div>
 
+  <a
+      class="btn btn-primary"
+      href="{% url view.base_namespace|add:':update:curriculum:educational_create' view.kwargs.uuid %}"
+  >
+    <i class="fa-solid fa-plus"></i>
+    {% translate 'Academic course' %}
+  </a>
+  <a
+      class="btn btn-primary"
+      href="{% url view.base_namespace|add:':update:curriculum:non_educational_create' view.kwargs.uuid %}"
+  >
+    <i class="fa-solid fa-plus"></i>
+    {% translate 'Non-academic experience' %}
+  </a>
 </div>

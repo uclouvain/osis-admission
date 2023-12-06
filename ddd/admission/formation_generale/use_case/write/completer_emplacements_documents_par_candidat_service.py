@@ -34,6 +34,7 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
 from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     DocumentsDemandesCompletesValidatorList,
 )
@@ -101,6 +102,7 @@ def completer_emplacements_documents_par_candidat(
         annee_courante=annee_courante,
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
+        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
     )
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
         proposition_uuid=cmd.uuid_proposition,

@@ -235,20 +235,29 @@
             {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' %}
           {% endpanel %}
           <div class="info-part">
-            {# TODO add here the financeability part when available #}
+            <strong>{{ _('Financeability')|tab_edit_button:'#financabilite'|safe }}</strong>
+            {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
         </div>
 
         {% for child in current.enfants %}
           <div role="tabpanel" class="tab-pane" id="parcours_anterieur__{{ child.extra.identifiant }}">
-            {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant %}
-
-            <div>
             {% with experience=experiences_by_uuid|get_item:child.extra.identifiant %}
-              {% experience_details_template resume_proposition=resume_proposition experience=experience %}
+              {% if experience.valorisee_par_admissions != None or view.admission_uuid not in experience.valorisee_par_admissions %}
+                <p class="alert alert-warning">
+                  {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
+                </p>
+                <div>
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience hide_files=False with_edit_link_button=False %}
+                </div>
+              {% else %}
+                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant %}
+                <div>
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience %}
+                </div>
+              {% endif %}
             {% endwith %}
-            </div>
           </div>
         {% endfor %}
       {% endwith %}
@@ -438,7 +447,7 @@
 
           // Activate a specific tab from link click inside the checklist
           $('a[data-toggle="checklist-tab"]').on('click', function () {
-              $(`#checklist-menu li[href="${$(this).attr('href')}"] `).click();
+              $(`#checklist-menu li[href="${$(this).attr('href')}"] a`).click();
           });
 
           $('#checklist-menu div[data-toggle="tab"]').on('click', function (event) {
@@ -750,12 +759,12 @@
       position: absolute;
     }
 
-    dl dt a.btn, .panel-heading .btn {
+    dl dt a.btn, .panel-heading .btn, .tab-edit-button {
       padding: 2px 5px 2px 7px;
       vertical-align: bottom;
     }
 
-    dl dt a.btn {
+    dl dt a.btn, .tab-edit-button {
       margin-left: 0.5em;
     }
 
@@ -929,6 +938,14 @@
       margin-top: 1em;
       margin-bottom: 0;
       max-width: 300px;
+    }
+
+    #checklist-menu .sub-item.bg-info {
+      background-color: #d9edf7;
+    }
+
+    #checklist-menu .sub-item.bg-warning {
+      background-color: #fcf8e3;
     }
 
   </style>

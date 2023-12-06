@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import uuid
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
@@ -42,6 +43,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
@@ -930,7 +932,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         return cls.etudes_secondaires.get(matricule) or EtudesSecondairesDTO()
 
     @classmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
+    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumDTO':
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
 
@@ -983,6 +985,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             nom_pays=experience.nom_pays,
                             nom_regime_linguistique=experience.nom_regime_linguistique,
                             type_enseignement=experience.type_enseignement,
+                            valorisee_par_admissions=[],
                         ),
                     )
 
@@ -997,6 +1000,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                     fonction=experience.fonction,
                     secteur=experience.secteur,
                     autre_activite=experience.autre_activite,
+                    valorisee_par_admissions=[],
                 )
                 for experience in cls.experiences_non_academiques
                 if experience.personne == matricule
@@ -1055,7 +1059,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def est_potentiel_vae(cls, matricule: str) -> bool:
-        curriculum = cls.get_curriculum(matricule, datetime.date.today().year)
+        curriculum = cls.get_curriculum(matricule, datetime.date.today().year, '')
         return curriculum.candidat_est_potentiel_vae
 
     @classmethod
@@ -1087,11 +1091,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         matricule: str,
         formation: str,
         annee_courante: int,
+        uuid_proposition: str,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> ResumeCandidatDTO:
         return ResumeCandidatDTO(
             identification=cls.get_identification(matricule),
             coordonnees=cls.get_coordonnees(matricule),
-            curriculum=cls.get_curriculum(matricule, annee_courante),
+            curriculum=cls.get_curriculum(matricule, annee_courante, uuid_proposition),
             etudes_secondaires=cls.get_etudes_secondaires(matricule),
             connaissances_langues=cls.get_connaissances_langues(matricule),
         )

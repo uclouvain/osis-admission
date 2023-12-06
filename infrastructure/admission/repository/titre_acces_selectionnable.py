@@ -32,6 +32,7 @@ from admission.contrib.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
+from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
@@ -39,7 +40,6 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnableIdentity,
 )
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.validator.exceptions import (
     PropositionNonTrouveeException,
     ExperienceNonTrouveeException,
@@ -151,8 +151,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             if experience.professionalexperience.end_date:
                 last_year = (
                     experience.professionalexperience.end_date.year
-                    if experience.professionalexperience.end_date.month
-                    >= IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE
+                    if experience.professionalexperience.end_date.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE
                     else experience.professionalexperience.end_date.year - 1
                 )
             access_titles.append(

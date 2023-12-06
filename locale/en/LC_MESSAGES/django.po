@@ -261,6 +261,9 @@ msgstr ""
 msgid "Academic Regulations"
 msgstr ""
 
+msgid "Academic course"
+msgstr ""
+
 msgid "Academic experience"
 msgstr ""
 
@@ -320,6 +323,9 @@ msgid "Acronym of the management entity"
 msgstr ""
 
 msgid "Acronym of the training"
+msgstr ""
+
+msgid "Action"
 msgstr ""
 
 msgid "Actions"
@@ -866,6 +872,9 @@ msgstr ""
 msgid "Block 1"
 msgstr ""
 
+msgid "Block1:"
+msgstr ""
+
 msgid "Body"
 msgstr ""
 
@@ -920,6 +929,7 @@ msgstr ""
 msgid "CESS"
 msgstr ""
 
+msgctxt "equivalence_type"
 msgid "CESS equivalence"
 msgstr ""
 
@@ -1343,6 +1353,9 @@ msgstr ""
 msgid "Competent diplomatic post"
 msgstr ""
 
+msgid "Compl:"
+msgstr ""
+
 msgid "Complement"
 msgstr ""
 
@@ -1355,6 +1368,7 @@ msgstr ""
 msgid "Complementary training proposition"
 msgstr ""
 
+msgctxt "equivalence_status"
 msgid "Completed"
 msgstr ""
 
@@ -1810,6 +1824,7 @@ msgctxt "admission tab"
 msgid "Defense method"
 msgstr ""
 
+msgctxt "equivalence_state"
 msgid "Definitive"
 msgstr ""
 
@@ -2279,6 +2294,7 @@ msgstr ""
 msgid "FWB - Registered credits"
 msgstr ""
 
+msgctxt "equivalence_type"
 msgid "FWB academic degree equivalence"
 msgstr ""
 
@@ -3189,6 +3205,7 @@ msgstr ""
 msgid "Letters of recommendation"
 msgstr ""
 
+msgctxt "equivalence_type"
 msgid "Level equivalence"
 msgstr ""
 
@@ -3611,7 +3628,7 @@ msgstr ""
 msgid "Modification of a non-academic activity"
 msgstr ""
 
-msgid "Modification of an academic activity"
+msgid "Modification of an academic course"
 msgstr ""
 
 msgid "Modification of the secondary studies"
@@ -3859,6 +3876,10 @@ msgctxt "checklist"
 msgid "Not concerned"
 msgstr ""
 
+msgctxt "equivalence_type"
+msgid "Not concerned"
+msgstr ""
+
 msgid "Not financeable"
 msgstr ""
 
@@ -3868,10 +3889,15 @@ msgstr ""
 msgid "Not fundable"
 msgstr ""
 
+msgctxt "admission-header"
 msgid "Not specified"
 msgstr ""
 
-msgctxt "admission-header"
+msgctxt "equivalence_status"
+msgid "Not specified"
+msgstr ""
+
+msgctxt "equivalence_type"
 msgid "Not specified"
 msgstr ""
 
@@ -4256,6 +4282,11 @@ msgid ""
 "documents."
 msgstr ""
 
+msgid ""
+"Please note that this experience was not part of the application when it was "
+"submitted."
+msgstr ""
+
 msgid "Please provide a copy of your curriculum."
 msgstr ""
 
@@ -4461,6 +4492,7 @@ msgstr ""
 msgid "Proposition type"
 msgstr ""
 
+msgctxt "equivalence_state"
 msgid "Provisional"
 msgstr ""
 
@@ -4526,6 +4558,9 @@ msgstr ""
 msgid ""
 "Question tooltip text for Document, Selection and Text form elements. "
 "Content of the message to be displayed for Message elements."
+msgstr ""
+
+msgid "R102"
 msgstr ""
 
 msgid "REFUSEE"
@@ -4739,6 +4774,7 @@ msgstr ""
 msgid "Restore activity to submitted"
 msgstr ""
 
+msgctxt "equivalence_status"
 msgid "Restricted"
 msgstr ""
 
@@ -6065,6 +6101,9 @@ msgstr ""
 msgid "Update doctorate admission"
 msgstr ""
 
+msgid "Update experience"
+msgstr ""
+
 msgid "Update member"
 msgstr ""
 
@@ -6128,6 +6167,7 @@ msgstr ""
 msgid "WORK_CONTRACT"
 msgstr "Work contract"
 
+msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr ""
 

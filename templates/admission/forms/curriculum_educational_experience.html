@@ -34,7 +34,7 @@
 
   <div class="panel panel-default">
     {% if existing_experience %}
-      {% display _("Modification of an academic activity") as header_title %}
+      {% display _("Modification of an academic course") as header_title %}
       {% url request.resolver_match.namespace|add:':educational_delete' view.kwargs.uuid view.kwargs.experience_uuid as delete_url %}
     {% else %}
       {% display _("Add an academic course") as header_title %}
@@ -518,9 +518,9 @@
              $('#other-program').dependsOn({
                  '#id_base_form-country': { values: [beIsoCode] },
                  '#id_base_form-other_program': { checked: true },
-             }).or({
+             }, { valueOnDisable: null }).or({
                  '#id_base_form-country': { is_truthy, not: [beIsoCode] },
-             });
+             }, { valueOnDisable: null });
 
              {# Evaluation system field #}
              $('#container_evaluation_type').dependsOn({
@@ -650,12 +650,12 @@
 
                  {# The selected program must be from the first or second cycle #}
                  let currentProgramCycle = '';
-                 if (!program.prop('disabled')) {
+                 if (program.val()) {
                      const programData = program.select2('data');
                      if (programData.length > 0) {
                          currentProgramCycle = programData[0].cycle;
                      }
-                 } else if (!fwbProgram.prop('disabled')) {
+                 } else if (fwbProgram.val()) {
                      const fwbProgramData = fwbProgram.select2('data');
                      if (fwbProgramData.length > 0) {
                          currentProgramCycle = fwbProgramData[0].cycle;

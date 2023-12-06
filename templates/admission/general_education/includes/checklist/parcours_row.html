@@ -22,7 +22,9 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-<tr class="{% if experience|est_experience_academique %}bg-info{% elif experience|est_etudes_secondaires %}bg-warning{% endif %}">
+<tr
+    class="{% if experience|est_experience_academique %}bg-info{% elif experience|est_etudes_secondaires %}bg-warning{% if experience.alternative_secondaires and not experience.alternative_secondaires.examen_admission_premier_cycle %} hidden{% endif %}{% endif %}"
+>
   {% if forloop.first %}<td rowspan="{{ year_experiences | length }}" class="{{ year_experiences|get_parcours_annee_background }}">{{ year | get_short_academic_year }}</td>{% endif %}
   {% if experience|est_experience_academique %}
     <td>
@@ -30,14 +32,51 @@
         <i class="fa fa-graduation-cap"></i>
       {% endif %}
     </td>
-    <td>{{ experience.nom_formation }}</td>
+    <td>{{ experience.nom_formation_equivalente_communaute_fr|default:experience.nom_formation }}</td>
     <td>{% access_title_checkbox experience.uuid 'EXPERIENCE_ACADEMIQUE' year %}</td>
     {% with experience_annee=experience|get_experience_year:year %}
-      <td>{{ experience_annee.credits_inscrits|floatformat }}</td>
-      <td>{{ experience_annee.credits_acquis|floatformat }}</td>
+      <td>
+        <div style="display: flex; align-items: baseline; gap: 5px">
+          {{ experience_annee.credits_inscrits|floatformat }}
+          {% if experience_annee.credits_inscrits_communaute_fr != None %}
+            <span class="label label-info">
+              {% if experience_annee.avec_bloc_1 %}
+                {% translate 'Block1:' %}
+              {% elif experience_annee.avec_complement %}
+                {% translate 'Compl:' %}
+              {% endif %}
+              {{ experience_annee.credits_inscrits_communaute_fr|floatformat }}
+            </span>
+          {% endif %}
+        </div>
+      </td>
+      <td>
+        <div style="display: flex; align-items: baseline; gap: 5px">
+          {{ experience_annee.credits_acquis|floatformat }}
+          {% if experience_annee.credits_acquis_communaute_fr != None %}
+            <span class="label label-info">
+              {% if experience_annee.avec_bloc_1 %}
+                {% translate 'Block1:' %}
+              {% elif experience_annee.avec_complement %}
+                {% translate 'Compl:' %}
+              {% endif %}
+              {{ experience_annee.credits_acquis_communaute_fr|floatformat }}
+            </span>
+          {% endif %}
+        </div>
+      </td>
+      <td>
+        {% if experience_annee.avec_allegement %}
+            <span class="label label-warning">{{ _('Reduction')|slice:':1' }}</span>
+        {% endif %}
+      </td>
+      <td>
+        <div>
+          {% if experience_annee.est_reorientation_102 %}
+            <span class="label label-success">{% translate 'R102' %}</span>
+          {% endif %}
+        </div>
     {% endwith %}
-    <td>{# TODO Allègement #}</td>
-    <td>{# TODO Réorientation #}</td>
     <td>
       {% if experience.pays == 'BE' %}<img src="{% static "img/be-square.svg" %}" class="flag-icon">{% else %}<i class="fa fa-earth"></i>{% endif %}
       {{ experience.nom_institut }}
@@ -51,7 +90,7 @@
     <td></td>
     <td></td>
     <td></td>
-  {% elif experience|est_etudes_secondaires and experience.annee_diplome_etudes_secondaires or experience|est_etudes_secondaires and experience.alternative_secondaires.examen_admission_premier_cycle %}
+  {% elif experience|est_etudes_secondaires %}
     <td>{% if experience.diplome_etudes_secondaires == 'YES' %}<i class="fa fa-graduation-cap"></i>{% endif %}</td>
     <td>
       {% if experience.diplome_belge %}
@@ -83,4 +122,7 @@
       {% endif %}
     </td>
   {% endif %}
+  <td class="flex-content-no-wrap">
+    {% checklist_experience_action_links experience=experience current_year=year %}
+  </td>
 </tr>

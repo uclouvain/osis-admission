@@ -58,6 +58,10 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+)
 from admission.tests.factories.form_item import DocumentAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
@@ -96,6 +100,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             'curriculum_file_token': uuid.uuid4(),
             'non_free_specific_question_file_token': uuid.uuid4(),
             'free_file_token': uuid.uuid4(),
+            'certificate_token': uuid.uuid4(),
+            'transcript_token': uuid.uuid4(),
         }
         AcademicYearFactory(year=2019)
 
@@ -314,6 +320,85 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.value,
         )
         self.assertEqual(later_requested_documents[1]['required'], False)
+
+    def test_only_retrieve_requested_documents_of_valuated_cv_experiences(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        educational_experience = self.admission.candidate.educationalexperience_set.first()
+        non_educational_experience = self.admission.candidate.professionalexperience_set.first()
+        other_admission = GeneralEducationAdmissionFactory(candidate=self.admission.candidate)
+
+        transcript_identifier = f'CURRICULUM.{educational_experience.uuid}.RELEVE_NOTES'
+        certificate_identifier = f'CURRICULUM.{non_educational_experience.uuid}.CERTIFICAT_EXPERIENCE'
+
+        self.admission.requested_documents = {
+            transcript_identifier: {
+                **self.manuel_required_params,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+            certificate_identifier: {
+                **self.manuel_required_params,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+        }
+
+        self.admission.save()
+
+        # No valuated experience -> no document
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+
+        immediate_requested_documents = response_data['immediate_requested_documents']
+        later_requested_documents = response_data['later_requested_documents']
+
+        self.assertEqual(len(immediate_requested_documents), 0)
+        self.assertEqual(len(later_requested_documents), 0)
+
+        # Valuated experiences but by another admission -> no document
+        educational_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            educationalexperience=educational_experience,
+        )
+
+        non_educational_valuation = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+
+        immediate_requested_documents = response_data['immediate_requested_documents']
+        later_requested_documents = response_data['later_requested_documents']
+
+        self.assertEqual(len(immediate_requested_documents), 0)
+        self.assertEqual(len(later_requested_documents), 0)
+
+        # Valuated experiences by this admission -> retrieve documents
+        educational_valuation.baseadmission = self.admission
+        educational_valuation.save()
+
+        non_educational_valuation.baseadmission = self.admission
+        non_educational_valuation.save()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+
+        immediate_requested_documents = response_data['immediate_requested_documents']
+
+        self.assertEqual(len(immediate_requested_documents), 2)
+
+        self.assertEqual(immediate_requested_documents[0]['uuid'], transcript_identifier)
+        self.assertEqual(immediate_requested_documents[1]['uuid'], certificate_identifier)
 
     def test_retrieve_requested_documents_with_not_candidate_user_is_not_authorized(self):
         self.client.force_authenticate(user=None)

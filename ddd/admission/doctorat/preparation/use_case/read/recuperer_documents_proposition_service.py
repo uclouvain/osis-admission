@@ -38,6 +38,7 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.doctorat.preparation.commands import RecupererDocumentsPropositionQuery
@@ -88,6 +89,7 @@ def recuperer_documents_proposition(
         comptabilite_dto=comptabilite_dto,
         groupe_supervision_dto=groupe_supervision_dto,
         annee_courante=annee_courante,
+        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
     )
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
         proposition_uuid=cmd.uuid_proposition,
