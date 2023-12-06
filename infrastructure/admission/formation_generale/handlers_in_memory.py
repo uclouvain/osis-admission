@@ -302,6 +302,13 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
             emplacement_document_repository=_emplacement_document_repository,
             historique=_historique_global,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            question_specifique_translator=_question_specific_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+            notification=_notification,
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -507,5 +514,17 @@ COMMAND_HANDLERS = {
     SpecifierFinancabiliteRegleCommand: lambda msg_bus, cmd: specifier_financabilite_regle(
         cmd,
         proposition_repository=_proposition_repository,
+    ),
+    ModifierStatutChecklistExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
+    ),
+    ModifierAuthentificationExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
+            cmd,
+            proposition_repository=_proposition_repository,
+        )
     ),
 }

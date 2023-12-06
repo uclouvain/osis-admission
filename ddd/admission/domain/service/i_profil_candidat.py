@@ -67,7 +67,7 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
         raise NotImplementedError
 
     @classmethod

@@ -1,0 +1,141 @@
+{% extends base_template %}
+{% load bootstrap3 i18n static admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block actions-group %}
+{% endblock %}
+
+{% block tab_content %}
+  {% bootstrap_form_errors form %}
+
+  <div class="panel panel-default">
+    {% if existing_experience %}
+      {% display _("Modification of a non-academic activity") as header_title %}
+      {% url request.resolver_match.namespace|add:':non_educational_delete' view.kwargs.uuid view.kwargs.experience_uuid as delete_url %}
+    {% else %}
+      {% display _("Add a non-academic activity") as header_title %}
+    {% endif %}
+    {% include 'admission/includes/curriculum_experience_header.html' with title=header_title delete_url=delete_url existing_experience=existing_experience %}
+    <div class="panel-body">
+      <form id="admission-form" method="post" action="">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-6 form-group">
+            <fieldset class="custom-fieldset">
+              <legend>{% translate "Start" %}</legend>
+              <div class="row">
+                <div class="col-md-6 required_field">{% bootstrap_field form.start_date_month %}</div>
+                <div class="col-md-6 required_field">{% bootstrap_field form.start_date_year %}</div>
+              </div>
+            </fieldset>
+          </div>
+          <div class="col-md-6 form-group">
+            <fieldset class="custom-fieldset">
+              <legend>{% translate "End" context 'admission' %}</legend>
+              <div class="row">
+                <div class="col-md-6 required_field">{% bootstrap_field form.end_date_month %}</div>
+                <div class="col-md-6 required_field">{% bootstrap_field form.end_date_year %}</div>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 required_field">
+            {% bootstrap_field form.type %}
+          </div>
+          <div class="col-md-6 work-fields required_field">
+            {% bootstrap_field form.sector %}
+          </div>
+          <div id="other-activity" class="col-md-6 required_field">
+            {% bootstrap_field form.activity placeholder='' %}
+          </div>
+        </div>
+        <div class="row work-fields">
+          <div class="col-md-6 required_field">
+            {% bootstrap_field form.institute_name placeholder='' %}
+          </div>
+          <div class="col-md-6 required_field">
+            {% bootstrap_field form.role %}
+          </div>
+        </div>
+        <div id="certificate">
+          {% bootstrap_field form.certificate %}
+        </div>
+        <div class="text-right">
+          <button class="btn btn-primary" type="submit" form="admission-form">
+            <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
+            {% translate 'Save' context 'admission' %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  <script type="application/javascript">
+      $(function () {
+          const CERTIFICATE_HELP_TEXT = {{ CURRICULUM_ACTIVITY_LABEL|safe }};
+
+          $('.work-fields').dependsOn({
+              '#id_type': { values: ['WORK'] },
+          });
+
+          $('#other-activity').dependsOn({
+              '#id_type': { values: ['OTHER'] },
+          })
+
+          $('#certificate').dependsOn({
+              '#id_type': { values: Object.keys(CERTIFICATE_HELP_TEXT) },
+          })
+
+          $('#id_type').change(function () {
+              const specificLabel = this.value ? CERTIFICATE_HELP_TEXT[this.value] : '{% translate 'Certificate' %}';
+              $('#certificate .popover-buttons').attr('data-content', specificLabel);
+              $('#certificate label').text(specificLabel);
+          }).change()
+
+          {# Display the options of the end date depending on the start date #}
+          const startSelect = $('#id_start_date_year');
+          let startYear = parseInt(startSelect.val());
+
+          startSelect.on('change', function () {
+              startYear = parseInt(this.value);
+          })
+
+          function formatState(result) {
+              return result.id && parseInt(result.id) >= startYear ? result.text : null;
+          }
+
+          $('#id_end_date_year').select2({
+              templateResult: formatState,
+          });
+
+          document.dispatchEvent(new Event('refreshFormInitial'));
+      });
+  </script>
+{% endblock %}

@@ -43,6 +43,8 @@ class EducationalExperienceYearFactory(factory.django.DjangoModelFactory):
     transcript = factory.LazyFunction(lambda: [uuid.uuid4()])
     transcript_translation = factory.LazyFunction(lambda: [uuid.uuid4()])
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
+    fwb_registered_credit_number = 20
+    fwb_acquired_credit_number = 15
 
     class Meta:
         model = EducationalExperienceYear

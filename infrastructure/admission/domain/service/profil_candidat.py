@@ -213,16 +213,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         candidate: Person,
         has_default_language: bool,
         valuated_secondary_studies: Optional[bool],
-        formation: str,
     ):
-        if formation == TrainingType.BACHELOR.name:
-            belgian_high_school_diploma = getattr(candidate, 'belgianhighschooldiploma', None)
-            foreign_high_school_diploma = getattr(candidate, 'foreignhighschooldiploma', None)
-            high_school_diploma_alternative = getattr(candidate, 'highschooldiplomaalternative', None)
-        else:
-            belgian_high_school_diploma = None
-            foreign_high_school_diploma = None
-            high_school_diploma_alternative = None
+        belgian_high_school_diploma = getattr(candidate, 'belgianhighschooldiploma', None)
+        foreign_high_school_diploma = getattr(candidate, 'foreignhighschooldiploma', None)
+        high_school_diploma_alternative = getattr(candidate, 'highschooldiplomaalternative', None)
 
         return EtudesSecondairesDTO(
             diplome_etudes_secondaires=candidate.graduated_from_high_school,
@@ -308,6 +302,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             traduction_releve_notes=educational_experience_year.transcript_translation,
             credits_inscrits=educational_experience_year.registered_credit_number,
             credits_acquis=educational_experience_year.acquired_credit_number,
+            avec_bloc_1=educational_experience_year.with_block_1,
+            avec_complement=educational_experience_year.with_complement,
+            avec_allegement=educational_experience_year.with_reduction,
+            est_reorientation_102=educational_experience_year.is_102_change_of_course,
+            credits_inscrits_communaute_fr=educational_experience_year.fwb_registered_credit_number,
+            credits_acquis_communaute_fr=educational_experience_year.fwb_acquired_credit_number,
         )
 
     @classmethod
@@ -325,6 +325,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             'educational_experience__country',
             'educational_experience__linguistic_regime',
             'educational_experience__program',
+            'educational_experience__fwb_equivalent_program',
             'educational_experience__institute',
         )
         educational_experience_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
@@ -337,6 +338,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                         'code_institut': experience_year.educational_experience.institute.acronym,
                         'communaute_institut': experience_year.educational_experience.institute.community,
                         'adresse_institut': '',
+                        'type_institut': experience_year.educational_experience.institute.establishment_type,
                     }
                     if experience_year.educational_experience.institute
                     else {
@@ -344,6 +346,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                         'code_institut': '',
                         'communaute_institut': '',
                         'adresse_institut': experience_year.educational_experience.institute_address,
+                        'type_institut': '',
                     }
                 )
                 linguistic_regime = (
@@ -360,6 +363,26 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                         'nom_regime_linguistique': '',
                     }
                 )
+                program_info = {
+                    'nom_formation': '',
+                    'nom_formation_equivalente_communaute_fr': '',
+                    'cycle_formation': '',
+                }
+
+                if experience_year.educational_experience.education_name:
+                    program_info['nom_formation'] = experience_year.educational_experience.education_name
+
+                if experience_year.educational_experience.program_id:
+                    program_info['nom_formation'] = experience_year.educational_experience.program.title
+                    program_info['cycle_formation'] = experience_year.educational_experience.program.cycle
+
+                if experience_year.educational_experience.fwb_equivalent_program_id:
+                    program_info[
+                        'nom_formation_equivalente_communaute_fr'
+                    ] = experience_year.educational_experience.fwb_equivalent_program.title
+                    program_info[
+                        'cycle_formation'
+                    ] = experience_year.educational_experience.fwb_equivalent_program.cycle
 
                 educational_experience_dtos[experience_year.educational_experience.pk] = ExperienceAcademiqueDTO(
                     uuid=experience_year.educational_experience.uuid,
@@ -382,12 +405,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     annees=[experience_year_dto],
                     grade_obtenu=experience_year.educational_experience.obtained_grade,
                     systeme_evaluation=experience_year.educational_experience.evaluation_type,
-                    nom_formation=experience_year.educational_experience.program.title
-                    if experience_year.educational_experience.program
-                    else experience_year.educational_experience.education_name,
                     type_enseignement=experience_year.educational_experience.study_system,
                     **institute,
                     **linguistic_regime,
+                    **program_info,
                 )
             else:
                 educational_experience_dtos[experience_year.educational_experience.pk].annees.append(
@@ -448,41 +469,31 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
         valuated_secondary_studies = cls.etudes_secondaires_valorisees(matricule)
 
-        queryset = Person.objects.select_related(
+        candidate: Person = Person.objects.select_related(
             'graduated_from_high_school_year',
-        )
-
-        if type_formation == TrainingType.BACHELOR:
-            queryset = queryset.select_related(
-                'highschooldiplomaalternative',
-                'belgianhighschooldiploma__institute',
-                'foreignhighschooldiploma__country',
-                'foreignhighschooldiploma__linguistic_regime',
-            )
-
-        candidate: Person = queryset.get(global_id=matricule)
+            'highschooldiplomaalternative',
+            'belgianhighschooldiploma__institute',
+            'foreignhighschooldiploma__country',
+            'foreignhighschooldiploma__linguistic_regime',
+        ).get(global_id=matricule)
 
         return cls._get_secondary_studies_dto(
             candidate,
             cls.has_default_language(),
             valuated_secondary_studies,
-            type_formation.name,
         )
 
     @classmethod
     def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
         minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
-        maximal_date = cls.get_date_maximale_curriculum()
 
         academic_experiences_dtos = cls._get_academic_experiences_dtos(matricule, cls.has_default_language())
 
         non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
             person__global_id=matricule,
-            start_date__lte=maximal_date,
-            end_date__gte=minimal_years.get('minimal_date'),
         )
 
         non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
@@ -634,6 +645,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     ) -> ResumeCandidatDTO:
         has_default_language = cls.has_default_language()
 
+        be_institute_address = 'belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress'
+
         queryset = (
             Person.objects.prefetch_related(
                 Prefetch(
@@ -652,12 +665,25 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 'birth_country',
                 'last_registration_year',
                 'graduated_from_high_school_year',
+                'highschooldiplomaalternative',
+                'belgianhighschooldiploma__institute',
+                'foreignhighschooldiploma__country',
+                'foreignhighschooldiploma__linguistic_regime',
             )
             .annotate(
                 secondary_studies_are_valuated=ExpressionWrapper(
                     Q(baseadmission__isnull=False),
                     output_field=BooleanField(),
-                )
+                ),
+                belgian_highschool_diploma_institute_address=Concat(
+                    F(f'{be_institute_address}__street'),
+                    Value(' '),
+                    F(f'{be_institute_address}__street_number'),
+                    Value(', '),
+                    F(f'{be_institute_address}__postal_code'),
+                    Value(' '),
+                    F(f'{be_institute_address}__city'),
+                ),
             )
         )
 
@@ -678,25 +704,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     )
                     .all()
                     .order_by('order', 'language__code'),
-                ),
-            )
-
-        if formation == TrainingType.BACHELOR.name:
-            be_institute_address = 'belgianhighschooldiploma__institute__entity__entityversion__entityversionaddress'
-            queryset = queryset.select_related(
-                'highschooldiplomaalternative',
-                'belgianhighschooldiploma__institute',
-                'foreignhighschooldiploma__country',
-                'foreignhighschooldiploma__linguistic_regime',
-            ).annotate(
-                belgian_highschool_diploma_institute_address=Concat(
-                    F(f'{be_institute_address}__street'),
-                    Value(' '),
-                    F(f'{be_institute_address}__street_number'),
-                    Value(', '),
-                    F(f'{be_institute_address}__postal_code'),
-                    Value(' '),
-                    F(f'{be_institute_address}__city'),
                 ),
             )
 
@@ -733,7 +740,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 candidate=candidate,
                 has_default_language=has_default_language,
                 valuated_secondary_studies=candidate.secondary_studies_are_valuated,  # From annotation
-                formation=formation,
             ),
             connaissances_langues=cls._get_language_knowledge_dto(candidate) if is_doctorate else None,
         )

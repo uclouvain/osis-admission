@@ -34,7 +34,7 @@
       data-class="btn-{{ class }}"
       data-icon="{{ icon }}"
       {% if disabled or is_current_status %}disabled="disabled"{% endif %}
-      {% if extra %}hx-vals="{{ extra|to_json }}"{% endif %}
+      {% if submitted_extra %}hx-vals="{{ submitted_extra|to_json }}"{% endif %}
       {% if open_modal %}
       data-toggle="modal"
       data-target="{{ open_modal }}"

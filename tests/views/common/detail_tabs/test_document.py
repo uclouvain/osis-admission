@@ -2580,8 +2580,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form['deadline'].value(), datetime.date(2022, 1, 16))
         self.assertEqual(
             form['message_object'].value(),
-            "[OSIS] Documents demandés pour votre candidature à l'UCLouvain "
-            f"({response.context['admission'].reference})",
+            "Inscription UCLouvain – compléter votre dossier " f"({response.context['admission'].reference})",
         )
 
         first_field = form.fields.get(self.sic_free_requestable_candidate_document_with_default_file)
@@ -2599,6 +2598,17 @@ class DocumentViewTestCase(TestCase):
             '<span class="fa-solid fa-link-slash"></span> My file name',
         )
         self.assertEqual(second_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
+
+        # Custom deadline in the second part of September
+        with freezegun.freeze_time('2022-09-20'):
+            self.client.force_login(user=self.second_sic_manager_user)
+
+            response = self.client.get(url)
+
+            self.assertEqual(response.status_code, 200)
+
+            form = response.context['form']
+            self.assertEqual(form['deadline'].value(), datetime.date(2022, 9, 30))
 
         # Post an invalid form -> missing fields
         response = self.client.post(
@@ -2715,8 +2725,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form['deadline'].value(), datetime.date(2022, 1, 16))
         self.assertEqual(
             form['message_object'].value(),
-            "[OSIS] Documents demandés pour votre candidature à l'UCLouvain "
-            f"({response.context['admission'].reference})",
+            "Inscription UCLouvain – compléter votre dossier " f"({response.context['admission'].reference})",
         )
 
         first_field = form.fields.get(self.fac_free_requestable_candidate_document_with_default_file)
