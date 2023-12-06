@@ -76,6 +76,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.pdf_ge
 from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.reference import ReferenceTranslator
 from admission.infrastructure.admission.formation_generale.repository.emplacement_document import (
     EmplacementDocumentRepository,
 )
@@ -337,6 +338,7 @@ COMMAND_HANDLERS = {
             notification=Notification(),
             paiement_frais_dossier_service=PaiementFraisDossier(),
             historique=HistoriqueFormationGenerale(),
+            reference_translator=ReferenceTranslator(),
         )
     ),
     PayerFraisDossierPropositionSuiteDemandeCommand: (
@@ -346,6 +348,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             paiement_frais_dossier_service=PaiementFraisDossier(),
             historique=HistoriqueFormationGenerale(),
+            reference_translator=ReferenceTranslator(),
         )
     ),
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand: (
