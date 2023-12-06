@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.formation_generale.commands import PayerFraisDossierPropositionSuiteSoumissionCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -32,10 +32,13 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
+from admission.ddd.admission.formation_generale.events import FraisDossierPayeEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.repository.i_proposition import formater_reference
 
 
 def payer_frais_dossier_proposition_suite_soumission(
+    message_bus: 'MessageBus',
     cmd: 'PayerFraisDossierPropositionSuiteSoumissionCommand',
     proposition_repository: 'IPropositionRepository',
     notification: 'INotification',
@@ -57,4 +60,17 @@ def payer_frais_dossier_proposition_suite_soumission(
     notification.confirmer_soumission(proposition)
     historique.historiser_paiement_frais_dossier_suite_soumission(proposition)
 
+    message_bus.publish(
+        FraisDossierPayeEvent(
+            entity_id=proposition_id,
+            numero_dossier=formater_reference(
+                reference=proposition.reference,
+                nom_campus_inscription='TEST',  # formation.campus_inscription   # TODO: Add translator to get formation
+                sigle_entite_gestion='TEST',  # formation.sigle_entite_gestion # TODO: Add translator to get formation
+                annee=proposition.formation_id.annee,
+            ),
+            montant=MONTANT_FRAIS_DOSSIER,
+            matricule=proposition.matricule_candidat,
+        )
+    )
     return proposition_id

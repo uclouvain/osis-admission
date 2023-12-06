@@ -383,6 +383,7 @@ COMMAND_HANDLERS = {
     ),
     PayerFraisDossierPropositionSuiteSoumissionCommand: (
         lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_soumission(
+            msg_bus,
             cmd,
             proposition_repository=_proposition_repository,
             notification=_notification,
@@ -392,6 +393,7 @@ COMMAND_HANDLERS = {
     ),
     PayerFraisDossierPropositionSuiteDemandeCommand: (
         lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_demande(
+            msg_bus,
             cmd,
             proposition_repository=_proposition_repository,
             paiement_frais_dossier_service=_paiement_frais_dossier,
