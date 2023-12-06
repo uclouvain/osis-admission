@@ -25,15 +25,15 @@
 ##############################################################################
 import datetime
 from functools import reduce
-from typing import List, Optional
+from typing import List, Optional, Set
+from uuid import UUID
 
 import attr
 from dateutil import relativedelta
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
-from django.utils.text import Truncator
 
-from admission.ddd import NB_MOIS_MIN_VAE
+from admission.ddd import NB_MOIS_MIN_VAE, MOIS_DEBUT_ANNEE_ACADEMIQUE
 from base.models.enums.community import CommunityEnum
 from osis_common.ddd import interface
 from osis_profile.models.enums.curriculum import ActivityType
@@ -86,6 +86,7 @@ class ExperienceAcademiqueDTO(interface.DTO):
     nom_formation_equivalente_communaute_fr: str
     cycle_formation: str
     type_enseignement: str
+    valorisee_par_admissions: Optional[List[str]] = None
 
     def __str__(self):
         return self.nom_formation
@@ -106,14 +107,17 @@ class ExperienceAcademiqueDTO(interface.DTO):
             and not self.a_obtenu_diplome
         )
 
+    @cached_property
+    def derniere_annee(self):
+        return max(self.annees, key=lambda annee: annee.annee).annee
+
     @property
     def titre_formate(self):
         annee_minimale = min(self.annees, key=lambda annee: annee.annee)
-        annee_maximale = max(self.annees, key=lambda annee: annee.annee)
 
         return "{annee_minimale}-{annee_maximale} : {nom_formation}".format(
             annee_minimale=annee_minimale.annee,
-            annee_maximale=annee_maximale.annee + 1,
+            annee_maximale=self.derniere_annee + 1,
             nom_formation=truncatechars(self.nom_formation_equivalente_communaute_fr or self.nom_formation, 30),
         )
 
@@ -129,6 +133,7 @@ class ExperienceNonAcademiqueDTO(interface.DTO):
     fonction: str
     secteur: str
     autre_activite: str
+    valorisee_par_admissions: Optional[List[str]] = None
 
     def __str__(self):
         return str(ActivityType.get_value(self.type))
@@ -139,6 +144,10 @@ class ExperienceNonAcademiqueDTO(interface.DTO):
             return f"{self.date_debut.strftime('%m/%Y')}-{self.date_fin.strftime('%m/%Y')} : {self}"
         else:
             return f"{self.date_debut.strftime('%m/%Y')} : {self}"
+
+    @cached_property
+    def derniere_annee(self):
+        return self.date_fin.year if self.date_fin.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE else self.date_fin.year - 1
 
 
 @attr.dataclass(frozen=True, slots=True)

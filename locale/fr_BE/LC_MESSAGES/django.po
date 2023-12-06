@@ -321,6 +321,9 @@ msgstr "Résumé"
 msgid "Academic Regulations"
 msgstr "Règlement général des études"
 
+msgid "Academic course"
+msgstr "Formation académique"
+
 msgid "Academic experience"
 msgstr "Expérience académique"
 
@@ -381,6 +384,9 @@ msgstr "Sigle de l'entité de gestion"
 
 msgid "Acronym of the training"
 msgstr "Sigle de la formation"
+
+msgid "Action"
+msgstr "Action"
 
 msgid "Actions"
 msgstr "Actions"
@@ -956,6 +962,9 @@ msgstr "Le type de l'adresse de facturation"
 msgid "Block 1"
 msgstr "Bloc 1"
 
+msgid "Block1:"
+msgstr "Bloc 1:"
+
 msgid "Body"
 msgstr "Corps"
 
@@ -1014,6 +1023,7 @@ msgstr "120 crédits non encore acquis"
 msgid "CESS"
 msgstr "CESS"
 
+msgctxt "equivalence_type"
 msgid "CESS equivalence"
 msgstr "Equivalence au CESS"
 
@@ -1454,6 +1464,9 @@ msgstr "Communication avec votre école secondaire"
 msgid "Competent diplomatic post"
 msgstr "Poste diplomatique compétent"
 
+msgid "Compl:"
+msgstr "Compl:"
+
 msgid "Complement"
 msgstr "Complément"
 
@@ -1466,6 +1479,7 @@ msgstr "Formation complémentaire non activée"
 msgid "Complementary training proposition"
 msgstr "Proposition de formation complémentaire"
 
+msgctxt "equivalence_status"
 msgid "Completed"
 msgstr "Complète"
 
@@ -1979,6 +1993,7 @@ msgctxt "admission tab"
 msgid "Defense method"
 msgstr "Modalités de défense"
 
+msgctxt "equivalence_state"
 msgid "Definitive"
 msgstr "Définitive"
 
@@ -2467,6 +2482,7 @@ msgstr "FWB - Crédits acquis"
 msgid "FWB - Registered credits"
 msgstr "FWB - Crédits inscrits"
 
+msgctxt "equivalence_type"
 msgid "FWB academic degree equivalence"
 msgstr "Equivalence de grade académique FWB"
 
@@ -3533,6 +3549,7 @@ msgstr "Domicile légal"
 msgid "Letters of recommendation"
 msgstr "Lettres de recommandation"
 
+msgctxt "equivalence_type"
 msgid "Level equivalence"
 msgstr "Equivalence de niveau"
 
@@ -4052,7 +4069,7 @@ msgstr "Date modif."
 msgid "Modification of a non-academic activity"
 msgstr "Modification d'une activité non-académique"
 
-msgid "Modification of an academic activity"
+msgid "Modification of an academic course"
 msgstr "Modification d'une formation académique"
 
 msgid "Modification of the secondary studies"
@@ -4306,6 +4323,10 @@ msgctxt "checklist"
 msgid "Not concerned"
 msgstr "Non concerné·e"
 
+msgctxt "equivalence_type"
+msgid "Not concerned"
+msgstr "Non concerné·e"
+
 msgid "Not financeable"
 msgstr "Non-finançable"
 
@@ -4315,12 +4336,17 @@ msgstr "Non libre"
 msgid "Not fundable"
 msgstr "Non-finançable"
 
-msgid "Not specified"
-msgstr "Non renseigné"
-
 msgctxt "admission-header"
 msgid "Not specified"
 msgstr "Non précisée"
+
+msgctxt "equivalence_status"
+msgid "Not specified"
+msgstr "Non renseigné"
+
+msgctxt "equivalence_type"
+msgid "Not specified"
+msgstr "Non renseigné"
 
 msgctxt "address"
 msgid "Number"
@@ -4737,6 +4763,13 @@ msgstr ""
 "Veuillez noter que ce document sera retiré de la liste des documents "
 "manquants."
 
+msgid ""
+"Please note that this experience was not part of the application when it was "
+"submitted."
+msgstr ""
+"Attention, cette expérience ne faisait pas partie de la demande lors de sa "
+"soumission."
+
 msgid "Please provide a copy of your curriculum."
 msgstr "Merci de fournir une copie de votre curriculum."
 
@@ -4960,6 +4993,7 @@ msgstr "Soumission de la demande"
 msgid "Proposition type"
 msgstr "Type de la demande"
 
+msgctxt "equivalence_state"
 msgid "Provisional"
 msgstr "Provisoire"
 
@@ -5035,6 +5069,9 @@ msgstr ""
 "Texte du tooltip de la question pour les éléments de formulaire de type "
 "Document, Sélection et Texte. Contenu du message à afficher pour les "
 "éléments de type Message."
+
+msgid "R102"
+msgstr "R102"
 
 msgid "REFUSEE"
 msgstr "Refusée"
@@ -5257,6 +5294,7 @@ msgstr "Résident (au sens du Décret)"
 msgid "Restore activity to submitted"
 msgstr "Remettre cette activité au statut soumise"
 
+msgctxt "equivalence_status"
 msgid "Restricted"
 msgstr "Restrictive"
 
@@ -6727,6 +6765,9 @@ msgstr "Date de mise à jour"
 msgid "Update doctorate admission"
 msgstr "Mettre à jour admission en doctorat"
 
+msgid "Update experience"
+msgstr "Mettre à jour l'expérience"
+
 msgid "Update member"
 msgstr "Modifier le membre"
 
@@ -6790,6 +6831,7 @@ msgstr "Visualiser"
 msgid "WORK_CONTRACT"
 msgstr "Contrat de travail"
 
+msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr "En attente"
 

@@ -31,11 +31,13 @@ from django.test import TestCase
 from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     PoursuiteDeCycle,
 )
-from admission.tests.factories.curriculum import EducationalExperienceYearFactory, EducationalExperienceFactory
+from admission.tests.factories.curriculum import EducationalExperienceYearFactory, EducationalExperienceFactory, \
+    AdmissionProfessionalValuatedExperiencesFactory, AdmissionEducationalValuatedExperiencesFactory
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
@@ -124,6 +126,111 @@ class ChecklistViewTestCase(TestCase):
         self.assertNotContains(response, f'{self.training.acronym}-1')
         self.assertContains(response, self.training.acronym)
         self.assertContains(response, self.training.title)
+
+    def test_get_only_valuated_experiences(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        educational_experience = self.candidate.educationalexperience_set.first()
+        non_educational_experience = self.candidate.professionalexperience_set.first()
+
+        educational_experience_uuid_str = str(educational_experience.uuid)
+        non_educational_experience_uuid_str = str(non_educational_experience.uuid)
+
+        secondary_studies_child_identifier = f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}'
+        educational_experience_child_identifier = f'parcours_anterieur__{educational_experience_uuid_str}'
+        non_educational_experience_child_identifier = f'parcours_anterieur__{non_educational_experience_uuid_str}'
+
+        url = resolve_url('admission:general-education:checklist', uuid=self.general_admission.uuid)
+
+        # No curriculum valuated experiences
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+        past_experiences = [
+            experience['extra']['identifiant']
+            for experience in response.context['original_admission'].checklist['current']['parcours_anterieur'][
+                'enfants'
+            ]
+        ]
+
+        documents = response.context['documents']
+
+        # Experiences
+        self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, past_experiences)
+        self.assertNotIn(educational_experience_uuid_str, past_experiences)
+        self.assertNotIn(non_educational_experience_uuid_str, past_experiences)
+
+        # Documents
+        self.assertIn(secondary_studies_child_identifier, documents)
+        self.assertNotIn(educational_experience_child_identifier, documents)
+        self.assertNotIn(non_educational_experience_child_identifier, documents)
+
+        # Two valuated experiences but by another admission -> we retrieve the experiences but no their documents
+        other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
+
+        educational_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            educationalexperience=educational_experience,
+        )
+
+        non_educational_valuation = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+        past_experiences = [
+            experience['extra']['identifiant']
+            for experience in response.context['original_admission'].checklist['current']['parcours_anterieur'][
+                'enfants'
+            ]
+        ]
+
+        documents = response.context['documents']
+
+        # Experiences
+        self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, past_experiences)
+        self.assertIn(educational_experience_uuid_str, past_experiences)
+        self.assertIn(non_educational_experience_uuid_str, past_experiences)
+
+        # Documents
+        self.assertIn(secondary_studies_child_identifier, documents)
+        self.assertNotIn(educational_experience_child_identifier, documents)
+        self.assertNotIn(non_educational_experience_child_identifier, documents)
+
+        # Two valuated experiences by the current admission -> we retrieve the experiences and their documents
+        educational_valuation.baseadmission = self.general_admission
+        educational_valuation.save(update_fields=['baseadmission'])
+
+        non_educational_valuation.baseadmission = self.general_admission
+        non_educational_valuation.save(update_fields=['baseadmission'])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+        past_experiences = [
+            experience['extra']['identifiant']
+            for experience in response.context['original_admission'].checklist['current']['parcours_anterieur'][
+                'enfants'
+            ]
+        ]
+
+        documents = response.context['documents']
+
+        # Experiences
+        self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, past_experiences)
+        self.assertIn(educational_experience_uuid_str, past_experiences)
+        self.assertIn(non_educational_experience_uuid_str, past_experiences)
+
+        # Documents
+        self.assertIn(secondary_studies_child_identifier, documents)
+        self.assertIn(educational_experience_child_identifier, documents)
+        self.assertIn(non_educational_experience_child_identifier, documents)
 
     def test_poursuite_de_cycle_no(self):
         self.training.education_group_type = EducationGroupTypeFactory(name=TrainingType.BACHELOR.name)

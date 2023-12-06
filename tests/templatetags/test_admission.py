@@ -754,11 +754,11 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             authentication_css_class(EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name),
         )
         self.assertEqual(
-            'fa-solid fa-file-circle-check text-success',
+            'fa-solid fa-file-circle-check text-danger',
             authentication_css_class(EtatAuthentificationParcours.FAUX.name),
         )
         self.assertEqual(
-            'fa-solid fa-file-circle-check text-danger',
+            'fa-solid fa-file-circle-check text-success',
             authentication_css_class(EtatAuthentificationParcours.VRAI.name),
         )
 

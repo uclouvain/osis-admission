@@ -166,10 +166,12 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
         curriculum_pdf: List[str],
+        uuid_proposition: str,
     ) -> None:
         curriculum = profil_candidat_translator.get_curriculum(
             matricule=matricule,
             annee_courante=annee_courante,
+            uuid_proposition=uuid_proposition,
         )
 
         experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
@@ -198,6 +200,7 @@ class ProfilCandidat(interface.DomainService):
         curriculum = profil_candidat_translator.get_curriculum(
             matricule=proposition.matricule_candidat,
             annee_courante=annee_courante,
+            uuid_proposition=proposition.entity_id.uuid,
         )
         experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,

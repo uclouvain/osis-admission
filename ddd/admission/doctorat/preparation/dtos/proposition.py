@@ -32,6 +32,7 @@ import attr
 from admission.ddd.admission.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
 from .doctorat import DoctoratDTO
+from ..domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 
 
 @attr.dataclass(slots=True)
@@ -88,3 +89,7 @@ class PropositionDTO(interface.DTO):
     curriculum: List[str]
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
+
+    @property
+    def est_non_soumise(self):
+        return self.statut in STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE

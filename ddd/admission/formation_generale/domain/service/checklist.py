@@ -128,8 +128,11 @@ class Checklist(interface.DomainService):
         annee_courante: int = None,
     ) -> Optional[StatutsChecklistGenerale]:
         identification_dto = profil_candidat_translator.get_identification(proposition.matricule_candidat)
-        curriculum_dto = profil_candidat_translator.get_curriculum(proposition.matricule_candidat, annee_courante)
-        secondary_studies_dto = profil_candidat_translator.get_etudes_secondaires(proposition.matricule_candidat)
+        curriculum_dto = profil_candidat_translator.get_curriculum(
+            proposition.matricule_candidat,
+            annee_courante,
+            proposition.entity_id.uuid,
+        )
 
         nombre_questions = cls._get_specific_questions_number(
             proposition=proposition,

@@ -30,6 +30,7 @@ import attr
 
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.formation_continue.domain.model.enums import STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
 from osis_common.ddd import interface
 
 
@@ -69,3 +70,7 @@ class PropositionDTO(interface.DTO):
     adresse_facturation: Optional[AdressePersonnelleDTO]
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
+
+    @property
+    def est_non_soumise(self):
+        return self.statut in STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE

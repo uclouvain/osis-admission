@@ -31,6 +31,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO, AdmissionPropositionDTO, AdmissionComptabiliteDTO
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from osis_common.ddd import interface
 
 
@@ -43,6 +44,7 @@ class ResumeProposition(interface.DomainService):
         proposition_dto: AdmissionPropositionDTO,
         comptabilite_dto: Optional[AdmissionComptabiliteDTO] = None,
         groupe_supervision_dto: Optional[GroupeDeSupervisionDTO] = None,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> 'ResumePropositionDTO':
 
         resume_candidat_dto = profil_candidat_translator.recuperer_toutes_informations_candidat(
@@ -51,6 +53,8 @@ class ResumeProposition(interface.DomainService):
             if isinstance(proposition_dto, PropositionDoctoraleDTO)
             else proposition_dto.formation.type,
             annee_courante=annee_courante,
+            uuid_proposition=proposition_dto.uuid,
+            experiences_cv_recuperees=experiences_cv_recuperees,
         )
 
         return ResumePropositionDTO(
