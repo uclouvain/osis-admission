@@ -37,6 +37,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     TypeEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
 from admission.forms import AdmissionFileUploadField, CustomDateInput
 from admission.templatetags.admission import formatted_language, document_request_status_css_class
@@ -44,13 +45,13 @@ from base.forms.utils.choice_field import BLANK_CHOICE
 
 
 class UploadDocumentFormMixin(forms.Form):
-    def __init__(self, mimetypes, *args, **kwargs):
+    def __init__(self, mimetypes, identifier, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['file'] = AdmissionFileUploadField(
             label=_('File'),
             max_files=1,
             min_files=1,
-            mimetypes=mimetypes,
+            forced_mimetypes=mimetypes if identifier in DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION else None,
         )
 
 

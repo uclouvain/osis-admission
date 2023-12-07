@@ -1979,7 +1979,7 @@ class DocumentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(form.fields['file'].max_files, 1)
         self.assertEqual(form.fields['file'].min_files, 1)
-        self.assertCountEqual(form.fields['file'].mimetypes, list(SUPPORTED_MIME_TYPES))
+        self.assertCountEqual(form.fields['file'].mimetypes, [PDF_MIME_TYPE])
 
         response = self.client.get(
             resolve_url(
@@ -2342,7 +2342,7 @@ class DocumentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(form.fields['file'].max_files, 1)
         self.assertEqual(form.fields['file'].min_files, 1)
-        self.assertCountEqual(form.fields['file'].mimetypes, list(SUPPORTED_MIME_TYPES))
+        self.assertCountEqual(form.fields['file'].mimetypes, [PDF_MIME_TYPE])
 
         response = self.client.get(
             resolve_url(
@@ -2906,9 +2906,9 @@ class DocumentViewTestCase(TestCase):
             StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
         )
         self.assertEqual(context['request_form']['reason'].value(), 'My reason')
-        self.assertEqual(context['replace_form'].fields['file'].mimetypes, list(SUPPORTED_MIME_TYPES))
+        self.assertEqual(context['replace_form'].fields['file'].mimetypes, [PDF_MIME_TYPE])
         self.assertEqual(context['replace_form']['file'].value(), [])
-        self.assertEqual(context['upload_form'].fields['file'].mimetypes, list(SUPPORTED_MIME_TYPES))
+        self.assertEqual(context['upload_form'].fields['file'].mimetypes, [PDF_MIME_TYPE])
         self.assertEqual(context['upload_form']['file'].value(), [])
 
         # Filled document

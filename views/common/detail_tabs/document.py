@@ -238,8 +238,8 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
             editable_document=editable_document,
         )
 
-        context['replace_form'] = ReplaceDocumentForm(mimetypes=document.mimetypes)
-        context['upload_form'] = UploadDocumentForm(mimetypes=document.mimetypes)
+        context['replace_form'] = ReplaceDocumentForm(mimetypes=document.mimetypes, identifier=document_identifier)
+        context['upload_form'] = UploadDocumentForm(mimetypes=document.mimetypes, identifier=document_identifier)
 
         return context
 
@@ -424,6 +424,7 @@ class ReplaceDocumentView(DocumentFormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['mimetypes'] = self.document.mimetypes
+        kwargs['identifier'] = self.document_identifier
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -444,7 +445,12 @@ class ReplaceDocumentView(DocumentFormView):
         self.message_on_success = _('The document has been replaced')
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
 
-        return super().form_valid(self.form_class(mimetypes=self.document.mimetypes))
+        return super().form_valid(
+            self.form_class(
+                mimetypes=self.document.mimetypes,
+                identifier=self.document_identifier,
+            )
+        )
 
 
 class UploadDocumentByManagerView(DocumentFormView):
@@ -456,6 +462,7 @@ class UploadDocumentByManagerView(DocumentFormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['mimetypes'] = self.document.mimetypes
+        kwargs['identifier'] = self.document_identifier
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -484,4 +491,9 @@ class UploadDocumentByManagerView(DocumentFormView):
         self.message_on_success = _('The document has been uploaded')
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
 
-        return super().form_valid(self.form_class(mimetypes=self.document.mimetypes))
+        return super().form_valid(
+            self.form_class(
+                mimetypes=self.document.mimetypes,
+                identifier=self.document_identifier,
+            )
+        )
