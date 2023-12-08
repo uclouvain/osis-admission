@@ -31,42 +31,31 @@ import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
-from django.utils.translation import gettext
 from rest_framework import status
 
 from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
 from admission.contrib.models.base import (
-    AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
-    EducationalExperienceYearFactory,
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
-from base.models.academic_year import AcademicYear
-from base.models.campus import Campus
-from base.models.enums.community import CommunityEnum
-from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.organization import OrganizationFactory
-from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
-from osis_profile.models.enums.curriculum import TranscriptType, Result, EvaluationSystem, ActivityType, ActivitySector
-from reference.models.enums.cycle import Cycle
+from osis_profile.models import ProfessionalExperience
+from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
 from reference.tests.factories.country import CountryFactory
-from reference.tests.factories.diploma_title import DiplomaTitleFactory
-from reference.tests.factories.language import LanguageFactory
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -85,7 +74,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         # Create users
@@ -135,11 +124,11 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             uuid=self.general_admission.uuid,
         )
 
-    def test_update_curriculum_is_allowed_for_fac_users(self):
+    def test_update_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
         response = self.client.get(self.form_url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
@@ -434,7 +423,7 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         # Create users
@@ -465,11 +454,10 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
             experience_uuid=self.experience.uuid,
         )
 
-    def test_delete_experience_from_curriculum_is_allowed_for_fac_users(self):
+    def test_delete_experience_from_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
         response = self.client.delete(self.delete_url)
-
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_experience_from_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)

@@ -47,6 +47,7 @@ from admission.ddd.admission.enums import (
     LienParente,
     ChoixAssimilation6,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.accounting import AccountingForm
 from admission.tests.factories.curriculum import EducationalExperienceYearFactory, EducationalExperienceFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -113,7 +114,7 @@ class GeneralAccountingFormViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         # Create users

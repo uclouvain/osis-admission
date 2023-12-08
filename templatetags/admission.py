@@ -34,7 +34,7 @@ from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
-from django.urls import NoReverseMatch, reverse, resolve
+from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from osis_comment.models import CommentEntry
@@ -55,12 +55,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.dtos import EtudesSecondairesDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
+from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -887,6 +886,10 @@ def checklist_state_button(context, **kwargs):
             'sub_id',
         ]
     }
+
+    if context.get('can_update_checklist_tab') is False:
+        expected_attrs['disabled'] = True
+
     return {
         'current': context['current'] or context['initial'],
         **expected_attrs,
@@ -901,7 +904,10 @@ def checklist_state_button(context, **kwargs):
 
 @register.filter
 def edit_button(string, url):
-    return str(string) + f'<a class="btn btn-default" href="{url}"><i class="fas fa-edit"></i></a>'
+    return (
+        str(string)
+        + f'<a class="btn btn-default" href="{url}"><i class="fas fa-{"edit" if "update" in url else "eye"}"></i></a>'
+    )
 
 
 @register.filter
@@ -1024,8 +1030,8 @@ def experience_details_template(
     resume_proposition: ResumePropositionDTO,
     experience,
     specific_questions: List[QuestionSpecifiqueDTO] = None,
-    hide_files=True,
     with_edit_link_button=True,
+    hide_files=True,
 ):
     """
     Return the template used to render the experience details.

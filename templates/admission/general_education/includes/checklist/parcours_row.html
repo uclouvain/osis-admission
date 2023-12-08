@@ -122,7 +122,9 @@
       {% endif %}
     </td>
   {% endif %}
-  <td class="flex-content-no-wrap">
-    {% checklist_experience_action_links experience=experience current_year=year %}
-  </td>
+  {% if show_actions %}
+    <td>
+      {% checklist_experience_action_links experience=experience current_year=year %}
+    </td>
+  {% endif %}
 </tr>

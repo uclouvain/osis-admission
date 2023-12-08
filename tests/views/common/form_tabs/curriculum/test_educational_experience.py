@@ -38,7 +38,10 @@ from admission.contrib.models.base import AdmissionEducationalValuatedExperience
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -83,7 +86,7 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         # Create users
@@ -159,11 +162,11 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
             uuid=self.general_admission.uuid,
         )
 
-    def test_update_curriculum_is_allowed_for_fac_users(self):
+    def test_update_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
         response = self.client.get(self.form_url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
@@ -1661,7 +1664,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         # Create users
@@ -1718,11 +1721,11 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             experience_uuid=self.experience.uuid,
         )
 
-    def test_delete_experience_from_curriculum_is_allowed_for_fac_users(self):
+    def test_delete_experience_from_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
         response = self.client.delete(self.delete_url)
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_experience_from_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)

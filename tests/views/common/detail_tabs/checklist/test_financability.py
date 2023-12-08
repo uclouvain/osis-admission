@@ -41,7 +41,7 @@ from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import ProgramManagerRoleFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -61,6 +61,7 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
         )
 
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
@@ -74,7 +75,7 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
         )
 
     def test_post(self):
-        self.client.force_login(user=self.fac_manager_user)
+        self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(self.url, **self.default_headers)
 
@@ -104,6 +105,7 @@ class FinancabiliteApprovalViewTestCase(TestCase):
         )
 
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
@@ -116,7 +118,7 @@ class FinancabiliteApprovalViewTestCase(TestCase):
         )
 
     def test_post(self):
-        self.client.force_login(user=self.fac_manager_user)
+        self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(
             self.url,
@@ -136,7 +138,7 @@ class FinancabiliteApprovalViewTestCase(TestCase):
         )
         self.assertEqual(
             self.general_admission.financability_rule_established_by,
-            self.fac_manager_user.person,
+            self.sic_manager_user.person,
         )
         self.assertEqual(
             self.general_admission.checklist['current']['financabilite']['statut'],
@@ -158,6 +160,7 @@ class FinancabiliteComputeRuleViewTestCase(TestCase):
         )
 
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
@@ -177,7 +180,7 @@ class FinancabiliteComputeRuleViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
 
     def test_post(self):
-        self.client.force_login(user=self.fac_manager_user)
+        self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.post(
             self.url,

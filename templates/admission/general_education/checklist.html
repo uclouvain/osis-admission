@@ -47,11 +47,44 @@
     {% include "admission/general_education/checklist_menu.html" %}
     {% url base_namespace|add:":checklist" view.kwargs.uuid as checklist_url %}
     {% concat '?next=' checklist_url '&next_hash_url=' as next_base_url %}
-    {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
-    {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
-    {% url base_namespace|add:":update:accounting" view.kwargs.uuid as comptabilite_url %}
-    {% url base_namespace|add:":update:training-choice" view.kwargs.uuid as training_choice_url %}
-    {% url base_namespace|add:":update:specific-questions" view.kwargs.uuid as specific_questions_url %}
+
+    {% can_update_tab 'person' as can_update_person_tab %}
+    {% can_update_tab 'coordonnees' as can_update_coordonnees_tab %}
+    {% can_update_tab 'accounting' as can_update_accounting_tab %}
+    {% can_update_tab 'training-choice' as can_update_training_choice_tab %}
+    {% can_update_tab 'specific-questions' as can_update_specific_questions_tab %}
+    {% can_update_tab 'curriculum' as can_update_curriculum %}
+
+    {% if can_update_person_tab %}
+      {% url base_namespace|add:":update:person" view.kwargs.uuid as person_url %}
+    {% else %}
+      {% url base_namespace|add:":person" view.kwargs.uuid as person_url %}
+    {% endif %}
+
+    {% if can_update_coordonnees_tab %}
+      {% url base_namespace|add:":update:coordonnees" view.kwargs.uuid as coordonnees_url %}
+    {% else %}
+      {% url base_namespace|add:":coordonnees" view.kwargs.uuid as coordonnees_url %}
+    {% endif %}
+
+    {% if can_update_accounting_tab %}
+      {% url base_namespace|add:":update:accounting" view.kwargs.uuid as comptabilite_url %}
+    {% else %}
+      {% url base_namespace|add:":accounting" view.kwargs.uuid as comptabilite_url %}
+    {% endif %}
+
+    {% if can_update_training_choice_tab %}
+      {% url base_namespace|add:":update:training-choice" view.kwargs.uuid as training_choice_url %}
+    {% else %}
+      {% url base_namespace|add:":training-choice" view.kwargs.uuid as training_choice_url %}
+    {% endif %}
+
+    {% if can_update_specific_questions_tab %}
+      {% url base_namespace|add:":update:specific-questions" view.kwargs.uuid as specific_questions_url %}
+    {% else %}
+      {% url base_namespace|add:":specific-questions" view.kwargs.uuid as specific_questions_url %}
+    {% endif %}
+
     {% concat "#choix_formation" as checklist_training_choice_url %}
 
     <div
@@ -111,7 +144,12 @@
 
           <div class="info-part">
             <dl>
-              <dt>{% trans "Course choice" %} {{ ''|tab_edit_button:'#choix_formation'|safe }}</dt>
+              <dt>
+                {% trans "Course choice" %}
+                {% if can_update_checklist_tab %}
+                  {{ ''|tab_edit_button:'#choix_formation'|safe }}
+                {% endif %}
+              </dt>
               <dd>
                 {% with formation=admission.formation %}
                   {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
@@ -130,7 +168,7 @@
             </dl>
 
             {% panel _("Parcours") %}
-            {% include "admission/general_education/includes/checklist/parcours.html" with prefix="financabilite" default_tab="financabilite" %}
+            {% include "admission/general_education/includes/checklist/parcours.html" with prefix="financabilite" default_tab="financabilite" show_actions=can_update_curriculum %}
             {% endpanel %}
           </div>
         </div>
@@ -182,8 +220,12 @@
 
             {% firstof training_choice_url|add:next_url as contextual_training_choice %}
             {% translate "Course" context 'admission' as course_label %}
-            {% display course_label ''|tab_edit_button:'#choix_formation' as button %}
-            {% field_data button resume_proposition.proposition.formation %}
+            {% if can_update_checklist_tab %}
+              {% display course_label ''|tab_edit_button:'#choix_formation' as button %}
+              {% field_data button resume_proposition.proposition.formation %}
+            {% else %}
+              {% field_data course_label resume_proposition.proposition.formation %}
+            {% endif %}
 
             {% if resume_proposition.proposition.formation.type|admission_training_type == 'MASTER' and resume_proposition.proposition.candidat_vip %}
               {% include 'admission/general_education/includes/checklist/vip_profile.html' with url=contextual_training_choice %}
@@ -232,10 +274,15 @@
           {% bootstrap_form comment_forms.parcours_anterieur %}
           {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' %}
           {% panel _("Previous experience") %}
-            {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' %}
+            {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' show_actions=can_update_curriculum %}
           {% endpanel %}
           <div class="info-part">
-            <strong>{{ _('Financeability')|tab_edit_button:'#financabilite'|safe }}</strong>
+            <strong>
+              {% translate 'Financeability' %}
+              {% if can_update_checklist_tab %}
+                {{ ''|tab_edit_button:'#financabilite'|safe }}
+              {% endif %}
+            </strong>
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
@@ -249,12 +296,12 @@
                   {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
                 </p>
                 <div>
-                  {% experience_details_template resume_proposition=resume_proposition experience=experience hide_files=False with_edit_link_button=False %}
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False hide_files=False %}
                 </div>
               {% else %}
                 {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant %}
                 <div>
-                  {% experience_details_template resume_proposition=resume_proposition experience=experience %}
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=can_update_curriculum %}
                 </div>
               {% endif %}
             {% endwith %}
