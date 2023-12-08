@@ -244,7 +244,7 @@
         {% for child in current.enfants %}
           <div role="tabpanel" class="tab-pane" id="parcours_anterieur__{{ child.extra.identifiant }}">
             {% with experience=experiences_by_uuid|get_item:child.extra.identifiant %}
-              {% if experience.valorisee_par_admissions != None or view.admission_uuid not in experience.valorisee_par_admissions %}
+              {% if experience.valorisee_par_admissions != None and view.kwargs.uuid not in experience.valorisee_par_admissions %}
                 <p class="alert alert-warning">
                   {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
                 </p>
