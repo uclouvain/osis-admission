@@ -95,6 +95,6 @@ class Notification(INotification):
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING,
             admission.candidate.language,
             common_tokens,
-            recipients=[admission.candidate],
+            recipients=[admission.candidate.email],
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
