@@ -42,6 +42,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
@@ -369,4 +370,19 @@ class PropositionInMemoryRepository(
             if proposition.etat_equivalence_titre_acces
             else '',
             date_prise_effet_equivalence_titre_acces=proposition.date_prise_effet_equivalence_titre_acces,
+        )
+
+    @classmethod
+    def initialiser_checklist_proposition(cls, proposition_id: 'PropositionIdentity'):
+        from admission.infrastructure.admission.formation_generale.domain.service.in_memory.question_specifique import (
+            QuestionSpecifiqueInMemoryTranslator,
+        )
+
+        proposition = cls.get(proposition_id)
+        Checklist.initialiser(
+            proposition=proposition,
+            formation=FormationGeneraleInMemoryTranslator.get(proposition.formation_id),
+            profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
+            annee_courante=proposition.annee_calculee,
+            questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
         )

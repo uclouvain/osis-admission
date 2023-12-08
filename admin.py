@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Dict
 
 from django import forms
 from django.conf import settings
@@ -756,6 +757,11 @@ class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
 
     def get_hijack_user(self, obj):
         return obj.person.user
+
+    def _build_model_from_csv_row(self, csv_row: Dict):
+        central_manager = super()._build_model_from_csv_row(csv_row)
+        central_manager.scopes = csv_row.get('SCOPES', 'ALL').split("|")
+        return central_manager
 
 
 class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):

@@ -239,6 +239,18 @@
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
         </div>
+
+        {% for child in current.enfants %}
+          <div role="tabpanel" class="tab-pane" id="parcours_anterieur__{{ child.extra.identifiant }}">
+            {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant %}
+
+            <div>
+            {% with experience=experiences_by_uuid|get_item:child.extra.identifiant %}
+              {% experience_details_template resume_proposition=resume_proposition experience=experience %}
+            {% endwith %}
+            </div>
+          </div>
+        {% endfor %}
       {% endwith %}
       {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation next_url=next_base_url|add:'specificites_formation' %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
@@ -261,7 +273,7 @@
                 {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
               {% endpanel %}
             {% endif %}
-            {% multiple_field_data questions_specifiques title=_('Dynamic questions about "Specific aspects" sub-tab') %}
+            {% multiple_field_data specific_questions_by_tab|get_item:'INFORMATIONS_ADDITIONNELLES' title=_('Dynamic questions about "Specific aspects" sub-tab') %}
           </div>
 
         </div>
@@ -350,6 +362,14 @@
 
       (function ($) {
           const defaultTab = window.location.hash || '#donnees_personnelles';
+          const buttonClassByState = {
+              INITIAL_NON_CONCERNE: 'fas fa-xmark text-muted',
+              GEST_EN_COURS: 'fas fa-pencil text-warning',
+              GEST_BLOCAGE: 'fas fa-circle-stop text-danger',
+              GEST_BLOCAGE_ULTERIEUR: 'fas fa-circle-arrow-right text-info',
+              GEST_REUSSITE: 'fas fa-check text-success',
+              SYST_REUSSITE: 'fas fa-check text-success',
+          };
 
           function refreshDocuments() {
               const selectedTab = window.location.hash || defaultTab;
@@ -369,11 +389,6 @@
               );
           }
 
-          // Activate tab from hash on first load
-          $(`#checklist-menu li[data-toggle="tab"][href="${defaultTab}"]`).click();
-
-          refreshDocuments();
-
           function autogrow () {
               if (this.scrollHeight > this.clientHeight) {
                   this.style.height = `${this.scrollHeight}px`;
@@ -384,7 +399,23 @@
               autogrow.call(this);
           });
 
-          $('#checklist-menu li[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+          const menuItems = $('#checklist-menu *[data-toggle="tab"]');
+
+          menuItems.on('show.bs.tab', function (e) {
+              {# Don't indicate the previous tab as selected #}
+              $('#checklist-menu .active').removeClass('active');
+              {# Hide all sub-items except the selected one #}
+              const parentOfSelectedElement = $(this).parent()[0];
+              $('#checklist-menu .sub-items').each(function(event){
+                  if ($(this)[0] !== parentOfSelectedElement) {
+                      $(this).hide();
+                  }
+              })
+          });
+
+          menuItems.on('shown.bs.tab', function (e) {
+              $(this).parents('.list-group-item').find('.sub-items').show();
+
               const tabPaneId = $(this).attr('href');
               window.location.hash = tabPaneId;
 
@@ -410,6 +441,13 @@
               $(`#checklist-menu li[href="${$(this).attr('href')}"] `).click();
           });
 
+          $('#checklist-menu div[data-toggle="tab"]').on('click', function (event) {
+              // When selecting a tab that have children,
+              const parent = $(this).parent();
+              parent.removeClass('active');
+              parent.find('.sub-item').show('active');
+          });
+
           // TODO find a way to genericly save extra and status
 
           let configurationCache = null;
@@ -419,6 +457,9 @@
           $(document).ready(function () {
               configurationCache = new BaseCache('admission_checklist_configuration');
               sidebars.css('min-width', configurationCache.getItem('split_size', '20%'));
+
+              // Activate tab from hash on first load
+              $(`#checklist-menu *[data-toggle="tab"][href="${defaultTab}"]`).click();
 
               if (configurationCache.getItem('side-tab', 'documents') === 'info') {
                   $('#infos-shortcut').click();
@@ -493,22 +534,17 @@
 
               if (elt.classList.contains('checklist-state-button')) {
                   {# Click on checklist state button #}
-                  const siblingsButton = formGroup.querySelectorAll('button');
-                  for (let i = 0; i < siblingsButton.length; i++) {
-                      if (siblingsButton[i].classList.contains('active')) {
-                          siblingsButton[i].disabled = false;
-                          previousSelectedButton = siblingsButton[i];
-                      }
-                      siblingsButton[i].classList.remove(
-                          'active',
-                          'btn-muted',
-                          'btn-info',
-                          'btn-warning',
-                          'btn-danger',
-                          'btn-success',
-                      )
-                      siblingsButton[i].classList.add('btn-default');
-                  }
+                  previousSelectedButton = formGroup.querySelector('button.active');
+                  previousSelectedButton.disabled = false;
+                  previousSelectedButton.classList.remove(
+                      'active',
+                      'btn-muted',
+                      'btn-info',
+                      'btn-warning',
+                      'btn-danger',
+                      'btn-success',
+                  )
+                  previousSelectedButton.classList.add('btn-default');
                   elt.querySelector('i').className = 'fas fa-spinner fa-spin-pulse';
               } else {
                   formGroup.classList.add("saving");
@@ -549,9 +585,8 @@
 
                   {# Change the state icon in the list of the tabs #}
                   const currentTabHref = $('#checklist-menu').find('.active').attr('href');
-                  htmx.ajax('GET', './checklist', '#checklist-menu').then(() => {
-                      $('#checklist-menu').find('li').removeClass('active').filter('[href="' + currentTabHref + '"]').addClass('active');
-                  });
+                  const currentItem = $('#checklist-menu').find('div[href="' + currentTabHref + '"] i');
+                  currentItem[0].className = buttonClassByState[buttonToSelect.dataset.status];
               } else {
                   if (formGroup) formGroup.classList.remove("saving");
                   elt.readOnly = false;
@@ -691,6 +726,9 @@
       cursor: pointer;
       background: inherit;
       color: inherit;
+    }
+
+    #checklist-menu li.active > div > a, #checklist-menu li.active > a {
       font-weight: bold;
     }
 
@@ -885,6 +923,12 @@
       position: sticky;
       bottom: 0;
       background: white;
+    }
+
+    #checklist-menu .sub-items {
+      margin-top: 1em;
+      margin-bottom: 0;
+      max-width: 300px;
     }
 
   </style>

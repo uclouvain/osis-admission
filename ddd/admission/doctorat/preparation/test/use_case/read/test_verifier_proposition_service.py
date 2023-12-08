@@ -98,6 +98,7 @@ from admission.infrastructure.admission.domain.service.in_memory.profil_candidat
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.establishment_type import EstablishmentTypeEnum
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from osis_profile.models.enums.curriculum import (
@@ -108,6 +109,7 @@ from osis_profile.models.enums.curriculum import (
     ActivityType,
     ActivitySector,
 )
+from reference.models.enums.cycle import Cycle
 
 
 class TestVerifierPropositionServiceCommun(TestCase):
@@ -1002,6 +1004,9 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             adresse_institut='',
             communaute_institut='',
             nom_regime_linguistique='',
+            type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
+            cycle_formation=Cycle.FIRST_CYCLE.name,
+            nom_formation_equivalente_communaute_fr='Formation B',
         )
 
     def assertAnneesCurriculum(self, exceptions, messages):

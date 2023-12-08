@@ -51,7 +51,7 @@
     <td></td>
     <td></td>
     <td></td>
-  {% elif experience|est_etudes_secondaires %}
+  {% elif experience|est_etudes_secondaires and experience.annee_diplome_etudes_secondaires or experience|est_etudes_secondaires and experience.alternative_secondaires.examen_admission_premier_cycle %}
     <td>{% if experience.diplome_etudes_secondaires == 'YES' %}<i class="fa fa-graduation-cap"></i>{% endif %}</td>
     <td>
       {% if experience.diplome_belge %}

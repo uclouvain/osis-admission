@@ -35,6 +35,8 @@ __all__ = [
     'ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE',
     'ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING',
     'ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING',
+    'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL',
+    'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL',
 ]
 
 
@@ -65,13 +67,8 @@ DOCUMENT_TOKENS = admission_common_tokens + [
         example='Identity card. The format is unknown.',
     ),
     Token(
-        name='later_blocking_requested_documents',
-        description=_('List of the mandatory requested documents that can be submitted later, with the reason'),
-        example='Identity card. The format is unknown.',
-    ),
-    Token(
-        name='later_non_blocking_requested_documents',
-        description=_('List of the not-mandatory requested documents that can be submitted later, with the reason'),
+        name='later_requested_documents',
+        description=_('List of the requested documents that can be submitted later, with the reason'),
         example='Identity card. The format is unknown.',
     ),
     Token(
@@ -165,4 +162,71 @@ templates.register(
     ),
     tag=CONTINUING_ADMISSION_TAG,
     tokens=DOCUMENT_TOKENS,
+)
+
+
+DOCUMENTS_CONFIRM_TOKENS = admission_common_tokens + [
+    Token(
+        name='training_acronym',
+        description=_('Acronym of the training'),
+        example='ESP3DP',
+    ),
+    Token(
+        name='training_campus',
+        description=_('Teaching campus of the training'),
+        example='Louvain-La-Neuve',
+    ),
+    Token(
+        name='training_year',
+        description=_('Year of the training'),
+        example='2023-2024',
+    ),
+    Token(
+        name='requested_submitted_documents',
+        description=_('List of the requested documents that have been submitted'),
+        example=_('Identity card'),
+    ),
+    Token(
+        name='requested_not_submitted_documents',
+        description=_('List of the requested documents that haven\'t been submitted'),
+        example=_('Identity card'),
+    ),
+    Token(
+        name='admission_reference',
+        description=_('Reference of the admission'),
+        example='L-ESPO24-100.102',
+    ),
+    Token(
+        name='salutation',
+        description=_('Mail salutation'),
+        example='Chère',
+    ),
+    Token(
+        name='enrolment_service_email',
+        description=_('Enrolment campus email'),
+        example='inscription-lln@uclouvain.be',
+    ),
+]
+
+ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL = (
+    'osis-admission-submission-confirm-with-submitted-and-not-submitted-general'
+)
+templates.register(
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL,
+    description=_(
+        'Mail sent to the candidate to inform him that some requested documents have been received '
+        'and some are still missing for general education'
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=DOCUMENTS_CONFIRM_TOKENS,
+)
+
+ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL = 'osis-admission-submission-confirm-with-submitted-general'
+templates.register(
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL,
+    description=_(
+        'Mail sent to the candidate to inform him that all requested documents have been received for general education'
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=DOCUMENTS_CONFIRM_TOKENS,
 )

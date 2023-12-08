@@ -55,6 +55,8 @@ from admission.infrastructure.admission.repository.in_memory.emplacement_documen
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
 class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
@@ -67,6 +69,15 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
         self.uuid_id1 = str(uuid.uuid4())
         self.uuid_id2 = str(uuid.uuid4())
         self.proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-MASTER-SCI'))
+        academic_year_repository = AcademicYearInMemoryRepository()
+        for annee in range(2016, 2023):
+            academic_year_repository.save(
+                AcademicYear(
+                    entity_id=AcademicYearIdentity(year=annee),
+                    start_date=datetime.date(annee, 9, 15),
+                    end_date=datetime.date(annee + 1, 9, 30),
+                )
+            )
 
     @freezegun.freeze_time("2023-01-03", as_kwarg="freeze_time")
     def test_should_completer_emplacements_documents_demandes_par_fac(self, freeze_time):

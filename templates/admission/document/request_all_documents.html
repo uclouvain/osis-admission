@@ -131,7 +131,7 @@
               {% endif %}
           });
 
-          function resetListOfDocuments(containerSelector, optionValue) {
+          function resetListOfDocuments(containerSelector, optionsValues) {
               const contentToUpdate = defaultMessageElement.find(containerSelector);
               const contentToUpdateParent = contentToUpdate.parent();
 
@@ -143,7 +143,7 @@
               let htmlDocumentsList = '';
               let previousTab = '';
               requestedDocumentsSelects.each(function(){
-                  if ($(this).val() === optionValue) {
+                  if (optionsValues.indexOf($(this).val()) >= 0) {
                       const selectedDocument = requestedDocuments[$(this).attr('name')];
                       if(previousTab !== selectedDocument['tab']) {
                           if (previousTab !== '') htmlDocumentsList += '</ul></li>'
@@ -169,13 +169,12 @@
               if (!instance) return;
 
               {# Update the list of documents #}
-              resetListOfDocuments('#immediate-requested-documents-email-list', 'IMMEDIATEMENT');
-              resetListOfDocuments('#later-blocking-requested-documents-email-list', 'ULTERIEUREMENT_BLOQUANT');
-              resetListOfDocuments('#later-non-blocking-requested-documents-email-list', 'ULTERIEUREMENT_NON_BLOQUANT');
+              resetListOfDocuments('#immediate-requested-documents-email-list', ['IMMEDIATEMENT']);
+              resetListOfDocuments('#later-requested-documents-email-list', ['ULTERIEUREMENT_BLOQUANT', 'ULTERIEUREMENT_NON_BLOQUANT']);
 
               {# Update the deadline #}
               const currentDate = moment($('#id_deadline').val(), "DD-MM-YYYY");
-              defaultMessageElement.find('#request_deadline').html(currentDate.isValid()
+              defaultMessageElement.find('.request_deadline').html(currentDate.isValid()
                   ? moment(currentDate).format('D MMMM YYYY')
                   : '<span style="background-color: #f2dede">[{% translate 'Invalid date' %}]</span>'
               );

@@ -51,6 +51,10 @@ ALL_EMPTY_CHOICE = (('', _('All')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
 EMPTY_CHOICE_AS_LIST = [list(EMPTY_CHOICE[0])]
+FORM_SET_PREFIX = '__prefix__'
+FOLLOWING_FORM_SET_PREFIX = '__prefix_1__'
+OSIS_DOCUMENT_UPLOADER_CLASS = 'document-uploader'
+OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX = '__{}__'.format(OSIS_DOCUMENT_UPLOADER_CLASS)
 
 DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
     'data-minimum-input-length': 3,
@@ -226,12 +230,22 @@ RadioBooleanField = partial(
 
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
+        to_field_name = kwargs.get('to_field_name', '')
+
+        forward_params = [
+            forward.Const(True, 'active'),
+        ]
+
+        # The ids of the returned results will be the 'id_field' fields of the country model instead of 'pk'
+        if to_field_name:
+            forward_params.append(forward.Const(to_field_name, 'id_field'))
+
         kwargs.setdefault(
             'widget',
             autocomplete.ListSelect2(
                 url="admission:autocomplete:countries",
                 attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
-                forward=[forward.Const(True, 'active')],
+                forward=forward_params,
             ),
         )
         kwargs.setdefault('queryset', Country.objects.none())
