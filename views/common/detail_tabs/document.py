@@ -78,7 +78,7 @@ __all__ = [
 
 class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     form_class = UploadFreeDocumentForm
-    permission_required = 'admission.view_documents_management'
+    permission_required = 'admission.change_documents_management'
     template_name = 'admission/document/upload_free_document.html'
     htmx_template_name = 'admission/document/upload_free_document.html'
     default_htmx_trigger_form_extra = {
@@ -146,7 +146,7 @@ def can_edit_document(person: Person, document: AdmissionDocument) -> bool:
 
 
 class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    permission_required = 'admission.view_documents_management'
+    permission_required = 'admission.change_documents_management'
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
@@ -248,7 +248,7 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
-    permission_required = 'admission.view_documents_management'
+    permission_required = 'admission.change_documents_management'
     name = 'document-action'
 
     def get_context_data(self, **kwargs):

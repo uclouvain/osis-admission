@@ -26,10 +26,12 @@
 
 from unittest import mock
 
+from django.conf import settings
 from django.test import TestCase
+from django.utils import translation
 from osis_signature.enums import SignatureState
 
-from admission.auth.predicates import common, doctorate, general
+from admission.auth.predicates import common, doctorate, general, not_in_general_statuses_predicate_message
 from admission.auth.predicates.general import is_invited_to_pay_after_request
 from admission.auth.roles.cdd_configurator import CddConfigurator
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -398,4 +400,32 @@ class PredicatesTestCase(TestCase):
                 general.is_submitted(admission.candidate.user, admission),
                 status in STATUTS_PROPOSITION_GENERALE_SOUMISE,
                 status,
+            )
+
+    def not_in_general_statuses_predicate_message_in_english(self):
+        with translation.override(settings.LANGUAGE_CODE_EN):
+            result = not_in_general_statuses_predicate_message(
+                statuses=[
+                    ChoixStatutPropositionGenerale.CONFIRMEE.name,
+                    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+                ]
+            )
+            self.assertEqual(
+                result,
+                'The global status of the application must be one of the following in order to realize this action: '
+                'Application confirmed (by student), To be completed (by student) for the Enrolment Office (SIC).',
+            )
+
+    def not_in_general_statuses_predicate_message_in_french(self):
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            result = not_in_general_statuses_predicate_message(
+                statuses=[
+                    ChoixStatutPropositionGenerale.CONFIRMEE.name,
+                    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+                ]
+            )
+            self.assertEqual(
+                result,
+                'Le statut global de la demande doit être l\'un des suivants pour pouvoir réaliser cette action : '
+                'Demande confirmée (par étudiant), A compléter (par étudiant) pour SIC.',
             )

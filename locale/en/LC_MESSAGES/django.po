@@ -5561,6 +5561,11 @@ msgid_plural "The following admissions have not been updated: {}."
 msgstr[0] ""
 msgstr[1] ""
 
+msgid ""
+"The global status of the application must be one of the following in order "
+"to realize this action: "
+msgstr ""
+
 #, python-format
 msgid ""
 "The global status of the application must be one of the following in order "
@@ -5571,12 +5576,6 @@ msgstr ""
 msgid ""
 "The global status of the application must be one of the following in order "
 "to submit the dossier to the faculty: %(statuses)s."
-msgstr ""
-
-#, python-format
-msgid ""
-"The global status of the application must be one of the following to realize "
-"this action: %(statuses)s."
 msgstr ""
 
 msgid "The jury is not in progress"

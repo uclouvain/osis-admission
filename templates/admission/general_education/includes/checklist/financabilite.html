@@ -25,6 +25,7 @@
 {% endcomment %}
 
 {% with initial=original_admission.checklist.initial.financabilite current=original_admission.checklist.current.financabilite %}
+  {% has_perm 'admission.change_checklist' as can_change_checklist %}
   <div role="tabpanel" class="tab-pane" id="financabilite-content"
        hx-target="this" hx-swap-oob="true">
     <div class="form-group btn-group status-group" role="group">
@@ -67,9 +68,11 @@
           {% blocktrans trimmed with rule=original_admission.financability_rule|financability_enum_display established_by=original_admission.financability_rule_established_by %}
             {{ rule }} (Established by {{ established_by }})
           {% endblocktrans %}
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#financabilite-approval-modal">
-            <i class="fa fa-pencil"></i> {% translate "Change rule" %}
-          </button>
+          {% if can_change_checklist %}
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#financabilite-approval-modal">
+              <i class="fa fa-pencil"></i> {% translate "Change rule" %}
+            </button>
+          {% endif %}
           <br>
         {% endif %}
         <em>
@@ -81,9 +84,11 @@
           {% endblocktrans %}
         {% endif %}
         </em>
-        <a class="btn btn-primary" href="#" hx-post="{% url view.base_namespace|add:':financability-compute-rule' uuid=view.kwargs.uuid %}">
-          <i class="fa fa-rotate-right"></i> {% trans "Recompute" %}
-        </a>
+        {% if can_change_checklist %}
+          <a class="btn btn-primary" href="#" hx-post="{% url view.base_namespace|add:':financability-compute-rule' uuid=view.kwargs.uuid %}">
+            <i class="fa fa-rotate-right"></i> {% trans "Recompute" %}
+          </a>
+        {% endif %}
       </div>
     </div>
 

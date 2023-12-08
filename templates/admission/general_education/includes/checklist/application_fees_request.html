@@ -24,7 +24,7 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% with initial=original_admission.checklist.initial.frais_dossier current=original_admission.checklist.current.frais_dossier %}
+{% with initial=original_admission.checklist.initial.frais_dossier current=original_admission.checklist.current.frais_dossier can_update_checklist_tab=can_change_payment %}
   <div
       id="request-application-fees-container"
       hx-target="this"

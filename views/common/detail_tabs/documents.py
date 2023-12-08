@@ -88,6 +88,12 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         CONTEXT_GENERAL: general_education_commands.ReclamerDocumentsAuCandidatParSICCommand,
     }
 
+    def get_permission_required(self):
+        if self.request.method == 'POST':
+            return ['admission.change_documents_management']
+        else:
+            return ['admission.view_documents_management']
+
     def get_template_names(self):
         self.htmx_template_name = (
             'admission/document/request_all_documents.html'

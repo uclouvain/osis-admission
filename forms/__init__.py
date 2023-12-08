@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 from functools import partial
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import phonenumbers
 from dal import forward
@@ -35,7 +35,7 @@ from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
 
-from admission.constants import SUPPORTED_MIME_TYPES, PDF_MIME_TYPE
+from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
 from admission.forms import autocomplete
@@ -334,3 +334,14 @@ def get_diplomatic_post_initial_choices(diplomatic_post):
             diplomatic_post.name_fr if get_language() == settings.LANGUAGE_CODE else diplomatic_post.name_en,
         ),
     )
+
+
+def disable_unavailable_forms(forms_by_access: Dict[forms.Form, bool]):
+    """
+    Disable forms that are not available for the current user.
+    :param forms_by_access: Association between the form and its availability.
+    """
+    for form, is_available in forms_by_access.items():
+        if not is_available:
+            for field in form.fields:
+                form.fields[field].disabled = True

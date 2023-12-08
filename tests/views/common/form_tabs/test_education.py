@@ -35,6 +35,7 @@ from rest_framework import status
 from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from admission.tests.factories.secondary_studies import (
@@ -92,7 +93,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
             training=self.training,
             candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
             candidate__graduated_from_high_school_year=self.academic_years[1],
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         # Url
@@ -112,11 +113,11 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         patched = patcher.start()
         patched.side_effect = lambda _, value: value
 
-    def test_update_education_is_allowed_for_fac_users(self):
+    def test_update_education_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
         response = self.client.get(self.form_url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_education_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
@@ -571,7 +572,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             training=self.training,
             candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
             candidate__graduated_from_high_school_year=self.academic_years[1],
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         # Url
@@ -591,11 +592,11 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         patched = patcher.start()
         patched.side_effect = lambda _, value: value
 
-    def test_update_education_is_allowed_for_fac_users(self):
+    def test_update_education_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
         response = self.client.get(self.form_url)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_education_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)

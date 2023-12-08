@@ -24,7 +24,7 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire %}
+{% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire can_update_checklist_tab=can_change_faculty_decision %}
   <div
       id="fac-decision-container"
       hx-target="this"
@@ -125,11 +125,11 @@
             {% translate 'Reason for refusal' %}
             {% if can_change_faculty_decision %}
               <button
-                  class="btn btn-primary"
+                  class="btn btn-default"
                   data-toggle="modal"
                   data-target="#fac-decision-refusal-modal"
               >
-                <i class="fa fa-pen"></i>
+                <i class="fa fa-edit"></i>
               </button>
             {% endif %}
           </div>
@@ -163,11 +163,11 @@
             {% translate 'Approval' %}
             {% if can_change_faculty_decision %}
               <button
-                  class="btn btn-primary"
+                  class="btn btn-default"
                   data-toggle="modal"
                   data-target="#fac-decision-approval-modal"
               >
-                <i class="fa fa-pen"></i>
+                <i class="fa fa-edit"></i>
               </button>
             {% endif %}
           </div>
