@@ -99,6 +99,9 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.question_specifique import (
     QuestionSpecifiqueInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.reference import (
+    ReferenceInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -134,6 +137,7 @@ _pdf_generation = PDFGenerationInMemory()
 _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
 _poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
 _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
+_reference_translator = ReferenceInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -383,19 +387,23 @@ COMMAND_HANDLERS = {
     ),
     PayerFraisDossierPropositionSuiteSoumissionCommand: (
         lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_soumission(
+            msg_bus,
             cmd,
             proposition_repository=_proposition_repository,
             notification=_notification,
             paiement_frais_dossier_service=_paiement_frais_dossier,
             historique=_historique_formation_generale,
+            reference_translator=_reference_translator,
         )
     ),
     PayerFraisDossierPropositionSuiteDemandeCommand: (
         lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_demande(
+            msg_bus,
             cmd,
             proposition_repository=_proposition_repository,
             paiement_frais_dossier_service=_paiement_frais_dossier,
             historique=_historique_formation_generale,
+            reference_translator=_reference_translator,
         )
     ),
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand: (
