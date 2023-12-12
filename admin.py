@@ -36,6 +36,7 @@ from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext
 from hijack.contrib.admin import HijackUserAdminMixin
+from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
 from admission.auth.roles.adre import AdreSecretary
@@ -76,7 +77,6 @@ from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
-from osis_document.contrib import FileField
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
@@ -537,6 +537,12 @@ class DiplomaticPostAdmin(admin.ModelAdmin):
     list_display = ['name_fr', 'name_en', 'email']
 
 
+class OnlinePaymentAdmin(admin.ModelAdmin):
+    search_fields = ['admission', 'payment_id']
+    list_display = ['admission', 'payment_id', 'status', 'method']
+    list_filter = ['status', 'method']
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
@@ -552,6 +558,7 @@ admin.site.register(RefusalReasonCategory, RefusalReasonCategoryAdmin)
 admin.site.register(RefusalReason, RefusalReasonAdmin)
 admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
 admin.site.register(DiplomaticPost, DiplomaticPostAdmin)
+admin.site.register(OnlinePayment, OnlinePaymentAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
