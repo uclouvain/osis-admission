@@ -334,6 +334,6 @@ class Notification(INotification):
             else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL,
             admission.candidate.language,
             tokens,
-            recipients=[admission.candidate.email],
+            recipients=[admission.candidate.private_email],
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
