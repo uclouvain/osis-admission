@@ -2623,6 +2623,9 @@ msgstr ""
 msgid "Help text"
 msgstr ""
 
+msgid "Hide the checklist menu"
+msgstr ""
+
 msgctxt "tab"
 msgid "History"
 msgstr ""
@@ -5103,6 +5106,9 @@ msgid "Short name"
 msgstr ""
 
 msgid "Show details"
+msgstr ""
+
+msgid "Show the checklist menu"
 msgstr ""
 
 msgid "Signatures"

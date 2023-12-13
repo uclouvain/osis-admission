@@ -67,6 +67,7 @@
   body {
     font-family: Calibri, Arial, sans-serif;
     font-size: 11pt;
+    overflow-wrap: break-word;
   }
 
   dl {

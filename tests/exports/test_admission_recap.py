@@ -700,6 +700,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
                     'coordinates',
                     'training_choice',
                     'languages',
+                    'curriculum_attachment',
                     'curriculum_academic_experience',
                     'curriculum_non_academic_experience',
                     'curriculum',
@@ -717,6 +718,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['coordinates'].title, 'Coordonnées')
         self.assertEqual(call_args_by_tab['training_choice'].title, 'Choix de formation')
         self.assertEqual(call_args_by_tab['languages'].title, 'Connaissance des langues')
+        self.assertEqual(call_args_by_tab['curriculum_attachment'].title, 'Curriculum vitae détaillé, daté et signé')
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
         self.assertEqual(
             call_args_by_tab['curriculum_academic_experience'].title,
@@ -748,7 +750,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
 
-        self.assertEqual(len(tabs_titles), 10)
+        self.assertEqual(len(tabs_titles), 11)
 
         self.assertNotIn('Curriculum > Computer science (2021-2023)', tabs_titles)
         self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
@@ -771,7 +773,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
 
-        self.assertEqual(len(tabs_titles), 10)
+        self.assertEqual(len(tabs_titles), 11)
 
         self.assertNotIn('Curriculum > Computer science (2021-2023)', tabs_titles)
         self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
@@ -792,7 +794,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
 
-        self.assertEqual(len(tabs_titles), 12)
+        self.assertEqual(len(tabs_titles), 13)
 
         self.assertIn('Curriculum > Computer science (2021-2023)', tabs_titles)
         self.assertIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)

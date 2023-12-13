@@ -768,6 +768,7 @@ def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], ti
         'title': title,
         'all_inline': context.get('all_inline'),
         'load_files': context.get('load_files'),
+        'hide_files': context.get('hide_files'),
     }
 
 
