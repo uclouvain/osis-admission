@@ -559,7 +559,11 @@ def get_sections(
         pdf_sections.append(get_languages_section(context, load_content))
 
     if not hide_curriculum:
+        # Display the global curriculum page and the related attachments
         pdf_sections.append(get_curriculum_section(context, specific_questions_by_tab, load_content))
+    else:
+        # Only display the curriculum attachments
+        pdf_sections.append(get_curriculum_section(context, {Onglets.CURRICULUM.name: []}, False))
 
     # We keep all the experiences even the ones that are not valuated when the admission has not been submitted,
     # otherwise we only keep the ones that have been valuated by the current admission

@@ -2851,6 +2851,9 @@ msgstr "Nom du siège social"
 msgid "Help text"
 msgstr "Texte d'aide"
 
+msgid "Hide the checklist menu"
+msgstr "Cacher le menu de la checklist"
+
 msgctxt "tab"
 msgid "History"
 msgstr "Historique"
@@ -5630,6 +5633,9 @@ msgstr "Nom court"
 
 msgid "Show details"
 msgstr "Voir le détail"
+
+msgid "Show the checklist menu"
+msgstr "Afficher le menu de la checklist"
 
 msgid "Signatures"
 msgstr "Signatures"

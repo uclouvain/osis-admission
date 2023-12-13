@@ -182,7 +182,12 @@ class AllAdmissionsFilterForm(forms.Form):
     )
 
     def __init__(self, user, load_labels=False, *args, **kwargs):
+        if kwargs.get('data'):
+            kwargs['data'] = kwargs['data'].copy()
+            kwargs['data'].setdefault('taille_page', DEFAULT_PAGINATOR_SIZE)
+
         super().__init__(*args, **kwargs)
+
         self.fields['annee_academique'].choices = get_academic_year_choices()
         self.fields['annee_academique'].initial = AnneeInscriptionFormationTranslator().recuperer(
             AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT

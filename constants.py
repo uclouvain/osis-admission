@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import re
 from django.utils.translation import gettext_lazy as _
 
 FIELD_REQUIRED_MESSAGE = _("This field is required.")
-DEFAULT_PAGINATOR_SIZE = 10
+DEFAULT_PAGINATOR_SIZE = 500
 PDF_MIME_TYPE = 'application/pdf'
 JPEG_MIME_TYPE = 'image/jpeg'
 PNG_MIME_TYPE = 'image/png'
