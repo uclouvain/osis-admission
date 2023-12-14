@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from email import message_from_string
 from unittest.mock import patch, PropertyMock
 
 import freezegun
@@ -81,7 +82,9 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
 
         # Validation errors
-        cls.candidate_errors = IncompletePersonForBachelorFactory()
+        cls.candidate_errors = IncompletePersonForBachelorFactory(
+            private_email='candidate1@test.be',
+        )
         cls.admission = GeneralEducationAdmissionFactory(
             candidate=cls.candidate_errors,
             # force type to have access conditions
@@ -94,10 +97,12 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         cls.admission_ok = GeneralEducationAdmissionFactory(
             training__academic_year__year=1980,
             candidate__country_of_citizenship__european_union=True,
+            candidate__private_email='candidate2@test.be',
             bachelor_with_access_conditions_met=True,
         )
         cls.second_admission_ok = GeneralEducationAdmissionFactory(
             candidate__country_of_citizenship__european_union=True,
+            candidate__private_email='candidate3@test.be',
             bachelor_with_access_conditions_met=True,
             training=cls.admission_ok.training,
         )
@@ -290,6 +295,8 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         notifications = EmailNotification.objects.filter(person=self.admission_ok.candidate)
         self.assertEqual(len(notifications), 1)
 
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], 'candidate2@test.be')
         self.assertNotIn('inscription tardive', notifications[0].payload)
         self.assertNotIn('payement des frais de dossier', notifications[0].payload)
 
