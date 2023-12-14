@@ -620,11 +620,12 @@ def status_as_class(activity):
 
 
 @register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False):
+def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False):
     return {
         'field': field,
         'classes': classes,
         'show_help': show_help,
+        'html_tooltip': html_tooltip,
     }
 
 
@@ -980,6 +981,7 @@ def access_title_checkbox(context, experience_uuid, experience_type, current_yea
             'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
             'checked': access_title.selectionne,
             'experience_uuid': experience_uuid,
+            'can_choose_access_title': context['can_choose_access_title'],
         }
 
 

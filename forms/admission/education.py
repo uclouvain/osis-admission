@@ -188,7 +188,7 @@ class BachelorAdmissionEducationBelgianDiplomaForm(forms.ModelForm):
         required=False,
     )
     institute = forms.ModelChoiceField(
-        label=_('Institute'),
+        label=pgettext_lazy('curriculum', 'Institute'),
         required=False,
         help_text=_('You can specify the locality or postcode in your search.'),
         widget=autocomplete.ListSelect2(

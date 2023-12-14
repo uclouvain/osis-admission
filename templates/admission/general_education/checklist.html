@@ -294,6 +294,7 @@
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
+          {% include 'admission/general_education/includes/checklist/previous_experiences_prevent_to_choose_success_modal.html' %}
         </div>
 
         {% for child in current.enfants %}
@@ -1078,6 +1079,13 @@
     #checklist-menu .sub-item.bg-warning {
       background-color: #fcf8e3;
     }
+    
+    /* Allow to scroll the content above the header menu */
+    html {
+      overflow: auto;
+      scroll-padding-top: 60px; /* height of sticky header */
+    }
+
 
   </style>
 {% endblock style %}

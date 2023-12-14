@@ -40,6 +40,13 @@
       {% checklist_state_button tab='parcours_anterieur' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' class='danger' htmx_post=change_status_url_insufficient %}
       {% checklist_state_button tab='parcours_anterieur' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' htmx_post=change_status_url_sufficient %}
     </div>
+    {% if view.valid_operation == False %}
+      <script>
+        $(document).ready(function () {
+            $('#previous-experiences-prevent-to-choose-success-modal').modal('show');
+        });
+      </script>
+    {% endif %}
   </div>
 
   {% if request.htmx %}

@@ -59,6 +59,7 @@ textarea {
   justify-content:space-between;
   align-items: center;
   flex-wrap: wrap;
+  gap: 1em;
 }
 
 .flex-content-no-wrap {
@@ -74,6 +75,14 @@ textarea {
 
 .border-right {
   border-right: 1px solid #ddd;
+}
+
+.flex-content.align-top {
+  align-items: start;
+}
+
+.flex-1 {
+  flex: 1;
 }
 
 .inline-field-data {

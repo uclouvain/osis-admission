@@ -146,10 +146,7 @@ class PastExperiencesStatusViewTestCase(TestCase):
         )
 
         # The success status requires at least one access title and an admission requirement
-        error_message_if_missing_data = gettext(
-            "To move to this state, an admission requirement must have been selected and at least one access title "
-            "line must be selected in the past experience views.",
-        )
+        error_message_if_missing_data = gettext("Some errors have been encountered.")
 
         response = self.client.post(success_url, **self.default_headers)
 

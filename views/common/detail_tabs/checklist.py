@@ -121,6 +121,7 @@ from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_profile.models import EducationalExperience
@@ -170,6 +171,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'decision_facultaire': _("Decision of the faculty"),
         },
         'hide_files': True,
+        'condition_acces_enum': ConditionAcces,
     }
 
     @cached_property
@@ -783,6 +785,9 @@ class ChecklistView(
                     prefix=tab_identifier,
                 )
 
+            # Remove the experiences that we had in the checklist that have been removed
+            children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
+
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
                 document_tab_identifier = admission_document.onglet.split('.')
@@ -858,6 +863,7 @@ class ChecklistView(
                     },
                 }
             )
+            context['can_choose_access_title'] = can_change_access_title
 
         return context
 
@@ -979,6 +985,10 @@ class PastExperiencesStatusView(
     htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
     form_class = StatusForm
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.valid_operation = False
+
     def get_initial(self):
         return self.admission.checklist['current']['parcours_anterieur']['statut']
 
@@ -995,11 +1005,8 @@ class PastExperiencesStatusView(
                     statut=form.cleaned_data['status'],
                 )
             )
+            self.valid_operation = True
         except MultipleBusinessExceptions:
-            self.message_on_failure = _(
-                "To move to this state, an admission requirement must have been selected and at least one access title "
-                "line must be selected in the past experience views.",
-            )
             return super().form_invalid(form)
 
         return super().form_valid(form)
@@ -1077,6 +1084,7 @@ class PastExperiencesAccessTitleView(
         context['checked'] = self.checked
         context['url'] = self.request.get_full_path()
         context['experience_uuid'] = self.request.GET.get('experience_uuid')
+        context['can_choose_access_title'] = True  # True as the user can access to the current view
         return context
 
     def form_valid(self, form):
