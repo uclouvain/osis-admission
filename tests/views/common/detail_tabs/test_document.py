@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 import uuid
+from email import message_from_string
 from unittest import mock
 from unittest.mock import patch
 
@@ -144,7 +145,10 @@ class DocumentViewTestCase(TestCase):
         # Reset the admission
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
-            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
+            candidate=CompletePersonFactory(
+                language=settings.LANGUAGE_CODE_FR,
+                private_email='candidate@test.be',
+            ),
             curriculum=[uuid.uuid4()],
             pdf_recap=[uuid.uuid4()],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
@@ -2678,6 +2682,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(EmailNotification.objects.count(), 1)
         email_notification: EmailNotification = EmailNotification.objects.first()
         self.assertEqual(email_notification.person, self.general_admission.candidate)
+        email_object = message_from_string(email_notification.payload)
+        self.assertEqual(email_object['To'], 'candidate@test.be')
         self.assertIn(form.cleaned_data['message_content'], email_notification.payload)
         self.assertIn(form.cleaned_data['message_object'], email_notification.payload)
 
@@ -2849,6 +2855,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(EmailNotification.objects.count(), 1)
         email_notification: EmailNotification = EmailNotification.objects.first()
         self.assertEqual(email_notification.person, self.general_admission.candidate)
+        email_object = message_from_string(email_notification.payload)
+        self.assertEqual(email_object['To'], 'candidate@test.be')
         self.assertIn(form.cleaned_data['message_content'], email_notification.payload)
         self.assertIn(form.cleaned_data['message_object'], email_notification.payload)
 
