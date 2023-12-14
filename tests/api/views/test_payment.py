@@ -26,6 +26,7 @@
 import datetime
 import uuid
 from decimal import Decimal
+from email import message_from_string
 from unittest import mock
 
 import freezegun
@@ -61,6 +62,7 @@ class ApplicationFeesListViewTestCase(APITestCase):
         self.admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             candidate=CompletePersonFactory(
                 language=settings.LANGUAGE_CODE_FR,
+                private_email='candidate@test.be',
             ),
             training=Master120TrainingFactory(),
             status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
@@ -162,6 +164,7 @@ class OpenApplicationFeesPaymentViewTestCase(APITestCase):
         self.admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             candidate=CompletePersonFactory(
                 language=settings.LANGUAGE_CODE_FR,
+                private_email='candidate@test.be',
             ),
             training=Master120TrainingFactory(),
             status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
@@ -382,6 +385,7 @@ class MollieWebHookTestCase(APITestCase):
         self.admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             candidate=CompletePersonFactory(
                 language=settings.LANGUAGE_CODE_FR,
+                private_email='candidate@test.be',
             ),
             training=Master120TrainingFactory(),
             status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
@@ -465,6 +469,8 @@ class MollieWebHookTestCase(APITestCase):
         notifications = EmailNotification.objects.filter(person=self.admission.candidate)
         self.assertEqual(len(notifications), 1)
 
+        email_object = message_from_string(notifications[0].payload)
+        self.assertEqual(email_object['To'], 'candidate@test.be')
         self.assertNotIn('inscription tardive', notifications[0].payload)
         self.assertIn('payement des frais de dossier', notifications[0].payload)
 
