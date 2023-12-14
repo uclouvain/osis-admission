@@ -1,3 +1,6 @@
+{% extends "admission/modal/modal.html" %}
+{% load i18n %}
+
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -21,22 +24,26 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-{% if url %}
-  <div>
-    <label>
-      <input
-          type="checkbox"
-          class="access-title-{{ experience_uuid }}"
-          name="access-title"
-          hx-target="closest div"
-          hx-trigger="click"
-          hx-post="{{ url }}"
-          hx-swap="outerHTML"
-          {% if checked %}
-          checked="checked"
-          {% endif %}
-          {% if can_choose_access_title is False %}disabled{% endif %}
-      />
-    </label>
-  </div>
-{% endif %}
+
+
+{% block modal_id %}previous-experiences-prevent-to-choose-success-modal{% endblock %}
+
+{% block modal_title %}
+  {% translate "Impossible action" %}
+{% endblock %}
+
+{% block modal_body %}
+  <p>
+    {% blocktranslate trimmed %}
+      To move to this state, an admission requirement must have been selected and at least one access title line must
+      be selected in the past experience views.
+    {% endblocktranslate %}
+  </p>
+{% endblock %}
+
+{% block modal_footer %}
+  <button type="button" class="btn btn-primary" data-dismiss="modal">
+    {% translate 'Ok' %}
+  </button>
+
+{% endblock %}

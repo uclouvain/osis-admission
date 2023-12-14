@@ -6677,8 +6677,8 @@ components:
       enum:
       - ''
       - 'YES'
-      - 'NO'
       - PENDING
+      - 'NO'
       type: string
     LanguageKnowledge:
       type: object

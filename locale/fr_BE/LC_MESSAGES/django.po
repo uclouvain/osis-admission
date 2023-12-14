@@ -667,6 +667,11 @@ msgstr ""
 msgid "Another admission has been submitted."
 msgstr "Une autre admission a déjà été soumise."
 
+msgid "Any other assessment system that is not based on a credit system."
+msgstr ""
+"Tout autre système d’évaluation qui ne se base pas sur l’évaluation par "
+"crédit."
+
 msgid "Application accepted"
 msgstr "Inscription autorisée"
 
@@ -803,6 +808,15 @@ msgstr ""
 "non-résident·es, les inscriptions pour l'année académique 2024-2025 sont à "
 "introduire via cette <a href=\"https://uclouvain.be/fr/etudier/inscriptions/"
 "demande-en-ligne\" target=\"_blank\">plateforme spécifique</a>."
+
+msgid ""
+"Assessment is also based on the credit system, which quantifies the workload "
+"involved in a class. Depending on the country, a full year of study is "
+"equivalent to a defined number of credits (e.g. 30 credits)."
+msgstr ""
+"Évaluation également basée sur le système de crédits qui quantifie la charge "
+"de travail que représente un cours. En fonction du pays, une année complète "
+"d’études équivaut à un nombre défini de crédit (exemple : 30 crédits)."
 
 msgid "Assimilated,Non-assimilated"
 msgstr "Assimilé(e),Non assimilé(e)"
@@ -2220,7 +2234,20 @@ msgid "ECTS added"
 msgstr "ECTS ajoutés"
 
 msgid "ECTS credits"
-msgstr "crédits ECTS"
+msgstr "Crédits ECTS"
+
+msgid ""
+"ECTS credits are a European unit of measurement that assesses the workload "
+"represented by a class within a course. A full year of study is generally "
+"equivalent to 60 credits. The ECTS system has been introduced in most "
+"European countries but is also increasingly used in other countries."
+msgstr ""
+"Les crédits ECTS représentent une unité de mesure <span class='text-"
+"decoration-underline'>européenne</span> qui évalue la charge de travail que "
+"représente un cours au sein d’un programme d’études. Une année complète "
+"d’études équivaut généralement à 60 crédits. Le système ECTS a été mis en "
+"place dans la plupart des pays européens mais est également utilisé de plus "
+"en plus dans d’autres pays."
 
 msgid "ECTS for participating"
 msgstr "ECTS pour la participation"
@@ -3232,6 +3259,9 @@ msgstr "Immédiatement"
 msgid "Important information:"
 msgstr "Informations importantes"
 
+msgid "Impossible action"
+msgstr "Action impossible"
+
 msgid ""
 "Impossible action: please be sure that the confirmation date and report are "
 "specified."
@@ -3322,10 +3352,11 @@ msgstr ""
 "Initialisation des questions spécifiques prédéfinies pour une année "
 "académique"
 
+msgctxt "admission"
 msgid "Institute"
 msgstr "Établissement"
 
-msgctxt "admission"
+msgctxt "curriculum"
 msgid "Institute"
 msgstr "Établissement"
 
@@ -4225,6 +4256,9 @@ msgstr "Pas de doctorat trouvé."
 msgid "No continuing enrolment"
 msgstr "Aucune inscription en formation continue n'a été trouvée"
 
+msgid "No credit system"
+msgstr "Pas de système de crédits"
+
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
 
@@ -4285,6 +4319,9 @@ msgstr "Noma"
 
 msgid "Non doctor reason"
 msgstr "Justification"
+
+msgid "Non-European credits"
+msgstr "Crédits non-européens"
 
 msgid "Non-academic experience"
 msgstr "Expérience non-académique"
@@ -4384,6 +4421,9 @@ msgstr "Autre"
 
 msgid "Obtained grade"
 msgstr "Grade obtenu"
+
+msgid "Ok"
+msgstr "Ok"
 
 msgid ""
 "On the basis of the information you have provided, you will need to apply "
@@ -4490,6 +4530,10 @@ msgstr "Autres informations à propos des compléments de formation"
 
 msgid "Other institute"
 msgstr "Autre institution"
+
+msgctxt "curriculum"
+msgid "Other institute"
+msgstr "Autre établissement"
 
 msgid "Other institute (if necessary)"
 msgstr "Autre institution (le cas échéant)"
@@ -4809,6 +4853,16 @@ msgid ""
 msgstr ""
 "Veuillez sélectionner la première situation d’assimilation qui vous "
 "correspond"
+
+msgid ""
+"Please select the assessment system used by the institution where you "
+"studied. The assessment system is usually indicated <strong>on your "
+"transcripts or diploma supplements</strong>."
+msgstr ""
+"Veuillez sélectionner le système d'évaluation au sein de l'établissement "
+"dans lequel vous avez suivi vos études. Le système d'évaluation est "
+"généralement mentionné <strong>sur vos relevés de notes ou sur vos "
+"suppléments de diplôme</strong>."
 
 msgid "Please specify at least one identity number."
 msgstr "Merci de spécifier au-moins un numéro d'identité."
@@ -7385,6 +7439,16 @@ msgstr "En échec"
 #, python-format
 msgid "from %(start)s to %(end)s"
 msgstr "du %(start)s au %(end)s"
+
+#, python-format
+msgctxt "month_year"
+msgid "from %(start)s to %(end)s"
+msgstr "de %(start)s à %(end)s"
+
+#, python-format
+msgctxt "month_year"
+msgid "in %(end)s"
+msgstr "en %(end)s"
 
 msgid "items per page"
 msgstr "éléments par page"

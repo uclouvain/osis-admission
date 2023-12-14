@@ -331,15 +331,19 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     ) -> List[ExperienceAcademiqueDTO]:
         """Returns the DTO of the academic experiences of the given candidate."""
 
-        educational_experience_years: QuerySet[EducationalExperienceYear] = EducationalExperienceYear.objects.filter(
-            educational_experience__person__global_id=matricule,
-        ).select_related(
-            'academic_year',
-            'educational_experience__country',
-            'educational_experience__linguistic_regime',
-            'educational_experience__program',
-            'educational_experience__fwb_equivalent_program',
-            'educational_experience__institute',
+        educational_experience_years: QuerySet[EducationalExperienceYear] = (
+            EducationalExperienceYear.objects.filter(
+                educational_experience__person__global_id=matricule,
+            )
+            .select_related(
+                'academic_year',
+                'educational_experience__country',
+                'educational_experience__linguistic_regime',
+                'educational_experience__program',
+                'educational_experience__fwb_equivalent_program',
+                'educational_experience__institute',
+            )
+            .order_by('-academic_year__year')
         )
 
         if experiences_cv_recuperees in EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES:

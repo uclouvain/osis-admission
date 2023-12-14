@@ -588,6 +588,9 @@ msgstr ""
 msgid "Another admission has been submitted."
 msgstr ""
 
+msgid "Any other assessment system that is not based on a credit system."
+msgstr ""
+
 msgid "Application accepted"
 msgstr ""
 
@@ -715,6 +718,12 @@ msgid ""
 "government decree) candidate, applications for the 2024-2025 academic year "
 "must be submitted via this <a href=\"https://uclouvain.be/fr/etudier/"
 "inscriptions/demande-en-ligne\" target=\"_blank\">specific platform</a>."
+msgstr ""
+
+msgid ""
+"Assessment is also based on the credit system, which quantifies the workload "
+"involved in a class. Depending on the country, a full year of study is "
+"equivalent to a defined number of credits (e.g. 30 credits)."
 msgstr ""
 
 msgid "Assimilated,Non-assimilated"
@@ -2044,6 +2053,13 @@ msgstr ""
 msgid "ECTS credits"
 msgstr ""
 
+msgid ""
+"ECTS credits are a European unit of measurement that assesses the workload "
+"represented by a class within a course. A full year of study is generally "
+"equivalent to 60 credits. The ECTS system has been introduced in most "
+"European countries but is also increasingly used in other countries."
+msgstr ""
+
 msgid "ECTS for participating"
 msgstr ""
 
@@ -2913,6 +2929,9 @@ msgstr ""
 msgid "Important information:"
 msgstr ""
 
+msgid "Impossible action"
+msgstr ""
+
 msgid ""
 "Impossible action: please be sure that the confirmation date and report are "
 "specified."
@@ -2981,10 +3000,11 @@ msgid ""
 "Initialization of the predefined specific questions for an academic year"
 msgstr ""
 
+msgctxt "admission"
 msgid "Institute"
 msgstr ""
 
-msgctxt "admission"
+msgctxt "curriculum"
 msgid "Institute"
 msgstr ""
 
@@ -3779,6 +3799,9 @@ msgstr ""
 msgid "No continuing enrolment"
 msgstr ""
 
+msgid "No credit system"
+msgstr ""
+
 msgid "No defense reason"
 msgstr ""
 
@@ -3837,6 +3860,9 @@ msgid "Noma"
 msgstr ""
 
 msgid "Non doctor reason"
+msgstr ""
+
+msgid "Non-European credits"
 msgstr ""
 
 msgid "Non-academic experience"
@@ -3936,6 +3962,9 @@ msgstr "Other"
 msgid "Obtained grade"
 msgstr ""
 
+msgid "Ok"
+msgstr ""
+
 msgid ""
 "On the basis of the information you have provided, you will need to apply "
 "for a student visa if your application to attend our university is accepted "
@@ -4029,6 +4058,10 @@ msgstr ""
 msgid "Other information about prerequisite courses"
 msgstr ""
 
+msgid "Other institute"
+msgstr ""
+
+msgctxt "curriculum"
 msgid "Other institute"
 msgstr ""
 
@@ -4315,6 +4348,12 @@ msgstr ""
 
 msgid ""
 "Please select the Belgian student status situation that most applies to you"
+msgstr ""
+
+msgid ""
+"Please select the assessment system used by the institution where you "
+"studied. The assessment system is usually indicated <strong>on your "
+"transcripts or diploma supplements</strong>."
 msgstr ""
 
 msgid "Please specify at least one identity number."
@@ -6637,6 +6676,16 @@ msgstr "Failed"
 
 #, python-format
 msgid "from %(start)s to %(end)s"
+msgstr ""
+
+#, python-format
+msgctxt "month_year"
+msgid "from %(start)s to %(end)s"
+msgstr ""
+
+#, python-format
+msgctxt "month_year"
+msgid "in %(end)s"
 msgstr ""
 
 msgid "items per page"

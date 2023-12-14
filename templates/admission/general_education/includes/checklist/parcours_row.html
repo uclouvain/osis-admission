@@ -39,7 +39,7 @@
         <div style="display: flex; align-items: baseline; gap: 5px">
           {{ experience_annee.credits_inscrits|floatformat }}
           {% if experience_annee.credits_inscrits_communaute_fr != None %}
-            <span class="label label-info">
+            <span class="label label-info" style="padding: 0.4em;">
               {% if experience_annee.avec_bloc_1 %}
                 {% translate 'Block1:' %}
               {% elif experience_annee.avec_complement %}
@@ -54,7 +54,7 @@
         <div style="display: flex; align-items: baseline; gap: 5px">
           {{ experience_annee.credits_acquis|floatformat }}
           {% if experience_annee.credits_acquis_communaute_fr != None %}
-            <span class="label label-info">
+            <span class="label label-info" style="padding: 0.4em;">
               {% if experience_annee.avec_bloc_1 %}
                 {% translate 'Block1:' %}
               {% elif experience_annee.avec_complement %}
@@ -65,12 +65,12 @@
           {% endif %}
         </div>
       </td>
-      <td>
+      <td class="text-center">
         {% if experience_annee.avec_allegement %}
             <span class="label label-warning">{{ _('Reduction')|slice:':1' }}</span>
         {% endif %}
       </td>
-      <td>
+      <td class="text-center">
         <div>
           {% if experience_annee.est_reorientation_102 %}
             <span class="label label-success">{% translate 'R102' %}</span>
@@ -83,7 +83,16 @@
     </td>
   {% elif experience|est_experience_non_academique %}
     <td></td>
-    <td>{{ experience.type|enum_display:'ActivityType' }} {% blocktrans with start=experience.date_debut end=experience.date_fin %}from {{ start }} to {{ end }}{% endblocktrans %}</td>
+    <td>
+      {{ experience.type|enum_display:'ActivityType' }}
+      {% with start=experience.date_debut|date:'F Y'|capfirst end=experience.date_fin|date:'F Y'|capfirst %}
+        {% if start == end %}
+          {% blocktranslate context 'month_year' %}in {{ end }}{% endblocktranslate %}
+        {% else %}
+          {% blocktranslate context 'month_year' %}from {{ start }} to {{ end }}{% endblocktranslate %}
+        {% endif %}
+      {% endwith %}
+    </td>
     <td>{% access_title_checkbox experience.uuid 'EXPERIENCE_NON_ACADEMIQUE' year %}</td>
     <td></td>
     <td></td>
