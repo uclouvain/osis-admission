@@ -1,6 +1,6 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
+#    OSIS stands for Open Student Information System. Its an application
 #    designed to manage the core business of higher education institutions,
 #    such as universities, faculties, institutes and professional schools.
 #    The core business involves the administration of students, teachers,
@@ -88,53 +88,81 @@ from osis_profile.models.education import LanguageKnowledge
 
 class DigitService(IDigitService):
 
+
     @classmethod
     def rechercher_compte_existant(cls, matricule: str, nom: str, prenom: str, date_naissance: str,) -> str:
-        mock = True
+        mock = False
 
         if mock:
             response = _mock_search_digit_account_return_response()
+            similarity_data = response.json()
         else:
-            response = requests.post(
-                headers={'Content-Type': 'application/json'},
-                data=json.dumps({
-                    "last_name": nom,
-                    "first_name": prenom,
-                    "birth_date": date_naissance,
-                }),
-                url=settings.DIGIT_ACCOUNT_SEARCH_URL,
+            original_person = Person.objects.get(global_id=matricule)
+
+            person_merge_proposal, created = PersonMergeProposal.objects.get_or_create(
+                original_person=original_person,
             )
 
-        original_person = Person.objects.get(global_id=matricule)
+            if created:
+                response = requests.post(
+                    headers={
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ZXBjOkRBdi00dFUtejM3LW1WbQ==',
+                    },
+                    data=json.dumps({
+                        "lastname": nom,
+                        "firstname": prenom,
+                        "birthDate": date_naissance,
+                    }),
+                    url=settings.DIGIT_ACCOUNT_SEARCH_URL,
+                )
 
-        PersonMergeProposal.objects.update_or_create(
-            original_person=original_person,
-            defaults={
-                "status": PersonMergeStatus.MATCH_FOUND.name,
-                "similarity_result": str(response),
-                "last_similarity_result_update": datetime.datetime.now(),
-            }
-        )
+                similarity_data = response.json()
 
-        return response
+                PersonMergeProposal.objects.update_or_create(
+                    original_person=original_person,
+                    defaults={
+                        "status": PersonMergeStatus.MATCH_FOUND.name if similarity_data else PersonMergeStatus.NO_MATCH.name,
+                        "similarity_result": response.json(),
+                        "last_similarity_result_update": datetime.datetime.now(),
+                    }
+                )
+
+            similarity_data = person_merge_proposal.similarity_result
+
+        return similarity_data
 
 
 def _mock_search_digit_account_return_response():
     return json.loads(
-            '['
-            '      {'
-            '        "person" : {'
-            '          "matricule" : "12345678" ,'
-            '          "lastName" : "Nom" ,'
-            '          "firstName" : "Prenom" ,'
-            '          "birthDate" : "2000-02-02" ,'
-            '          "gender" : "M" ,'
-            '          "nationalRegister" : "12345678910" ,'
-            '          "nationality" : "BE" ,'
-            '          "deceased" : false ,'
-            '        },'
-            '        "similarityRate" : 1000.0 ,'
-            '      }'
-            '    ]'
-    )
-
+        """
+            [
+                  {
+                    "person" : {
+                      "matricule" : "12345678" ,
+                      "lastName" : "Nom" ,
+                      "firstName" : "Prenom" ,
+                      "birthDate" : "2000-02-02" ,
+                      "gender" : "M" ,
+                      "nationalRegister" : "12345678910" ,
+                      "nationality" : "BE" ,
+                      "deceased" : false
+                    },
+                    "similarityRate" : 1000.0
+                  },
+                  {
+                    "person" : {
+                      "matricule" : "9870653" ,
+                      "lastName" : "Test" ,
+                      "firstName" : "Test" ,
+                      "birthDate" : "1930-01-01" ,
+                      "gender" : "M" ,
+                      "nationalRegister" : "098764432112" ,
+                      "nationality" : "BE" ,
+                      "deceased" : false
+                    },
+                    "similarityRate" : 50.0
+                  }
+                ]
+        """
+        )

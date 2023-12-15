@@ -23,42 +23,34 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import ABCMeta
-from typing import List
 
-from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
-from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
-from osis_common.ddd import interface
+from django.views.generic import TemplateView
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from osis_common.utils.htmx import HtmxMixin
+
+__all__ = [
+    "SearchPreviousExperienceView",
+]
 
 
-class IPropositionPersonneFusionRepository:
-    @classmethod
-    def initialiser(
-            cls,
-            global_id: str,
-            nom: str,
-            prenom: str,
-            autres_prenoms: str,
-            date_naissance: str,
-            lieu_naissance: str,
-            email: str,
-            genre: str,
-            etat_civil: str,
-            nationalite: str,
-            numero_national: str,
-            numero_carte_id: str,
-            numero_passeport: str,
-            dernier_noma_connu: str,
-            expiration_carte_id: str,
-            educational_curex_ids: List[str],
-            professional_curex_ids: List[str],
-    ) -> PropositionFusionPersonneIdentity:
-        raise NotImplementedError
+class SearchPreviousExperienceView(HtmxMixin, TemplateView):
+    name = "search_previous_experience"
 
-    @classmethod
-    def get(cls, global_id: str) -> 'PropositionFusionPersonneDTO':
-        raise NotImplementedError
+    template_name = "admission/previous_experience.html"
+    htmx_template_name = "admission/previous_experience.html"
+    urlpatterns = {'previous-experience': 'previous-experience/'}
 
-    @classmethod
-    def defaire(cls, global_id: str) -> 'PropositionFusionPersonneIdentity':
-        raise NotImplementedError
+    @property
+    def experience(self):
+        from infrastructure.messages_bus import message_bus_instance
+        return message_bus_instance.invoke(
+            RechercherParcoursAnterieurQuery(
+                global_id=self.request.GET.get('matricule'),
+            )
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['professional_experience'] = self.experience['professional']
+        context['educational_experience'] = self.experience['educational']
+        return context

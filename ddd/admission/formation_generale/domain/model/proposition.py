@@ -172,8 +172,6 @@ class Proposition(interface.RootEntity):
     etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
-    reponse_digit: str = ''
-
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,

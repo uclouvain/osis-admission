@@ -647,6 +647,17 @@
           })
 
       })(jQuery)
+
+        $('#merge-experience-form').on('submit', (e) => {
+            e.preventDefault();
+            htmx.ajax('GET', e.target.action, {
+                source: '#merge-experience-btn',
+                target: '#form-ajax-modal',
+                indicator: '#htmx-overlay',
+                swap: 'innerHTML',
+            }).then(() => $('#form-ajax-modal').modal('show'));
+        })
+    </script>
   </script>
 {% endblock script %}
 

@@ -150,8 +150,21 @@ class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
     numero_carte_id: str
     numero_passeport: str
     dernier_noma_connu: str
+    expiration_carte_id: str
+    educational_curex_uuids: List[str]
+    professional_curex_uuids: List[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
 class GetPropositionFusionQuery(interface.QueryRequest):
+    global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DefairePropositionFusionCommand(interface.CommandRequest):
+    global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RechercherParcoursAnterieurQuery(interface.CommandRequest):
     global_id: str

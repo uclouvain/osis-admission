@@ -47,4 +47,7 @@ def initialiser_proposition_fusion_personne(
       numero_carte_id=cmd.numero_carte_id,
       numero_passeport=cmd.numero_passeport,
       dernier_noma_connu=cmd.dernier_noma_connu,
+      expiration_carte_id=cmd.expiration_carte_id,
+      educational_curex_ids=cmd.educational_curex_uuids,
+      professional_curex_ids=cmd.professional_curex_uuids,
    )

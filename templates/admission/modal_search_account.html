@@ -30,104 +30,35 @@
     <div id="merge-form-modal-content" class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
         <div class="modal-header">
             <h4 class="modal-title" id="">{% trans "Merge with existing entry" %}</h4>
+            <div class="panel-title form-group">
+                <select id="match" class="form-control" name="match">
+                    {% for match in matches %}
+                      <option value="{{ forloop.counter0 }}">
+                        {{ match.person.lastName }}, {{ match.person.firstName }} - <span class="badge panel-default-badge-success">{{ match.similarityRate }}</span>
+                      </option>
+                    {% endfor %}
+                </select>
+                <input id="selectedMatricule" type="hidden" value="{{ matches.0.person.matricule }}"/>
+            </div>
         </div>
         <div class="modal-body">
 
-            <div class="merge-panel-container">
+            <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#personal-data">{% trans 'Personal data' %}</a></li>
+              <li><a data-toggle="tab" href="#previous-experience">{% trans 'Previous experience' %}</a></li>
+            </ul>
 
-                <div class="panel panel-default flex-3">
-                    <div class="panel-heading original-data-heading">
-                        <div class="panel-title">
-                            <div class="bold-text">{% trans 'Candidate information' %}</div>
-                            {{ candidate.last_name }}, {{ candidate.first_name }}
-                        </div>
-                        <div class="merge-btn-container">
-                            <button data-toggle="tooltip" title="{% trans 'Merge all non-empty data from original to merge form' %}" data-merge-source="original" class="btn btn-default btn-merge-all">
-                                <i class="fa fa-angles-right"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="panel-body original-data">
-                        {% for label, value in candidate.items %}
-                            <div class="flex-merge-input">
-                                <div class="input-field-data">
-                                {% if label == "birth_date" %}
-                                    {% input_field_data label value|date:"d/m/Y" False %}
-                                {% else %}
-                                    {% input_field_data label value False %}
-                                {% endif %}
-                                </div>
-                                <div class="merge-btn-container">
-                                    <button data-merge-source="original" data-merge-label="{{ label }}" class="btn btn-xs btn-default btn-merge">
-                                        <i style="font-size: 10px;" class="fa fa-arrow-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
+            <div class="tab-content">
+                <div id="personal-data" class="tab-pane fade in active">
+                    <h6>Choisir les informations personnelles à conserver pour la fusion</h6>
+                    {% include 'admission/modal_block_personal_data.html' %}
                 </div>
-
-                <div class="panel panel-primary flex-3">
-                    <div class="panel-heading fusion-data-heading">
-                        <div class="panel-title">
-                                <div class="bold-text">{% trans 'Fusion proposal' %}</div>
-                                {{ candidate.last_name }}, {{ candidate.first_name }}
-                        </div>
-                    </div>
-                    <form id="proposal-form" method="post" action="{{ request.get_full_path }}" class="panel-body fusion-data">
-                        {{ form.media }}
-                        {% csrf_token %}
-                        {% for field in form %}
-                            {% bootstrap_field field %}
-                        {% endfor %}
-                    </form>
-                </div>
-
-                <div class="panel panel-default flex-3">
-                    <div class="panel-heading digit-data-heading">
-                            <div class="merge-btn-container">
-                                <button data-toggle="tooltip" title="{% trans 'Merge all non-empty data from digit match to merge form' %}" data-merge-source="digit-0" class="btn btn-default btn-merge-all">
-                                    <i class="fa fa-angles-left"></i>
-                                </button>
-                            </div>
-                            <div class="panel-title form-group">
-                                    <div class="bold-text">{% trans 'Available information' %}</div>
-                                    <select id="match" class="form-control" name="match">
-                                        {% for match in matches %}
-                                          <option value="{{ forloop.counter0 }}">
-                                            {{ match.person.lastName }}, {{ match.person.firstName }} - <span class="badge panel-default-badge-success">{{ match.similarityRate }}</span>
-                                          </option>
-                                        {% endfor %}
-                                    </select>
-                            </div>
-                    </div>
-
-                    <div class="panel-body digit-data">
-                    {% for match in matches %}
-                        <span class="match-data-panel digit-{{ forloop.counter0 }}-data" {% if not forloop.first %} style="display: none;" {% endif %}>
-                        {% for label, value in match.person|map_fields_items %}
-                            <div class="flex-merge-input">
-                                <div class="merge-btn-container">
-                                    <button data-merge-source="digit-{{ forloop.parentloop.counter0 }}" data-merge-label="{{ label }}" class="btn btn-xs btn-default btn-merge">
-                                        <i style="font-size: 10px;" class="fa fa-arrow-left"></i>
-                                    </button>
-                                </div>
-                                <div class="input-field-data">
-                                    {% if label == "birth_date" %}
-                                        {% input_field_data label value|date:"d/m/Y" False %}
-                                    {% else %}
-                                        {% input_field_data label value False %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                        </span>
-                    {% endfor %}
-                    </div>
-
+                <div id="previous-experience" class="tab-pane fade in">
+                    <h6>Choisir les lignes de CV à fusionner dans le CV existant</h6>
+                    {% include 'admission/modal_previous_experience.html' %}
                 </div>
             </div>
+
         </div>
 
         <div class="modal-footer">
@@ -138,7 +69,7 @@
                 hx-post="{{ request.get_full_path }}"
                 hx-target="#form-ajax-modal"
                 hx-trigger="click"
-                hx-include="#proposal-form"
+                hx-include="#proposal-form, #curex-form"
                 hx-indicator="#htmx-overlay"
                 hx-swap="innerHTML"
             >
@@ -159,7 +90,13 @@
             const selectedMatchId = $('#match').select2('data')[0].id;
             $('.match-data-panel').hide();
             $('.digit-data-heading .btn-merge-all').attr('data-merge-source', `digit-${selectedMatchId}`)
+            $(`.match-name`).hide();
+            $(`#match-${selectedMatchId}`).show();
+            $(`#match-parcours-${selectedMatchId}`).show();
             $(`.digit-${selectedMatchId}-data`).show();
+            const selectedMatriculeVal = $(`#match-${selectedMatchId}`).data('matricule');
+            $('#selectedMatricule').val(selectedMatriculeVal);
+            document.dispatchEvent(new CustomEvent("selectMergePerson"));
         });
 
         $('.fusion-data #national_number').mask('00.00.00-000.00');

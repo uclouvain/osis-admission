@@ -265,7 +265,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if entity.etat_equivalence_titre_acces
                 else '',
                 'foreign_access_title_equivalency_effective_date': entity.date_prise_effet_equivalence_titre_acces,
-                'digit_response': entity.reponse_digit,
             },
         )
 
@@ -463,7 +462,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.foreign_access_title_equivalency_state
             else None,
             date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
-            reponse_digit=admission.digit_response,
         )
 
     @classmethod

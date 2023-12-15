@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from typing import Optional, List
 
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
@@ -52,6 +52,9 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             numero_carte_id: str,
             numero_passeport: str,
             dernier_noma_connu: str,
+            expiration_carte_id: str,
+            educational_curex_ids: List[str],
+            professional_curex_ids: List[str],
     ) -> PropositionFusionPersonneIdentity:
 
         country_of_citizenship = Country.objects.get(name=nationalite)
@@ -70,6 +73,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             id_card_number=numero_carte_id,
             passport_number=numero_passeport,
             last_registration_id=dernier_noma_connu,
+            id_card_expiry_date=expiration_carte_id,
         )
 
         person_merge_proposal, created = PersonMergeProposal.objects.update_or_create(
@@ -77,7 +81,9 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             defaults={
                 "proposal_merge_person_id": merge_person.id,
                 "status": PersonMergeStatus.MERGED.name,
-                "selected_global_id": "",
+                "selected_global_id": "test",
+                "professional_curex_to_merge": professional_curex_ids,
+                "educational_curex_to_merge": educational_curex_ids,
             }
         )
 
@@ -90,6 +96,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
         )
         return PropositionFusionPersonneDTO(
             status=person_merge_proposal.status,
+            matricule=person_merge_proposal.selected_global_id,
             original_person_uuid=person_merge_proposal.original_person.uuid,
             first_name=person_merge_proposal.proposal_merge_person.first_name,
             last_name=person_merge_proposal.proposal_merge_person.last_name,
@@ -104,4 +111,17 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             national_number=person_merge_proposal.proposal_merge_person.national_number,
             id_card_number=person_merge_proposal.proposal_merge_person.id_card_number,
             passport_number=person_merge_proposal.proposal_merge_person.passport_number,
+            id_card_expiry_date=person_merge_proposal.proposal_merge_person.id_card_expiry_date,
+            professional_curex_uuids=person_merge_proposal.professional_curex_to_merge,
+            educational_curex_uuids=person_merge_proposal.educational_curex_to_merge,
         ) if person_merge_proposal and person_merge_proposal.proposal_merge_person else None
+
+    @classmethod
+    def defaire(cls, global_id: str) -> PropositionFusionPersonneIdentity:
+        person_merge_proposal, _ = PersonMergeProposal.objects.update_or_create(
+            original_person__global_id=global_id,
+            defaults={
+                "status": PersonMergeStatus.MATCH_FOUND.name,
+            }
+        )
+        return PropositionFusionPersonneIdentity(uuid=person_merge_proposal.uuid)

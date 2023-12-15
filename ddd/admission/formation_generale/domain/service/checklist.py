@@ -72,7 +72,6 @@ class Checklist(interface.DomainService):
         formation: Formation,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
-        digit_service: 'IDigitService',
     ):
         checklist_initiale = cls.recuperer_checklist_initiale(
             proposition=proposition,
@@ -82,13 +81,6 @@ class Checklist(interface.DomainService):
         )
         proposition.checklist_initiale = checklist_initiale
         proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
-
-        identification_candidat = profil_candidat_translator.get_identification(proposition.matricule_candidat)
-        proposition.reponse_digit = digit_service.rechercher_compte_existant(
-            last_name=identification_candidat.nom,
-            first_name=identification_candidat.prenom,
-            birth_date=str(identification_candidat.date_naissance),
-        )
 
     @classmethod
     def _get_specific_questions_number(

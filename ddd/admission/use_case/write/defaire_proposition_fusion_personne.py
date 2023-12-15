@@ -23,42 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import ABCMeta
-from typing import List
-
+from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand, \
+   DefairePropositionFusionCommand
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
-from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 
 
-class IPropositionPersonneFusionRepository:
-    @classmethod
-    def initialiser(
-            cls,
-            global_id: str,
-            nom: str,
-            prenom: str,
-            autres_prenoms: str,
-            date_naissance: str,
-            lieu_naissance: str,
-            email: str,
-            genre: str,
-            etat_civil: str,
-            nationalite: str,
-            numero_national: str,
-            numero_carte_id: str,
-            numero_passeport: str,
-            dernier_noma_connu: str,
-            expiration_carte_id: str,
-            educational_curex_ids: List[str],
-            professional_curex_ids: List[str],
-    ) -> PropositionFusionPersonneIdentity:
-        raise NotImplementedError
-
-    @classmethod
-    def get(cls, global_id: str) -> 'PropositionFusionPersonneDTO':
-        raise NotImplementedError
-
-    @classmethod
-    def defaire(cls, global_id: str) -> 'PropositionFusionPersonneIdentity':
-        raise NotImplementedError
+def defaire_proposition_fusion_personne(
+    cmd: 'DefairePropositionFusionCommand',
+    proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
+) -> PropositionFusionPersonneIdentity:
+   return proposition_fusion_personne_repository.defaire(global_id=cmd.global_id)

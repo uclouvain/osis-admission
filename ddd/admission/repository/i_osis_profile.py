@@ -23,42 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import ABCMeta
-from typing import List
-
-from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
-from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
-from osis_common.ddd import interface
 
 
-class IPropositionPersonneFusionRepository:
-    @classmethod
-    def initialiser(
-            cls,
-            global_id: str,
-            nom: str,
-            prenom: str,
-            autres_prenoms: str,
-            date_naissance: str,
-            lieu_naissance: str,
-            email: str,
-            genre: str,
-            etat_civil: str,
-            nationalite: str,
-            numero_national: str,
-            numero_carte_id: str,
-            numero_passeport: str,
-            dernier_noma_connu: str,
-            expiration_carte_id: str,
-            educational_curex_ids: List[str],
-            professional_curex_ids: List[str],
-    ) -> PropositionFusionPersonneIdentity:
-        raise NotImplementedError
+class IOsisProfileRepository:
 
     @classmethod
-    def get(cls, global_id: str) -> 'PropositionFusionPersonneDTO':
-        raise NotImplementedError
-
-    @classmethod
-    def defaire(cls, global_id: str) -> 'PropositionFusionPersonneIdentity':
+    def get_curriculum(cls, global_id: str) -> any:
         raise NotImplementedError

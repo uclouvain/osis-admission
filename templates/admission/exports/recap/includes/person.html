@@ -36,64 +36,169 @@
 {% endwith %}
 
 {% panel _("Identification") %}
-  <div class="row">
-    {% field_data _("Surname") identification.nom "col-md-4" %}
-    {% field_data _("First name") identification.prenom "col-md-4" %}
-    {% field_data _("Other given names") identification.autres_prenoms "col-md-4" hide_empty=inline %}
-  </div>
-  <div class="row">
-    {% field_data _("Sex") identification.sexe|enum_display:'ChoixSexe' "col-md-4" %}
-    {% field_data _("Gender") identification.genre|enum_display:'ChoixGenre' "col-md-4" %}
-    {% field_data _("Civil status") identification.etat_civil|enum_display:'CivilState' "col-md-4" %}
-  </div>
-  <div class="row">
-    {% if identification.date_naissance %}
-      {% field_data _("Date of birth") identification.date_naissance|date:'d/m/Y' "col-md-4" %}
-    {% elif identification.annee_naissance %}
-      {% field_data _("Year of birth") identification.annee_naissance "col-md-4" %}
+
+  <div style="display:flex; flex-direction: row;">
+    <div class="original-person-data" style="flex: 1;">
+
+    {% if proposition_fusion.status == "MERGED" %}
+      <div class="alert alert-warning">
+        Données originales fournies par le candidat
+      </div>
     {% endif %}
-    {% field_data _("Country of birth") identification.nom_pays_naissance "col-md-4" %}
-    {% field_data _("Place of birth") identification.lieu_naissance "col-md-4" %}
-  </div>
-  <div class="row">
-    {% field_data _("Country of citizenship") identification.nom_pays_nationalite "col-md-4" %}
-  </div>
-  {% field_data _("Identification photo") identification.photo_identite %}
-  {% field_data _("Contact language") identification.nom_langue_contact %}
+
+      <div class="row">
+        {% field_data _("Surname") identification.nom "col-md-4" %}
+        {% field_data _("First name") identification.prenom "col-md-4" %}
+        {% field_data _("Other given names") identification.autres_prenoms "col-md-4" hide_empty=inline %}
+      </div>
+      <div class="row">
+        {% field_data _("Sex") identification.sexe|enum_display:'ChoixSexe' "col-md-4" %}
+        {% field_data _("Gender") identification.genre|enum_display:'ChoixGenre' "col-md-4" %}
+        {% field_data _("Civil status") identification.etat_civil|enum_display:'CivilState' "col-md-4" %}
+      </div>
+      <div class="row">
+        {% if identification.date_naissance %}
+          {% field_data _("Date of birth") identification.date_naissance|date:'d/m/Y' "col-md-4" %}
+        {% elif identification.annee_naissance %}
+          {% field_data _("Year of birth") identification.annee_naissance "col-md-4" %}
+        {% endif %}
+        {% field_data _("Country of birth") identification.nom_pays_naissance "col-md-4" %}
+        {% field_data _("Place of birth") identification.lieu_naissance "col-md-4" %}
+      </div>
+      <div class="row">
+        {% field_data _("Country of citizenship") identification.nom_pays_nationalite "col-md-4" %}
+      </div>
+      {% field_data _("Identification photo") identification.photo_identite %}
+      {% field_data _("Contact language") identification.nom_langue_contact %}
+    </div>
+
+{% if proposition_fusion.status == "MERGED" %}
+
+    <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
+
+    <div class="proposition-fusion-data" style="flex:1;">
+
+        <div class="alert alert-warning">
+            <form id="undo-merge-proposal" method="POST" action="{% url 'admission:services:digit:undo-merge' uuid=uuid %}">
+                {% csrf_token %}
+                <button id="undo-merge-proposal-btn" type="submit" class="btn btn-xs btn-warning pull-right">
+                    Défaire
+                </button>
+                Proposition de fusion avec personne déjà connue
+            </form>
+        </div>
+
+        <div class="row">
+            {% field_data _("Surname") proposition_fusion.last_name "col-md-4" %}
+            {% field_data _("First name") proposition_fusion.first_name "col-md-4" %}
+            {% field_data _("Other given names") proposition_fusion.middle_name "col-md-4" hide_empty=True %}
+        </div>
+        <div class="row">
+            {% field_data _("Sex") proposition_fusion.sex|enum_display:'ChoixSexe' "col-md-4" %}
+            {% field_data _("Gender") proposition_fusion.gender|enum_display:'ChoixGenre' "col-md-4" %}
+        </div>
+        <div class="row">
+            {% if identification.date_naissance %}
+                {% field_data _("Date of birth") proposition_fusion.birth_date|date:'d/m/Y' "col-md-4" %}
+            {% endif %}
+            {% field_data _("Place of birth") proposition_fusion.birth_place "col-md-4" %}
+        </div>
+        <div class="row">
+          {% field_data _("Civil status") proposition_fusion.civil_state|enum_display:'CivilState' "col-md-4" %}
+          {% field_data _("Country of citizenship") country_of_citizenship "col-md-4" %}
+        </div>
+
+    </div>
+
+{% endif %}
+
+</div>
+
 {% endpanel %}
 
 {% panel _("Identity document") %}
-  {% if identification.numero_registre_national_belge %}
-    {% field_data _("Belgian national registry number (NISS)") identification.numero_registre_national_belge %}
-    {% field_data _("Identity card (both sides)") identification.carte_identite %}
-    <div class="row">
-      {% field_data _('Identity card expiry date') identification.date_expiration_carte_identite "col-md-6" %}
+
+    <div style="display:flex; flex-direction: row;">
+        <div class="original-person-data" style="flex: 1;">
+
+          {% if identification.numero_registre_national_belge %}
+            {% field_data _("Belgian national registry number (NISS)") identification.numero_registre_national_belge %}
+            {% field_data _("Identity card (both sides)") identification.carte_identite %}
+            <div class="row">
+              {% field_data _('Identity card expiry date') identification.date_expiration_carte_identite "col-md-6" %}
+            </div>
+          {% elif identification.numero_carte_identite %}
+            {% field_data _("Identity card number") identification.numero_carte_identite %}
+            {% field_data _("Identity card (both sides)") identification.carte_identite %}
+            <div class="row">
+              {% field_data _('Identity card expiry date') identification.date_expiration_carte_identite "col-md-6" %}
+            </div>
+          {% elif identification.numero_passeport %}
+            {% field_data _("Passport number") identification.numero_passeport %}
+            {% field_data _("Passport") identification.passeport %}
+            <div class="row">
+              {% field_data _('Passport expiry date') identification.date_expiration_passeport "col-md-6" %}
+            </div>
+          {% else %}
+            {% translate 'Incomplete field' %}
+          {% endif %}
+
+        </div>
+
+    {% if proposition_fusion.status == "MERGED" %}
+
+        <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
+
+        <div class="proposition-fusion-data" style="flex:1;">
+
+            {% if proposition_fusion.national_number or proposition_fusion.id_card_number %}
+                {% field_data _("Belgian national registry number (NISS)") proposition_fusion.national_number hide_empty=True %}
+                {% field_data _("Identity card number") proposition_fusion.id_card_number hide_empty=True %}
+                <div class="row">
+                  {% field_data _('Identity card expiry date') proposition_fusion.id_card_expiry_date "col-md-6" %}
+                </div>
+            {% elif proposition_fusion.passport_number %}
+                {% field_data _("Passport number") proposition_fusion.passport_number %}
+            {% else %}
+                {% translate 'Incomplete field' %}
+            {% endif %}
+
+        </div>
+    {% endif %}
+
     </div>
-  {% elif identification.numero_carte_identite %}
-    {% field_data _("Identity card number") identification.numero_carte_identite %}
-    {% field_data _("Identity card (both sides)") identification.carte_identite %}
-    <div class="row">
-      {% field_data _('Identity card expiry date') identification.date_expiration_carte_identite "col-md-6" %}
-    </div>
-  {% elif identification.numero_passeport %}
-    {% field_data _("Passport number") identification.numero_passeport %}
-    {% field_data _("Passport") identification.passeport %}
-    <div class="row">
-      {% field_data _('Passport expiry date') identification.date_expiration_passeport "col-md-6" %}
-    </div>
-  {% else %}
-    {% translate 'Incomplete field' %}
-  {% endif %}
+
 {% endpanel %}
 
 {% panel _("Former UCLouvain student") %}
-  {% if identification.annee_derniere_inscription_ucl %}
-    {% field_data _('Have you previously enrolled at UCLouvain?') _('Yes') %}
-    <div class="row">
-      {% field_data _("Most recent year of enrolment") identification.annee_derniere_inscription_ucl|get_academic_year "col-md-6" %}
-      {% field_data _("Your previous NOMA (matriculation number)") identification.noma_derniere_inscription_ucl "col-md-6" %}
+  <div style="display:flex; flex-direction: row;">
+    <div class="original-person-data" style="flex: 1;">
+
+      {% if identification.annee_derniere_inscription_ucl %}
+        {% field_data _('Have you previously enrolled at UCLouvain?') _('Yes') %}
+        <div class="row">
+          {% field_data _("Most recent year of enrolment") identification.annee_derniere_inscription_ucl|get_academic_year "col-md-6" %}
+          {% field_data _("Your previous NOMA (matriculation number)") identification.noma_derniere_inscription_ucl "col-md-6" %}
+        </div>
+      {% else %}
+        {% field_data _('Have you previously enrolled at UCLouvain?') _('No') %}
+      {% endif %}
     </div>
-  {% else %}
-    {% field_data _('Have you previously enrolled at UCLouvain?') _('No') %}
-  {% endif %}
+
+    {% if proposition_fusion.status == "MERGED" %}
+
+        <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
+
+
+        <div class="proposition-fusion-data" style="flex:1;">
+            <dt>&nbsp;</dt>
+            <dl>&nbsp;</dl>
+            <div class="row">
+              {% field_data _("Most recent year of enrolment") proposition_fusion.annee_derniere_inscription_ucl|get_academic_year "col-md-6" %}
+              {% field_data _("Your previous NOMA (matriculation number)") proposition_fusion.noma_derniere_inscription_ucl "col-md-6" %}
+            </div>
+        </div>
+
+    {% endif %}
+  </div>
 {% endpanel %}

@@ -33,13 +33,14 @@ from django.urls import reverse
 
 __all__ = [
     "RequestDigitAccountCreationView",
-    "SearchDigitAccountView"
+    "SearchDigitAccountView",
+    "UndoMergeAccountView",
 ]
 
 from django.views.generic import FormView
 
 from admission.contrib.models.base import BaseAdmission
-from admission.ddd.admission.commands import RechercherCompteExistantQuery
+from admission.ddd.admission.commands import RechercherCompteExistantQuery, DefairePropositionFusionCommand
 from base.views.common import display_error_messages
 
 from django.utils.translation import gettext_lazy as _
@@ -164,3 +165,23 @@ def search_digit_account(global_id: str, last_name: str, first_name: str, birth_
             matricule=global_id, nom=last_name, prenom=first_name, date_naissance=birth_date
         )
     )
+
+
+class UndoMergeAccountView(FormView):
+
+    name = 'undo-merge'
+    urlpatterns = {'undo-merge': 'undo-merge/<uuid:uuid>'}
+
+    def post(self, request, *args, **kwargs):
+
+        admission = BaseAdmission.objects.get(uuid=kwargs['uuid'])
+
+        from infrastructure.messages_bus import message_bus_instance
+
+        message_bus_instance.invoke(
+            DefairePropositionFusionCommand(
+                global_id=admission.candidate.global_id,
+            )
+        )
+
+        return redirect(request.META['HTTP_REFERER'])

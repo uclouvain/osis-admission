@@ -31,6 +31,7 @@ from osis_common.ddd import interface
 @attr.dataclass(frozen=True, slots=True, eq=False)
 class PropositionFusionPersonneDTO(interface.DTO):
     status: str
+    matricule: str
     original_person_uuid: str
     last_name: str
     first_name: str
@@ -45,3 +46,6 @@ class PropositionFusionPersonneDTO(interface.DTO):
     national_number: str
     passport_number: str
     id_card_number: str
+    id_card_expiry_date: str
+    professional_curex_uuids: str
+    educational_curex_uuids: str

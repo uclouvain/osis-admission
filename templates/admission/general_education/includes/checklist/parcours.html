@@ -33,6 +33,9 @@
   <li role="presentation" {% if default_tab == 'financabilite' %}class="active"{% endif %}>
     <a href="#{{ prefix }}-parcours-financabilite" aria-controls="{{ prefix }}-parcours-financabilite" role="tab" data-toggle="tab">{% trans "Financeability view" %}</a>
   </li>
+  {% if proposition_fusion.status == 'MERGED' %}
+    <span class="pull-right badge badge-warning" style="margin-top: 15px;">Modifié par fusion</span>
+  {% endif %}
 </ul>
 
 <div id="{{ prefix }}-parcours" class="tab-content">

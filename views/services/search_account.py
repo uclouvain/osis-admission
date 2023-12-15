@@ -23,19 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
-from django.contrib.messages import SUCCESS
 from django.http import HttpResponse
 from django.urls import reverse
 from django.views.generic import FormView
 
 __all__ = [
-    "SearchAccountView"
+    "SearchAccountView",
 ]
 
 from admission.contrib.models.base import BaseAdmission
-from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand
+from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand, \
+    RechercherParcoursAnterieurQuery
 from admission.forms.admission.person_merge_proposal_form import PersonMergeProposalForm
 from base.models.person import Person
 from base.views.common import display_success_messages
@@ -62,9 +61,20 @@ class SearchAccountView(HtmxMixin, FormView):
             'passport_number', 'last_registration_id', 'global_id',
         ).get(pk=admission.candidate_id)
 
+    @property
+    def experience(self):
+        from infrastructure.messages_bus import message_bus_instance
+        return message_bus_instance.invoke(
+            RechercherParcoursAnterieurQuery(
+                global_id=self.candidate['global_id']
+            )
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         context['candidate'] = self.candidate
+        context['professional_experience'] = self.experience['professional']
+        context['educational_experience'] = self.experience['educational']
         search_context = self.request.session.get('search_context', {})
         context.update(**search_context)
         return context
@@ -87,6 +97,9 @@ class SearchAccountView(HtmxMixin, FormView):
                 numero_carte_id=form.cleaned_data['id_card_number'],
                 numero_passeport=form.cleaned_data['passport_number'],
                 dernier_noma_connu=form.cleaned_data['last_registration_id'],
+                expiration_carte_id=form.cleaned_data['id_card_expiry_date'],
+                educational_curex_uuids=self.get_educational_curex_form_values(),
+                professional_curex_uuids=self.get_professional_curex_form_values(),
             )
         )
         return HttpResponse(status=200, headers={'HX-Refresh': 'true'})
@@ -95,6 +108,12 @@ class SearchAccountView(HtmxMixin, FormView):
         response = super().form_invalid(form)
         response.status_code = 200  # invalid request
         return response
+
+    def get_professional_curex_form_values(self):
+        return self.request.POST.getlist('professional')
+
+    def get_educational_curex_form_values(self):
+        return self.request.POST.getlist('educational')
 
     def get_success_url(self):
         return reverse(

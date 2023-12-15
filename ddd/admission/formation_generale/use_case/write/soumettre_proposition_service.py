@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 
+from admission.ddd.admission.commands import RechercherCompteExistantQuery
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
@@ -153,6 +154,18 @@ def soumettre_proposition(
         questions_specifiques_translator=questions_specifiques_translator,
     )
     proposition_repository.save(proposition)
+
+    # use event to trigger duplicate person search in DIGIT
+    from infrastructure.messages_bus import message_bus_instance
+    message_bus_instance.invoke(
+        RechercherCompteExistantQuery(
+            matricule=proposition.matricule_candidat,
+            nom=proposition.profil_soumis_candidat.nom,
+            prenom=proposition.profil_soumis_candidat.prenom,
+            date_naissance="",
+        )
+    )
+
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
 

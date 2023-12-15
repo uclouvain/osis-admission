@@ -47,6 +47,8 @@ from rest_framework.views import APIView
 
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MONTANT_FRAIS_DOSSIER
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
@@ -749,6 +751,27 @@ class ChecklistView(
                 experiences.setdefault(0, []).append(etudes_secondaires)
 
         experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
+
+        if self.proposition_fusion:
+            curex_a_fusionner = self.proposition_fusion.educational_curex_uuids + self.proposition_fusion.professional_curex_uuids
+            if curex_a_fusionner:
+                curex_existant = message_bus_instance.invoke(
+                    RechercherParcoursAnterieurQuery(global_id=self.proposition_fusion.matricule)
+                )
+                experiences = {
+                    annee: [exp for exp in exp_list if str(exp.uuid) in curex_a_fusionner]
+                    for annee, exp_list in experiences.items()
+                }
+                # add existing curex by years
+                for exp in (curex_existant['educational'] + curex_existant['professional']):
+                    years_range = exp.annees \
+                        if type(exp) == ExperienceAcademiqueDTO else range(exp.date_debut.year, exp.date_fin.year)
+                    for annee in years_range:
+                        if annee in experiences.keys():
+                            experiences[annee] += [exp]
+                        else:
+                            experiences[annee] = [exp]
+                experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
 
         return experiences
 
