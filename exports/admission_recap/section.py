@@ -32,7 +32,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
 )
-from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE, PLUS_5_ISO_CODES
+from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
@@ -179,24 +179,33 @@ def get_training_choice_section(
     )
 
 
+def get_secondary_studies_context(
+    resume_proposition: ResumePropositionDTO,
+    specific_questions: List[QuestionSpecifiqueDTO],
+) -> dict:
+    secondary_studies_context = {'specific_questions': specific_questions}
+    if resume_proposition.etudes_secondaires.diplome_etranger:
+        secondary_studies_context['need_translations'] = (
+            resume_proposition.etudes_secondaires.diplome_etranger.regime_linguistique
+            not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+        )
+        secondary_studies_context['ue_or_assimilated'] = (
+            resume_proposition.etudes_secondaires.diplome_etranger.pays_membre_ue
+            or est_formation_medecine_ou_dentisterie(resume_proposition.proposition.formation.code_domaine)
+        )
+    return secondary_studies_context
+
+
 def get_secondary_studies_section(
     context: ResumePropositionDTO,
     specific_questions_by_tab: Dict[str, List[QuestionSpecifiqueDTO]],
     load_content: bool,
 ) -> Section:
     """Returns the secondary studies section."""
-    education_extra_context = {
-        'specific_questions': specific_questions_by_tab[Onglets.ETUDES_SECONDAIRES.name],
-    }
-    if context.etudes_secondaires.diplome_etranger:
-        education_extra_context['need_translations'] = (
-            context.etudes_secondaires.diplome_etranger.regime_linguistique not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-        )
-        education_extra_context[
-            'ue_or_assimilated'
-        ] = context.etudes_secondaires.diplome_etranger.pays_membre_ue or est_formation_medecine_ou_dentisterie(
-            context.proposition.formation.code_domaine
-        )
+    education_extra_context = get_secondary_studies_context(
+        context,
+        specific_questions_by_tab[Onglets.ETUDES_SECONDAIRES.name],
+    )
     return Section(
         identifier=OngletsDemande.ETUDES_SECONDAIRES,
         content_template='admission/exports/recap/includes/education.html',
@@ -277,17 +286,30 @@ def get_curriculum_specific_questions_section(
     )
 
 
+def get_educational_experience_context(context: ResumePropositionDTO, educational_experience: ExperienceAcademiqueDTO):
+    translation_required = (
+        (context.est_proposition_doctorale or context.est_proposition_generale)
+        and educational_experience.regime_linguistique
+        and educational_experience.regime_linguistique not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+    )
+
+    return {
+        'experience': educational_experience,
+        'is_foreign_experience': educational_experience.pays != BE_ISO_CODE,
+        'is_belgian_experience': educational_experience.pays == BE_ISO_CODE,
+        'translation_required': translation_required,
+        'evaluation_system_with_credits': educational_experience.systeme_evaluation
+        in VerifierCurriculum.SYSTEMES_EVALUATION_AVEC_CREDITS,
+    }
+
+
 def get_educational_experience_section(
     context: ResumePropositionDTO,
     educational_experience: ExperienceAcademiqueDTO,
     load_content: bool,
 ) -> Section:
     """Returns the educational experience section."""
-    translation_required = (
-        (context.est_proposition_doctorale or context.est_proposition_generale)
-        and educational_experience.regime_linguistique
-        and educational_experience.regime_linguistique not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-    )
+    template_context = get_educational_experience_context(context, educational_experience)
     min_year = min(educational_experience_year.annee for educational_experience_year in educational_experience.annees)
     max_year = 1 + max(
         educational_experience_year.annee for educational_experience_year in educational_experience.annees
@@ -299,21 +321,21 @@ def get_educational_experience_section(
         sub_identifier_dates=f'{min_year}-{max_year}',
         content_template='admission/exports/recap/includes/curriculum_educational_experience.html',
         context=context,
-        extra_context={
-            'experience': educational_experience,
-            'is_foreign_experience': educational_experience.pays != BE_ISO_CODE,
-            'is_belgian_experience': educational_experience.pays == BE_ISO_CODE,
-            'translation_required': translation_required,
-            'evaluation_system_with_credits': educational_experience.systeme_evaluation
-            in VerifierCurriculum.SYSTEMES_EVALUATION_AVEC_CREDITS,
-        },
+        extra_context=template_context,
         attachments=get_curriculum_academic_experience_attachments(
             context,
             educational_experience,
-            translation_required,
+            template_context['translation_required'],
         ),
         load_content=load_content,
     )
+
+
+def get_non_educational_experience_context(educational_experience: ExperienceNonAcademiqueDTO):
+    return {
+        'experience': educational_experience,
+        'CURRICULUM_ACTIVITY_LABEL': CURRICULUM_ACTIVITY_LABEL,
+    }
 
 
 def get_non_educational_experience_section(
@@ -331,10 +353,7 @@ def get_non_educational_experience_section(
         sub_identifier_dates=f'{start_date} - {end_date}' if start_date != end_date else start_date,
         content_template='admission/exports/recap/includes/curriculum_professional_experience.html',
         context=context,
-        extra_context={
-            'experience': non_educational_experience,
-            'CURRICULUM_ACTIVITY_LABEL': CURRICULUM_ACTIVITY_LABEL,
-        },
+        extra_context=get_non_educational_experience_context(non_educational_experience),
         attachments=get_curriculum_non_academic_experience_attachments(context, non_educational_experience),
         load_content=load_content,
     )
@@ -540,13 +559,29 @@ def get_sections(
         pdf_sections.append(get_languages_section(context, load_content))
 
     if not hide_curriculum:
+        # Display the global curriculum page and the related attachments
         pdf_sections.append(get_curriculum_section(context, specific_questions_by_tab, load_content))
+    else:
+        # Only display the curriculum attachments
+        pdf_sections.append(get_curriculum_section(context, {Onglets.CURRICULUM.name: []}, False))
 
+    # We keep all the experiences even the ones that are not valuated when the admission has not been submitted,
+    # otherwise we only keep the ones that have been valuated by the current admission
     for educational_experience in context.curriculum.experiences_academiques:
-        pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
+        if (
+            context.proposition.est_non_soumise
+            or context.proposition.uuid in educational_experience.valorisee_par_admissions
+        ):
+            pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
 
     for non_educational_experience in context.curriculum.experiences_non_academiques:
-        pdf_sections.append(get_non_educational_experience_section(context, non_educational_experience, load_content))
+        if (
+            context.proposition.est_non_soumise
+            or context.proposition.uuid in non_educational_experience.valorisee_par_admissions
+        ):
+            pdf_sections.append(
+                get_non_educational_experience_section(context, non_educational_experience, load_content)
+            )
 
     if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))

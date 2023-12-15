@@ -78,7 +78,7 @@ __all__ = [
 
 class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
     form_class = UploadFreeDocumentForm
-    permission_required = 'admission.view_documents_management'
+    permission_required = 'admission.change_documents_management'
     template_name = 'admission/document/upload_free_document.html'
     htmx_template_name = 'admission/document/upload_free_document.html'
     default_htmx_trigger_form_extra = {
@@ -146,7 +146,7 @@ def can_edit_document(person: Person, document: AdmissionDocument) -> bool:
 
 
 class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    permission_required = 'admission.view_documents_management'
+    permission_required = 'admission.change_documents_management'
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
@@ -238,8 +238,8 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
             editable_document=editable_document,
         )
 
-        context['replace_form'] = ReplaceDocumentForm(mimetypes=document.mimetypes)
-        context['upload_form'] = UploadDocumentForm(mimetypes=document.mimetypes)
+        context['replace_form'] = ReplaceDocumentForm(mimetypes=document.mimetypes, identifier=document_identifier)
+        context['upload_form'] = UploadDocumentForm(mimetypes=document.mimetypes, identifier=document_identifier)
 
         return context
 
@@ -248,7 +248,7 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
-    permission_required = 'admission.view_documents_management'
+    permission_required = 'admission.change_documents_management'
     name = 'document-action'
 
     def get_context_data(self, **kwargs):
@@ -424,6 +424,7 @@ class ReplaceDocumentView(DocumentFormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['mimetypes'] = self.document.mimetypes
+        kwargs['identifier'] = self.document_identifier
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -444,7 +445,12 @@ class ReplaceDocumentView(DocumentFormView):
         self.message_on_success = _('The document has been replaced')
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
 
-        return super().form_valid(self.form_class(mimetypes=self.document.mimetypes))
+        return super().form_valid(
+            self.form_class(
+                mimetypes=self.document.mimetypes,
+                identifier=self.document_identifier,
+            )
+        )
 
 
 class UploadDocumentByManagerView(DocumentFormView):
@@ -456,6 +462,7 @@ class UploadDocumentByManagerView(DocumentFormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['mimetypes'] = self.document.mimetypes
+        kwargs['identifier'] = self.document_identifier
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -484,4 +491,9 @@ class UploadDocumentByManagerView(DocumentFormView):
         self.message_on_success = _('The document has been uploaded')
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
 
-        return super().form_valid(self.form_class(mimetypes=self.document.mimetypes))
+        return super().form_valid(
+            self.form_class(
+                mimetypes=self.document.mimetypes,
+                identifier=self.document_identifier,
+            )
+        )

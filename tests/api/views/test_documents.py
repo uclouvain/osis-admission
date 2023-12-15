@@ -33,6 +33,7 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext
+from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -56,6 +57,10 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
 )
 from admission.tests.factories.form_item import DocumentAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -95,6 +100,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             'curriculum_file_token': uuid.uuid4(),
             'non_free_specific_question_file_token': uuid.uuid4(),
             'free_file_token': uuid.uuid4(),
+            'certificate_token': uuid.uuid4(),
+            'transcript_token': uuid.uuid4(),
         }
         AcademicYearFactory(year=2019)
 
@@ -176,12 +183,16 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             candidate=CompletePersonFactory(
                 language=settings.LANGUAGE_CODE_FR,
             ),
-            training=Master120TrainingFactory(),
+            training=Master120TrainingFactory(
+                enrollment_campus__email='abc@example.com',
+            ),
             status=ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
         )
 
         self.free_document = AdmissionFormItemInstantiationFactory(
-            form_item=DocumentAdmissionFormItemFactory(),
+            form_item=DocumentAdmissionFormItemFactory(
+                title={'en': 'Free document field', 'fr-be': 'Champ document libre'}
+            ),
             admission=self.admission,
             academic_year=self.admission.determined_academic_year or self.admission.training.academic_year,
             tab=Onglets.DOCUMENTS.name,
@@ -190,10 +201,11 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
         self.non_free_document = AdmissionFormItemInstantiationFactory(
             form_item=DocumentAdmissionFormItemFactory(
+                title={'en': 'Non free document field', 'fr-be': 'Champ document non libre'},
                 configuration={
                     CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name: [PDF_MIME_TYPE],
                     CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name: 4,
-                }
+                },
             ),
             academic_year=self.admission.determined_academic_year or self.admission.training.academic_year,
             tab=Onglets.CHOIX_FORMATION.name,
@@ -246,7 +258,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         self.assertEqual(immediate_requested_documents[0]['type'], TypeItemFormulaire.DOCUMENT.name)
         self.assertEqual(
             immediate_requested_documents[0]['title'][settings.LANGUAGE_CODE_FR],
-            'Champ document',
+            'Champ document non libre',
         )
         self.assertEqual(immediate_requested_documents[0]['text'][settings.LANGUAGE_CODE_FR], 'Ma raison')
         self.assertEqual(immediate_requested_documents[0]['help_text'], {})
@@ -290,7 +302,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         self.assertEqual(later_requested_documents[1]['type'], TypeItemFormulaire.DOCUMENT.name)
         self.assertEqual(
             later_requested_documents[1]['title'][settings.LANGUAGE_CODE_FR],
-            'Champ document',
+            'Champ document libre',
         )
         self.assertEqual(later_requested_documents[1]['text'][settings.LANGUAGE_CODE_FR], 'Ma raison')
         self.assertEqual(later_requested_documents[1]['help_text'], {})
@@ -308,6 +320,85 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.value,
         )
         self.assertEqual(later_requested_documents[1]['required'], False)
+
+    def test_only_retrieve_requested_documents_of_valuated_cv_experiences(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        educational_experience = self.admission.candidate.educationalexperience_set.first()
+        non_educational_experience = self.admission.candidate.professionalexperience_set.first()
+        other_admission = GeneralEducationAdmissionFactory(candidate=self.admission.candidate)
+
+        transcript_identifier = f'CURRICULUM.{educational_experience.uuid}.RELEVE_NOTES'
+        certificate_identifier = f'CURRICULUM.{non_educational_experience.uuid}.CERTIFICAT_EXPERIENCE'
+
+        self.admission.requested_documents = {
+            transcript_identifier: {
+                **self.manuel_required_params,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+            certificate_identifier: {
+                **self.manuel_required_params,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+        }
+
+        self.admission.save()
+
+        # No valuated experience -> no document
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+
+        immediate_requested_documents = response_data['immediate_requested_documents']
+        later_requested_documents = response_data['later_requested_documents']
+
+        self.assertEqual(len(immediate_requested_documents), 0)
+        self.assertEqual(len(later_requested_documents), 0)
+
+        # Valuated experiences but by another admission -> no document
+        educational_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            educationalexperience=educational_experience,
+        )
+
+        non_educational_valuation = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+
+        immediate_requested_documents = response_data['immediate_requested_documents']
+        later_requested_documents = response_data['later_requested_documents']
+
+        self.assertEqual(len(immediate_requested_documents), 0)
+        self.assertEqual(len(later_requested_documents), 0)
+
+        # Valuated experiences by this admission -> retrieve documents
+        educational_valuation.baseadmission = self.admission
+        educational_valuation.save()
+
+        non_educational_valuation.baseadmission = self.admission
+        non_educational_valuation.save()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_data = response.json()
+
+        immediate_requested_documents = response_data['immediate_requested_documents']
+
+        self.assertEqual(len(immediate_requested_documents), 2)
+
+        self.assertEqual(immediate_requested_documents[0]['uuid'], transcript_identifier)
+        self.assertEqual(immediate_requested_documents[1]['uuid'], certificate_identifier)
 
     def test_retrieve_requested_documents_with_not_candidate_user_is_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -360,6 +451,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             },
         )
 
+        self.assertFalse(EmailNotification.objects.filter(person=self.admission.candidate).exists())
+
         # Non-requested files are specified
         response = self.client.post(
             self.url,
@@ -388,6 +481,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 ]
             },
         )
+
+        self.assertFalse(EmailNotification.objects.filter(person=self.admission.candidate).exists())
 
         # > Some files must be converted
         with mock.patch('osis_document.api.utils.get_several_remote_metadata') as get_several_remote_metadata_patcher:
@@ -454,7 +549,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 post_processing_types=[PostProcessingType.CONVERT.name, PostProcessingType.MERGE.name],
                 post_process_params={
                     PostProcessingType.MERGE.name: {
-                        'output_filename': 'champ-document.pdf',
+                        'output_filename': 'champ-document-non-libre.pdf',
                     },
                     PostProcessingType.CONVERT.name: {},
                 },
@@ -495,12 +590,24 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 post_processing_types=[PostProcessingType.MERGE.name],
                 post_process_params={
                     PostProcessingType.MERGE.name: {
-                        'output_filename': 'champ-document.pdf',
+                        'output_filename': 'champ-document-non-libre.pdf',
                     },
                     PostProcessingType.CONVERT.name: {},
                 },
                 async_post_processing=False,
             )
+
+    @freezegun.freeze_time('2020-01-02')
+    def test_submit_all_documents(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        curriculum_file = ['curriculum_file_token']
+        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        several_non_free_specific_question_files = [
+            'non_free_specific_question_file_token-1',
+            'non_free_specific_question_file_token-2',
+        ]
+        free_file = ['free_file_token']
 
         response = self.client.post(
             self.url,
@@ -585,3 +692,127 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 str(self.free_document.form_item.uuid): [str(self.uuid_documents_by_token[free_file[0]])],
             },
         )
+
+        # Check the sent notification
+        self.assertEqual(EmailNotification.objects.count(), 1)
+        email_notification: EmailNotification = EmailNotification.objects.first()
+        self.assertEqual(email_notification.person, self.admission.candidate)
+
+        self.assertIn('documents suivants indispensables', email_notification.payload)
+        self.assertIn('Curriculum vitae', email_notification.payload)
+        self.assertIn('Champ document libre', email_notification.payload)
+        self.assertIn('Champ document non libre', email_notification.payload)
+
+        self.assertNotIn('Nous vous rappelons que certains documents', email_notification.payload)
+        self.assertNotIn('abc@example.com', email_notification.payload)
+
+    @freezegun.freeze_time('2020-01-02')
+    def test_submit_a_part_of_the_documents(self):
+        self.admission.requested_documents[f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}'] = {
+            **self.manuel_required_params,
+            'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+        }
+
+        self.admission.save()
+
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        curriculum_file = ['curriculum_file_token']
+        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        several_non_free_specific_question_files = [
+            'non_free_specific_question_file_token-1',
+            'non_free_specific_question_file_token-2',
+        ]
+
+        response = self.client.post(
+            self.url,
+            {
+                'reponses_documents_a_completer': {
+                    'CURRICULUM.CURRICULUM': curriculum_file,
+                    f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}': (
+                        non_free_specific_question_file
+                    ),
+                    f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}': [],
+                },
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
+
+        # Check admission status and last modification data
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.admission.last_update_author, self.admission.candidate)
+
+        # Check updates of the documents
+        self.assertEqual(
+            self.admission.requested_documents['CURRICULUM.CURRICULUM'],
+            {
+                **self.manuel_required_params,
+                'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
+                'request_status': '',
+            },
+        )
+
+        self.assertEqual(
+            self.admission.requested_documents[
+                f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}'
+            ],
+            {
+                **self.manuel_required_params,
+                'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
+                'request_status': '',
+            },
+        )
+
+        self.assertEqual(
+            self.admission.requested_documents[f'LIBRE_CANDIDAT.{self.free_document.form_item.uuid}'],
+            {
+                **self.manuel_required_params,
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            },
+        )
+
+        # Check the metadata of the submitted files
+        self.change_remote_metadata_patcher.assert_has_calls(
+            [
+                call(
+                    token=curriculum_file[0],
+                    metadata={'author': self.admission.candidate.global_id},
+                ),
+                call(
+                    token=non_free_specific_question_file[0],
+                    metadata={'author': self.admission.candidate.global_id},
+                ),
+            ],
+            any_order=True,
+        )
+
+        # Check the updates of the files
+        self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
+        self.assertEqual(
+            self.admission.specific_question_answers,
+            {
+                str(self.non_free_document.form_item.uuid): [
+                    str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
+                ],
+            },
+        )
+
+        # Check the sent notification
+        self.assertEqual(EmailNotification.objects.count(), 1)
+        email_notification: EmailNotification = EmailNotification.objects.first()
+        self.assertEqual(email_notification.person, self.admission.candidate)
+
+        self.assertIn('documents suivants indispensables', email_notification.payload)
+        self.assertIn('Curriculum vitae', email_notification.payload)
+        self.assertIn('Champ document libre', email_notification.payload)
+
+        self.assertIn('Nous vous rappelons que certains documents', email_notification.payload)
+        self.assertIn('abc@example.com', email_notification.payload)
+        self.assertIn('Champ document non libre', email_notification.payload)

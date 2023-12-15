@@ -38,9 +38,9 @@
   {% endif %}
 </ul>
 
-<div id="{{ prefix }}-parcours" class="tab-content">
+<div id="{{ prefix }}-parcours" class="tab-content parcours">
   {# Vue complète #}
-  <div role="tabpanel" class="tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ prefix }}-parcours-complete">
+  <div role="tabpanel" class="table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ prefix }}-parcours-complete">
     <table class="table">
       <thead>
         <tr>
@@ -53,12 +53,15 @@
           <th>{% trans "Reduction" %}</th>
           <th>{% trans "Course change" %}</th>
           <th>{% trans "Institute" context "admission" %}</th>
+          {% if show_actions %}
+            <th>{% trans "Action" %}</th>
+          {% endif %}
         </tr>
       </thead>
       <tbody>
         {% for year, year_experiences in experiences.items %}
           {% for experience in year_experiences %}
-            {% include "admission/general_education/includes/checklist/parcours_row.html" %}
+            {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
           {% endfor %}
         {% endfor %}
       </tbody>
@@ -66,7 +69,7 @@
   </div>
 
   {# Vue formations académiques #}
-  <div role="tabpanel" class="tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
+  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
     <table class="table">
       <thead>
         <tr>
@@ -79,13 +82,16 @@
           <th>{% trans "Reduction" %}</th>
           <th>{% trans "Course change" %}</th>
           <th>{% trans "Institute" context "admission" %}</th>
+          {% if show_actions %}
+            <th>{% trans "Action" %}</th>
+          {% endif %}
         </tr>
       </thead>
       <tbody>
         {% with experiences_formations=experiences|filter_experiences_trainings %}
           {% for year, year_experiences in experiences_formations.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" %}
+              {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
             {% empty %}
               {% ifchanged %}
               <tr class="bg-primary">
@@ -100,7 +106,7 @@
   </div>
 
   {# Vue finançabilité #}
-  <div role="tabpanel" class="tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ prefix }}-parcours-financabilite">
+  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ prefix }}-parcours-financabilite">
     <table class="table">
       <thead>
         <tr>
@@ -113,13 +119,16 @@
           <th>{% trans "Reduction" %}</th>
           <th>{% trans "Course change" %}</th>
           <th>{% trans "Institute" context "admission" %}</th>
+          {% if show_actions %}
+            <th>{% trans "Action" %}</th>
+          {% endif %}
         </tr>
       </thead>
       <tbody>
         {% with experiences_financabilite=experiences|filter_experiences_financability %}
           {% for year, year_experiences in experiences_financabilite.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" %}
+              {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
             {% endfor %}
           {% endfor %}
         {% endwith %}
@@ -127,4 +136,20 @@
     </table>
   </div>
 
+  {% if show_actions %}
+    <a
+        class="btn btn-primary"
+        href="{% url view.base_namespace|add:':update:curriculum:educational_create' view.kwargs.uuid %}"
+    >
+      <i class="fa-solid fa-plus"></i>
+      {% translate 'Academic course' %}
+    </a>
+    <a
+        class="btn btn-primary"
+        href="{% url view.base_namespace|add:':update:curriculum:non_educational_create' view.kwargs.uuid %}"
+    >
+      <i class="fa-solid fa-plus"></i>
+      {% translate 'Non-academic experience' %}
+    </a>
+  {% endif %}
 </div>

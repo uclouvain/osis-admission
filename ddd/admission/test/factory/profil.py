@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from typing import List
 
 import factory
@@ -119,6 +120,12 @@ class AnneeExperienceAcademiqueDTOFactory(factory.Factory):
     traduction_releve_notes = []
     credits_inscrits = None
     credits_acquis = None
+    avec_bloc_1 = None
+    avec_complement = None
+    credits_inscrits_communaute_fr = None
+    credits_acquis_communaute_fr = None
+    avec_allegement = None
+    est_reorientation_102 = None
 
 
 class ExperienceAcademiqueDTOFactory(factory.Factory):
@@ -126,13 +133,14 @@ class ExperienceAcademiqueDTOFactory(factory.Factory):
         model = ExperienceAcademiqueDTO
         abstract = False
 
-    uuid = ''
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
     pays = ''
     nom_pays = ''
     nom_institut = ''
     adresse_institut = ''
     code_institut = ''
     communaute_institut = ''
+    type_institut = ''
     regime_linguistique = ''
     nom_regime_linguistique = ''
     type_releve_notes = ''
@@ -151,6 +159,8 @@ class ExperienceAcademiqueDTOFactory(factory.Factory):
     systeme_evaluation = ''
     nom_formation = ''
     type_enseignement = ''
+    nom_formation_equivalente_communaute_fr = ''
+    cycle_formation = ''
 
 
 class ExperienceNonAcademiqueDTOFactory(factory.Factory):
@@ -158,7 +168,7 @@ class ExperienceNonAcademiqueDTOFactory(factory.Factory):
         model = ExperienceNonAcademiqueDTO
         abstract = False
 
-    uuid = ''
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
     employeur = ''
     date_debut = datetime.date(2020, 9, 1)
     date_fin = datetime.date(2020, 10, 15)

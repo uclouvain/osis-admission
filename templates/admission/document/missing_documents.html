@@ -92,34 +92,29 @@
     </table>
   </div>
 
-  <div class="row mt-1">
-    <div class="col-md-6 ">
-      <button
-          class="btn btn-primary"
-          data-toggle="collapse"
-          data-target="#request-document-form"
-          hx-get="{% url request.resolver_match.namespace|add:':document:free-candidate-request' uuid=view.kwargs.uuid %}"
-          hx-target="#request-document-form"
-          hx-trigger="click once"
-      >
-        <i class="fa-solid fa-plus"></i>
-        {% translate 'List a missing document' %}
-        <i class="fa-solid fa-paperclip"></i>
-      </button>
-    </div>
-
-    <div class="col-md-6 text-right">
-      <button
-          class="btn btn-primary"
-          data-toggle="modal"
-          data-target="#request-all-form-modal"
-          data-backdrop="static"
-          data-keyboard="false"
-      >
-        <i class="fa-solid fa-envelope"></i>
-        {% translate 'Request the documents from the candidate' %}
-      </button>
-    </div>
+  <div class="flex-content mt-1" style="gap: 5px">
+    <button
+        class="btn btn-primary"
+        data-toggle="collapse"
+        data-target="#request-document-form"
+        hx-get="{% url request.resolver_match.namespace|add:':document:free-candidate-request' uuid=view.kwargs.uuid %}"
+        hx-target="#request-document-form"
+        hx-trigger="click once"
+    >
+      <i class="fa-solid fa-plus"></i>
+      {% translate 'List a missing document' %}
+      <i class="fa-solid fa-paperclip"></i>
+    </button>
+    <button
+        class="btn btn-primary"
+        data-toggle="modal"
+        data-target="#request-all-form-modal"
+        data-backdrop="static"
+        data-keyboard="false"
+    >
+      <i class="fa-solid fa-envelope"></i>
+      {% translate 'Request the documents from the candidate' %}
+    </button>
   </div>
 
   <div id="request-document-form" class="collapse mt-1 media">

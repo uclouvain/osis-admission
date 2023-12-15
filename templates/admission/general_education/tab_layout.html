@@ -42,18 +42,6 @@
 {% endblock %}
 
 {% block page-header %}
-  <div class="page-header flex-content">
-    <h2>
-      {{ admission.formation.intitule }} ({{ admission.reference }})
-    </h2>
-    <a
-        href="{% url 'admission:all-list' %}"
-        class="text-primary"
-    >
-      <span class="fa fa-stream"></span>
-      {% trans "Back to the list" %}
-    </a>
-  </div>
 {% endblock %}
 
 {% block panel-heading %}

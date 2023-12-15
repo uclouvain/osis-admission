@@ -29,3 +29,7 @@ from django.db import models
 class ToChar(models.Func):
     function = 'TO_CHAR'
     output_field = models.CharField()
+
+
+class ArrayLength(models.Func):
+    function = 'CARDINALITY'

@@ -515,3 +515,19 @@ class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
     uuid_proposition: str
     financabilite_regle: str
     etabli_par: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    statut: str
+    statut_authentification: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    etat_authentification: str
+    commentaire_authentification: str

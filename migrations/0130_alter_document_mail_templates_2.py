@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                         don't have them yet:
                     </p>
                     
-                    {later_blocking_requested_documents}
+                    {later_requested_documents}
                 </div>
                 
                 <div>
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                          The following documents aren't mandatory and can be provided later if you don't have them yet:
                     </p>
                     
-                    {later_non_blocking_requested_documents}
+                    {later_requested_documents}
                 </div>
 
                 <p>
@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
                 ultérieurement, si vous ne les avez pas encore :
             </p>
             
-            {later_blocking_requested_documents}
+            {later_requested_documents}
         </div>
         
         <div>
@@ -120,7 +120,7 @@ class Migration(migrations.Migration):
                  avez pas encore :
             </p>
             
-            {later_non_blocking_requested_documents}
+            {later_requested_documents}
         </div>
 
         <p>
@@ -176,7 +176,7 @@ class Migration(migrations.Migration):
                         don't have them yet:
                     </p>
                     
-                    {later_blocking_requested_documents}
+                    {later_requested_documents}
                 </div>
                 
                 <div>
@@ -184,7 +184,7 @@ class Migration(migrations.Migration):
                          The following documents aren't mandatory and can be provided later if you don't have them yet:
                     </p>
                     
-                    {later_non_blocking_requested_documents}
+                    {later_requested_documents}
                 </div>
 
                 <p>
@@ -226,7 +226,7 @@ class Migration(migrations.Migration):
                 ultérieurement, si vous ne les avez pas encore :
             </p>
             
-            {later_blocking_requested_documents}
+            {later_requested_documents}
         </div>
         
         <div>
@@ -235,7 +235,7 @@ class Migration(migrations.Migration):
                  avez pas encore :
             </p>
             
-            {later_non_blocking_requested_documents}
+            {later_requested_documents}
         </div>
 
         <p>

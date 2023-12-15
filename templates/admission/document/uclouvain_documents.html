@@ -70,44 +70,40 @@
     </table>
   </div>
 
-  <div class="row mt-1">
-    <div class="col-md-6 ">
-      <button
-          class="btn btn-primary"
-          data-toggle="collapse"
-          data-target="#upload-internal-document-form"
-          hx-get="{% url request.resolver_match.namespace|add:':document:free-internal-upload' uuid=view.kwargs.uuid %}"
-          hx-target="#upload-internal-document-form"
-          hx-trigger="click once"
-      >
-        <i class="fa-solid fa-upload"></i>
-        {% translate 'Upload a document' %}
-        <i class="fa-solid fa-paperclip"></i>
-      </button>
-    </div>
+  <div class="flex-content mt-1" style="gap: 5px">
+    <button
+        class="btn btn-primary"
+        data-toggle="collapse"
+        data-target="#upload-internal-document-form"
+        hx-get="{% url request.resolver_match.namespace|add:':document:free-internal-upload' uuid=view.kwargs.uuid %}"
+        hx-target="#upload-internal-document-form"
+        hx-trigger="click once"
+    >
+      <i class="fa-solid fa-upload"></i>
+      {% translate 'Upload a document' %}
+      <i class="fa-solid fa-paperclip"></i>
+    </button>
 
-    <div class="col-md-6 text-right">
-      <button
-          class="btn btn-primary"
-          data-toggle="modal"
-          data-target="#request-all-form-modal"
-          data-backdrop="static"
-          data-keyboard="false"
-      >
-        <i class="fa-solid fa-envelope"></i>
-        {% translate 'Request the documents from the candidate' %}
-      </button>
-      <button
-          class="btn btn-default htmx-button mt-1"
-          hx-post="{% url request.resolver_match.namespace|add:':document:analysis-folder-generation' uuid=view.kwargs.uuid %}"
-          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-          hx-swap="none"
-      >
-        <i class="fa-solid fa-arrows-rotate"></i>
-        {% translate 'Generate an analysis folder' %}
-      </button>
+    <button
+        class="btn btn-primary"
+        data-toggle="modal"
+        data-target="#request-all-form-modal"
+        data-backdrop="static"
+        data-keyboard="false"
+    >
+      <i class="fa-solid fa-envelope"></i>
+      {% translate 'Request the documents from the candidate' %}
+    </button>
 
-    </div>
+    <button
+        class="btn btn-default htmx-button"
+        hx-post="{% url request.resolver_match.namespace|add:':document:analysis-folder-generation' uuid=view.kwargs.uuid %}"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        hx-swap="none"
+    >
+      <i class="fa-solid fa-arrows-rotate"></i>
+      {% translate 'Generate an analysis folder' %}
+    </button>
   </div>
 
 

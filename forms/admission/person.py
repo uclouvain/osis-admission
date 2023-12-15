@@ -222,6 +222,7 @@ class AdmissionPersonForm(AdmissionModelForm):
         required=False,
         label=_('Identification photo'),
         max_files=1,
+        forced_mimetypes=IMAGE_MIME_TYPES,
         mimetypes=IMAGE_MIME_TYPES,
         with_cropping=True,
         cropping_options={'aspectRatio': 0.766},

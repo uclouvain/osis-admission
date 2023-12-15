@@ -95,19 +95,26 @@ def admission_pdf_recap(
         # If too much memory usage -> use temporary files or subprocess
         with pdf.open_outline() as outline:
             for section in pdf_sections:
-                outline_item = OutlineItem(str(section.label), page_count)
-                content = BytesIO(section.content)
+                if section.content is not None:
+                    # There is a content to display so we create an outline item to put it and the related attachments
+                    outline_item = OutlineItem(str(section.label), page_count)
+                    outline_item_children = outline_item.children
 
-                # Add section data
-                with Pdf.open(content) as pdf_content:
-                    version = max(version, pdf_content.pdf_version)
-                    pdf.pages.extend(pdf_content.pages)
-                    page_count += len(pdf_content.pages)
+                    content = BytesIO(section.content)
+
+                    # Add section data
+                    with Pdf.open(content) as pdf_content:
+                        version = max(version, pdf_content.pdf_version)
+                        pdf.pages.extend(pdf_content.pages)
+                        page_count += len(pdf_content.pages)
+                else:
+                    # There is no content to display so the attachments will be directly added to the outline root
+                    outline_item_children = outline.root
 
                 # Add section attachments
                 for attachment in section.attachments:
                     if attachment.uuids:
-                        outline_item.children.append(OutlineItem(str(attachment.label), page_count))
+                        outline_item_children.append(OutlineItem(str(attachment.label), page_count))
                     for attachment_uuid in attachment.uuids:
                         token = file_tokens.get(attachment_uuid)
                         raw_content = attachment.get_raw(
@@ -120,7 +127,8 @@ def admission_pdf_recap(
                             pdf.pages.extend(attachment_content.pages)
                             page_count += len(attachment_content.pages)
 
-                outline.root.append(outline_item)
+                if section.content is not None:
+                    outline.root.append(outline_item)
 
         # Finalize the PDF
         final_pdf = BytesIO()

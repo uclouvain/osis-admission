@@ -34,8 +34,8 @@ class CoordonneesSerializer(serializers.Serializer):
     contact = PersonAddressSerializer(allow_null=True)
     residential = PersonAddressSerializer(allow_null=True)
     private_email = serializers.EmailField(allow_blank=True)
-    phone_mobile = serializers.CharField(allow_blank=True)
-    emergency_contact_phone = serializers.CharField(allow_blank=True)
+    phone_mobile = serializers.CharField(allow_blank=True, max_length=30)
+    emergency_contact_phone = serializers.CharField(allow_blank=True, max_length=30)
 
     def load_addresses(self, instance):
         instance.contact = PersonAddress.objects.filter(

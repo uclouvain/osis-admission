@@ -315,6 +315,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             metadonnees_courantes = metadonnees.get(uuid_document, {})
             types_documents[uuid_document] = metadonnees_courantes.get('mimetype') or ''
             noms_documents_televerses[uuid_document] = metadonnees_courantes.get('name') or ''
+        est_requis_et_manquant = document.required and not document.uuids
         return EmplacementDocumentDTO(
             identifiant=document_id,
             libelle=document.label,
@@ -324,7 +325,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             statut=document_demande['status']
             if 'status' in document_demande
             else StatutEmplacementDocument.A_RECLAMER.name
-            if (document.required and not document.uuids)
+            if est_requis_et_manquant
             else StatutEmplacementDocument.NON_ANALYSE.name,
             justification_gestionnaire=document_demande.get('reason', ''),
             reclame_le=parse_datetime(document_demande['requested_at'])
@@ -345,7 +346,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             document_soumis_le=parse_datetime(metadonnees_document['uploaded_at'])
             if metadonnees_document.get('uploaded_at')
             else None,
-            requis_automatiquement=document.required,
+            requis_automatiquement=est_requis_et_manquant,
             types_documents=types_documents,
             noms_documents_televerses=noms_documents_televerses,
             statut_reclamation=document_demande.get('request_status', ''),

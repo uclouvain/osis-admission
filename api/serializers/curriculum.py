@@ -101,6 +101,12 @@ class EducationalExperienceYearSerializer(serializers.ModelSerializer):
             'id',
             'educational_experience',
             'external_id',
+            'with_block_1',
+            'with_complement',
+            'fwb_registered_credit_number',
+            'fwb_acquired_credit_number',
+            'with_reduction',
+            'is_102_change_of_course',
         ]
 
 
@@ -149,6 +155,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         exclude = [
             'id',
             'external_id',
+            'fwb_equivalent_program',
         ]
 
     @staticmethod

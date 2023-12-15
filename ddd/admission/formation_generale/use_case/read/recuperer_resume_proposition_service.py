@@ -27,6 +27,7 @@ import datetime
 
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.formation_generale.commands import RecupererResumePropositionQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
@@ -64,6 +65,9 @@ def recuperer_resume_proposition(
         annee_courante=annee_courante,
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
+        experiences_cv_recuperees=ExperiencesCVRecuperees.TOUTES
+        if proposition_dto.est_non_soumise
+        else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
     )
 
     # THEN

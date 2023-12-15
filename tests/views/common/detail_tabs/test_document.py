@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 import uuid
+from email import message_from_string
 from unittest import mock
 from unittest.mock import patch
 
@@ -144,7 +145,10 @@ class DocumentViewTestCase(TestCase):
         # Reset the admission
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
-            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
+            candidate=CompletePersonFactory(
+                language=settings.LANGUAGE_CODE_FR,
+                private_email='candidate@test.be',
+            ),
             curriculum=[uuid.uuid4()],
             pdf_recap=[uuid.uuid4()],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
@@ -1979,7 +1983,7 @@ class DocumentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(form.fields['file'].max_files, 1)
         self.assertEqual(form.fields['file'].min_files, 1)
-        self.assertCountEqual(form.fields['file'].mimetypes, list(SUPPORTED_MIME_TYPES))
+        self.assertCountEqual(form.fields['file'].mimetypes, [PDF_MIME_TYPE])
 
         response = self.client.get(
             resolve_url(
@@ -2342,7 +2346,7 @@ class DocumentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(form.fields['file'].max_files, 1)
         self.assertEqual(form.fields['file'].min_files, 1)
-        self.assertCountEqual(form.fields['file'].mimetypes, list(SUPPORTED_MIME_TYPES))
+        self.assertCountEqual(form.fields['file'].mimetypes, [PDF_MIME_TYPE])
 
         response = self.client.get(
             resolve_url(
@@ -2580,8 +2584,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form['deadline'].value(), datetime.date(2022, 1, 16))
         self.assertEqual(
             form['message_object'].value(),
-            "[OSIS] Documents demandés pour votre candidature à l'UCLouvain "
-            f"({response.context['admission'].reference})",
+            "Inscription UCLouvain – compléter votre dossier " f"({response.context['admission'].reference})",
         )
 
         first_field = form.fields.get(self.sic_free_requestable_candidate_document_with_default_file)
@@ -2599,6 +2602,17 @@ class DocumentViewTestCase(TestCase):
             '<span class="fa-solid fa-link-slash"></span> My file name',
         )
         self.assertEqual(second_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
+
+        # Custom deadline in the second part of September
+        with freezegun.freeze_time('2022-09-20'):
+            self.client.force_login(user=self.second_sic_manager_user)
+
+            response = self.client.get(url)
+
+            self.assertEqual(response.status_code, 200)
+
+            form = response.context['form']
+            self.assertEqual(form['deadline'].value(), datetime.date(2022, 9, 30))
 
         # Post an invalid form -> missing fields
         response = self.client.post(
@@ -2678,6 +2692,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(EmailNotification.objects.count(), 1)
         email_notification: EmailNotification = EmailNotification.objects.first()
         self.assertEqual(email_notification.person, self.general_admission.candidate)
+        email_object = message_from_string(email_notification.payload)
+        self.assertEqual(email_object['To'], 'candidate@test.be')
         self.assertIn(form.cleaned_data['message_content'], email_notification.payload)
         self.assertIn(form.cleaned_data['message_object'], email_notification.payload)
 
@@ -2715,8 +2731,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(form['deadline'].value(), datetime.date(2022, 1, 16))
         self.assertEqual(
             form['message_object'].value(),
-            "[OSIS] Documents demandés pour votre candidature à l'UCLouvain "
-            f"({response.context['admission'].reference})",
+            "Inscription UCLouvain – compléter votre dossier " f"({response.context['admission'].reference})",
         )
 
         first_field = form.fields.get(self.fac_free_requestable_candidate_document_with_default_file)
@@ -2849,6 +2864,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(EmailNotification.objects.count(), 1)
         email_notification: EmailNotification = EmailNotification.objects.first()
         self.assertEqual(email_notification.person, self.general_admission.candidate)
+        email_object = message_from_string(email_notification.payload)
+        self.assertEqual(email_object['To'], 'candidate@test.be')
         self.assertIn(form.cleaned_data['message_content'], email_notification.payload)
         self.assertIn(form.cleaned_data['message_object'], email_notification.payload)
 
@@ -2897,9 +2914,9 @@ class DocumentViewTestCase(TestCase):
             StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
         )
         self.assertEqual(context['request_form']['reason'].value(), 'My reason')
-        self.assertEqual(context['replace_form'].fields['file'].mimetypes, list(SUPPORTED_MIME_TYPES))
+        self.assertEqual(context['replace_form'].fields['file'].mimetypes, [PDF_MIME_TYPE])
         self.assertEqual(context['replace_form']['file'].value(), [])
-        self.assertEqual(context['upload_form'].fields['file'].mimetypes, list(SUPPORTED_MIME_TYPES))
+        self.assertEqual(context['upload_form'].fields['file'].mimetypes, [PDF_MIME_TYPE])
         self.assertEqual(context['upload_form']['file'].value(), [])
 
         # Filled document

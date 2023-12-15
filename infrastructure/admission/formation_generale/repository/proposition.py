@@ -550,6 +550,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         curriculum = ProfilCandidatTranslator.get_curriculum(
             matricule=proposition.matricule_candidat,
             annee_courante=annee_courante,
+            uuid_proposition=proposition.uuid,
         )
         candidat_a_reussi_experience_academique_belge = any(
             annee.resultat == Result.SUCCESS.name or annee.resultat == Result.SUCCESS_WITH_RESIDUAL_CREDITS.name

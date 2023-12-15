@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,13 +25,19 @@
 ##############################################################################
 import datetime
 from functools import reduce
-from typing import List, Optional
+from typing import List, Optional, Set
+from uuid import UUID
 
 import attr
 from dateutil import relativedelta
+from django.template.defaultfilters import truncatechars
+from django.utils.functional import cached_property
 
-from admission.ddd import NB_MOIS_MIN_VAE
+from admission.ddd import NB_MOIS_MIN_VAE, MOIS_DEBUT_ANNEE_ACADEMIQUE
+from base.models.enums.community import CommunityEnum
 from osis_common.ddd import interface
+from osis_profile.models.enums.curriculum import ActivityType
+from reference.models.enums.cycle import Cycle
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -42,6 +48,12 @@ class AnneeExperienceAcademiqueDTO(interface.DTO):
     traduction_releve_notes: List[str]
     credits_inscrits: Optional[float]
     credits_acquis: Optional[float]
+    avec_bloc_1: Optional[bool]
+    avec_complement: Optional[bool]
+    credits_inscrits_communaute_fr: Optional[float]
+    credits_acquis_communaute_fr: Optional[float]
+    avec_allegement: Optional[bool]
+    est_reorientation_102: Optional[bool]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -53,6 +65,7 @@ class ExperienceAcademiqueDTO(interface.DTO):
     adresse_institut: str
     code_institut: str
     communaute_institut: str
+    type_institut: str
     regime_linguistique: str
     nom_regime_linguistique: str
     type_releve_notes: str
@@ -70,10 +83,43 @@ class ExperienceAcademiqueDTO(interface.DTO):
     grade_obtenu: str
     systeme_evaluation: str
     nom_formation: str
+    nom_formation_equivalente_communaute_fr: str
+    cycle_formation: str
     type_enseignement: str
+    valorisee_par_admissions: Optional[List[str]] = None
 
     def __str__(self):
         return self.nom_formation
+
+    @cached_property
+    def est_formation_bachelier_fwb(self):
+        return (
+            self.cycle_formation == Cycle.FIRST_CYCLE.name
+            and self.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
+            and not self.a_obtenu_diplome
+        )
+
+    @cached_property
+    def est_formation_master_fwb(self):
+        return (
+            self.cycle_formation == Cycle.SECOND_CYCLE.name
+            and self.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
+            and not self.a_obtenu_diplome
+        )
+
+    @cached_property
+    def derniere_annee(self):
+        return max(self.annees, key=lambda annee: annee.annee).annee
+
+    @property
+    def titre_formate(self):
+        annee_minimale = min(self.annees, key=lambda annee: annee.annee)
+
+        return "{annee_minimale}-{annee_maximale} : {nom_formation}".format(
+            annee_minimale=annee_minimale.annee,
+            annee_maximale=self.derniere_annee + 1,
+            nom_formation=truncatechars(self.nom_formation_equivalente_communaute_fr or self.nom_formation, 30),
+        )
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -87,6 +133,21 @@ class ExperienceNonAcademiqueDTO(interface.DTO):
     fonction: str
     secteur: str
     autre_activite: str
+    valorisee_par_admissions: Optional[List[str]] = None
+
+    def __str__(self):
+        return str(ActivityType.get_value(self.type))
+
+    @property
+    def titre_formate(self):
+        if self.date_debut != self.date_fin:
+            return f"{self.date_debut.strftime('%m/%Y')}-{self.date_fin.strftime('%m/%Y')} : {self}"
+        else:
+            return f"{self.date_debut.strftime('%m/%Y')} : {self}"
+
+    @cached_property
+    def derniere_annee(self):
+        return self.date_fin.year if self.date_fin.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE else self.date_fin.year - 1
 
 
 @attr.dataclass(frozen=True, slots=True)

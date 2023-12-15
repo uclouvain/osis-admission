@@ -42,7 +42,7 @@ blockquote {
 }
 
 dl .media-list {
-    margin-top: 0.5em;
+  margin-top: 0.5em;
 }
 
 .media {
@@ -51,7 +51,7 @@ dl .media-list {
 }
 
 textarea {
-    resize: vertical;
+  resize: vertical;
 }
 
 .flex-content {
@@ -391,4 +391,13 @@ select#match + .select2-container {
 
 .relative-position {
   position: relative;
+}
+
+select.select2-hidden-accessible + span {
+  width: 100% !important;
+  min-width: auto;
+}
+
+.select2-selection.select2-selection--single {
+  padding: 6px 12px;
 }

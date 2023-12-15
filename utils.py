@@ -244,8 +244,8 @@ class WeasyprintStylesheets:
         return getattr(cls, '_stylesheet')
 
 
-def get_salutation_prefix(person: Person, language: str) -> str:
-    with override(language=language):
+def get_salutation_prefix(person: Person) -> str:
+    with override(language=person.language):
         return {
             ChoixGenre.H.name: pgettext('male gender', 'Dear'),
             ChoixGenre.F.name: pgettext('female gender', 'Dear'),
