@@ -280,7 +280,7 @@ class Notification(INotification):
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
             candidat.language,
             common_tokens,
-            recipients=[candidat.email],
+            recipients=[candidat.private_email],
         )
         EmailNotificationHandler.create(email_message, person=candidat)
 

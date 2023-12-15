@@ -148,7 +148,7 @@ class Notification(INotification):
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL,
             admission.candidate.language,
             common_tokens,
-            recipients=[admission.candidate.email],
+            recipients=[admission.candidate.private_email],
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
 
@@ -158,7 +158,7 @@ class Notification(INotification):
         candidate = Person.objects.get(global_id=proposition.matricule_candidat)
 
         email_notification = EmailNotification(
-            recipient=candidate,
+            recipient=candidate.private_email,
             subject=objet_message,
             html_content=corps_message,
             plain_text_content=transform_html_to_text(corps_message),
@@ -186,7 +186,7 @@ class Notification(INotification):
             ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
             admission.candidate.language,
             common_tokens,
-            recipients=[admission.candidate.email],
+            recipients=[admission.candidate.private_email],
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
 
