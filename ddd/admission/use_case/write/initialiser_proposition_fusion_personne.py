@@ -29,25 +29,25 @@ from admission.ddd.admission.repository.i_proposition_fusion_personne import IPr
 
 
 def initialiser_proposition_fusion_personne(
-    cmd: 'InitialiserPropositionFusionPersonneCommand',
-    proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
+        cmd: 'InitialiserPropositionFusionPersonneCommand',
+        proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
 ) -> PropositionFusionPersonneIdentity:
-   return proposition_fusion_personne_repository.initialiser(
-      global_id=cmd.original_global_id,
-      nom=cmd.nom,
-      prenom=cmd.prenom,
-      autres_prenoms=cmd.autres_prenoms,
-      date_naissance=cmd.date_naissance,
-      lieu_naissance=cmd.lieu_naissance,
-      email=cmd.email,
-      genre=cmd.genre,
-      etat_civil=cmd.etat_civil,
-      nationalite=cmd.nationalite,
-      numero_national=cmd.numero_national,
-      numero_carte_id=cmd.numero_carte_id,
-      numero_passeport=cmd.numero_passeport,
-      dernier_noma_connu=cmd.dernier_noma_connu,
-      expiration_carte_id=cmd.expiration_carte_id,
-      educational_curex_ids=cmd.educational_curex_uuids,
-      professional_curex_ids=cmd.professional_curex_uuids,
-   )
+    return proposition_fusion_personne_repository.initialiser(
+        global_id=cmd.original_global_id,
+        nom=cmd.nom,
+        prenom=cmd.prenom,
+        autres_prenoms=cmd.autres_prenoms,
+        date_naissance=cmd.date_naissance,
+        lieu_naissance=cmd.lieu_naissance,
+        email=cmd.email,
+        genre=cmd.genre,
+        etat_civil=cmd.etat_civil,
+        nationalite=cmd.nationalite,
+        numero_national=cmd.numero_national,
+        numero_carte_id=cmd.numero_carte_id,
+        numero_passeport=cmd.numero_passeport,
+        dernier_noma_connu=cmd.dernier_noma_connu,
+        expiration_carte_id=cmd.expiration_carte_id,
+        educational_curex_ids=cmd.educational_curex_uuids,
+        professional_curex_ids=cmd.professional_curex_uuids,
+    )

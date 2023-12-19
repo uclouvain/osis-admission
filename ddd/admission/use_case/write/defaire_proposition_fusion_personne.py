@@ -24,13 +24,13 @@
 #
 # ##############################################################################
 from admission.ddd.admission.commands import InitialiserPropositionFusionPersonneCommand, \
-   DefairePropositionFusionCommand
+    DefairePropositionFusionCommand
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.repository.i_proposition_fusion_personne import IPropositionPersonneFusionRepository
 
 
 def defaire_proposition_fusion_personne(
-    cmd: 'DefairePropositionFusionCommand',
-    proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
+        cmd: 'DefairePropositionFusionCommand',
+        proposition_fusion_personne_repository: 'IPropositionPersonneFusionRepository',
 ) -> PropositionFusionPersonneIdentity:
-   return proposition_fusion_personne_repository.defaire(global_id=cmd.global_id)
+    return proposition_fusion_personne_repository.defaire(global_id=cmd.global_id)
