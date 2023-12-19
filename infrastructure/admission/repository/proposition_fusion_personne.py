@@ -125,3 +125,13 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             }
         )
         return PropositionFusionPersonneIdentity(uuid=person_merge_proposal.uuid)
+
+    @classmethod
+    def refuser(cls, global_id: str) -> PropositionFusionPersonneIdentity:
+        person_merge_proposal, _ = PersonMergeProposal.objects.update_or_create(
+            original_person__global_id=global_id,
+            defaults={
+                "status": PersonMergeStatus.REFUSED.name,
+            }
+        )
+        return PropositionFusionPersonneIdentity(uuid=person_merge_proposal.uuid)

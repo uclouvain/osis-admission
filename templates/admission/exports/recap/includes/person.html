@@ -82,7 +82,7 @@
             <form id="undo-merge-proposal" method="POST" action="{% url 'admission:services:digit:undo-merge' uuid=uuid %}">
                 {% csrf_token %}
                 <button id="undo-merge-proposal-btn" type="submit" class="btn btn-xs btn-warning pull-right">
-                    Défaire
+                    {% trans 'Undo' %}
                 </button>
                 Proposition de fusion avec personne déjà connue
             </form>

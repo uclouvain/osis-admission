@@ -1,0 +1,105 @@
+# ##############################################################################
+#
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
+#
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
+#
+# ##############################################################################
+import json
+
+import requests
+from django.conf import settings
+
+from admission.ddd.admission.repository.i_digit import IDigitRepository
+from base.models.person import Person
+from base.models.person_creation_ticket import PersonTicketCreation
+from base.models.person_merge_proposal import PersonMergeProposal
+
+
+class DigitRepository(IDigitRepository):
+    @classmethod
+    def submit_person_ticket(cls, global_id: str) -> any:
+        person = Person.objects.get(global_id=global_id)
+
+        # get proposal merge person if any is linked
+        if PersonMergeProposal.objects.filter(original_person=person).exists():
+            person = PersonMergeProposal.objects.get(original_person=person).proposal_merge_person
+
+        ticket_response = _request_person_ticket_creation(person)
+
+        if ticket_response:
+            PersonTicketCreation.objects.get_or_create(
+                request_id=ticket_response['requestId'], status=ticket_response['status']
+            )
+
+    @classmethod
+    def retrieve_person_ticket_status(cls, global_id: str) -> any:
+        stored_ticket = PersonTicketCreation.objects.get(person__global_id=global_id)
+        remote_ticket = _retrieve_person_ticket_status(stored_ticket.request_id)
+        if remote_ticket:
+            PersonTicketCreation.objects.update(status=remote_ticket['status'])
+        return remote_ticket['status']
+
+
+def _retrieve_person_ticket_status(request_id: int):
+    return requests.get(
+        headers={'Content-Type': 'application/json'},
+        data=json.dumps({'requestId': request_id}),
+        url=settings.DIGIT_ACCOUNT_CREATION_URL
+    ).json()
+
+
+def _request_person_ticket_creation(person: Person):
+    response = requests.post(
+        headers={'Content-Type': 'application/json'},
+        data=json.dumps({
+            "provider": {
+                "source": "ETU",
+                "sourceId": "",  # noma
+                "actif": True,
+            },
+            "person": {
+                "matricule": person.global_id,
+                "lastName": person.last_name,
+                "firstName": person.first_name,
+                "birthDate": person.birth_date.strftime('%Y-%m-%d'),
+                "gender": person.gender,
+                "nationalRegister": person.national_number,
+                "nationality": person.country_of_citizenship.iso_code,
+            },
+            "addresses": [
+                {
+                    "addressType": "LEG",
+                    "country": address.country.iso_code,
+                    "postalCode": address.postal_code,
+                    "locality": address.city,
+                    "street": address.street,
+                    "number": address.street_number,
+                    "box": address.postal_box,
+                    "additionalAddressDetails": [address.label, address.place, address.location],
+                }
+                for address in person.personaddress_set
+            ],
+            "physicalPerson": True,
+        }),
+        url=settings.DIGIT_ACCOUNT_CREATION_URL,
+    )
+    return response.json()

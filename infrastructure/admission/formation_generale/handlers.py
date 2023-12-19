@@ -25,7 +25,8 @@
 ##############################################################################
 from admission.ddd.admission.commands import \
     (RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand,
-     DefairePropositionFusionCommand, RechercherParcoursAnterieurQuery, SoumettreTicketPersonneCommand)
+     DefairePropositionFusionCommand, RechercherParcoursAnterieurQuery, SoumettreTicketPersonneCommand,
+     RefuserPropositionFusionCommand)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
@@ -52,6 +53,8 @@ from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne 
     defaire_proposition_fusion_personne
 from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import \
     initialiser_proposition_fusion_personne
+from admission.ddd.admission.use_case.write.refuser_proposition_fusion_personne import \
+    refuser_proposition_fusion_personne
 from admission.ddd.admission.use_case.write.soumettre_ticket_creation_personne import soumettre_ticket_creation_personne
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -456,6 +459,10 @@ COMMAND_HANDLERS = {
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository()
     ),
     DefairePropositionFusionCommand: lambda msg_bus, cmd: defaire_proposition_fusion_personne(
+        cmd,
+        proposition_fusion_personne_repository=PropositionPersonneFusionRepository()
+    ),
+    RefuserPropositionFusionCommand: lambda msg_bus, cmd: refuser_proposition_fusion_personne(
         cmd,
         proposition_fusion_personne_repository=PropositionPersonneFusionRepository()
     ),

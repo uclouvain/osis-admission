@@ -79,6 +79,9 @@ def _convertir_en_liste_experience_academique_dto(liste_exp):
         systeme_evaluation=exp.get_evaluation_type_display(),
         nom_formation=exp.program.title,
         type_enseignement=exp.program.get_study_type_display(),
+        type_institut="",
+        nom_formation_equivalente_communaute_fr="",
+        cycle_formation=""
     ) for exp in liste_exp]
 
 

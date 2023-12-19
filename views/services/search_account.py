@@ -72,6 +72,7 @@ class SearchAccountView(HtmxMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
+        context['uuid'] = self.kwargs['uuid']
         context['candidate'] = self.candidate
         context['professional_experience'] = self.experience['professional']
         context['educational_experience'] = self.experience['educational']

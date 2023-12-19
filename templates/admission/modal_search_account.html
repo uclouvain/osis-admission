@@ -65,6 +65,14 @@
             <button type="button" class="btn btn-secondary" data-dismiss="modal">
                 {% trans "Cancel" %}
             </button>
+            <button type="button" class="btn btn-danger"
+                hx-post="{% url 'admission:services:digit:discard-merge' uuid=uuid %}"
+                hx-trigger="click"
+                hx-include="#proposal-form"
+                hx-indicator="#htmx-overlay"
+            >
+                {% trans "Discard fusion" %}
+            </button>
             <button type="button" class="btn btn-primary"
                 hx-post="{{ request.get_full_path }}"
                 hx-target="#form-ajax-modal"

@@ -24,24 +24,12 @@
 #
 # ##############################################################################
 
-from django.test import SimpleTestCase
-
-from admission.ddd.admission.commands import GetPropositionFusionQuery
-from admission.ddd.admission.use_case.read.get_proposition_fusion_service import get_proposition_fusion_personne
-from admission.infrastructure.admission.repository.in_memory.proposition_fusion_personne import \
-    PropositionPersonneFusionInMemoryRepository
+from admission.ddd.admission.commands import GetStatutTicketPersonneQuery
+from admission.ddd.admission.repository.i_digit import IDigitRepository
 
 
-class GetPropositionFusionPersonneTest(SimpleTestCase):
-    def setUp(self):
-        self.repository = PropositionPersonneFusionInMemoryRepository()
-
-    def test_get_proposition_fusion_personne(self):
-        cmd = GetPropositionFusionQuery(global_id="123")
-        result = get_proposition_fusion_personne(cmd, self.repository)
-        self.assertIsNone(result)
-
-    def test_get_proposition_fusion_personne_invalid_input(self):
-        cmd = GetPropositionFusionQuery(global_id="invalid_global_id")
-        result = get_proposition_fusion_personne(cmd, self.repository)
-        self.assertIsNone(result)
+def recuperer_statut_ticket_personne(
+    cmd: 'GetStatutTicketPersonneQuery',
+    digit_repository: 'IDigitRepository',
+) -> str:
+    return digit_repository.retrieve_person_ticket_status(global_id=cmd.global_id)

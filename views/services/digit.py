@@ -28,6 +28,7 @@ import json
 
 import requests
 from django.conf import settings
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -35,12 +36,14 @@ __all__ = [
     "RequestDigitAccountCreationView",
     "SearchDigitAccountView",
     "UndoMergeAccountView",
+    "DiscardMergeAccountView",
 ]
 
 from django.views.generic import FormView
 
 from admission.contrib.models.base import BaseAdmission
-from admission.ddd.admission.commands import RechercherCompteExistantQuery, DefairePropositionFusionCommand
+from admission.ddd.admission.commands import RechercherCompteExistantQuery, DefairePropositionFusionCommand, \
+    SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
 from base.views.common import display_error_messages
 
 from django.utils.translation import gettext_lazy as _
@@ -48,41 +51,19 @@ from django.utils.translation import gettext_lazy as _
 
 class RequestDigitAccountCreationView(FormView):
 
-    urlpatterns = {'request-account': 'request-account/<uuid:uuid>'}
+    urlpatterns = {'request-digit-person-creation': 'request-digit-person-creation/<uuid:uuid>'}
 
     def post(self, request, *args, **kwargs):
 
         admission = BaseAdmission.objects.get(uuid=kwargs['uuid'])
 
-        if self._is_valid_for_account_creation(request, admission):
-            return redirect(to=reverse('admission:doctorate:coordonnees', kwargs={'uuid': kwargs['uuid']}))
-
-        response = request_digit_account_creation({
-            "last_name": admission.candidate.last_name,
-            "first_name": admission.candidate.first_name,
-            "birth_date": str(admission.candidate.birth_date),
-            "gender": admission.candidate.gender,
-            "national_register": admission.candidate.national_number,
-            "nationality": admission.candidate.country_of_citizenship.iso_code,
-            "registration_id": "",  # noma à déterminer
-            "residence_address": admission.candidate.personaddress_set.first(),  # adresse de résidence à déterminer
-        })
+        response = create_digit_person(admission.candidate.global_id)
         return response
 
-    @staticmethod
-    def _is_valid_for_account_creation(request, admission):
-        candidate_required_fields = [
-            "last_name", "first_name", "birth_date", "gender", "national_number", "country_of_citizenship",
-        ]
-        missing_fields = [field for field in candidate_required_fields if not getattr(admission.candidate, field)]
-        has_missing_fields = any(missing_fields)
 
-        if has_missing_fields:
-            display_error_messages(request, _(
-                "Admission is not yet valid for UCLouvain account creation. The following fields are required: "
-            ) + ", ".join(missing_fields))
-
-        return has_missing_fields
+def create_digit_person(global_id: str):
+    from infrastructure.messages_bus import message_bus_instance
+    return message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=global_id))
 
 
 class SearchDigitAccountView(FormView):
@@ -185,3 +166,23 @@ class UndoMergeAccountView(FormView):
         )
 
         return redirect(request.META['HTTP_REFERER'])
+
+
+class DiscardMergeAccountView(FormView):
+
+    name = 'discard-merge'
+    urlpatterns = {'discard-merge': 'discard-merge/<uuid:uuid>'}
+
+    def post(self, request, *args, **kwargs):
+
+        admission = BaseAdmission.objects.get(uuid=kwargs['uuid'])
+
+        from infrastructure.messages_bus import message_bus_instance
+
+        message_bus_instance.invoke(
+            RefuserPropositionFusionCommand(
+                global_id=admission.candidate.global_id,
+            )
+        )
+
+        return HttpResponse(status=200, headers={'HX-Refresh': 'true'})

@@ -31,38 +31,11 @@ from admission.ddd.admission.dtos.proposition_fusion_personne import Proposition
 from osis_common.ddd import interface
 
 
-class IPropositionPersonneFusionRepository:
+class IDigitRepository:
     @classmethod
-    def initialiser(
-            cls,
-            global_id: str,
-            nom: str,
-            prenom: str,
-            autres_prenoms: str,
-            date_naissance: str,
-            lieu_naissance: str,
-            email: str,
-            genre: str,
-            etat_civil: str,
-            nationalite: str,
-            numero_national: str,
-            numero_carte_id: str,
-            numero_passeport: str,
-            dernier_noma_connu: str,
-            expiration_carte_id: str,
-            educational_curex_ids: List[str],
-            professional_curex_ids: List[str],
-    ) -> PropositionFusionPersonneIdentity:
+    def submit_person_ticket(cls, global_id: str) -> any:
         raise NotImplementedError
 
     @classmethod
-    def get(cls, global_id: str) -> 'PropositionFusionPersonneDTO':
-        raise NotImplementedError
-
-    @classmethod
-    def defaire(cls, global_id: str) -> 'PropositionFusionPersonneIdentity':
-        raise NotImplementedError
-
-    @classmethod
-    def refuser(cls, global_id: str) -> 'PropositionFusionPersonneIdentity':
+    def retrieve_person_ticket_status(cls, global_id: str) -> any:
         raise NotImplementedError

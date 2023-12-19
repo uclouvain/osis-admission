@@ -166,5 +166,20 @@ class DefairePropositionFusionCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RefuserPropositionFusionCommand(interface.CommandRequest):
+    global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class RechercherParcoursAnterieurQuery(interface.CommandRequest):
+    global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettreTicketPersonneCommand(interface.CommandRequest):
+    global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class GetStatutTicketPersonneQuery(interface.CommandRequest):
     global_id: str
