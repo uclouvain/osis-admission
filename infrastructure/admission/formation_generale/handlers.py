@@ -23,8 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.admission.commands import RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand, \
-    DefairePropositionFusionCommand, RechercherParcoursAnterieurQuery
+from admission.ddd.admission.commands import \
+    (RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand,
+     DefairePropositionFusionCommand, RechercherParcoursAnterieurQuery, SoumettreTicketPersonneCommand)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
@@ -51,6 +52,7 @@ from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne 
     defaire_proposition_fusion_personne
 from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import \
     initialiser_proposition_fusion_personne
+from admission.ddd.admission.use_case.write.soumettre_ticket_creation_personne import soumettre_ticket_creation_personne
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -88,6 +90,7 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
     EmplacementDocumentRepository,
 )
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
+from admission.infrastructure.admission.repository.digit import DigitRepository
 from admission.infrastructure.admission.repository.osis_profile import OsisProfileRepository
 from admission.infrastructure.admission.repository.proposition_fusion_personne import \
     PropositionPersonneFusionRepository
@@ -505,5 +508,9 @@ COMMAND_HANDLERS = {
     RechercherParcoursAnterieurQuery: lambda msg_bus, cmd: rechercher_parcours_anterieur(
         cmd,
         osis_profile_repository=OsisProfileRepository(),
+    ),
+    SoumettreTicketPersonneCommand: lambda msg_bus, cmd: soumettre_ticket_creation_personne(
+        cmd,
+        digit_repository=DigitRepository()
     ),
 }

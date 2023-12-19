@@ -88,7 +88,6 @@ from osis_profile.models.education import LanguageKnowledge
 
 class DigitService(IDigitService):
 
-
     @classmethod
     def rechercher_compte_existant(cls, matricule: str, nom: str, prenom: str, date_naissance: str,) -> str:
         mock = False
@@ -122,7 +121,8 @@ class DigitService(IDigitService):
                 PersonMergeProposal.objects.update_or_create(
                     original_person=original_person,
                     defaults={
-                        "status": PersonMergeStatus.MATCH_FOUND.name if similarity_data else PersonMergeStatus.NO_MATCH.name,
+                        "status": PersonMergeStatus.MATCH_FOUND.name
+                        if similarity_data else PersonMergeStatus.NO_MATCH.name,
                         "similarity_result": response.json(),
                         "last_similarity_result_update": datetime.datetime.now(),
                     }

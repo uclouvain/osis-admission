@@ -904,7 +904,8 @@ class ChecklistView(
         experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
 
         if self.proposition_fusion:
-            curex_a_fusionner = self.proposition_fusion.educational_curex_uuids + self.proposition_fusion.professional_curex_uuids
+            curex_a_fusionner = (self.proposition_fusion.educational_curex_uuids +
+                                 self.proposition_fusion.professional_curex_uuids)
             if curex_a_fusionner:
                 curex_existant = message_bus_instance.invoke(
                     RechercherParcoursAnterieurQuery(global_id=self.proposition_fusion.matricule)
