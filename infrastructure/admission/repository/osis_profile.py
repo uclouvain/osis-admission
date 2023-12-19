@@ -42,10 +42,10 @@ class OsisProfileRepository(IOsisProfileRepository):
         return {
             'educational': _convertir_en_liste_experience_academique_dto(
                 list(EducationalExperience.objects.filter(person__global_id=global_id).annotate(
-                credits=models.Sum('educationalexperienceyear__acquired_credit_number'),
-                first_year=models.Min('educationalexperienceyear__academic_year__year'),
-                last_year=models.Max('educationalexperienceyear__academic_year__year'),
-            ))),
+                    credits=models.Sum('educationalexperienceyear__acquired_credit_number'),
+                    first_year=models.Min('educationalexperienceyear__academic_year__year'),
+                    last_year=models.Max('educationalexperienceyear__academic_year__year'),
+                ))),
             'professional': _convertir_en_liste_experience_non_academique_dto(
                 list(ProfessionalExperience.objects.filter(person__global_id=global_id))
             ),

@@ -420,5 +420,3 @@ class AdmissionPersonForm(AdmissionModelForm):
             'last_registration_year',
             'last_registration_id',
         ]
-
-
