@@ -118,7 +118,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
         # Add filters
         if annee_academique:
-            qs = qs.filter(determined_academic_year__year=annee_academique)
+            qs = qs.filter(
+                Q(determined_academic_year__year=annee_academique)
+                | Q(determined_academic_year__isnull=True, training__academic_year__year=annee_academique)
+            )
         if numero:
             qs = qs.filter(reference=numero)
         if noma:
