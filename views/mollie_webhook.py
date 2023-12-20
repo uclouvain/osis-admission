@@ -28,12 +28,11 @@ from django.http import HttpResponse
 from rest_framework.parsers import FormParser
 from rest_framework.views import APIView
 
-from admission.contrib.models import GeneralEducationAdmission
-
 from admission.auth.predicates.general import (
     payment_needed_after_submission,
     payment_needed_after_manager_request,
 )
+from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.online_payment import PaymentStatus
 from admission.ddd.admission.formation_generale.commands import (
     PayerFraisDossierPropositionSuiteDemandeCommand,
@@ -47,8 +46,6 @@ from admission.services.paiement_en_ligne import PaiementEnLigneService
 __all__ = [
     'MollieWebHook',
 ]
-
-from infrastructure.messages_bus import message_bus_instance
 
 
 class MollieWebHook(APIView):
@@ -71,6 +68,8 @@ class MollieWebHook(APIView):
 
     @staticmethod
     def update_from_payment(paiement_id):
+        from infrastructure.messages_bus import message_bus_instance
+
         # Update the payment
         updated_payment = PaiementEnLigneService.update_payment(paiement_id=paiement_id)
 
