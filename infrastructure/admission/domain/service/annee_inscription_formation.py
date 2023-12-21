@@ -64,7 +64,7 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
             TrainingType.CAPAES.name,
         ],
         TypeFormation.CERTIFICAT.name: [
-            TrainingType.RESEARCH_CERTIFICATE.name,
+            # TrainingType.RESEARCH_CERTIFICATE.name,
             TrainingType.CERTIFICATE.name,
         ],
         TypeFormation.FORMATION_CONTINUE.name: [
