@@ -33,6 +33,7 @@ from typing import Union, Optional, List
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
+from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
@@ -48,6 +49,7 @@ from admission.auth.roles.sic_management import SicManagement
 from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
@@ -56,6 +58,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiq
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos import EtudesSecondairesDTO
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
@@ -69,6 +72,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     RegleCalculeResultatAvecFinancable,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -86,6 +91,10 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from admission.utils import format_academic_year
 from osis_document.api.utils import get_remote_metadata, get_remote_token
+
+from base.models.enums.education_group_types import TrainingType
+from osis_profile.models import EducationalExperienceYear
+from osis_profile.models.enums.curriculum import Result
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -1129,3 +1138,17 @@ def checklist_experience_action_links(
                     experience_uuid=experience.uuid,
                 ),
             }
+
+
+@register.filter
+def est_premiere_annee(admission: Union[PropositionGestionnaireDTO, DemandeRechercheDTO]):
+    if isinstance(admission, PropositionGestionnaireDTO):
+        return admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO'
+    elif isinstance(admission, DemandeRechercheDTO):
+        return admission.est_premiere_annee
+    return None
+
+
+@register.filter
+def intitule_premiere_annee(intitule: str):
+    return _("First year of") + ' ' + intitule.lower()

@@ -42,8 +42,8 @@
         <dt>{% trans "Course" context 'admission' %}</dt>
         <dd>
           {% with formation=admission.formation %}
-            {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
-              {{ formation.sigle }}-1 - {% trans "First year of" %} {{ formation.intitule|lower }} ({{ formation.campus }})
+            {% if admission|est_premiere_annee %}
+              {{ formation.sigle }}-1 - {{ formation.intitule|intitule_premiere_annee }} ({{ formation.campus }})
             {% else %}
               {{ formation.sigle }} - {{ formation.intitule }} ({{ formation.campus }})
             {% endif %}

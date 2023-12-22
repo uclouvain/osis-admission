@@ -93,8 +93,12 @@
     </div>
   </td>
   <td>
-    {% display admission.sigle_formation '-' admission.intitule_formation ' ' '(' admission.lieu_formation ')' as training_complete_name %}
-    {{ training_complete_name }}
+    {% if admission|est_premiere_annee %}
+      {{ admission.sigle_formation }}-1 - {{ admission.intitule_formation|intitule_premiere_annee }} ({{ admission.lieu_formation }})
+    {% else %}
+      {% display admission.sigle_formation '-' admission.intitule_formation ' ' '(' admission.lieu_formation ')' as training_complete_name %}
+      {{ training_complete_name }}
+    {% endif %}
   </td>
   <td>
     <div class="flex-content-no-wrap">
