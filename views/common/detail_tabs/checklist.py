@@ -1303,7 +1303,6 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['formation'] = self.proposition.formation
-        kwargs['has_success_be_experience'] = self.proposition.candidat_a_reussi_experience_academique_belge
         return kwargs
 
     def get_initial(self):
