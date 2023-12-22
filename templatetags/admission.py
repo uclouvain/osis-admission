@@ -57,8 +57,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos import EtudesSecondairesDTO
+from admission.ddd.admission.dtos import EtudesSecondairesDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
@@ -95,6 +96,7 @@ from osis_document.api.utils import get_remote_metadata, get_remote_token
 from base.models.enums.education_group_types import TrainingType
 from osis_profile.models import EducationalExperienceYear
 from osis_profile.models.enums.curriculum import Result
+from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -950,31 +952,69 @@ def diplomatic_post_name(diplomatic_post):
 
 
 @register.filter
-def is_profile_identification_different(profil_candidat, identification):
+def is_profile_identification_different(
+    profil_candidat: ProfilCandidatDTO,
+    identification: Union[Person, IdentificationDTO],
+):
     if profil_candidat is None or identification is None:
         return False
+    if isinstance(identification, Person):
+        return any(
+            (
+                profil_candidat.nom != identification.last_name,
+                profil_candidat.prenom != identification.first_name,
+                profil_candidat.genre != identification.gender,
+                profil_candidat.nationalite
+                != (identification.country_of_citizenship.iso_code if identification.country_of_citizenship else ''),
+            )
+        )
     return any(
         (
             profil_candidat.nom != identification.nom,
             profil_candidat.prenom != identification.prenom,
             profil_candidat.genre != identification.genre,
-            profil_candidat.nom_pays_nationalite != identification.nom_pays_nationalite,
+            profil_candidat.nationalite != identification.pays_nationalite,
         )
     )
 
 
 @register.filter
-def is_profile_coordinates_different(profil_candidat, coordonnees):
-    if profil_candidat is None or coordonnees is None or coordonnees.domicile_legal is None:
+def is_profile_coordinates_different(profil_candidat: ProfilCandidatDTO, coordonnees: Union[CoordonneesDTO, dict]):
+    if profil_candidat is None or coordonnees is None:
+        return False
+    if isinstance(coordonnees, CoordonneesDTO):
+        if coordonnees.domicile_legal is None:
+            return False
+        if coordonnees.adresse_correspondance is not None:
+            adresse = coordonnees.adresse_correspondance
+        else:
+            adresse = coordonnees.domicile_legal
+        if not adresse:
+            return False
+        return any(
+            (
+                str(profil_candidat.numero_rue) != str(adresse.numero_rue),
+                profil_candidat.rue != adresse.rue,
+                profil_candidat.boite_postale != adresse.boite_postale,
+                profil_candidat.code_postal != adresse.code_postal,
+                profil_candidat.ville != adresse.ville,
+                profil_candidat.pays != adresse.pays,
+            )
+        )
+    if coordonnees['contact'] is not None:
+        adresse = coordonnees['contact']
+    else:
+        adresse = coordonnees['residential']
+    if not adresse:
         return False
     return any(
         (
-            profil_candidat.numero_rue != coordonnees.domicile_legal.numero_rue,
-            profil_candidat.rue != coordonnees.domicile_legal.rue,
-            profil_candidat.boite_postale != coordonnees.domicile_legal.boite_postale,
-            profil_candidat.code_postal != coordonnees.domicile_legal.code_postal,
-            profil_candidat.ville != coordonnees.domicile_legal.ville,
-            profil_candidat.nom_pays != coordonnees.domicile_legal.nom_pays,
+            str(profil_candidat.numero_rue) != adresse.street_number,
+            profil_candidat.rue != adresse.street,
+            profil_candidat.boite_postale != adresse.postal_box,
+            profil_candidat.code_postal != adresse.postal_code,
+            profil_candidat.ville != adresse.city,
+            profil_candidat.pays != adresse.country.iso_code,
         )
     )
 

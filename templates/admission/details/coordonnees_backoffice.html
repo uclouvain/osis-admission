@@ -25,7 +25,7 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 {% block tab_content %}
-  {% if profil_candidat %}
+  {% if profil_candidat|is_profile_coordinates_different:coordonnees %}
     <p class="alert alert-info" role="alert">
       <i class="fa fa-question-circle" style="margin-right: 0.5em"></i>
       {% trans "The dossier has been confirmed with the following contact address:" %}
