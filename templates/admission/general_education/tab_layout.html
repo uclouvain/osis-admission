@@ -37,7 +37,12 @@
     </a>
   </li>
   <li class="active">
-    {{ admission.formation.intitule }} ({{ admission.reference }})
+    {% if admission|est_premiere_annee %}
+      {{ admission.formation.intitule|intitule_premiere_annee }}
+    {% else %}
+      {{ admission.formation.intitule }}
+    {% endif %}
+    ({{ admission.reference }})
   </li>
 {% endblock %}
 
@@ -86,9 +91,9 @@
     <br>
     {% url 'admission:access-conditions-url' admission.formation.type admission.formation.sigle|urlencode:'' admission.formation.code as access_conditions_url %}
     <span>
-      {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
+      {% if admission|est_premiere_annee %}
         <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}-1</a> -
-        {% trans "First year of" %} {{ admission.formation.intitule|lower }} ({{ admission.formation.campus }})
+        {{ admission.formation.intitule|intitule_premiere_annee }} ({{ admission.formation.campus }})
       {% else %}
         <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}</a> -
         {{ admission.formation.intitule }} ({{ admission.formation.campus }})
