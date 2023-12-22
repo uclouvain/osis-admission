@@ -180,6 +180,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                     ),
                 ],
                 date_confirmation=cls.admissions[0].submitted_at,
+                est_premiere_annee=False,
             ),
         ]
 

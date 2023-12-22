@@ -180,7 +180,6 @@ class ChoixFormationForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         formation = kwargs.pop('formation')
-        self.has_success_be_experience = kwargs.pop('has_success_be_experience')
         super().__init__(*args, **kwargs)
         today = datetime.date.today()
         try:
@@ -210,9 +209,8 @@ class ChoixFormationForm(forms.Form):
         cleaned_data = super().clean()
         formation = cleaned_data.get('formation')
 
-        if formation and self.has_success_be_experience:
-            # The bachelor cycle continuation field is shown and required if the training is a bachelor and the user has
-            # successfully completed a belgian academic experience
+        if formation:
+            # The bachelor cycle continuation field is shown and required if the training is a bachelor
             if self.initial_training_type == TrainingType.BACHELOR.name:
                 if not cleaned_data.get('poursuite_cycle'):
                     self.add_error('poursuite_cycle', FIELD_REQUIRED_MESSAGE)

@@ -313,7 +313,6 @@ class PropositionInMemoryRepository(
             nationalite_ue_candidat=candidat.pays_nationalite_europeen,
             photo_identite_candidat=candidat.photo_identite,
             poursuite_de_cycle_a_specifier=proposition.poursuite_de_cycle_a_specifier,
-            candidat_a_reussi_experience_academique_belge=proposition.poursuite_de_cycle_a_specifier,
             poursuite_de_cycle=proposition.poursuite_de_cycle if proposition.poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=any(
                 proposition.statut == ChoixStatutPropositionGenerale.EN_BROUILLON for proposition in propositions

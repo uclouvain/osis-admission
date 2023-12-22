@@ -107,14 +107,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     output_field=BooleanField(),
                 ),
                 est_premiere_annee=ExpressionWrapper(
-                    Exists(
-                        EducationalExperienceYear.objects.filter(
-                            Q(result=Result.SUCCESS.name) | Q(result=Result.SUCCESS_WITH_RESIDUAL_CREDITS.name),
-                            educational_experience__country__iso_code=BE_ISO_CODE,
-                            educational_experience__person=OuterRef('candidate'),
-                        )
-                    )
-                    & Q(training__education_group_type__name=TrainingType.BACHELOR.name)
+                    Q(training__education_group_type__name=TrainingType.BACHELOR.name)
                     & ~Q(generaleducationadmission__cycle_pursuit=PoursuiteDeCycle.YES.name),
                     output_field=BooleanField(),
                 ),
