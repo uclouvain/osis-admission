@@ -34,18 +34,18 @@
 
       {% if current.extra.to_be_completed == '0' or current.statut == 'GEST_REUSSITE' %}
         {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
-          {% checklist_state_button tab='financabilite' label=initial_state_label icon='xmark' state=initial.statut class='primary' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='xmark' state=initial.statut class='info' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
         {% else %}
-          {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='primary' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='info' open_modal='#financabilite-confirm-modal-'|add:initial.statut %}
         {% endif %}
         {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' open_modal='#financabilite-confirm-modal-GEST_EN_COURS' %}
         {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='1' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE-1' %}
         {% checklist_state_button tab='financabilite' label=_("Not financeable") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='0' class='danger' open_modal='#financabilite-confirm-modal-GEST_BLOCAGE-0' %}
       {% else %}
         {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
-          {% checklist_state_button tab='financabilite' label=initial_state_label icon='xmark' state=initial.statut class='primary' %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='xmark' state=initial.statut class='info' %}
         {% else %}
-          {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='primary' %}
+          {% checklist_state_button tab='financabilite' label=initial_state_label icon='user' state=initial.statut class='info' %}
         {% endif %}
         {% checklist_state_button tab='financabilite' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}
         {% checklist_state_button tab='financabilite' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='1' class='danger' %}
