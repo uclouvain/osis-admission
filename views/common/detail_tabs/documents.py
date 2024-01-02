@@ -103,10 +103,6 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         return super().get_template_names()
 
     @cached_property
-    def is_fac(self):
-        return ProgramManager.belong_to(self.request.user.person)
-
-    @cached_property
     def deadline(self):
         today_date = datetime.date.today()
 
@@ -151,6 +147,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         kwargs = super().get_form_kwargs()
         kwargs['documents'] = self.requestable_documents
         kwargs['proposition_uuid'] = self.admission_uuid
+        kwargs['only_limited_request_choices'] = self.is_fac
         return kwargs
 
     def get_context_data(self, **kwargs):

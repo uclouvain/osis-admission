@@ -104,7 +104,7 @@ class CentralManager(EntityRoleModel):
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
             'admission.view_documents_management': is_entity_manager & is_submitted,
-            'admission.change_documents_management': is_entity_manager & is_submitted,
+            'admission.change_documents_management': is_entity_manager & in_sic_status,
             'admission.view_checklist': is_entity_manager & is_submitted,
             'admission.change_checklist': is_entity_manager & in_sic_status,
             'admission.change_payment': is_entity_manager & in_sic_status_or_application_fees,

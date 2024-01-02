@@ -116,7 +116,6 @@ from admission.utils import (
     get_backoffice_admission_url,
     get_portal_admission_url,
 )
-from admission.utils import person_is_sic, person_is_fac_cdd
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -173,14 +172,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         'hide_files': True,
         'condition_acces_enum': ConditionAcces,
     }
-
-    @cached_property
-    def is_sic(self):
-        return person_is_sic(self.request.user.person)
-
-    @cached_property
-    def is_fac(self):
-        return person_is_fac_cdd(self.request.user.person)
 
     @cached_property
     def can_update_checklist_tab(self):
@@ -1265,14 +1256,6 @@ class SaveCommentView(AdmissionFormMixin, FormView):
             uuid=self.admission_uuid,
             tab=self.kwargs['tab'],
         )
-
-    @cached_property
-    def is_sic(self):
-        return person_is_sic(self.request.user.person)
-
-    @cached_property
-    def is_fac(self):
-        return person_is_fac_cdd(self.request.user.person)
 
     def get_prefix(self):
         return self.kwargs['tab']
