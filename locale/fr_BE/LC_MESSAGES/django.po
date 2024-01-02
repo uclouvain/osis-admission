@@ -900,9 +900,6 @@ msgstr "Auteur"
 msgid "Authors"
 msgstr "Auteurs et autrices"
 
-msgid "Automatically required"
-msgstr "Requis automatiquement"
-
 msgid "Awaiting approval"
 msgstr "En révision"
 
@@ -1460,11 +1457,11 @@ msgstr "Attestation de communication"
 
 #, python-brace-format
 msgid ""
-"Communication to the candidate, in <span class=\"label label-admission-"
-"primary\">{language_code}]</span>"
+"Communication to the candidate (refusal reason), in <span class=\"label "
+"label-admission-primary\">{language_code}]</span>"
 msgstr ""
-"Communication au candidat, en langue <span class=\"label label-admission-"
-"primary\">{language_code}</span>"
+"Communication au candidat (motif de refus), en langue <span class=\"label "
+"label-admission-primary\">{language_code}</span>"
 
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
@@ -2040,9 +2037,6 @@ msgstr "Description"
 msgid "Description of your communication"
 msgstr "Description de votre communication"
 
-msgid "Designate the document as to be requested"
-msgstr "Désigner le document comme étant à réclamer"
-
 msgid "Detailed curriculum vitae"
 msgstr "Curriculum vitae détaillé"
 
@@ -2142,6 +2136,10 @@ msgstr "Document"
 #, python-format
 msgid "Document merging of the proposition %(reference)s"
 msgstr "Fusion des documents de la proposition %(reference)s"
+
+msgctxt "admission"
+msgid "Document name"
+msgstr "Nom du document"
 
 msgid "Document not found."
 msgstr "Document non trouvé."
@@ -2550,10 +2548,6 @@ msgstr "Féminin"
 
 msgid "File"
 msgstr "Fichier"
-
-msgctxt "admission"
-msgid "File name"
-msgstr "Nom du fichier"
 
 msgid "Filter by documents"
 msgstr "Filtrer par documents"
@@ -5789,6 +5783,9 @@ msgstr "Renseigné(e)"
 
 msgid "Specify if other"
 msgstr "Si autre, précisez"
+
+msgid "Specify the reason for requesting"
+msgstr "Spécifier la raison de la réclamation"
 
 msgid "Sport affiliation"
 msgstr "Affiliation sportive"

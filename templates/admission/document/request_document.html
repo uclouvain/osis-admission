@@ -55,13 +55,13 @@
     $(function () {
         const requestStatusInput = $('#id_request_status');
         const defaultRequestStatus = requestStatusInput.val();
-        const requestSubmitButton = $('#request-form-modal button[type="submit"]')[0];
+        const requestSubmitButton = $('#request-form-modal button[type="submit"]');
 
         requestStatusInput.change(function() {
             if (this.value) {
-                $('#request-form-modal').modal('show');
+                requestSubmitButton.click();
             } else {
-                {% if document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES %}
+                {% if document.type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES %}
                     $('#cancel-request-form-modal').modal('show');
                 {% else %}
                     $('#cancel-request-form-modal button[type="submit"]').click();
@@ -73,11 +73,9 @@
             $('#request-form-modal textarea').focus();
         });
 
-        $('#request-form-modal').on('hide.bs.modal', function (event) {
-            {# Reset the request status as the form has not been submitted #}
-            if (document.activeElement !== requestSubmitButton) {
-              requestStatusInput.val(defaultRequestStatus);
-            }
+        $('#request-form-modal, #cancel-request-form-modal').on('hidden.bs.modal', function (event) {
+            {# Reset the request status in case the form has not been submitted #}
+            requestStatusInput.val(defaultRequestStatus);
         });
 
         $('#request-form').on('htmx:beforeSend', function (evt) {

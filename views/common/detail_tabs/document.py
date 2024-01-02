@@ -31,9 +31,6 @@ from django.utils.translation import gettext as _, get_language
 from django.views.generic import TemplateView, FormView
 from rest_framework.status import HTTP_204_NO_CONTENT
 
-from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.program_manager import ProgramManager
-from admission.auth.roles.sic_management import SicManagement
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     EMPLACEMENTS_FAC,
@@ -54,7 +51,6 @@ from admission.forms.admission.document import (
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
-from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
@@ -92,7 +88,7 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
     def document_type(self):
         return (
             TypeEmplacementDocument.LIBRE_INTERNE_FAC.name
-            if ProgramManager.belong_to(self.request.user.person)
+            if self.is_fac
             else TypeEmplacementDocument.LIBRE_INTERNE_SIC.name
         )
 
@@ -124,7 +120,7 @@ class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
         }
 
 
-def can_edit_document(person: Person, document: AdmissionDocument) -> bool:
+def can_edit_document(document: AdmissionDocument, is_fac: bool, is_sic: bool) -> bool:
     """
     Check if the document can be edited by the person.
     - FAC user can only update their own documents
@@ -137,10 +133,10 @@ def can_edit_document(person: Person, document: AdmissionDocument) -> bool:
         return False
 
     if document_type in EMPLACEMENTS_FAC:
-        return ProgramManager.belong_to(person=person)
+        return is_fac
 
     if document_type in EMPLACEMENTS_SIC:
-        return SicManagement.belong_to(person) or CentralManager.belong_to(person)
+        return is_sic
 
     return False
 
@@ -158,7 +154,7 @@ class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequire
                 auteur=self.request.user.person.global_id,
                 type_emplacement=(
                     TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name
-                    if ProgramManager.belong_to(self.request.user.person)
+                    if self.is_fac
                     else TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name
                 ),
                 libelle=form.cleaned_data['file_name'],
@@ -168,7 +164,7 @@ class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequire
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
-        return super().form_valid(self.form_class())
+        return super().form_valid(self.get_form())
 
 
 class RequestFreeCandidateDocumentView(BaseRequestFreeCandidateDocument):
@@ -177,6 +173,11 @@ class RequestFreeCandidateDocumentView(BaseRequestFreeCandidateDocument):
     htmx_template_name = 'admission/document/request_free_document.html'
     urlpatterns = 'free-candidate-request'
     name = 'request-free-candidate-document'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['only_limited_request_choices'] = self.is_fac
+        return kwargs
 
 
 class RequestFreeCandidateDocumentWithDefaultFileView(BaseRequestFreeCandidateDocument):
@@ -212,8 +213,9 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['document_identifier'] = document_identifier
         context['document_type'] = document.type
         context['requestable_document'] = document.requestable
-        editable_document = can_edit_document(self.request.user.person, document)
+        editable_document = can_edit_document(document, self.is_fac, self.is_sic)
         context['editable_document'] = editable_document
+        context['document'] = document
 
         if document.uuids:
             context['document_uuid'] = document.uuids[0]
@@ -234,8 +236,8 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['request_form'] = RequestDocumentForm(
             candidate_language=self.admission.candidate.language,
             initial=request_initial,
-            auto_requested=document.automatically_required,
             editable_document=editable_document,
+            only_limited_request_choices=self.is_fac and document.type in EMPLACEMENTS_FAC,
         )
 
         context['replace_form'] = ReplaceDocumentForm(mimetypes=document.mimetypes, identifier=document_identifier)
@@ -254,6 +256,7 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['document_identifier'] = self.document_identifier
+        context['document'] = self.document
         return context
 
     @property
@@ -271,7 +274,7 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
         if not self.document:
             raise Http404
 
-        return has_permission and can_edit_document(self.request.user.person, self.document)
+        return has_permission and can_edit_document(self.document, self.is_fac, self.is_sic)
 
 
 class RequestCandidateDocumentView(DocumentFormView):
@@ -282,7 +285,7 @@ class RequestCandidateDocumentView(DocumentFormView):
 
     @cached_property
     def editable_document(self):
-        return can_edit_document(self.request.user.person, self.document)
+        return can_edit_document(self.document, self.is_fac, self.is_sic)
 
     def has_permission(self):
         return super().has_permission() and self.document.requestable is True
@@ -305,8 +308,8 @@ class RequestCandidateDocumentView(DocumentFormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['candidate_language'] = self.admission.candidate.language
-        kwargs['auto_requested'] = self.document.automatically_required
         kwargs['editable_document'] = self.editable_document
+        kwargs['only_limited_request_choices'] = self.is_fac and self.document.type in EMPLACEMENTS_FAC
         return kwargs
 
     def form_valid(self, form):
@@ -320,7 +323,10 @@ class RequestCandidateDocumentView(DocumentFormView):
                     statut_reclamation=form.cleaned_data['request_status'],
                 )
             )
-            self.message_on_success = _('The document has been designated as to be requested')
+            if not self.document.request_status:
+                self.message_on_success = _('The document has been designated as to be requested')
+            elif self.document.request_status != form.cleaned_data['request_status']:
+                self.message_on_success = _('The request status has been changed')
         else:
             document_id = message_bus_instance.invoke(
                 general_education_commands.AnnulerReclamationEmplacementDocumentCommand(
@@ -375,7 +381,7 @@ class RequestStatusChangeDocumentView(DocumentFormView):
 
     @cached_property
     def editable_document(self):
-        return can_edit_document(self.request.user.person, self.document)
+        return can_edit_document(self.document, self.is_fac, self.is_sic)
 
     def has_permission(self):
         return super().has_permission() and self.document.requestable is True
@@ -384,7 +390,7 @@ class RequestStatusChangeDocumentView(DocumentFormView):
         kwargs = super().get_form_kwargs()
         kwargs['document_identifier'] = self.document_identifier
         kwargs['proposition_uuid'] = self.admission_uuid
-        kwargs['automatically_required'] = self.document.automatically_required
+        kwargs['only_limited_request_choices'] = self.is_fac and self.document.type in EMPLACEMENTS_FAC
         return kwargs
 
     def form_valid(self, form):

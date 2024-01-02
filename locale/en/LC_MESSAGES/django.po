@@ -806,9 +806,6 @@ msgstr ""
 msgid "Authors"
 msgstr ""
 
-msgid "Automatically required"
-msgstr ""
-
 msgid "Awaiting approval"
 msgstr ""
 
@@ -1346,8 +1343,8 @@ msgstr ""
 
 #, python-brace-format
 msgid ""
-"Communication to the candidate, in <span class=\"label label-admission-"
-"primary\">{language_code}]</span>"
+"Communication to the candidate (refusal reason), in <span class=\"label "
+"label-admission-primary\">{language_code}]</span>"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -1866,9 +1863,6 @@ msgstr ""
 msgid "Description of your communication"
 msgstr ""
 
-msgid "Designate the document as to be requested"
-msgstr ""
-
 msgid "Detailed curriculum vitae"
 msgstr ""
 
@@ -1967,6 +1961,10 @@ msgstr ""
 
 #, python-format
 msgid "Document merging of the proposition %(reference)s"
+msgstr ""
+
+msgctxt "admission"
+msgid "Document name"
 msgstr ""
 
 msgid "Document not found."
@@ -2350,10 +2348,6 @@ msgid "Female"
 msgstr ""
 
 msgid "File"
-msgstr ""
-
-msgctxt "admission"
-msgid "File name"
 msgstr ""
 
 msgid "Filter by documents"
@@ -5229,6 +5223,9 @@ msgid "Specified"
 msgstr ""
 
 msgid "Specify if other"
+msgstr ""
+
+msgid "Specify the reason for requesting"
 msgstr ""
 
 msgid "Sport affiliation"
