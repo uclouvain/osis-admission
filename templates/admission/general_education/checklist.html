@@ -458,6 +458,19 @@
               }
           });
 
+          function refreshDocumentsSelectButtons(jQuerySelect) {
+              /*
+              * Enable/disable the previous and next buttons depending on the number of options in the select.
+              */
+              const prevOptionButton = jQuerySelect.siblings('.previous-option-button');
+              const nextOptionButton = jQuerySelect.siblings('.next-option-button');
+              const documentSelectElement = jQuerySelect[0];
+
+              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 1);
+              nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
+          }
+
+
           function refreshDocuments() {
               const selectedTab = window.location.hash || defaultTab;
               const currentSelect = $(`${selectedTab}-documents-select`);
@@ -473,7 +486,11 @@
                           'identifier': currentSelect.val(),
                       }
                   },
-              );
+              ).finally(() => {
+                  if (currentSelect.length) {
+                      refreshDocumentsSelectButtons(currentSelect);
+                  }
+              });
           }
 
           {# Change the selected document by using the left and right buttons #}
@@ -498,12 +515,7 @@
           });
 
           $('select[name="identifier"]').on('change', function(){
-              const prevOptionButton = $(this).siblings('.previous-option-button');
-              const nextOptionButton = $(this).siblings('.next-option-button');
-              const documentSelectElement = $(this)[0];
-
-              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 1)
-              nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
+              refreshDocumentsSelectButtons($(this));
           });
 
           $('.documents-tab').each(function(){
