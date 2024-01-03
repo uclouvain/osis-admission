@@ -106,3 +106,15 @@ class AdmissionCommentApiView(CommentEntryAPIMixin):
 
     def has_delete_permission(self, comment):
         return self.has_change_permission(comment)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        tags = self.request.query_params.get('tags', '')
+
+        # Apply the 'contained_by' filter (in addition to the default `contains` filter) to retrieve the comments whose
+        # the tags are exactly the same as those requested
+        if tags:
+            queryset = queryset.filter(tags__contained_by=tags.split(','))
+
+        return queryset

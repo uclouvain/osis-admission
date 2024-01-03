@@ -161,6 +161,7 @@ class ExperienceAcademiqueDTOFactory(factory.Factory):
     type_enseignement = ''
     nom_formation_equivalente_communaute_fr = ''
     cycle_formation = ''
+    est_autre_formation = None
 
 
 class ExperienceNonAcademiqueDTOFactory(factory.Factory):

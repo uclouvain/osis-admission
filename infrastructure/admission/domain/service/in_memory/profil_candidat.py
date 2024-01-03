@@ -986,6 +986,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             nom_regime_linguistique=experience.nom_regime_linguistique,
                             type_enseignement=experience.type_enseignement,
                             valorisee_par_admissions=[],
+                            est_autre_formation=None,
                         ),
                     )
 

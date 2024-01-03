@@ -120,7 +120,7 @@
     <br>
     <span>
       {% translate 'Not specified' context "admission-header" as not_specified %}
-      {% translate 'Access condition:' %} <span class="label label-success">{{ admission.condition_acces|enum_with_acronym_display:'ConditionAcces'|default:not_specified }}</span>
+      {% translate 'Access condition:' %} <span id="header-access-condition" class="label label-success" hx-swap-oob="innerHTML">{{ admission.condition_acces|enum_with_acronym_display:'ConditionAcces'|default:not_specified }}</span>
     </span>
   </div>
   <div id="admission-badges" class="min-width">

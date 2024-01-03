@@ -28,7 +28,7 @@ import re
 from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict
 
 from django import template
 from django.conf import settings
@@ -63,7 +63,7 @@ from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -1081,7 +1081,7 @@ def bg_class_by_checklist_experience(experience):
 def experience_details_template(
     resume_proposition: ResumePropositionDTO,
     experience,
-    specific_questions: List[QuestionSpecifiqueDTO] = None,
+    specific_questions: Dict[str, List[QuestionSpecifiqueDTO]] = None,
     with_edit_link_button=True,
     hide_files=True,
 ):
@@ -1137,7 +1137,12 @@ def experience_details_template(
             if with_edit_link_button
             else None
         )
-        context.update(get_secondary_studies_context(resume_proposition, specific_questions))
+        context.update(
+            get_secondary_studies_context(
+                resume_proposition,
+                specific_questions[Onglets.ETUDES_SECONDAIRES.name],
+            )
+        )
 
     return context
 
