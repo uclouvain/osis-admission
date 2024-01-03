@@ -48,4 +48,11 @@
       </div>
     </div>
   </form>
+  {% if request.htmx %}
+    {# Update the access condition in the header #}
+    <span id="header-access-condition" hx-swap-oob="innerHTML">
+      {% translate 'Not specified' context "admission-header" as not_specified %}
+      {{ admission.condition_acces|enum_with_acronym_display:'ConditionAcces'|default:not_specified }}
+    </span>
+  {% endif %}
 </div>

@@ -1047,6 +1047,7 @@ class SectionsAttachmentsTestCase(TestCase):
             cycle_formation=Cycle.FIRST_CYCLE.name,
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
+            est_autre_formation=False,
         )
         cls.foreign_academic_curriculum_experience = _ExperienceAcademiqueDTO(
             uuid='uuid-1',
@@ -1092,6 +1093,7 @@ class SectionsAttachmentsTestCase(TestCase):
             cycle_formation=Cycle.FIRST_CYCLE.name,
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
+            est_autre_formation=False,
         )
         curriculum_dto = _CurriculumDTO(
             experiences_non_academiques=[

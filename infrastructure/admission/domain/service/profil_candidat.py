@@ -404,14 +404,17 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     'nom_formation': '',
                     'nom_formation_equivalente_communaute_fr': '',
                     'cycle_formation': '',
+                    'est_autre_formation': None,
                 }
 
                 if experience_year.educational_experience.education_name:
                     program_info['nom_formation'] = experience_year.educational_experience.education_name
+                    program_info['est_autre_formation'] = True
 
                 if experience_year.educational_experience.program_id:
                     program_info['nom_formation'] = experience_year.educational_experience.program.title
                     program_info['cycle_formation'] = experience_year.educational_experience.program.cycle
+                    program_info['est_autre_formation'] = False
 
                 if experience_year.educational_experience.fwb_equivalent_program_id:
                     program_info[

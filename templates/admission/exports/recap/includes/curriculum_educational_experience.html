@@ -66,11 +66,13 @@
   </div>
   {% if checklist_display %}
     <div class="row">
+      {% if is_foreign_experience or is_belgian_experience and experience.est_autre_formation %}
+        <div class="col-md-6">
+          {% field_data _('FWB equivalent course') experience.nom_formation_equivalente_communaute_fr %}
+        </div>
+      {% endif %}
       <div class="col-md-6">
-        {% field_data _('FWB equivalent course') experience.nom_formation_equivalente_communaute_fr hide_empty=True %}
-      </div>
-      <div class="col-md-6">
-        {% field_data _("Course cycle") experience.cycle_formation|enum_display:'Cycle' %}
+        {% field_data _("Course cycle") experience.cycle_formation|enum_display:'Cycle' hide_empty=True %}
       </div>
     </div>
   {% endif %}

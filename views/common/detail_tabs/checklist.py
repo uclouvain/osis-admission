@@ -570,7 +570,7 @@ class ChecklistView(
     permission_required = 'admission.view_checklist'
 
     @classmethod
-    def checklist_documents_by_tab(cls) -> Dict[str, Set[str]]:
+    def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
         assimilation_documents = {
             'CARTE_IDENTITE',
             'PASSEPORT',
@@ -579,7 +579,7 @@ class ChecklistView(
         for document in DocumentsAssimilation:
             assimilation_documents.add(document)
 
-        return {
+        documents_by_tab = {
             'assimilation': assimilation_documents,
             'financabilite': {
                 'RELEVE_NOTES',
@@ -626,6 +626,24 @@ class ChecklistView(
             f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}': set(DocumentsEtudesSecondaires.keys()),
         }
 
+        # Add documents from the specific questions
+        checklist_target_tab_by_specific_question_tab = {
+            Onglets.CURRICULUM.name: 'parcours_anterieur',
+            Onglets.ETUDES_SECONDAIRES.name: f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}',
+            Onglets.INFORMATIONS_ADDITIONNELLES.name: 'specificites_formation',
+        }
+
+        for specific_question in specific_questions:
+            if (
+                specific_question.type == TypeItemFormulaire.DOCUMENT.name
+                and specific_question.onglet in checklist_target_tab_by_specific_question_tab
+            ):
+                documents_by_tab[checklist_target_tab_by_specific_question_tab[specific_question.onglet]].add(
+                    specific_question.uuid
+                )
+
+        return documents_by_tab
+
     def get_template_names(self):
         if self.request.htmx:
             return ["admission/general_education/checklist_menu.html"]
@@ -649,6 +667,7 @@ class ChecklistView(
                     onglets=[
                         Onglets.INFORMATIONS_ADDITIONNELLES.name,
                         Onglets.ETUDES_SECONDAIRES.name,
+                        Onglets.CURRICULUM.name,
                     ],
                 )
             )
@@ -691,29 +710,20 @@ class ChecklistView(
 
             # Documents
             admission_documents = command_result.emplacements_documents
-            question_specifiques_documents_uuids = [
-                valeur
-                for question in context['specific_questions_by_tab'][Onglets.INFORMATIONS_ADDITIONNELLES.name]
-                for valeur in (question.valeur if question.valeur else [])
-                if question.type == TypeItemFormulaire.DOCUMENT.name
-            ]
 
-            documents_by_tab = self.checklist_documents_by_tab()
+            documents_by_tab = self.checklist_documents_by_tab(specific_questions=specific_questions)
 
             context['documents'] = {
-                tab_name: [
-                    admission_document
-                    for admission_document in admission_documents
-                    if admission_document.identifiant.split('.')[-1] in tab_documents
-                ]
+                tab_name: sorted(
+                    [
+                        admission_document
+                        for admission_document in admission_documents
+                        if admission_document.identifiant.split('.')[-1] in tab_documents
+                    ],
+                    key=lambda doc: doc.libelle,
+                )
                 for tab_name, tab_documents in documents_by_tab.items()
             }
-            context['documents']['specificites_formation'] += [
-                document
-                for document_uuid in question_specifiques_documents_uuids
-                for document in admission_documents
-                if document_uuid in document.document_uuids
-            ]
 
             # Experiences
             experiences = self._get_experiences(command_result.resume)

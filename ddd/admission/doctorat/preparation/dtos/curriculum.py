@@ -84,6 +84,7 @@ class ExperienceAcademiqueDTO(interface.DTO):
     systeme_evaluation: str
     nom_formation: str
     nom_formation_equivalente_communaute_fr: str
+    est_autre_formation: Optional[bool]
     cycle_formation: str
     type_enseignement: str
     valorisee_par_admissions: Optional[List[str]] = None

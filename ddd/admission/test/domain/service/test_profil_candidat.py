@@ -64,6 +64,7 @@ class ProfilCandidatTestCase(TestCase):
             'type_institut': '',
             'nom_formation_equivalente_communaute_fr': '',
             'cycle_formation': '',
+            'est_autre_formation': None,
         }
 
     def test_recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes_sans_etablissement(self):
