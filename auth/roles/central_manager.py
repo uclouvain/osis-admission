@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ from admission.auth.predicates.general import (
     in_sic_status,
     is_submitted,
     in_sic_status_or_application_fees,
+    in_fac_status,
 )
 from admission.auth.predicates.common import (
     has_scope,
@@ -109,6 +110,7 @@ class CentralManager(EntityRoleModel):
             'admission.change_checklist': is_entity_manager & in_sic_status,
             'admission.change_payment': is_entity_manager & in_sic_status_or_application_fees,
             'admission.checklist_faculty_decision_transfer_to_fac': is_entity_manager & in_sic_status,
+            'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_entity_manager & in_fac_status,
             'admission.checklist_change_past_experiences': is_entity_manager & in_sic_status,
             'admission.checklist_select_access_title': is_entity_manager & in_sic_status,
             'admission.checklist_change_sic_comment': is_entity_manager & in_sic_status,
