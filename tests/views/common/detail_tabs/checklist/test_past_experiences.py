@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 
@@ -59,6 +60,7 @@ from admission.tests.factories.curriculum import ProfessionalExperienceFactory
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    AdmissionPrerequisiteCoursesFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
@@ -389,6 +391,56 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
                 (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
             ],
         )
+
+    def test_post_form_with_with_prerequisite_courses(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        # Add prerequisite courses
+        self.general_admission.with_prerequisite_courses = True
+        self.general_admission.prerequisite_courses_fac_comment = 'Test'
+        self.general_admission.save()
+
+        AdmissionPrerequisiteCoursesFactory(
+            admission=self.general_admission,
+        )
+
+        # With prerequisite courses
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+            data={
+                'with_prerequisite_courses': True,
+            },
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check the admission
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.with_prerequisite_courses, True)
+        self.assertEqual(self.general_admission.prerequisite_courses_fac_comment, 'Test')
+        self.assertEqual(self.general_admission.prerequisite_courses.count(), 1)
+
+        # Without prerequisite courses
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+            data={
+                'with_prerequisite_courses': False,
+            },
+        )
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check the admission
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.with_prerequisite_courses, False)
+        self.assertEqual(self.general_admission.prerequisite_courses_fac_comment, '')
+        self.assertEqual(self.general_admission.prerequisite_courses.count(), 0)
 
     def test_post_form_with_admission_requirement_without_access_titles(self):
         self.client.force_login(user=self.sic_manager_user)
