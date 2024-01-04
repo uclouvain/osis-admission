@@ -148,7 +148,7 @@ class Notification(INotification):
                 "actors_as_list_items": '<li></li>'.join(actor_list_str),
                 "actors_comma_separated": ', '.join(actor_list_str),
             },
-            recipients=[candidat],
+            recipients=[candidat.email],
         )
         EmailNotificationHandler.create(email_message, person=candidat)
 
@@ -215,7 +215,7 @@ class Notification(INotification):
                 "decision": ChoixEtatSignature.get_value(avis.etat),
                 "reason": avis.motif_refus,
             },
-            recipients=[candidat],
+            recipients=[candidat.email],
         )
         EmailNotificationHandler.create(email_message, person=candidat)
 
@@ -280,7 +280,7 @@ class Notification(INotification):
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
             candidat.language,
             common_tokens,
-            recipients=[candidat],
+            recipients=[candidat.private_email],
         )
         EmailNotificationHandler.create(email_message, person=candidat)
 
@@ -294,7 +294,7 @@ class Notification(INotification):
                     "actor_first_name": manager.first_name,
                     "actor_last_name": manager.last_name,
                 },
-                recipients=[manager],
+                recipients=[manager.email],
             )
             EmailNotificationHandler.create(email_message, person=manager)
 

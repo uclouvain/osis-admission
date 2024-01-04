@@ -24,9 +24,12 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from typing import Dict, List, Optional
 
 from django.conf import settings
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (
     Exists,
@@ -40,11 +43,14 @@ from django.db.models import (
     ExpressionWrapper,
     Q,
     BooleanField,
+    QuerySet,
 )
+from django.db.models.fields import UUIDField
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
 from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.functions import ArrayLength
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from admission.ddd import NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
@@ -56,6 +62,10 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     ExperienceNonAcademiqueDTO,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+    EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES,
+)
 from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
@@ -64,11 +74,11 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
 )
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.models.enums.community import CommunityEnum
-from base.models.enums.education_group_types import TrainingType
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
@@ -289,6 +299,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 secteur=experience.sector,
                 autre_activite=experience.activity,
                 uuid=experience.uuid,
+                valorisee_par_admissions=getattr(experience, 'valuated_from_admissions', None),
             )
             for experience in experiences_non_academiques
         ]
@@ -315,19 +326,45 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         cls,
         matricule: str,
         has_default_language: bool,
+        uuid_proposition: str,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> List[ExperienceAcademiqueDTO]:
         """Returns the DTO of the academic experiences of the given candidate."""
 
-        educational_experience_years: List[EducationalExperienceYear] = EducationalExperienceYear.objects.filter(
-            educational_experience__person__global_id=matricule,
-        ).select_related(
-            'academic_year',
-            'educational_experience__country',
-            'educational_experience__linguistic_regime',
-            'educational_experience__program',
-            'educational_experience__fwb_equivalent_program',
-            'educational_experience__institute',
+        educational_experience_years: QuerySet[EducationalExperienceYear] = (
+            EducationalExperienceYear.objects.filter(
+                educational_experience__person__global_id=matricule,
+            )
+            .select_related(
+                'academic_year',
+                'educational_experience__country',
+                'educational_experience__linguistic_regime',
+                'educational_experience__program',
+                'educational_experience__fwb_equivalent_program',
+                'educational_experience__institute',
+            )
+            .order_by('-academic_year__year')
         )
+
+        if experiences_cv_recuperees in EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES:
+            educational_experience_years = educational_experience_years.annotate(
+                valuated_from_admissions=ArrayAgg(
+                    'educational_experience__valuated_from_admission__uuid',
+                    filter=Q(educational_experience__valuated_from_admission__isnull=False),
+                ),
+            )
+
+            if experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES:
+                educational_experience_years = educational_experience_years.alias(
+                    nb_valuated_admissions=ArrayLength('valuated_from_admissions'),
+                ).filter(nb_valuated_admissions__gt=0)
+            elif experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION:
+                educational_experience_years = educational_experience_years.filter(
+                    educational_experience__educational_valuated_experiences__baseadmission_id=uuid.UUID(
+                        str(uuid_proposition)
+                    )
+                )
+
         educational_experience_dtos: Dict[int, ExperienceAcademiqueDTO] = {}
         for experience_year in educational_experience_years:
             experience_year_dto = cls._get_academic_experience_year_dto(experience_year)
@@ -406,6 +443,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     grade_obtenu=experience_year.educational_experience.obtained_grade,
                     systeme_evaluation=experience_year.educational_experience.evaluation_type,
                     type_enseignement=experience_year.educational_experience.study_system,
+                    valorisee_par_admissions=getattr(experience_year, 'valuated_from_admissions', None),
                     **institute,
                     **linguistic_regime,
                     **program_info,
@@ -487,10 +525,14 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
+    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumDTO':
         minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
 
-        academic_experiences_dtos = cls._get_academic_experiences_dtos(matricule, cls.has_default_language())
+        academic_experiences_dtos = cls._get_academic_experiences_dtos(
+            matricule,
+            cls.has_default_language(),
+            uuid_proposition,
+        )
 
         non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
             person__global_id=matricule,
@@ -642,6 +684,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         matricule: str,
         formation: str,
         annee_courante: int,
+        uuid_proposition: str,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> ResumeCandidatDTO:
         has_default_language = cls.has_default_language()
 
@@ -715,13 +759,35 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
         coordonnees_dto = cls._get_coordonnees_dto(candidate=candidate, has_default_language=has_default_language)
 
+        professional_experiences = candidate.professionalexperience_set.all()
+
+        if experiences_cv_recuperees in EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES:
+            professional_experiences = professional_experiences.annotate(
+                valuated_from_admissions=ArrayAgg(
+                    'valuated_from_admission__uuid',
+                    filter=Q(valuated_from_admission__isnull=False),
+                ),
+            )
+
+            if experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES:
+                professional_experiences = professional_experiences.alias(
+                    nb_valuated_admissions=ArrayLength('valuated_from_admissions'),
+                ).filter(nb_valuated_admissions__gt=0)
+            elif experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION:
+                professional_experiences = professional_experiences.filter(
+                    professional_valuated_experiences__baseadmission_id=uuid.UUID(str(uuid_proposition))
+                )
+
         curriculum_dto = CurriculumDTO(
             annee_derniere_inscription_ucl=last_registration_year,
             annee_diplome_etudes_secondaires=graduated_from_high_school_year,
-            experiences_academiques=cls._get_academic_experiences_dtos(matricule, has_default_language),
-            experiences_non_academiques=cls._get_non_academic_experiences_dtos(
-                candidate.professionalexperience_set.all(),
+            experiences_academiques=cls._get_academic_experiences_dtos(
+                matricule,
+                has_default_language,
+                uuid_proposition,
+                experiences_cv_recuperees,
             ),
+            experiences_non_academiques=cls._get_non_academic_experiences_dtos(professional_experiences),
             annee_minimum_a_remplir=cls.get_annee_minimale_a_completer_cv(
                 annee_courante=annee_courante,
                 annee_diplome_etudes_secondaires=graduated_from_high_school_year,

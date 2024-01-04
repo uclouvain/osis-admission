@@ -44,3 +44,5 @@ PLUS_5_ISO_CODES = {
     "LI",  # Liechtenstein
     "MC",  # Monaco
 }
+MAIL_INSCRIPTION_DEFAUT = 'inscription-lln@uclouvain.be'
+MOIS_DEBUT_ANNEE_ACADEMIQUE = 9

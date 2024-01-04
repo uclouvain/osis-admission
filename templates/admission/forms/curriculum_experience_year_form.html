@@ -31,7 +31,7 @@
       {{ year_form.academic_year }}
       <label class="switch enrolled-switch">
         {{ year_form.is_enrolled }}
-        <span class="osis-slider round"></span>
+        <span class="slider round"></span>
       </label>
     </td>
     <td class="active-year required_field credit-input {% if not year_form.is_enrolled.value %}hidden{% endif %}">
@@ -40,7 +40,7 @@
     <td class="active-year required_field credit-input {% if not year_form.is_enrolled.value %}hidden{% endif %}">
       {% bootstrap_field year_form.acquired_credit_number show_label=False placeholder='' %}
     </td>
-    <td class="active-year required_field result flex-container align-items-baseline {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+    <td class="active-year required_field result flex-content align-items-baseline {% if not year_form.is_enrolled.value %}hidden{% endif %}">
       {% bootstrap_field year_form.result show_label=False form_group_class="form-group flex-1" %}
       <button class="btn btn-primary" type="button">
         {% translate "Transcript" context "cv-attachment" %}
@@ -56,16 +56,16 @@
         <span class="caret"></span>
       </button>
     </td>
-    <td class="active-year block-1-field with-block-1-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+    <td class="centered-element active-year block-1-field with-block-1-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
       <label class="switch">
         {{ year_form.with_block_1 }}
-        <span class="osis-slider round"></span>
+        <span class="slider round"></span>
       </label>
     </td>
-    <td class="active-year complement-field with-complement-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+    <td class="centered-element active-year complement-field with-complement-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
       <label class="switch">
         {{ year_form.with_complement }}
-        <span class="osis-slider round"></span>
+        <span class="slider round"></span>
       </label>
     </td>
     <td class="active-year fwb-credits-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
@@ -74,10 +74,10 @@
     <td class="active-year fwb-credits-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
       {% bootstrap_field year_form.fwb_acquired_credit_number show_label=False %}
     </td>
-    <td class="active-year {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+    <td class="centered-element active-year {% if not year_form.is_enrolled.value %}hidden{% endif %}">
       {{ year_form.with_reduction }}
     </td>
-    <td class="active-year block-1-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+    <td class="centered-element active-year block-1-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
       {{ year_form.is_102_change_of_course }}
     </td>
     <td colspan="9" class="non-active-year {% if year_form.is_enrolled.value %}hidden{% endif %}">
@@ -86,7 +86,7 @@
   </tr>
   <tr class="active-year {% if not year_form.is_enrolled.value %}hidden{% endif %}">
     <td class="annual-transcript hidden" colspan="9">
-      <div class="flex-container align-top">
+      <div class="flex-content align-top">
         <div class="annual-transcript-file required_field flex-1">
           {% bootstrap_field year_form.transcript %}
         </div>

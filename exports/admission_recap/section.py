@@ -181,11 +181,9 @@ def get_training_choice_section(
 
 def get_secondary_studies_context(
     resume_proposition: ResumePropositionDTO,
-    specific_questions_by_tab: Dict[str, List[QuestionSpecifiqueDTO]],
+    specific_questions: List[QuestionSpecifiqueDTO],
 ) -> dict:
-    secondary_studies_context = {
-        'specific_questions': specific_questions_by_tab[Onglets.ETUDES_SECONDAIRES.name],
-    }
+    secondary_studies_context = {'specific_questions': specific_questions}
     if resume_proposition.etudes_secondaires.diplome_etranger:
         secondary_studies_context['need_translations'] = (
             resume_proposition.etudes_secondaires.diplome_etranger.regime_linguistique
@@ -204,7 +202,10 @@ def get_secondary_studies_section(
     load_content: bool,
 ) -> Section:
     """Returns the secondary studies section."""
-    education_extra_context = get_secondary_studies_context(context, specific_questions_by_tab)
+    education_extra_context = get_secondary_studies_context(
+        context,
+        specific_questions_by_tab[Onglets.ETUDES_SECONDAIRES.name],
+    )
     return Section(
         identifier=OngletsDemande.ETUDES_SECONDAIRES,
         content_template='admission/exports/recap/includes/education.html',
@@ -558,13 +559,29 @@ def get_sections(
         pdf_sections.append(get_languages_section(context, load_content))
 
     if not hide_curriculum:
+        # Display the global curriculum page and the related attachments
         pdf_sections.append(get_curriculum_section(context, specific_questions_by_tab, load_content))
+    else:
+        # Only display the curriculum attachments
+        pdf_sections.append(get_curriculum_section(context, {Onglets.CURRICULUM.name: []}, False))
 
+    # We keep all the experiences even the ones that are not valuated when the admission has not been submitted,
+    # otherwise we only keep the ones that have been valuated by the current admission
     for educational_experience in context.curriculum.experiences_academiques:
-        pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
+        if (
+            context.proposition.est_non_soumise
+            or context.proposition.uuid in educational_experience.valorisee_par_admissions
+        ):
+            pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
 
     for non_educational_experience in context.curriculum.experiences_non_academiques:
-        pdf_sections.append(get_non_educational_experience_section(context, non_educational_experience, load_content))
+        if (
+            context.proposition.est_non_soumise
+            or context.proposition.uuid in non_educational_experience.valorisee_par_admissions
+        ):
+            pdf_sections.append(
+                get_non_educational_experience_section(context, non_educational_experience, load_content)
+            )
 
     if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))

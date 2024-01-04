@@ -23,8 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Dict, Set, Optional
+from typing import Dict, Set, Optional, List
 
+import rules
 from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
@@ -45,12 +46,20 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
-from admission.ddd import MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd import MONTANT_FRAIS_DOSSIER, MOIS_DEBUT_ANNEE_ACADEMIQUE
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
-from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO, ResumeCandidatDTO
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.dtos.resume import (
+    ResumeEtEmplacementsDocumentsPropositionDTO,
+    ResumeCandidatDTO,
+    ResumePropositionDTO,
+)
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
-from admission.ddd.admission.enums.emplacement_document import DocumentsAssimilation
+from admission.ddd.admission.enums.emplacement_document import (
+    DocumentsAssimilation,
+    OngletsDemande,
+    DocumentsEtudesSecondaires,
+)
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
     ModifierChecklistChoixFormationCommand,
@@ -84,6 +93,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
 )
+from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
+from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import ChoixFormationForm, FinancabiliteApprovalForm, ExperienceStatusForm
 from admission.forms.admission.checklist import (
     CommentForm,
@@ -98,7 +110,7 @@ from admission.forms.admission.checklist import (
     SinglePastExperienceAuthenticationForm,
 )
 from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
-from admission.templatetags.admission import authentication_css_class
+from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
     get_portal_admission_list_url,
     get_backoffice_admission_url,
@@ -109,6 +121,7 @@ from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_profile.models import EducationalExperience
@@ -140,6 +153,7 @@ __all__ = [
 
 __namespace__ = False
 
+from osis_role.templatetags.osis_role import has_perm
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
 
@@ -157,6 +171,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'decision_facultaire': _("Decision of the faculty"),
         },
         'hide_files': True,
+        'condition_acces_enum': ConditionAcces,
     }
 
     @cached_property
@@ -166,6 +181,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     @cached_property
     def is_fac(self):
         return person_is_fac_cdd(self.request.user.person)
+
+    @cached_property
+    def can_update_checklist_tab(self):
+        return has_perm('admission.change_checklist', user=self.request.user, obj=self.admission)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -185,6 +204,12 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 checklist_additional_icons['decision_facultaire'] = 'fa-regular fa-comment'
 
         context['checklist_additional_icons'] = checklist_additional_icons
+        context['can_update_checklist_tab'] = self.can_update_checklist_tab
+        context['can_change_payment'] = self.request.user.has_perm('admission.change_payment', self.admission)
+        context['can_change_faculty_decision'] = self.request.user.has_perm(
+            'admission.checklist_change_faculty_decision',
+            self.admission,
+        )
         return context
 
 
@@ -607,6 +632,7 @@ class ChecklistView(
                 'ATTESTATION_ACCORD_FACULTAIRE',
                 'ATTESTATION_REFUS_FACULTAIRE',
             },
+            f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}': set(DocumentsEtudesSecondaires.keys()),
         }
 
     def get_template_names(self):
@@ -626,12 +652,17 @@ class ChecklistView(
 
             context['resume_proposition'] = command_result.resume
 
-            context['questions_specifiques'] = message_bus_instance.invoke(
+            specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
                 RecupererQuestionsSpecifiquesQuery(
                     uuid_proposition=self.admission_uuid,
-                    onglets=[Onglets.INFORMATIONS_ADDITIONNELLES.name],
+                    onglets=[
+                        Onglets.INFORMATIONS_ADDITIONNELLES.name,
+                        Onglets.ETUDES_SECONDAIRES.name,
+                    ],
                 )
             )
+
+            context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
             # Initialize forms
             tab_names = list(self.extra_context['checklist_tabs'].keys())
@@ -650,8 +681,6 @@ class ChecklistView(
                     comment=comments.get(tab_name, None),
                     form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
                     prefix=tab_name,
-                    user_is_sic=self.is_sic,
-                    user_is_fac=self.is_fac,
                 )
                 for tab_name in tab_names
             }
@@ -673,7 +702,7 @@ class ChecklistView(
             admission_documents = command_result.emplacements_documents
             question_specifiques_documents_uuids = [
                 valeur
-                for question in context['questions_specifiques']
+                for question in context['specific_questions_by_tab'][Onglets.INFORMATIONS_ADDITIONNELLES.name]
                 for valeur in (question.valeur if question.valeur else [])
                 if question.type == TypeItemFormulaire.DOCUMENT.name
             ]
@@ -716,39 +745,56 @@ class ChecklistView(
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
 
+            context['bg_classes'] = {}
+
             children = (
                 context['original_admission']
                 .checklist.get('current', {})
                 .get('parcours_anterieur', {})
                 .get('enfants', [])
             )
-            for child in children:
-                identifier = child['extra']['identifiant']
-                tab_identifier = f'parcours_anterieur__{identifier}'
-                context['authentication_forms'][identifier] = SinglePastExperienceAuthenticationForm(child)
+
+            children_by_identifier = {
+                child['extra']['identifiant']: child for child in children if child.get('extra', {}).get('identifiant')
+            }
+
+            for experience_uuid, current_experience in experiences_by_uuid.items():
+                tab_identifier = f'parcours_anterieur__{experience_uuid}'
+
+                if experience_uuid in children_by_identifier:
+                    experience_checklist_info = children_by_identifier.get(experience_uuid, {})
+                else:
+                    experience_checklist_info = Checklist.initialiser_checklist_experience(experience_uuid).to_dict()
+                    children.append(experience_checklist_info)
+
                 context['checklist_additional_icons'][tab_identifier] = authentication_css_class(
-                    authentication_status=child['extra'].get('etat_authentification'),
+                    authentication_status=experience_checklist_info['extra'].get('etat_authentification'),
                 )
-                current_experience = experiences_by_uuid.get(identifier)
-                if current_experience:
-                    context['checklist_tabs'][tab_identifier] = current_experience.titre_formate
-                    context['comment_forms'][tab_identifier] = CommentForm(
-                        comment=comments.get(tab_identifier, None),
-                        form_url=resolve_url(
-                            f'{self.base_namespace}:save-comment',
-                            uuid=self.admission_uuid,
-                            tab=tab_identifier,
-                        ),
-                        prefix=tab_identifier,
-                        user_is_sic=self.is_sic,
-                        user_is_fac=self.is_fac,
-                    )
+                context['authentication_forms'][experience_uuid] = SinglePastExperienceAuthenticationForm(
+                    experience_checklist_info,
+                )
+                context['bg_classes'][tab_identifier] = bg_class_by_checklist_experience(current_experience)
+                context['checklist_tabs'][tab_identifier] = current_experience.titre_formate
+                context['comment_forms'][tab_identifier] = CommentForm(
+                    comment=comments.get(tab_identifier, None),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        tab=tab_identifier,
+                    ),
+                    prefix=tab_identifier,
+                )
+
+            # Remove the experiences that we had in the checklist that have been removed
+            children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
                 document_tab_identifier = admission_document.onglet.split('.')
-                if len(document_tab_identifier) > 1:
+
+                if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
                     tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
+
                     if tab_identifier not in context['documents']:
                         context['documents'][tab_identifier] = [admission_document]
                     else:
@@ -768,9 +814,60 @@ class ChecklistView(
 
                 children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
 
+            original_admission = self.admission
+
+            can_change_checklist = self.request.user.has_perm('admission.change_checklist', original_admission)
+            can_change_faculty_decision = self.request.user.has_perm(
+                'admission.checklist_change_faculty_decision',
+                original_admission,
+            )
+            can_change_past_experiences = self.request.user.has_perm(
+                'admission.checklist_change_past_experiences',
+                original_admission,
+            )
+            can_change_access_title = self.request.user.has_perm(
+                'admission.checklist_select_access_title',
+                original_admission,
+            )
+            comment_permissions = {
+                'admission.checklist_change_comment': self.request.user.has_perm(
+                    'admission.checklist_change_comment',
+                    original_admission,
+                ),
+                'admission.checklist_change_fac_comment': self.request.user.has_perm(
+                    'admission.checklist_change_fac_comment',
+                    original_admission,
+                ),
+                'admission.checklist_change_sic_comment': self.request.user.has_perm(
+                    'admission.checklist_change_sic_comment',
+                    original_admission,
+                ),
+            }
+
+            disable_unavailable_forms(
+                {
+                    context['assimilation_form']: can_change_checklist,
+                    context['fac_decision_refusal_form']: can_change_faculty_decision,
+                    context['fac_decision_approval_form']: can_change_faculty_decision,
+                    context['financabilite_approval_form']: can_change_checklist,
+                    context['past_experiences_admission_requirement_form']: can_change_past_experiences,
+                    context['past_experiences_admission_access_title_equivalency_form']: can_change_access_title,
+                    context['financabilite_approval_form']: can_change_checklist,
+                    **{
+                        authentication_form: can_change_checklist
+                        for authentication_form in context['authentication_forms'].values()
+                    },
+                    **{
+                        comment_form: comment_permissions[comment_form.permission]
+                        for comment_form in context['comment_forms'].values()
+                    },
+                }
+            )
+            context['can_choose_access_title'] = can_change_access_title
+
         return context
 
-    def _get_experiences(self, resume):
+    def _get_experiences(self, resume: ResumePropositionDTO):
         experiences = {}
 
         for experience_academique in resume.curriculum.experiences_academiques:
@@ -786,9 +883,7 @@ class ChecklistView(
             date_courante = experience_non_academique.date_debut
             while True:
                 annee = (
-                    date_courante.year
-                    if date_courante.month >= IProfilCandidatTranslator.MOIS_DEBUT_ANNEE_ACADEMIQUE
-                    else date_courante.year - 1
+                    date_courante.year if date_courante.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE else date_courante.year - 1
                 )
                 if experience_non_academique not in experiences_non_academiques.get(annee, []):
                     experiences_non_academiques.setdefault(annee, []).append(experience_non_academique)
@@ -807,10 +902,7 @@ class ChecklistView(
                 experiences.setdefault(etudes_secondaires.annee_diplome_etudes_secondaires, []).append(
                     etudes_secondaires
                 )
-            elif (
-                etudes_secondaires.alternative_secondaires
-                and etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle
-            ):
+            elif etudes_secondaires.alternative_secondaires:
                 experiences.setdefault(0, []).append(etudes_secondaires)
 
         experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
@@ -830,9 +922,7 @@ class ChecklistView(
             experiences[str(experience_academique.uuid)] = experience_academique
         for experience_non_academique in resume.curriculum.experiences_non_academiques:
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
-        high_school_experience = resume.etudes_secondaires.experience
-        if high_school_experience:
-            experiences[str(high_school_experience.uuid)] = resume.etudes_secondaires
+        experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
         return experiences
 
 
@@ -844,7 +934,7 @@ class ApplicationFeesView(
 ):
     name = 'application-fees'
     urlpatterns = {'application-fees': 'application-fees/<str:status>'}
-    permission_required = 'admission.view_checklist'
+    permission_required = 'admission.change_payment'
     template_name = 'admission/general_education/includes/checklist/application_fees_request.html'
     htmx_template_name = 'admission/general_education/includes/checklist/application_fees_request.html'
     form_class = Form
@@ -890,10 +980,14 @@ class PastExperiencesStatusView(
 ):
     name = 'past-experiences-status'
     urlpatterns = {'past-experiences-change-status': 'past-experiences-change-status/<str:status>'}
-    permission_required = 'admission.checklist_change_past_experiences'
+    permission_required = 'admission.change_checklist'
     template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
     htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
     form_class = StatusForm
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.valid_operation = False
 
     def get_initial(self):
         return self.admission.checklist['current']['parcours_anterieur']['statut']
@@ -911,11 +1005,8 @@ class PastExperiencesStatusView(
                     statut=form.cleaned_data['status'],
                 )
             )
+            self.valid_operation = True
         except MultipleBusinessExceptions:
-            self.message_on_failure = _(
-                "To move to this state, an admission requirement must have been selected and at least one access title "
-                "line must be selected in the past experience views.",
-            )
             return super().form_invalid(form)
 
         return super().form_valid(form)
@@ -930,7 +1021,7 @@ class PastExperiencesAdmissionRequirementView(
 ):
     name = 'past-experiences-admission-requirement'
     urlpatterns = 'past-experiences-admission-requirement'
-    permission_required = 'admission.checklist_change_past_experiences'
+    permission_required = 'admission.change_checklist'
     template_name = (
         'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html'
     )
@@ -993,6 +1084,7 @@ class PastExperiencesAccessTitleView(
         context['checked'] = self.checked
         context['url'] = self.request.get_full_path()
         context['experience_uuid'] = self.request.GET.get('experience_uuid')
+        context['can_choose_access_title'] = True  # True as the user can access to the current view
         return context
 
     def form_valid(self, form):
@@ -1026,7 +1118,7 @@ class PastExperiencesAccessTitleEquivalencyView(
 ):
     name = 'past-experiences-access-title-equivalency'
     urlpatterns = 'past-experiences-access-title-equivalency'
-    permission_required = 'admission.checklist_change_past_experiences'
+    permission_required = 'admission.change_checklist'
     template_name = (
         'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html'
     )
@@ -1101,7 +1193,7 @@ def change_admission_status(tab, admission_status, extra, admission, replace_ext
 
 class ChangeStatusView(LoadDossierViewMixin, APIView):
     urlpatterns = {'change-checklist-status': 'change-checklist-status/<str:tab>/<str:status>'}
-    permission_required = 'admission.view_checklist'
+    permission_required = 'admission.change_checklist'
     parser_classes = [FormParser]
     authentication_classes = [SessionAuthentication]
 
@@ -1120,7 +1212,7 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
 
 class ChangeExtraView(AdmissionFormMixin, FormView):
     urlpatterns = {'change-checklist-extra': 'change-checklist-extra/<str:tab>'}
-    permission_required = 'admission.view_checklist'
+    permission_required = 'admission.change_checklist'
     template_name = 'admission/forms/default_form.html'
 
     def get_form_kwargs(self):
@@ -1154,9 +1246,17 @@ class ChangeExtraView(AdmissionFormMixin, FormView):
 
 class SaveCommentView(AdmissionFormMixin, FormView):
     urlpatterns = {'save-comment': 'save-comment/<str:tab>'}
-    permission_required = 'admission.view_checklist'
     form_class = CommentForm
     template_name = 'admission/forms/default_form.html'
+
+    def get_permission_required(self):
+        if f'__{COMMENT_TAG_FAC}' in self.kwargs['tab']:
+            self.permission_required = 'admission.checklist_change_fac_comment'
+        elif f'__{COMMENT_TAG_SIC}' in self.kwargs['tab']:
+            self.permission_required = 'admission.checklist_change_sic_comment'
+        else:
+            self.permission_required = 'admission.checklist_change_comment'
+        return super().get_permission_required()
 
     @cached_property
     def form_url(self):
@@ -1180,8 +1280,6 @@ class SaveCommentView(AdmissionFormMixin, FormView):
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
         form_kwargs['form_url'] = self.form_url
-        form_kwargs['user_is_sic'] = self.is_sic
-        form_kwargs['user_is_fac'] = self.is_fac
         return form_kwargs
 
     def form_valid(self, form):
@@ -1198,7 +1296,7 @@ class SaveCommentView(AdmissionFormMixin, FormView):
 
 class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     urlpatterns = 'choix-formation-update'
-    permission_required = 'admission.view_checklist'
+    permission_required = 'admission.change_checklist'
     template_name = 'admission/general_education/includes/checklist/choix_formation_form.html'
     form_class = ChoixFormationForm
 
@@ -1244,7 +1342,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
 
 class ChoixFormationDetailView(LoadDossierViewMixin, TemplateView):
     urlpatterns = 'choix-formation-detail'
-    permission_required = 'admission.view_checklist'
+    permission_required = 'admission.change_checklist'
     template_name = 'admission/general_education/includes/checklist/choix_formation_detail.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -1271,8 +1369,6 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                     tab='financabilite',
                 ),
                 prefix='financabilite',
-                user_is_sic=self.is_sic,
-                user_is_fac=self.is_fac,
             )
         }
 
@@ -1287,7 +1383,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
 class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
     urlpatterns = {'financability-change-status': 'financability-change-checklist-status/<str:status>'}
     template_name = 'admission/general_education/includes/checklist/financabilite.html'
-    permission_required = 'admission.view_checklist'
+    permission_required = 'admission.change_checklist'
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
@@ -1319,7 +1415,7 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
 class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, FormView):
     urlpatterns = {'financability-approval': 'financability-checklist-approval'}
     template_name = 'admission/general_education/includes/checklist/financabilite_approval_form.html'
-    permission_required = 'admission.view_checklist'
+    permission_required = 'admission.change_checklist'
     http_method_names = ['post']
 
     def get_form(self, form_class=None):
@@ -1348,7 +1444,7 @@ class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContex
 class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteContextMixin, TemplateView):
     urlpatterns = {'financability-compute-rule': 'financability-compute-rule'}
     template_name = 'admission/general_education/includes/checklist/financabilite.html'
-    permission_required = 'admission.view_checklist'
+    permission_required = 'admission.change_checklist'
     http_method_names = ['post']
 
     def post(self, request, *args, **kwargs):
@@ -1366,7 +1462,7 @@ class SinglePastExperienceMixin(
 ):
     @cached_property
     def experience_uuid(self):
-        return str(self.kwargs['experience_uuid'])
+        return self.request.GET.get('identifier')
 
     @property
     def experience(self):
@@ -1402,9 +1498,7 @@ class SinglePastExperienceMixin(
 
 class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
     name = 'single-past-experience-change-status'
-    urlpatterns = {
-        'single-past-experience-change-status': 'single-past-experience-change-status/<uuid:experience_uuid>',
-    }
+    urlpatterns = 'single-past-experience-change-status'
     permission_required = 'admission.checklist_change_past_experiences'
     template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
     htmx_template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
@@ -1428,11 +1522,7 @@ class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
 
 class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
     name = 'single-past-experience-change-authentication'
-    urlpatterns = {
-        'single-past-experience-change-authentication': (
-            'single-past-experience-change-authentication/<uuid:experience_uuid>'
-        ),
-    }
+    urlpatterns = 'single-past-experience-change-authentication'
     permission_required = 'admission.checklist_change_past_experiences'
     template_name = 'admission/general_education/includes/checklist/previous_experience_single_authentication_form.html'
     htmx_template_name = (

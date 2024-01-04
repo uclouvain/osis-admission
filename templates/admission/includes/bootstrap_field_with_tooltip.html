@@ -36,7 +36,11 @@
       <a
           tabindex="0"
           class="fa fa-question-circle popover-buttons"
-          data-content="<p>{{ field.help_text }}</p>"
+          {% if html_tooltip %}
+            data-content="{{ field.help_text }}"
+          {% else %}
+            data-content="<p>{{ field.help_text }}</p>"
+          {% endif %}
           data-html="true"
           data-placement="auto top"
           data-toggle="popover"

@@ -28,6 +28,7 @@ from typing import Optional, List
 import attr
 from django.utils.translation import gettext as _
 
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from osis_common.ddd import interface
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 
@@ -97,8 +98,7 @@ class EtudesSecondairesDTO(interface.DTO):
 
     @property
     def uuid(self):
-        experience = self.experience
-        return experience.uuid if experience else ''
+        return OngletsDemande.ETUDES_SECONDAIRES.name
 
     @property
     def titre_formate(self):

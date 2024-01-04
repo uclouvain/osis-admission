@@ -36,10 +36,18 @@ from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre, ChoixSexe
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.person import AdmissionPersonForm, IdentificationType
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    AdmissionEducationalValuatedExperiencesFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
 from base.models.enums.civil_state import CivilState
@@ -49,6 +57,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
+from osis_profile.models.enums.curriculum import TranscriptType
 from reference.tests.factories.country import CountryFactory
 
 
@@ -87,6 +96,7 @@ class PersonFormTestCase(TestCase):
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
         cls.general_url = resolve_url('admission:general-education:update:person', uuid=cls.general_admission.uuid)
 
@@ -94,6 +104,7 @@ class PersonFormTestCase(TestCase):
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate=cls.general_admission.candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
 
         cls.continuing_url = resolve_url(
@@ -104,6 +115,7 @@ class PersonFormTestCase(TestCase):
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
             candidate=cls.general_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
 
         cls.doctorate_url = resolve_url('admission:doctorate:update:person', uuid=cls.doctorate_admission.uuid)
@@ -613,6 +625,7 @@ class PersonFormTestCase(TestCase):
             candidate__phone_mobile='987654321',
             candidate__private_email='joe.foe@example.com',
             submitted_profile={},
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         url = resolve_url('admission:general-education:update:person', uuid=general_admission.uuid)
@@ -664,6 +677,55 @@ class PersonFormTestCase(TestCase):
                 },
             },
         )
+
+    def test_computation_of_missing_documents(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        # Add curriculum experiences
+        educational_experience = EducationalExperienceFactory(
+            person=self.general_admission.candidate,
+            transcript_type=TranscriptType.ONE_FOR_ALL_YEARS.name,
+            transcript=[],
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=educational_experience,
+            academic_year=self.general_admission.training.academic_year,
+        )
+        transcript_identifier = f'CURRICULUM.{educational_experience.uuid}.RELEVE_NOTES'
+
+        # No valuated experience -> no document
+        response = self.client.post(self.general_url, self.form_data)
+
+        self.assertEqual(response.status_code, 302)
+
+        self.general_admission.refresh_from_db()
+        self.assertNotIn(transcript_identifier, self.general_admission.requested_documents)
+
+        # Valuated experiences but by another admission -> no document
+        educational_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.continuing_admission,
+            educationalexperience=educational_experience,
+        )
+
+        response = self.client.post(self.general_url, self.form_data)
+
+        self.assertEqual(response.status_code, 302)
+
+        self.general_admission.refresh_from_db()
+
+        self.assertNotIn(transcript_identifier, self.general_admission.requested_documents)
+
+        # Valuated experiences by this admission -> retrieve documents
+        educational_valuation.baseadmission = self.general_admission
+        educational_valuation.save()
+
+        response = self.client.post(self.general_url, self.form_data)
+
+        self.assertEqual(response.status_code, 302)
+
+        self.general_admission.refresh_from_db()
+
+        self.assertIn(transcript_identifier, self.general_admission.requested_documents)
 
     def test_general_person_form_post_with_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)

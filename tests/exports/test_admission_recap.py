@@ -44,10 +44,12 @@ from admission.calendar.admission_calendar import (
 )
 from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
+from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.ddd import FR_ISO_CODE, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
+    ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
     AnneeExperienceAcademiqueDTO,
@@ -132,13 +134,21 @@ from admission.infrastructure.admission.domain.service.in_memory.profil_candidat
 from admission.tests import QueriesAssertionsMixin, TestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+)
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,
     DocumentAdmissionFormItemFactory,
     TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.person import CompletePersonForIUFCFactory
+from admission.tests.factories.person import (
+    CompletePersonForIUFCFactory,
+    CompletePersonForBachelorFactory,
+    CompletePersonFactory,
+)
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
@@ -146,6 +156,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
+from base.models.person import Person
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from infrastructure.messages_bus import message_bus_instance
@@ -428,11 +439,12 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.get_raw_content_mock.assert_called_once_with('token')
         self.assertEqual(raw, self.bytes_io_default_content)
 
-    def test_generation_with_continuing_education(self):
+    def test_generation_with_continuing_education_not_submitted_proposition(self):
         candidate = CompletePersonForIUFCFactory(country_of_citizenship=CountryFactory(european_union=False))
         admission = ContinuingEducationAdmissionFactory(
             candidate=candidate,
             residence_permit=['file-uuid'],
+            status=ChoixStatutPropositionContinue.EN_BROUILLON.name,
         )
 
         from admission.exports.admission_recap.admission_recap import admission_pdf_recap
@@ -483,8 +495,81 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(pdf_token, 'pdf-token')
 
-    def test_generation_with_general_education(self):
-        admission = GeneralEducationAdmissionFactory(training__education_group_type__name=TrainingType.BACHELOR.name)
+    def test_generation_with_continuing_education_submitted_proposition(self):
+        candidate: Person = CompletePersonForIUFCFactory(country_of_citizenship=CountryFactory(european_union=False))
+
+        educational_experience = candidate.educationalexperience_set.first()
+        non_educational_experience = candidate.professionalexperience_set.first()
+
+        admission = ContinuingEducationAdmissionFactory(
+            candidate=candidate,
+            residence_permit=['file-uuid'],
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
+        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+
+        admission_pdf_recap(admission, settings.LANGUAGE_CODE)
+
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+
+        self.assertEqual(len(tabs_titles), 7)
+
+        self.assertNotIn('Curriculum > Computer science (2021-2022)', tabs_titles)
+        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+
+        other_admission = ContinuingEducationAdmissionFactory()
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission, educationalexperience=educational_experience
+        )
+
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        self.outline_root.reset_mock()
+
+        admission_pdf_recap(admission, settings.LANGUAGE_CODE)
+
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+
+        self.assertEqual(len(tabs_titles), 7)
+
+        self.assertNotIn('Curriculum > Computer science (2021-2022)', tabs_titles)
+        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=admission, educationalexperience=educational_experience
+        )
+
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        self.outline_root.reset_mock()
+
+        admission_pdf_recap(admission, settings.LANGUAGE_CODE)
+
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+
+        self.assertEqual(len(tabs_titles), 9)
+
+        self.assertIn('Curriculum > Computer science (2021-2022)', tabs_titles)
+        self.assertIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+
+    def test_generation_with_general_education_not_submitted_proposition(self):
+        candidate: Person = CompletePersonForBachelorFactory(
+            country_of_citizenship=CountryFactory(european_union=False),
+        )
+
+        admission = GeneralEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+            candidate=candidate,
+        )
 
         from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 
@@ -500,6 +585,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
                     'coordinates',
                     'training_choice',
                     'education',
+                    'curriculum_academic_experience',
+                    'curriculum_non_academic_experience',
                     'curriculum',
                     'specific_question',
                     'accounting',
@@ -513,13 +600,91 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['coordinates'].title, 'Coordonnées')
         self.assertEqual(call_args_by_tab['training_choice'].title, 'Choix de formation')
         self.assertEqual(call_args_by_tab['education'].title, 'Études secondaires')
+        self.assertEqual(
+            call_args_by_tab['curriculum_academic_experience'].title,
+            'Curriculum > Computer science (2021-2022)',
+        )
+        self.assertEqual(
+            call_args_by_tab['curriculum_non_academic_experience'].title,
+            'Curriculum > Travail (01/2021 - 03/2021)',
+        )
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
 
-    def test_generation_with_doctorate_education(self):
-        admission = DoctorateAdmissionFactory()
+    def test_generation_with_general_education_submitted_proposition(self):
+        candidate: Person = CompletePersonForBachelorFactory(
+            country_of_citizenship=CountryFactory(european_union=False),
+        )
+
+        educational_experience = candidate.educationalexperience_set.first()
+        non_educational_experience = candidate.professionalexperience_set.first()
+
+        admission = GeneralEducationAdmissionFactory(
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            candidate=candidate,
+        )
+        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+
+        admission_pdf_recap(admission, settings.LANGUAGE_CODE)
+
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+
+        self.assertEqual(len(tabs_titles), 8)
+
+        self.assertNotIn('Curriculum > Computer science (2021-2022)', tabs_titles)
+        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+
+        other_admission = GeneralEducationAdmissionFactory(candidate=candidate)
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission, educationalexperience=educational_experience
+        )
+
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        self.outline_root.reset_mock()
+
+        admission_pdf_recap(admission, settings.LANGUAGE_CODE)
+
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+
+        self.assertEqual(len(tabs_titles), 8)
+
+        self.assertNotIn('Curriculum > Computer science (2021-2022)', tabs_titles)
+        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=admission, educationalexperience=educational_experience
+        )
+
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        self.outline_root.reset_mock()
+
+        admission_pdf_recap(admission, settings.LANGUAGE_CODE)
+
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+
+        self.assertEqual(len(tabs_titles), 10)
+
+        self.assertIn('Curriculum > Computer science (2021-2022)', tabs_titles)
+        self.assertIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+
+    def test_generation_with_doctorate_education_not_submitted_proposition(self):
+        candidate = CompletePersonFactory()
+        admission = DoctorateAdmissionFactory(
+            candidate=candidate,
+            status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
+        )
 
         from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 
@@ -535,6 +700,9 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
                     'coordinates',
                     'training_choice',
                     'languages',
+                    'curriculum_attachment',
+                    'curriculum_academic_experience',
+                    'curriculum_non_academic_experience',
                     'curriculum',
                     'accounting',
                     'project',
@@ -550,12 +718,86 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['coordinates'].title, 'Coordonnées')
         self.assertEqual(call_args_by_tab['training_choice'].title, 'Choix de formation')
         self.assertEqual(call_args_by_tab['languages'].title, 'Connaissance des langues')
+        self.assertEqual(call_args_by_tab['curriculum_attachment'].title, 'Curriculum vitae détaillé, daté et signé')
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
+        self.assertEqual(
+            call_args_by_tab['curriculum_academic_experience'].title,
+            'Curriculum > Computer science (2021-2023)',
+        )
+        self.assertEqual(
+            call_args_by_tab['curriculum_non_academic_experience'].title,
+            'Curriculum > Travail (01/2021 - 03/2021)',
+        )
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
         self.assertEqual(call_args_by_tab['project'].title, 'Projet de recherche doctoral')
         self.assertEqual(call_args_by_tab['cotutelle'].title, 'Cotutelle')
         self.assertEqual(call_args_by_tab['supervision'].title, 'Supervision')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
+
+    def test_generation_with_doctorate_education_submitted_proposition(self):
+        candidate: Person = CompletePersonFactory()
+        admission = DoctorateAdmissionFactory(
+            candidate=candidate,
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        )
+
+        educational_experience = candidate.educationalexperience_set.first()
+        non_educational_experience = candidate.professionalexperience_set.first()
+
+        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+
+        admission_pdf_recap(admission, settings.LANGUAGE_CODE)
+
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+
+        self.assertEqual(len(tabs_titles), 11)
+
+        self.assertNotIn('Curriculum > Computer science (2021-2023)', tabs_titles)
+        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+
+        other_admission = DoctorateAdmissionFactory(candidate=candidate)
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            educationalexperience=educational_experience,
+        )
+
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        self.outline_root.reset_mock()
+
+        admission_pdf_recap(admission, settings.LANGUAGE_CODE)
+
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+
+        self.assertEqual(len(tabs_titles), 11)
+
+        self.assertNotIn('Curriculum > Computer science (2021-2023)', tabs_titles)
+        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=admission,
+            educationalexperience=educational_experience,
+        )
+
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        self.outline_root.reset_mock()
+
+        admission_pdf_recap(admission, settings.LANGUAGE_CODE)
+
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+
+        self.assertEqual(len(tabs_titles), 13)
+
+        self.assertIn('Curriculum > Computer science (2021-2023)', tabs_titles)
+        self.assertIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
 
     def test_async_generation_with_continuing_education(self):
         admission = ContinuingEducationAdmissionFactory()

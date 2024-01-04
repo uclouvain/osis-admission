@@ -42,18 +42,6 @@
 {% endblock %}
 
 {% block page-header %}
-  <div class="page-header flex-content">
-    <h2>
-      {{ admission.formation.intitule }} ({{ admission.reference }})
-    </h2>
-    <a
-        href="{% url 'admission:all-list' %}"
-        class="text-primary"
-    >
-      <span class="fa fa-stream"></span>
-      {% trans "Back to the list" %}
-    </a>
-  </div>
 {% endblock %}
 
 {% block panel-heading %}
@@ -127,7 +115,7 @@
     <br>
     <span>
       {% translate 'Not specified' context "admission-header" as not_specified %}
-      {% translate 'Access condition:' %} <span class="label label-success">{{ admission.titre_acces|default:not_specified }}</span>
+      {% translate 'Access condition:' %} <span class="label label-success">{{ admission.condition_acces|enum_with_acronym_display:'ConditionAcces'|default:not_specified }}</span>
     </span>
   </div>
   <div id="admission-badges" class="min-width">

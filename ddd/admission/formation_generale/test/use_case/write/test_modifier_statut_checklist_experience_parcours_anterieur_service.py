@@ -28,6 +28,8 @@ from django.test import SimpleTestCase
 
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import (
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
 )
@@ -64,7 +66,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             '1cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
             '1cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
             # Etudes secondaires
-            '5cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
+            OngletsDemande.ETUDES_SECONDAIRES.name,
         ]
 
         self.assertEqual(len(enfants_parcours_anterieur), len(uuids_experiences))

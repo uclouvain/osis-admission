@@ -30,7 +30,8 @@
 >
   {% concat 'parcours_anterieur__' current.extra.identifiant as checklist_item_name %}
   <div class="form-group btn-group status-group" role="group">
-    {% url view.base_namespace|add:':single-past-experience-change-status' uuid=view.kwargs.uuid experience_uuid=current.extra.identifiant as change_status_url %}
+    {% url view.base_namespace|add:':single-past-experience-change-status' uuid=view.kwargs.uuid as base_change_status_url %}
+    {% concat base_change_status_url '?identifier=' current.extra.identifiant as change_status_url %}
     {% checklist_state_button tab=checklist_item_name label=_('To be processed') icon='xmark' state='INITIAL_CANDIDAT' class='muted' htmx_post=change_status_url %}
     {% checklist_state_button tab=checklist_item_name label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' htmx_post=change_status_url %}
     {% checklist_state_button tab=checklist_item_name label=_("Authentication") icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=change_status_url authentification='1' %}

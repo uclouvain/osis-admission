@@ -92,10 +92,13 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.general_admission.save(update_fields=['checklist'])
 
-        self.url = resolve_url(
-            self.url_name,
-            uuid=self.general_admission.uuid,
-            experience_uuid=self.experiences[0].uuid,
+        self.url = (
+            resolve_url(
+                self.url_name,
+                uuid=self.general_admission.uuid,
+            )
+            + '?identifier='
+            + str(self.experiences[0].uuid)
         )
 
     def test_change_the_checklist_status_is_forbidden_with_fac_user(self):
@@ -112,8 +115,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
             resolve_url(
                 self.url_name,
                 uuid=self.general_admission.uuid,
-                experience_uuid=uuid.uuid4(),
-            ),
+            )
+            + '?identifier='
+            + str(uuid.uuid4()),
             **self.default_headers,
             data={
                 'status': ChoixStatutChecklist.GEST_BLOCAGE.name,
@@ -267,10 +271,13 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
         self.general_admission.save(update_fields=['checklist'])
 
-        self.url = resolve_url(
-            self.url_name,
-            uuid=self.general_admission.uuid,
-            experience_uuid=self.experiences[0].uuid,
+        self.url = (
+            resolve_url(
+                self.url_name,
+                uuid=self.general_admission.uuid,
+            )
+            + '?identifier='
+            + str(self.experiences[0].uuid)
         )
 
     def test_change_the_authentication_is_forbidden_with_fac_user(self):
@@ -287,8 +294,9 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
             resolve_url(
                 self.url_name,
                 uuid=self.general_admission.uuid,
-                experience_uuid=uuid.uuid4(),
-            ),
+            )
+            + '?identifier='
+            + str(uuid.uuid4()),
             **self.default_headers,
             data={
                 'status': ChoixStatutChecklist.GEST_BLOCAGE.name,

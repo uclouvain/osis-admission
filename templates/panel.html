@@ -35,7 +35,9 @@
           {% else %}
           href="{{ edit_link_button }}"
           {% endif %}
-      ><i class="fas fa-edit"></i></a>
+      >
+        <i class="fas fa-{% if edit_link_button == 'JS_BUTTON' or 'update' in edit_link_button %}edit{% else %}eye{% endif %}"></i>
+      </a>
     {% endif %}
     <h{{ title_level }} class="panel-title">
         {{ title }}

@@ -90,8 +90,6 @@ class CommentForm(forms.Form):
     )
 
     def __init__(self, form_url, comment=None, *args, **kwargs):
-        user_is_sic = kwargs.pop('user_is_sic', False)
-        user_is_fac = kwargs.pop('user_is_fac', False)
         super().__init__(*args, **kwargs)
 
         form_for_sic = f'__{COMMENT_TAG_SIC}' in self.prefix
@@ -99,13 +97,15 @@ class CommentForm(forms.Form):
 
         self.fields['comment'].widget.attrs['hx-post'] = form_url
 
-        label = (
-            _("Faculty comment for the SIC")
-            if form_for_fac
-            else _('SIC comment for the faculty')
-            if form_for_sic
-            else _('Comment')
-        )
+        if form_for_fac:
+            label = _('Faculty comment for the SIC')
+            self.permission = 'admission.checklist_change_fac_comment'
+        elif form_for_sic:
+            label = _('SIC comment for the faculty')
+            self.permission = 'admission.checklist_change_sic_comment'
+        else:
+            label = _('Comment')
+            self.permission = 'admission.checklist_change_comment'
 
         self.fields['comment'].label = label
 
@@ -116,8 +116,6 @@ class CommentForm(forms.Form):
                 date=comment.modified_at.strftime("%d/%m/%Y"),
                 time=comment.modified_at.strftime("%H:%M"),
             )
-        if form_for_sic and not user_is_sic or form_for_fac and not user_is_fac:
-            self.fields['comment'].disabled = True
 
 
 class DateInput(forms.DateInput):
@@ -551,7 +549,7 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
     admission_requirement_year = AcademicYearField(
         past_only=True,
         required=False,
-        label=_('Admission requirement'),
+        label=_('Admission requirement year'),
     )
 
     def __init__(self, *args, **kwargs):

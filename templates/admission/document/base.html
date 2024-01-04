@@ -152,7 +152,6 @@
 
     #document-details .osis-document-editor {
       height: 100%;
-      flex: 1;
     }
 
     #document-details img {
@@ -184,6 +183,12 @@
       left: 0;
       background-color: #fff;
       transition-duration: 1s;
+    }
+
+    #document-editor-container {
+      height: 100%;
+      overflow-y: scroll;
+      resize: vertical;
     }
 
   </style>
@@ -224,6 +229,23 @@
           if (splitSize) {
               document.getElementById('document-lists').style.width = splitSize;
           }
+
+          {# The document viewer is resizable so we apply the previous custom height if there is one #}
+          $(document).on('htmx:afterSettle', '#document-details', function(){
+              const documentEditorContainer = $('#document-editor-container');
+              documentEditorContainer.css(
+                  'height',
+                  documentEditorContainer.find('#no-document-container').length === 0 ?
+                    configurationCache.getItem('document_size', '100%')
+                    : 'fit-content',
+              );
+          });
+          $(document).mouseup(function (event) {
+              if (event.target.id === 'document-editor-container') {
+                  {# The document viewer is resizable so we keep its height for future document reloads #}
+                  configurationCache.setItem('document_size', $('#document-editor-container').css('height'));
+              }
+          });
 
           let selectedRowId;
 

@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List, TypeVar
 
-from django.core.paginator import Paginator
+from django.core import paginator
 from django.utils.functional import cached_property
 
 
@@ -38,7 +38,7 @@ class PaginatedList(List[T]):
         super().__init__(*args, **kwargs)
 
 
-class ListPaginator(Paginator):
+class ListPaginator(paginator.Paginator):
     """object_list must be a PaginatedList instance."""
 
     def page(self, number):

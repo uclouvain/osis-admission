@@ -34,6 +34,7 @@ from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms import EMPTY_CHOICE_AS_LIST
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -86,7 +87,7 @@ class TrainingChoiceFormViewTestCase(TestCase):
                 academic_year=academic_years[0],
             ),
             candidate__language=settings.LANGUAGE_CODE_EN,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             double_degree_scholarship=cls.scholarships[0],
             international_scholarship=cls.scholarships[3],
             erasmus_mundus_scholarship=cls.scholarships[4],
@@ -103,7 +104,7 @@ class TrainingChoiceFormViewTestCase(TestCase):
                 academic_year=academic_years[0],
             ),
             candidate__language=settings.LANGUAGE_CODE_EN,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             double_degree_scholarship=None,
             international_scholarship=None,
             erasmus_mundus_scholarship=None,
@@ -158,12 +159,12 @@ class TrainingChoiceFormViewTestCase(TestCase):
         response = self.client.get(self.master_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        self.client.force_login(self.program_manager_user)
+        response = self.client.get(self.master_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         # If the user is authenticated and has the right role, they should be able to access the page
         self.client.force_login(self.sic_manager_user)
-        response = self.client.get(self.master_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.client.force_login(self.program_manager_user)
         response = self.client.get(self.master_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

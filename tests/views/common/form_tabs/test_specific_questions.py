@@ -38,6 +38,7 @@ from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms import EMPTY_CHOICE
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from admission.tests.factories.form_item import (
@@ -141,7 +142,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.master_training,
             candidate__language=settings.LANGUAGE_CODE_EN,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
             diplomatic_post=self.diplomatic_post,
@@ -159,12 +160,12 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        self.client.force_login(self.program_manager_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         # If the user is authenticated and has the right role, they should be able to access the page
         self.client.force_login(self.sic_manager_user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.client.force_login(self.program_manager_user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -174,7 +175,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.master_training,
             candidate__language=settings.LANGUAGE_CODE_EN,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
         )
@@ -211,7 +212,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.bachelor_training_with_quota,
             candidate__language=settings.LANGUAGE_CODE_EN,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
             diplomatic_post=self.diplomatic_post,
@@ -274,7 +275,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.master_training,
             candidate__language=settings.LANGUAGE_CODE_EN,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
         )
@@ -364,7 +365,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.bachelor_training_with_quota,
             candidate__language=settings.LANGUAGE_CODE_EN,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
         )
@@ -638,7 +639,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.bachelor_training,
             candidate__language=settings.LANGUAGE_CODE_EN,
-            admitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
         )

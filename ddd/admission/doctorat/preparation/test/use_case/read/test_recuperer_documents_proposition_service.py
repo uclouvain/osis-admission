@@ -113,7 +113,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(photo_identite.nom_onglet, OngletsDemande.IDENTIFICATION.value)
         self.assertEqual(photo_identite.nom_onglet_langue_candidat, OngletsDemande.IDENTIFICATION.value)
         self.assertEqual(photo_identite.uuid_proposition, 'uuid-SC3DP-promoteur-membre')
-        self.assertEqual(photo_identite.requis_automatiquement, True)
+        self.assertEqual(photo_identite.requis_automatiquement, False)
 
         curriculum: Optional[EmplacementDocumentDTO] = next(
             (doc for doc in documents if doc.identifiant == 'CURRICULUM.CURRICULUM'),
@@ -136,7 +136,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(curriculum.nom_onglet, OngletsDemande.CURRICULUM.value)
         self.assertEqual(curriculum.nom_onglet_langue_candidat, OngletsDemande.CURRICULUM.value)
         self.assertEqual(curriculum.uuid_proposition, 'uuid-SC3DP-promoteur-membre')
-        self.assertEqual(curriculum.requis_automatiquement, True)
+        self.assertEqual(curriculum.requis_automatiquement, False)
 
         # Documents système
         document: Optional[EmplacementDocumentDTO] = next(

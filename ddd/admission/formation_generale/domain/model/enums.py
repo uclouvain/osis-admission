@@ -79,6 +79,14 @@ STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC = {
     ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
 }
 
+# Le gestionnaire SIC a la main ou attend le paiement
+STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_OU_FRAIS_DOSSIER_EN_ATTENTE = (
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC
+    | {
+        ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+    }
+)
+
 # Le gestionnaire SIC a la main ou attend une réponse du candidat
 STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS = STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC | {
     ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,

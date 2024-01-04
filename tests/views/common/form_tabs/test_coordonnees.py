@@ -31,6 +31,9 @@ from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -65,11 +68,13 @@ class CoordonneesFormTestCase(TestCase):
             training__academic_year=academic_years[0],
             candidate__phone_mobile='987654321',
             candidate__private_email='joe.foe@example.com',
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         cls.general_url = resolve_url('admission:general-education:update:coordonnees', uuid=cls.general_admission.uuid)
         cls.general_redirect_url = resolve_url(
-            'admission:general-education:coordonnees', uuid=cls.general_admission.uuid
+            'admission:general-education:coordonnees',
+            uuid=cls.general_admission.uuid,
         )
 
         cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
@@ -77,10 +82,12 @@ class CoordonneesFormTestCase(TestCase):
             training__academic_year=academic_years[0],
             candidate__phone_mobile='987654321',
             candidate__private_email='joe.foe@example.com',
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
 
         cls.continuing_url = resolve_url(
-            'admission:continuing-education:update:coordonnees', uuid=cls.continuing_admission.uuid
+            'admission:continuing-education:update:coordonnees',
+            uuid=cls.continuing_admission.uuid,
         )
 
         cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
@@ -88,6 +95,7 @@ class CoordonneesFormTestCase(TestCase):
             training__academic_year=academic_years[0],
             candidate__phone_mobile='987654321',
             candidate__private_email='joe.foe@example.com',
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
 
         cls.doctorate_url = resolve_url('admission:doctorate:update:coordonnees', uuid=cls.doctorate_admission.uuid)
@@ -512,6 +520,7 @@ class CoordonneesFormTestCase(TestCase):
             candidate__phone_mobile='987654321',
             candidate__private_email='joe.foe@example.com',
             submitted_profile={},
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
         url = resolve_url('admission:general-education:update:coordonnees', uuid=general_admission.uuid)

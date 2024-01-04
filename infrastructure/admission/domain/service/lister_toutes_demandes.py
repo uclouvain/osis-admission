@@ -80,7 +80,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
             .order_by('-viewed_at')
         )
 
-        roles = []
         if demandeur:
             prefetch_viewers_queryset = prefetch_viewers_queryset.exclude(person__uuid=demandeur)
 
@@ -103,7 +102,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             )
             .select_related(
                 'candidate__country_of_citizenship',
-                'last_update_author__user',
+                'last_update_author',
                 'training__academic_year',
                 'training__enrollment_campus',
                 'training__education_group_type',
@@ -119,7 +118,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
         # Add filters
         if annee_academique:
-            qs = qs.filter(determined_academic_year__year=annee_academique)
+            qs = qs.filter(
+                Q(determined_academic_year__year=annee_academique)
+                | Q(determined_academic_year__isnull=True, training__academic_year__year=annee_academique)
+            )
         if numero:
             qs = qs.filter(reference=numero)
         if noma:
@@ -225,7 +227,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
             etat_demande=admission.status,  # From annotation
             type_demande=admission.type_demande,
             derniere_modification_le=admission.modified_at,
-            derniere_modification_par=admission.last_update_author.user.username
+            derniere_modification_par='{first_name} {last_name}'.format(
+                first_name=admission.last_update_author.first_name,
+                last_name=admission.last_update_author.last_name,
+            )
             if admission.last_update_author_id
             else '',
             derniere_modification_par_candidat=admission.candidate_id == admission.last_update_author_id,

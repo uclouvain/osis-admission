@@ -28,7 +28,6 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Optional
 
-from dal import autocomplete
 from django import forms
 from django.forms import BaseFormSet
 from django.utils.dates import MONTHS_ALT
@@ -37,6 +36,7 @@ from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pge
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.forms import (
+    autocomplete,
     EMPTY_CHOICE,
     AdmissionFileUploadField as FileUploadField,
     RadioBooleanField,
@@ -46,6 +46,7 @@ from admission.forms import (
     AdmissionModelCountryChoiceField,
 )
 from admission.forms.doctorate.training.activity import AcademicYearField
+from admission.mark_safe_lazy import mark_safe_lazy
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -290,7 +291,7 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
     )
 
     other_institute = forms.BooleanField(
-        label=_('Other institute'),
+        label=pgettext_lazy('curriculum', 'Other institute'),
         required=False,
     )
 
@@ -305,7 +306,7 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
     )
 
     institute = forms.ModelChoiceField(
-        label=_('Institute'),
+        label=pgettext_lazy('curriculum', 'Institute'),
         required=False,
         queryset=Organization.objects.filter(
             establishment_type__in=[
@@ -353,6 +354,28 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
     evaluation_type = forms.ChoiceField(
         choices=EMPTY_CHOICE + EvaluationSystem.choices(),
         label=_('Evaluation system'),
+        help_text=mark_safe_lazy(
+            '<p>%(p0)s</p> <p><strong><u>%(t1)s</u></strong></p> <p>%(p1)s</p> <p><strong><u>%(t2)s</strong></u></p> '
+            '<p>%(p2)s</p> <p><strong><u>%(t3)s</u></strong></p> <p>%(p3)s</p>',
+            p0=_(
+                'Please select the assessment system used by the institution where you studied. The assessment system '
+                'is usually indicated <strong>on your transcripts or diploma supplements</strong>.'
+            ),
+            t1=_('ECTS credits'),
+            p1=_(
+                'ECTS credits are a European unit of measurement that assesses the workload represented by a class '
+                'within a course. A full year of study is generally equivalent to 60 credits. The ECTS system has been '
+                'introduced in most European countries but is also increasingly used in other countries.'
+            ),
+            t2=_('Non-European credits'),
+            p2=_(
+                'Assessment is also based on the credit system, which quantifies the workload involved in a class. '
+                'Depending on the country, a full year of study is equivalent to a defined number of credits (e.g. '
+                '30 credits).'
+            ),
+            t3=_('No credit system'),
+            p3=_('Any other assessment system that is not based on a credit system.'),
+        ),
     )
 
     linguistic_regime = forms.ModelChoiceField(

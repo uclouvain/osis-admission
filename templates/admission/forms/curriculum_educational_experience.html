@@ -34,7 +34,7 @@
 
   <div class="panel panel-default">
     {% if existing_experience %}
-      {% display _("Modification of an academic activity") as header_title %}
+      {% display _("Modification of an academic course") as header_title %}
       {% url request.resolver_match.namespace|add:':educational_delete' view.kwargs.uuid view.kwargs.experience_uuid as delete_url %}
     {% else %}
       {% display _("Add an academic course") as header_title %}
@@ -43,7 +43,7 @@
     {% include 'admission/includes/curriculum_experience_header.html' with title=header_title delete_url=delete_url existing_experience=existing_experience %}
 
     <div class="panel-body">
-      <form id="admission-form" class="osis-form" method="post" action="">
+      <form id="admission-form" method="post" action="">
         {% csrf_token %}
         {{ year_formset.management_form }}
         <div class="row">
@@ -99,11 +99,11 @@
             {% bootstrap_field base_form.transcript_type %}
           </div>
           <div class="col-md-6 required_field">
-            {% bootstrap_field_with_tooltip base_form.evaluation_type %}
+            {% bootstrap_field_with_tooltip base_form.evaluation_type html_tooltip=True %}
           </div>
         </div>
 
-        <div id="global-transcript" class="flex-container align-top">
+        <div id="global-transcript" class="flex-content align-top">
           <div class="required_field flex-1">
             {% bootstrap_field base_form.transcript %}
           </div>
@@ -213,7 +213,7 @@
           </div>
         </div>
 
-        <div class="flex-container align-top diploma-year-field">
+        <div class="flex-content align-top diploma-year-field">
           <div class="flex-1{% if not view.is_continuing %} required_field{% endif %}">
             {% bootstrap_field base_form.graduate_degree %}
           </div>
@@ -240,6 +240,9 @@
 
 {% block style %}
   {{ block.super }}
+
+  <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
+
   <style>
     #formset-container thead {
       background: #eee;
@@ -287,6 +290,14 @@
     }
     .select2-results__option--highlighted[aria-selected] .school-address {
       color: #eee;
+    }
+    
+    .centered-element {
+      text-align: center;
+    }
+    
+    #formset-container .centered-element > * {
+      margin-top: 1em;
     }
   </style>
 {% endblock %}
@@ -483,13 +494,14 @@
 
                      totalFormInput.val(nbYearsOfTheExperience);
 
-                     {# Update FWB fields of the new added years #}
-                     displayOrHideFWBFields()
-                     $('.with-block-1-field input').change();
                  }
                  {# Update fields depending on the fields of the year forms #}
                  const countryValue = country.val();
                  if (countryValue === beIsoCode) manageCreditsFields(evaluationType.val(), countryValue);
+
+                 {# Update FWB fields of the new added years #}
+                 displayOrHideFWBFields()
+                 $('.with-block-1-field input').change();
              });
 
              endSelect.change();
@@ -515,12 +527,20 @@
                  '#id_base_form-other_program': { checked: false },
              }, { hide: false, valueOnDisable: null,});
 
+             function resetOtherProgram() {
+                 const countryValue = country.val();
+                 if (!countryValue || countryValue === beIsoCode && !$('#id_base_form-other_program').is(':checked')) {
+                     $('#id_base_form-education_name').val(null).change();
+                     $('#id_base_form-fwb_equivalent_program').val(null).change();
+                 }
+             }
+             
              $('#other-program').dependsOn({
                  '#id_base_form-country': { values: [beIsoCode] },
                  '#id_base_form-other_program': { checked: true },
-             }).or({
+             }, { onDisable: resetOtherProgram }).or({
                  '#id_base_form-country': { is_truthy, not: [beIsoCode] },
-             });
+             }, { onDisable: resetOtherProgram });
 
              {# Evaluation system field #}
              $('#container_evaluation_type').dependsOn({
@@ -627,6 +647,7 @@
                  if(this.checked) {
                      nonActiveElts.addClass('hidden');
                      activeElts.removeClass('hidden');
+                     displayOrHideFWBFields();
                  } else {
                      activeElts.addClass('hidden');
                      nonActiveElts.removeClass('hidden');
@@ -650,12 +671,12 @@
 
                  {# The selected program must be from the first or second cycle #}
                  let currentProgramCycle = '';
-                 if (!program.prop('disabled')) {
+                 if (program.val()) {
                      const programData = program.select2('data');
                      if (programData.length > 0) {
                          currentProgramCycle = programData[0].cycle;
                      }
-                 } else if (!fwbProgram.prop('disabled')) {
+                 } else if (fwbProgram.val()) {
                      const fwbProgramData = fwbProgram.select2('data');
                      if (fwbProgramData.length > 0) {
                          currentProgramCycle = fwbProgramData[0].cycle;

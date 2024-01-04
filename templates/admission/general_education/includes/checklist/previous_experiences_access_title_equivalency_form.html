@@ -26,8 +26,14 @@
 
 <div
     id="previous-experiences-access-title-equivalency-container"
+    class="mt-1"
 >
-  {% panel _('Equivalency of the foreign access title') id='previous-experiences-access-title-equivalency-details' edit_link_button="JS_BUTTON" %}
+  {% has_perm 'admission.change_checklist' as can_change_checklist %}
+  {% if can_change_checklist %}
+    {% firstof "JS_BUTTON" as edit_link_button %}
+  {% endif %}
+
+  {% panel _('Equivalency of the foreign access title') id='previous-experiences-access-title-equivalency-details' %}
     <div class="row">
       <div class="col-md-6">
         {% field_data _('Type') original_admission.foreign_access_title_equivalency_type|enum_display:'TypeEquivalenceTitreAcces' %}

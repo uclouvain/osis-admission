@@ -76,6 +76,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.pdf_ge
 from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.reference import ReferenceTranslator
 from admission.infrastructure.admission.formation_generale.repository.emplacement_document import (
     EmplacementDocumentRepository,
 )
@@ -250,6 +251,13 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             emplacement_document_repository=EmplacementDocumentRepository(),
             historique=HistoriqueGlobal(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            notification=Notification(),
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -324,19 +332,23 @@ COMMAND_HANDLERS = {
     ),
     PayerFraisDossierPropositionSuiteSoumissionCommand: (
         lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_soumission(
+            msg_bus,
             cmd,
             proposition_repository=PropositionRepository(),
             notification=Notification(),
             paiement_frais_dossier_service=PaiementFraisDossier(),
             historique=HistoriqueFormationGenerale(),
+            reference_translator=ReferenceTranslator(),
         )
     ),
     PayerFraisDossierPropositionSuiteDemandeCommand: (
         lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_demande(
+            msg_bus,
             cmd,
             proposition_repository=PropositionRepository(),
             paiement_frais_dossier_service=PaiementFraisDossier(),
             historique=HistoriqueFormationGenerale(),
+            reference_translator=ReferenceTranslator(),
         )
     ),
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand: (

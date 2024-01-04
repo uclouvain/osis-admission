@@ -116,7 +116,7 @@
       </div>
       <div>
         {% block actions-group %}
-          <div class="btn-group">
+          <div class="btn-group hidden" id="actions-group-container">
             <button
                 type="button"
                 class="btn btn-default"
@@ -221,6 +221,10 @@
   <script>
     $(function () {
       initializePopover();
+      const actionsGroupContainer = $('#actions-group-container');
+      if (actionsGroupContainer.find('li').length > 0) {
+        actionsGroupContainer.removeClass('hidden');
+      }
     });
   </script>
   {% if form %}

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 from django import template
 from django.utils.translation import gettext_lazy as _
 
-from base.models.utils.utils import ChoiceEnum
+from base.models.utils.utils import ChoiceEnum, ChoiceEnumWithAcronym
 
 register = template.Library()
 
@@ -37,6 +37,17 @@ def enum_display(value, enum_name):
         for enum in ChoiceEnum.__subclasses__():
             if enum.__name__ == enum_name:
                 return enum.get_value(value)
+    return value or ''
+
+
+@register.filter
+def enum_with_acronym_display(value, enum_name):
+    if isinstance(value, str):
+        for enum in ChoiceEnumWithAcronym.__subclasses__():
+            if enum.__name__ == enum_name:
+                if hasattr(enum, value):
+                    return getattr(enum, value, value).label
+                break
     return value or ''
 
 

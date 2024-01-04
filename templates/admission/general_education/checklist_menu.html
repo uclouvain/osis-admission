@@ -48,7 +48,7 @@
             {% for child in current.enfants %}
               {% concat checklist_item_name '__' child.extra.identifiant as child_identifier %}
               <li
-                  class="list-group-item sub-item"
+                  class="list-group-item sub-item {{ bg_classes|get_item:child_identifier }}"
                   data-toggle="tab"
                   href="#{{ child_identifier }}"
               >

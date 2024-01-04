@@ -111,7 +111,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(photo_identite.nom_onglet, OngletsDemande.IDENTIFICATION.value)
         self.assertEqual(photo_identite.nom_onglet_langue_candidat, OngletsDemande.IDENTIFICATION.value)
         self.assertEqual(photo_identite.uuid_proposition, 'uuid-USCC4')
-        self.assertEqual(photo_identite.requis_automatiquement, True)
+        self.assertEqual(photo_identite.requis_automatiquement, False)
 
         curriculum: Optional[EmplacementDocumentDTO] = next(
             (doc for doc in documents if doc.identifiant == 'CURRICULUM.CURRICULUM'),
