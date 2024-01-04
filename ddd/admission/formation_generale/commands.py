@@ -402,6 +402,7 @@ class EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(interface.CommandR
 class EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
+    envoi_par_fac: bool
 
 
 @attr.dataclass(frozen=True, slots=True)

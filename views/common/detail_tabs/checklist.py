@@ -420,10 +420,16 @@ class FacultyDecisionSendToSicView(
 ):
     name = 'faculty-decision-send-to-sic'
     urlpatterns = {'fac-decision-send-to-sic': 'fac-decision/send-to-sic'}
-    permission_required = 'admission.checklist_faculty_decision_transfer_to_sic'
     template_name = 'admission/general_education/includes/checklist/fac_decision.html'
     htmx_template_name = 'admission/general_education/includes/checklist/fac_decision.html'
     form_class = Form
+
+    def get_permission_required(self):
+        return (
+            ('admission.checklist_faculty_decision_transfer_to_sic_with_decision',)
+            if self.request.GET.get('approval') or self.request.GET.get('refusal')
+            else ('admission.checklist_faculty_decision_transfer_to_sic_without_decision',)
+        )
 
     def form_valid(self, form):
         try:
@@ -441,6 +447,7 @@ class FacultyDecisionSendToSicView(
                 else EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
+                    envoi_par_fac=self.is_fac,
                 )
             )
 
@@ -467,7 +474,7 @@ class FacultyRefusalDecisionView(
     def get_permission_required(self):
         return (
             (
-                'admission.checklist_faculty_decision_transfer_to_sic'
+                'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
                 if 'save_transfer' in self.request.POST
                 else 'admission.checklist_change_faculty_decision'
             ),
@@ -515,7 +522,7 @@ class FacultyApprovalDecisionView(
     def get_permission_required(self):
         return (
             (
-                'admission.checklist_faculty_decision_transfer_to_sic'
+                'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
                 if 'save_transfer' in self.request.POST
                 else 'admission.checklist_change_faculty_decision'
             ),
