@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from typing import Dict, Set, Optional, List
 
-import rules
 from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
@@ -124,6 +124,7 @@ from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_profile.models import EducationalExperience
+from osis_role.templatetags.osis_role import has_perm
 
 __all__ = [
     'ChecklistView',
@@ -152,7 +153,6 @@ __all__ = [
 
 __namespace__ = False
 
-from osis_role.templatetags.osis_role import has_perm
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
 
@@ -1046,6 +1046,7 @@ class PastExperiencesAdmissionRequirementView(
                     condition_acces=form.cleaned_data['admission_requirement'],
                     millesime_condition_acces=form.cleaned_data['admission_requirement_year']
                     and form.cleaned_data['admission_requirement_year'].year,
+                    avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
                 )
             )
 
@@ -1053,6 +1054,7 @@ class PastExperiencesAdmissionRequirementView(
             form.data = {
                 'admission_requirement': self.admission.admission_requirement,
                 'admission_requirement_year': self.admission.admission_requirement_year_id,
+                'with_prerequisite_courses': self.admission.with_prerequisite_courses,
             }
 
         except BusinessException as exception:

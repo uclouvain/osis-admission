@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.formation_generale.commands import SpecifierConditionAccesPropositionCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
@@ -44,6 +45,7 @@ def specifier_condition_acces_proposition(
         condition_acces=cmd.condition_acces,
         millesime_condition_acces=cmd.millesime_condition_acces,
         titre_acces_selectionnable_repository=titre_acces_selectionnable_repository,
+        avec_complements_formation=cmd.avec_complements_formation,
     )
 
     proposition_repository.save(proposition)

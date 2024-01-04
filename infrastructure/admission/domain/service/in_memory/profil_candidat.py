@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@
 # ##############################################################################
 
 import datetime
-import uuid
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
@@ -49,7 +48,6 @@ from admission.ddd.admission.dtos.etudes_secondaires import DiplomeBelgeEtudesSe
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
-from base.models.enums.education_group_types import TrainingType
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType

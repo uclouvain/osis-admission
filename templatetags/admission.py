@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ from typing import Union, Optional, List, Dict
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
-from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString
@@ -49,7 +48,6 @@ from admission.auth.roles.sic_management import SicManagement
 from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
-from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
@@ -73,7 +71,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     RegleCalculeResultatAvecFinancable,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
-from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
@@ -93,9 +90,6 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.utils import format_academic_year
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 
-from base.models.enums.education_group_types import TrainingType
-from osis_profile.models import EducationalExperienceYear
-from osis_profile.models.enums.curriculum import Result
 from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
