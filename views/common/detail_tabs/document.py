@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,12 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from django.contrib import messages
 from django.http import HttpResponse, Http404
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _, get_language
-from django.views.generic import TemplateView, FormView
+from django.views.generic import TemplateView, FormView, RedirectView
 from rest_framework.status import HTTP_204_NO_CONTENT
 
 from admission.ddd.admission.enums.emplacement_document import (
@@ -69,7 +68,10 @@ __all__ = [
     'UploadDocumentByManagerView',
     'UploadFreeInternalDocumentView',
     'RequestStatusChangeDocumentView',
+    'InProgressAnalysisFolderGenerationView',
 ]
+
+from osis_document.utils import get_file_url
 
 
 class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
@@ -503,3 +505,14 @@ class UploadDocumentByManagerView(DocumentFormView):
                 identifier=self.document_identifier,
             )
         )
+
+
+class InProgressAnalysisFolderGenerationView(LoadDossierViewMixin, RedirectView):
+    name = 'in-progress-analysis-folder-generation'
+    permission_required = 'admission.generate_in_progress_analysis_folder'
+    urlpatterns = 'in-progress-analysis-folder-generation'
+
+    def get(self, request, *args, **kwargs):
+        reading_token = admission_pdf_recap(self.admission, get_language(), with_annotated_documents=True)
+        self.url = get_file_url(reading_token)
+        return super().get(request, *args, **kwargs)
