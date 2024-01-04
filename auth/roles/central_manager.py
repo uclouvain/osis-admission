@@ -34,6 +34,8 @@ from admission.auth.predicates.general import (
     is_submitted,
     in_sic_status_or_application_fees,
     in_fac_status,
+    not_cancelled,
+    in_progress,
 )
 from admission.auth.predicates.common import (
     has_scope,
@@ -104,8 +106,9 @@ class CentralManager(EntityRoleModel):
             'admission.view_debug_info': is_entity_manager & is_debug,
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
-            'admission.view_documents_management': is_entity_manager & is_submitted,
+            'admission.view_documents_management': is_entity_manager & not_cancelled,
             'admission.change_documents_management': is_entity_manager & in_sic_status,
+            'admission.generate_in_progress_analysis_folder': is_entity_manager & in_progress,
             'admission.view_checklist': is_entity_manager & is_submitted,
             'admission.change_checklist': is_entity_manager & in_sic_status,
             'admission.change_payment': is_entity_manager & in_sic_status_or_application_fees,
