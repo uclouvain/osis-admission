@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 >
   <div class="modal-body" style="overflow:auto;">
 
-    {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic' as can_transfer_to_sic %}
+    {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic_with_decision' as can_transfer_to_sic %}
     {% has_perm 'admission.checklist_change_faculty_decision' as can_change_faculty_decision %}
 
     {% bootstrap_form_errors fac_decision_refusal_form %}
