@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_SIC,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.document import (
     RequestAllDocumentsForm,
 )
@@ -72,7 +73,6 @@ __all__ = [
 
 
 class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    template_name = 'admission/document/base.html'
     permission_required = 'admission.view_documents_management'
     urlpatterns = 'documents'
     form_class = RequestAllDocumentsForm
@@ -100,6 +100,10 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             if self.request.method == 'POST'
             else 'admission/document/base_htmx.html'
         )
+        if self.admission.status == ChoixStatutPropositionGenerale.EN_BROUILLON.name:
+            self.template_name = 'admission/document/base_in_progress.html'
+        else:
+            self.template_name = 'admission/document/base.html'
         return super().get_template_names()
 
     @cached_property
