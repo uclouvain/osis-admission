@@ -2574,6 +2574,9 @@ msgstr ""
 msgid "Generate an analysis folder"
 msgstr ""
 
+msgid "Generate an in-progress analysis folder"
+msgstr ""
+
 msgid "Generate the PDF recap"
 msgstr ""
 
@@ -5714,6 +5717,9 @@ msgstr ""
 msgid "The proposition must be submitted to realize this action."
 msgstr ""
 
+msgid "The proposition must not be cancelled to realize this action."
+msgstr ""
+
 msgid "The proposition must not be concerned by the payment."
 msgstr ""
 
@@ -6130,6 +6136,11 @@ msgid "Unknown noma"
 msgstr ""
 
 msgid "Unsubmitted for publication"
+msgstr ""
+
+msgid ""
+"Until the application is submitted, you can generate a recap of the "
+"application on this page."
 msgstr ""
 
 msgctxt "verb"

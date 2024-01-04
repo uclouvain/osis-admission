@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ from django.test import TestCase, override_settings
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
+from rest_framework import status
 
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.person import CompletePersonFactory
@@ -398,8 +399,7 @@ class DocumentViewTestCase(TestCase):
             },
         )
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_sic_manager_generates_new_analysis_folder(self):
+    def _mock_folder_generation(self):
         save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
         patched = save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
@@ -425,6 +425,10 @@ class DocumentViewTestCase(TestCase):
         patcher = mock.patch('admission.exports.admission_recap.admission_recap.save_raw_content_remotely')
         self.save_raw_content_mock = patcher.start()
         self.save_raw_content_mock.return_value = 'pdf-token'
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_sic_manager_generates_new_analysis_folder(self):
+        self._mock_folder_generation()
 
         self.client.force_login(user=self.sic_manager_user)
 
@@ -3757,3 +3761,48 @@ class DocumentViewTestCase(TestCase):
         self.assertTrue(form.is_valid())
         self.general_admission.refresh_from_db()
         self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
+
+    # The details page is different when the application is in progress
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_document_detail_sic_manager_when_in_progress(self):
+        self.general_admission.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
+        self.general_admission.save(update_fields=['status'])
+
+        url = resolve_url('admission:general-education:documents', uuid=self.general_admission.uuid)
+
+        self.client.force_login(user=self.second_sic_manager_user)
+
+        # Get the list and the request form
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertInHTML(
+            gettext('Until the application is submitted, you can generate a recap of the application on this page.'),
+            response.content.decode('utf-8'),
+        )
+
+    def test_general_sic_manage_generated_in_progress_analysis_folder(self):
+        self._mock_folder_generation()
+
+        url = resolve_url(
+            'admission:general-education:document:in-progress-analysis-folder-generation',
+            uuid=self.general_admission.uuid,
+        )
+
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
+        self.general_admission.save(update_fields=['status'])
+
+        response = self.client.get(url)
+
+        self.assertRedirects(
+            response=response,
+            expected_url='http://dummyurl/file/pdf-token',
+            fetch_redirect_response=False,
+        )

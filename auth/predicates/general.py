@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -101,6 +101,12 @@ def can_view_payment(self, user: User, obj: GeneralEducationAdmission):
 @predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
 def is_submitted(self, user: User, obj: GeneralEducationAdmission):
     return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_('The proposition must not be cancelled to realize this action.'))
+def not_cancelled(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status != ChoixStatutPropositionGenerale.ANNULEE.name
 
 
 @predicate(bind=True)
