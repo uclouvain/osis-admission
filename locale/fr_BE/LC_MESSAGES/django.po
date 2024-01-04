@@ -2803,6 +2803,9 @@ msgstr "Inscriptions en formation générale"
 msgid "Generate an analysis folder"
 msgstr "Générer un dossier d'analyse"
 
+msgid "Generate an in-progress analysis folder"
+msgstr "Générer un brouillon de dossier d'analyse"
+
 msgid "Generate the PDF recap"
 msgstr "Générer le PDF récapitulatif"
 
@@ -6344,6 +6347,9 @@ msgstr "La proposition doit être gérée par SIC pour réaliser cette action."
 msgid "The proposition must be submitted to realize this action."
 msgstr "La proposition doit être soumise pour réaliser cette action."
 
+msgid "The proposition must not be cancelled to realize this action."
+msgstr "La proposition ne doit pas être annulée pour réaliser cette action."
+
 msgid "The proposition must not be concerned by the payment."
 msgstr "La proposition ne doit pas être concernée par le paiement."
 
@@ -6810,6 +6816,13 @@ msgstr "Noma inconnu"
 
 msgid "Unsubmitted for publication"
 msgstr "Non soumis pour publication"
+
+msgid ""
+"Until the application is submitted, you can generate a recap of the "
+"application on this page."
+msgstr ""
+"Jusqu'à ce que la proposition soit soumise, vous pouvez générer un "
+"récapitulatif de la proposition sur cette page."
 
 msgctxt "verb"
 msgid "Update"
