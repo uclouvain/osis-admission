@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (
     Exists,
@@ -45,7 +44,6 @@ from django.db.models import (
     BooleanField,
     QuerySet,
 )
-from django.db.models.fields import UUIDField
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
@@ -62,10 +60,6 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     ExperienceNonAcademiqueDTO,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-    EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES,
-)
 from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
@@ -74,7 +68,10 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
 )
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+    EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
