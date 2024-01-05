@@ -139,7 +139,7 @@ class AnneeExperienceAcademique:
     avec_complement: Optional[bool] = None
     credits_inscrits_communaute_fr: Optional[float] = None
     credits_acquis_communaute_fr: Optional[float] = None
-    avec_allegement: Optional[bool] = None
+    allegement: str = ''
     est_reorientation_102: Optional[bool] = None
 
 
@@ -953,7 +953,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                                     avec_complement=annee.avec_complement,
                                     credits_acquis_communaute_fr=annee.credits_inscrits_communaute_fr,
                                     credits_inscrits_communaute_fr=annee.credits_acquis_communaute_fr,
-                                    avec_allegement=annee.avec_allegement,
+                                    allegement=annee.allegement,
                                     est_reorientation_102=annee.est_reorientation_102,
                                 )
                                 for annee in experience.annees
