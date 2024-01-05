@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -100,7 +100,39 @@ templates.register(
         "Mail sent to the candidate to confirm that his application for continuing education has been taken "
         "into account by UCLouvain"
     ),
-    tokens=admission_common_tokens,
+    tokens=admission_common_tokens
+    + [
+        Token(
+            name='salutation',
+            description=_('Mail salutation'),
+            example='Chère',
+        ),
+        Token(
+            name='recap_link',
+            description=_("Expirable link to the admission recap"),
+            example="https://dev.studies.uclouvain.be/somewhere",
+        ),
+        Token(
+            name='admission_reference',
+            description=_('Reference of the admission'),
+            example='L-ESPO24-100.102',
+        ),
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='program_managers_emails',
+            description=_("List of emails of the program managers."),
+            example='john.doe@example.com or jane.doe@example.com',
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
+    ],
     tag=CONTINUING_ADMISSION_TAG,
 )
 

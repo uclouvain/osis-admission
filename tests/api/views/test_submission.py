@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 from email import message_from_string
-from unittest.mock import patch, PropertyMock
+from unittest.mock import patch, PropertyMock, MagicMock
 
 import freezegun
 import mock
@@ -37,6 +37,7 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
@@ -56,7 +57,6 @@ from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
@@ -68,6 +68,7 @@ from admission.tests.factories.person import (
     IncompletePersonForBachelorFactory,
     IncompletePersonForIUFCFactory,
 )
+from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
@@ -383,6 +384,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
 
 @freezegun.freeze_time('2022-12-10')
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class ContinuingPropositionSubmissionTestCase(APITestCase):
     @classmethod
     @patch("osis_document.contrib.fields.FileField._confirm_upload")
@@ -401,18 +403,22 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
 
         # Validation ok
         cls.admission_ok = ContinuingEducationAdmissionFactory(with_access_conditions_met=True)
+        training = cls.admission_ok.training
         cls.candidate_ok = cls.admission_ok.candidate
         cls.ok_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=cls.admission_ok.uuid)
 
         cls.second_admission_ok = ContinuingEducationAdmissionFactory(
             with_access_conditions_met=True,
-            training=cls.admission_ok.training,
+            training=training,
         )
         cls.third_admission_ok = ContinuingEducationAdmissionFactory(
             candidate=cls.second_admission_ok.candidate,
             with_access_conditions_met=True,
-            training=cls.admission_ok.training,
+            training=training,
         )
+
+        cls.first_fac_manager = ProgramManagerRoleFactory(education_group=training.education_group).person
+        cls.second_fac_manager = ProgramManagerRoleFactory(education_group=training.education_group).person
 
         cls.second_candidate_ok = cls.second_admission_ok.candidate
 
@@ -439,6 +445,79 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
                 'droits_inscription_iufc': IElementsConfirmation.DROITS_INSCRIPTION_IUFC,
             },
         }
+
+    def setUp(self):
+        # Mock osis-document
+        patcher = mock.patch(
+            'admission.infrastructure.admission.formation_continue.domain.service.notification.get_remote_token',
+            return_value='foobar',
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'osis_document.api.utils.get_remote_metadata',
+            return_value={
+                'name': 'myfile',
+                'mimetype': PDF_MIME_TYPE,
+            },
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        patched = patcher.start()
+        patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
+        patched = patcher.start()
+        patched.side_effect = lambda uuids, **kwargs: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        patched = patcher.start()
+        patched.side_effect = lambda tokens: {
+            token: {
+                'name': 'myfile',
+                'mimetype': PDF_MIME_TYPE,
+            }
+            for token in tokens
+        }
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('admission.exports.admission_recap.attachments.get_raw_content_remotely')
+        self.get_raw_content_mock = patcher.start()
+        self.get_raw_content_mock.return_value = b'some content'
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('admission.exports.admission_recap.admission_recap.save_raw_content_remotely')
+        self.save_raw_content_mock = patcher.start()
+        self.save_raw_content_mock.return_value = 'pdf-token'
+        self.addCleanup(patcher.stop)
+
+        # Mock img2pdf
+        patcher = mock.patch('admission.exports.admission_recap.attachments.img2pdf.convert')
+        self.convert_img_mock = patcher.start()
+        self.convert_img_mock.return_value = b'some content'
+        self.addCleanup(patcher.stop)
+
+        # Mock pikepdf
+        patcher = mock.patch('admission.exports.admission_recap.admission_recap.Pdf')
+        patched = patcher.start()
+        patched.new.return_value = mock.MagicMock(pdf_version=1)
+        self.outline_root = patched.new.return_value.open_outline.return_value.__enter__.return_value.root = MagicMock()
+        patched.open.return_value.__enter__.return_value = mock.Mock(pdf_version=1, pages=[None])
+        self.addCleanup(patcher.stop)
+
+        # Mock weasyprint
+        patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_continuing_proposition_verification_with_errors(self):
         self.client.force_authenticate(user=self.candidate_errors.user)
@@ -476,15 +555,40 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
 
     def test_continuing_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
+
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.EN_BROUILLON.name)
+
         response = self.client.post(self.ok_url, self.submitted_data)
+
+        # Check the response
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+
+        # Check the admission
         self.admission_ok.refresh_from_db()
         self.assertEqual(self.admission_ok.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
         self.assertIsNotNone(self.admission_ok.submitted_at)
-        admission_tasks = AdmissionTask.objects.filter(admission=self.admission_ok).order_by('type')
-        self.assertEqual(len(admission_tasks), 2)
+
+        # Check tasks
+        admission_tasks = AdmissionTask.objects.filter(admission=self.admission_ok)
+        self.assertEqual(len(admission_tasks), 1)
         self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.CONTINUING_MERGE.name)
+
+        # Check the notification
+        notifications = EmailNotification.objects.filter(person=self.candidate_ok)
+        self.assertEqual(len(notifications), 1)
+
+        email_object = message_from_string(notifications[0].payload)
+
+        self.assertEqual(email_object['To'], self.admission_ok.candidate.private_email)
+
+        cc_recipients = email_object['Cc'].split(',')
+        self.assertEqual(len(cc_recipients), 2)
+        self.assertCountEqual(cc_recipients, [self.first_fac_manager.email, self.second_fac_manager.email])
+
+        content = email_object.as_string()
+        self.assertIn(f'{self.first_fac_manager.first_name } {self.first_fac_manager.last_name}', content)
+        self.assertIn(f'{self.second_fac_manager.first_name } {self.second_fac_manager.last_name}', content)
+        self.assertIn('http://dummyurl/file/foobar', content)
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()
