@@ -720,7 +720,7 @@ msgid "Approbation by pdf"
 msgstr "Approbation par pdf"
 
 msgid "Approval"
-msgstr "Approbation"
+msgstr "Accord"
 
 msgid "Approval certificate of faculty"
 msgstr "Attestation d'accord facultaire"
