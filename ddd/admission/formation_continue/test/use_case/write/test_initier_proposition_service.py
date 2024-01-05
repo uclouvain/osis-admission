@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,10 @@ from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
 from admission.ddd.admission.formation_continue.commands import InitierPropositionCommand
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    ChoixMoyensDecouverteFormation,
+)
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -46,6 +49,11 @@ class TestInitierPropositionService(SimpleTestCase):
             sigle_formation='USCC1',
             annee_formation=2020,
             matricule_candidat='01234567',
+            motivations='Motivations',
+            moyens_decouverte_formation=[
+                ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
+                ChoixMoyensDecouverteFormation.AUTRE.name,
+            ],
         )
 
     def test_should_initier(self):
@@ -56,6 +64,14 @@ class TestInitierPropositionService(SimpleTestCase):
         self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.formation_id.annee, self.cmd.annee_formation)
         self.assertEqual(proposition.matricule_candidat, self.cmd.matricule_candidat)
+        self.assertEqual(proposition.motivations, self.cmd.motivations)
+        self.assertEqual(
+            proposition.moyens_decouverte_formation,
+            [
+                ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE,
+                ChoixMoyensDecouverteFormation.AUTRE,
+            ],
+        )
 
     def test_should_empecher_si_pas_formation_continue(self):
         pas_formation_continue = 'DROI1BA'

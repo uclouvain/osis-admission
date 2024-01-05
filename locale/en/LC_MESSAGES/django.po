@@ -2660,6 +2660,12 @@ msgstr ""
 msgid "Household composition, or copy of your birth certificate"
 msgstr ""
 
+msgid "How did the candidate find out about this course?"
+msgstr ""
+
+msgid "How did you find out about this course?"
+msgstr ""
+
 msgid "I am a long-term resident in the European Union outside Belgium"
 msgstr ""
 
@@ -3679,6 +3685,9 @@ msgstr ""
 msgid "Motivation for joint supervision"
 msgstr ""
 
+msgid "Motivations"
+msgstr ""
+
 #, python-format
 msgid "Move the doctorate to the \"%(status)s\" state?"
 msgstr ""
@@ -3969,6 +3978,9 @@ msgid ""
 "the student <a href=\"https://uclouvain.be/en/study/inscriptions/welcome-to-"
 "international-students.html\" target=\"_blank\"> visa </a> application "
 "information."
+msgstr ""
+
+msgid "On the press"
 msgstr ""
 
 msgid "One choice per line, leave the \"Other\" value out"
@@ -6202,6 +6214,36 @@ msgid "Validated"
 msgstr ""
 
 msgid "Values"
+msgstr ""
+
+msgid "Via Facebook"
+msgstr ""
+
+msgid "Via LinkedIn"
+msgstr ""
+
+msgid "Via MOOCs"
+msgstr ""
+
+msgid "Via a personalized letter"
+msgstr ""
+
+msgid "Via an emailing"
+msgstr ""
+
+msgid "Via former students"
+msgstr ""
+
+msgid "Via friends"
+msgstr ""
+
+msgid "Via the website of UCLouvain"
+msgstr ""
+
+msgid "Via the website of the continuing education"
+msgstr ""
+
+msgid "Via word of mouth"
 msgstr ""
 
 msgid "Viewed at"
