@@ -2448,6 +2448,9 @@ msgstr ""
 msgid "Expert opinion"
 msgstr ""
 
+msgid "Expirable link to the admission recap"
+msgstr ""
+
 msgid "Export"
 msgstr ""
 
@@ -3517,6 +3520,12 @@ msgid "List a missing document"
 msgstr ""
 
 msgid "List of LUs of the additional module or others"
+msgstr ""
+
+msgid "List of emails of the program managers."
+msgstr ""
+
+msgid "List of names of the program managers."
 msgstr ""
 
 msgid ""
@@ -7172,6 +7181,9 @@ msgstr ""
 msgctxt "payment"
 msgid "open"
 msgstr "Open"
+
+msgid "or"
+msgstr ""
 
 msgctxt "payment"
 msgid "paid"

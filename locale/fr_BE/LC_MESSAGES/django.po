@@ -2099,7 +2099,7 @@ msgstr "Cher"
 
 msgctxt "other gender"
 msgid "Dear"
-msgstr "Chere·ère"
+msgstr "Cher·ère"
 
 #, python-format
 msgid "Dear %(name)s,"
@@ -2652,6 +2652,9 @@ msgstr "Avis expert"
 
 msgid "Expert opinion"
 msgstr "Avis expert"
+
+msgid "Expirable link to the admission recap"
+msgstr "Lien expirable vers le récapitulatif de l'admission"
 
 msgid "Export"
 msgstr "Exporter"
@@ -3892,6 +3895,12 @@ msgstr "Lister un document manquant"
 
 msgid "List of LUs of the additional module or others"
 msgstr "Liste des UEs du module complémentaire ou autres"
+
+msgid "List of emails of the program managers."
+msgstr "Liste des emails des gestionnaires d'admission d'un programme."
+
+msgid "List of names of the program managers."
+msgstr "Liste des noms des gestionnaires d'admission d'un programme."
 
 msgid ""
 "List of the mandatory requested documents that must be submitted "
@@ -7965,6 +7974,9 @@ msgstr "le %(date)s à %(time)s"
 msgctxt "payment"
 msgid "open"
 msgstr "Ouvert"
+
+msgid "or"
+msgstr "ou"
 
 msgctxt "payment"
 msgid "paid"
