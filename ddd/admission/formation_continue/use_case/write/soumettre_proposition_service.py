@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -89,6 +89,7 @@ def soumettre_proposition(
     # THEN
     proposition.soumettre(formation_id, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation)
     proposition_repository.save(proposition)
+
     notification.confirmer_soumission(proposition)
 
     return proposition_id

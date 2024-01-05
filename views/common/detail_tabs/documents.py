@@ -89,10 +89,12 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
     }
 
     def get_permission_required(self):
-        if self.request.method == 'POST':
-            return ['admission.change_documents_management']
-        else:
-            return ['admission.view_documents_management']
+        self.permission_required = (
+            'admission.change_documents_management'
+            if self.request.method == 'POST'
+            else 'admission.view_documents_management'
+        )
+        return super().get_permission_required()
 
     def get_template_names(self):
         self.htmx_template_name = (
