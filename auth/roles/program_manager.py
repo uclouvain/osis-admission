@@ -35,7 +35,6 @@ from admission.auth.predicates.common import (
 )
 from admission.auth.predicates.general import (
     in_fac_status,
-    in_fac_status_extended,
     is_submitted,
 )
 from base.models.education_group import EducationGroup
