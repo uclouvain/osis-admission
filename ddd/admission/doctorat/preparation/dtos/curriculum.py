@@ -52,7 +52,7 @@ class AnneeExperienceAcademiqueDTO(interface.DTO):
     avec_complement: Optional[bool]
     credits_inscrits_communaute_fr: Optional[float]
     credits_acquis_communaute_fr: Optional[float]
-    avec_allegement: Optional[bool]
+    allegement: str
     est_reorientation_102: Optional[bool]
 
 

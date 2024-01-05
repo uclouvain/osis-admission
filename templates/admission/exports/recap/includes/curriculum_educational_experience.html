@@ -184,7 +184,7 @@
                       <td></td>
                     {% endif %}
                   {% endif %}
-                    <td>{{ experience_year.avec_allegement|yesno:_('Yes,No,Incomplete field') }}</td>
+                    <td>{{ experience_year.allegement|enum_display:'Reduction' }}</td>
                 {% endif %}
               </tr>
               {% if experience.type_releve_notes == 'ONE_A_YEAR' and not hide_files %}
