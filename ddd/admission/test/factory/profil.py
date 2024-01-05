@@ -125,7 +125,7 @@ class AnneeExperienceAcademiqueDTOFactory(factory.Factory):
     avec_complement = None
     credits_inscrits_communaute_fr = None
     credits_acquis_communaute_fr = None
-    avec_allegement = None
+    allegement = ''
     est_reorientation_102 = None
 
 
