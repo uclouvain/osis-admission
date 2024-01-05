@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest import mock
@@ -57,7 +58,7 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import TranscriptType, Result, EvaluationSystem
+from osis_profile.models.enums.curriculum import TranscriptType, Result, EvaluationSystem, Reduction
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -127,14 +128,14 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
             educational_experience=self.experience,
             academic_year=self.academic_years[0],
             with_block_1=True,
-            with_reduction=False,
+            reduction='',
             is_102_change_of_course=True,
         )
         self.second_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[2],
             with_complement=True,
-            with_reduction=True,
+            reduction=Reduction.A150.name,
         )
 
         # Mock osis document api
@@ -371,9 +372,9 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         )
 
         # With reduction
-        self.assertEqual(third_year_form['with_reduction'].value(), self.second_experience_year.with_reduction)
-        self.assertEqual(second_year_form['with_reduction'].value(), None)
-        self.assertEqual(first_year_form['with_reduction'].value(), self.first_experience_year.with_reduction)
+        self.assertEqual(third_year_form['reduction'].value(), self.second_experience_year.reduction)
+        self.assertEqual(second_year_form['reduction'].value(), None)
+        self.assertEqual(first_year_form['reduction'].value(), self.first_experience_year.reduction)
 
         # Is 102 change of course
         self.assertEqual(
@@ -1705,14 +1706,14 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             educational_experience=self.experience,
             academic_year=self.academic_years[0],
             with_block_1=True,
-            with_reduction=False,
+            reduction='',
             is_102_change_of_course=True,
         )
         self.second_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
             academic_year=self.academic_years[2],
             with_complement=True,
-            with_reduction=True,
+            reduction=Reduction.A150.name,
         )
         # Targeted url
         self.delete_url = resolve_url(
