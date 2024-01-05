@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from unittest.mock import patch
 
@@ -48,6 +49,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.domain.validator.exceptions import BourseNonTrouveeException
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
+    ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.validator import exceptions as continuing_education_exceptions
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -253,6 +255,11 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
             'sigle_formation': cls.training.acronym,
             'annee_formation': cls.training.academic_year.year,
             'matricule_candidat': cls.candidate.global_id,
+            'motivations': 'Motivation',
+            'moyens_decouverte_formation': [
+                ChoixMoyensDecouverteFormation.FACEBOOK.name,
+                ChoixMoyensDecouverteFormation.LINKEDIN.name,
+            ],
         }
 
         cls.url = resolve_url('admission_api_v1:continuing_training_choice')
@@ -271,6 +278,14 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
         self.assertEqual(admission.training_id, self.training.pk)
         self.assertEqual(admission.candidate_id, self.candidate.pk)
         self.assertEqual(admission.status, ChoixStatutPropositionContinue.EN_BROUILLON.name)
+        self.assertEqual(admission.motivations, 'Motivation')
+        self.assertEqual(
+            admission.ways_to_find_out_about_the_course,
+            [
+                ChoixMoyensDecouverteFormation.FACEBOOK.name,
+                ChoixMoyensDecouverteFormation.LINKEDIN.name,
+            ],
+        )
 
     def test_training_choice_initialization_using_api_candidate_with_wrong_training(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -436,6 +451,11 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
                 'fe254203-17c7-47d6-95e4-3c5c532da552': [cls.file_uuid, 'token:abcdef'],
             },
+            'motivations': 'Motivation',
+            'moyens_decouverte_formation': [
+                ChoixMoyensDecouverteFormation.FACEBOOK.name,
+                ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
+            ],
         }
 
         AdmissionFormItemInstantiationFactory(
@@ -495,6 +515,14 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
         self.assertEqual(admission.specific_question_answers, expected)
+        self.assertEqual(admission.motivations, 'Motivation')
+        self.assertEqual(
+            admission.ways_to_find_out_about_the_course,
+            [
+                ChoixMoyensDecouverteFormation.FACEBOOK.name,
+                ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
+            ],
+        )
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)
