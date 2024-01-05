@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from io import BytesIO
 from typing import Dict, List
@@ -1254,6 +1255,8 @@ class SectionsAttachmentsTestCase(TestCase):
             elements_confirmation={},
             pdf_recapitulatif=['uuid-pdf-recapitulatif'],
             documents_additionnels=[],
+            motivations='My motivation',
+            moyens_decouverte_formation=[],
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',

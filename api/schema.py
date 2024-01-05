@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ from rest_framework.serializers import Serializer
 from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.models.utils.utils import ChoiceEnum
 
-ADMISSION_SDK_VERSION = "1.0.92"
+ADMISSION_SDK_VERSION = "1.0.93"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):

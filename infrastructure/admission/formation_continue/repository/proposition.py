@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from typing import List, Optional
 
 from django.conf import settings
@@ -42,6 +43,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
+    ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
@@ -151,6 +153,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'vat_number': entity.numero_tva_entreprise,
                 'professional_email': entity.adresse_mail_professionnelle,
                 'billing_address_type': entity.type_adresse_facturation.name if entity.type_adresse_facturation else '',
+                'motivations': entity.motivations,
+                'ways_to_find_out_about_the_course': [way.name for way in entity.moyens_decouverte_formation],
                 **adresse_facturation,
             },
         )
@@ -204,6 +208,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
             else None,
             documents_additionnels=admission.additional_documents,
+            motivations=admission.motivations,
+            moyens_decouverte_formation=[
+                ChoixMoyensDecouverteFormation[way] for way in admission.ways_to_find_out_about_the_course
+            ],
         )
 
     @classmethod
@@ -267,4 +275,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             elements_confirmation=admission.confirmation_elements,
             pdf_recapitulatif=admission.pdf_recap,
             documents_additionnels=admission.additional_documents,
+            motivations=admission.motivations,
+            moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,
         )

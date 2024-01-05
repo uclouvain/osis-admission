@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,8 +23,10 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from contextlib import suppress
 
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rest_framework.settings import api_settings
@@ -35,6 +37,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
+    ChoixMoyensDecouverteFormation,
 )
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
@@ -161,6 +164,20 @@ class ContinuingEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         verbose_name=_('Additional documents'),
         max_files=10,
+    )
+
+    motivations = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Motivations'),
+        max_length=1000,
+    )
+
+    ways_to_find_out_about_the_course = ArrayField(
+        models.CharField(max_length=30, choices=ChoixMoyensDecouverteFormation.choices()),
+        blank=True,
+        default=list,
+        verbose_name=_('How did the candidate find out about this course?'),
     )
 
     class Meta:
