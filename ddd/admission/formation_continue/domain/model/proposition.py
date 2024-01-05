@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from typing import Optional, Dict, List
 
@@ -35,6 +36,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
+    ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_action import (
     InformationsComplementairesValidatorList,
@@ -79,9 +81,22 @@ class Proposition(interface.RootEntity):
 
     documents_additionnels: List[str] = attr.Factory(list)
 
-    def modifier_choix_formation(self, formation_id: FormationIdentity, reponses_questions_specifiques: Dict):
+    motivations: Optional[str] = ''
+    moyens_decouverte_formation: List[ChoixMoyensDecouverteFormation] = attr.Factory(list)
+
+    def modifier_choix_formation(
+        self,
+        formation_id: FormationIdentity,
+        reponses_questions_specifiques: Dict,
+        motivations: str,
+        moyens_decouverte_formation: List[str],
+    ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.motivations = motivations
+        self.moyens_decouverte_formation = [
+            ChoixMoyensDecouverteFormation[moyen] for moyen in moyens_decouverte_formation
+        ]
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionContinue.ANNULEE

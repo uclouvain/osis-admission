@@ -743,7 +743,7 @@ msgstr "Fiche archivée lors de l'envoi des signatures"
 
 msgid "Are the secondary studies the access title for this admission?"
 msgstr ""
-"Les études secondaires sont-elles le titre d'accès de cette proposition ?"
+"Les études secondaires sont-elles le titre d'accès de cette proposition ?"
 
 msgid "Are there any additional conditions (subject to ...)?"
 msgstr "Y a-t-il des conditions complémentaires (\"sous réserve de ...\") ?"
@@ -778,7 +778,7 @@ msgstr "Êtes-vous sûr de vouloir refuser \"%(object)s\" ?"
 
 #, python-format
 msgid "Are you sure you want to remove \"%(prenom)s %(nom)s\" from the jury?"
-msgstr "Êtes-vous sûr de vouloir retirer \"%(prenom)s %(nom)s\" du jury ?"
+msgstr "Êtes-vous sûr de vouloir retirer \"%(prenom)s %(nom)s\" du jury ?"
 
 #, python-format
 msgid "Are you sure you want to restore \"%(object)s\"?"
@@ -2102,10 +2102,10 @@ msgid "Do you have an international scholarship?"
 msgstr "Bénéficiez-vous d'une bourse internationale ?"
 
 msgid "Do you want to continue?"
-msgstr "Souhaitez-vous continuer ?"
+msgstr "Souhaitez-vous continuer ?"
 
 msgid "Do you want to request the application fee now?"
-msgstr "Voulez-vous réclamer les frais de dossier maintenant ?"
+msgstr "Voulez-vous réclamer les frais de dossier maintenant ?"
 
 #, python-format
 msgid "Do you wish to move the doctorate to the \"%(status)s\" state?"
@@ -2900,6 +2900,12 @@ msgstr "Composition de ménage ou acte de mariage"
 msgid "Household composition, or copy of your birth certificate"
 msgstr "Composition de ménage, ou copie de votre acte de naissance"
 
+msgid "How did the candidate find out about this course?"
+msgstr "Comment le candidat a connu l'existence de cette formation ?"
+
+msgid "How did you find out about this course?"
+msgstr "Comment avez-vous connu l'existence de cette formation ?"
+
 msgid "I am a long-term resident in the European Union outside Belgium"
 msgstr "Je suis résident·e de longue durée en Union Européenne hors Belgique "
 
@@ -3437,7 +3443,7 @@ msgid "Invitations must have been sent"
 msgstr "Les invitations doivent avoir été envoyées"
 
 msgid "Is access title of the proposition?"
-msgstr "Est-ce que c'est un titre d'accès de la proposition ?"
+msgstr "Est-ce que c'est un titre d'accès de la proposition ?"
 
 msgid "Is active?"
 msgstr "Actif ?"
@@ -4131,6 +4137,9 @@ msgstr "Motivation"
 msgid "Motivation for joint supervision"
 msgstr "Motivation de la cotutelle"
 
+msgid "Motivations"
+msgstr "Motivations"
+
 #, python-format
 msgid "Move the doctorate to the \"%(status)s\" state?"
 msgstr "Passer la demande dans l'état \"%(status)s\" ?"
@@ -4436,6 +4445,9 @@ msgstr ""
 "informations relatives à la demande <a href=\"https://uclouvain.be/fr/"
 "etudier/inscriptions/bienvenue-aux-etudiants-internationaux-et-aux-"
 "etudiantes-internationales.html\" target=\"_blank\"> visa</a>."
+
+msgid "On the press"
+msgstr "Dans la presse"
 
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
@@ -5258,7 +5270,7 @@ msgstr "Retirer"
 
 msgctxt "jury member"
 msgid "Remove?"
-msgstr "Retirer ?"
+msgstr "Retirer ?"
 
 msgid "Replace a document"
 msgstr "Remplacer un document"
@@ -6884,6 +6896,36 @@ msgstr "Validée"
 
 msgid "Values"
 msgstr "Valeurs"
+
+msgid "Via Facebook"
+msgstr "Sur Facebook"
+
+msgid "Via LinkedIn"
+msgstr "Sur LinkedIn"
+
+msgid "Via MOOCs"
+msgstr "Par les Moocs"
+
+msgid "Via a personalized letter"
+msgstr "Par courrier personnalisé"
+
+msgid "Via an emailing"
+msgstr "Par un emailing"
+
+msgid "Via former students"
+msgstr "Par des anciens étudiants"
+
+msgid "Via friends"
+msgstr "Par des amis"
+
+msgid "Via the website of UCLouvain"
+msgstr "Par le site web de l'UCLouvain"
+
+msgid "Via the website of the continuing education"
+msgstr "Par le site de la formation continue"
+
+msgid "Via word of mouth"
+msgstr "Par le bouche à oreille"
 
 msgid "Viewed at"
 msgstr "Vue le"
