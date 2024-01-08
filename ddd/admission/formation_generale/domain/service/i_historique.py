@@ -28,6 +28,7 @@ from email.message import EmailMessage
 
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
 
 
@@ -82,9 +83,9 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
-    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str):
+    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
         raise NotImplementedError
 
     @classmethod
-    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: str):
+    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
         raise NotImplementedError

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -371,7 +371,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertTrue('entites' in response.context['filter_form'].errors)
         self.assertEqual(
             response.context['filter_form'].errors['entites'],
-            ["Attention, l'entité suivante n'existe pas à l'UCLouvain : %(entities)s" % {'entities': 'XYZ'}],
+            ["Attention, l'entité suivante n'existe pas à l'UCLouvain : %(entities)s" % {'entities': 'XYZ'}],
         )
 
         # Invalid entities
@@ -381,7 +381,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(
             response.context['filter_form'].errors['entites'],
             [
-                "Attention, les entités suivantes n'existent pas à l'UCLouvain : %(entities)s"
+                "Attention, les entités suivantes n'existent pas à l'UCLouvain : %(entities)s"
                 % {'entities': 'XYZ1, XYZ2'}
             ],
         )

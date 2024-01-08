@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import ChoixS
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.infrastructure.utils import get_message_to_historize
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
 
@@ -147,23 +148,21 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str):
-        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
         add_history_entry(
             proposition.entity_id.uuid,
             "La faculté a informé le SIC de son refus.",
             "The faculty informed the SIC of its refusal.",
-            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire),
             tags=["proposition", "fac-decision", "refusal-send-to-sic", "status-changed"],
         )
 
     @classmethod
-    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: str):
-        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
         add_history_entry(
             proposition.entity_id.uuid,
             "La faculté a informé le SIC de son acceptation.",
             "The faculty informed the SIC of its approval.",
-            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire),
             tags=["proposition", "fac-decision", "approval-send-to-sic", "status-changed"],
         )

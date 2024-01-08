@@ -51,11 +51,13 @@ class ITitreAccesSelectionnableRepository(interface.AbstractRepository):
 
     @classmethod
     def search_dto_by_proposition(
-        cls, proposition_identity: PropositionIdentity
+        cls,
+        proposition_identity: PropositionIdentity,
+        seulement_selectionnes: Optional[bool] = None,
     ) -> Dict[str, TitreAccesSelectionnableDTO]:
         return {
             entity.entity_id.uuid_experience: cls.entity_to_dto(entity)
-            for entity in cls.search_by_proposition(proposition_identity)
+            for entity in cls.search_by_proposition(proposition_identity, seulement_selectionnes)
         }
 
     @classmethod

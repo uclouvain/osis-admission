@@ -163,7 +163,7 @@ def display(*args):
         elif nextarg == ",":
             ret, val = ret[:-1], next(iter(ret[-1:]), '')
             ret.append(reduce_list_separated(val, next(iterargs, None)))
-        elif nextarg in ["-", ':']:
+        elif nextarg in ["-", ':', ' - ']:
             ret, val = ret[:-1], next(iter(ret[-1:]), '')
             ret.append(reduce_list_separated(val, next(iterargs, None), separator=f" {nextarg} "))
         elif isinstance(nextarg, str) and len(nextarg) > 1 and re.match(r'\s', nextarg[0]):

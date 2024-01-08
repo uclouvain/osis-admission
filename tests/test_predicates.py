@@ -436,6 +436,6 @@ class PredicatesTestCase(TestCase):
             )
             self.assertEqual(
                 result,
-                'Le statut global de la demande doit être l\'un des suivants pour pouvoir réaliser cette action : '
+                'Le statut global de la demande doit être l\'un des suivants pour pouvoir réaliser cette action : '
                 'Demande confirmée (par étudiant), A compléter (par étudiant) pour SIC.',
             )
