@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -370,14 +370,8 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         historique=HistoriqueFormationGenerale(),
         pdf_generation=PDFGeneration(),
-    ),
-    RefuserPropositionParFaculteAvecNouveauxMotifsCommand: (
-        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveaux_motifs(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            historique=HistoriqueFormationGenerale(),
-            pdf_generation=PDFGeneration(),
-        )
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
     ),
     SpecifierInformationsAcceptationPropositionParFaculteCommand: (
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
@@ -385,19 +379,16 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
         )
     ),
-    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand: (
-        lambda msg_bus, cmd: approuver_proposition_par_faculte_avec_nouvelles_informations(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            historique=HistoriqueFormationGenerale(),
-            pdf_generation=PDFGeneration(),
-        )
-    ),
     ApprouverPropositionParFaculteCommand: lambda msg_bus, cmd: approuver_proposition_par_faculte(
         cmd,
         proposition_repository=PropositionRepository(),
         historique=HistoriqueFormationGenerale(),
         pdf_generation=PDFGeneration(),
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
     ),
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
