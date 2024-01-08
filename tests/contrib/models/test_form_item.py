@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ class AdmissionFormItemTestCase(TestCase):
             first_field.clean()
             self.assertIn(
                 ValidationError(
-                    'Propriétés invalides : TAILLE_TEXTE,TYPE_SELECTION,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'
+                    'Propriétés invalides : TAILLE_TEXTE,TYPE_SELECTION,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'
                 ),
                 error.error_dict['configuration'],
             )
@@ -131,7 +131,7 @@ class AdmissionFormItemTestCase(TestCase):
             first_field.clean()
             self.assertIn(
                 ValidationError(
-                    'Propriétés invalides : TYPE_SELECTION,CLASSE_CSS,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'
+                    'Propriétés invalides : TYPE_SELECTION,CLASSE_CSS,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'
                 ),
                 error.error_dict['configuration'],
             )
@@ -145,7 +145,7 @@ class AdmissionFormItemTestCase(TestCase):
         with self.assertRaises(ValidationError) as error:
             first_field.clean()
             self.assertIn(
-                ValidationError('Propriétés invalides : TYPE_SELECTION,TAILLE_TEXTE,CLASSE_CSS'),
+                ValidationError('Propriétés invalides : TYPE_SELECTION,TAILLE_TEXTE,CLASSE_CSS'),
                 error.error_dict['configuration'],
             )
 
@@ -159,7 +159,7 @@ class AdmissionFormItemTestCase(TestCase):
             first_field.clean()
             self.assertIn(
                 ValidationError(
-                    'Propriétés invalides : TAILLE_TEXTE,TYPE_SELECTION,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'
+                    'Propriétés invalides : TAILLE_TEXTE,TYPE_SELECTION,TYPES_MIME_FICHIER,NOMBRE_MAX_DOCUMENTS'
                 ),
                 error.error_dict['configuration'],
             )

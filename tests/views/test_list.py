@@ -376,7 +376,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertTrue('entites' in response.context['filter_form'].errors)
         self.assertEqual(
             response.context['filter_form'].errors['entites'],
-            ["Attention, l'entité suivante n'existe pas à l'UCLouvain : %(entities)s" % {'entities': 'XYZ'}],
+            ["Attention, l'entité suivante n'existe pas à l'UCLouvain : %(entities)s" % {'entities': 'XYZ'}],
         )
 
         # Invalid entities
@@ -386,7 +386,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(
             response.context['filter_form'].errors['entites'],
             [
-                "Attention, les entités suivantes n'existent pas à l'UCLouvain : %(entities)s"
+                "Attention, les entités suivantes n'existent pas à l'UCLouvain : %(entities)s"
                 % {'entities': 'XYZ1, XYZ2'}
             ],
         )

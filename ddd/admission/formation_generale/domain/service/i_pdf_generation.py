@@ -26,8 +26,12 @@
 from abc import abstractmethod
 from typing import Optional
 
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd.interface import DomainService
 
 
@@ -36,9 +40,13 @@ class IPDFGeneration(DomainService):
     @abstractmethod
     def generer_attestation_accord_facultaire(
         cls,
-        proposition_repository: IPropositionRepository,
         proposition: Proposition,
-        gestionnaire: str,
+        gestionnaire: PersonneConnueUclDTO,
+        proposition_repository: IPropositionRepository,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        titre_acces_selectionnable_repository: ITitreAccesSelectionnableRepository,
+        annee_courante: int,
     ) -> None:
         raise NotImplementedError
 
@@ -46,9 +54,10 @@ class IPDFGeneration(DomainService):
     @abstractmethod
     def generer_attestation_refus_facultaire(
         cls,
-        proposition_repository: IPropositionRepository,
         proposition: Proposition,
-        gestionnaire: str,
+        gestionnaire: PersonneConnueUclDTO,
+        proposition_repository: IPropositionRepository,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
     ) -> None:
         raise NotImplementedError
 

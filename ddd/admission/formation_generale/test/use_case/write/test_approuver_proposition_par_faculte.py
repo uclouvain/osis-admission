@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,10 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from unittest import TestCase
 
 import factory
+import freezegun
 
+from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverPropositionParFaculteCommand,
 )
@@ -48,8 +51,14 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 
+@freezegun.freeze_time('2021-11-01')
 class TestApprouverPropositionParFaculte(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -57,6 +66,19 @@ class TestApprouverPropositionParFaculte(TestCase):
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
         cls.command = ApprouverPropositionParFaculteCommand
+        academic_year_repository = AcademicYearInMemoryRepository()
+        for annee in range(2020, 2022):
+            academic_year_repository.save(
+                AcademicYear(
+                    entity_id=AcademicYearIdentity(year=annee),
+                    start_date=datetime.date(annee, 9, 15),
+                    end_date=datetime.date(annee + 1, 9, 30),
+                )
+            )
+        for matricule in ['00321234', '00987890']:
+            PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
+                PersonneConnueUclDTOFactory(matricule=matricule),
+            )
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(

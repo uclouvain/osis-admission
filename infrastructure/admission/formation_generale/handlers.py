@@ -394,14 +394,8 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         historique=HistoriqueFormationGenerale(),
         pdf_generation=PDFGeneration(),
-    ),
-    RefuserPropositionParFaculteAvecNouveauxMotifsCommand: (
-        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveaux_motifs(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            historique=HistoriqueFormationGenerale(),
-            pdf_generation=PDFGeneration(),
-        )
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
     ),
     SpecifierInformationsAcceptationPropositionParFaculteCommand: (
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
@@ -409,19 +403,16 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
         )
     ),
-    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand: (
-        lambda msg_bus, cmd: approuver_proposition_par_faculte_avec_nouvelles_informations(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            historique=HistoriqueFormationGenerale(),
-            pdf_generation=PDFGeneration(),
-        )
-    ),
     ApprouverPropositionParFaculteCommand: lambda msg_bus, cmd: approuver_proposition_par_faculte(
         cmd,
         proposition_repository=PropositionRepository(),
         historique=HistoriqueFormationGenerale(),
         pdf_generation=PDFGeneration(),
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
     ),
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,

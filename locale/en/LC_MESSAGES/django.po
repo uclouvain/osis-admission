@@ -478,6 +478,9 @@ msgstr ""
 msgid "Additional course(s):"
 msgstr ""
 
+msgid "Additional conditions:"
+msgstr ""
+
 msgid "Additional documents"
 msgstr ""
 
@@ -518,6 +521,11 @@ msgid "Admission form item instantiations"
 msgstr ""
 
 msgid "Admission form items"
+msgstr ""
+
+#, python-format
+msgid ""
+"Admission request for the academic year %(academic_year)s to the program:"
 msgstr ""
 
 msgid "Admission requirement"
@@ -860,6 +868,9 @@ msgid "Author"
 msgstr ""
 
 msgid "Authorize"
+msgstr ""
+
+msgid "Authorized program"
 msgstr ""
 
 msgid "Authors"
@@ -1543,6 +1554,9 @@ msgstr ""
 msgid "Contact person for the design of the annual program"
 msgstr ""
 
+msgid "Contact person for the design of the annual program (PAE)"
+msgstr ""
+
 msgid "Context"
 msgstr ""
 
@@ -1872,6 +1886,9 @@ msgid "Date on which you expect to graduate."
 msgstr ""
 
 msgid "Date the application is sent to the supervision group"
+msgstr ""
+
+msgid "Date the application was sent to the faculty"
 msgstr ""
 
 msgid "Deadline extended"
@@ -2484,13 +2501,16 @@ msgstr ""
 msgid "FWB equivalent course"
 msgstr ""
 
-msgid "Faculty approval certificate"
-msgstr ""
-
 msgid "Faculty comment about the collaborative program"
 msgstr ""
 
 msgid "Faculty comment for the SIC"
+msgstr ""
+
+msgid "Faculty comment for the SIC:"
+msgstr ""
+
+msgid "Faculty opinion:"
 msgstr ""
 
 msgid "Faculty process"
@@ -2622,6 +2642,12 @@ msgid ""
 "the application for admission <strong>must contain the equivalency</strong> "
 "of your diploma issued by the <a href=\"http://www.equivalences.cfwb.be/\" "
 "target=\"_blank\">French Community</a> of Belgium."
+msgstr ""
+
+#, python-format
+msgid ""
+"For the jury president, %(manager_first_name)s %(manager_last_name)s on "
+"%(date)s."
 msgstr ""
 
 msgid "Foreign access title equivalence effective date"
@@ -3842,6 +3868,9 @@ msgstr ""
 msgid "Message subject"
 msgstr ""
 
+msgid "Message to candidate concerning the prerequisite courses"
+msgstr ""
+
 msgid ""
 "Method 1 (the private defense and the public defense are separated by at "
 "least a month"
@@ -4177,6 +4206,9 @@ msgid "Number of previous registration"
 msgstr ""
 
 msgid "Number of values mismatch"
+msgstr ""
+
+msgid "Number of years required for the full program"
 msgstr ""
 
 msgid ""
@@ -4650,6 +4682,9 @@ msgstr ""
 msgid "Prerequisite courses"
 msgstr ""
 
+msgid "Prerequisite courses:"
+msgstr ""
+
 msgid "Presentation date"
 msgstr ""
 
@@ -5000,6 +5035,9 @@ msgid "Refusal to validate"
 msgstr ""
 
 msgid "Refusal type"
+msgstr ""
+
+msgid "Refusal reasons:"
 msgstr ""
 
 msgid "Refuse activity"
@@ -6444,6 +6482,9 @@ msgstr ""
 msgid "Type of training"
 msgstr ""
 
+msgid "UCL seal"
+msgstr ""
+
 msgid "UCLOUVAIN_SCIENTIFIC_STAFF"
 msgstr "UCLouvain scientific staff"
 
@@ -6570,6 +6611,9 @@ msgstr ""
 
 msgctxt "assimilation-checklist"
 msgid "Validated"
+msgstr ""
+
+msgid "Valuated diplomas or experiences:"
 msgstr ""
 
 msgid "Values"
@@ -7042,6 +7086,9 @@ msgstr ""
 msgid "actions"
 msgstr ""
 
+msgid "approval"
+msgstr ""
+
 msgctxt "payment"
 msgid "bancontact"
 msgstr "Bancontact"
@@ -7133,6 +7180,9 @@ msgstr "Paid"
 msgctxt "payment"
 msgid "pending"
 msgstr "Pending"
+
+msgid "refusal"
+msgstr ""
 
 msgid "the <strong>failure</strong> of the confirmation paper."
 msgstr ""
