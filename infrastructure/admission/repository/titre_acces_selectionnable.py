@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List, Optional
 
-from django.db.models import QuerySet, Max
+from django.db.models import QuerySet, Max, Q
 
 from admission.contrib.models.base import (
     BaseAdmission,
@@ -44,6 +44,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     PropositionNonTrouveeException,
     ExperienceNonTrouveeException,
 )
+from osis_profile.models.enums.curriculum import Result
 
 
 class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
@@ -74,14 +75,16 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
         additional_filters = {'is_access_title': True} if seulement_selectionnes else {}
 
         # Retrieve the academic experiences from the curriculum
-        educational_valuated_experiences: QuerySet[
-            AdmissionEducationalValuatedExperiences
-        ] = AdmissionEducationalValuatedExperiences.objects.filter(
-            baseadmission=admission,
-            educationalexperience__obtained_diploma=True,
-            **additional_filters,
-        ).annotate(
-            last_year=Max('educationalexperience__educationalexperienceyear__academic_year__year')
+        educational_valuated_experiences: QuerySet[AdmissionEducationalValuatedExperiences] = (
+            AdmissionEducationalValuatedExperiences.objects.filter(
+                baseadmission=admission,
+                **additional_filters,
+            )
+            .filter(
+                Q(educationalexperience__obtained_diploma=True)
+                | Q(educationalexperience__educationalexperienceyear__result=Result.WAITING_RESULT.name)
+            )
+            .annotate(last_year=Max('educationalexperience__educationalexperienceyear__academic_year__year'))
         )
 
         # Retrieve the non academic experiences from the curriculum
