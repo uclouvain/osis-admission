@@ -78,7 +78,7 @@
                     {% for experience in educational_experience %}
                     <tr>
                         <td><input type="checkbox" name="educational" value="{{ experience.uuid }}" checked/></td>
-                        <td>{{ experience.annees }}</td>
+                        <td>{{ experience.annees|display_academic_years_range }}</td>
                         <td>{{ experience.program.title|default_if_none_or_empty:'Non spécifié' }}</td>
                         <td>{{ experience.institute.name|default_if_none_or_empty:'Non spécifié' }}</td>
                     </tr>

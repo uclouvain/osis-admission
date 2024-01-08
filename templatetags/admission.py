@@ -1187,3 +1187,8 @@ def checklist_experience_action_links(
                     experience_uuid=experience.uuid,
                 ),
             }
+
+
+@register.filter
+def display_academic_years_range(ac_years):
+    return '{} - {}'.format(ac_years[0].annee, ac_years[-1].annee)

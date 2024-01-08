@@ -66,7 +66,7 @@ def _convertir_en_liste_experience_academique_dto(liste_exp):
         type_releve_notes='',
         releve_notes=[''],
         traduction_releve_notes=[''],
-        annees=[SimpleNamespace(annee=year) for year in range(exp.first_year, exp.last_year)],
+        annees=[SimpleNamespace(annee=year) for year in range(exp.first_year, exp.last_year + 1)],
         a_obtenu_diplome=exp.obtained_diploma,
         diplome=[''],
         traduction_diplome=[''],
