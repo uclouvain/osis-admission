@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -301,7 +301,7 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
             'form',
             None,
             [
-                "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
+                "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
                 "et le procès verbal de l'épreuve ont bien été complétés."
             ],
         )
@@ -413,7 +413,7 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
             'form',
             None,
             [
-                "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
+                "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
                 "et le procès verbal de l'épreuve ont bien été complétés."
             ],
         )

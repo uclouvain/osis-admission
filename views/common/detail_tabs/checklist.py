@@ -86,18 +86,15 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementPlusNecessaireCommand,
     RecupererQuestionsSpecifiquesQuery,
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
-    RefuserPropositionParFaculteAvecNouveauxMotifsCommand,
     SpecifierMotifsRefusPropositionParFaculteCommand,
     SpecifierInformationsAcceptationPropositionParFaculteCommand,
     ApprouverPropositionParFaculteCommand,
     RefuserPropositionParFaculteCommand,
-    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand,
     RecupererListePaiementsPropositionQuery,
     ModifierStatutChecklistParcoursAnterieurCommand,
     SpecifierConditionAccesPropositionCommand,
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
     SpecifierExperienceEnTantQueTitreAccesCommand,
-    RecupererTitresAccesSelectionnablesPropositionQuery,
     SpecifierFinancabiliteRegleCommand,
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
     ModifierAuthentificationExperienceParcoursAnterieurCommand,
@@ -536,16 +533,15 @@ class FacultyRefusalDecisionView(
         }
 
         try:
+            message_bus_instance.invoke(SpecifierMotifsRefusPropositionParFaculteCommand(**base_params))
             if 'save-transfer' in self.request.POST:
                 message_bus_instance.invoke(
-                    RefuserPropositionParFaculteAvecNouveauxMotifsCommand(
+                    RefuserPropositionParFaculteCommand(
+                        uuid_proposition=self.admission_uuid,
                         gestionnaire=self.request.user.person.global_id,
-                        **base_params,
                     )
                 )
                 self.htmx_refresh = True
-            else:
-                message_bus_instance.invoke(SpecifierMotifsRefusPropositionParFaculteCommand(**base_params))
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -594,16 +590,15 @@ class FacultyApprovalDecisionView(
             'commentaire_programme_conjoint': form.cleaned_data['join_program_fac_comment'],
         }
         try:
+            message_bus_instance.invoke(SpecifierInformationsAcceptationPropositionParFaculteCommand(**base_params))
             if 'save-transfer' in self.request.POST:
                 message_bus_instance.invoke(
-                    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(
+                    ApprouverPropositionParFaculteCommand(
+                        uuid_proposition=self.admission_uuid,
                         gestionnaire=self.request.user.person.global_id,
-                        **base_params,
                     )
                 )
                 self.htmx_refresh = True
-            else:
-                message_bus_instance.invoke(SpecifierInformationsAcceptationPropositionParFaculteCommand(**base_params))
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
