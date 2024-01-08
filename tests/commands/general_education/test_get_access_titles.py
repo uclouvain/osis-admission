@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -59,6 +59,7 @@ from admission.tests.factories.secondary_studies import (
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models.enums.curriculum import Result
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -101,6 +102,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         for year in self.academic_years:
             EducationalExperienceYearFactory(
                 educational_experience=educational_experience,
+                result=Result.SUCCESS.name,
                 academic_year=year,
             )
 
@@ -147,6 +149,20 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
 
         self.assertEqual(len(access_titles), 0)
+
+        # The diploma has not been obtained but the results of one year are in progress
+        educational_experience.educationalexperienceyear_set.filter(academic_year=self.academic_years[-1]).update(
+            result=Result.WAITING_RESULT.name,
+        )
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 1)
+        self.assertIn(educational_experience_uuid, access_titles)
 
     def test_get_access_title_with_cv_non_academic_experience(self):
         access_titles: List[TitreAccesSelectionnableDTO]
