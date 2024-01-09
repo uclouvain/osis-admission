@@ -102,6 +102,8 @@ class CommentForm(forms.Form):
     )
 
     def __init__(self, form_url, comment=None, label=None, *args, **kwargs):
+        disabled = kwargs.pop('disabled', False)
+
         super().__init__(*args, **kwargs)
 
         form_for_sic = f'__{COMMENT_TAG_SIC}' in self.prefix
@@ -129,6 +131,9 @@ class CommentForm(forms.Form):
                 date=comment.modified_at.strftime("%d/%m/%Y"),
                 time=comment.modified_at.strftime("%H:%M"),
             )
+
+        if disabled:
+            self.fields['comment'].disabled = True
 
 
 class DateInput(forms.DateInput):
@@ -959,17 +964,23 @@ class FinancabiliteApprovalForm(forms.ModelForm):
         ]
 
 
+def can_edit_experience_authentication(checklist_experience_data):
+    checklist_experience_data = checklist_experience_data or {}
+
+    extra = checklist_experience_data.get('extra', {})
+
+    return (
+        checklist_experience_data.get('statut') == ChoixStatutChecklist.GEST_EN_COURS.name
+        and extra.get('authentification') == '1'
+    )
+
+
 class SinglePastExperienceAuthenticationForm(forms.Form):
     state = forms.ChoiceField(
         label=_('Past experiences authentication'),
         choices=EtatAuthentificationParcours.choices(),
         required=False,
         widget=forms.RadioSelect,
-    )
-    comment = forms.CharField(
-        label=_('Comment about the authentication'),
-        required=False,
-        widget=forms.Textarea(attrs={'rows': 2}),
     )
 
     def __init__(self, checklist_experience_data, *args, **kwargs):
@@ -981,14 +992,7 @@ class SinglePastExperienceAuthenticationForm(forms.Form):
         extra = checklist_experience_data.get('extra', {})
 
         self.initial['state'] = extra.get('etat_authentification')
-        self.initial['comment'] = extra.get('commentaire_authentification')
-
-        can_edit = (
-            checklist_experience_data.get('statut') == ChoixStatutChecklist.GEST_EN_COURS.name
-            and extra.get('authentification') == '1'
-        )
 
         self.prefix = extra.get('identifiant', '')
 
-        for field in self.fields.values():
-            field.disabled = not can_edit
+        self.fields['state'].disabled = not can_edit_experience_authentication(checklist_experience_data)
