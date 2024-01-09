@@ -1641,7 +1641,6 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
                 'extra': {
                     'identifiant': str(new_experience.uuid),
                     'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                    'commentaire_authentification': '',
                 },
                 'enfants': [],
             },

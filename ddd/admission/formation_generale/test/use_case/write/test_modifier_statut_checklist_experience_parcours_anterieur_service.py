@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -75,7 +75,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.assertEqual(experience.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
             self.assertEqual(experience.libelle, 'To be processed')
             self.assertEqual(experience.extra.get('etat_authentification'), 'NON_CONCERNE')
-            self.assertEqual(experience.extra.get('commentaire_authentification'), '')
             self.assertEqual(experience.extra.get('identifiant'), uuids_experiences[index])
 
     def test_should_modifier_vers_statut_checklist_sans_indication_authentification(self):
@@ -101,7 +100,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             {
                 'identifiant': self.experience_uuid,
                 'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'commentaire_authentification': "",
             },
         )
 
@@ -128,7 +126,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             {
                 'identifiant': self.experience_uuid,
                 'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'commentaire_authentification': '',
                 'authentification': '1',
             },
         )
@@ -156,7 +153,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             {
                 'identifiant': self.experience_uuid,
                 'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'commentaire_authentification': '',
                 'authentification': '0',
             },
         )

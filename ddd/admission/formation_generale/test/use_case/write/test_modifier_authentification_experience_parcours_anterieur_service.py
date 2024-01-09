@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -58,7 +58,6 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
                 etat_authentification=EtatAuthentificationParcours.VRAI.name,
-                commentaire_authentification='Mon commentaire',
             )
         )
 
@@ -75,7 +74,6 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
             {
                 'identifiant': self.experience_uuid,
                 'etat_authentification': EtatAuthentificationParcours.VRAI.name,
-                'commentaire_authentification': "Mon commentaire",
             },
         )
 
@@ -86,7 +84,6 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='INCONNUE',
                     uuid_experience=self.experience_uuid,
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,
-                    commentaire_authentification='Mon commentaire',
                 )
             )
 
@@ -97,6 +94,5 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience='INCONNUE',
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,
-                    commentaire_authentification='Mon commentaire',
                 )
             )

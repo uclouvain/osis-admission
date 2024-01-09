@@ -218,6 +218,5 @@ class Checklist(interface.DomainService):
             extra={
                 'identifiant': experience_uuid,
                 'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'commentaire_authentification': '',
             },
         )

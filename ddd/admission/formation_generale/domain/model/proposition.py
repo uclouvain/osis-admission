@@ -588,7 +588,6 @@ class Proposition(interface.RootEntity):
         self,
         uuid_experience: str,
         etat_authentification: str,
-        commentaire_authentification: str,
     ):
         try:
             experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
@@ -596,7 +595,6 @@ class Proposition(interface.RootEntity):
             raise ExperienceNonTrouveeException
 
         experience.extra['etat_authentification'] = etat_authentification
-        experience.extra['commentaire_authentification'] = commentaire_authentification
 
     def specifier_condition_acces(
         self,

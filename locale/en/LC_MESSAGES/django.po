@@ -904,6 +904,9 @@ msgstr ""
 msgid "Belgian education community"
 msgstr ""
 
+msgid "Belgian flag"
+msgstr ""
+
 msgid "Belgian national registry number (NISS)"
 msgstr ""
 
@@ -2764,10 +2767,16 @@ msgstr ""
 msgid "Generic mail that can be manually sent once the candidate is admitted"
 msgstr ""
 
+msgid "Global"
+msgstr ""
+
 msgid "Global FAC/CDD comments"
 msgstr ""
 
 msgid "Global SIC comments"
+msgstr ""
+
+msgid "Global comment"
 msgstr ""
 
 msgctxt "admission"

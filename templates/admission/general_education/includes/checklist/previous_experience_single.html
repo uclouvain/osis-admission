@@ -41,7 +41,7 @@
   </div>
 
   <div id="comment-{{ current.extra.identifiant }}" hx-preserve="true">
-    {% if comment_forms %}
+    {% if comment_forms and checklist_item_name in comment_forms %}
       {% bootstrap_form comment_forms|get_item:checklist_item_name %}
     {% endif %}
   </div>
