@@ -533,4 +533,3 @@ class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.Comma
     uuid_proposition: str
     uuid_experience: str
     etat_authentification: str
-    commentaire_authentification: str

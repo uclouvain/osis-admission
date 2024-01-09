@@ -937,6 +937,9 @@ msgstr "Diplôme belge"
 msgid "Belgian education community"
 msgstr "Communauté d'enseignement"
 
+msgid "Belgian flag"
+msgstr "Drapeau belge"
+
 msgid "Belgian national registry number (NISS)"
 msgstr "Numéro de registre national belge (NISS)"
 
@@ -2820,11 +2823,17 @@ msgstr ""
 "E-mail générique qui peut être envoyé manuellement une fois que le candidat "
 "est admis"
 
+msgid "Global"
+msgstr "Global"
+
 msgid "Global FAC/CDD comments"
 msgstr "Commentaires globaux FAC/CDD"
 
 msgid "Global SIC comments"
 msgstr "Commentaires globaux SIC"
+
+msgid "Global comment"
+msgstr "Commentaire global"
 
 msgctxt "admission"
 msgid "Grade"

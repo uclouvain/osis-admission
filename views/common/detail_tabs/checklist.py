@@ -31,6 +31,7 @@ from django.db.models import QuerySet
 from django.forms import Form
 from django.http import HttpResponse
 from django.shortcuts import resolve_url, redirect, render
+from django.template.defaultfilters import truncatechars
 from django.urls import reverse
 from django.utils import translation
 from django.utils.functional import cached_property
@@ -96,7 +97,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import ChoixFormationForm, FinancabiliteApprovalForm, ExperienceStatusForm
+from admission.forms.admission.checklist import (
+    ChoixFormationForm,
+    FinancabiliteApprovalForm,
+    ExperienceStatusForm,
+    can_edit_experience_authentication,
+)
 from admission.forms.admission.checklist import (
     CommentForm,
     AssimilationForm,
@@ -271,14 +277,6 @@ class PastExperiencesMixin:
     @cached_property
     def past_experiences_admission_access_title_equivalency_form(self):
         return PastExperiencesAdmissionAccessTitleForm(instance=self.admission, data=self.request.POST or None)
-
-    @cached_property
-    def access_titles(self):
-        return message_bus_instance.invoke(
-            RecupererTitresAccesSelectionnablesPropositionQuery(
-                uuid_proposition=self.kwargs['uuid'],
-            )
-        )
 
     @property
     def access_title_url(self):
@@ -740,7 +738,7 @@ class ChecklistView(
 
             # Access titles
             context['access_title_url'] = self.access_title_url
-            context['access_titles'] = self.access_titles
+            context['access_titles'] = self.selectable_access_titles
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
             context[
@@ -782,7 +780,7 @@ class ChecklistView(
                     experience_checklist_info,
                 )
                 context['bg_classes'][tab_identifier] = bg_class_by_checklist_experience(current_experience)
-                context['checklist_tabs'][tab_identifier] = current_experience.titre_formate
+                context['checklist_tabs'][tab_identifier] = truncatechars(current_experience.titre_formate, 50)
                 context['comment_forms'][tab_identifier] = CommentForm(
                     comment=comments.get(tab_identifier, None),
                     form_url=resolve_url(
@@ -791,6 +789,18 @@ class ChecklistView(
                         tab=tab_identifier,
                     ),
                     prefix=tab_identifier,
+                )
+                authentication_comment_identifier = f'{tab_identifier}__authentication'
+                context['comment_forms'][authentication_comment_identifier] = CommentForm(
+                    comment=comments.get(authentication_comment_identifier, None),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        tab=authentication_comment_identifier,
+                    ),
+                    prefix=authentication_comment_identifier,
+                    disabled=not can_edit_experience_authentication(experience_checklist_info),
+                    label=_('Comment about the authentication'),
                 )
 
             # Remove the experiences that we had in the checklist that have been removed
@@ -1264,6 +1274,8 @@ class SaveCommentView(AdmissionFormMixin, FormView):
             self.permission_required = 'admission.checklist_change_fac_comment'
         elif f'__{COMMENT_TAG_SIC}' in self.kwargs['tab']:
             self.permission_required = 'admission.checklist_change_sic_comment'
+        elif '__authentication' in self.kwargs['tab']:
+            self.permission_required = 'admission.checklist_change_past_experiences'
         else:
             self.permission_required = 'admission.checklist_change_comment'
         return super().get_permission_required()
@@ -1480,6 +1492,22 @@ class SinglePastExperienceMixin(
         context = super().get_context_data(**kwargs)
         context['current'] = self.experience
         context['initial'] = self.experience or {}
+        authentication_comment_identifier = f'parcours_anterieur__{self.experience_uuid}__authentication'
+        context.setdefault('comment_forms', {})
+        context['comment_forms'][authentication_comment_identifier] = CommentForm(
+            comment=CommentEntry.objects.filter(
+                object_uuid=self.admission_uuid,
+                tags=['parcours_anterieur', self.experience_uuid, 'authentication'],
+            ).first(),
+            form_url=resolve_url(
+                f'{self.base_namespace}:save-comment',
+                uuid=self.admission_uuid,
+                tab=authentication_comment_identifier,
+            ),
+            prefix=authentication_comment_identifier,
+            disabled=not can_edit_experience_authentication(self.experience),
+            label=_('Comment about the authentication'),
+        )
         return context
 
     def get_success_url(self):
@@ -1547,6 +1575,5 @@ class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
                 uuid_proposition=self.admission_uuid,
                 uuid_experience=self.experience_uuid,
                 etat_authentification=form.cleaned_data['state'],
-                commentaire_authentification=form.cleaned_data['comment'],
             )
         )
