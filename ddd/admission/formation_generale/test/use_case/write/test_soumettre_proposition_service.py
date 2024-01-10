@@ -28,6 +28,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import freezegun
+import mock
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -91,6 +92,7 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.assertEqual(updated_proposition.est_inscription_tardive, False)
 
     @freezegun.freeze_time('22/10/2020')
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_tardive(self):
         with patch.multiple(
             self.candidat,
@@ -126,6 +128,7 @@ class TestSoumettrePropositionGenerale(TestCase):
             self.assertEqual(proposition.est_inscription_tardive, True)
 
     @freezegun.freeze_time('22/09/2020')
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_non_tardive_avant_limite(self):
         with patch.multiple(
             self.candidat,
@@ -161,6 +164,7 @@ class TestSoumettrePropositionGenerale(TestCase):
             self.assertEqual(proposition.est_inscription_tardive, False)
 
     @freezegun.freeze_time('22/10/2020')
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_non_tardive_pot_sans_possibilite_inscription_tardive(self):
         elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
