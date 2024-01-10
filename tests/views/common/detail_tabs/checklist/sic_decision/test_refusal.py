@@ -67,7 +67,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=cls.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
-            status=ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
+            status=ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
         )
         cls.url = resolve_url(
             'admission:general-education:sic-decision-refusal',

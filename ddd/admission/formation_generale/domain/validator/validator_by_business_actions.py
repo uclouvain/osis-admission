@@ -79,6 +79,9 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldTitreAccesEtreSelectionne,
     ShouldConditionAccesEtreSelectionne,
 )
+from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
+    ShouldSicPeutDonnerDecision,
+)
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
 from epc.models.enums.condition_acces import ConditionAcces
@@ -297,6 +300,9 @@ class RefuserParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
+            ),
             ShouldSpecifierMotifRefusFacultaire(
                 motifs_refus=self.motifs_refus,
                 autres_motifs_refus=self.autres_motifs_refus,
@@ -354,6 +360,9 @@ class ApprouverParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidato
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
+            ),
             ShouldSpecifierInformationsAcceptationFacultaire(
                 avec_conditions_complementaires=self.avec_conditions_complementaires,
                 conditions_complementaires_existantes=self.conditions_complementaires_existantes,
@@ -424,5 +433,35 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
                 pays_nationalite_europeen=self.pays_nationalite_europeen,
                 pays_residence=self.pays_residence,
                 poste_diplomatique=self.poste_diplomatique,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
             ),
         ]

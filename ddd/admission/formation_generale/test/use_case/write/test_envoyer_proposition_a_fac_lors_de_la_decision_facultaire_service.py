@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -80,6 +80,10 @@ class TestEnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(TestCase):
             ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
             ChoixStatutPropositionGenerale.CONFIRMEE,
             ChoixStatutPropositionGenerale.RETOUR_DE_FAC,
+            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION,
+            ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE,
+            ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE,
+            ChoixStatutPropositionGenerale.CLOTUREE,
         )
 
         for statut in statuts_invalides:

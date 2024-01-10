@@ -77,6 +77,10 @@ STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC = {
     ChoixStatutPropositionGenerale.CONFIRMEE.name,
     ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
     ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
+    ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
+    ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+    ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+    ChoixStatutPropositionGenerale.CLOTUREE.name,
 }
 
 # Le gestionnaire SIC a la main ou attend le paiement

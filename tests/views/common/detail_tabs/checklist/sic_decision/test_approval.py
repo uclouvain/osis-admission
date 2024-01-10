@@ -77,7 +77,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
                 language=settings.LANGUAGE_CODE_FR,
                 country_of_citizenship__european_union=True,
             ),
-            status=ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
+            status=ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
             determined_academic_year=cls.academic_years[0],
         )
         cls.url = resolve_url(
