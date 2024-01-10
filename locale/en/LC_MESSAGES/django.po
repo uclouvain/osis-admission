@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-22 17:43+0200\n"
+"POT-Creation-Date: 2024-01-10 16:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -488,6 +488,11 @@ msgstr ""
 msgid "Admission form items"
 msgstr ""
 
+msgid ""
+"Admission is not yet valid for searching UCLouvain. The following fields are "
+"required: "
+msgstr ""
+
 msgid "Admission requirement"
 msgstr ""
 
@@ -804,6 +809,9 @@ msgid "Author"
 msgstr ""
 
 msgid "Authors"
+msgstr ""
+
+msgid "Available information"
 msgstr ""
 
 msgid "Awaiting approval"
@@ -1141,6 +1149,9 @@ msgid "Cancelled application"
 msgstr ""
 
 msgid "Candidate"
+msgstr ""
+
+msgid "Candidate information"
 msgstr ""
 
 msgid "Candidate nationality"
@@ -1896,6 +1907,9 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
+msgid "Discard fusion"
+msgstr ""
+
 msgid "Dispensed"
 msgstr ""
 
@@ -2085,6 +2099,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Education"
+msgstr ""
+
+msgid "Educational experience"
 msgstr ""
 
 msgid "Educational experience not found."
@@ -2536,6 +2553,9 @@ msgid "Funding"
 msgstr ""
 
 msgid "Funding type"
+msgstr ""
+
+msgid "Fusion proposal"
 msgstr ""
 
 msgid "GEOGRAPHY"
@@ -3599,6 +3619,15 @@ msgstr ""
 msgid "Membre CA not found."
 msgstr "Supervisory panel member not found."
 
+msgid "Merge all non-empty data from digit match to merge form"
+msgstr ""
+
+msgid "Merge all non-empty data from original to merge form"
+msgstr ""
+
+msgid "Merge with existing entry"
+msgstr ""
+
 msgid "Merging of each document field of a continuing proposition into one PDF"
 msgstr ""
 
@@ -3922,6 +3951,9 @@ msgid "Not free"
 msgstr ""
 
 msgid "Not fundable"
+msgstr ""
+
+msgid "Not specified"
 msgstr ""
 
 msgctxt "admission-header"
@@ -4456,6 +4488,9 @@ msgid "Professional"
 msgstr ""
 
 msgid "Professional email"
+msgstr ""
+
+msgid "Professional experience"
 msgstr ""
 
 msgid "Professional experiences"
@@ -4997,6 +5032,9 @@ msgid "Save and transfer to SIC"
 msgstr ""
 
 msgid "Save and view result"
+msgstr ""
+
+msgid "Save fusion proposal"
 msgstr ""
 
 msgid "Scholarship"
@@ -6126,6 +6164,9 @@ msgstr ""
 msgid "Undecided"
 msgstr ""
 
+msgid "Undo"
+msgstr ""
+
 msgid ""
 "Unemployment certificate issued by the relevant body, justifying the period "
 "concerned"
@@ -6214,6 +6255,9 @@ msgid "Validated"
 msgstr ""
 
 msgid "Values"
+msgstr ""
+
+msgid "Verify"
 msgstr ""
 
 msgid "Via Facebook"
@@ -6811,10 +6855,4 @@ msgstr ""
 
 #, python-brace-format
 msgid "{items} types out of {total}"
-msgstr ""
-
-msgid "Verify"
-msgstr ""
-
-msgid "Undo"
 msgstr ""
