@@ -31,4 +31,4 @@ def soumettre_ticket_creation_personne(
     cmd: 'SoumettreTicketPersonneCommand',
     digit_repository: 'IDigitRepository',
 ) -> any:
-   return digit_repository.submit_person_ticket(global_id=cmd.global_id)
+    return digit_repository.submit_person_ticket(global_id=cmd.global_id)
