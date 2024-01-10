@@ -69,6 +69,7 @@ class TestSoumettrePropositionGenerale(TestCase):
             )
 
     @freezegun.freeze_time('2020-11-01')
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
