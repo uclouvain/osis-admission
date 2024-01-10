@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from typing import Dict, Optional, List
 
@@ -578,6 +579,7 @@ class Proposition(interface.RootEntity):
         self,
         condition_acces: str,
         millesime_condition_acces: Optional[int],
+        avec_complements_formation: Optional[bool],
         titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
     ):
         nouveau_millesime_condition_acces = millesime_condition_acces
@@ -596,6 +598,11 @@ class Proposition(interface.RootEntity):
 
         self.condition_acces = nouvelle_condition_acces
         self.millesime_condition_acces = nouveau_millesime_condition_acces
+        self.avec_complements_formation = avec_complements_formation
+
+        if not avec_complements_formation:
+            self.complements_formation = []
+            self.commentaire_complements_formation = ''
 
     def specifier_equivalence_titre_acces(
         self,

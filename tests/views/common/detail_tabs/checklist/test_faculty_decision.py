@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import copy
 import uuid
 from typing import List
@@ -321,15 +322,18 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def test_send_to_sic_is_forbidden_with_sic_user(self):
-        self.client.force_login(user=self.sic_manager_user)
+    def test_send_to_sic_is_forbidden_with_fac_user_if_the_admission_is_not_in_specific_statuses(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
+        self.general_admission.save()
 
         response = self.client.post(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, 403)
 
-    def test_send_to_sic_is_forbidden_with_fac_user_if_the_admission_is_not_in_specific_statuses(self):
-        self.client.force_login(user=self.fac_manager_user)
+    def test_send_to_sic_is_forbidden_with_sic_user_if_the_admission_is_not_in_specific_statuses(self):
+        self.client.force_login(user=self.sic_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
         self.general_admission.save()
@@ -526,6 +530,60 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(history_entry.message_fr, 'Le dossier a été soumis au SIC par la faculté.')
 
         self.assertEqual(history_entry.message_en, 'The dossier has been submitted to the SIC by the faculty.')
+
+        self.assertCountEqual(
+            history_entry.tags,
+            ['proposition', 'fac-decision', 'send-to-sic', 'status-changed'],
+        )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_send_to_sic_with_sic_user_in_specific_statuses_without_approving_or_refusing(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.checklist['current']['decision_facultaire'][
+            'statut'
+        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.general_admission.save()
+
+        # Invalid request -> We need to be in the right status
+        response = self.client.post(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            gettext('The proposition must be managed by FAC to realized this action.'),
+            [m.message for m in response.context['messages']],
+        )
+
+        # Valid request
+        self.general_admission.checklist['current']['decision_facultaire'][
+            'statut'
+        ] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
+        self.general_admission.save()
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+
+        self.assertEqual(len(history_entries), 1)
+        history_entry = history_entries[0]
+
+        self.assertEqual(
+            history_entry.author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+
+        self.assertEqual(history_entry.message_fr, 'Le dossier a été soumis au SIC par le SIC.')
+
+        self.assertEqual(history_entry.message_en, 'The dossier has been submitted to the SIC by the SIC.')
 
         self.assertCountEqual(
             history_entry.tags,

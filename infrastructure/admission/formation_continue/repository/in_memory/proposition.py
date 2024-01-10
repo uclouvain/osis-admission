@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ from typing import List, Optional
 import factory
 
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
@@ -186,4 +185,6 @@ class PropositionInMemoryRepository(
             elements_confirmation=proposition.elements_confirmation,
             pdf_recapitulatif=[],
             documents_additionnels=[],
+            motivations=proposition.motivations,
+            moyens_decouverte_formation=[way.name for way in proposition.moyens_decouverte_formation],
         )

@@ -30,7 +30,7 @@ from typing import Dict
 import freezegun
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.validator.exceptions import (
     DocumentsReclamesImmediatementNonCompletesException,
     DocumentsCompletesDifferentsDesReclamesException,
@@ -38,6 +38,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
 from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.commands import (
     ReclamerDocumentsAuCandidatParFACCommand,
@@ -78,17 +79,58 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
                     end_date=datetime.date(annee + 1, 9, 30),
                 )
             )
+        self.id_curriculum = 'CURRICULUM.CURRICULUM'
+        self.id_document_libre = 'LIBRE_CANDIDAT.16de0c3d-3c06-4c93-8eb4-c8648f04f146'
+
+        # Initialiser les emplacements
+        emplacement_document_in_memory_repository.save(
+            EmplacementDocument(
+                entity_id=EmplacementDocumentIdentity(
+                    identifiant=self.id_curriculum,
+                    proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCI'),
+                ),
+                uuids_documents=[],
+                type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
+                statut=StatutEmplacementDocument.A_RECLAMER,
+                statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT,
+                justification_gestionnaire='Ma raison 1',
+                requis_automatiquement=False,
+                libelle='Example',
+                reclame_le=None,
+                a_echeance_le=None,
+                derniere_action_le=datetime.datetime(2023, 1, 1),
+                dernier_acteur='0123456789',
+                document_soumis_par='',
+            ),
+        )
+        emplacement_document_in_memory_repository.save(
+            EmplacementDocument(
+                entity_id=EmplacementDocumentIdentity(
+                    identifiant=self.id_document_libre,
+                    proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCI'),
+                ),
+                uuids_documents=[],
+                type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
+                statut=StatutEmplacementDocument.A_RECLAMER,
+                statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT,
+                justification_gestionnaire='Ma raison 1',
+                requis_automatiquement=False,
+                libelle='Example',
+                reclame_le=None,
+                a_echeance_le=None,
+                derniere_action_le=datetime.datetime(2023, 1, 1),
+                dernier_acteur='0123456789',
+                document_soumis_par='',
+            ),
+        )
 
     @freezegun.freeze_time("2023-01-03", as_kwarg="freeze_time")
     def test_should_completer_emplacements_documents_demandes_par_fac(self, freeze_time):
-        self.proposition.documents_demandes = {'ID1': {}, 'ID2': {}, 'ID3': {}, 'ID4': {}}
-        self.proposition_repository.save(self.proposition)
-
-        # Le gestionne réclame les emplacements de documents
+        # Le gestionnaire réclame les emplacements de documents
         self.message_bus.invoke(
             ReclamerDocumentsAuCandidatParFACCommand(
                 uuid_proposition='uuid-MASTER-SCI',
-                identifiants_emplacements=['ID1', 'ID2'],
+                identifiants_emplacements=[self.id_curriculum, self.id_document_libre],
                 a_echeance_le=datetime.date(2023, 1, 15),
                 objet_message='Objet du message',
                 corps_message='Corps du message',
@@ -103,8 +145,8 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
             CompleterEmplacementsDocumentsParCandidatCommand(
                 uuid_proposition='uuid-MASTER-SCI',
                 reponses_documents_a_completer={
-                    'ID1': [self.uuid_id1],
-                    'ID2': [self.uuid_id2],
+                    self.id_curriculum: [self.uuid_id1],
+                    self.id_document_libre: [self.uuid_id2],
                 },
             ),
         )
@@ -117,7 +159,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)
 
         # Les emplacements des documents réclamés ont été modifiés
-        for identifiant in ['ID1', 'ID2']:
+        for identifiant in [self.id_curriculum, self.id_document_libre]:
             self.assertEqual(emplacements_documents[identifiant].dernier_acteur, '987654321')
             self.assertEqual(emplacements_documents[identifiant].a_echeance_le, datetime.date(2023, 1, 15))
             self.assertEqual(emplacements_documents[identifiant].derniere_action_le, datetime.datetime(2023, 1, 3))
@@ -129,8 +171,8 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
             self.assertEqual(emplacements_documents[identifiant].statut_reclamation, None)
             self.assertEqual(emplacements_documents[identifiant].document_soumis_par, proposition.matricule_candidat)
 
-        self.assertEqual(emplacements_documents['ID1'].uuids_documents, [self.uuid_id1])
-        self.assertEqual(emplacements_documents['ID2'].uuids_documents, [self.uuid_id2])
+        self.assertEqual(emplacements_documents[self.id_curriculum].uuids_documents, [self.uuid_id1])
+        self.assertEqual(emplacements_documents[self.id_document_libre].uuids_documents, [self.uuid_id2])
 
         # Les emplacements des documents non réclamés sont restés identifiques
         for identifiant in ['ID3', 'ID4']:
@@ -146,14 +188,11 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
 
     @freezegun.freeze_time("2023-01-03", as_kwarg="freeze_time")
     def test_should_completer_emplacements_documents_demandes_immediatement_par_fac(self, freeze_time):
-        self.proposition.documents_demandes = {'ID1': {}, 'ID2': {}, 'ID3': {}, 'ID4': {}}
-        self.proposition_repository.save(self.proposition)
-
         # Le gestionne réclame les emplacements de documents
         self.message_bus.invoke(
             ReclamerDocumentsAuCandidatParFACCommand(
                 uuid_proposition='uuid-MASTER-SCI',
-                identifiants_emplacements=['ID1', 'ID2'],
+                identifiants_emplacements=[self.id_curriculum, self.id_document_libre],
                 a_echeance_le=datetime.date(2023, 1, 15),
                 objet_message='Objet du message',
                 corps_message='Corps du message',
@@ -168,8 +207,8 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
             CompleterEmplacementsDocumentsParCandidatCommand(
                 uuid_proposition='uuid-MASTER-SCI',
                 reponses_documents_a_completer={
-                    'ID1': [self.uuid_id1],
-                    'ID2': [],
+                    self.id_curriculum: [self.uuid_id1],
+                    self.id_document_libre: [],
                 },
             ),
         )
@@ -182,38 +221,42 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)
 
         # Les emplacements des documents réclamés ont été modifiés
-        # ID1 a été complété par le candidat
-        self.assertEqual(emplacements_documents['ID1'].dernier_acteur, '987654321')
-        self.assertEqual(emplacements_documents['ID1'].a_echeance_le, datetime.date(2023, 1, 15))
-        self.assertEqual(emplacements_documents['ID1'].derniere_action_le, datetime.datetime(2023, 1, 3))
-        self.assertEqual(emplacements_documents['ID1'].reclame_le, datetime.datetime(2023, 1, 3))
+        # Le curriculum a été complété par le candidat
+        self.assertEqual(emplacements_documents[self.id_curriculum].dernier_acteur, '987654321')
+        self.assertEqual(emplacements_documents[self.id_curriculum].a_echeance_le, datetime.date(2023, 1, 15))
+        self.assertEqual(emplacements_documents[self.id_curriculum].derniere_action_le, datetime.datetime(2023, 1, 3))
+        self.assertEqual(emplacements_documents[self.id_curriculum].reclame_le, datetime.datetime(2023, 1, 3))
         self.assertEqual(
-            emplacements_documents['ID1'].statut,
+            emplacements_documents[self.id_curriculum].statut,
             StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION,
         )
-        self.assertEqual(emplacements_documents['ID1'].statut_reclamation, None)
-        self.assertEqual(emplacements_documents['ID1'].document_soumis_par, proposition.matricule_candidat)
+        self.assertEqual(emplacements_documents[self.id_curriculum].statut_reclamation, None)
+        self.assertEqual(emplacements_documents[self.id_curriculum].document_soumis_par, proposition.matricule_candidat)
 
-        self.assertEqual(emplacements_documents['ID1'].uuids_documents, [self.uuid_id1])
+        self.assertEqual(emplacements_documents[self.id_curriculum].uuids_documents, [self.uuid_id1])
 
-        # ID2 n'a pas été complété par le candidat
-        self.assertEqual(emplacements_documents['ID2'].dernier_acteur, '987654321')
-        self.assertEqual(emplacements_documents['ID2'].a_echeance_le, datetime.date(2023, 1, 15))
-        self.assertEqual(emplacements_documents['ID2'].derniere_action_le, datetime.datetime(2023, 1, 3))
-        self.assertEqual(emplacements_documents['ID2'].reclame_le, datetime.datetime(2023, 1, 3))
-        self.assertEqual(emplacements_documents['ID2'].statut, StatutEmplacementDocument.A_RECLAMER)
-        self.assertEqual(emplacements_documents['ID2'].document_soumis_par, '')
+        # Le document libre n'a pas été complété par le candidat
+        self.assertEqual(emplacements_documents[self.id_document_libre].dernier_acteur, '987654321')
+        self.assertEqual(emplacements_documents[self.id_document_libre].a_echeance_le, datetime.date(2023, 1, 15))
         self.assertEqual(
-            emplacements_documents['ID2'].statut_reclamation,
-            StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT,
+            emplacements_documents[self.id_document_libre].derniere_action_le,
+            datetime.datetime(2023, 1, 3),
+        )
+        self.assertEqual(emplacements_documents[self.id_document_libre].reclame_le, datetime.datetime(2023, 1, 3))
+        self.assertEqual(emplacements_documents[self.id_document_libre].statut, StatutEmplacementDocument.A_RECLAMER)
+        self.assertEqual(emplacements_documents[self.id_document_libre].document_soumis_par, '')
+        self.assertEqual(
+            emplacements_documents[self.id_document_libre].statut_reclamation,
+            StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT,
         )
 
-        self.assertEqual(emplacements_documents['ID2'].uuids_documents, [])
+        self.assertEqual(emplacements_documents[self.id_document_libre].uuids_documents, [])
 
         # Le statut de la proposition a changé
         self.assertEqual(proposition_id, proposition.entity_id)
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC)
 
+    @freezegun.freeze_time("2023-01-03")
     def test_should_pas_completer_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(
@@ -226,15 +269,13 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
                 )
             )
 
-    def test_should_lever_exception_si_documents_non_reclames_sont_completes(self):
-        self.proposition.documents_demandes = {'ID1': {}, 'ID2': {}, 'ID3': {}, 'ID4': {}}
-        self.proposition_repository.save(self.proposition)
-
+    @freezegun.freeze_time("2023-01-03")
+    def test_should_lever_exception_si_documents_reclames_immediatement_ne_sont_pas_completes(self):
         # Le gestionne réclame les emplacements de documents
         self.message_bus.invoke(
             ReclamerDocumentsAuCandidatParFACCommand(
                 uuid_proposition='uuid-MASTER-SCI',
-                identifiants_emplacements=['ID1', 'ID2'],
+                identifiants_emplacements=[self.id_curriculum, self.id_curriculum],
                 a_echeance_le=datetime.date(2023, 1, 15),
                 objet_message='Objet du message',
                 corps_message='Corps du message',
@@ -248,54 +289,49 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
                 CompleterEmplacementsDocumentsParCandidatCommand(
                     uuid_proposition='uuid-MASTER-SCI',
                     reponses_documents_a_completer={
-                        'ID1': [],
-                        'ID2': [],
-                    },
-                ),
-            )
-            exception = context.exception.exceptions.pop()
-            self.assertIsInstance(exception, DocumentsCompletesDifferentsDesReclamesException)
-
-    def test_should_lever_exception_si_documents_reclames_immediatement_ne_non_pas_completes(self):
-        self.proposition.documents_demandes = {'ID1': {}, 'ID2': {}, 'ID3': {}, 'ID4': {}}
-        self.proposition_repository.save(self.proposition)
-
-        # Le gestionne réclame les emplacements de documents
-        self.message_bus.invoke(
-            ReclamerDocumentsAuCandidatParFACCommand(
-                uuid_proposition='uuid-MASTER-SCI',
-                identifiants_emplacements=['ID1', 'ID2'],
-                a_echeance_le=datetime.date(2023, 1, 15),
-                objet_message='Objet du message',
-                corps_message='Corps du message',
-                auteur='987654321',
-            )
-        )
-
-        # Le candidat ne remplit pas tous les emplacements demandés immédiatement
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(
-                CompleterEmplacementsDocumentsParCandidatCommand(
-                    uuid_proposition='uuid-MASTER-SCI',
-                    reponses_documents_a_completer={
-                        'ID1': [self.uuid_id1],
-                        'ID3': [self.uuid_id2],
+                        self.id_curriculum: [],
+                        self.id_document_libre: [],
                     },
                 ),
             )
             exception = context.exception.exceptions.pop()
             self.assertIsInstance(exception, DocumentsReclamesImmediatementNonCompletesException)
 
+    @freezegun.freeze_time("2023-01-03")
+    def test_should_lever_exception_si_documents_non_reclames_sont_completes(self):
+        # Le gestionne réclame les emplacements de documents
+        self.message_bus.invoke(
+            ReclamerDocumentsAuCandidatParFACCommand(
+                uuid_proposition='uuid-MASTER-SCI',
+                identifiants_emplacements=[self.id_curriculum, self.id_document_libre],
+                a_echeance_le=datetime.date(2023, 1, 15),
+                objet_message='Objet du message',
+                corps_message='Corps du message',
+                auteur='987654321',
+            )
+        )
+
+        # Le candidat ne remplit pas tous les emplacements demandés immédiatement
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(
+                CompleterEmplacementsDocumentsParCandidatCommand(
+                    uuid_proposition='uuid-MASTER-SCI',
+                    reponses_documents_a_completer={
+                        self.id_curriculum: [self.uuid_id1],
+                        'ID3': [self.uuid_id2],
+                    },
+                ),
+            )
+            exception = context.exception.exceptions.pop()
+            self.assertIsInstance(exception, DocumentsCompletesDifferentsDesReclamesException)
+
     @freezegun.freeze_time("2023-01-03", as_kwarg="freeze_time")
     def test_should_completer_emplacements_documents_demandes_par_sic(self, freeze_time):
-        self.proposition.documents_demandes = {'ID1': {}, 'ID2': {}, 'ID3': {}, 'ID4': {}}
-        self.proposition_repository.save(self.proposition)
-
         # Le gestionne réclame les emplacements de documents
         self.message_bus.invoke(
             ReclamerDocumentsAuCandidatParSICCommand(
                 uuid_proposition='uuid-MASTER-SCI',
-                identifiants_emplacements=['ID1', 'ID2'],
+                identifiants_emplacements=[self.id_curriculum, self.id_document_libre],
                 a_echeance_le=datetime.date(2023, 1, 15),
                 objet_message='Objet du message',
                 corps_message='Corps du message',
@@ -310,8 +346,8 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
             CompleterEmplacementsDocumentsParCandidatCommand(
                 uuid_proposition='uuid-MASTER-SCI',
                 reponses_documents_a_completer={
-                    'ID1': [self.uuid_id1],
-                    'ID2': [self.uuid_id2],
+                    self.id_curriculum: [self.uuid_id1],
+                    self.id_document_libre: [self.uuid_id2],
                 },
             ),
         )
@@ -324,7 +360,7 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)
 
         # Les emplacements de documents réclamés ont été modifiés
-        for identifiant in ['ID1', 'ID2']:
+        for identifiant in [self.id_curriculum, self.id_document_libre]:
             self.assertEqual(emplacements_documents[identifiant].dernier_acteur, '987654321')
             self.assertEqual(emplacements_documents[identifiant].a_echeance_le, datetime.date(2023, 1, 15))
             self.assertEqual(emplacements_documents[identifiant].derniere_action_le, datetime.datetime(2023, 1, 3))
@@ -336,8 +372,8 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
             self.assertEqual(emplacements_documents[identifiant].document_soumis_par, proposition.matricule_candidat)
             self.assertEqual(emplacements_documents[identifiant].statut_reclamation, None)
 
-        self.assertEqual(emplacements_documents['ID1'].uuids_documents, [self.uuid_id1])
-        self.assertEqual(emplacements_documents['ID2'].uuids_documents, [self.uuid_id2])
+        self.assertEqual(emplacements_documents[self.id_curriculum].uuids_documents, [self.uuid_id1])
+        self.assertEqual(emplacements_documents[self.id_document_libre].uuids_documents, [self.uuid_id2])
 
         # Les emplacements de documents non réclamés sont restés identifiques
         for identifiant in ['ID3', 'ID4']:

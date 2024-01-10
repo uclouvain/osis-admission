@@ -70,22 +70,6 @@ def completer_emplacements_documents_par_candidat(
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    identifiants_documents_demandes = EmplacementDocumentIdentityBuilder.build_list(
-        list(proposition.documents_demandes.keys()),
-        cmd.uuid_proposition,
-    )
-
-    documents_reclames = emplacement_document_repository.search(
-        entity_ids=identifiants_documents_demandes,
-        statut=StatutEmplacementDocument.RECLAME,
-    )
-
-    # WHEN
-    DocumentsDemandesCompletesValidatorList(
-        documents_reclames=documents_reclames,
-        reponses_documents_a_completer=cmd.reponses_documents_a_completer,
-    ).validate()
-
     # Récupération des DTO des emplacements de documents demandés pour avoir le nom de ces documents
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
     annee_courante = (
@@ -109,11 +93,27 @@ def completer_emplacements_documents_par_candidat(
         type=TypeItemFormulaire.DOCUMENT.name,
     )
 
-    documents_dto = emplacements_documents_demande_translator.recuperer_emplacements_reclames_dto(
+    documents_reclames_dtos = emplacements_documents_demande_translator.recuperer_emplacements_reclames_dto(
         personne_connue_translator=personne_connue_translator,
         resume_dto=resume_dto,
         questions_specifiques=questions_specifiques_dtos,
     )
+
+    identifiants_documents_demandes = EmplacementDocumentIdentityBuilder.build_list(
+        [document_dto.identifiant for document_dto in documents_reclames_dtos],
+        cmd.uuid_proposition,
+    )
+
+    documents_reclames = emplacement_document_repository.search(
+        entity_ids=identifiants_documents_demandes,
+        statut=StatutEmplacementDocument.RECLAME,
+    )
+
+    # WHEN
+    DocumentsDemandesCompletesValidatorList(
+        documents_reclames=documents_reclames,
+        reponses_documents_a_completer=cmd.reponses_documents_a_completer,
+    ).validate()
 
     emplacement_document_repository.completer_documents_par_candidat(
         documents_completes=documents_reclames,
@@ -129,7 +129,7 @@ def completer_emplacements_documents_par_candidat(
     message = notification.confirmer_reception_documents_envoyes_par_candidat(
         proposition=proposition_dto,
         liste_documents_reclames=documents_reclames,
-        liste_documents_dto=documents_dto,
+        liste_documents_dto=documents_reclames_dtos,
     )
     historique.historiser_completion_documents_par_candidat(proposition=proposition)
 

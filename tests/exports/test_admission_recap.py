@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from io import BytesIO
 from typing import Dict, List
@@ -1026,7 +1027,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     credits_acquis=220,
                     avec_bloc_1=None,
                     avec_complement=None,
-                    avec_allegement=None,
+                    allegement='',
                     est_reorientation_102=None,
                     credits_inscrits_communaute_fr=None,
                     credits_acquis_communaute_fr=None,
@@ -1047,6 +1048,7 @@ class SectionsAttachmentsTestCase(TestCase):
             cycle_formation=Cycle.FIRST_CYCLE.name,
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
+            est_autre_formation=False,
         )
         cls.foreign_academic_curriculum_experience = _ExperienceAcademiqueDTO(
             uuid='uuid-1',
@@ -1071,7 +1073,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     credits_acquis=220,
                     avec_bloc_1=None,
                     avec_complement=None,
-                    avec_allegement=None,
+                    allegement='',
                     est_reorientation_102=None,
                     credits_inscrits_communaute_fr=None,
                     credits_acquis_communaute_fr=None,
@@ -1092,6 +1094,7 @@ class SectionsAttachmentsTestCase(TestCase):
             cycle_formation=Cycle.FIRST_CYCLE.name,
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
+            est_autre_formation=False,
         )
         curriculum_dto = _CurriculumDTO(
             experiences_non_academiques=[
@@ -1252,6 +1255,8 @@ class SectionsAttachmentsTestCase(TestCase):
             elements_confirmation={},
             pdf_recapitulatif=['uuid-pdf-recapitulatif'],
             documents_additionnels=[],
+            motivations='My motivation',
+            moyens_decouverte_formation=[],
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',

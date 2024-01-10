@@ -182,6 +182,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
                 ),
             ],
             date_confirmation=cls.admission.submitted_at,
+            est_premiere_annee=False,
         )
 
         cls.default_params = {
