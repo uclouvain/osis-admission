@@ -106,7 +106,7 @@ class DigitService(IDigitService):
                 response = requests.post(
                     headers={
                         'Content-Type': 'application/json',
-                        'Authorization': 'Basic ZXBjOkRBdi00dFUtejM3LW1WbQ==',
+                        'Authorization': f"{settings.DIGIT_AUTH_TYPE} {settings.DIGIT_AUTH_TOKEN}",
                     },
                     data=json.dumps({
                         "lastname": nom,
