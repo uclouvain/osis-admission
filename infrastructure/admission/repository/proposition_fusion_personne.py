@@ -55,7 +55,7 @@ class PropositionPersonneFusionRepository(IPropositionPersonneFusionRepository):
             expiration_carte_id: str,
             educational_curex_ids: List[str],
             professional_curex_ids: List[str],
-    ) -> PropositionFusionPersonneIdentity:
+    ) -> PropositionFusionPersonneIdentity:  # noqa
 
         country_of_citizenship = Country.objects.get(name=nationalite)
 

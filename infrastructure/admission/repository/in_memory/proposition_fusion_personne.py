@@ -55,7 +55,7 @@ class PropositionPersonneFusionInMemoryRepository(IPropositionPersonneFusionRepo
             expiration_carte_id: str,
             educational_curex_ids: List[str],
             professional_curex_ids: List[str],
-    ) -> PropositionFusionPersonneIdentity:
+    ) -> PropositionFusionPersonneIdentity:  # noqa
         return PropositionFusionPersonneIdentity(uuid="uuid")
 
     @classmethod
