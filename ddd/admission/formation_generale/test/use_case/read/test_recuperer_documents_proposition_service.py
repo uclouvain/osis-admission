@@ -117,7 +117,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(photo_identite.nom_onglet, OngletsDemande.IDENTIFICATION.value)
         self.assertEqual(photo_identite.nom_onglet_langue_candidat, OngletsDemande.IDENTIFICATION.value)
         self.assertEqual(photo_identite.uuid_proposition, 'uuid-MASTER-SCI')
-        self.assertEqual(photo_identite.requis_automatiquement, True)
+        self.assertEqual(photo_identite.requis_automatiquement, False)
 
         # Document non libre faisant l'objet d'une relance
         curriculum: Optional[EmplacementDocumentDTO] = next(
@@ -155,7 +155,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
         self.assertEqual(curriculum.nom_onglet, OngletsDemande.CURRICULUM.value)
         self.assertEqual(curriculum.nom_onglet_langue_candidat, OngletsDemande.CURRICULUM.value)
         self.assertEqual(curriculum.uuid_proposition, 'uuid-MASTER-SCI')
-        self.assertEqual(curriculum.requis_automatiquement, True)
+        self.assertEqual(curriculum.requis_automatiquement, False)
 
         # Documents libres réclamables
         document: Optional[EmplacementDocumentDTO] = next(

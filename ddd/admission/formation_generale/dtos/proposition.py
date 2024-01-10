@@ -33,6 +33,7 @@ from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.poste_diplomatique import PosteDiplomatiqueDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
 from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO
 from osis_common.ddd import interface
@@ -103,6 +104,10 @@ class PropositionDTO(interface.DTO):
             ]
         )
 
+    @property
+    def est_non_soumise(self):
+        return self.statut in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+
 
 @attr.dataclass(frozen=True, slots=True)
 class PropositionGestionnaireDTO(PropositionDTO):
@@ -118,7 +123,6 @@ class PropositionGestionnaireDTO(PropositionDTO):
     photo_identite_candidat: List[str]
 
     poursuite_de_cycle_a_specifier: bool
-    candidat_a_reussi_experience_academique_belge: bool
     poursuite_de_cycle: str
 
     candidat_a_plusieurs_demandes: bool

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.92
+  version: 1.0.93
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -6677,8 +6677,8 @@ components:
       enum:
       - ''
       - 'YES'
-      - 'NO'
       - PENDING
+      - 'NO'
       type: string
     LanguageKnowledge:
       type: object
@@ -10280,6 +10280,12 @@ components:
           type: array
           items:
             type: string
+        motivations:
+          type: string
+        moyens_decouverte_formation:
+          type: array
+          items:
+            type: string
       required:
       - uuid
       - reference
@@ -10296,6 +10302,8 @@ components:
       - copie_titre_sejour
       - pdf_recapitulatif
       - documents_additionnels
+      - motivations
+      - moyens_decouverte_formation
     SectorDTO:
       type: object
       properties:
@@ -10752,10 +10760,18 @@ components:
           type: integer
         matricule_candidat:
           type: string
+        motivations:
+          type: string
+        moyens_decouverte_formation:
+          type: array
+          items:
+            type: string
       required:
       - sigle_formation
       - annee_formation
       - matricule_candidat
+      - motivations
+      - moyens_decouverte_formation
     CompleterPropositionCommand:
       type: object
       properties:
@@ -11550,12 +11566,20 @@ components:
           type: string
         annee_formation:
           type: integer
+        motivations:
+          type: string
+        moyens_decouverte_formation:
+          type: array
+          items:
+            type: string
         reponses_questions_specifiques:
           type: object
       required:
       - uuid_proposition
       - sigle_formation
       - annee_formation
+      - motivations
+      - moyens_decouverte_formation
     ContinuingEducationCompleterCurriculumCommand:
       type: object
       properties:

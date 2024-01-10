@@ -1,0 +1,99 @@
+{% load i18n admission bootstrap3 %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain
+  (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<tbody id="year_form_{{ year_form.academic_year.value }}" class="year-form">
+  <tr>
+    <td rowspan="2" class="academic-year-container">
+      <p>{{ year_form.academic_year.value }}-{{ next_year }}</p>
+      {{ year_form.academic_year }}
+      <label class="switch enrolled-switch">
+        {{ year_form.is_enrolled }}
+        <span class="slider round"></span>
+      </label>
+    </td>
+    <td class="active-year required_field credit-input {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+      {% bootstrap_field year_form.registered_credit_number show_label=False placeholder='' %}
+    </td>
+    <td class="active-year required_field credit-input {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+      {% bootstrap_field year_form.acquired_credit_number show_label=False placeholder='' %}
+    </td>
+    <td class="active-year required_field result flex-content align-items-baseline {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+      {% bootstrap_field year_form.result show_label=False form_group_class="form-group flex-1" %}
+      <button class="btn btn-primary" type="button">
+        {% translate "Transcript" context "cv-attachment" %}
+        <span class="text-invalid transcript-badge">
+          <span class="fa-solid fa-circle-xmark"></span>
+        </span>
+        <span class="translated-fields">
+          {% translate "Translation" %}
+          <span class="text-invalid translation-badge">
+            <span class="fa-solid fa-circle-xmark"></span>
+          </span>
+        </span>
+        <span class="caret"></span>
+      </button>
+    </td>
+    <td class="centered-element active-year block-1-field with-block-1-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+      <label class="switch">
+        {{ year_form.with_block_1 }}
+        <span class="slider round"></span>
+      </label>
+    </td>
+    <td class="centered-element active-year complement-field with-complement-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+      <label class="switch">
+        {{ year_form.with_complement }}
+        <span class="slider round"></span>
+      </label>
+    </td>
+    <td class="active-year fwb-credits-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+      {% bootstrap_field year_form.fwb_registered_credit_number show_label=False %}
+    </td>
+    <td class="active-year fwb-credits-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+      {% bootstrap_field year_form.fwb_acquired_credit_number show_label=False %}
+    </td>
+    <td class="active-year {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+      {% bootstrap_field year_form.reduction show_label=False %}
+    </td>
+    <td class="centered-element active-year block-1-field {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+      {{ year_form.is_102_change_of_course }}
+    </td>
+    <td colspan="9" class="non-active-year {% if year_form.is_enrolled.value %}hidden{% endif %}">
+      <p>{% translate "Year without enrolling in the course." %}</p>
+    </td>
+  </tr>
+  <tr class="active-year {% if not year_form.is_enrolled.value %}hidden{% endif %}">
+    <td class="annual-transcript hidden" colspan="9">
+      <div class="flex-content align-top">
+        <div class="annual-transcript-file required_field flex-1">
+          {% bootstrap_field year_form.transcript %}
+        </div>
+        <div class="annual-transcript-translation-file required_field translated-fields flex-1">
+          {% bootstrap_field year_form.transcript_translation %}
+        </div>
+      </div>
+    </td>
+  </tr>
+</tbody>

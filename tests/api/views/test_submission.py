@@ -174,8 +174,8 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertIsNotNone(ret['date_fin_pot'])
 
     def test_general_proposition_verification_ok_valuate_experiences(self):
-        educational_experience = EducationalExperienceFactory(person=self.second_candidate_ok)
-        professional_experience = ProfessionalExperienceFactory(person=self.second_candidate_ok)
+        educational_experience = self.second_candidate_ok.educationalexperience_set.first()
+        professional_experience = self.second_candidate_ok.professionalexperience_set.first()
 
         self.client.force_authenticate(user=self.second_candidate_ok.user)
 

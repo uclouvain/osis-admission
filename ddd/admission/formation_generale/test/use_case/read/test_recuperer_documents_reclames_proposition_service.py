@@ -43,7 +43,13 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererDocumentsPropositionQuery,
     RecupererDocumentsReclamesPropositionQuery,
 )
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
@@ -111,7 +117,7 @@ class RecupererDocumentsReclamesPropositionTestCase(SimpleTestCase):
         self.assertEqual(curriculum.nom_onglet, OngletsDemande.CURRICULUM.value)
         self.assertEqual(curriculum.nom_onglet_langue_candidat, OngletsDemande.CURRICULUM.value)
         self.assertEqual(curriculum.uuid_proposition, 'uuid-MASTER-SCI')
-        self.assertEqual(curriculum.requis_automatiquement, True)
+        self.assertEqual(curriculum.requis_automatiquement, False)
 
         # Documents libres réclamables
         document: Optional[EmplacementDocumentDTO] = next(

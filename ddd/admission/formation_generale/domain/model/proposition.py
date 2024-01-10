@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from typing import Dict, Optional, List
 
@@ -46,6 +47,7 @@ from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiploma
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
+from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
     ChoixAssimilation1,
@@ -542,10 +544,42 @@ class Proposition(interface.RootEntity):
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
 
+    def specifier_statut_checklist_experience_parcours_anterieur(
+        self,
+        statut_checklist_cible: str,
+        statut_checklist_authentification: Optional[bool],
+        uuid_experience: str,
+    ):
+        try:
+            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
+        except StopIteration:
+            raise ExperienceNonTrouveeException
+        experience.statut = ChoixStatutChecklist[statut_checklist_cible]
+
+        if statut_checklist_authentification is None:
+            experience.extra.pop('authentification', None)
+        else:
+            experience.extra['authentification'] = '1' if statut_checklist_authentification else '0'
+
+    def specifier_authentification_experience_parcours_anterieur(
+        self,
+        uuid_experience: str,
+        etat_authentification: str,
+        commentaire_authentification: str,
+    ):
+        try:
+            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
+        except StopIteration:
+            raise ExperienceNonTrouveeException
+
+        experience.extra['etat_authentification'] = etat_authentification
+        experience.extra['commentaire_authentification'] = commentaire_authentification
+
     def specifier_condition_acces(
         self,
         condition_acces: str,
         millesime_condition_acces: Optional[int],
+        avec_complements_formation: Optional[bool],
         titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
     ):
         nouveau_millesime_condition_acces = millesime_condition_acces
@@ -564,6 +598,11 @@ class Proposition(interface.RootEntity):
 
         self.condition_acces = nouvelle_condition_acces
         self.millesime_condition_acces = nouveau_millesime_condition_acces
+        self.avec_complements_formation = avec_complements_formation
+
+        if not avec_complements_formation:
+            self.complements_formation = []
+            self.commentaire_complements_formation = ''
 
     def specifier_equivalence_titre_acces(
         self,

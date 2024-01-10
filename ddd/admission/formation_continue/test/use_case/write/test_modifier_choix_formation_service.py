@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,10 @@ import attr
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.formation_continue.commands import ModifierChoixFormationCommand
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    ChoixMoyensDecouverteFormation,
+)
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     PropositionNonTrouveeException,
     FormationNonTrouveeException,
@@ -48,6 +51,11 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
             sigle_formation='USCC4',
             annee_formation=2022,
             uuid_proposition='uuid-USCC1',
+            motivations='Motivations',
+            moyens_decouverte_formation=[
+                ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
+                ChoixMoyensDecouverteFormation.AUTRE.name,
+            ],
         )
 
     def test_should_modifier_choix_formation(self):
@@ -57,6 +65,14 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
         self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.EN_BROUILLON)
         self.assertEqual(proposition.formation_id.sigle, self.cmd.sigle_formation)
         self.assertEqual(proposition.formation_id.annee, self.cmd.annee_formation)
+        self.assertEqual(proposition.motivations, self.cmd.motivations)
+        self.assertEqual(
+            proposition.moyens_decouverte_formation,
+            [
+                ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE,
+                ChoixMoyensDecouverteFormation.AUTRE,
+            ],
+        )
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='INCONNUE')

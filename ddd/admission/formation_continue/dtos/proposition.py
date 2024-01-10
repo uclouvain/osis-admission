@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from typing import Dict, List, Optional, Union
 
@@ -30,6 +31,7 @@ import attr
 
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.formation_continue.domain.model.enums import STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
 from osis_common.ddd import interface
 
 
@@ -69,3 +71,10 @@ class PropositionDTO(interface.DTO):
     adresse_facturation: Optional[AdressePersonnelleDTO]
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
+
+    motivations: str
+    moyens_decouverte_formation: List[str]
+
+    @property
+    def est_non_soumise(self):
+        return self.statut in STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE

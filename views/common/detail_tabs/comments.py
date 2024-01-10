@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -106,3 +106,15 @@ class AdmissionCommentApiView(CommentEntryAPIMixin):
 
     def has_delete_permission(self, comment):
         return self.has_change_permission(comment)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        tags = self.request.query_params.get('tags', '')
+
+        # Apply the 'contained_by' filter (in addition to the default `contains` filter) to retrieve the comments whose
+        # the tags are exactly the same as those requested
+        if tags:
+            queryset = queryset.filter(tags__contained_by=tags.split(','))
+
+        return queryset

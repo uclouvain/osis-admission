@@ -24,7 +24,7 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% with initial=original_admission.checklist.initial.frais_dossier current=original_admission.checklist.current.frais_dossier %}
+{% with initial=original_admission.checklist.initial.frais_dossier current=original_admission.checklist.current.frais_dossier can_update_checklist_tab=can_change_payment %}
   <div
       id="request-application-fees-container"
       hx-target="this"
@@ -86,11 +86,12 @@
     {% include 'admission/general_education/includes/checklist/application_fees_request_cancel_modal.html' with target_status='GEST_REUSSITE' %}
 
   </div>
-{% endwith %}
 
-{% if request.htmx %}
-  {# Update the admission status in the header #}
-  {% include 'admission/includes/admission_status.html' with display_on_load=False %}
-  {# Update the checklist menu  #}
-  {% include "admission/general_education/checklist_menu.html" with current_item='frais_dossier' %}
-{% endif %}
+  {% if request.htmx %}
+    {# Update the admission status in the header #}
+    {% include 'admission/includes/admission_status.html' %}
+    {# Update the checklist menu item status #}
+    {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='frais_dossier' %}
+  {% endif %}
+
+{% endwith %}

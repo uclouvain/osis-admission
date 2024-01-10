@@ -273,8 +273,8 @@ class ConfigurableFormItemFieldTestCase(TestCase):
         self.assertEqual(field.required, False)
         self.assertEqual(field.label, 'Document field')
         self.assertEqual(field.help_text, 'Detailed data')
-        self.assertEqual(field.max_files, 2)
-        self.assertEqual(field.mimetypes, ['text/plain'])
+        self.assertEqual(field.max_files, 1)
+        self.assertEqual(field.mimetypes, [PDF_MIME_TYPE])
 
     def test_configurable_form_with_selection_field(self):
         # Unique selection

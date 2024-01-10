@@ -24,26 +24,26 @@
 #
 # ##############################################################################
 
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from base.models.utils.utils import ChoiceEnum
 
 
 class TypeEquivalenceTitreAcces(ChoiceEnum):
-    NON_CONCERNE = _('Not concerned')
-    EQUIVALENCE_CESS = _('CESS equivalence')
-    EQUIVALENCE_GRADE_ACADEMIQUE_FWB = _('FWB academic degree equivalence')
-    EQUIVALENCE_DE_NIVEAU = _('Level equivalence')
-    NON_RENSEIGNE = _('Not specified')
+    NON_CONCERNE = pgettext_lazy('equivalence_type', 'Not concerned')
+    EQUIVALENCE_CESS = pgettext_lazy('equivalence_type', 'CESS equivalence')
+    EQUIVALENCE_GRADE_ACADEMIQUE_FWB = pgettext_lazy('equivalence_type', 'FWB academic degree equivalence')
+    EQUIVALENCE_DE_NIVEAU = pgettext_lazy('equivalence_type', 'Level equivalence')
+    NON_RENSEIGNE = pgettext_lazy('equivalence_type', 'Not specified')
 
 
 class StatutEquivalenceTitreAcces(ChoiceEnum):
-    COMPLETE = _('Completed')
-    RESTRICTIVE = _('Restricted')
-    EN_ATTENTE = _('Waiting')
-    NON_RENSEIGNE = _('Not specified')
+    COMPLETE = pgettext_lazy('equivalence_status', 'Completed')
+    RESTRICTIVE = pgettext_lazy('equivalence_status', 'Restricted')
+    EN_ATTENTE = pgettext_lazy('equivalence_status', 'Waiting')
+    NON_RENSEIGNE = pgettext_lazy('equivalence_status', 'Not specified')
 
 
 class EtatEquivalenceTitreAcces(ChoiceEnum):
-    DEFINITIVE = _('Definitive')
-    PROVISOIRE = _('Provisional')
+    DEFINITIVE = pgettext_lazy('equivalence_state', 'Definitive')
+    PROVISOIRE = pgettext_lazy('equivalence_state', 'Provisional')

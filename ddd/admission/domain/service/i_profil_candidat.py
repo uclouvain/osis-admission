@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from abc import abstractmethod
 from typing import Dict, List, Optional
 
@@ -36,10 +37,10 @@ from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAExperiencesDTO
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from base.models.enums.community import CommunityEnum
-from base.models.enums.education_group_types import TrainingType
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from osis_common.ddd import interface
 
@@ -67,12 +68,12 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_etudes_secondaires(cls, matricule: str, type_formation: TrainingType) -> 'EtudesSecondairesDTO':
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int) -> 'CurriculumDTO':
+    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumDTO':
         raise NotImplementedError
 
     @classmethod
@@ -134,6 +135,8 @@ class IProfilCandidatTranslator(interface.DomainService):
         matricule: str,
         formation: str,
         annee_courante: int,
+        uuid_proposition: str,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> ResumeCandidatDTO:
         """Retourne toutes les données relatives à un candidat nécessaires à son admission."""
         raise NotImplementedError

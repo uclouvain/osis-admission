@@ -69,3 +69,9 @@ from .specifier_equivalence_titre_acces_etranger_proposition_service import (
     specifier_equivalence_titre_acces_etranger_proposition,
 )
 from .specifier_experience_en_tant_que_titre_acces_service import specifier_experience_en_tant_que_titre_acces
+from .modifier_statut_checklist_experience_parcours_anterieur_service import (
+    modifier_statut_checklist_experience_parcours_anterieur,
+)
+from .modifier_authentification_experience_parcours_anterieur_service import (
+    modifier_authentification_experience_parcours_anterieur,
+)

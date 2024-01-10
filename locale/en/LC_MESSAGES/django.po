@@ -73,6 +73,9 @@ msgstr ""
 msgid ", on"
 msgstr ""
 
+msgid "102 change of course"
+msgstr ""
+
 #, python-format
 msgid ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
@@ -258,6 +261,9 @@ msgstr ""
 msgid "Academic Regulations"
 msgstr ""
 
+msgid "Academic course"
+msgstr ""
+
 msgid "Academic experience"
 msgstr ""
 
@@ -317,6 +323,9 @@ msgid "Acronym of the management entity"
 msgstr ""
 
 msgid "Acronym of the training"
+msgstr ""
+
+msgid "Action"
 msgstr ""
 
 msgid "Actions"
@@ -383,6 +392,9 @@ msgstr ""
 msgid "Add a new member"
 msgstr ""
 
+msgid "Add a non-academic activity"
+msgstr ""
+
 msgid "Add a paper"
 msgstr ""
 
@@ -411,6 +423,9 @@ msgid "Add a seminar"
 msgstr ""
 
 msgid "Add a service"
+msgstr ""
+
+msgid "Add an academic course"
 msgstr ""
 
 msgid "Add an activity"
@@ -573,6 +588,9 @@ msgstr ""
 msgid "Another admission has been submitted."
 msgstr ""
 
+msgid "Any other assessment system that is not based on a credit system."
+msgstr ""
+
 msgid "Application accepted"
 msgstr ""
 
@@ -702,6 +720,12 @@ msgid ""
 "inscriptions/demande-en-ligne\" target=\"_blank\">specific platform</a>."
 msgstr ""
 
+msgid ""
+"Assessment is also based on the credit system, which quantifies the workload "
+"involved in a class. Depending on the country, a full year of study is "
+"equivalent to a defined number of credits (e.g. 30 credits)."
+msgstr ""
+
 msgid "Assimilated,Non-assimilated"
 msgstr ""
 
@@ -744,6 +768,9 @@ msgstr ""
 msgid "Assimilation start date"
 msgstr ""
 
+msgid "At least one academic year is required."
+msgstr ""
+
 msgid "At least one document must be selected."
 msgstr ""
 
@@ -767,13 +794,16 @@ msgstr[1] ""
 msgid "Attestation of the communication"
 msgstr ""
 
+msgid "Authentication"
+msgstr ""
+
+msgid "Authentication requested"
+msgstr ""
+
 msgid "Author"
 msgstr ""
 
 msgid "Authors"
-msgstr ""
-
-msgid "Automatically required"
 msgstr ""
 
 msgid "Awaiting approval"
@@ -792,6 +822,9 @@ msgid "Bachelor"
 msgstr ""
 
 msgid "Bachelor's course entrance exam"
+msgstr ""
+
+msgid "Back to checklist"
 msgstr ""
 
 msgid "Back to the list"
@@ -840,6 +873,12 @@ msgid "Billing address street number"
 msgstr ""
 
 msgid "Billing address type"
+msgstr ""
+
+msgid "Block 1"
+msgstr ""
+
+msgid "Block1:"
 msgstr ""
 
 msgid "Body"
@@ -896,6 +935,7 @@ msgstr ""
 msgid "CESS"
 msgstr ""
 
+msgctxt "equivalence_type"
 msgid "CESS equivalence"
 msgstr ""
 
@@ -1279,6 +1319,9 @@ msgstr ""
 msgid "Comment about jury"
 msgstr ""
 
+msgid "Comment about the authentication"
+msgstr ""
+
 msgid "Comment for PhD Committee manager"
 msgstr ""
 
@@ -1300,8 +1343,8 @@ msgstr ""
 
 #, python-brace-format
 msgid ""
-"Communication to the candidate, in <span class=\"label label-admission-"
-"primary\">{language_code}]</span>"
+"Communication to the candidate (refusal reason), in <span class=\"label "
+"label-admission-primary\">{language_code}]</span>"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -1316,6 +1359,12 @@ msgstr ""
 msgid "Competent diplomatic post"
 msgstr ""
 
+msgid "Compl:"
+msgstr ""
+
+msgid "Complement"
+msgstr ""
+
 msgid "Complementary training"
 msgstr ""
 
@@ -1325,6 +1374,7 @@ msgstr ""
 msgid "Complementary training proposition"
 msgstr ""
 
+msgctxt "equivalence_status"
 msgid "Completed"
 msgstr ""
 
@@ -1599,6 +1649,9 @@ msgstr ""
 msgid "Course completed"
 msgstr ""
 
+msgid "Course cycle"
+msgstr ""
+
 msgid "Course name"
 msgstr ""
 
@@ -1697,6 +1750,9 @@ msgstr ""
 msgid "Date of the confirmation paper (DD/MM/YYYY)"
 msgstr ""
 
+msgid "Date on which you expect to graduate."
+msgstr ""
+
 msgid "Date the application is sent to the supervision group"
 msgstr ""
 
@@ -1774,6 +1830,7 @@ msgctxt "admission tab"
 msgid "Defense method"
 msgstr ""
 
+msgctxt "equivalence_state"
 msgid "Definitive"
 msgstr ""
 
@@ -1793,6 +1850,9 @@ msgstr ""
 msgid "Delete?"
 msgstr ""
 
+msgid "Deletion of an experience"
+msgstr ""
+
 msgctxt "admission decision"
 msgid "Denied"
 msgstr "Rejetée"
@@ -1801,9 +1861,6 @@ msgid "Description"
 msgstr ""
 
 msgid "Description of your communication"
-msgstr ""
-
-msgid "Designate the document as to be requested"
 msgstr ""
 
 msgid "Detailed curriculum vitae"
@@ -1854,6 +1911,10 @@ msgstr ""
 msgid "Dissertation title"
 msgstr ""
 
+msgctxt "admission"
+msgid "Dissertation title"
+msgstr ""
+
 msgid "Do not reorder values, and keep the same count"
 msgstr ""
 
@@ -1864,6 +1925,9 @@ msgid "Do you have a secondary school diploma?"
 msgstr ""
 
 msgid "Do you have an international scholarship?"
+msgstr ""
+
+msgid "Do you want to continue?"
 msgstr ""
 
 msgid "Do you want to request the application fee now?"
@@ -1897,6 +1961,10 @@ msgstr ""
 
 #, python-format
 msgid "Document merging of the proposition %(reference)s"
+msgstr ""
+
+msgctxt "admission"
+msgid "Document name"
 msgstr ""
 
 msgid "Document not found."
@@ -1983,6 +2051,13 @@ msgstr ""
 msgid "ECTS credits"
 msgstr ""
 
+msgid ""
+"ECTS credits are a European unit of measurement that assesses the workload "
+"represented by a class within a course. A full year of study is generally "
+"equivalent to 60 credits. The ECTS system has been introduced in most "
+"European countries but is also increasingly used in other countries."
+msgstr ""
+
 msgid "ECTS for participating"
 msgstr ""
 
@@ -2010,6 +2085,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Education"
+msgstr ""
+
+msgid "Educational experience not found."
 msgstr ""
 
 msgid "Educational experiences"
@@ -2079,10 +2157,16 @@ msgstr ""
 msgid "Enroll in a course"
 msgstr ""
 
+msgid "Enrolled"
+msgstr ""
+
 msgid "Enrolment applications"
 msgstr ""
 
 msgid "Enrolment campus"
+msgstr ""
+
+msgid "Enrolment campus email"
 msgstr ""
 
 msgid "Enrolment in limited enrolment bachelor's course"
@@ -2172,6 +2256,9 @@ msgstr "Expérience non trouvée."
 msgid "Experiences"
 msgstr ""
 
+msgid "Expert advice"
+msgstr ""
+
 msgid "Expert opinion"
 msgstr ""
 
@@ -2215,7 +2302,17 @@ msgstr ""
 msgid "FRIA"
 msgstr ""
 
+msgid "FWB - Credits earned"
+msgstr ""
+
+msgid "FWB - Registered credits"
+msgstr ""
+
+msgctxt "equivalence_type"
 msgid "FWB academic degree equivalence"
+msgstr ""
+
+msgid "FWB equivalent course"
 msgstr ""
 
 msgid "Faculty approval certificate"
@@ -2236,6 +2333,9 @@ msgstr ""
 msgid "Failure of the test"
 msgstr ""
 
+msgid "False"
+msgstr ""
+
 msgid "Feedback from Fac"
 msgstr ""
 
@@ -2248,10 +2348,6 @@ msgid "Female"
 msgstr ""
 
 msgid "File"
-msgstr ""
-
-msgctxt "admission"
-msgid "File name"
 msgstr ""
 
 msgid "Filter by documents"
@@ -2347,6 +2443,13 @@ msgid ""
 "the radios buttons allow to select only one value whereas the checkboxes "
 "allow to select several values.<br>Full example: <code>{\"TYPE_SELECTION\": "
 "\"CASES_A_COCHER\"}</code>."
+msgstr ""
+
+msgid ""
+"For any secondary school diploma from a country outside the European Union, "
+"the application for admission <strong>must contain the equivalency</strong> "
+"of your diploma issued by the <a href=\"http://www.equivalences.cfwb.be/\" "
+"target=\"_blank\">French Community</a> of Belgium."
 msgstr ""
 
 msgid "Foreign access title equivalence effective date"
@@ -2471,6 +2574,9 @@ msgstr ""
 msgid "Generate an analysis folder"
 msgstr ""
 
+msgid "Generate an in-progress analysis folder"
+msgstr ""
+
 msgid "Generate the PDF recap"
 msgstr ""
 
@@ -2530,6 +2636,9 @@ msgstr ""
 msgid "Help text"
 msgstr ""
 
+msgid "Hide the checklist menu"
+msgstr ""
+
 msgctxt "tab"
 msgid "History"
 msgstr ""
@@ -2549,6 +2658,12 @@ msgid "Household composition or the marriage certificate"
 msgstr ""
 
 msgid "Household composition, or copy of your birth certificate"
+msgstr ""
+
+msgid "How did the candidate find out about this course?"
+msgstr ""
+
+msgid "How did you find out about this course?"
 msgstr ""
 
 msgid "I am a long-term resident in the European Union outside Belgium"
@@ -2700,6 +2815,10 @@ msgid ""
 "with Article 9 of the Academic Regulations and Procedures (RGEE)."
 msgstr ""
 
+#, python-format
+msgid "I will be graduating from secondary school during the %s academic year"
+msgstr ""
+
 msgid ""
 "I would like to receive my mail at an address other than my legal address"
 msgstr ""
@@ -2740,6 +2859,9 @@ msgstr ""
 msgid "Identifier"
 msgstr ""
 
+msgid "Identity card"
+msgstr ""
+
 msgid "Identity card (both sides)"
 msgstr ""
 
@@ -2762,7 +2884,36 @@ msgid ""
 "defense preparation below before submitting the jury proposition."
 msgstr ""
 
+msgid "If other language regime, specify"
+msgstr ""
+
 msgid "If other, specify"
+msgstr ""
+
+msgid ""
+"If you do not have an equivalency certificate, you must apply for one in "
+"strict accordance with the instructions of the <a href='http://www."
+"equivalences.cfwb.be' target='_blank'> French Community of Belgium.</a>."
+msgstr ""
+
+msgid ""
+"If you do not yet have a final equivalency decision from the <a "
+"href=\"http://www.equivalences.cfwb.be/\" target=\"_blank\">French "
+"Community</a> of Belgium, provide a copy of both sides of it as soon as you "
+"receive it. In the meantime, you will be asked to provide proof that you "
+"have indeed requested it: postal receipt and proof of payment, "
+"acknowledgement of receipt of the application, etc."
+msgstr ""
+
+msgid ""
+"If you have a final equivalence decision issued by the <a href=\"http://www."
+"equivalences.cfwb.be/\" target=\"_blank\">French Community</a> of Belgium, "
+"you must provide a double-sided copy of this document."
+msgstr ""
+
+msgid ""
+"If you have not attended your course for one or more years, please indicate "
+"this by turning off the switch for the those years."
 msgstr ""
 
 msgid ""
@@ -2779,6 +2930,9 @@ msgid "Immediately"
 msgstr ""
 
 msgid "Important information:"
+msgstr ""
+
+msgid "Impossible action"
 msgstr ""
 
 msgid ""
@@ -2853,6 +3007,10 @@ msgctxt "admission"
 msgid "Institute"
 msgstr ""
 
+msgctxt "curriculum"
+msgid "Institute"
+msgstr ""
+
 msgctxt "jury"
 msgid "Institute"
 msgstr ""
@@ -2863,10 +3021,16 @@ msgstr ""
 msgid "Institute name"
 msgstr ""
 
+msgid "Institute type"
+msgstr ""
+
 msgid "Institution"
 msgstr ""
 
 msgid "Institution Federation Wallonie-Bruxelles"
+msgstr ""
+
+msgid "Institution contacted"
 msgstr ""
 
 msgid "Institution should be set when PhD has been set to yes or partial"
@@ -2942,6 +3106,10 @@ msgid "Is it a Wallonia-Brussels Federation institution?"
 msgstr ""
 
 msgid "Is non-resident (as defined in decree)"
+msgstr ""
+
+msgctxt "diploma_type"
+msgid "It is a diploma"
 msgstr ""
 
 msgid "JURY_APPROUVE_ADRE"
@@ -3063,6 +3231,7 @@ msgstr ""
 msgid "Letters of recommendation"
 msgstr ""
 
+msgctxt "equivalence_type"
 msgid "Level equivalence"
 msgstr ""
 
@@ -3115,18 +3284,18 @@ msgid "List of LUs of the additional module or others"
 msgstr ""
 
 msgid ""
-"List of the mandatory requested documents that can be submitted later, with "
-"the reason"
-msgstr ""
-
-msgid ""
 "List of the mandatory requested documents that must be submitted "
 "immediately, with the reason"
 msgstr ""
 
 msgid ""
-"List of the not-mandatory requested documents that can be submitted later, "
-"with the reason"
+"List of the requested documents that can be submitted later, with the reason"
+msgstr ""
+
+msgid "List of the requested documents that have been submitted"
+msgstr ""
+
+msgid "List of the requested documents that haven't been submitted"
 msgstr ""
 
 msgid "List of the values that the Selection elements can take (one per row)."
@@ -3251,6 +3420,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"Mail sent to the candidate to inform him that all requested documents have "
+"been received for general education"
+msgstr ""
+
+msgid ""
 "Mail sent to the candidate to inform him that some FAC documents are missing "
 "or invalid in his application for doctorate education"
 msgstr ""
@@ -3273,6 +3447,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to inform him that some SIC documents are missing "
 "or invalid in his application for general education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to inform him that some requested documents have "
+"been received and some are still missing for general education"
 msgstr ""
 
 msgid ""
@@ -3472,6 +3651,15 @@ msgstr ""
 msgid "Modification date"
 msgstr ""
 
+msgid "Modification of a non-academic activity"
+msgstr ""
+
+msgid "Modification of an academic course"
+msgstr ""
+
+msgid "Modification of the secondary studies"
+msgstr ""
+
 msgid "Modification requested"
 msgstr ""
 
@@ -3485,6 +3673,9 @@ msgstr ""
 msgid "Mollie ID"
 msgstr ""
 
+msgid "Month"
+msgstr ""
+
 msgid "Most recent year of enrolment"
 msgstr ""
 
@@ -3492,6 +3683,9 @@ msgid "Motivation"
 msgstr ""
 
 msgid "Motivation for joint supervision"
+msgstr ""
+
+msgid "Motivations"
 msgstr ""
 
 #, python-format
@@ -3521,6 +3715,9 @@ msgid ""
 "nationality of a country of a European Union member state, or fulfils the "
 "conditions covered by one of the Belgian student statuses from 1 to 4 "
 "(Belgian student status 5)"
+msgstr ""
+
+msgid "My institute is not on this list"
 msgstr ""
 
 msgid "My legal cohabitant"
@@ -3571,6 +3768,9 @@ msgstr ""
 msgid "Name of the contact person for the design of the annual program"
 msgstr ""
 
+msgid "Name of the education type"
+msgstr ""
+
 msgid "Name of the management entity"
 msgstr ""
 
@@ -3603,6 +3803,9 @@ msgid "No PhD found."
 msgstr ""
 
 msgid "No continuing enrolment"
+msgstr ""
+
+msgid "No credit system"
 msgstr ""
 
 msgid "No defense reason"
@@ -3653,6 +3856,9 @@ msgstr ""
 msgid "No training found."
 msgstr ""
 
+msgid "No year has yet been added"
+msgstr ""
+
 msgid "No."
 msgstr ""
 
@@ -3662,7 +3868,13 @@ msgstr ""
 msgid "Non doctor reason"
 msgstr ""
 
+msgid "Non-European credits"
+msgstr ""
+
 msgid "Non-academic experience"
+msgstr ""
+
+msgid "Non-educational experience not found."
 msgstr ""
 
 msgid "Non-resident (as defined by government decree)"
@@ -3699,6 +3911,10 @@ msgctxt "checklist"
 msgid "Not concerned"
 msgstr ""
 
+msgctxt "equivalence_type"
+msgid "Not concerned"
+msgstr ""
+
 msgid "Not financeable"
 msgstr ""
 
@@ -3708,10 +3924,15 @@ msgstr ""
 msgid "Not fundable"
 msgstr ""
 
+msgctxt "admission-header"
 msgid "Not specified"
 msgstr ""
 
-msgctxt "admission-header"
+msgctxt "equivalence_status"
+msgid "Not specified"
+msgstr ""
+
+msgctxt "equivalence_type"
 msgid "Not specified"
 msgstr ""
 
@@ -3721,6 +3942,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Number of additional years the candidate can have"
+msgstr ""
+
+msgid "Number of credits earned at the end of the academic year."
 msgstr ""
 
 msgid "Number of days participating"
@@ -3744,6 +3968,9 @@ msgstr "Other"
 msgid "Obtained grade"
 msgstr ""
 
+msgid "Ok"
+msgstr ""
+
 msgid ""
 "On the basis of the information you have provided, you will need to apply "
 "for a student visa if your application to attend our university is accepted "
@@ -3751,6 +3978,9 @@ msgid ""
 "the student <a href=\"https://uclouvain.be/en/study/inscriptions/welcome-to-"
 "international-students.html\" target=\"_blank\"> visa </a> application "
 "information."
+msgstr ""
+
+msgid "On the press"
 msgstr ""
 
 msgid "One choice per line, leave the \"Other\" value out"
@@ -3828,6 +4058,9 @@ msgstr ""
 msgid "Other documents relating to joint supervision"
 msgstr ""
 
+msgid "Other education type"
+msgstr ""
+
 msgid "Other given names"
 msgstr ""
 
@@ -3837,13 +4070,26 @@ msgstr ""
 msgid "Other institute"
 msgstr ""
 
+msgctxt "curriculum"
+msgid "Other institute"
+msgstr ""
+
 msgid "Other institute (if necessary)"
+msgstr ""
+
+msgid "Other institute address"
+msgstr ""
+
+msgid "Other institute name"
 msgstr ""
 
 msgid "Other international scholarship"
 msgstr ""
 
 msgid "Other members of the supervisory panel"
+msgstr ""
+
+msgid "Other programme"
 msgstr ""
 
 msgctxt "admission"
@@ -3957,6 +4203,9 @@ msgstr ""
 msgid "Passport number"
 msgstr ""
 
+msgid "Past experiences authentication"
+msgstr ""
+
 msgid "Payed"
 msgstr ""
 
@@ -4021,6 +4270,12 @@ msgid ""
 "Please check the details of the activity to fill in all mandatory fields"
 msgstr ""
 
+msgid "Please choose the institute or specify another institute"
+msgstr ""
+
+msgid "Please choose the language regime or specify another regime."
+msgstr ""
+
 msgid "Please complete this field: {}"
 msgstr ""
 
@@ -4028,6 +4283,9 @@ msgid "Please confirm the change to this new state."
 msgstr ""
 
 msgid "Please confirm the change to this new status."
+msgstr ""
+
+msgid "Please correct the errors below"
 msgstr ""
 
 msgid ""
@@ -4052,6 +4310,9 @@ msgstr ""
 msgid "Please fill in at least your last or first name."
 msgstr ""
 
+msgid "Please indicate the academic year in which you obtained your degree"
+msgstr ""
+
 msgid ""
 "Please indicate your other given names in accordance with your identity "
 "document. If there are no other given names on your identity document, you "
@@ -4064,6 +4325,11 @@ msgstr ""
 msgid ""
 "Please note that this document will be removed from the list of the missing "
 "documents."
+msgstr ""
+
+msgid ""
+"Please note that this experience was not part of the application when it was "
+"submitted."
 msgstr ""
 
 msgid "Please provide a copy of your curriculum."
@@ -4091,6 +4357,12 @@ msgstr ""
 
 msgid ""
 "Please select the Belgian student status situation that most applies to you"
+msgstr ""
+
+msgid ""
+"Please select the assessment system used by the institution where you "
+"studied. The assessment system is usually indicated <strong>on your "
+"transcripts or diploma supplements</strong>."
 msgstr ""
 
 msgid "Please specify at least one identity number."
@@ -4271,6 +4543,7 @@ msgstr ""
 msgid "Proposition type"
 msgstr ""
 
+msgctxt "equivalence_state"
 msgid "Provisional"
 msgstr ""
 
@@ -4336,6 +4609,9 @@ msgstr ""
 msgid ""
 "Question tooltip text for Document, Selection and Text form elements. "
 "Content of the message to be displayed for Message elements."
+msgstr ""
+
+msgid "R102"
 msgstr ""
 
 msgid "REFUSEE"
@@ -4549,6 +4825,7 @@ msgstr ""
 msgid "Restore activity to submitted"
 msgstr ""
 
+msgctxt "equivalence_status"
 msgid "Restricted"
 msgstr ""
 
@@ -4751,13 +5028,26 @@ msgstr ""
 msgid "Search on portal"
 msgstr ""
 
+msgid ""
+"Secondary education in Belgium is the level of education between the end of "
+"primary school and the beginning of higher education."
+msgstr ""
+
 msgid "Secondary education type"
 msgstr ""
 
 msgid "Secondary school diploma"
 msgstr ""
 
+msgid ""
+"Secondary school diploma or, if not available, a certificate of enrolment or "
+"school attendance."
+msgstr ""
+
 msgid "Secondary school graduation year"
+msgstr ""
+
+msgid "Secondary school or alternative"
 msgstr ""
 
 msgid "Secondary studies"
@@ -4866,6 +5156,9 @@ msgstr ""
 msgid "Show details"
 msgstr ""
 
+msgid "Show the checklist menu"
+msgstr ""
+
 msgid "Signatures"
 msgstr ""
 
@@ -4945,6 +5238,9 @@ msgid "Specified"
 msgstr ""
 
 msgid "Specify if other"
+msgstr ""
+
+msgid "Specify the reason for requesting"
 msgstr ""
 
 msgid "Sport affiliation"
@@ -5322,6 +5618,11 @@ msgid_plural "The following admissions have not been updated: {}."
 msgstr[0] ""
 msgstr[1] ""
 
+msgid ""
+"The global status of the application must be one of the following in order "
+"to realize this action: "
+msgstr ""
+
 #, python-format
 msgid ""
 "The global status of the application must be one of the following in order "
@@ -5332,12 +5633,6 @@ msgstr ""
 msgid ""
 "The global status of the application must be one of the following in order "
 "to submit the dossier to the faculty: %(statuses)s."
-msgstr ""
-
-#, python-format
-msgid ""
-"The global status of the application must be one of the following to realize "
-"this action: %(statuses)s."
 msgstr ""
 
 msgid "The jury is not in progress"
@@ -5377,6 +5672,17 @@ msgstr ""
 msgid ""
 "The number of acquired <strong>doctoral</strong> credits amounts to "
 "%(credits_nb)s credits."
+msgstr ""
+
+msgid "The number of credits earned must be greater than or equal to 0."
+msgstr ""
+
+msgid ""
+"The number of credits earned must be less than or equal to the number of "
+"credits registered."
+msgstr ""
+
+msgid "The number of credits registered must be greater than 0."
 msgstr ""
 
 msgid "The opinion about the extension request is not completed."
@@ -5423,6 +5729,9 @@ msgstr ""
 msgid "The proposition must be submitted to realize this action."
 msgstr ""
 
+msgid "The proposition must not be cancelled to realize this action."
+msgstr ""
+
 msgid "The proposition must not be concerned by the payment."
 msgstr ""
 
@@ -5444,6 +5753,12 @@ msgstr ""
 msgid "The resulting calculated academic year or pool is not consistent."
 msgstr ""
 
+msgid ""
+"The secondary school diploma is the Certificat d'Enseignement Secondaire "
+"Superieur (CESS, Certificate of Higher Secondary Education). It is commonly "
+"referred to in many countries as the baccalaureat."
+msgstr ""
+
 #, python-format
 msgid "The selection type must be one of the following values: %(values)s."
 msgstr ""
@@ -5455,6 +5770,9 @@ msgid "The signature request procedure isn't in progress."
 msgstr ""
 
 msgid "The start date can't be later than the end date"
+msgstr ""
+
+msgid "The start date must be earlier than or the same as the end date."
 msgstr ""
 
 #, python-format
@@ -5611,6 +5929,17 @@ msgid ""
 "The applicant will still need to be informed."
 msgstr ""
 
+msgid "This value may not exceed the number of registered credits"
+msgstr ""
+
+#, python-format
+msgid "This value must be equal to or greater than %(MINIMUM_CREDIT_NUMBER)s"
+msgstr ""
+
+#, python-format
+msgid "This value must be greater than %(MINIMUM_CREDIT_NUMBER)s"
+msgstr ""
+
 msgid "Tick boxes"
 msgstr ""
 
@@ -5665,6 +5994,9 @@ msgid ""
 "during your studies and therefore obtain a residence permit in Belgium."
 msgstr ""
 
+msgid "To complete after enrolment"
+msgstr ""
+
 msgid ""
 "To enrol in a bachelor's or master's course, the child of a staff member "
 "may, under certain conditions, benefit from a reduced tuition fee. Parents "
@@ -5692,6 +6024,9 @@ msgstr ""
 msgid "Total hourly volume"
 msgstr ""
 
+msgid "Total number of credits registered in your annual programme (PAE)."
+msgstr ""
+
 msgctxt "admission"
 msgid "Training acronym"
 msgstr ""
@@ -5715,18 +6050,32 @@ msgstr ""
 msgid "Transcript"
 msgstr ""
 
+msgctxt "cv-attachment"
+msgid "Transcript"
+msgstr ""
+
 msgid "Transcript translation"
 msgstr ""
 
 msgid "Transcript type"
 msgstr ""
 
+msgid "Translation"
+msgstr ""
+
 msgid "Trigger the payment hook"
+msgstr ""
+
+msgid "True"
 msgstr ""
 
 msgid "Tutorship act"
 msgstr ""
 
+msgid "Type"
+msgstr ""
+
+msgctxt "admission"
 msgid "Type"
 msgstr ""
 
@@ -5801,6 +6150,11 @@ msgstr ""
 msgid "Unsubmitted for publication"
 msgstr ""
 
+msgid ""
+"Until the application is submitted, you can generate a recap of the "
+"application on this page."
+msgstr ""
+
 msgctxt "verb"
 msgid "Update"
 msgstr ""
@@ -5809,6 +6163,9 @@ msgid "Update date"
 msgstr ""
 
 msgid "Update doctorate admission"
+msgstr ""
+
+msgid "Update experience"
 msgstr ""
 
 msgid "Update member"
@@ -5859,6 +6216,36 @@ msgstr ""
 msgid "Values"
 msgstr ""
 
+msgid "Via Facebook"
+msgstr ""
+
+msgid "Via LinkedIn"
+msgstr ""
+
+msgid "Via MOOCs"
+msgstr ""
+
+msgid "Via a personalized letter"
+msgstr ""
+
+msgid "Via an emailing"
+msgstr ""
+
+msgid "Via former students"
+msgstr ""
+
+msgid "Via friends"
+msgstr ""
+
+msgid "Via the website of UCLouvain"
+msgstr ""
+
+msgid "Via the website of the continuing education"
+msgstr ""
+
+msgid "Via word of mouth"
+msgstr ""
+
 msgid "Viewed at"
 msgstr ""
 
@@ -5874,6 +6261,7 @@ msgstr ""
 msgid "WORK_CONTRACT"
 msgstr "Work contract"
 
+msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr ""
 
@@ -6059,6 +6447,9 @@ msgstr "Yes, only in Saint-Louis (€12)"
 msgid "Yes, only in Tournai (E12)"
 msgstr "Yes, only in Tournai (€12)"
 
+msgid "Yes,No,Incomplete field"
+msgstr ""
+
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
 
@@ -6095,6 +6486,9 @@ msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
 "list of acronyms separated by the \"%(separator)s\" character and ending "
 "with the same character."
+msgstr ""
+
+msgid "You can specify the locality or postcode in your search."
 msgstr ""
 
 msgid ""
@@ -6313,6 +6707,12 @@ msgstr ""
 msgid "e.g.: %(example)s"
 msgstr ""
 
+msgid "e.g.: 5th out of 30"
+msgstr ""
+
+msgid "e.g.: Librarian"
+msgstr ""
+
 msgid "education group type"
 msgstr ""
 
@@ -6326,6 +6726,16 @@ msgstr "Failed"
 
 #, python-format
 msgid "from %(start)s to %(end)s"
+msgstr ""
+
+#, python-format
+msgctxt "month_year"
+msgid "from %(start)s to %(end)s"
+msgstr ""
+
+#, python-format
+msgctxt "month_year"
+msgid "in %(end)s"
 msgstr ""
 
 msgid "items per page"

@@ -40,10 +40,17 @@
       {% checklist_state_button tab='parcours_anterieur' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' class='danger' htmx_post=change_status_url_insufficient %}
       {% checklist_state_button tab='parcours_anterieur' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' htmx_post=change_status_url_sufficient %}
     </div>
+    {% if view.valid_operation == False %}
+      <script>
+        $(document).ready(function () {
+            $('#previous-experiences-prevent-to-choose-success-modal').modal('show');
+        });
+      </script>
+    {% endif %}
   </div>
-{% endwith %}
 
-{% if request.htmx %}
-  {# Update the checklist menu  #}
-  {% include "admission/general_education/checklist_menu.html" with current_item='parcours_anterieur' %}
-{% endif %}
+  {% if request.htmx %}
+    {# Update the checklist menu item status #}
+    {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='parcours_anterieur' %}
+  {% endif %}
+{% endwith %}

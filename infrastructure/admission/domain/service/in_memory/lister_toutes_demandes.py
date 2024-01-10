@@ -111,6 +111,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             derniere_modification_par_candidat=False,
             dernieres_vues_par=[],
             date_confirmation=proposition.soumise_le,
+            est_premiere_annee=None,
         )
 
     @classmethod
@@ -137,6 +138,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             derniere_modification_par_candidat=False,
             dernieres_vues_par=[],
             date_confirmation=proposition.soumise_le,
+            est_premiere_annee=None,
         )
 
     @classmethod
@@ -163,4 +165,5 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             derniere_modification_par_candidat=False,
             dernieres_vues_par=[],
             date_confirmation=proposition.soumise_le,
+            est_premiere_annee=None,
         )
