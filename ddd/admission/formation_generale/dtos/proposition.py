@@ -123,7 +123,6 @@ class PropositionGestionnaireDTO(PropositionDTO):
     photo_identite_candidat: List[str]
 
     poursuite_de_cycle_a_specifier: bool
-    candidat_a_reussi_experience_academique_belge: bool
     poursuite_de_cycle: str
 
     candidat_a_plusieurs_demandes: bool

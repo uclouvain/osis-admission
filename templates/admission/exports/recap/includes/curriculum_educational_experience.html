@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain
+  * Copyright (C) 2015-2024 Université catholique de Louvain
   (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
@@ -66,11 +66,13 @@
   </div>
   {% if checklist_display %}
     <div class="row">
+      {% if is_foreign_experience or is_belgian_experience and experience.est_autre_formation %}
+        <div class="col-md-6">
+          {% field_data _('FWB equivalent course') experience.nom_formation_equivalente_communaute_fr %}
+        </div>
+      {% endif %}
       <div class="col-md-6">
-        {% field_data _('FWB equivalent course') experience.nom_formation_equivalente_communaute_fr hide_empty=True %}
-      </div>
-      <div class="col-md-6">
-        {% field_data _("Course cycle") experience.cycle_formation|enum_display:'Cycle' %}
+        {% field_data _("Course cycle") experience.cycle_formation|enum_display:'Cycle' hide_empty=True %}
       </div>
     </div>
   {% endif %}
@@ -182,7 +184,7 @@
                       <td></td>
                     {% endif %}
                   {% endif %}
-                    <td>{{ experience_year.avec_allegement|yesno:_('Yes,No,Incomplete field') }}</td>
+                    <td>{{ experience_year.allegement|enum_display:'Reduction' }}</td>
                 {% endif %}
               </tr>
               {% if experience.type_releve_notes == 'ONE_A_YEAR' and not hide_files %}

@@ -1,5 +1,5 @@
 {% extends "admission/modal/modal.html" %}
-{% load i18n bootstrap3 %}
+{% load i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -26,15 +26,24 @@
 {% endcomment %}
 
 
-{% block modal_id %}request-form-modal{% endblock %}
+{% block modal_id %}previous-experiences-prevent-to-choose-success-modal{% endblock %}
 
-{% block modal_title %}{% translate "Specify the reason for requesting" %}{% endblock %}
+{% block modal_title %}
+  {% translate "Impossible action" %}
+{% endblock %}
 
 {% block modal_body %}
-  {% bootstrap_field request_form.reason %}
+  <p>
+    {% blocktranslate trimmed %}
+      To move to this state, an admission requirement must have been selected and at least one access title line must
+      be selected in the past experience views.
+    {% endblocktranslate %}
+  </p>
 {% endblock %}
 
 {% block modal_footer %}
-  <button type="button" class="cancel-button btn btn-default" data-dismiss="modal">{% translate 'Close' %}</button>
-  <button type="submit" class="btn btn-primary" name="request-form">{% translate 'Confirm' %}</button>
+  <button type="button" class="btn btn-primary" data-dismiss="modal">
+    {% translate 'Ok' %}
+  </button>
+
 {% endblock %}

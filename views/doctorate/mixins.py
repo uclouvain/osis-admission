@@ -82,6 +82,8 @@ from admission.utils import (
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
     add_messages_into_htmx_response,
+    person_is_sic,
+    person_is_fac_cdd,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
@@ -126,6 +128,14 @@ class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMix
     @property
     def is_general(self):
         return self.current_context == CONTEXT_GENERAL
+
+    @cached_property
+    def is_sic(self):
+        return person_is_sic(self.request.user.person)
+
+    @cached_property
+    def is_fac(self):
+        return person_is_fac_cdd(self.request.user.person)
 
 
 class LoadDossierViewMixin(AdmissionViewMixin):

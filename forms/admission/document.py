@@ -65,7 +65,7 @@ class UploadDocumentForm(UploadDocumentFormMixin):
 
 class UploadFreeDocumentForm(forms.Form):
     file_name = forms.CharField(
-        label=pgettext_lazy('admission', 'File name'),
+        label=pgettext_lazy('admission', 'Document name'),
     )
 
     file = AdmissionFileUploadField(
@@ -75,13 +75,20 @@ class UploadFreeDocumentForm(forms.Form):
     )
 
 
-REQUEST_STATUS_CHOICES = StatutReclamationEmplacementDocument.choices()
-REQUEST_STATUS_CHOICES_WITH_OPTIONAL = (BLANK_CHOICE[0],) + StatutReclamationEmplacementDocument.choices()
+REQUEST_STATUS_CHOICES = (BLANK_CHOICE[0],) + StatutReclamationEmplacementDocument.choices()
+LIMITED_REQUEST_STATUS_CHOICES = (BLANK_CHOICE[0],) + StatutReclamationEmplacementDocument.choices_except(
+    StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT,
+    StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT,
+)
+
+
+def get_request_status_choices(only_limited_request_choices):
+    return LIMITED_REQUEST_STATUS_CHOICES if only_limited_request_choices else REQUEST_STATUS_CHOICES
 
 
 class RequestFreeDocumentForm(forms.Form):
     file_name = forms.CharField(
-        label=pgettext_lazy('admission', 'File name'),
+        label=pgettext_lazy('admission', 'Document name'),
     )
 
     reason = forms.CharField(
@@ -92,8 +99,18 @@ class RequestFreeDocumentForm(forms.Form):
 
     request_status = forms.ChoiceField(
         label=_('Document to be requested'),
-        choices=REQUEST_STATUS_CHOICES_WITH_OPTIONAL,
+        choices=REQUEST_STATUS_CHOICES,
     )
+
+    def __init__(self, only_limited_request_choices, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['request_status'].choices = get_request_status_choices(only_limited_request_choices)
+
+        if len(self.fields['request_status'].choices) == 2:
+            # If there is only one not empty choice, hide the field and select the related value
+            self.initial['request_status'] = self.fields['request_status'].choices[1][0]
+            self.fields['request_status'].widget = forms.HiddenInput()
 
 
 class RequestFreeDocumentWithDefaultFileForm(UploadFreeDocumentForm):
@@ -108,12 +125,12 @@ class ChangeRequestDocumentForm(forms.Form):
         request_status,
         document_identifier,
         proposition_uuid,
-        automatically_required,
+        only_limited_request_choices,
     ):
         document_field = forms.ChoiceField(
             label=label,
-            required=automatically_required,
-            choices=REQUEST_STATUS_CHOICES if automatically_required else REQUEST_STATUS_CHOICES_WITH_OPTIONAL,
+            required=False,
+            choices=get_request_status_choices(only_limited_request_choices),
             initial=request_status,
         )
         document_field.widget.attrs['hx-trigger'] = 'change changed delay:2s, confirmStatusChange'
@@ -126,14 +143,21 @@ class ChangeRequestDocumentForm(forms.Form):
         )
         return document_field
 
-    def __init__(self, document_identifier, proposition_uuid, automatically_required, *args, **kwargs):
+    def __init__(
+        self,
+        document_identifier,
+        proposition_uuid,
+        only_limited_request_choices,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self.fields[document_identifier] = self.create_change_request_document_field(
             label='',
             request_status='',
             document_identifier=document_identifier,
             proposition_uuid=proposition_uuid,
-            automatically_required=automatically_required,
+            only_limited_request_choices=only_limited_request_choices,
         )
 
 
@@ -149,12 +173,20 @@ class RequestDocumentForm(forms.Form):
         required=False,
     )
 
-    def __init__(self, candidate_language, auto_requested=False, editable_document=False, *args, **kwargs):
+    def __init__(
+        self,
+        candidate_language,
+        editable_document=False,
+        only_limited_request_choices=False,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         self.fields['reason'].label = mark_safe(
             _(
-                'Communication to the candidate, in <span class="label label-admission-primary">{language_code}]</span>'
+                'Communication to the candidate (refusal reason), in '
+                '<span class="label label-admission-primary">{language_code}]</span>'
             ).format(language_code=formatted_language(candidate_language))
         )
 
@@ -165,14 +197,7 @@ class RequestDocumentForm(forms.Form):
                 f'<span class="fa-solid fa-file {document_request_status_css_class(request_status)}"></span>'
             )
 
-        self.auto_requested = auto_requested
-        self.fields['request_status'].choices = (
-            REQUEST_STATUS_CHOICES if auto_requested else REQUEST_STATUS_CHOICES_WITH_OPTIONAL
-        )
-        if auto_requested:
-            # If the document is automatically requested, it must be requested to specify a reason
-            self.fields['request_status'].required = True
-            self.fields['request_status'].widget.attrs['title'] = _('Automatically required')
+        self.fields['request_status'].choices = get_request_status_choices(only_limited_request_choices)
 
         if not editable_document:
             self.fields['request_status'].disabled = True
@@ -202,7 +227,14 @@ class RequestAllDocumentsForm(forms.Form):
         widget=forms.Textarea(),
     )
 
-    def __init__(self, documents: List[EmplacementDocumentDTO], proposition_uuid, *args, **kwargs):
+    def __init__(
+        self,
+        documents: List[EmplacementDocumentDTO],
+        proposition_uuid,
+        only_limited_request_choices,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         documents_choices = []
@@ -219,7 +251,7 @@ class RequestAllDocumentsForm(forms.Form):
         self.documents = {}
 
         for document in documents:
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
+            if document.statut == StatutEmplacementDocument.A_RECLAMER.name and document.statut_reclamation:
                 if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:
@@ -233,7 +265,7 @@ class RequestAllDocumentsForm(forms.Form):
                     document_identifier=document.identifiant,
                     request_status=document.statut_reclamation,
                     proposition_uuid=proposition_uuid,
-                    automatically_required=document.requis_automatiquement,
+                    only_limited_request_choices=only_limited_request_choices,
                 )
 
                 self.fields[document.identifiant] = document_field

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from typing import Dict, Set, Optional, List
 
-import rules
 from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
@@ -118,14 +118,15 @@ from admission.utils import (
     get_backoffice_admission_url,
     get_portal_admission_url,
 )
-from admission.utils import person_is_sic, person_is_fac_cdd
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_profile.models import EducationalExperience
+from osis_role.templatetags.osis_role import has_perm
 
 __all__ = [
     'ChecklistView',
@@ -154,7 +155,6 @@ __all__ = [
 
 __namespace__ = False
 
-from osis_role.templatetags.osis_role import has_perm
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
 
@@ -172,15 +172,8 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'decision_facultaire': _("Decision of the faculty"),
         },
         'hide_files': True,
+        'condition_acces_enum': ConditionAcces,
     }
-
-    @cached_property
-    def is_sic(self):
-        return person_is_sic(self.request.user.person)
-
-    @cached_property
-    def is_fac(self):
-        return person_is_fac_cdd(self.request.user.person)
 
     @cached_property
     def can_update_checklist_tab(self):
@@ -429,10 +422,16 @@ class FacultyDecisionSendToSicView(
 ):
     name = 'faculty-decision-send-to-sic'
     urlpatterns = {'fac-decision-send-to-sic': 'fac-decision/send-to-sic'}
-    permission_required = 'admission.checklist_faculty_decision_transfer_to_sic'
     template_name = 'admission/general_education/includes/checklist/fac_decision.html'
     htmx_template_name = 'admission/general_education/includes/checklist/fac_decision.html'
     form_class = Form
+
+    def get_permission_required(self):
+        return (
+            ('admission.checklist_faculty_decision_transfer_to_sic_with_decision',)
+            if self.request.GET.get('approval') or self.request.GET.get('refusal')
+            else ('admission.checklist_faculty_decision_transfer_to_sic_without_decision',)
+        )
 
     def form_valid(self, form):
         try:
@@ -450,6 +449,7 @@ class FacultyDecisionSendToSicView(
                 else EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
+                    envoi_par_fac=self.is_fac,
                 )
             )
 
@@ -476,7 +476,7 @@ class FacultyRefusalDecisionView(
     def get_permission_required(self):
         return (
             (
-                'admission.checklist_faculty_decision_transfer_to_sic'
+                'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
                 if 'save_transfer' in self.request.POST
                 else 'admission.checklist_change_faculty_decision'
             ),
@@ -524,7 +524,7 @@ class FacultyApprovalDecisionView(
     def get_permission_required(self):
         return (
             (
-                'admission.checklist_faculty_decision_transfer_to_sic'
+                'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
                 if 'save_transfer' in self.request.POST
                 else 'admission.checklist_change_faculty_decision'
             ),
@@ -579,7 +579,7 @@ class ChecklistView(
     permission_required = 'admission.view_checklist'
 
     @classmethod
-    def checklist_documents_by_tab(cls) -> Dict[str, Set[str]]:
+    def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
         assimilation_documents = {
             'CARTE_IDENTITE',
             'PASSEPORT',
@@ -588,7 +588,7 @@ class ChecklistView(
         for document in DocumentsAssimilation:
             assimilation_documents.add(document)
 
-        return {
+        documents_by_tab = {
             'assimilation': assimilation_documents,
             'financabilite': {
                 'RELEVE_NOTES',
@@ -635,6 +635,24 @@ class ChecklistView(
             f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}': set(DocumentsEtudesSecondaires.keys()),
         }
 
+        # Add documents from the specific questions
+        checklist_target_tab_by_specific_question_tab = {
+            Onglets.CURRICULUM.name: 'parcours_anterieur',
+            Onglets.ETUDES_SECONDAIRES.name: f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}',
+            Onglets.INFORMATIONS_ADDITIONNELLES.name: 'specificites_formation',
+        }
+
+        for specific_question in specific_questions:
+            if (
+                specific_question.type == TypeItemFormulaire.DOCUMENT.name
+                and specific_question.onglet in checklist_target_tab_by_specific_question_tab
+            ):
+                documents_by_tab[checklist_target_tab_by_specific_question_tab[specific_question.onglet]].add(
+                    specific_question.uuid
+                )
+
+        return documents_by_tab
+
     def get_template_names(self):
         if self.request.htmx:
             return ["admission/general_education/checklist_menu.html"]
@@ -658,6 +676,7 @@ class ChecklistView(
                     onglets=[
                         Onglets.INFORMATIONS_ADDITIONNELLES.name,
                         Onglets.ETUDES_SECONDAIRES.name,
+                        Onglets.CURRICULUM.name,
                     ],
                 )
             )
@@ -700,29 +719,20 @@ class ChecklistView(
 
             # Documents
             admission_documents = command_result.emplacements_documents
-            question_specifiques_documents_uuids = [
-                valeur
-                for question in context['specific_questions_by_tab'][Onglets.INFORMATIONS_ADDITIONNELLES.name]
-                for valeur in (question.valeur if question.valeur else [])
-                if question.type == TypeItemFormulaire.DOCUMENT.name
-            ]
 
-            documents_by_tab = self.checklist_documents_by_tab()
+            documents_by_tab = self.checklist_documents_by_tab(specific_questions=specific_questions)
 
             context['documents'] = {
-                tab_name: [
-                    admission_document
-                    for admission_document in admission_documents
-                    if admission_document.identifiant.split('.')[-1] in tab_documents
-                ]
+                tab_name: sorted(
+                    [
+                        admission_document
+                        for admission_document in admission_documents
+                        if admission_document.identifiant.split('.')[-1] in tab_documents
+                    ],
+                    key=lambda doc: doc.libelle,
+                )
                 for tab_name, tab_documents in documents_by_tab.items()
             }
-            context['documents']['specificites_formation'] += [
-                document
-                for document_uuid in question_specifiques_documents_uuids
-                for document in admission_documents
-                if document_uuid in document.document_uuids
-            ]
 
             # Experiences
             experiences = self._get_experiences(command_result.resume)
@@ -784,6 +794,9 @@ class ChecklistView(
                     ),
                     prefix=tab_identifier,
                 )
+
+            # Remove the experiences that we had in the checklist that have been removed
+            children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
@@ -860,6 +873,7 @@ class ChecklistView(
                     },
                 }
             )
+            context['can_choose_access_title'] = can_change_access_title
 
         return context
 
@@ -1003,6 +1017,10 @@ class PastExperiencesStatusView(
     htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
     form_class = StatusForm
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.valid_operation = False
+
     def get_initial(self):
         return self.admission.checklist['current']['parcours_anterieur']['statut']
 
@@ -1019,11 +1037,8 @@ class PastExperiencesStatusView(
                     statut=form.cleaned_data['status'],
                 )
             )
+            self.valid_operation = True
         except MultipleBusinessExceptions:
-            self.message_on_failure = _(
-                "To move to this state, an admission requirement must have been selected and at least one access title "
-                "line must be selected in the past experience views.",
-            )
             return super().form_invalid(form)
 
         return super().form_valid(form)
@@ -1062,6 +1077,7 @@ class PastExperiencesAdmissionRequirementView(
                     condition_acces=form.cleaned_data['admission_requirement'],
                     millesime_condition_acces=form.cleaned_data['admission_requirement_year']
                     and form.cleaned_data['admission_requirement_year'].year,
+                    avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
                 )
             )
 
@@ -1069,6 +1085,7 @@ class PastExperiencesAdmissionRequirementView(
             form.data = {
                 'admission_requirement': self.admission.admission_requirement,
                 'admission_requirement_year': self.admission.admission_requirement_year_id,
+                'with_prerequisite_courses': self.admission.with_prerequisite_courses,
             }
 
         except BusinessException as exception:
@@ -1101,6 +1118,7 @@ class PastExperiencesAccessTitleView(
         context['checked'] = self.checked
         context['url'] = self.request.get_full_path()
         context['experience_uuid'] = self.request.GET.get('experience_uuid')
+        context['can_choose_access_title'] = True  # True as the user can access to the current view
         return context
 
     def form_valid(self, form):
@@ -1282,14 +1300,6 @@ class SaveCommentView(AdmissionFormMixin, FormView):
             tab=self.kwargs['tab'],
         )
 
-    @cached_property
-    def is_sic(self):
-        return person_is_sic(self.request.user.person)
-
-    @cached_property
-    def is_fac(self):
-        return person_is_fac_cdd(self.request.user.person)
-
     def get_prefix(self):
         return self.kwargs['tab']
 
@@ -1327,7 +1337,6 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['formation'] = self.proposition.formation
-        kwargs['has_success_be_experience'] = self.proposition.candidat_a_reussi_experience_academique_belge
         return kwargs
 
     def get_initial(self):

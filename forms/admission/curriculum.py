@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ from admission.forms import (
     AdmissionModelCountryChoiceField,
 )
 from admission.forms.doctorate.training.activity import AcademicYearField
+from admission.mark_safe_lazy import mark_safe_lazy
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -56,6 +57,7 @@ from osis_profile.models.enums.curriculum import (
     TranscriptType,
     Grade,
     Result,
+    Reduction,
 )
 from reference.models.country import Country
 from reference.models.diploma_title import DiplomaTitle
@@ -290,7 +292,7 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
     )
 
     other_institute = forms.BooleanField(
-        label=_('Other institute'),
+        label=pgettext_lazy('curriculum', 'Other institute'),
         required=False,
     )
 
@@ -305,7 +307,7 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
     )
 
     institute = forms.ModelChoiceField(
-        label=_('Institute'),
+        label=pgettext_lazy('curriculum', 'Institute'),
         required=False,
         queryset=Organization.objects.filter(
             establishment_type__in=[
@@ -353,6 +355,28 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
     evaluation_type = forms.ChoiceField(
         choices=EMPTY_CHOICE + EvaluationSystem.choices(),
         label=_('Evaluation system'),
+        help_text=mark_safe_lazy(
+            '<p>%(p0)s</p> <p><strong><u>%(t1)s</u></strong></p> <p>%(p1)s</p> <p><strong><u>%(t2)s</strong></u></p> '
+            '<p>%(p2)s</p> <p><strong><u>%(t3)s</u></strong></p> <p>%(p3)s</p>',
+            p0=_(
+                'Please select the assessment system used by the institution where you studied. The assessment system '
+                'is usually indicated <strong>on your transcripts or diploma supplements</strong>.'
+            ),
+            t1=_('ECTS credits'),
+            p1=_(
+                'ECTS credits are a European unit of measurement that assesses the workload represented by a class '
+                'within a course. A full year of study is generally equivalent to 60 credits. The ECTS system has been '
+                'introduced in most European countries but is also increasingly used in other countries.'
+            ),
+            t2=_('Non-European credits'),
+            p2=_(
+                'Assessment is also based on the credit system, which quantifies the workload involved in a class. '
+                'Depending on the country, a full year of study is equivalent to a defined number of credits (e.g. '
+                '30 credits).'
+            ),
+            t3=_('No credit system'),
+            p3=_('Any other assessment system that is not based on a credit system.'),
+        ),
     )
 
     linguistic_regime = forms.ModelChoiceField(
@@ -608,7 +632,7 @@ EDUCATIONAL_EXPERIENCE_YEAR_FIELDS = {
     'with_complement',
     'fwb_registered_credit_number',
     'fwb_acquired_credit_number',
-    'with_reduction',
+    'reduction',
     'is_102_change_of_course',
 }
 
@@ -673,8 +697,9 @@ class AdmissionCurriculumEducationalExperienceYearForm(ByContextAdmissionFormMix
         required=False,
         localize=True,
     )
-    with_reduction = forms.BooleanField(
+    reduction = forms.ChoiceField(
         label=_('Reduction'),
+        choices=EMPTY_CHOICE + Reduction.choices(),
         required=False,
     )
     is_102_change_of_course = forms.BooleanField(

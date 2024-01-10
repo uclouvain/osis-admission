@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -171,8 +171,8 @@
               </dt>
               <dd>
                 {% with formation=admission.formation %}
-                  {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
-                    {{ formation.sigle }}-1 - {% trans "First year of" %} {{ formation.intitule|lower }} ({{ formation.campus }})
+                  {% if admission|est_premiere_annee %}
+                    {{ formation.sigle }}-1 - {{ formation.intitule|intitule_premiere_annee }} ({{ formation.campus }})
                   {% else %}
                     {{ formation.sigle }} - {{ formation.intitule }} ({{ formation.campus }})
                   {% endif %}
@@ -303,8 +303,12 @@
               {% endif %}
             </strong>
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
+            <div class="mt-1">
+              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' %}
+            </div>
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
+          {% include 'admission/general_education/includes/checklist/previous_experiences_prevent_to_choose_success_modal.html' %}
         </div>
 
         {% for child in current.enfants %}
@@ -315,12 +319,12 @@
                   {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
                 </p>
                 <div>
-                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False hide_files=False %}
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False hide_files=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
                 {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant %}
                 <div>
-                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=can_update_curriculum %}
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=can_update_curriculum specific_questions=specific_questions_by_tab %}
                 </div>
               {% endif %}
             {% endwith %}
@@ -468,6 +472,19 @@
               }
           });
 
+          function refreshDocumentsSelectButtons(jQuerySelect) {
+              /*
+              * Enable/disable the previous and next buttons depending on the number of options in the select.
+              */
+              const prevOptionButton = jQuerySelect.siblings('.previous-option-button');
+              const nextOptionButton = jQuerySelect.siblings('.next-option-button');
+              const documentSelectElement = jQuerySelect[0];
+
+              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 1);
+              nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
+          }
+
+
           function refreshDocuments() {
               const selectedTab = window.location.hash || defaultTab;
               const currentSelect = $(`${selectedTab}-documents-select`);
@@ -483,7 +500,11 @@
                           'identifier': currentSelect.val(),
                       }
                   },
-              );
+              ).finally(() => {
+                  if (currentSelect.length) {
+                      refreshDocumentsSelectButtons(currentSelect);
+                  }
+              });
           }
 
           {# Change the selected document by using the left and right buttons #}
@@ -508,12 +529,7 @@
           });
 
           $('select[name="identifier"]').on('change', function(){
-              const prevOptionButton = $(this).siblings('.previous-option-button');
-              const nextOptionButton = $(this).siblings('.next-option-button');
-              const documentSelectElement = $(this)[0];
-
-              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 1)
-              nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
+              refreshDocumentsSelectButtons($(this));
           });
 
           $('.documents-tab').each(function(){
@@ -617,7 +633,13 @@
 
           {# The document viewer is resizable so we apply the previous custom height if there is one #}
           $(document).on('htmx:afterSettle', '#document-details', function(){
-              $('#document-editor-container').css('height', configurationCache.getItem('document_size', '100%'));
+              const documentEditorContainer = $('#document-editor-container');
+              documentEditorContainer.css(
+                  'height',
+                  documentEditorContainer.find('#no-document-container').length === 0 ?
+                    configurationCache.getItem('document_size', '100%')
+                    : 'fit-content',
+              );
           });
 
           $(document).mouseup(function (event) {
@@ -1100,6 +1122,13 @@
     #checklist-menu .sub-item.bg-warning {
       background-color: #fcf8e3;
     }
+    
+    /* Allow to scroll the content above the header menu */
+    html {
+      overflow: auto;
+      scroll-padding-top: 60px; /* height of sticky header */
+    }
+
 
   </style>
 {% endblock style %}

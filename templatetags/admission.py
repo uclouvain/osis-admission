@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import re
 from dataclasses import dataclass
 from functools import wraps
 from inspect import getfullargspec
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict
 
 from django import template
 from django.conf import settings
@@ -55,11 +55,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos import EtudesSecondairesDTO
+from admission.ddd.admission.dtos import EtudesSecondairesDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -69,6 +71,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     RegleCalculeResultatAvecFinancable,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -86,6 +89,8 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from admission.utils import format_academic_year
 from osis_document.api.utils import get_remote_metadata, get_remote_token
+
+from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -620,11 +625,12 @@ def status_as_class(activity):
 
 
 @register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False):
+def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False):
     return {
         'field': field,
         'classes': classes,
         'show_help': show_help,
+        'html_tooltip': html_tooltip,
     }
 
 
@@ -941,31 +947,69 @@ def diplomatic_post_name(diplomatic_post):
 
 
 @register.filter
-def is_profile_identification_different(profil_candidat, identification):
+def is_profile_identification_different(
+    profil_candidat: ProfilCandidatDTO,
+    identification: Union[Person, IdentificationDTO],
+):
     if profil_candidat is None or identification is None:
         return False
+    if isinstance(identification, Person):
+        return any(
+            (
+                profil_candidat.nom != identification.last_name,
+                profil_candidat.prenom != identification.first_name,
+                profil_candidat.genre != identification.gender,
+                profil_candidat.nationalite
+                != (identification.country_of_citizenship.iso_code if identification.country_of_citizenship else ''),
+            )
+        )
     return any(
         (
             profil_candidat.nom != identification.nom,
             profil_candidat.prenom != identification.prenom,
             profil_candidat.genre != identification.genre,
-            profil_candidat.nom_pays_nationalite != identification.nom_pays_nationalite,
+            profil_candidat.nationalite != identification.pays_nationalite,
         )
     )
 
 
 @register.filter
-def is_profile_coordinates_different(profil_candidat, coordonnees):
-    if profil_candidat is None or coordonnees is None or coordonnees.domicile_legal is None:
+def is_profile_coordinates_different(profil_candidat: ProfilCandidatDTO, coordonnees: Union[CoordonneesDTO, dict]):
+    if profil_candidat is None or coordonnees is None:
+        return False
+    if isinstance(coordonnees, CoordonneesDTO):
+        if coordonnees.domicile_legal is None:
+            return False
+        if coordonnees.adresse_correspondance is not None:
+            adresse = coordonnees.adresse_correspondance
+        else:
+            adresse = coordonnees.domicile_legal
+        if not adresse:
+            return False
+        return any(
+            (
+                str(profil_candidat.numero_rue) != str(adresse.numero_rue),
+                profil_candidat.rue != adresse.rue,
+                profil_candidat.boite_postale != adresse.boite_postale,
+                profil_candidat.code_postal != adresse.code_postal,
+                profil_candidat.ville != adresse.ville,
+                profil_candidat.pays != adresse.pays,
+            )
+        )
+    if coordonnees['contact'] is not None:
+        adresse = coordonnees['contact']
+    else:
+        adresse = coordonnees['residential']
+    if not adresse:
         return False
     return any(
         (
-            profil_candidat.numero_rue != coordonnees.domicile_legal.numero_rue,
-            profil_candidat.rue != coordonnees.domicile_legal.rue,
-            profil_candidat.boite_postale != coordonnees.domicile_legal.boite_postale,
-            profil_candidat.code_postal != coordonnees.domicile_legal.code_postal,
-            profil_candidat.ville != coordonnees.domicile_legal.ville,
-            profil_candidat.nom_pays != coordonnees.domicile_legal.nom_pays,
+            str(profil_candidat.numero_rue) != adresse.street_number,
+            profil_candidat.rue != adresse.street,
+            profil_candidat.boite_postale != adresse.postal_box,
+            profil_candidat.code_postal != adresse.postal_code,
+            profil_candidat.ville != adresse.city,
+            profil_candidat.pays != adresse.country.iso_code,
         )
     )
 
@@ -1039,6 +1083,7 @@ def access_title_checkbox(context, experience_uuid, experience_type, current_yea
             'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
             'checked': access_title.selectionne,
             'experience_uuid': experience_uuid,
+            'can_choose_access_title': context['can_choose_access_title'],
         }
 
 
@@ -1089,7 +1134,7 @@ def bg_class_by_checklist_experience(experience):
 def experience_details_template(
     resume_proposition: ResumePropositionDTO,
     experience,
-    specific_questions: List[QuestionSpecifiqueDTO] = None,
+    specific_questions: Dict[str, List[QuestionSpecifiqueDTO]] = None,
     with_edit_link_button=True,
     hide_files=True,
 ):
@@ -1145,7 +1190,12 @@ def experience_details_template(
             if with_edit_link_button
             else None
         )
-        context.update(get_secondary_studies_context(resume_proposition, specific_questions))
+        context.update(
+            get_secondary_studies_context(
+                resume_proposition,
+                specific_questions[Onglets.ETUDES_SECONDAIRES.name],
+            )
+        )
 
     return context
 
@@ -1192,3 +1242,17 @@ def checklist_experience_action_links(
 @register.filter
 def display_academic_years_range(ac_years):
     return '{} - {}'.format(ac_years[0].annee, ac_years[-1].annee)
+
+
+@register.filter
+def est_premiere_annee(admission: Union[PropositionGestionnaireDTO, DemandeRechercheDTO]):
+    if isinstance(admission, PropositionGestionnaireDTO):
+        return admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO'
+    elif isinstance(admission, DemandeRechercheDTO):
+        return admission.est_premiere_annee
+    return None
+
+
+@register.filter
+def intitule_premiere_annee(intitule: str):
+    return _("First year of") + ' ' + intitule.lower()

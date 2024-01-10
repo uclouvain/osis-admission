@@ -61,3 +61,4 @@ class DemandeRechercheDTO(interface.DTO):
     derniere_modification_par_candidat: bool
     dernieres_vues_par: List[VisualiseurAdmissionDTO]
     date_confirmation: Optional[datetime.datetime]
+    est_premiere_annee: Optional[bool]

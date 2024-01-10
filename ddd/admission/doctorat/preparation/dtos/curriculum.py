@@ -1,32 +1,32 @@
-##############################################################################
+# ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
-##############################################################################
+# ##############################################################################
+
 import datetime
 from functools import reduce
-from typing import List, Optional, Set
-from uuid import UUID
+from typing import List, Optional
 
 import attr
 from dateutil import relativedelta
@@ -52,7 +52,7 @@ class AnneeExperienceAcademiqueDTO(interface.DTO):
     avec_complement: Optional[bool]
     credits_inscrits_communaute_fr: Optional[float]
     credits_acquis_communaute_fr: Optional[float]
-    avec_allegement: Optional[bool]
+    allegement: str
     est_reorientation_102: Optional[bool]
 
 
@@ -84,6 +84,7 @@ class ExperienceAcademiqueDTO(interface.DTO):
     systeme_evaluation: str
     nom_formation: str
     nom_formation_equivalente_communaute_fr: str
+    est_autre_formation: Optional[bool]
     cycle_formation: str
     type_enseignement: str
     valorisee_par_admissions: Optional[List[str]] = None

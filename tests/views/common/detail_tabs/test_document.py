@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ from django.test import TestCase, override_settings
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
+from rest_framework import status
 
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.person import CompletePersonFactory
@@ -197,8 +198,9 @@ class DocumentViewTestCase(TestCase):
             return f'{IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE[document_type]}.{document_uuid}'
         return ''
 
-    def init_documents(self):
+    def init_documents(self, for_fac: bool = False, for_sic: bool = True):
         self.client.force_login(user=self.sic_manager_user)
+        default_status = self.general_admission.status
         self.sic_free_non_requestable_internal_document = self._create_a_free_document(
             self.sic_manager_user,
             TypeEmplacementDocument.LIBRE_INTERNE_SIC.name,
@@ -214,6 +216,9 @@ class DocumentViewTestCase(TestCase):
         )
 
         self.client.force_login(user=self.fac_manager_user)
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save(update_fields=['status'])
+        self.general_admission.refresh_from_db()
         self.fac_free_non_requestable_internal_document = self._create_a_free_document(
             self.fac_manager_user,
             TypeEmplacementDocument.LIBRE_INTERNE_FAC.name,
@@ -227,6 +232,14 @@ class DocumentViewTestCase(TestCase):
             self.fac_manager_user,
             TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
         )
+
+        if for_fac:
+            return
+
+        if for_sic:
+            self.general_admission.status = default_status
+            self.general_admission.save(update_fields=['status'])
+            self.general_admission.refresh_from_db()
 
     # The manager uploads a free document that only the other managers can view
     @freezegun.freeze_time('2022-01-01')
@@ -308,6 +321,9 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_uploads_free_and_readonly_internal_document(self):
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save(update_fields=['status'])
+
         self.client.force_login(user=self.fac_manager_user)
 
         url = resolve_url(
@@ -383,8 +399,7 @@ class DocumentViewTestCase(TestCase):
             },
         )
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_sic_manager_generates_new_analysis_folder(self):
+    def _mock_folder_generation(self):
         save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
         patched = save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
@@ -410,6 +425,10 @@ class DocumentViewTestCase(TestCase):
         patcher = mock.patch('admission.exports.admission_recap.admission_recap.save_raw_content_remotely')
         self.save_raw_content_mock = patcher.start()
         self.save_raw_content_mock.return_value = 'pdf-token'
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_sic_manager_generates_new_analysis_folder(self):
+        self._mock_folder_generation()
 
         self.client.force_login(user=self.sic_manager_user)
 
@@ -616,6 +635,9 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_requests_a_free_document_immediately(self):
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save(update_fields=['status'])
+
         self.client.force_login(user=self.fac_manager_user)
 
         url = resolve_url(
@@ -696,6 +718,9 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_requests_a_free_document_for_later(self):
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save(update_fields=['status'])
+
         self.client.force_login(user=self.fac_manager_user)
 
         url = resolve_url(
@@ -715,36 +740,13 @@ class DocumentViewTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-
-        # Create a specific question linked to the admission
-        form_item_instantiation: AdmissionFormItemInstantiation = (
-            AdmissionFormItemInstantiation.objects.select_related('form_item', 'admission')
-            .filter(
-                admission=self.general_admission,
-            )
-            .first()
-        )
-        self.assertIsNotNone(form_item_instantiation)
-        self.assertEqual(form_item_instantiation.required, False)
-
-        # Save information about the request into the admission
-        desired_result = {
-            f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
-                'last_actor': self.fac_manager_user.person.global_id,
-                'reason': 'My reason',
-                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
-                'last_action_at': '2022-01-01T00:00:00',
-                'deadline_at': '',
-                'requested_at': '',
-                'status': StatutEmplacementDocument.A_RECLAMER.name,
-                'automatically_required': False,
-                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
-            }
-        }
-        self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
+        self.assertFalse(response.context['form'].is_valid())
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_requests_a_free_document_with_a_default_file(self):
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save(update_fields=['status'])
+
         self.client.force_login(user=self.fac_manager_user)
 
         url = resolve_url(
@@ -834,7 +836,7 @@ class DocumentViewTestCase(TestCase):
     # The manager updates the reason of a free document that the candidate must upload
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_general_sic_manager_updates_the_request_of_a_free_document(self, frozen_time):
-        self.init_documents()
+        self.init_documents(for_sic=True)
 
         self.client.force_login(user=self.sic_manager_user)
         base_url = 'admission:general-education:document:candidate-request'
@@ -952,7 +954,7 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_general_fac_manager_updates_the_request_of_a_free_document(self, frozen_time):
-        self.init_documents()
+        self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.fac_manager_user)
         base_url = 'admission:general-education:document:candidate-request'
@@ -1035,7 +1037,7 @@ class DocumentViewTestCase(TestCase):
                 identifier=document_identifier,
             ),
             data={
-                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'reason': 'My new reason',
             },
             **self.default_headers,
@@ -1055,7 +1057,7 @@ class DocumentViewTestCase(TestCase):
             'requested_at': '',
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
-            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+            'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
@@ -1074,6 +1076,9 @@ class DocumentViewTestCase(TestCase):
         base_url = 'admission:general-education:document:candidate-request'
 
         # A FAC user cannot request a categorized document
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save(update_fields=['status'])
+
         self.client.force_login(user=self.fac_manager_user)
 
         response = self.client.get(
@@ -1088,6 +1093,9 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
         # A SIC user can request a categorized document
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
+
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(
@@ -1211,28 +1219,9 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], 'My new reason')
         form = response.context['form']
-        self.assertEqual(form.fields['request_status'].required, True)
+        self.assertEqual(form.fields['request_status'].required, False)
 
         frozen_time.move_to('2022-01-03')
-
-        # Post an invalid form
-        response = self.client.post(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=self.non_free_document_identifier,
-            ),
-            data={
-                'request_status': '',
-                'reason': '',
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('request_status', []))
 
         # Post a valid form
         response = self.client.post(
@@ -1274,10 +1263,30 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.second_sic_manager_user.person)
 
+        # Don't request the document anymore
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={
+                'request_status': '',
+                'reason': '',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+        self.general_admission.refresh_from_db()
+        self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
+
     # The manager cancels the request of a document
     @freezegun.freeze_time('2022-01-01')
     def test_general_sic_manager_cancels_the_request_of_a_free_document(self):
-        self.init_documents()
+        self.init_documents(for_sic=True)
 
         self.client.force_login(user=self.sic_manager_user)
         base_url = 'admission:general-education:document:candidate-request'
@@ -1388,7 +1397,7 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_cancels_the_request_of_a_free_document(self):
-        self.init_documents()
+        self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.fac_manager_user)
         base_url = 'admission:general-education:document:candidate-request'
@@ -1501,6 +1510,8 @@ class DocumentViewTestCase(TestCase):
         base_url = 'admission:general-education:document:candidate-request'
 
         # A FAC user cannot request a categorized document
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save(update_fields=['status'])
         self.client.force_login(user=self.fac_manager_user)
 
         response = self.client.get(
@@ -1515,6 +1526,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
         # A SIC user can request a categorized document
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(
@@ -1618,9 +1631,9 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['request_reason'], 'My reason')
         form = response.context['form']
-        self.assertEqual(form.fields['request_status'].required, True)
+        self.assertEqual(form.fields['request_status'].required, False)
 
-        # Post an invalid form
+        # Don't request this document anymore
         response = self.client.post(
             resolve_url(
                 base_url,
@@ -1633,13 +1646,14 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('request_status', []))
+        self.assertTrue(form.is_valid())
+        self.general_admission.refresh_from_db()
+        self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
 
     # The manager deletes a document
     @freezegun.freeze_time('2022-01-01')
     def test_general_sic_manager_deletes_a_document(self):
-        self.init_documents()
+        self.init_documents(for_sic=True)
 
         base_url = 'admission:general-education:document:delete'
 
@@ -1745,7 +1759,7 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_deletes_a_document(self):
-        self.init_documents()
+        self.init_documents(for_fac=True)
 
         base_url = 'admission:general-education:document:delete'
 
@@ -1841,7 +1855,7 @@ class DocumentViewTestCase(TestCase):
     # The manager replaces the document
     @freezegun.freeze_time('2022-01-01')
     def test_general_sic_manager_replaces_a_document(self):
-        self.init_documents()
+        self.init_documents(for_sic=True)
 
         base_url = 'admission:general-education:document:replace'
 
@@ -2067,7 +2081,7 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_replaces_a_document(self):
-        self.init_documents()
+        self.init_documents(for_fac=True)
 
         base_url = 'admission:general-education:document:replace'
 
@@ -2204,7 +2218,7 @@ class DocumentViewTestCase(TestCase):
     # The manager uploads the document
     @freezegun.freeze_time('2022-01-01')
     def test_general_sic_manager_uploads_a_document(self):
-        self.init_documents()
+        self.init_documents(for_sic=True)
 
         base_url = 'admission:general-education:document:upload'
 
@@ -2430,7 +2444,7 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_uploads_a_document(self):
-        self.init_documents()
+        self.init_documents(for_fac=True)
 
         base_url = 'admission:general-education:document:upload'
 
@@ -2567,7 +2581,7 @@ class DocumentViewTestCase(TestCase):
     # Lists of documents
     @freezegun.freeze_time('2022-01-01')
     def test_general_document_detail_sic_manager(self):
-        self.init_documents()
+        self.init_documents(for_sic=True)
 
         self.client.force_login(user=self.second_sic_manager_user)
 
@@ -2714,7 +2728,7 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_document_detail_fac_manager(self):
-        self.init_documents()
+        self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.second_fac_manager_user)
 
@@ -2885,7 +2899,7 @@ class DocumentViewTestCase(TestCase):
         )
 
     def test_document_detail_view(self):
-        self.init_documents()
+        self.init_documents(for_sic=True)
 
         self.client.force_login(user=self.sic_manager_user)
 
@@ -2936,7 +2950,7 @@ class DocumentViewTestCase(TestCase):
     # The manager updates the reason of a free document that the candidate must upload
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_general_sic_manager_updates_the_request_status_of_a_free_document(self, frozen_time):
-        self.init_documents()
+        self.init_documents(for_sic=True)
 
         self.client.force_login(user=self.sic_manager_user)
         base_url = 'admission:general-education:document:candidate-request-status'
@@ -3052,7 +3066,7 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_general_fac_manager_updates_the_request_status_of_a_free_document(self, frozen_time):
-        self.init_documents()
+        self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.fac_manager_user)
         base_url = 'admission:general-education:document:candidate-request-status'
@@ -3126,7 +3140,7 @@ class DocumentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(form.fields[document_identifier].required, False)
 
-        # Post a valid form
+        # Post an invalid form
         response = self.client.post(
             resolve_url(
                 base_url,
@@ -3135,6 +3149,22 @@ class DocumentViewTestCase(TestCase):
             ),
             data={
                 document_identifier: StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+            },
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertFalse(form.is_valid())
+
+        # Post a valid form
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=document_identifier,
+            ),
+            data={
+                document_identifier: StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
             **self.default_headers,
         )
@@ -3153,7 +3183,7 @@ class DocumentViewTestCase(TestCase):
             'requested_at': '',
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
-            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+            'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
@@ -3172,6 +3202,8 @@ class DocumentViewTestCase(TestCase):
         base_url = 'admission:general-education:document:candidate-request-status'
 
         # A FAC user cannot request a categorized document
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save(update_fields=['status'])
         self.client.force_login(user=self.fac_manager_user)
 
         response = self.client.get(
@@ -3186,6 +3218,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
         # A SIC user can request a categorized document
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(
@@ -3305,27 +3339,9 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
-        self.assertEqual(form.fields[self.non_free_document_identifier].required, True)
+        self.assertEqual(form.fields[self.non_free_document_identifier].required, False)
 
         frozen_time.move_to('2022-01-03')
-
-        # Post an invalid form
-        response = self.client.post(
-            resolve_url(
-                base_url,
-                uuid=self.general_admission.uuid,
-                identifier=self.non_free_document_identifier,
-            ),
-            data={
-                self.non_free_document_identifier: '',
-            },
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        form = response.context['form']
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get(self.non_free_document_identifier, []))
 
         # Post a valid form
         response = self.client.post(
@@ -3366,10 +3382,29 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.second_sic_manager_user.person)
 
+        # Don't request this document anymore
+        response = self.client.post(
+            resolve_url(
+                base_url,
+                uuid=self.general_admission.uuid,
+                identifier=self.non_free_document_identifier,
+            ),
+            data={
+                self.non_free_document_identifier: '',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
+        self.general_admission.refresh_from_db()
+        self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
+
     # The manager cancels the request of a document
     @freezegun.freeze_time('2022-01-01')
     def test_general_sic_manager_cancels_the_request_status_of_a_free_document(self):
-        self.init_documents()
+        self.init_documents(for_sic=True)
 
         self.client.force_login(user=self.sic_manager_user)
         base_url = 'admission:general-education:document:candidate-request-status'
@@ -3479,7 +3514,7 @@ class DocumentViewTestCase(TestCase):
 
     @freezegun.freeze_time('2022-01-01')
     def test_general_fac_manager_cancels_the_request_status_of_a_free_document(self):
-        self.init_documents()
+        self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.fac_manager_user)
         base_url = 'admission:general-education:document:candidate-request-status'
@@ -3591,6 +3626,8 @@ class DocumentViewTestCase(TestCase):
         base_url = 'admission:general-education:document:candidate-request-status'
 
         # A FAC user cannot request a categorized document
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save(update_fields=['status'])
         self.client.force_login(user=self.fac_manager_user)
 
         response = self.client.get(
@@ -3605,6 +3642,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
         # A SIC user can request a categorized document
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
         self.client.force_login(user=self.sic_manager_user)
 
         response = self.client.get(
@@ -3703,10 +3742,10 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
-        self.assertEqual(form.fields[self.non_free_document_identifier].required, True)
-        self.assertNotIn(BLANK_CHOICE[0], form.fields[self.non_free_document_identifier].choices)
+        self.assertEqual(form.fields[self.non_free_document_identifier].required, False)
+        self.assertIn(BLANK_CHOICE[0], form.fields[self.non_free_document_identifier].choices)
 
-        # Post an invalid form
+        # Don't request the document anymore
         response = self.client.post(
             resolve_url(
                 base_url,
@@ -3719,5 +3758,51 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         form = response.context['form']
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get(self.non_free_document_identifier, []))
+        self.assertTrue(form.is_valid())
+        self.general_admission.refresh_from_db()
+        self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
+
+    # The details page is different when the application is in progress
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_document_detail_sic_manager_when_in_progress(self):
+        self.general_admission.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
+        self.general_admission.save(update_fields=['status'])
+
+        url = resolve_url('admission:general-education:documents', uuid=self.general_admission.uuid)
+
+        self.client.force_login(user=self.second_sic_manager_user)
+
+        # Get the list and the request form
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertInHTML(
+            gettext('Until the application is submitted, you can generate a recap of the application on this page.'),
+            response.content.decode('utf-8'),
+        )
+
+    def test_general_sic_manage_generated_in_progress_analysis_folder(self):
+        self._mock_folder_generation()
+
+        url = resolve_url(
+            'admission:general-education:document:in-progress-analysis-folder-generation',
+            uuid=self.general_admission.uuid,
+        )
+
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
+        self.general_admission.save(update_fields=['status'])
+
+        response = self.client.get(url)
+
+        self.assertRedirects(
+            response=response,
+            expected_url='http://dummyurl/file/pdf-token',
+            fetch_redirect_response=False,
+        )

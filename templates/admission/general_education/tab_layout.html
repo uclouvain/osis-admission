@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,12 @@
     </a>
   </li>
   <li class="active">
-    {{ admission.formation.intitule }} ({{ admission.reference }})
+    {% if admission|est_premiere_annee %}
+      {{ admission.formation.intitule|intitule_premiere_annee }}
+    {% else %}
+      {{ admission.formation.intitule }}
+    {% endif %}
+    ({{ admission.reference }})
   </li>
 {% endblock %}
 
@@ -86,9 +91,9 @@
     <br>
     {% url 'admission:access-conditions-url' admission.formation.type admission.formation.sigle|urlencode:'' admission.formation.code as access_conditions_url %}
     <span>
-      {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
+      {% if admission|est_premiere_annee %}
         <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}-1</a> -
-        {% trans "First year of" %} {{ admission.formation.intitule|lower }} ({{ admission.formation.campus }})
+        {{ admission.formation.intitule|intitule_premiere_annee }} ({{ admission.formation.campus }})
       {% else %}
         <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}</a> -
         {{ admission.formation.intitule }} ({{ admission.formation.campus }})
@@ -115,7 +120,7 @@
     <br>
     <span>
       {% translate 'Not specified' context "admission-header" as not_specified %}
-      {% translate 'Access condition:' %} <span class="label label-success">{{ admission.titre_acces|default:not_specified }}</span>
+      {% translate 'Access condition:' %} <span id="header-access-condition" class="label label-success" hx-swap-oob="innerHTML">{{ admission.condition_acces|enum_with_acronym_display:'ConditionAcces'|default:not_specified }}</span>
     </span>
   </div>
   <div id="admission-badges" class="min-width">

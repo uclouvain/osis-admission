@@ -588,6 +588,9 @@ msgstr ""
 msgid "Another admission has been submitted."
 msgstr ""
 
+msgid "Any other assessment system that is not based on a credit system."
+msgstr ""
+
 msgid "Application accepted"
 msgstr ""
 
@@ -717,6 +720,12 @@ msgid ""
 "inscriptions/demande-en-ligne\" target=\"_blank\">specific platform</a>."
 msgstr ""
 
+msgid ""
+"Assessment is also based on the credit system, which quantifies the workload "
+"involved in a class. Depending on the country, a full year of study is "
+"equivalent to a defined number of credits (e.g. 30 credits)."
+msgstr ""
+
 msgid "Assimilated,Non-assimilated"
 msgstr ""
 
@@ -795,9 +804,6 @@ msgid "Author"
 msgstr ""
 
 msgid "Authors"
-msgstr ""
-
-msgid "Automatically required"
 msgstr ""
 
 msgid "Awaiting approval"
@@ -1337,8 +1343,8 @@ msgstr ""
 
 #, python-brace-format
 msgid ""
-"Communication to the candidate, in <span class=\"label label-admission-"
-"primary\">{language_code}]</span>"
+"Communication to the candidate (refusal reason), in <span class=\"label "
+"label-admission-primary\">{language_code}]</span>"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -1857,9 +1863,6 @@ msgstr ""
 msgid "Description of your communication"
 msgstr ""
 
-msgid "Designate the document as to be requested"
-msgstr ""
-
 msgid "Detailed curriculum vitae"
 msgstr ""
 
@@ -1960,6 +1963,10 @@ msgstr ""
 msgid "Document merging of the proposition %(reference)s"
 msgstr ""
 
+msgctxt "admission"
+msgid "Document name"
+msgstr ""
+
 msgid "Document not found."
 msgstr ""
 
@@ -2042,6 +2049,13 @@ msgid "ECTS added"
 msgstr ""
 
 msgid "ECTS credits"
+msgstr ""
+
+msgid ""
+"ECTS credits are a European unit of measurement that assesses the workload "
+"represented by a class within a course. A full year of study is generally "
+"equivalent to 60 credits. The ECTS system has been introduced in most "
+"European countries but is also increasingly used in other countries."
 msgstr ""
 
 msgid "ECTS for participating"
@@ -2336,10 +2350,6 @@ msgstr ""
 msgid "File"
 msgstr ""
 
-msgctxt "admission"
-msgid "File name"
-msgstr ""
-
 msgid "Filter by documents"
 msgstr ""
 
@@ -2564,6 +2574,9 @@ msgstr ""
 msgid "Generate an analysis folder"
 msgstr ""
 
+msgid "Generate an in-progress analysis folder"
+msgstr ""
+
 msgid "Generate the PDF recap"
 msgstr ""
 
@@ -2645,6 +2658,12 @@ msgid "Household composition or the marriage certificate"
 msgstr ""
 
 msgid "Household composition, or copy of your birth certificate"
+msgstr ""
+
+msgid "How did the candidate find out about this course?"
+msgstr ""
+
+msgid "How did you find out about this course?"
 msgstr ""
 
 msgid "I am a long-term resident in the European Union outside Belgium"
@@ -2913,6 +2932,9 @@ msgstr ""
 msgid "Important information:"
 msgstr ""
 
+msgid "Impossible action"
+msgstr ""
+
 msgid ""
 "Impossible action: please be sure that the confirmation date and report are "
 "specified."
@@ -2981,10 +3003,11 @@ msgid ""
 "Initialization of the predefined specific questions for an academic year"
 msgstr ""
 
+msgctxt "admission"
 msgid "Institute"
 msgstr ""
 
-msgctxt "admission"
+msgctxt "curriculum"
 msgid "Institute"
 msgstr ""
 
@@ -3662,6 +3685,9 @@ msgstr ""
 msgid "Motivation for joint supervision"
 msgstr ""
 
+msgid "Motivations"
+msgstr ""
+
 #, python-format
 msgid "Move the doctorate to the \"%(status)s\" state?"
 msgstr ""
@@ -3779,6 +3805,9 @@ msgstr ""
 msgid "No continuing enrolment"
 msgstr ""
 
+msgid "No credit system"
+msgstr ""
+
 msgid "No defense reason"
 msgstr ""
 
@@ -3837,6 +3866,9 @@ msgid "Noma"
 msgstr ""
 
 msgid "Non doctor reason"
+msgstr ""
+
+msgid "Non-European credits"
 msgstr ""
 
 msgid "Non-academic experience"
@@ -3936,6 +3968,9 @@ msgstr "Other"
 msgid "Obtained grade"
 msgstr ""
 
+msgid "Ok"
+msgstr ""
+
 msgid ""
 "On the basis of the information you have provided, you will need to apply "
 "for a student visa if your application to attend our university is accepted "
@@ -3943,6 +3978,9 @@ msgid ""
 "the student <a href=\"https://uclouvain.be/en/study/inscriptions/welcome-to-"
 "international-students.html\" target=\"_blank\"> visa </a> application "
 "information."
+msgstr ""
+
+msgid "On the press"
 msgstr ""
 
 msgid "One choice per line, leave the \"Other\" value out"
@@ -4029,6 +4067,10 @@ msgstr ""
 msgid "Other information about prerequisite courses"
 msgstr ""
 
+msgid "Other institute"
+msgstr ""
+
+msgctxt "curriculum"
 msgid "Other institute"
 msgstr ""
 
@@ -4315,6 +4357,12 @@ msgstr ""
 
 msgid ""
 "Please select the Belgian student status situation that most applies to you"
+msgstr ""
+
+msgid ""
+"Please select the assessment system used by the institution where you "
+"studied. The assessment system is usually indicated <strong>on your "
+"transcripts or diploma supplements</strong>."
 msgstr ""
 
 msgid "Please specify at least one identity number."
@@ -5192,6 +5240,9 @@ msgstr ""
 msgid "Specify if other"
 msgstr ""
 
+msgid "Specify the reason for requesting"
+msgstr ""
+
 msgid "Sport affiliation"
 msgstr ""
 
@@ -5678,6 +5729,9 @@ msgstr ""
 msgid "The proposition must be submitted to realize this action."
 msgstr ""
 
+msgid "The proposition must not be cancelled to realize this action."
+msgstr ""
+
 msgid "The proposition must not be concerned by the payment."
 msgstr ""
 
@@ -6096,6 +6150,11 @@ msgstr ""
 msgid "Unsubmitted for publication"
 msgstr ""
 
+msgid ""
+"Until the application is submitted, you can generate a recap of the "
+"application on this page."
+msgstr ""
+
 msgctxt "verb"
 msgid "Update"
 msgstr ""
@@ -6155,6 +6214,36 @@ msgid "Validated"
 msgstr ""
 
 msgid "Values"
+msgstr ""
+
+msgid "Via Facebook"
+msgstr ""
+
+msgid "Via LinkedIn"
+msgstr ""
+
+msgid "Via MOOCs"
+msgstr ""
+
+msgid "Via a personalized letter"
+msgstr ""
+
+msgid "Via an emailing"
+msgstr ""
+
+msgid "Via former students"
+msgstr ""
+
+msgid "Via friends"
+msgstr ""
+
+msgid "Via the website of UCLouvain"
+msgstr ""
+
+msgid "Via the website of the continuing education"
+msgstr ""
+
+msgid "Via word of mouth"
 msgstr ""
 
 msgid "Viewed at"
@@ -6637,6 +6726,16 @@ msgstr "Failed"
 
 #, python-format
 msgid "from %(start)s to %(end)s"
+msgstr ""
+
+#, python-format
+msgctxt "month_year"
+msgid "from %(start)s to %(end)s"
+msgstr ""
+
+#, python-format
+msgctxt "month_year"
+msgid "in %(end)s"
 msgstr ""
 
 msgid "items per page"

@@ -91,9 +91,9 @@
                           checked="checked"
                           {% endifequal %}/>
                       <span style="font-weight: normal">{{ choice_label }}</span>
-                      {% if foreign_diploma_type_images|get_item:radio_value %}
+                      {% if foreign_diploma_type_images|get_item_or_none:radio_value %}
                         <img
-                            src="{% static foreign_diploma_type_images|get_item:radio_value %}"
+                            src="{% static foreign_diploma_type_images|get_item_or_none:radio_value %}"
                             alt="{{ choice_label }}"
                             height="40"
                         />

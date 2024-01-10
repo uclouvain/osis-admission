@@ -232,7 +232,13 @@
 
           {# The document viewer is resizable so we apply the previous custom height if there is one #}
           $(document).on('htmx:afterSettle', '#document-details', function(){
-              $('#document-editor-container').css('height', configurationCache.getItem('document_size', '100%'));
+              const documentEditorContainer = $('#document-editor-container');
+              documentEditorContainer.css(
+                  'height',
+                  documentEditorContainer.find('#no-document-container').length === 0 ?
+                    configurationCache.getItem('document_size', '100%')
+                    : 'fit-content',
+              );
           });
           $(document).mouseup(function (event) {
               if (event.target.id === 'document-editor-container') {

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.test.factory.profil import (
@@ -580,7 +580,7 @@ class DisplayTagTestCase(TestCase):
     def test_experience_details_with_secondary_studies(self):
         proposition_uuid = uuid.uuid4()
         experience = EtudesSecondairesDTOFactory()
-        specific_questions = [QuestionSpecifiqueDTOFactory()]
+        specific_questions = {Onglets.ETUDES_SECONDAIRES.name: [QuestionSpecifiqueDTOFactory()]}
         template_params = experience_details_template(
             resume_proposition=MagicMock(
                 est_proposition_generale=True,
@@ -599,7 +599,7 @@ class DisplayTagTestCase(TestCase):
             template_params['edit_link_button'],
             '/admissions/general-education/{}/update/education'.format(proposition_uuid),
         )
-        self.assertEqual(template_params['specific_questions'], specific_questions)
+        self.assertEqual(template_params['specific_questions'], specific_questions[Onglets.ETUDES_SECONDAIRES.name])
 
 
 class SimpleAdmissionTemplateTagsTestCase(TestCase):

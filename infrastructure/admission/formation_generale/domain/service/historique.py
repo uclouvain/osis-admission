@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from email.message import EmailMessage
 
@@ -126,13 +127,22 @@ class Historique(IHistorique):
         cls,
         proposition: Proposition,
         gestionnaire: str,
+        envoi_par_fac: bool,
     ):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+
+        if envoi_par_fac:
+            message_fr = "Le dossier a été soumis au SIC par la faculté."
+            message_en = "The dossier has been submitted to the SIC by the faculty."
+        else:
+            message_fr = "Le dossier a été soumis au SIC par le SIC."
+            message_en = "The dossier has been submitted to the SIC by the SIC."
+
         add_history_entry(
-            proposition.entity_id.uuid,
-            "Le dossier a été soumis au SIC par la faculté.",
-            "The dossier has been submitted to the SIC by the faculty.",
-            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            object_uuid=proposition.entity_id.uuid,
+            message_fr=message_fr,
+            message_en=message_en,
+            author="{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
             tags=["proposition", "fac-decision", "send-to-sic", "status-changed"],
         )
 

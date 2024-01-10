@@ -1,35 +1,35 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (
     Exists,
@@ -45,7 +45,6 @@ from django.db.models import (
     BooleanField,
     QuerySet,
 )
-from django.db.models.fields import UUIDField
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
@@ -62,10 +61,6 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     ExperienceNonAcademiqueDTO,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-    EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES,
-)
 from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
@@ -74,7 +69,10 @@ from admission.ddd.admission.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
 )
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+    EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -316,7 +314,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             credits_acquis=educational_experience_year.acquired_credit_number,
             avec_bloc_1=educational_experience_year.with_block_1,
             avec_complement=educational_experience_year.with_complement,
-            avec_allegement=educational_experience_year.with_reduction,
+            allegement=educational_experience_year.reduction,
             est_reorientation_102=educational_experience_year.is_102_change_of_course,
             credits_inscrits_communaute_fr=educational_experience_year.fwb_registered_credit_number,
             credits_acquis_communaute_fr=educational_experience_year.fwb_acquired_credit_number,
@@ -332,15 +330,19 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     ) -> List[ExperienceAcademiqueDTO]:
         """Returns the DTO of the academic experiences of the given candidate."""
 
-        educational_experience_years: QuerySet[EducationalExperienceYear] = EducationalExperienceYear.objects.filter(
-            educational_experience__person__global_id=matricule,
-        ).select_related(
-            'academic_year',
-            'educational_experience__country',
-            'educational_experience__linguistic_regime',
-            'educational_experience__program',
-            'educational_experience__fwb_equivalent_program',
-            'educational_experience__institute',
+        educational_experience_years: QuerySet[EducationalExperienceYear] = (
+            EducationalExperienceYear.objects.filter(
+                educational_experience__person__global_id=matricule,
+            )
+            .select_related(
+                'academic_year',
+                'educational_experience__country',
+                'educational_experience__linguistic_regime',
+                'educational_experience__program',
+                'educational_experience__fwb_equivalent_program',
+                'educational_experience__institute',
+            )
+            .order_by('-academic_year__year')
         )
 
         if experiences_cv_recuperees in EXPERIENCES_CV_RECUPEREES_SEULEMENT_VALORISEES:
@@ -401,14 +403,17 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     'nom_formation': '',
                     'nom_formation_equivalente_communaute_fr': '',
                     'cycle_formation': '',
+                    'est_autre_formation': None,
                 }
 
                 if experience_year.educational_experience.education_name:
                     program_info['nom_formation'] = experience_year.educational_experience.education_name
+                    program_info['est_autre_formation'] = True
 
                 if experience_year.educational_experience.program_id:
                     program_info['nom_formation'] = experience_year.educational_experience.program.title
                     program_info['cycle_formation'] = experience_year.educational_experience.program.cycle
+                    program_info['est_autre_formation'] = False
 
                 if experience_year.educational_experience.fwb_equivalent_program_id:
                     program_info[

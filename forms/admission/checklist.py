@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import itertools
 from collections import defaultdict
@@ -180,7 +181,6 @@ class ChoixFormationForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         formation = kwargs.pop('formation')
-        self.has_success_be_experience = kwargs.pop('has_success_be_experience')
         super().__init__(*args, **kwargs)
         today = datetime.date.today()
         try:
@@ -210,9 +210,8 @@ class ChoixFormationForm(forms.Form):
         cleaned_data = super().clean()
         formation = cleaned_data.get('formation')
 
-        if formation and self.has_success_be_experience:
-            # The bachelor cycle continuation field is shown and required if the training is a bachelor and the user has
-            # successfully completed a belgian academic experience
+        if formation:
+            # The bachelor cycle continuation field is shown and required if the training is a bachelor
             if self.initial_training_type == TrainingType.BACHELOR.name:
                 if not cleaned_data.get('poursuite_cycle'):
                     self.add_error('poursuite_cycle', FIELD_REQUIRED_MESSAGE)
@@ -567,7 +566,11 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
         fields = [
             'admission_requirement',
             'admission_requirement_year',
+            'with_prerequisite_courses',
         ]
+        widgets = {
+            'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+        }
 
 
 class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
