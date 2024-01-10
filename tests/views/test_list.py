@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,10 @@ from django.urls import reverse
 
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    PoursuiteDeCycle,
+)
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -104,6 +107,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 training__acronym="ABCD0",
                 last_update_author__user__username='user1',
                 submitted_at=datetime.datetime(2023, 1, 1),
+                cycle_pursuit=PoursuiteDeCycle.YES.name,
             ),
         ]
 
