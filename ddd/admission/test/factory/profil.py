@@ -105,6 +105,8 @@ class CoordonneesDTOFactory(factory.Factory):
 
 
 class EtudesSecondairesDTOFactory(factory.Factory):
+    uuid = uuid.uuid4()
+
     class Meta:
         model = EtudesSecondairesDTO
         abstract = False
