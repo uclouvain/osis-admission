@@ -85,21 +85,21 @@ from osis_profile.models import (
 )
 from osis_profile.models.education import LanguageKnowledge
 
+MOCK_DIGIT_SERVICE_CALL = False
+
 
 class DigitService(IDigitService):
 
     @classmethod
     def rechercher_compte_existant(cls, matricule: str, nom: str, prenom: str, date_naissance: str,) -> str:
-        mock = False
-
-        if mock:
-            response = _mock_search_digit_account_return_response()
-            similarity_data = response.json()
+        if MOCK_DIGIT_SERVICE_CALL:
+            similarity_data = _mock_search_digit_account_return_response()
         else:
             original_person = Person.objects.get(global_id=matricule)
 
             person_merge_proposal, created = PersonMergeProposal.objects.get_or_create(
                 original_person=original_person,
+                last_similarity_result_update=datetime.datetime.now(),
             )
 
             if created:
