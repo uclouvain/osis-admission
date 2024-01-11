@@ -23,32 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
-from typing import List, Optional
+from typing import Optional, List
 
-from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
-from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
-from admission.ddd.admission.dtos.formation import FormationDTO
+import attr
+
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMoyensDecouverteFormation
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    ChoixDeFormationNonRenseigneException,
+)
+from base.ddd.utils.business_validator import BusinessValidator
 from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
 
 
-class IFormationContinueTranslator(IFormationTranslator):
-    @classmethod
-    @abstractmethod
-    def get(cls, entity_id: FormationIdentity) -> Formation:
-        raise NotImplementedError
+@attr.dataclass(frozen=True, slots=True)
+class ShouldRenseignerChoixDeFormation(BusinessValidator):
+    motivations: str
+    moyens_decouverte_formation: List[ChoixMoyensDecouverteFormation]
+    informations_specifiques_formation: Optional[InformationsSpecifiquesDTO]
 
-    @classmethod
-    @abstractmethod
-    def get_dto(cls, sigle: str, annee: int) -> FormationDTO:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def search(cls, annee: Optional[int], terme_de_recherche: str, campus: Optional[str]) -> List['FormationDTO']:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_informations_specifiques_dto(cls, entity_id: FormationIdentity) -> Optional[InformationsSpecifiquesDTO]:
-        raise NotImplementedError
+    def validate(self, *args, **kwargs):
+        if not self.motivations or (
+            self.informations_specifiques_formation
+            and self.informations_specifiques_formation.inscription_au_role_obligatoire is True
+            and not self.moyens_decouverte_formation
+        ):
+            raise ChoixDeFormationNonRenseigneException

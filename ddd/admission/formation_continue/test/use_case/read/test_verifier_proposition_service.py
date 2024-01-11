@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -42,11 +42,15 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ExperiencesCurriculumNonRenseigneesException,
     InformationsComplementairesNonRenseigneesException,
+    ChoixDeFormationNonRenseigneException,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
+    FormationContinueInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -60,6 +64,11 @@ class TestVerifierPropositionService(TestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
             self.fail(msg or f"No instance of '{cls}' has been found")
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.formation_continue_translator = FormationContinueInMemoryTranslator
 
     def setUp(self) -> None:
         self.message_bus = message_bus_in_memory_instance
@@ -231,3 +240,43 @@ class TestVerifierPropositionService(TestCase):
                 context.exception.exceptions,
                 InformationsComplementairesNonRenseigneesException,
             )
+
+    def test_should_retourner_erreur_si_motivations_non_renseignees(self):
+        with mock.patch.multiple(
+            self.complete_proposition,
+            motivations='',
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.verifier_commande)
+
+            self.assertHasInstance(
+                context.exception.exceptions,
+                ChoixDeFormationNonRenseigneException,
+            )
+
+    def test_should_retourner_erreur_si_moyens_decouverte_formation_non_renseignes_formation_longue(self):
+        proposition_formation_longue = self.proposition_repository.get(entity_id=PropositionIdentity(uuid='uuid-USCC4'))
+
+        with mock.patch.multiple(
+            proposition_formation_longue,
+            moyens_decouverte_formation=[],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC4'))
+
+            self.assertHasInstance(
+                context.exception.exceptions,
+                ChoixDeFormationNonRenseigneException,
+            )
+
+    def test_should_etre_ok_si_moyens_decouverte_formation_non_renseignes_et_infos_formation_non_trouvees(self):
+        proposition_sans_infos_formation_iufc = self.proposition_repository.get(
+            entity_id=PropositionIdentity(uuid='uuid-USCC3')
+        )
+
+        with mock.patch.multiple(
+            proposition_sans_infos_formation_iufc,
+            moyens_decouverte_formation=[],
+        ):
+            proposition_id = self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC3'))
+            self.assertEqual(proposition_id, proposition_sans_infos_formation_iufc.entity_id)
