@@ -75,6 +75,10 @@ class PropositionDTO(interface.DTO):
     motivations: str
     moyens_decouverte_formation: List[str]
 
+    aide_a_la_formation: Optional[bool]
+    inscription_au_role_obligatoire: Optional[bool]
+    etat_formation: str
+
     @property
     def est_non_soumise(self):
         return self.statut in STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE

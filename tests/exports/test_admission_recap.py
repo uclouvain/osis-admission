@@ -161,6 +161,7 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.state_iufc import StateIUFC
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
@@ -1298,6 +1299,9 @@ class SectionsAttachmentsTestCase(TestCase):
             documents_additionnels=[],
             motivations='My motivation',
             moyens_decouverte_formation=[],
+            aide_a_la_formation=False,
+            inscription_au_role_obligatoire=False,
+            etat_formation=StateIUFC.OPEN.name,
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',
