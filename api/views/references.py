@@ -33,7 +33,7 @@ from admission.api import serializers
 from admission.api.schema import AuthorizationAwareSchema
 from admission.contrib.models import Scholarship, DiplomaticPost
 from base.models.campus import Campus
-from ddd.logic.shared_kernel.campus.commands import SearchUclouvainCampusesCommand, GetCampusCommand
+from ddd.logic.shared_kernel.campus.commands import SearchUclouvainCampusesQuery, GetCampusQuery
 from infrastructure.messages_bus import message_bus_instance
 
 
@@ -58,7 +58,7 @@ class RetrieveCampusView(RetrieveAPIView):
 
     def retrieve(self, request, **kwargs):
         try:
-            campus = message_bus_instance.invoke(GetCampusCommand(uuid=kwargs.get('uuid')))
+            campus = message_bus_instance.invoke(GetCampusQuery(uuid=kwargs.get('uuid')))
         except Campus.DoesNotExist:
             raise Http404
         serializer = serializers.CampusSerializer(instance=campus)
@@ -90,7 +90,7 @@ class ListCampusView(ListAPIView):
     }
 
     def list(self, request, *args, **kwargs):
-        campuses = message_bus_instance.invoke(SearchUclouvainCampusesCommand())
+        campuses = message_bus_instance.invoke(SearchUclouvainCampusesQuery())
         campuses.sort(key=lambda campus: self.campus_order_by_uuid.get(campus.entity_id.uuid, 100))
         serializer = serializers.CampusSerializer(instance=campuses, many=True)
         return Response(serializer.data)
