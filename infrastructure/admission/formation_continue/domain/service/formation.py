@@ -44,6 +44,11 @@ from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
+from ddd.logic.formation_catalogue.formation_continue.commands import RecupererInformationsSpecifiquesQuery
+from ddd.logic.formation_catalogue.formation_continue.domain.validator.exceptions import (
+    InformationsSpecifiquesNonTrouveesException,
+)
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
 from ddd.logic.shared_kernel.academic_year.commands import SearchAcademicYearCommand
 from ddd.logic.shared_kernel.campus.commands import GetCampusQuery
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
@@ -221,3 +226,17 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             )
         )
         return bool(dtos)
+
+    @classmethod
+    def get_informations_specifiques_dto(cls, entity_id: FormationIdentity) -> Optional[InformationsSpecifiquesDTO]:
+        from infrastructure.messages_bus import message_bus_instance
+
+        try:
+            return message_bus_instance.invoke(
+                RecupererInformationsSpecifiquesQuery(
+                    sigle_formation=entity_id.sigle,
+                    annee=entity_id.annee,
+                )
+            )
+        except InformationsSpecifiquesNonTrouveesException:
+            pass

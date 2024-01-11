@@ -1629,6 +1629,10 @@ msgstr ""
 msgid "Continuing education admission"
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "Continuing education website"
+msgstr ""
+
 msgid "Continuing enrolment applications"
 msgstr ""
 
@@ -2395,6 +2399,10 @@ msgstr ""
 msgid "Email object"
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "Email"
+msgstr ""
+
 msgid "Email of the contact person for the design of the annual program"
 msgstr ""
 
@@ -2653,6 +2661,10 @@ msgstr ""
 msgid "FWB equivalent course"
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "Facebook"
+msgstr ""
+
 msgid "Faculty comment about the collaborative program"
 msgstr ""
 
@@ -2840,6 +2852,10 @@ msgstr ""
 msgid "Former UCLouvain student"
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "Former students"
+msgstr ""
+
 msgid "Fraudster"
 msgstr ""
 
@@ -2886,6 +2902,10 @@ msgid "French value"
 msgstr ""
 
 msgid "French values"
+msgstr ""
+
+msgctxt "ways_hear_about_training"
+msgid "Friends"
 msgstr ""
 
 msgid "From"
@@ -3047,7 +3067,7 @@ msgstr ""
 msgid "How did the candidate find out about this course?"
 msgstr ""
 
-msgid "How did you find out about this course?"
+msgid "How did you hear about this course?"
 msgstr ""
 
 msgid "I am a long-term resident in the European Union outside Belgium"
@@ -3404,6 +3424,10 @@ msgstr ""
 msgid "Include or exclude the checklist filters"
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "In the press"
+msgstr ""
+
 msgid "Incomplete field"
 msgstr ""
 
@@ -3696,6 +3720,10 @@ msgid ""
 "(back-office)"
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "Linkedin"
+msgstr ""
+
 msgid "List"
 msgstr ""
 
@@ -3763,6 +3791,10 @@ msgid "MEMBRE"
 msgstr ""
 
 msgid "MIME file types"
+msgstr ""
+
+msgctxt "ways_hear_about_training"
+msgid "MOOCs"
 msgstr ""
 
 msgid "Madam"
@@ -3975,6 +4007,9 @@ msgstr ""
 
 msgid ""
 "Mandatory fields are missing in the 'Additional information > Visa' tab."
+msgstr ""
+
+msgid "Mandatory fields are missing in the 'Course choice' tab."
 msgstr ""
 
 msgid "Mandatory fields are missing in the cotutelle."
@@ -4435,9 +4470,6 @@ msgid ""
 "information."
 msgstr ""
 
-msgid "On the press"
-msgstr ""
-
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr ""
 
@@ -4495,6 +4527,10 @@ msgid "Other"
 msgstr ""
 
 msgctxt "admission gender"
+msgid "Other"
+msgstr ""
+
+msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr ""
 
@@ -4703,6 +4739,10 @@ msgid "Personal email"
 msgstr ""
 
 msgid "Personalized"
+msgstr ""
+
+msgctxt "ways_hear_about_training"
+msgid "Personalised mail"
 msgstr ""
 
 msgid "PhD"
@@ -6798,6 +6838,10 @@ msgid ""
 "the possible mention of"
 msgstr ""
 
+msgctxt "ways_hear_about_training"
+msgid "UCLouvain website"
+msgstr ""
+
 msgid "UE"
 msgstr ""
 
@@ -6904,36 +6948,6 @@ msgstr ""
 msgid "Values"
 msgstr ""
 
-msgid "Via Facebook"
-msgstr ""
-
-msgid "Via LinkedIn"
-msgstr ""
-
-msgid "Via MOOCs"
-msgstr ""
-
-msgid "Via a personalized letter"
-msgstr ""
-
-msgid "Via an emailing"
-msgstr ""
-
-msgid "Via former students"
-msgstr ""
-
-msgid "Via friends"
-msgstr ""
-
-msgid "Via the website of UCLouvain"
-msgstr ""
-
-msgid "Via the website of the continuing education"
-msgstr ""
-
-msgid "Via word of mouth"
-msgstr ""
-
 msgid "Viewed at"
 msgstr ""
 
@@ -7025,6 +7039,10 @@ msgid "With academic year"
 msgstr ""
 
 msgid "Without free documents"
+msgstr ""
+
+msgctxt "ways_hear_about_training"
+msgid "Word of mouth"
 msgstr ""
 
 msgid "Work contract"

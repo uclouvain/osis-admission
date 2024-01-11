@@ -80,6 +80,9 @@ class PropositionDTO(interface.DTO):
     documents_demandes: Dict
 
     marque_d_interet: Optional[bool]
+    aide_a_la_formation: Optional[bool]
+    inscription_au_role_obligatoire: Optional[bool]
+    etat_formation: str
     edition: Optional[str]
     en_ordre_de_paiement: Optional[bool]
     droits_reduits: Optional[bool]
