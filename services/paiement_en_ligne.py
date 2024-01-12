@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ from django.db.models import QuerySet
 
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.online_payment import OnlinePayment, PaymentStatus
-from admission.services.mollie import MollieService, PaiementMollie
+from admission.services.mollie import MollieService, PaiementMollie, FetchMolliePaymentException
 
 logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
@@ -50,8 +50,11 @@ class PaiementEnLigneService:
     @classmethod
     def get_and_update_payment(cls, paiement_id: str, admission: BaseAdmission) -> OnlinePayment:
         online_payment = OnlinePayment.objects.get(payment_id=paiement_id, admission_id=admission.pk)
-        paiement_mollie = cls.paiement_service.recuperer_paiement(paiement_id=paiement_id)
-        cls._update_payment(online_payment, paiement_mollie)
+        try:
+            paiement_mollie = cls.paiement_service.recuperer_paiement(paiement_id=paiement_id)
+            cls._update_payment(online_payment, paiement_mollie)
+        except FetchMolliePaymentException:
+            pass
         return online_payment
 
     @classmethod
