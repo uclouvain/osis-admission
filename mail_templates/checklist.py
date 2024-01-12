@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -84,6 +84,72 @@ templates.register(
             name='candidate_nationality_country',
             description=_("Candidate's country of nationality"),
             example="Belgique",
+        ),
+    ],
+)
+
+
+ADMISSION_EMAIL_SIC_REFUSAL = 'osis-admission-sic-refusal'
+templates.register(
+    ADMISSION_EMAIL_SIC_REFUSAL,
+    description=_(
+        'Email sent to the candidate when SIC refuses an admission.',
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='candidate',
+            description=_("Candidate of the admission"),
+            example="John Doe",
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='admission_training',
+            description=_("Training of the admission"),
+            example="AGRO3DP / Doctorat en sciences agronomiques et ingénierie biologique",
+        ),
+    ],
+)
+
+
+ADMISSION_EMAIL_SIC_APPROVAL = 'osis-admission-sic-approval'
+templates.register(
+    ADMISSION_EMAIL_SIC_APPROVAL,
+    description=_(
+        'Email sent to the candidate when SIC approves an admission.',
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='candidate',
+            description=_("Candidate of the admission"),
+            example="John Doe",
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='academic_year_start_date',
+            description=_("Start date of the academic year of the admission"),
+            example="14 September",
+        ),
+        Token(
+            name='admission_email',
+            description=_("Email receiving the documents"),
+            example="inscription-lln@uclouvain.be",
+        ),
+        Token(
+            name='admission_training',
+            description=_("Training of the admission"),
+            example="AGRO3DP / Doctorat en sciences agronomiques et ingénierie biologique",
         ),
     ],
 )

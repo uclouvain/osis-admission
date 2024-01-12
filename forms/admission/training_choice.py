@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -108,7 +108,7 @@ class TrainingChoiceForm(ConfigurableFormMixin):
         ]
 
         kwargs['initial'] = {
-            'campus': proposition.formation.campus,
+            'campus': proposition.formation.campus.nom if proposition.formation.campus else '',
             'training_type': self.training_type,
             'double_degree_scholarship': proposition.bourse_double_diplome and proposition.bourse_double_diplome.uuid,
             'international_scholarship': proposition.bourse_internationale and proposition.bourse_internationale.uuid,

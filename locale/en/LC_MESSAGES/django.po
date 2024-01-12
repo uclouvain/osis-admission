@@ -76,6 +76,12 @@ msgstr ""
 msgid "102 change of course"
 msgstr ""
 
+msgid "12"
+msgstr ""
+
+msgid "6"
+msgstr ""
+
 #, python-format
 msgid ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
@@ -156,6 +162,11 @@ msgid ""
 "to delete the custom mail template? This cannot be undone.</p>"
 msgstr ""
 
+msgid ""
+"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
+"strong>"
+msgstr ""
+
 #, python-format
 msgid ""
 "<ul><li>the information I have provided is accurate and complete. UCLouvain "
@@ -211,6 +222,9 @@ msgstr ""
 msgid "A promoter can not be updated from the jury."
 msgstr ""
 
+msgid "A refusal mail has been sent to the candidate."
+msgstr ""
+
 msgid "A specific education"
 msgstr ""
 
@@ -231,6 +245,9 @@ msgstr "Accepted"
 msgid "ACCEPTEE"
 msgstr "Accepted"
 
+msgid "ACCORD_DIRECTION"
+msgstr ""
+
 msgid "ACKNOWLEDGED"
 msgstr "Acknowledged"
 
@@ -248,6 +265,15 @@ msgstr "Admission in progress"
 
 msgid "ADMITTED"
 msgstr "Admitted"
+
+msgid "AGREGATION"
+msgstr ""
+
+msgid "AUTRE"
+msgstr ""
+
+msgid "AVIS_DIRECTION_DEMANDE"
+msgstr ""
 
 msgid "A_CLARIFIER"
 msgstr "To be clarified"
@@ -268,6 +294,9 @@ msgid "Academic experience"
 msgstr ""
 
 msgid "Academic year"
+msgstr ""
+
+msgid "Academic year of the admission"
 msgstr ""
 
 msgid "Academic year:"
@@ -446,6 +475,9 @@ msgstr ""
 msgid "Additional conditions"
 msgstr ""
 
+msgid "Additional course(s):"
+msgstr ""
+
 msgid "Additional documents"
 msgstr ""
 
@@ -535,6 +567,12 @@ msgstr "Already a member of the supervisory panel."
 msgid "Amount"
 msgstr ""
 
+msgid "Amount (without EUR/)"
+msgstr ""
+
+msgid "An approval mail has been sent to the candidate."
+msgstr ""
+
 msgid "An education type"
 msgstr ""
 
@@ -583,6 +621,12 @@ msgstr ""
 msgid ""
 "Annex 25 or 26 or the A/B card mentioning the refugee status or the decision "
 "confirming the protection of the parent"
+msgstr ""
+
+msgid "Annexe approval certificate from SIC"
+msgstr ""
+
+msgid "Annual programme contact person:"
 msgstr ""
 
 msgid "Another admission has been submitted."
@@ -640,10 +684,22 @@ msgstr ""
 msgid "Approval"
 msgstr ""
 
+msgid "Approval certificate annexe of SIC"
+msgstr ""
+
+msgid "Approval certificate from SIC"
+msgstr ""
+
+msgid "Approval certificate of SIC"
+msgstr ""
+
 msgid "Approval certificate of faculty"
 msgstr ""
 
 msgid "Approval for another training"
+msgstr ""
+
+msgid "Approval to validate"
 msgstr ""
 
 msgid "Approvals"
@@ -803,6 +859,9 @@ msgstr ""
 msgid "Author"
 msgstr ""
 
+msgid "Authorize"
+msgstr ""
+
 msgid "Authors"
 msgstr ""
 
@@ -810,6 +869,9 @@ msgid "Awaiting approval"
 msgstr ""
 
 msgid "Awaiting management approval"
+msgstr ""
+
+msgid "BESOIN_DE_COMPLEMENT"
 msgstr ""
 
 msgid "BIC/SWIFT code identifying the bank from which the account originates"
@@ -930,6 +992,9 @@ msgid "CDDs"
 msgstr ""
 
 msgid "CENT_VINGT_CREDITS_NON_ENCORE_ACQUIS"
+msgstr ""
+
+msgid "CERTIFICAT_60_CREDITS"
 msgstr ""
 
 msgid "CESS"
@@ -1149,6 +1214,9 @@ msgstr ""
 msgid "Candidate not found."
 msgstr ""
 
+msgid "Candidate of the admission"
+msgstr ""
+
 msgid "Candidate's country of nationality"
 msgstr ""
 
@@ -1316,6 +1384,9 @@ msgstr ""
 msgid "Comment"
 msgstr ""
 
+msgid "Comment about dispensation"
+msgstr ""
+
 msgid "Comment about jury"
 msgstr ""
 
@@ -1339,6 +1410,9 @@ msgid "Commitment and declaration"
 msgstr ""
 
 msgid "Communication attestation"
+msgstr ""
+
+msgid "Communication to the candidate"
 msgstr ""
 
 #, python-brace-format
@@ -1609,6 +1683,11 @@ msgid ""
 "(except for online courses)."
 msgstr ""
 
+msgid ""
+"Copy of your student visa D (permission to stay longer than 90 days in "
+"Belgium) issued by the Belgian Embassy or Consulate."
+msgstr ""
+
 msgid "Cotutelle"
 msgstr ""
 
@@ -1651,6 +1730,12 @@ msgstr ""
 
 msgid "Course cycle"
 msgstr ""
+
+#, python-format
+msgid "Course duration: 1 year."
+msgid_plural "Course duration: %(years)s years."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "Course name"
 msgstr ""
@@ -1735,8 +1820,38 @@ msgstr ""
 msgid "DD/scholarship/EM?"
 msgstr ""
 
+msgid "DISPENSE_BOURSE"
+msgstr ""
+
+msgid "DISPENSE_CESS_FWB"
+msgstr ""
+
+msgid "DISPENSE_DUREE"
+msgstr ""
+
+msgid "DISPENSE_LDC"
+msgstr ""
+
+msgid "DISPENSE_OFFRE"
+msgstr ""
+
+msgid "DISPENSE_REUSSITE"
+msgstr ""
+
+msgid "DISPENSE_UNIV"
+msgstr ""
+
+msgid "DISPENSE_VCRC"
+msgstr ""
+
 msgid "DOCTORAL_TRAINING"
 msgstr "PhD training"
+
+msgid "DROITS_MAJORES"
+msgstr ""
+
+msgid "DROITS_MAJORES_DEMANDES"
+msgstr ""
 
 msgid "Data protection"
 msgstr ""
@@ -1786,6 +1901,20 @@ msgctxt "other gender"
 msgid "Dear"
 msgstr ""
 
+#, python-format
+msgid "Dear %(name)s,"
+msgstr ""
+
+#, python-format
+msgctxt "F"
+msgid "Dear %(name)s,"
+msgstr ""
+
+#, python-format
+msgctxt "M"
+msgid "Dear %(name)s,"
+msgstr ""
+
 msgid "Debug"
 msgstr ""
 
@@ -1793,6 +1922,9 @@ msgid "Decision confirming the granting of subsidiary protection"
 msgstr ""
 
 msgid "Decision confirming the granting of temporary protection"
+msgstr ""
+
+msgid "Decision of SIC"
 msgstr ""
 
 msgid "Decision of the faculty"
@@ -1893,7 +2025,16 @@ msgstr ""
 msgid "Diplomatic post code"
 msgstr ""
 
+msgid "Director"
+msgstr ""
+
 msgid "Disabled"
+msgstr ""
+
+msgid "Dispensation needed"
+msgstr ""
+
+msgid "Dispensation or increased fees"
 msgstr ""
 
 msgid "Dispensed"
@@ -1927,10 +2068,19 @@ msgstr ""
 msgid "Do you have an international scholarship?"
 msgstr ""
 
+msgid "Do you want to authorize this inscription type admission now?"
+msgstr ""
+
 msgid "Do you want to continue?"
 msgstr ""
 
 msgid "Do you want to request the application fee now?"
+msgstr ""
+
+msgid "Do you want to send the approval to the candidate now?"
+msgstr ""
+
+msgid "Do you want to send the refusal to the candidate now?"
 msgstr ""
 
 #, python-format
@@ -2070,6 +2220,10 @@ msgstr ""
 msgid "EFT"
 msgstr ""
 
+#, python-format
+msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
+msgstr ""
+
 msgid "EU,NEU"
 msgstr ""
 
@@ -2103,6 +2257,9 @@ msgstr ""
 msgid "Email of the contact person for the design of the annual program"
 msgstr ""
 
+msgid "Email receiving the documents"
+msgstr ""
+
 #, python-format
 msgid ""
 "Email requesting the application fee sent to the candidate on %(date)s by "
@@ -2112,6 +2269,12 @@ msgstr ""
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
+msgstr ""
+
+msgid "Email sent to the candidate when SIC approves an admission."
+msgstr ""
+
+msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr ""
 
 msgid ""
@@ -2158,6 +2321,9 @@ msgid "Enroll in a course"
 msgstr ""
 
 msgid "Enrolled"
+msgstr ""
+
+msgid "Enrolment Office (SIC)"
 msgstr ""
 
 msgid "Enrolment applications"
@@ -2400,6 +2566,9 @@ msgstr ""
 msgid "First year of"
 msgstr ""
 
+msgid "First year of inscription + status"
+msgstr ""
+
 msgctxt "female gender"
 msgid ""
 "Following the presentation of the state of the research and the subsequent "
@@ -2484,6 +2653,12 @@ msgid "Fraudster"
 msgstr ""
 
 msgid "Fraudster (ARES)"
+msgstr ""
+
+msgid "Fraudster status from ARES"
+msgstr ""
+
+msgid "Fraudster status from SIC"
 msgstr ""
 
 msgid "Free additional approval conditions"
@@ -2724,6 +2899,12 @@ msgid ""
 "authorisation, etc.) in order to ensure their authenticity."
 msgstr ""
 
+#, python-format
+msgid ""
+"I am pleased to inform you that the faculty has authorised you to enrol for "
+"the %(academic_year)s academic year in:"
+msgstr ""
+
 msgid ""
 "I am supported by the CPAS or by a CPAS home or nominated by the CPAS "
 "(Belgian student status category 4)"
@@ -2837,6 +3018,12 @@ msgstr "Initial not concerned"
 
 msgid "INSCRIPTION"
 msgstr "Enrollment"
+
+msgid "INSCRIPTION_AU_ROLE"
+msgstr ""
+
+msgid "INSCRIPTION_REGULIERE"
+msgstr ""
 
 msgid "INVALID"
 msgstr "Invalid"
@@ -2980,6 +3167,20 @@ msgid ""
 msgstr ""
 
 msgid "In draft form"
+msgstr ""
+
+#, python-format
+msgid ""
+"In order to proceed with your enrolment at the university, please go to the "
+"Enrolment Office (see address below) between 1 June and 30 September "
+"%(year)s with the following documents:"
+msgstr ""
+
+#, python-format
+msgid ""
+"In order to proceed with your enrolment at the university, please send the "
+"document(s) listed below between 1 June and 30 September %(year)s to <a "
+"href=\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 
 msgid "In person"
@@ -3319,6 +3520,9 @@ msgstr ""
 msgid "MANAGEMENT"
 msgstr "Management"
 
+msgid "MASTER_DE_SPECIALISATION_SANTE"
+msgstr ""
+
 msgid "MATHEMATICS"
 msgstr "Mathematics"
 
@@ -3642,6 +3846,9 @@ msgstr ""
 msgid "Missing"
 msgstr ""
 
+msgid "Mobility months amount"
+msgstr ""
+
 msgid "Modification asked by the candidate"
 msgstr ""
 
@@ -3753,6 +3960,9 @@ msgstr "Not allowed to continue"
 msgid "NOT_INVITED"
 msgstr "Not invited to sign"
 
+msgid "NOUVEAUX_DROITS_MAJORES"
+msgstr ""
+
 msgid "Name"
 msgstr ""
 
@@ -3824,6 +4034,9 @@ msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 
 msgid "No enrolment application"
+msgstr ""
+
+msgid "No fraud identified"
 msgstr ""
 
 msgid "No general enrolment"
@@ -4055,6 +4268,9 @@ msgstr ""
 msgid "Other course accepted by the faculty"
 msgstr ""
 
+msgid "Other demand(s) by the candidate."
+msgstr ""
+
 msgid "Other documents relating to joint supervision"
 msgstr ""
 
@@ -4099,6 +4315,11 @@ msgstr ""
 msgid "Other refusal reasons"
 msgstr ""
 
+msgid ""
+"Our University is pleased to welcome you and wishes you an enriching and "
+"fruitful stay."
+msgstr ""
+
 msgctxt "CategorieActivite"
 msgid "PAPER"
 msgstr "Examination"
@@ -4108,6 +4329,9 @@ msgstr "Partially"
 
 msgid "PASSED_CONFIRMATION"
 msgstr "Passed confirmation exam"
+
+msgid "PAS_DE_DROITS_D_INSCRIPTION"
+msgstr ""
 
 msgid "PDF Export"
 msgstr ""
@@ -4189,6 +4413,9 @@ msgid "Participation certification"
 msgstr ""
 
 msgid "Participation to symposium/conference"
+msgstr ""
+
+msgid "Particular cost"
 msgstr ""
 
 msgid "Partner institution"
@@ -4320,6 +4547,10 @@ msgid ""
 msgstr ""
 
 msgid "Please justify why the member does not have a doctor title"
+msgstr ""
+
+#, python-format
+msgid "Please note that the first term begins on %(date)s."
 msgstr ""
 
 msgid ""
@@ -4614,8 +4845,44 @@ msgstr ""
 msgid "R102"
 msgstr ""
 
+msgid "REDUCTION_VCRC"
+msgstr ""
+
 msgid "REFUSEE"
 msgstr "Denied"
+
+msgid "REFUS_AGREGATION"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_JURY"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_SIC_CONDITIONS_PUBLIESS"
+msgstr ""
+
+msgid "REFUS_ARTICLE_96_HUE_NON_PROGRESSION"
+msgstr ""
+
+msgid "REFUS_ARTICLE_96_HUE_RAISON_ACADEMIQUE"
+msgstr ""
+
+msgid "REFUS_ARTICLE_96_UE_HUE_ASSIMILES"
+msgstr ""
+
+msgid "REFUS_BAC_HUE_ACADEMIQUE"
+msgstr ""
+
+msgid "REFUS_COMPLEMENT_TARDIF"
+msgstr ""
+
+msgid "REFUS_DIRECTION"
+msgstr ""
+
+msgid "REFUS_DOSSIER_TARDIF"
+msgstr ""
+
+msgid "REFUS_EQUIVALENCE"
+msgstr ""
 
 msgid "REJECTED"
 msgstr "Rejected"
@@ -4648,6 +4915,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Reasons"
+msgstr ""
+
+msgid "Rebilling or third-party payer"
 msgstr ""
 
 #, python-format
@@ -4696,6 +4966,12 @@ msgstr ""
 msgid "Refusal"
 msgstr ""
 
+msgid "Refusal certificate from SIC"
+msgstr ""
+
+msgid "Refusal certificate of SIC"
+msgstr ""
+
 msgid "Refusal certificate of faculty"
 msgstr ""
 
@@ -4709,6 +4985,12 @@ msgid "Refusal reason category"
 msgstr ""
 
 msgid "Refusal reasons"
+msgstr ""
+
+msgid "Refusal to validate"
+msgstr ""
+
+msgid "Refusal type"
 msgstr ""
 
 msgid "Refuse activity"
@@ -4941,6 +5223,9 @@ msgstr "Services"
 msgid "SERVICE types"
 msgstr ""
 
+msgid "SIC Approval"
+msgstr ""
+
 msgid "SIC comment for the faculty"
 msgstr ""
 
@@ -5013,6 +5298,9 @@ msgid "Scholarship end date"
 msgstr ""
 
 msgid "Scholarship start date"
+msgstr ""
+
+msgid "Scholarship-DD-Erasmus"
 msgstr ""
 
 msgid "Scientific residencies"
@@ -5093,6 +5381,10 @@ msgstr ""
 msgid "Seminar taken"
 msgstr ""
 
+msgid "Send"
+msgstr ""
+
+msgctxt "admission"
 msgid "Send"
 msgstr ""
 
@@ -5252,6 +5544,9 @@ msgstr ""
 msgid "Start date"
 msgstr ""
 
+msgid "Start date of the academic year of the admission"
+msgstr ""
+
 msgid "State"
 msgstr ""
 
@@ -5272,6 +5567,9 @@ msgid "Status:"
 msgstr ""
 
 msgid "Street"
+msgstr ""
+
+msgid "Student signature for agreement"
 msgstr ""
 
 msgid "Study language"
@@ -5464,6 +5762,14 @@ msgid ""
 "being generated. Please come back later to access it."
 msgstr ""
 
+#, python-format
+msgid ""
+"The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
+msgstr ""
+
+msgid "The University tuition fee is EUR 0.0."
+msgstr ""
+
 msgid "The acronym of the scholarship grant"
 msgstr ""
 
@@ -5474,6 +5780,12 @@ msgid "The candidate has a scholarship"
 msgstr ""
 
 msgid "The candidate has several enrolment applications in progress"
+msgstr ""
+
+msgid "The candidate is doing a mobility"
+msgstr ""
+
+msgid "The candidate must report to SIC"
 msgstr ""
 
 msgid "The certificate of achievement is being generated."
@@ -5685,6 +5997,9 @@ msgstr ""
 msgid "The number of credits registered must be greater than 0."
 msgstr ""
 
+msgid "The official French-language enrolment authorisation signed by you."
+msgstr ""
+
 msgid "The opinion about the extension request is not completed."
 msgstr ""
 
@@ -5797,6 +6112,20 @@ msgstr ""
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr ""
 
+#, python-format
+msgid ""
+"The university tuition fee is EURO %(montant)s. A compulsory minimum EURO 50 "
+"tuition fee deposit must be paid as soon as possible and no later than 31 "
+"October %(start_year)s. The tuition fee balance must be paid in full by 1 "
+"February %(end_year)s. As soon as we receive the enrolment authorisation "
+"signed by you, we will let you know how to pay."
+msgstr ""
+"The university tuition fee is €%(montant)s. A compulsory minimum €50 tuition "
+"fee deposit must be paid as soon as possible and no later than 31 October "
+"%(start_year)s. The tuition fee balance must be paid in full by 1 February "
+"%(end_year)s. As soon as we receive the enrolment authorisation signed by "
+"you, we will let you know how to pay."
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervisory panel members in the supervision group."
@@ -5896,6 +6225,18 @@ msgstr ""
 msgid ""
 "This choice will define the language of communication throughout your "
 "admission process."
+msgstr ""
+
+msgid ""
+"This document does not represent a commitment of financial support from "
+"UCLouvain."
+msgstr ""
+
+msgid ""
+"This enrolment authorisation letter allows you to submit an application for "
+"accommodation to the Logistics and Student Accommodation Service (LOGE). To "
+"find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
+"accomodation\">www.uclouvain.be/en/study/accomodation</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -6037,6 +6378,9 @@ msgstr ""
 msgid "Training activity"
 msgstr ""
 
+msgid "Training of the admission"
+msgstr ""
+
 msgid "Training specificities"
 msgstr ""
 
@@ -6067,6 +6411,9 @@ msgid "Trigger the payment hook"
 msgstr ""
 
 msgid "True"
+msgstr ""
+
+msgid "Tuition fees amount"
 msgstr ""
 
 msgid "Tutorship act"
@@ -6136,6 +6483,9 @@ msgstr ""
 
 msgctxt "document"
 msgid "Unknown"
+msgstr ""
+
+msgid "Unknown PDF type."
 msgstr ""
 
 msgid "Unknown citizenship"
@@ -6258,6 +6608,15 @@ msgstr ""
 msgid "Visualize"
 msgstr ""
 
+msgid "Visualize annexe1"
+msgstr ""
+
+msgid "Visualize approval"
+msgstr ""
+
+msgid "Visualize refusal"
+msgstr ""
+
 msgid "WORK_CONTRACT"
 msgstr "Work contract"
 
@@ -6274,6 +6633,11 @@ msgstr ""
 msgid ""
 "We congratulate you on your successful completion of the paper and wish you "
 "every success in your doctoral training."
+msgstr ""
+
+msgid ""
+"We would like to draw your attention to the fact that this enrolment "
+"authorisation is conditional on :"
 msgstr ""
 
 msgid ""

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ class SicManagement(EntityRoleModel):
         ruleset = {
             **CentralManager.rule_set(),
             # Listings
+            'admission.checklist_change_sic_decision': rules.always_allow,
             'admission.view_enrolment_applications': rules.always_allow,
             'admission.view_doctorate_enrolment_applications': rules.always_allow,
             'admission.view_continuing_enrolment_applications': rules.always_allow,

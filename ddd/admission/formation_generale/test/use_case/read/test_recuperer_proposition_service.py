@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ class RecupererPropositionServiceTestCase(SimpleTestCase):
         self.assertEqual(result.formation.sigle, 'MASTER-SCI')
         self.assertEqual(result.formation.annee, 2021)
         self.assertEqual(result.formation.intitule, 'Master en sciences')
-        self.assertEqual(result.formation.campus, 'Louvain-la-Neuve')
+        self.assertEqual(result.formation.campus.nom, 'Louvain-la-Neuve')
         self.assertEqual(result.statut, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
         self.assertEqual(result.matricule_candidat, '0000000001')
         self.assertEqual(result.prenom_candidat, 'Jane')

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,8 +41,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC1',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Mons',
-            campus_inscription='Mons',
+            campus__nom='Mons',
+            campus_inscription__nom='Mons',
             sigle_entite_gestion='FC1',
         ),
         FormationFactory(
@@ -50,8 +50,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC1',
             entity_id__annee=2020,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Louvain-la-Neuve',
-            campus_inscription='Louvain-la-Neuve',
+            campus__nom='Louvain-la-Neuve',
+            campus_inscription__nom='Louvain-la-Neuve',
             sigle_entite_gestion='FC1',
         ),
         FormationFactory(
@@ -59,8 +59,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC2',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Louvain-la-Neuve',
-            campus_inscription='Louvain-la-Neuve',
+            campus__nom='Louvain-la-Neuve',
+            campus_inscription__nom='Louvain-la-Neuve',
             sigle_entite_gestion='FC1',
         ),
         FormationFactory(
@@ -68,8 +68,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC3',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Charleroi',
-            campus_inscription='Charleroi',
+            campus__nom='Charleroi',
+            campus_inscription__nom='Charleroi',
             sigle_entite_gestion='FC1',
         ),
         FormationFactory(
@@ -77,8 +77,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC4',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Louvain-la-Neuve',
-            campus_inscription='Louvain-la-Neuve',
+            campus__nom='Louvain-la-Neuve',
+            campus_inscription__nom='Louvain-la-Neuve',
             sigle_entite_gestion='FC1',
         ),
         FormationFactory(
@@ -86,8 +86,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC5',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Charleroi',
-            campus_inscription='Charleroi',
+            campus__nom='Charleroi',
+            campus_inscription__nom='Charleroi',
             sigle_entite_gestion='FC1',
         ),
         FormationFactory(
@@ -95,8 +95,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='ESP3DP-MASTER',
             entity_id__annee=2022,
             type=TrainingType.MASTER_M1,
-            campus='Charleroi',
-            campus_inscription='Charleroi',
+            campus__nom='Charleroi',
+            campus_inscription__nom='Charleroi',
             sigle_entite_gestion='FC2',
         ),
         FormationFactory(
@@ -104,8 +104,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             entity_id__sigle='USCC4',
             entity_id__annee=2020,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
-            campus='Louvain-la-Neuve',
-            campus_inscription='Louvain-la-Neuve',
+            campus__nom='Louvain-la-Neuve',
+            campus_inscription__nom='Louvain-la-Neuve',
             sigle_entite_gestion='FC1',
         ),
     ]
@@ -115,7 +115,10 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
         return FormationDTO(
             sigle=entity.entity_id.sigle,
             annee=entity.entity_id.annee,
+            date_debut=None,
             intitule=entity.intitule,
+            intitule_fr=entity.intitule,
+            intitule_en=entity.intitule,
             campus=entity.campus,
             type=entity.type.name,
             code_domaine=entity.code_domaine,
@@ -166,7 +169,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             for training in cls.trainings
             if training.entity_id.annee == annee
             and (terme_de_recherche in training.intitule or terme_de_recherche in training.entity_id.sigle)
-            and (not campus or training.campus == campus)
+            and (not campus or training.campus.nom == campus)
         ]
 
     @classmethod

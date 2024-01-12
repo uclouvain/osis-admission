@@ -116,6 +116,27 @@ class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelS
         ]
 
 
+class DoctoratDTOSerializer(DTOSerializer):
+    class Meta:
+        source = DoctoratDTO
+
+
+class FormationGeneraleDTOSerializer(DTOSerializer):
+    campus = serializers.CharField(source='campus.nom', default='')
+    campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
+
+    class Meta:
+        source = FormationDTO
+
+
+class FormationContinueDTOSerializer(DTOSerializer):
+    campus = serializers.CharField(source='campus.nom', default='')
+    campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
+
+    class Meta:
+        source = FormationDTO
+
+
 class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     links = ActionLinksField(
         actions={
@@ -214,11 +235,14 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
         }
     )
 
+    formation = FormationGeneraleDTOSerializer()
+
     # This is to prevent schema from breaking on JSONField
     erreurs = None
     reponses_questions_specifiques = None
     elements_confirmation = None
     documents_demandes = None
+    droits_inscription_montant_autre = None
 
     class Meta:
         source = FormationGeneralePropositionDTO
@@ -262,6 +286,8 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
             ]
         }
     )
+
+    formation = FormationContinueDTOSerializer()
 
     # This is to prevent schema from breaking on JSONField
     erreurs = None
@@ -460,10 +486,14 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             ]
         }
     )
+
+    formation = FormationGeneraleDTOSerializer()
+
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
     elements_confirmation = None
     documents_demandes = None
+    droits_inscription_montant_autre = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -523,6 +553,9 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             ]
         }
     )
+
+    formation = FormationContinueDTOSerializer()
+
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
     elements_confirmation = None
@@ -609,18 +642,3 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
 class SectorDTOSerializer(serializers.Serializer):
     sigle = serializers.ReadOnlyField()
     intitule = serializers.ReadOnlyField()
-
-
-class DoctoratDTOSerializer(DTOSerializer):
-    class Meta:
-        source = DoctoratDTO
-
-
-class FormationGeneraleDTOSerializer(DTOSerializer):
-    class Meta:
-        source = FormationDTO
-
-
-class FormationContinueDTOSerializer(DTOSerializer):
-    class Meta:
-        source = FormationDTO

@@ -373,6 +373,47 @@
         </div>
       {% endwith %}
 
+      <div role="tabpanel" class="tab-pane" id="decision_sic">
+        {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
+
+        {% include "admission/general_education/includes/checklist/sic_decision_approval_modal.html" %}
+        {% include "admission/general_education/includes/checklist/sic_decision_refusal_modal.html" %}
+
+        <div class="info-part">
+          <dl>
+            <dt>{% trans "Fraudster status from SIC" %}</dt>
+            <dd>
+              {% if original_admission.checklist.current.donnees_personnelles.statut == 'GEST_BLOCAGE' and original_admission.checklist.current.donnees_personnelles.extra.fraud == '1' %}
+                <span class="bg-danger">{% trans "Fraudster" %}</span>
+              {% else %}
+                {% trans "No fraud identified" %}
+              {% endif %}
+            </dd>
+
+            <dt>{% trans "Fraudster status from ARES" %}</dt>
+            <dd>
+              Not implemented yet.
+            </dd>
+
+            {% if autres_demandes %}
+              <dt>{% trans "Other demand(s) by the candidate." %}</dt>
+              <dd>
+                {% for autre_demande in autres_demandes %}
+                  <a href="{% admission_url autre_demande.uuid autre_demande.type_formation %}">{{ autre_demande.numero_demande }}</a>
+                  {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
+                    {{ autre_demande.sigle_formation }}-1 - {% trans "First year of" %} {{ autre_demande.intitule_formation|lower }} ({{ autre_demande.lieu_formation }})
+                  {% else %}
+                    {{ autre_demande.sigle_formation }} - {{ autre_demande.intitule_formation }} ({{ autre_demande.lieu_formation }})
+                  {% endif %}
+                  {% if not forloop.last %}<br>{% endif %}
+                {% endfor %}
+              </dd>
+            {% endif %}
+          </dl>
+        </div>
+
+      </div>
+
     </div>
 
     <div id="info-viewer-tab" class="viewer-tab">
@@ -429,7 +470,9 @@
   {{ block.super }}
   {{ assimilation_form.media.js }}
   {{ fac_decision_refusal_form.media.js }}
-  {{ fac_decision_approval_form.media.js }}
+  {{ fac_decision_refusal_form.media.js }}
+  {{ sic_decision_refusal_form.media.js }}
+  {{ sic_decision_approval_form.media.js }}
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
   <script src="{% static 'admission/ckeditor.js' %}"></script>
   <script>
@@ -606,6 +649,8 @@
               }
 
               $('textarea[name="comment"]:visible').each(autogrow);
+
+              $('*[data-toggle=popover]').popover();
           });
 
           let bound = false;
@@ -830,6 +875,27 @@
               }
           })
 
+          // SIC decision
+          const sicDecisionContainer = $('#decision_sic');
+
+          sicDecisionContainer.on('change', 'input[name="sic-decision-approval-with_additional_approval_conditions"]', function(event){
+              const container = $('#sic-decision-additional-approval-conditions-container');
+              $(this).val() === 'True' && $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
+          });
+          $('input[name="sic-decision-approval-with_additional_approval_conditions"]:checked').change();
+
+          sicDecisionContainer.on('change', 'input[name="sic-decision-approval-with_prerequisite_courses"]', function(event){
+              const container = $('#sic-decision-additional-trainings-container');
+              $(this).val() === 'True' && $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
+          });
+          $('input[name="sic-decision-approval-with_prerequisite_courses"]:checked').change();
+
+          sicDecisionContainer.on('click', 'button[name^="save"]', function(event){
+              // To send the updated data from ckeditor instances
+              for (const editor in CKEDITOR.instances) {
+                  CKEDITOR.instances[editor].updateElement();
+              }
+          });
       })(jQuery);
   </script>
 {% endblock script %}
@@ -838,7 +904,9 @@
 {% block style %}
   {{ block.super }}
   {{ fac_decision_refusal_form.media.css }}
-  {{ fac_decision_approval_form.media.css }}
+  {{ fac_decision_refusal_form.media.css }}
+  {{ sic_decision_refusal_form.media.css }}
+  {{ sic_decision_approval_form.media.css }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
   <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
   <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
@@ -1108,5 +1176,25 @@
     }
 
 
+    #requested-documents-selects tbody tr.tab-name {
+      background-color: #f5f5f5;
+    }
+
+    #requested-documents-selects td {
+      vertical-align: middle;
+    }
+
+    #requested-documents-selects td .form-group {
+      margin-bottom: 0;
+    }
+
+    #requested-documents-selects select {
+      min-width: max-content;
+    }
+
+    .reset-button {
+      float: right;
+      margin-top: -7px;
+    }
   </style>
 {% endblock style %}

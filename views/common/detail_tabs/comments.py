@@ -63,6 +63,7 @@ class CheckListTagsEnum(ChoiceEnum):
     donnees_personnelles = _('Personal data')
     specificites_formation = _('Training specificities')
     decision_facultaire = _('Decision of the faculty')
+    decision_sic = _('Decision of SIC')
 
 
 class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):

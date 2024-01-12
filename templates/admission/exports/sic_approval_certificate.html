@@ -1,0 +1,256 @@
+{% load admission i18n osis_document static %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<!doctype html>{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}{{ admission.reference }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap5/bootstrap.min.css' %}">
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 1cm 2cm 120px 2cm;
+
+      @bottom-left {
+        content: element(footer);
+        width: 100%;
+        height: 120px;
+      }
+    }
+
+    @media print {
+      footer {
+        position: running(footer);
+        font-size: 8pt;
+      }
+
+      #page-counter:after {
+        content: counter(page) "/" counter(pages);
+      }
+
+      body {
+        font-family: Calibri, Arial, sans-serif;
+        font-size: 11pt;
+        text-align: justify;
+        line-height: 0.5cm;
+      }
+
+      #logo {
+        height: 1.5cm;
+        width: auto;
+      }
+
+      #student-signature td {
+          height: 2cm;
+          text-align: center;
+          vertical-align: top;
+          border: 1px #000 solid;
+      }
+
+      #sigle-container {
+          position: relative;
+      }
+
+      #sigle-container #sigle {
+          position: absolute;
+          width: 3cm;
+          height: auto;
+          top: 0;
+          right: 0;
+          z-index: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <footer>
+    {% footer_campus proposition %}
+    <a href="https://uclouvain.be/fr/etudier/inscriptions/contacts.html">https://uclouvain.be/fr/etudier/inscriptions/contacts.html</a><br>
+    <div id="page-counter" class="text-center small">Page </div>
+  </footer>
+
+  <div class="row mb-5">
+    <div class="col-6">
+      <img id="logo" src="{% static "img/logo_uclouvain.png" %}">
+    </div>
+    <div class="col-6 text-end">
+      <strong>{% blocktrans with academic_year=proposition.formation.annee|get_academic_year trimmed %}
+        ENROLMENT AUTHORISATION<br>for the {{ academic_year }} academic year
+      {% endblocktrans %}</strong>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-6">
+      <strong>{% trans "Enrolment Office (SIC)" %}</strong>
+    </div>
+    <div class="col-6">
+      {% with candidat=proposition.profil_soumis_candidat %}
+        {{ candidat.nom|upper }} {{ candidat.prenom }}<br><br>
+        {{ candidat.rue }} {{ candidat.numero_rue }} {{ candidat.boite_postale }}<br>
+        {{ candidat.code_postal }} {{ candidat.ville }}<br>
+        {{ candidat.nom_pays }}
+      {% endwith %}
+    </div>
+  </div>
+
+  <div class="text-end">{% if LANGUAGE_CODE == 'fr-be' %}Le {% endif %}{% now "d/m/Y" %}</div>
+
+  <p>Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
+
+  <p>
+    {% with name=proposition.prenom_candidat|add:" "|add:proposition.nom_candidat %}
+      {% if proposition.genre_candidat == "M" %}{% blocktrans with name=name context "M" %}Dear {{ name }},{% endblocktrans %}
+      {% elif proposition.genre_candidat == "F" %}{% blocktrans with name=name context "F" %}Dear {{ name }},{% endblocktrans %}
+      {% else %}{% blocktrans with name=name %}Dear {{ name }},{% endblocktrans %}
+      {% endif %}
+    {% endwith %}
+  </p>
+
+  <p>
+    {% blocktrans with academic_year=proposition.formation.annee|get_academic_year trimmed %}
+    I am pleased to inform you that the faculty has authorised you to enrol
+    for the {{ academic_year }} academic year in:
+    {% endblocktrans %}
+    {% with intitule=proposition|get_intitule_in_candidate_language %}
+    <strong>
+      {% if proposition.poursuite_de_cycle == 'TO_BE_DETERMINED' or proposition.poursuite_de_cycle == 'NO' %}
+        {% trans "First year of" %} {{ intitule|lower }} [{{ proposition.formation.sigle }}-1]
+      {% else %}
+        {{ intitule }} [{{ proposition.formation.sigle }}]
+      {% endif %}
+      ({{ proposition.formation.campus }})
+    </strong>
+    {% endwith %}
+  </p>
+
+  {% with name=proposition.nom_personne_contact_programme_annuel_annuel email=proposition.email_personne_contact_programme_annuel_annuel %}
+    {% if name or email %}
+    <p class="mb-0">
+      {% trans "Annual programme contact person:" %}
+      {{ name }}{% if name and email %}, {% endif %}{% if email %}<a href="mailto:{{ email }}">{{ email }}</a>{% endif %}.
+    </p>
+    {% endif %}
+  {% endwith %}
+
+  {% if proposition.nombre_annees_prevoir_programme %}
+    <p class="mb-0">{% blocktrans count years=proposition.nombre_annees_prevoir_programme %}Course duration: 1 year.{% plural %}Course duration: {{ years }} years.{% endblocktrans %}</p>
+  {% elif proposition.formation.type == 'BACHELOR' %}
+    <p class="mb-0">{% blocktrans count years=3 %}Course duration: 1 year.{% plural %}Course duration: {{ years }} years.{% endblocktrans %}</p>
+  {% endif %}
+
+  {% if proposition.avec_complements_formation %}
+    <p>{% trans "Additional course(s):" %}
+      <ul>
+      {% for learning_unit in proposition.complements_formation %}
+        <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %} ({{ learning_unit.credits }} ECTS)</li>
+      {% endfor %}
+      </ul>
+    </p>
+  {% endif %}
+
+  {% if proposition.commentaire_complements_formation %}
+    <p>{{ proposition.commentaire_complements_formation|safe }}</p>
+  {% endif %}
+
+  <p>
+    {% if proposition.doit_se_presenter_en_sic %}
+      {% blocktrans with year=proposition.formation.annee trimmed %}
+        In order to proceed with your enrolment at the university, please go to the Enrolment Office (see address below) between 1 June and 30 September {{ year }} with the following documents:
+      {% endblocktrans %}
+    {% else %}
+      {% blocktrans with year=proposition.formation.annee email=proposition.formation.campus_inscription.email trimmed %}
+        In order to proceed with your enrolment at the university, please send the document(s) listed below between 1 June and 30 September {{ year }} to <a href="mailto:{{ email }}">{{ email }}</a>:
+      {% endblocktrans %}
+    {% endif %}
+    <ul>
+      <li>{% trans "The official French-language enrolment authorisation signed by you." %}</li>
+      {% if not proposition.candidate.nationalite_ue_candidat %}
+        <li>{% trans "Copy of your student visa D (permission to stay longer than 90 days in Belgium) issued by the Belgian Embassy or Consulate." %}</li>
+      {% endif %}
+      {% for document in documents %}
+        <li>{{ document.libelle_langue_candidat }}.</li>
+      {% endfor %}
+    </ul>
+  </p>
+
+  {% if proposition.avec_conditions_complementaires %}
+  <p>
+    {% trans "We would like to draw your attention to the fact that this enrolment authorisation is conditional on :" %}
+    <ul>
+      {% for condition in proposition.conditions_complementaires %}
+      <li>{{ condition }}</li>
+      {% endfor %}
+    </ul>
+  </p>
+  {% endif %}
+
+  {% if proposition.communication_au_candidat %}<p>{{ proposition.communication_au_candidat|safe }}</p>{% endif %}
+
+  {% if proposition.droits_inscription_montant_valeur >= 50 %}
+  <p>
+    {% blocktrans with montant=proposition.droits_inscription_montant_valeur start_year=proposition.formation.annee end_year=proposition.formation.annee|add:1 trimmed %}
+      The university tuition fee is EURO {{ montant }}. A compulsory minimum EURO 50 tuition fee deposit must be paid as
+      soon as possible and no later than 31 October {{ start_year }}. The tuition fee balance must be paid in full by
+      1 February {{ end_year }}. As soon as we receive the enrolment authorisation signed by you, we will let you know how to pay.
+    {% endblocktrans %}
+  </p>
+  {% else %}
+  <p>{% blocktrans %}The University tuition fee is EUR 0.0.{% endblocktrans %}</p>
+  {% endif %}
+
+  <p>{% blocktrans with date=proposition.formation.date_debut|date:"d/m/Y" %}Please note that the first term begins on {{ date }}.{% endblocktrans %}</p>
+
+  <p>
+    {% blocktrans trimmed %}
+      This enrolment authorisation letter allows you to submit an application for accommodation to the Logistics and Student Accommodation Service (LOGE). To find out how, go to <a href="https://www.uclouvain.be/en/study/accomodation">www.uclouvain.be/en/study/accomodation</a>.
+    {% endblocktrans %}
+  </p>
+
+  <p>{% trans "Our University is pleased to welcome you and wishes you an enriching and fruitful stay." %}</p>
+
+  <div class="row">
+    <div class="col-6">
+      <table class="w-100" id="student-signature">
+        <tr>
+          <td class="text-center">{% trans "Date" %}</td>
+          <td class="text-center">{% trans "Student signature for agreement" %}</td>
+        </tr>
+      </table>
+    </div>
+    <div id="sigle-container" class="col-6 text-center">
+      {% if director.signature %}<img src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+      <p>
+        {{ director.first_name }} {{ director.last_name }},<br>
+        {% trans "Director" %}
+      </p>
+      <img id="sigle" src="{% static "img/sedes.png" %}">
+    </div>
+  </div>
+
+  <p><small>{% trans "This document does not represent a commitment of financial support from UCLouvain." %}</small></p>
+</body>
+</html>

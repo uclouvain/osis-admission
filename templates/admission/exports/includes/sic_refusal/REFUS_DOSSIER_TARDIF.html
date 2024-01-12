@@ -1,0 +1,54 @@
+{% load admission i18n static %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<p>
+  La date tardive à laquelle nous avons reçu votre dossier ne nous permet plus de traiter votre demande dans un délai
+  raisonnable pour cette année académique. Votre dossier n'est donc pas recevable en raison du non-respect du
+  calendrier des admissions, (cfr <a href="https://uclouvain.be/fr/etudier/inscriptions/calendrier-inscriptions.html">
+  https://uclouvain.be/fr/etudier/inscriptions/calendrier-inscriptions.html</a>).
+</p>
+
+<p>
+  Nous vous proposons, par conséquent, de réintroduire une nouvelle demande d’admission en ligne pour
+  l’année académique {{ proposition.formation.annee|add:1|get_academic_year }} (<a
+    href="https://uclouvain.be/fr/etudier/inscriptions/futurs-etudiants.html">
+    https://uclouvain.be/fr/etudier/inscriptions/futurs-etudiants.html</a>
+  ).
+</p>
+
+<p>
+  Toutefois, si vous estimez que les motifs de cette décision d'irrecevabilité ne sont pas fondés et que vous disposez
+  d’arguments à faire valoir, un recours peut être exercé auprès de la Déléguée du Gouvernement de la Communauté
+  française de Belgique conformément à l’article 95, § 1er du décret du 7 novembre 2013 définissant le paysage de
+  l'enseignement supérieur et l'organisation académique des études. Ce recours doit être introduit par courrier
+  électronique ou par courrier recommandé avec accusé de réception ou remis en mains propres contre accusé de
+  réception.
+</p>
+
+<p>
+  Afin de connaître cette procédure, je vous invite à consulter l’article 19 du Règlement Général des Études et des
+  Examens disponible à l’adresse suivante : <a href="https://uclouvain.be/fr/decouvrir/rgee.html">
+  https://uclouvain.be/fr/decouvrir/rgee.html</a>.
+</p>
