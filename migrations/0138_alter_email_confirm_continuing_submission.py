@@ -8,7 +8,7 @@ from admission.mail_templates import ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUI
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('admission', '0136_continuing_education_motivations'),
+        ('admission', '0137_sic_decision'),
     ]
 
     operations = [

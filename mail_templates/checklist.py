@@ -76,14 +76,19 @@ templates.register(
             example="http://dev.studies.uclouvain.be/somewhere",
         ),
         Token(
-            name='admission_link_back_for_uclouvain_documents',
-            description=_("Link to the page of the documents of the admission (back-office)"),
+            name='training_enrollment_campus_email',
+            description=_("Email of the enrollment campus"),
             example="http://dev.studies.uclouvain.be/somewhere",
         ),
         Token(
             name='candidate_nationality_country',
             description=_("Candidate's country of nationality"),
             example="Belgique",
+        ),
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
         ),
     ],
 )
