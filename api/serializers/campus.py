@@ -27,7 +27,7 @@ from rest_framework import serializers
 
 
 class CampusSerializer(serializers.Serializer):
-    uuid = serializers.CharField(source='entity_id.uuid', read_only=True)
+    uuid = serializers.CharField(read_only=True)
     name = serializers.CharField(read_only=True)
 
     def update(self, instance, validated_data):
