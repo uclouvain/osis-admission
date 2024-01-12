@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -57,4 +57,22 @@ class NotificationInMemory(INotification):
         liste_documents_reclames: List[EmplacementDocument],
         liste_documents_dto: List[EmplacementDocumentDTO],
     ):
+        pass
+
+    @classmethod
+    def refuser_proposition_par_sic(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        pass
+
+    @classmethod
+    def accepter_proposition_par_sic(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
         pass

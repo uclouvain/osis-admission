@@ -26,6 +26,8 @@
 
 import copy
 import uuid
+from email import message_from_string
+from email.policy import default
 from typing import List
 from unittest import mock
 
@@ -36,6 +38,7 @@ from django.test import TestCase
 from django.test import override_settings
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
+from osis_notification.models import EmailNotification
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
@@ -46,17 +49,28 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     DecisionFacultaireEnum,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.notification import NotificationException
+from admission.tests.factories.comment import CommentEntryFactory
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+)
 from admission.tests.factories.faculty_decision import RefusalReasonFactory, AdditionalApprovalConditionFactory
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
 )
+from admission.tests.factories.history import HistoryEntryFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.secondary_studies import ForeignHighSchoolDiplomaFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
 class FacultyDecisionViewTestCase(TestCase):
@@ -168,6 +182,7 @@ class FacultyDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.checklist['current']['decision_facultaire']['extra'], {})
 
 
+@override_settings(ADMISSION_BACKEND_LINK_PREFIX='https//example.com')
 class FacultyDecisionSendToFacultyViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -179,6 +194,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         cls.training = GeneralEducationTrainingFactory(
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
+            enrollment_campus__email='mons@campus.be',
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
@@ -215,11 +231,17 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     @freezegun.freeze_time('2022-01-01')
-    @mock.patch(
-        'admission.infrastructure.admission.formation_generale.domain.service.notification.send_mail_to_generic_email'
-    )
-    def test_send_to_faculty_with_sic_user_in_sic_statuses(self, send_mail):
+    def test_send_to_faculty_with_sic_user_in_valid_sic_statuses(self):
         self.client.force_login(user=self.sic_manager_user)
+
+        # If there is no recipient email, trigger an exception
+        with self.assertRaises(NotificationException):
+            self.client.post(self.url, **self.default_headers)
+
+        program_email = EmailFonctionProgrammeFactory(
+            programme=self.general_admission.training.education_group,
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+        )
 
         response = self.client.post(self.url, **self.default_headers)
 
@@ -230,8 +252,23 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
 
-        # Check that a message has been submitted
-        send_mail.assert_called()
+        # Check that a notification has been planned
+        email_notifications = EmailNotification.objects.all()
+
+        self.assertEqual(len(email_notifications), 1)
+
+        email_object = message_from_string(email_notifications[0].payload, policy=default)
+
+        self.assertEqual(email_object['To'], program_email.email)
+
+        content = email_object.as_string()
+
+        self.assertIn(
+            f'{self.general_admission.candidate.last_name}, {self.general_admission.candidate.first_name}',
+            content,
+        )
+
+        self.assertIn('mons@campus.be', content)
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -241,14 +278,14 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
 
         self.assertEqual(
             history_entry.message_fr,
-            'Un mail informant de la soumission du dossier en faculté a été envoyé à '
-            '"mail-inscription-formation-a-developper@uclouvain.be" le 1 Janvier 2022 00:00.',
+            f'Un mail informant de la soumission du dossier en faculté a été envoyé à '
+            f'"{program_email.email}" le 1 Janvier 2022 00:00.',
         )
 
         self.assertEqual(
             history_entry.message_en,
-            'An e-mail notifying that the dossier has been submitted to the faculty was sent to '
-            '"mail-inscription-formation-a-developper@uclouvain.be" on 1 Janvier 2022 00:00.',
+            f'An e-mail notifying that the dossier has been submitted to the faculty was sent to '
+            f'"{program_email.email}" on 1 Janvier 2022 00:00.',
         )
 
         self.assertEqual(
@@ -266,6 +303,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
+@freezegun.freeze_time('2022-01-01')
 class FacultyDecisionSendToSicViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -319,7 +357,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         # Mock weasyprint
         patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
-        patcher.start()
+        self.get_pdf_from_template_patcher = patcher.start()
         self.addCleanup(patcher.stop)
 
     def test_send_to_sic_is_forbidden_with_fac_user_if_the_admission_is_not_in_specific_statuses(self):
@@ -351,6 +389,19 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.other_refusal_reasons = []
         self.general_admission.fac_refusal_certificate = []
         self.general_admission.save()
+
+        # Simulate a transfer from the SIC to the FAC
+        history_entry = HistoryEntryFactory(
+            object_uuid=self.general_admission.uuid,
+            tags=['proposition', 'fac-decision', 'send-to-fac'],
+        )
+
+        # Simulate a comment from the FAC
+        comment_entry = CommentEntryFactory(
+            object_uuid=self.general_admission.uuid,
+            tags=['decision_facultaire', 'FAC'],
+            content='The comment from the FAC to the SIC',
+        )
 
         # Invalid request -> We need to specify a reason
         response = self.client.post(self.url + '?refusal=1', **self.default_headers)
@@ -387,10 +438,29 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_refusal_certificate, [self.file_uuid])
 
-        # Check that an entry in the history has been created
-        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
 
-        self.assertEqual(len(history_entries), 1)
+        self.assertIn('proposition', pdf_context)
+        self.assertEqual(pdf_context['proposition'].uuid, self.general_admission.uuid)
+
+        self.assertIn('fac_decision_comment', pdf_context)
+        self.assertEqual(pdf_context['fac_decision_comment'], comment_entry)
+
+        self.assertIn('sic_to_fac_history_entry', pdf_context)
+        self.assertEqual(pdf_context['sic_to_fac_history_entry'], history_entry)
+
+        self.assertIn('manager', pdf_context)
+        self.assertEqual(pdf_context['manager'].matricule, self.fac_manager_user.person.global_id)
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.general_admission.uuid
+        ).order_by('-id')
+
+        self.assertEqual(len(history_entries), 2)
+
         history_entry = history_entries[0]
 
         self.assertEqual(
@@ -422,6 +492,19 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.with_prerequisite_courses = None
         self.general_admission.program_planned_years_number = None
         self.general_admission.save()
+
+        # Simulate a transfer from the SIC to the FAC
+        history_entry = HistoryEntryFactory(
+            object_uuid=self.general_admission.uuid,
+            tags=['proposition', 'fac-decision', 'send-to-fac'],
+        )
+
+        # Simulate a comment from the FAC
+        comment_entry = CommentEntryFactory(
+            object_uuid=self.general_admission.uuid,
+            tags=['decision_facultaire', 'FAC'],
+            content='The comment from the FAC to the SIC',
+        )
 
         # Invalid request -> We need to specify the missing data
         response = self.client.post(self.url + '?approval=1', **self.default_headers)
@@ -456,10 +539,31 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_approval_certificate, [self.file_uuid])
 
-        # Check that an entry in the history has been created
-        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
 
-        self.assertEqual(len(history_entries), 1)
+        self.assertIn('proposition', pdf_context)
+        self.assertEqual(pdf_context['proposition'].uuid, self.general_admission.uuid)
+
+        self.assertIn('fac_decision_comment', pdf_context)
+        self.assertEqual(pdf_context['fac_decision_comment'], comment_entry)
+
+        self.assertIn('sic_to_fac_history_entry', pdf_context)
+        self.assertEqual(pdf_context['sic_to_fac_history_entry'], history_entry)
+
+        self.assertIn('manager', pdf_context)
+        self.assertEqual(pdf_context['manager'].matricule, self.fac_manager_user.person.global_id)
+
+        self.assertIn('access_titles_names', pdf_context)
+        self.assertEqual(pdf_context['access_titles_names'], [])
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.general_admission.uuid
+        ).order_by('-id')
+
+        self.assertEqual(len(history_entries), 2)
         history_entry = history_entries[0]
 
         self.assertEqual(
@@ -481,6 +585,163 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             history_entry.tags,
             ['proposition', 'fac-decision', 'approval-send-to-sic', 'status-changed'],
         )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve_with_secondary_studies_as_access_title(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.are_secondary_studies_access_title = True
+        self.general_admission.with_additional_approval_conditions = False
+        self.general_admission.with_prerequisite_courses = False
+        self.general_admission.program_planned_years_number = 1
+        self.general_admission.save()
+
+        # > Belgian diploma
+        candidate = self.general_admission.candidate
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
+        secondary_studies_base_title = gettext('Secondary school or alternative')
+        self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        self.assertEqual(
+            pdf_context['access_titles_names'][0],
+            f'{candidate.graduated_from_high_school_year.year}-{candidate.graduated_from_high_school_year.year + 1} : '
+            f'{secondary_studies_base_title}',
+        )
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save()
+
+        # > Foreign diploma
+        self.get_pdf_from_template_patcher.reset_mock()
+        candidate.belgianhighschooldiploma.delete()
+        ForeignHighSchoolDiplomaFactory(person=candidate)
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
+        secondary_studies_base_title = gettext('Secondary school or alternative')
+        self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        self.assertEqual(
+            pdf_context['access_titles_names'][0],
+            f'{candidate.graduated_from_high_school_year.year}-{candidate.graduated_from_high_school_year.year + 1} : '
+            f'{secondary_studies_base_title}',
+        )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve_with_a_cv_academic_experience_as_title(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.with_additional_approval_conditions = False
+        self.general_admission.with_prerequisite_courses = False
+        self.general_admission.program_planned_years_number = 1
+        self.general_admission.save()
+
+        academic_experience = EducationalExperience.objects.filter(
+            person=self.general_admission.candidate,
+        ).first()
+
+        academic_experience.obtained_diploma = True
+        academic_experience.save()
+
+        admission_educational_valuated_experience = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.general_admission,
+            educationalexperience=academic_experience,
+            is_access_title=True,
+        )
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
+        self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        self.assertEqual(
+            pdf_context['access_titles_names'][0],
+            '2020-2022 : Computer science',
+        )
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save()
+        admission_educational_valuated_experience.is_access_title = False
+        admission_educational_valuated_experience.save()
+        self.get_pdf_from_template_patcher.reset_mock()
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
+        self.assertEqual(len(pdf_context['access_titles_names']), 0)
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve_with_a_cv_non_academic_experience_as_title(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.with_additional_approval_conditions = False
+        self.general_admission.with_prerequisite_courses = False
+        self.general_admission.program_planned_years_number = 1
+        self.general_admission.save()
+
+        non_academic_experience = ProfessionalExperience.objects.filter(
+            person=self.general_admission.candidate,
+        ).first()
+
+        admission_non_educational_valuated_experience = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=self.general_admission,
+            professionalexperience=non_academic_experience,
+            is_access_title=True,
+        )
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
+        self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        self.assertEqual(
+            pdf_context['access_titles_names'][0],
+            '01/2020-03/2020 : Travail',
+        )
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save()
+        admission_non_educational_valuated_experience.is_access_title = False
+        admission_non_educational_valuated_experience.save()
+        self.get_pdf_from_template_patcher.reset_mock()
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
+        self.assertEqual(len(pdf_context['access_titles_names']), 0)
 
     @freezegun.freeze_time('2022-01-01')
     def test_send_to_sic_with_fac_user_in_specific_statuses_without_approving_or_refusing(self):
@@ -645,7 +906,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         # Mock weasyprint
         patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
-        patcher.start()
+        self.get_pdf_from_template_patcher = patcher.start()
         self.addCleanup(patcher.stop)
 
     def test_submit_refusal_decision_is_forbidden_with_sic_user(self):
@@ -801,6 +1062,19 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         refusal_reason = RefusalReasonFactory()
 
+        # Simulate a transfer from the SIC to the FAC
+        history_entry = HistoryEntryFactory(
+            object_uuid=self.general_admission.uuid,
+            tags=['proposition', 'fac-decision', 'send-to-fac'],
+        )
+
+        # Simulate a comment from the FAC
+        comment_entry = CommentEntryFactory(
+            object_uuid=self.general_admission.uuid,
+            tags=['decision_facultaire', 'FAC'],
+            content='The comment from the FAC to the SIC',
+        )
+
         # Chosen reason and transfer to SIC
         response = self.client.post(
             self.url,
@@ -837,10 +1111,28 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_refusal_certificate, [self.file_uuid])
 
-        # Check that an entry in the history has been created
-        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
 
-        self.assertEqual(len(history_entries), 1)
+        self.assertIn('proposition', pdf_context)
+        self.assertEqual(pdf_context['proposition'].uuid, self.general_admission.uuid)
+
+        self.assertIn('fac_decision_comment', pdf_context)
+        self.assertEqual(pdf_context['fac_decision_comment'], comment_entry)
+
+        self.assertIn('sic_to_fac_history_entry', pdf_context)
+        self.assertEqual(pdf_context['sic_to_fac_history_entry'], history_entry)
+
+        self.assertIn('manager', pdf_context)
+        self.assertEqual(pdf_context['manager'].matricule, self.fac_manager_user.person.global_id)
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.general_admission.uuid
+        ).order_by('-id')
+
+        self.assertEqual(len(history_entries), 2)
         history_entry = history_entries[0]
 
         self.assertEqual(

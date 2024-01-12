@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -103,6 +103,9 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             ('DOSSIER_ANALYSE', resume_dto.proposition.pdf_recapitulatif),
             ('ATTESTATION_ACCORD_FACULTAIRE', resume_dto.proposition.certificat_approbation_fac),
             ('ATTESTATION_REFUS_FACULTAIRE', resume_dto.proposition.certificat_refus_fac),
+            ('ATTESTATION_ACCORD_SIC', resume_dto.proposition.certificat_approbation_sic),
+            ('ATTESTATION_ACCORD_ANNEXE_SIC', resume_dto.proposition.certificat_approbation_sic_annexe),
+            ('ATTESTATION_REFUS_SIC', resume_dto.proposition.certificat_refus_sic),
         )
 
         for _, uuids_document_systeme in documents_systeme:

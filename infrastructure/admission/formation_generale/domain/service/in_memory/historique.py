@@ -25,6 +25,7 @@
 # ##############################################################################
 
 from email.message import EmailMessage
+from typing import Optional
 
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
@@ -83,4 +84,22 @@ class HistoriqueInMemory(IHistorique):
 
     @classmethod
     def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: str):
+        pass
+
+    @classmethod
+    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str):
+        pass
+
+    @classmethod
+    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: str):
+        pass
+
+    @classmethod
+    def historiser_refus_sic(cls, proposition: Proposition, message: EmailMessage, gestionnaire: str):
+        pass
+
+    @classmethod
+    def historiser_acceptation_sic(
+        cls, proposition: Proposition, gestionnaire: str, message: Optional[EmailMessage] = None
+    ):
         pass

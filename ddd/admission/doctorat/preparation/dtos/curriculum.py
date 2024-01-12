@@ -119,7 +119,7 @@ class ExperienceAcademiqueDTO(interface.DTO):
         return "{annee_minimale}-{annee_maximale} : {nom_formation}".format(
             annee_minimale=annee_minimale.annee,
             annee_maximale=self.derniere_annee + 1,
-            nom_formation=truncatechars(self.nom_formation_equivalente_communaute_fr or self.nom_formation, 30),
+            nom_formation=self.nom_formation_equivalente_communaute_fr or self.nom_formation,
         )
 
 

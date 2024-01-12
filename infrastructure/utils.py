@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -504,4 +504,7 @@ CORRESPONDANCE_CHAMPS_SYSTEME = {
     'DOSSIER_ANALYSE': 'pdf_recap',
     'ATTESTATION_ACCORD_FACULTAIRE': 'fac_approval_certificate',
     'ATTESTATION_REFUS_FACULTAIRE': 'fac_refusal_certificate',
+    'ATTESTATION_ACCORD_SIC': 'sic_approval_certificate',
+    'ATTESTATION_ACCORD_ANNEXE_SIC': 'sic_annexe_approval_certificate',
+    'ATTESTATION_REFUS_SIC': 'sic_refusal_certificate',
 }

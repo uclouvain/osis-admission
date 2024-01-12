@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -313,7 +313,6 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
         experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
         experience_checklist['extra']['authentification'] = '0'
-        experience_checklist['extra']['commentaire_authentification'] = 'My default comment'
         experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
 
         self.general_admission.save(update_fields=['checklist'])
@@ -325,10 +324,8 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         form = response.context['form']
 
         self.assertEqual(form.initial['state'], EtatAuthentificationParcours.VRAI.name)
-        self.assertEqual(form.initial['comment'], 'My default comment')
 
         self.assertTrue(form.fields['state'].disabled)
-        self.assertTrue(form.fields['comment'].disabled)
 
     def test_form_initialization_if_the_checklist_status_is_related_to_the_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -336,7 +333,6 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
         experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
         experience_checklist['extra']['authentification'] = '1'
-        experience_checklist['extra']['commentaire_authentification'] = 'My default comment'
         experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
 
         self.general_admission.save(update_fields=['checklist'])
@@ -348,10 +344,8 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         form = response.context['form']
 
         self.assertEqual(form.initial['state'], EtatAuthentificationParcours.VRAI.name)
-        self.assertEqual(form.initial['comment'], 'My default comment')
 
         self.assertFalse(form.fields['state'].disabled)
-        self.assertFalse(form.fields['comment'].disabled)
 
     def test_change_the_authentication_data(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -359,7 +353,6 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
         experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
         experience_checklist['extra']['authentification'] = '1'
-        experience_checklist['extra']['commentaire_authentification'] = 'My default comment'
         experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
 
         self.general_admission.save(update_fields=['checklist'])
@@ -385,7 +378,6 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
             **self.default_headers,
             data={
                 self.first_experience_uuid + '-state': EtatAuthentificationParcours.FAUX.name,
-                self.first_experience_uuid + '-comment': 'My new comment',
             },
         )
 
@@ -397,5 +389,4 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
         self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_EN_COURS.name)
         self.assertEqual(experience_checklist['extra']['authentification'], '1')
-        self.assertEqual(experience_checklist['extra']['commentaire_authentification'], 'My new comment')
         self.assertEqual(experience_checklist['extra']['etat_authentification'], EtatAuthentificationParcours.FAUX.name)

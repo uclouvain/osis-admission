@@ -68,6 +68,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
@@ -813,7 +814,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(12):
+        with self.assertNumQueriesLessThan(13):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -838,7 +839,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(13):
+        with self.assertNumQueriesLessThan(14):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -1219,11 +1220,36 @@ class SectionsAttachmentsTestCase(TestCase):
             formation=_FormationDTO(
                 sigle='FC1',
                 annee=2023,
+                date_debut=datetime.date(2023, 9, 15),
                 intitule='Formation continue 1',
-                campus='Louvain-la-Neuve',
+                intitule_fr='Formation continue 1',
+                intitule_en='Formation continue 1',
+                campus=CampusDTO(
+                    nom='Louvain-la-Neuve',
+                    code_postal='',
+                    ville='',
+                    pays_iso_code='',
+                    nom_pays='',
+                    rue='',
+                    numero_rue='',
+                    boite_postale='',
+                    localisation='',
+                    email='',
+                ),
                 type=TrainingType.CERTIFICATE_OF_SUCCESS.name,
                 code_domaine='CDFC',
-                campus_inscription='Mons',
+                campus_inscription=CampusDTO(
+                    nom='Mons',
+                    code_postal='',
+                    ville='',
+                    pays_iso_code='',
+                    nom_pays='',
+                    rue='',
+                    numero_rue='',
+                    boite_postale='',
+                    localisation='',
+                    email='',
+                ),
                 sigle_entite_gestion='FFC',
                 code='FC1',
             ),
@@ -1263,11 +1289,36 @@ class SectionsAttachmentsTestCase(TestCase):
             formation=_FormationDTO(
                 sigle='FG1',
                 annee=2023,
+                date_debut=datetime.date(2023, 9, 15),
                 intitule='Bachelor 1',
-                campus='Louvain-la-Neuve',
+                intitule_fr='Bachelor 1',
+                intitule_en='Bachelor 1',
+                campus=CampusDTO(
+                    nom='Louvain-la-Neuve',
+                    code_postal='',
+                    ville='',
+                    pays_iso_code='',
+                    nom_pays='',
+                    rue='',
+                    numero_rue='',
+                    boite_postale='',
+                    localisation='',
+                    email='',
+                ),
                 type=TrainingType.BACHELOR.name,
                 code_domaine='CDFG',
-                campus_inscription='Mons',
+                campus_inscription=CampusDTO(
+                    nom='Mons',
+                    code_postal='',
+                    ville='',
+                    pays_iso_code='',
+                    nom_pays='',
+                    rue='',
+                    numero_rue='',
+                    boite_postale='',
+                    localisation='',
+                    email='',
+                ),
                 sigle_entite_gestion='FFG',
                 code='FG1',
             ),
@@ -1308,6 +1359,9 @@ class SectionsAttachmentsTestCase(TestCase):
             financabilite_regle_calcule_le=None,
             financabilite_regle="",
             financabilite_regle_etabli_par="",
+            certificat_approbation_sic=[],
+            certificat_approbation_sic_annexe=[],
+            certificat_refus_sic=[],
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
