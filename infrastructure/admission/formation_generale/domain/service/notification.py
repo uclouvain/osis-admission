@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -49,9 +49,6 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
-from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
-    send_mail_to_generic_email,
-)
 from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
     ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
@@ -66,6 +63,12 @@ from admission.utils import (
     format_academic_year,
 )
 from base.models.person import Person
+from epc.models.email_fonction_programme import EmailFonctionProgramme
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+
+
+class NotificationException(Exception):
+    pass
 
 
 class Notification(INotification):
@@ -205,11 +208,17 @@ class Notification(INotification):
     def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
         admission = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
-            .select_related('candidate__country_of_citizenship')
+            .select_related('candidate__country_of_citizenship', 'training__enrollment_campus')
             .get(uuid=proposition.entity_id.uuid)
         )
 
-        faculty_email = 'mail-inscription-formation-a-developper@uclouvain.be'  # TODO get the right faculty email
+        program_email: EmailFonctionProgramme = EmailFonctionProgramme.objects.filter(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            programme=admission.training.education_group,
+        ).first()
+
+        if not program_email:
+            raise NotificationException(_('No recipient email found for this program.'))
 
         current_language = settings.LANGUAGE_CODE
 
@@ -222,11 +231,6 @@ class Notification(INotification):
                 sub_namespace=':checklist',
                 url_suffix='#decision_facultaire',
             )
-            common_tokens['admission_link_back_for_uclouvain_documents'] = get_backoffice_admission_url(
-                context='general-education',
-                admission_uuid=proposition.entity_id.uuid,
-                sub_namespace=':documents',
-            )
             common_tokens['candidate_nationality_country'] = getattr(
                 admission.candidate.country_of_citizenship,
                 {
@@ -234,15 +238,17 @@ class Notification(INotification):
                     settings.LANGUAGE_CODE_EN: 'name_en',
                 }[current_language],
             )
+            common_tokens['training_acronym'] = admission.training.acronym
+            common_tokens['training_enrollment_campus_email'] = admission.training.enrollment_campus.email
 
             email_message = generate_email(
                 ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
                 current_language,
                 common_tokens,
-                recipients=[faculty_email],
+                recipients=[program_email.email],
             )
 
-            send_mail_to_generic_email(email_message)
+            EmailNotificationHandler.create(email_message, person=None)
 
             return email_message
 
@@ -337,3 +343,45 @@ class Notification(INotification):
             recipients=[admission.candidate.private_email],
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+    @classmethod
+    def refuser_proposition_par_sic(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message
+
+    @classmethod
+    def accepter_proposition_par_sic(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message

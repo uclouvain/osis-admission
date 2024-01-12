@@ -412,14 +412,6 @@ class RefuserPropositionParFaculteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RefuserPropositionParFaculteAvecNouveauxMotifsCommand(interface.CommandRequest):
-    uuid_proposition: str
-    gestionnaire: str
-    uuids_motifs: List[str] = attr.Factory(list)
-    autres_motifs: List[str] = attr.Factory(list)
-
-
-@attr.dataclass(frozen=True, slots=True)
 class SpecifierMotifsRefusPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     uuids_motifs: List[str] = attr.Factory(list)
@@ -438,23 +430,6 @@ class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.Com
     sigle_autre_formation: str = ''
     uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
     avec_conditions_complementaires: Optional[bool] = None
-    conditions_complementaires_libres: List[str] = attr.Factory(list)
-    avec_complements_formation: Optional[bool] = None
-    uuids_complements_formation: List[str] = attr.Factory(list)
-    commentaire_complements_formation: str = ''
-    nombre_annees_prevoir_programme: Optional[int] = None
-    nom_personne_contact_programme_annuel: str = ''
-    email_personne_contact_programme_annuel: str = ''
-    commentaire_programme_conjoint: str = ''
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(interface.CommandRequest):
-    uuid_proposition: str
-    gestionnaire: str
-    sigle_autre_formation: str = ''
-    avec_conditions_complementaires: Optional[bool] = None
-    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
     conditions_complementaires_libres: List[str] = attr.Factory(list)
     avec_complements_formation: Optional[bool] = None
     uuids_complements_formation: List[str] = attr.Factory(list)
@@ -533,4 +508,78 @@ class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.Comma
     uuid_proposition: str
     uuid_experience: str
     etat_authentification: str
-    commentaire_authentification: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierBesoinDeDerogationSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    besoin_de_derogation: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierInformationsAcceptationPropositionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    avec_conditions_complementaires: Optional[bool] = None
+    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
+    conditions_complementaires_libres: List[str] = attr.Factory(list)
+    avec_complements_formation: Optional[bool] = None
+    uuids_complements_formation: List[str] = attr.Factory(list)
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel: str = ''
+    email_personne_contact_programme_annuel: str = ''
+    droits_inscription_montant: str = ''
+    droits_inscription_montant_autre: Optional[float] = None
+    dispense_ou_droits_majores: str = ''
+    tarif_particulier: str = ''
+    refacturation_ou_tiers_payant: str = ''
+    annee_de_premiere_inscription_et_statut: str = ''
+    est_mobilite: Optional[bool] = None
+    nombre_de_mois_de_mobilite: str = ''
+    doit_se_presenter_en_sic: Optional[bool] = None
+    communication_au_candidat: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierMotifsRefusPropositionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    type_de_refus: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserAdmissionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserInscriptionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverAdmissionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverInscriptionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPdfTemporaireDecisionSicQuery(interface.QueryRequest):
+    uuid_proposition: str
+    pdf: str
+    auteur: str

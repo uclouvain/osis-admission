@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ from unittest import TestCase
 
 import factory
 
+from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.formation_generale.commands import (
     RefuserPropositionParFaculteCommand,
@@ -50,6 +51,9 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
+    PersonneConnueUclInMemoryTranslator,
+)
 
 
 class TestRefuserPropositionParFaculte(TestCase):
@@ -59,6 +63,10 @@ class TestRefuserPropositionParFaculte(TestCase):
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
         cls.command = RefuserPropositionParFaculteCommand
+        for matricule in ['00321234', '00987890']:
+            PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
+                PersonneConnueUclDTOFactory(matricule=matricule),
+            )
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(

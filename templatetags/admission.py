@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 import re
 from dataclasses import dataclass
 from functools import wraps
@@ -69,6 +69,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
     RegleDeFinancement,
     RegleCalculeResultatAvecFinancable,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -105,6 +106,14 @@ PERMISSION_BY_ADMISSION_CLASS = {
     GeneralEducationAdmission: 'generaleducationadmission',
     ContinuingEducationAdmission: 'continuingeducationadmission',
 }
+
+NAMUR = 'Namur'
+TOURNAI = 'Tournai'
+MONS = 'Mons'
+CHARLEROI = 'Charleroi'
+WOLUWE = 'Bruxelles Woluwe'
+SAINT_LOUIS = 'Bruxelles Saint-Louis'
+SAINT_GILLES = 'Bruxelles Saint-Gilles'
 
 register = template.Library()
 
@@ -163,7 +172,7 @@ def display(*args):
         elif nextarg == ",":
             ret, val = ret[:-1], next(iter(ret[-1:]), '')
             ret.append(reduce_list_separated(val, next(iterargs, None)))
-        elif nextarg in ["-", ':']:
+        elif nextarg in ["-", ':', ' - ']:
             ret, val = ret[:-1], next(iter(ret[-1:]), '')
             ret.append(reduce_list_separated(val, next(iterargs, None), separator=f" {nextarg} "))
         elif isinstance(nextarg, str) and len(nextarg) > 1 and re.match(r'\s', nextarg[0]):
@@ -754,6 +763,12 @@ def get_short_academic_year(year: Union[int, str, float]):
     return format_academic_year(year, short=True)
 
 
+@register.filter
+def get_last_inscription_date(year: Union[int, str, float]):
+    """Return the academic year related to a specific year."""
+    return datetime.date(year, 9, 30)
+
+
 @register.filter(is_safe=False)
 def default_if_none_or_empty(value, arg):
     """If value is None or empty, use given default."""
@@ -887,6 +902,7 @@ def checklist_state_button(context, **kwargs):
             'state',
             'class',
             'tab',
+            'tooltip',
             'disabled',
             'open_modal',
             'htmx_post',
@@ -1191,3 +1207,38 @@ def est_premiere_annee(admission: Union[PropositionGestionnaireDTO, DemandeReche
 @register.filter
 def intitule_premiere_annee(intitule: str):
     return _("First year of") + ' ' + intitule.lower()
+
+
+@register.inclusion_tag('admission/exports/includes/footer_campus.html')
+def footer_campus(proposition):
+    CAMPUS = {
+        NAMUR: 'NAMUR',
+        TOURNAI: 'TOURNAI',
+        MONS: 'MONS',
+        CHARLEROI: 'CHARLEROI',
+        WOLUWE: 'BRUXELLES',
+        SAINT_LOUIS: 'BRUXELLES',
+        SAINT_GILLES: 'BRUXELLES',
+    }
+
+    return {
+        'campus': CAMPUS.get(proposition.formation.campus_inscription.nom, 'LLN'),
+        'proposition': proposition,
+    }
+
+
+@register.filter
+def admission_has_refusal(admission):
+    return admission.type_de_refus and (admission.motifs_refus or admission.autres_motifs_refus)
+
+
+@register.filter
+def get_intitule_in_candidate_language(proposition: PropositionGestionnaireDTO):
+    if proposition.langue_contact_candidat == settings.LANGUAGE_CODE_FR:
+        return proposition.formation.intitule_fr
+    return proposition.formation.intitule_en
+
+
+@register.filter
+def sic_can_edit(proposition: PropositionGestionnaireDTO):
+    return proposition.statut in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC

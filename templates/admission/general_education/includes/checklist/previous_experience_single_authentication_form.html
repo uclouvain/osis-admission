@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,12 @@
     {% csrf_token %}
     {% bootstrap_form_errors authentication_form %}
     {% bootstrap_field authentication_form.state %}
-    {% bootstrap_field authentication_form.comment %}
+
+    <div id="comment-{{ current.extra.identifiant }}-authentication">
+      {% with current_authentication_form='parcours_anterieur__'|add:current.extra.identifiant|add:'__authentication' %}
+        {% bootstrap_form comment_forms|get_item_or_none:current_authentication_form %}
+      {% endwith %}
+    </div>
 
     {% if request.htmx %}
       {# Update the checklist menu item authentication #}

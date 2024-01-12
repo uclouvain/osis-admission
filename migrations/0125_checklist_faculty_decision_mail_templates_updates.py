@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
 
                 <p>
                     You will find the analysis folder prepared by the SIC to help you analyze the application, 
-                    in the "Documents > "UCLouvain" tab (<a href="{admission_link_back_for_uclouvain_documents}">OSIS
+                    in the "Documents > "UCLouvain" tab (<a href="">OSIS
                     </a> application).
                 </p>
                 
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
 
         <p>
             Vous trouverez le dossier d'analyse préparé par SIC afin de vous aider dans l'analyse du dossier, 
-            dans l'onglet "Documents > UCLouvain" (Application <a href="{admission_link_back_for_uclouvain_documents}">
+            dans l'onglet "Documents > UCLouvain" (Application <a href="">
             OSIS</a>).
         </p>
         

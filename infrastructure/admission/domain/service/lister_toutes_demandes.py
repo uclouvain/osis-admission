@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -110,6 +110,20 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     Q(training__education_group_type__name=TrainingType.BACHELOR.name)
                     & ~Q(generaleducationadmission__cycle_pursuit=PoursuiteDeCycle.YES.name),
                     output_field=BooleanField(),
+                ),
+                cycle_pursuit=Case(
+                    When(
+                        Q(training__education_group_type__name=TrainingType.BACHELOR.name)
+                        & Exists(
+                            EducationalExperienceYear.objects.filter(
+                                Q(result=Result.SUCCESS.name) | Q(result=Result.SUCCESS_WITH_RESIDUAL_CREDITS.name),
+                                educational_experience__person=OuterRef('candidate'),
+                                educational_experience__country__iso_code=BE_ISO_CODE,
+                            )
+                        ),
+                        then=F('generaleducationadmission__cycle_pursuit'),
+                    ),
+                    default=Value(''),
                 ),
             )
             .select_related(
@@ -259,4 +273,5 @@ class ListerToutesDemandes(IListerToutesDemandes):
             ],
             date_confirmation=admission.submitted_at,
             est_premiere_annee=admission.est_premiere_annee,
+            poursuite_de_cycle=admission.cycle_pursuit,
         )

@@ -1,0 +1,207 @@
+{% load admission enums i18n osis_document static %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<!doctype html>{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}{{ admission.reference }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap5/bootstrap.min.css' %}">
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 1cm 2cm 120px 2cm;
+
+      @bottom-left {
+        content: element(footer);
+        width: 100%;
+        height: 120px;
+      }
+    }
+
+    @media print {
+      footer {
+        position: running(footer);
+        font-size: 10pt;
+        text-align: center;
+      }
+
+      footer #page-counter {
+        font-size: 8pt;
+      }
+
+      #page-counter:after {
+        content: counter(page) "/" counter(pages);
+      }
+
+      body {
+        font-family: Calibri, Arial, sans-serif;
+        font-size: 11pt;
+        text-align: justify;
+        line-height: 0.5cm;
+      }
+
+      #logo {
+        height: 1.5cm;
+        width: auto;
+      }
+
+      #sigle-container {
+          position: relative;
+      }
+
+      #sigle-container #sigle {
+          position: absolute;
+          width: 3cm;
+          height: auto;
+          top: -50%;
+          right: 0;
+          z-index: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <footer>
+    {% footer_campus proposition %}
+    <div id="page-counter" class="text-center small">Page </div>
+  </footer>
+
+  <div>
+    <img id="logo" src="{% static "img/logo_uclouvain.png" %}">
+  </div>
+
+  <p class="text-center fw-bold">Formulaire standard (dit « Annexe 1 »)</p>
+
+  <p class="text-center mx-5 mb-5">
+    pour l'obtention d'un visa ou d'un titre de séjour en tant qu'étudiant·e
+    (ressortissant d'un pays tiers), visé à l'article 99 de l'arrêté royal du 8 octobre 1981
+    sur l'accès au territoire, le séjour, l'établissement et l'éloignement des étrangers
+  </p>
+
+  <p>
+    Je soussignée <strong>Virginie Odeurs, Directrice du Service des inscriptions</strong><br>
+    En ma qualité de représentante de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
+  </p>
+
+  <p>
+    Confirme que l'étudiant·e ci-dessous :<br>
+    Nom : <strong>{{ proposition.profil_soumis_candidat.nom }}</strong><br>
+    Prénom : <strong>{{ proposition.profil_soumis_candidat.prenom }}</strong><br>
+    Date de naissance : <strong>{{ proposition.profil_soumis_candidat.date_naissance|date:"d/m/Y" }}</strong><br>
+    Nationalité : <strong>{{ proposition.profil_soumis_candidat.nationalite }}</strong><br>
+  </p>
+
+  <ul class="list-unstyled ms-3">
+    <li class="mb-3">☐ A obtenu une <strong>inscription définitive</strong>
+      pour suivre des études supérieures à temps plein en qualité d'étudiant·e régulièrement
+      inscrit·e durant l'année académique 20... - 20... .
+    </li>
+    <li class="mb-3">☐ Est accepté·e au sein de l’établissement d’enseignement supérieur susmentionné comme
+      <strong>étudiant·e d’échange</strong> du ../.../20... au .../.../20... .
+    </li>
+    <li class="mb-3">☐ <strong>Est inscrit·e à une année préparatoire</strong> durant l'année académique 20... - 20... .</li>
+    <li class="mb-3">☑ <strong>Est admis·e aux études</strong> en vue de suivre des études supérieures à temps plein, durant
+      l’année académique {{ proposition.formation.annee|get_academic_year }} avec comme date ultime d’inscription le {{ proposition.formation.annee|get_last_inscription_date|date:"d/m/Y" }}
+    </li>
+    <li class="mb-3">☐ <strong>Est admis·e à une année préparatoire</strong> durant l'année académique {{ proposition.formation.annee|get_academic_year }} avec
+      comme date ultime d’inscription le .../.../20... .
+    </li>
+    <li class="mb-3">☐ Est inscrit·e à un <strong>examen ou une épreuve d'admission</strong>
+      pour suivre des études supérieures à temps plein, durant l'année académique 20... - 20... .
+    </li>
+  </ul>
+
+  <p>
+    Intitulé du grade académique correspondant au programme d'études :
+    <strong>{{ proposition.formation.intitule }}</strong>
+  </p>
+
+  <p>
+    Le programme d’études susmentionné comprend un nombre total de 120 crédits ECTS,
+    pour l'ensemble de la formation, sous réserve d'ajouts d'enseignements
+    complémentaires qui pourront être imposés à l'étudiant·e, ou de dispense(s) qu'il·elle aurait
+    obtenue(s) (avec un minimum de 54 crédits par année académique).
+  </p>
+
+  <p>
+    Cette année académique, l’étudiant·e effectuera une mobilité, dans le cadre d’un programme
+    de l’Union européenne ou un programme multilatéral comportant des mesures de mobilité
+    ou d’une convention entre deux établissements d’enseignement supérieur ou plus, dans un ou
+    des établissements d’enseignement supérieur situé(s) dans un autre Etat membre de l’Union
+    européenne en vue d’acquérir un certain nombre de crédits ou un diplôme conjoint (unique ou
+    multiple):
+  </p>
+
+  <ul class="list-unstyled ms-3">
+    <li>{% if proposition.est_mobilite %}☑{% else %}☐{% endif %} OUI</li>
+    <li>☐ NON</li>
+  </ul>
+
+  {% if proposition.est_mobilite %}<p>Si OUI : la durée de la mobilité est <em>a priori</em> de {{ proposition.nombre_de_mois_de_mobilite|enum_display:"MobiliteNombreDeMois" }} mois.</p>{% endif %}
+
+  <p class="text-decoration-line-through">
+    Si, et seulement si, <strong>l'étudiant·e a obtenu une inscription définitive</strong>
+    remplissez les champs suivants (si dejà connu) :
+  </p>
+
+  <ul class="text-decoration-line-through">
+    <li>Le programme annuel de l’étudiant·e correspond à un nombre total de ... crédits pour l’année académique 20... - 20... .</li>
+
+    <li>Si le programme annuel de l’étudiant·e inclut moins de 54 crédits, veuillez en préciser les
+      raisons (par exemple année diplômante, motif pédagogique, doctorant, année de spécialisation,
+      international scholar, maladie, etc.) :
+    </li>
+  </ul>
+
+  <p>
+    <strong>----------------------------------------------------------------------------</strong><br>
+    <strong>----------------------------------------------------------------------------</strong>
+  </p>
+
+  <p>
+    Si, et seulement si, <strong>l’étudiant·e est admis·e aux études</strong>
+    mais n’a pas encore obtenu d’inscription définitive, remplissez les champs suivants :
+  </p>
+
+  <ul>
+    {% for condition in proposition.conditions_complementaires %}
+      <li>{{ condition }}</li>
+    {% endfor %}
+  </ul>
+
+  <div class="row">
+    <div class="col-6">Fait à Louvain la Neuve, le {% now "d/m/Y" %}</div>
+
+    <div id="sigle-container" class="col-6 text-center">
+      {% if director.signature %}<img src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+      <p>
+        {{ director.first_name }} {{ director.last_name }},<br>
+        {% trans "Director" %}
+      </p>
+      <img id="sigle" src="{% static "img/sedes.png" %}">
+    </div>
+  </div>
+</body>

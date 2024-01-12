@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import datetime
 from typing import Optional
 
 import attr
@@ -38,6 +39,7 @@ class ProfilCandidat(interface.ValueObject):
     prenom: Optional[str] = ''
     genre: Optional[str] = ''
     nationalite: Optional[str] = ''
+    date_naissance: Optional[datetime.date] = None
 
     # Coordonnees
     pays: Optional[str] = ''
@@ -54,6 +56,7 @@ class ProfilCandidat(interface.ValueObject):
                 'last_name': self.nom,
                 'gender': self.genre,
                 'country_of_citizenship': self.nationalite,
+                'date_of_birth': self.date_naissance,
             },
             'coordinates': {
                 'country': self.pays,
@@ -74,6 +77,7 @@ class ProfilCandidat(interface.ValueObject):
             prenom=identification.get('first_name'),
             genre=identification.get('gender'),
             nationalite=identification.get('country_of_citizenship'),
+            date_naissance=identification.get('date_of_birth'),
             pays=coordinates.get('country'),
             code_postal=coordinates.get('postal_code'),
             ville=coordinates.get('city'),
