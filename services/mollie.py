@@ -95,6 +95,7 @@ class MollieService:
                 f"[MOLLIE] La recuperation du paiement avec mollie_id = {paiement_id} "
                 f"a echouee avec un status code = {response.status_code}"
             )
+            raise FetchMolliePaymentException(mollie_id=paiement_id)
         return cls._convert_to_dto(result)
 
     @classmethod
