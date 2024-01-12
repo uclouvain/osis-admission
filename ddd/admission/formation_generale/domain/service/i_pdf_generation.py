@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from abc import abstractmethod
+from typing import Optional
 
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
@@ -49,4 +50,59 @@ class IPDFGeneration(DomainService):
         proposition: Proposition,
         gestionnaire: str,
     ) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def generer_sic_temporaire(
+        cls,
+        proposition_repository: IPropositionRepository,
+        proposition: Proposition,
+        gestionnaire: str,
+        pdf: str,
+    ) -> Optional[str]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def generer_attestation_accord_sic(
+        cls,
+        proposition_repository: IPropositionRepository,
+        proposition: Proposition,
+        gestionnaire: str,
+        temporaire: bool = False,
+    ) -> Optional[str]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def generer_attestation_accord_annexe_sic(
+        cls,
+        proposition_repository: IPropositionRepository,
+        proposition: Proposition,
+        gestionnaire: str,
+        temporaire: bool = False,
+    ) -> Optional[str]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def generer_attestation_refus_sic(
+        cls,
+        proposition_repository: IPropositionRepository,
+        proposition: Proposition,
+        gestionnaire: str,
+        temporaire: bool = False,
+    ) -> Optional[str]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def generer_attestation_refus_inscription_sic(
+        cls,
+        proposition_repository: IPropositionRepository,
+        proposition: Proposition,
+        gestionnaire: str,
+        temporaire: bool = False,
+    ) -> Optional[str]:
         raise NotImplementedError

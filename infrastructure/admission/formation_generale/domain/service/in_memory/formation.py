@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -42,35 +42,35 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2022,
             type=TrainingType.BACHELOR,
-            campus='Mons',
+            campus__nom='Mons',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
             entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2021,
             type=TrainingType.BACHELOR,
-            campus='Mons',
+            campus__nom='Mons',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
             entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2020,
             type=TrainingType.BACHELOR,
-            campus='Louvain-la-Neuve',
+            campus__nom='Louvain-la-Neuve',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
             entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2020,
             type=TrainingType.BACHELOR,
-            campus='Mons',
+            campus__nom='Mons',
         ),
         FormationFactory(
             intitule='Bachelier vétérinaire',
             entity_id__sigle=CODE_BACHELIER_VETERINAIRE,
             entity_id__annee=2020,
             type=TrainingType.BACHELOR,
-            campus='Mons',
+            campus__nom='Mons',
             code_domaine='11A',
         ),
         FormationFactory(
@@ -78,77 +78,77 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__sigle='MASTER-SCI',
             entity_id__annee=2022,
             type=TrainingType.MASTER_M1,
-            campus='Louvain-la-Neuve',
+            campus__nom='Louvain-la-Neuve',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
             entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2022,
             type=TrainingType.BACHELOR,
-            campus='Charleroi',
+            campus__nom='Charleroi',
         ),
         FormationFactory(
             intitule='Formation SC3DP',
             entity_id__sigle='SC3DP',
             entity_id__annee=2022,
             type=TrainingType.CERTIFICATE,
-            campus='Louvain-la-Neuve',
+            campus__nom='Louvain-la-Neuve',
         ),
         FormationFactory(
             intitule='Formation ESP3DP',
             entity_id__sigle='ESP3DP',
             entity_id__annee=2022,
             type=TrainingType.MASTER_M1,
-            campus='Charleroi',
+            campus__nom='Charleroi',
         ),
         FormationFactory(
             intitule='Formation continue ESP3DP',
             entity_id__sigle='ES3DP-CONTINUE',
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,
-            campus='Charleroi',
+            campus__nom='Charleroi',
         ),
         FormationFactory(
             intitule='Master en sciences',
             entity_id__sigle='MASTER-SCI',
             entity_id__annee=2021,
             type=TrainingType.MASTER_M1,
-            campus='Louvain-la-Neuve',
+            campus__nom='Louvain-la-Neuve',
         ),
         FormationFactory(
             intitule='Master en sciences',
             entity_id__sigle='MASTER-SCI-UNKNOWN-CAMPUS',
             entity_id__annee=2021,
             type=TrainingType.MASTER_M1,
-            campus='Unknown campus',
+            campus__nom='Unknown campus',
         ),
         FormationFactory(
             intitule='Master en sciences',
             entity_id__sigle='MASTER-SCI',
             entity_id__annee=2020,
             type=TrainingType.MASTER_M1,
-            campus='Louvain-la-Neuve',
+            campus__nom='Louvain-la-Neuve',
         ),
         FormationFactory(
             intitule='Aggrégation en économie',
             entity_id__sigle='AGGREGATION-ECO',
             entity_id__annee=2020,
             type=TrainingType.AGGREGATION,
-            campus='Charleroi',
+            campus__nom='Charleroi',
         ),
         FormationFactory(
             intitule='CAPAES en économie',
             entity_id__sigle='CAPAES-ECO',
             entity_id__annee=2020,
             type=TrainingType.CAPAES,
-            campus='Charleroi',
+            campus__nom='Charleroi',
         ),
         FormationFactory(
             intitule='Bachelier vétérinaire',
             entity_id__sigle=CODE_BACHELIER_VETERINAIRE,
             entity_id__annee=2021,
             type=TrainingType.BACHELOR,
-            campus='Mons',
+            campus__nom='Mons',
             code_domaine='11A',
         ),
         FormationFactory(
@@ -156,21 +156,21 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__sigle='AGGREGATION-ECO',
             entity_id__annee=2021,
             type=TrainingType.AGGREGATION,
-            campus='Charleroi',
+            campus__nom='Charleroi',
         ),
         FormationFactory(
             intitule='CAPAES en économie',
             entity_id__sigle='CAPAES-ECO',
             entity_id__annee=2021,
             type=TrainingType.CAPAES,
-            campus='Charleroi',
+            campus__nom='Charleroi',
         ),
         FormationFactory(
             intitule='Certificate of participation in business',
             entity_id__sigle='CERTIF-BUS',
             entity_id__annee=2021,
             type=TrainingType.CERTIFICATE_OF_PARTICIPATION.name,
-            campus='Charleroi',
+            campus__nom='Charleroi',
         ),
     ]
 
@@ -180,7 +180,10 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             sigle=entity.entity_id.sigle,
             code=entity.code,
             annee=entity.entity_id.annee,
+            date_debut=None,
             intitule=entity.intitule,
+            intitule_fr=entity.intitule,
+            intitule_en=entity.intitule,
             campus=entity.campus,
             type=entity.type.name,
             code_domaine=entity.code_domaine,
@@ -242,7 +245,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
                 (intitule and intitule in training.intitule)
                 or (terme_de_recherche and terme_de_recherche in training.intitule)
             )
-            and (not campus or training.campus == campus)
+            and (not campus or training.campus.nom == campus)
         ]
 
     @classmethod

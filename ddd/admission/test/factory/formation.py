@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 import attr
 import factory.fuzzy
 
+from admission.ddd.admission.domain.model._campus import Campus
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 
 
@@ -41,10 +42,35 @@ class FormationIdentityFactory(factory.Factory):
 @attr.dataclass(frozen=True, slots=True)
 class FormationEtendue(Formation):
     intitule: str
-    campus: str
-    campus_inscription: str
+    campus: Campus
+    campus_inscription: Campus
     sigle_entite_gestion: str
     code: str
+
+
+class CampusFactory(factory.Factory):
+    class Meta:
+        model = Campus
+
+    nom = factory.Iterator(
+        [
+            "Louvain-la-Neuve",
+            "Mons",
+            "Bruxelles Woluwe",
+            "Namur",
+            "Charleroi",
+            "Tournai",
+            "St-Gilles",
+        ]
+    )
+    code_postal = 'code_postal'
+    ville = 'ville'
+    pays_iso_code = 'pays'
+    nom_pays = 'nom_pays'
+    rue = 'rue'
+    numero_rue = 'numero_rue'
+    localisation = 'localisation'
+    email = 'email@example.com'
 
 
 class FormationFactory(factory.Factory):
@@ -56,26 +82,6 @@ class FormationFactory(factory.Factory):
     intitule = factory.Faker('sentence')
     code = factory.Sequence(lambda n: 'code%02d' % n)
     code_domaine = '01A'
-    campus = factory.Iterator(
-        [
-            "Louvain-la-Neuve",
-            "Mons",
-            "Bruxelles Woluwe",
-            "Namur",
-            "Charleroi",
-            "Tournai",
-            "St-Gilles",
-        ]
-    )
-    campus_inscription = factory.Iterator(
-        [
-            "Louvain-la-Neuve",
-            "Mons",
-            "Bruxelles Woluwe",
-            "Namur",
-            "Charleroi",
-            "Tournai",
-            "St-Gilles",
-        ]
-    )
+    campus = factory.SubFactory(CampusFactory)
+    campus_inscription = factory.SubFactory(CampusFactory)
     sigle_entite_gestion = factory.Sequence(lambda n: 'SIGLE%02d' % n)

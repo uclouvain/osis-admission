@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -287,6 +287,24 @@ class RefuserParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RefuserParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+    motifs_refus: List[MotifRefusIdentity]
+    autres_motifs_refus: List[str]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSpecifierMotifRefusFacultaire(
+                motifs_refus=self.motifs_refus,
+                autres_motifs_refus=self.autres_motifs_refus,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionGenerale
 
@@ -307,6 +325,35 @@ class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidato
             ShouldFacPeutDonnerDecision(
                 statut=self.statut,
             ),
+            ShouldSpecifierInformationsAcceptationFacultaire(
+                avec_conditions_complementaires=self.avec_conditions_complementaires,
+                conditions_complementaires_existantes=self.conditions_complementaires_existantes,
+                conditions_complementaires_libres=self.conditions_complementaires_libres,
+                avec_complements_formation=self.avec_complements_formation,
+                complements_formation=self.complements_formation,
+                nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    avec_conditions_complementaires: Optional[bool]
+    conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
+    conditions_complementaires_libres: List[str]
+
+    avec_complements_formation: Optional[bool]
+    complements_formation: Optional[List[ComplementFormationIdentity]]
+
+    nombre_annees_prevoir_programme: Optional[int]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
             ShouldSpecifierInformationsAcceptationFacultaire(
                 avec_conditions_complementaires=self.avec_conditions_complementaires,
                 conditions_complementaires_existantes=self.conditions_complementaires_existantes,

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -130,7 +130,10 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
         training_json = {
             'sigle': self.admission.training.acronym,
             'annee': self.admission.training.academic_year.year,
+            'date_debut': self.admission.training.academic_year.start_date.isoformat(),
             'intitule': self.admission.training.title,
+            'intitule_fr': self.admission.training.title,
+            'intitule_en': self.admission.training.title_english,
             'campus': self.teaching_campus_name,
             'type': self.admission.training.education_group_type.name,
             'code_domaine': self.admission.training.main_domain.code,
@@ -158,7 +161,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
         self.assertEqual(json_response['reference'], f'M-CMC22-{str(self.admission)}')
-        self.assertEqual(json_response['formation'], training_json)
+        self.assertDictEqual(json_response['formation'], training_json)
         self.assertEqual(json_response['matricule_candidat'], self.admission.candidate.global_id)
         self.assertEqual(json_response['prenom_candidat'], self.admission.candidate.first_name)
         self.assertEqual(json_response['nom_candidat'], self.admission.candidate.last_name)
@@ -295,7 +298,10 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         training_json = {
             'sigle': self.admission.training.acronym,
             'annee': self.admission.training.academic_year.year,
+            'date_debut': self.admission.training.academic_year.start_date.isoformat(),
             'intitule': self.admission.training.title,
+            'intitule_fr': self.admission.training.title,
+            'intitule_en': self.admission.training.title_english,
             'campus': self.teaching_campus_name,
             'type': self.admission.training.education_group_type.name,
             'code_domaine': self.admission.training.main_domain.code,
@@ -305,7 +311,8 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
         self.assertEqual(json_response['reference'], f'M-CMC22-{str(self.admission)}')
-        self.assertEqual(json_response['formation'], training_json)
+        self.maxDiff = None
+        self.assertDictEqual(json_response['formation'], training_json)
         self.assertEqual(json_response['matricule_candidat'], self.admission.candidate.global_id)
         self.assertEqual(json_response['prenom_candidat'], self.admission.candidate.first_name)
         self.assertEqual(json_response['nom_candidat'], self.admission.candidate.last_name)

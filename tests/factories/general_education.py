@@ -67,6 +67,7 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
     def create_related_group_version_factory(self, create, extracted, **kwargs):
         EducationGroupVersionFactory(
             offer=self,
+            version_name='',
             root_group__academic_year__year=self.academic_year.year,
             root_group__main_teaching_campus__name='Louvain-la-Neuve',
         )
@@ -88,6 +89,7 @@ def get_checklist():
         'financabilite': default_content,
         'specificites_formation': default_content,
         'decision_facultaire': default_content,
+        'decision_sic': default_content,
     }
 
 
@@ -125,7 +127,7 @@ class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
             status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
             submitted_profile={
                 "coordinates": {
-                    "city": "Louvain-la-Neuve",
+                    "city": "Louvain-La-Neuve",
                     "place": "",
                     "street": "Place de l'Université",
                     "country": "BE",
@@ -138,6 +140,7 @@ class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
                     "last_name": "Doe",
                     "first_name": "John",
                     "country_of_citizenship": "BE",
+                    "date_of_birth": "2020-01-01",
                 },
             },
         )

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 # ##############################################################################
 
 from django.template.loader import render_to_string
+from django.utils import translation
 from weasyprint import HTML
 
 from osis_common.utils.url_fetcher import django_url_fetcher
@@ -40,7 +41,7 @@ def get_pdf_from_template(template_name, stylesheets, context) -> bytes:
     return html.write_pdf(presentational_hints=True, stylesheets=stylesheets)
 
 
-def admission_generate_pdf(admission, template, filename, context=None, stylesheets=None, author=''):
+def admission_generate_pdf(admission, template, filename, context=None, stylesheets=None, author='', language=None):
     """
     Generate a pdf given an admission task and a template
 
@@ -54,7 +55,14 @@ def admission_generate_pdf(admission, template, filename, context=None, styleshe
     """
     from osis_document.utils import save_raw_content_remotely
 
-    result = get_pdf_from_template(template, stylesheets or [], {'admission': admission, **(context or {})})
+    current_language = translation.get_language()
+    try:
+        if language is not None:
+            translation.activate(language)
+        result = get_pdf_from_template(template, stylesheets or [], {'admission': admission, **(context or {})})
+    finally:
+        translation.activate(current_language)
+
     token = save_raw_content_remotely(result, filename, 'application/pdf')
     if author:
         change_remote_metadata(token=token, metadata={'author': author})

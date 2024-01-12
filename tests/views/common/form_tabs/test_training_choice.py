@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -96,6 +96,7 @@ class TrainingChoiceFormViewTestCase(TestCase):
         EducationGroupVersionFactory(
             root_group__main_teaching_campus=cls.first_campus,
             offer=cls.master_admission.training,
+            version_name='',
         )
 
         cls.bachelor_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
@@ -114,6 +115,7 @@ class TrainingChoiceFormViewTestCase(TestCase):
         EducationGroupVersionFactory(
             root_group__main_teaching_campus=cls.first_campus,
             offer=cls.bachelor_admission.training,
+            version_name='',
         )
 
         cls.specific_questions = [

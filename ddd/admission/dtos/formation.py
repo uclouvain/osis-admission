@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,8 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import datetime
+from typing import Optional
+
 import attr
 
+from admission.ddd.admission.dtos.campus import CampusDTO
 from osis_common.ddd import interface
 
 
@@ -33,11 +37,14 @@ class FormationDTO(interface.DTO):
     sigle: str
     code: str
     annee: int
+    date_debut: Optional[datetime.date]
     intitule: str
-    campus: str
+    intitule_fr: str
+    intitule_en: str
+    campus: Optional[CampusDTO]
     type: str
     code_domaine: str
-    campus_inscription: str
+    campus_inscription: Optional[CampusDTO]
     sigle_entite_gestion: str
 
     def __str__(self):
