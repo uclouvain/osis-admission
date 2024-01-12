@@ -63,6 +63,7 @@ class TestRefuserAdmissionParSic(TestCase):
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(
+            statut=ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
             entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI-APPROVED'),
             matricule_candidat='0000000001',
             formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
@@ -78,7 +79,7 @@ class TestRefuserAdmissionParSic(TestCase):
         }
 
     def test_should_etre_ok_si_traitement_sic_et_motif_connu(self):
-        self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
         self.proposition.motifs_refus = [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')]
         self.proposition.autres_motifs_refus = []
 

@@ -85,6 +85,8 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     ModifierStatutChecklistParcoursAnterieurValidatorList,
     RefuserParSicValidatorList,
     ApprouverParSicValidatorList,
+    ApprouverParSicAValiderValidatorList,
+    RefuserParSicAValiderValidatorList,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from epc.models.enums.condition_acces import ConditionAcces
@@ -717,6 +719,7 @@ class Proposition(interface.RootEntity):
         doit_se_presenter_en_sic: Optional[bool],
         communication_au_candidat: str,
     ):
+        ApprouverParSicAValiderValidatorList(statut=self.statut).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_EN_COURS,
@@ -765,6 +768,7 @@ class Proposition(interface.RootEntity):
         uuids_motifs: List[str],
         autres_motifs: List[str],
     ):
+        RefuserParSicAValiderValidatorList(statut=self.statut).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_EN_COURS,

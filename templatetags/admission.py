@@ -69,6 +69,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
     RegleDeFinancement,
     RegleCalculeResultatAvecFinancable,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -1236,3 +1237,8 @@ def get_intitule_in_candidate_language(proposition: PropositionGestionnaireDTO):
     if proposition.langue_contact_candidat == settings.LANGUAGE_CODE_FR:
         return proposition.formation.intitule_fr
     return proposition.formation.intitule_en
+
+
+@register.filter
+def sic_can_edit(proposition: PropositionGestionnaireDTO):
+    return proposition.statut in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC

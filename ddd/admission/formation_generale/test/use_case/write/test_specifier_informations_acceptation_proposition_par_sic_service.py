@@ -65,13 +65,13 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(
+            statut=ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
             entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI-APPROVED'),
             matricule_candidat='0000000001',
             formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
             curriculum=['file1.pdf'],
             est_confirmee=True,
             est_approuvee_par_fac=True,
-            statut=ChoixStatutPropositionGenerale.TRAITEMENT_FAC,
         )
         self.proposition_repository.save(self.proposition)
         self.parametres_commande_par_defaut = {
@@ -98,7 +98,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         }
 
     def test_should_etre_ok_avec_min_informations(self):
-        self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -133,7 +133,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         self.assertEqual(proposition.communication_au_candidat, '')
 
     def test_should_etre_ok_si_completee_avec_max_informations(self):
-        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC
+        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
         self.proposition.annee_calculee = 2020
 
         # Maximum d'informations données

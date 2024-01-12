@@ -364,6 +364,10 @@ class PredicatesTestCase(TestCase):
             ChoixStatutPropositionGenerale.CONFIRMEE.name,
             ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
             ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
+            ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+            ChoixStatutPropositionGenerale.CLOTUREE.name,
         }
 
         for status in ChoixStatutPropositionGenerale.get_names():
@@ -390,6 +394,10 @@ class PredicatesTestCase(TestCase):
             ChoixStatutPropositionGenerale.CONFIRMEE.name,
             ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
             ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
+            ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+            ChoixStatutPropositionGenerale.CLOTUREE.name,
             ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
             ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
         }
