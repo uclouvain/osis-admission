@@ -2315,6 +2315,9 @@ msgid "Email of the contact person for the design of the annual program"
 msgstr ""
 "E-mail de la personne de contact pour la composition du programme annuel"
 
+msgid "Email of the enrollment campus"
+msgstr "Email du campus d'inscription"
+
 #, python-format
 msgid ""
 "Email requesting the application fee sent to the candidate on %(date)s by "
@@ -3663,9 +3666,6 @@ msgstr "Lien vers la page liée à la formation doctorale (back-office)"
 msgid "Link to the doctoral training panel (front-office)"
 msgstr "Lien vers la page liée à la formation doctorale (front-office)"
 
-msgid "Link to the page of the documents of the admission (back-office)"
-msgstr "Lien vers la page des documents de l'admission (back-office)"
-
 msgid ""
 "Link to the page of the faculty decision in the checklist of the admission "
 "(back-office)"
@@ -4355,6 +4355,9 @@ msgstr "Aucun invité"
 
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
+
+msgid "No recipient email found for this program."
+msgstr "L'email du destinaire n'a pas été trouvé pour cette formation."
 
 msgid "No scholarship found."
 msgstr "Bourse non trouvée."
