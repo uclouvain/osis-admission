@@ -2280,6 +2280,9 @@ msgstr ""
 msgid "Email receiving the documents"
 msgstr ""
 
+msgid "Email of the enrollment campus"
+msgstr ""
+
 #, python-format
 msgid ""
 "Email requesting the application fee sent to the candidate on %(date)s by "
@@ -3505,9 +3508,6 @@ msgstr ""
 msgid "Link to the doctoral training panel (front-office)"
 msgstr ""
 
-msgid "Link to the page of the documents of the admission (back-office)"
-msgstr ""
-
 msgid ""
 "Link to the page of the faculty decision in the checklist of the admission "
 "(back-office)"
@@ -4105,6 +4105,9 @@ msgid "No one invited"
 msgstr ""
 
 msgid "No pool was found to match."
+msgstr ""
+
+msgid "No recipient email found for this program."
 msgstr ""
 
 msgid "No scholarship found."

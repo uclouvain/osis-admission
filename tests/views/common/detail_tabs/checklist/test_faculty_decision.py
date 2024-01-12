@@ -26,6 +26,8 @@
 
 import copy
 import uuid
+from email import message_from_string
+from email.policy import default
 from typing import List
 from unittest import mock
 
@@ -36,6 +38,7 @@ from django.test import TestCase
 from django.test import override_settings
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
+from osis_notification.models import EmailNotification
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
@@ -46,6 +49,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     DecisionFacultaireEnum,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.notification import NotificationException
 from admission.tests.factories.comment import CommentEntryFactory
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
@@ -64,6 +68,8 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
@@ -176,6 +182,7 @@ class FacultyDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.checklist['current']['decision_facultaire']['extra'], {})
 
 
+@override_settings(ADMISSION_BACKEND_LINK_PREFIX='https//example.com')
 class FacultyDecisionSendToFacultyViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -187,6 +194,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         cls.training = GeneralEducationTrainingFactory(
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
+            enrollment_campus__email='mons@campus.be',
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
@@ -223,11 +231,17 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     @freezegun.freeze_time('2022-01-01')
-    @mock.patch(
-        'admission.infrastructure.admission.formation_generale.domain.service.notification.send_mail_to_generic_email'
-    )
-    def test_send_to_faculty_with_sic_user_in_sic_statuses(self, send_mail):
+    def test_send_to_faculty_with_sic_user_in_valid_sic_statuses(self):
         self.client.force_login(user=self.sic_manager_user)
+
+        # If there is no recipient email, trigger an exception
+        with self.assertRaises(NotificationException):
+            self.client.post(self.url, **self.default_headers)
+
+        program_email = EmailFonctionProgrammeFactory(
+            programme=self.general_admission.training.education_group,
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+        )
 
         response = self.client.post(self.url, **self.default_headers)
 
@@ -238,8 +252,23 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
 
-        # Check that a message has been submitted
-        send_mail.assert_called()
+        # Check that a notification has been planned
+        email_notifications = EmailNotification.objects.all()
+
+        self.assertEqual(len(email_notifications), 1)
+
+        email_object = message_from_string(email_notifications[0].payload, policy=default)
+
+        self.assertEqual(email_object['To'], program_email.email)
+
+        content = email_object.as_string()
+
+        self.assertIn(
+            f'{self.general_admission.candidate.last_name}, {self.general_admission.candidate.first_name}',
+            content,
+        )
+
+        self.assertIn('mons@campus.be', content)
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -249,14 +278,14 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
 
         self.assertEqual(
             history_entry.message_fr,
-            'Un mail informant de la soumission du dossier en faculté a été envoyé à '
-            '"mail-inscription-formation-a-developper@uclouvain.be" le 1 Janvier 2022 00:00.',
+            f'Un mail informant de la soumission du dossier en faculté a été envoyé à '
+            f'"{program_email.email}" le 1 Janvier 2022 00:00.',
         )
 
         self.assertEqual(
             history_entry.message_en,
-            'An e-mail notifying that the dossier has been submitted to the faculty was sent to '
-            '"mail-inscription-formation-a-developper@uclouvain.be" on 1 Janvier 2022 00:00.',
+            f'An e-mail notifying that the dossier has been submitted to the faculty was sent to '
+            f'"{program_email.email}" on 1 Janvier 2022 00:00.',
         )
 
         self.assertEqual(
