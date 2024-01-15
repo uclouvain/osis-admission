@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from decimal import Decimal
 from typing import Dict, List, Optional, Union
 
 import attr
@@ -33,8 +34,9 @@ from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.poste_diplomatique import PosteDiplomatiqueDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
-from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO
+from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO, LearningUnitSearchDTO, PartimSearchDTO
 from osis_common.ddd import interface
 
 
@@ -91,6 +93,9 @@ class PropositionDTO(interface.DTO):
 
     certificat_refus_fac: List[str]
     certificat_approbation_fac: List[str]
+    certificat_approbation_sic: List[str]
+    certificat_approbation_sic_annexe: List[str]
+    certificat_refus_sic: List[str]
 
     @property
     def candidat_vip(self) -> bool:
@@ -102,6 +107,10 @@ class PropositionDTO(interface.DTO):
                 self.bourse_erasmus_mundus,
             ]
         )
+
+    @property
+    def est_non_soumise(self):
+        return self.statut in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -118,7 +127,6 @@ class PropositionGestionnaireDTO(PropositionDTO):
     photo_identite_candidat: List[str]
 
     poursuite_de_cycle_a_specifier: bool
-    candidat_a_reussi_experience_academique_belge: bool
     poursuite_de_cycle: str
 
     candidat_a_plusieurs_demandes: bool
@@ -132,18 +140,32 @@ class PropositionGestionnaireDTO(PropositionDTO):
     profil_soumis_candidat: Optional[ProfilCandidatDTO]
 
     # Décision fac & sic
+    type_de_refus: str
     motifs_refus: List[MotifRefusDTO]
 
     autre_formation_choisie_fac: Optional['BaseFormationDTO']
     avec_conditions_complementaires: Optional[bool]
     conditions_complementaires: List[str]
     avec_complements_formation: Optional[bool]
-    complements_formation: Optional[List['LearningUnitPartimDTO']]
+    complements_formation: Optional[List[Union['PartimSearchDTO', 'LearningUnitSearchDTO']]]
     commentaire_complements_formation: str
     nombre_annees_prevoir_programme: Optional[int]
     nom_personne_contact_programme_annuel_annuel: str
     email_personne_contact_programme_annuel_annuel: str
     commentaire_programme_conjoint: str
+    besoin_de_derogation: str
+
+    droits_inscription_montant: str
+    droits_inscription_montant_valeur: Optional[Decimal]
+    droits_inscription_montant_autre: Decimal
+    dispense_ou_droits_majores: str
+    tarif_particulier: str
+    refacturation_ou_tiers_payant: str
+    annee_de_premiere_inscription_et_statut: str
+    est_mobilite: Optional[bool]
+    nombre_de_mois_de_mobilite: str
+    doit_se_presenter_en_sic: Optional[bool]
+    communication_au_candidat: str
 
     # Titres et condition d'accès
     condition_acces: str

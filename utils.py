@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import json
 import os
 import uuid
 from collections import defaultdict
-from typing import Dict, Union
+from typing import Dict, Union, Iterable
 
 import weasyprint
 from django.conf import settings
@@ -47,6 +47,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AnneesCurriculumNonSpecifieesException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
+from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
@@ -244,10 +245,21 @@ class WeasyprintStylesheets:
         return getattr(cls, '_stylesheet')
 
 
-def get_salutation_prefix(person: Person, language: str) -> str:
-    with override(language=language):
+def get_salutation_prefix(person: Person) -> str:
+    with override(language=person.language):
         return {
             ChoixGenre.H.name: pgettext('male gender', 'Dear'),
             ChoixGenre.F.name: pgettext('female gender', 'Dear'),
             ChoixGenre.X.name: pgettext('other gender', 'Dear'),
         }.get(person.gender or ChoixGenre.X.name)
+
+
+def access_title_country(selectable_access_titles: Iterable[TitreAccesSelectionnableDTO]) -> str:
+    """Return the iso code of the country of the latest access title having a specify country."""
+    country = ''
+    last_experience_year = 0
+    for title in selectable_access_titles:
+        if title.selectionne and title.pays_iso_code and title.annee > last_experience_year:
+            country = title.pays_iso_code
+            last_experience_year = title.annee
+    return country

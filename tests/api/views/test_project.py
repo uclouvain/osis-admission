@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import json
 import uuid
 from unittest import mock
 from unittest.mock import patch
@@ -174,13 +175,17 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         self.assertEqual(proposition['prenom_candidat'], self.general_education_admission.candidate.first_name)
         self.assertEqual(proposition['nom_candidat'], self.general_education_admission.candidate.last_name)
         self.assertEqual(proposition['statut'], ChoixStatutPropositionGenerale.EN_BROUILLON.name)
-        self.assertEqual(
+
+        self.assertDictEqual(
             proposition['formation'],
             {
                 'sigle': self.general_education_admission.training.acronym,
                 'code': self.general_education_admission.training.partial_acronym,
                 'annee': self.general_education_admission.training.academic_year.year,
+                'date_debut': self.general_education_admission.training.academic_year.start_date.isoformat(),
                 'intitule': self.general_education_admission.training.title,
+                'intitule_fr': self.general_education_admission.training.title,
+                'intitule_en': self.general_education_admission.training.title_english,
                 'campus': self.general_campus_name,
                 'type': self.general_education_admission.training.education_group_type.name,
                 'code_domaine': self.general_education_admission.training.main_domain.code,
@@ -235,13 +240,16 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         self.assertEqual(proposition['nom_candidat'], self.continuing_education_admission.candidate.last_name)
         self.assertEqual(proposition['statut'], ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
 
-        self.assertEqual(
+        self.assertDictEqual(
             proposition['formation'],
             {
                 'sigle': self.continuing_education_admission.training.acronym,
                 'code': self.continuing_education_admission.training.partial_acronym,
                 'annee': self.continuing_education_admission.training.academic_year.year,
+                'date_debut': self.continuing_education_admission.training.academic_year.start_date.isoformat(),
                 'intitule': self.continuing_education_admission.training.title,
+                'intitule_fr': self.continuing_education_admission.training.title,
+                'intitule_en': self.continuing_education_admission.training.title_english,
                 'campus': self.continuing_campus_name,
                 'type': self.continuing_education_admission.training.education_group_type.name,
                 'code_domaine': self.continuing_education_admission.training.main_domain.code,
@@ -1010,6 +1018,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                     'last_name': self.first_candidate.last_name,
                     'gender': self.first_candidate.gender,
                     'country_of_citizenship': self.first_candidate.country_of_citizenship.iso_code,
+                    'date_of_birth': None,
                 },
                 'coordinates': {
                     'country': 'BE',

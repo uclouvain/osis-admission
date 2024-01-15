@@ -1,29 +1,31 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
+import uuid
 from typing import List
 
 import factory
@@ -119,6 +121,12 @@ class AnneeExperienceAcademiqueDTOFactory(factory.Factory):
     traduction_releve_notes = []
     credits_inscrits = None
     credits_acquis = None
+    avec_bloc_1 = None
+    avec_complement = None
+    credits_inscrits_communaute_fr = None
+    credits_acquis_communaute_fr = None
+    allegement = ''
+    est_reorientation_102 = None
 
 
 class ExperienceAcademiqueDTOFactory(factory.Factory):
@@ -126,13 +134,14 @@ class ExperienceAcademiqueDTOFactory(factory.Factory):
         model = ExperienceAcademiqueDTO
         abstract = False
 
-    uuid = ''
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
     pays = ''
     nom_pays = ''
     nom_institut = ''
     adresse_institut = ''
     code_institut = ''
     communaute_institut = ''
+    type_institut = ''
     regime_linguistique = ''
     nom_regime_linguistique = ''
     type_releve_notes = ''
@@ -151,6 +160,9 @@ class ExperienceAcademiqueDTOFactory(factory.Factory):
     systeme_evaluation = ''
     nom_formation = ''
     type_enseignement = ''
+    nom_formation_equivalente_communaute_fr = ''
+    cycle_formation = ''
+    est_autre_formation = None
 
 
 class ExperienceNonAcademiqueDTOFactory(factory.Factory):
@@ -158,7 +170,7 @@ class ExperienceNonAcademiqueDTOFactory(factory.Factory):
         model = ExperienceNonAcademiqueDTO
         abstract = False
 
-    uuid = ''
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
     employeur = ''
     date_debut = datetime.date(2020, 9, 1)
     date_fin = datetime.date(2020, 10, 15)

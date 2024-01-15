@@ -30,6 +30,7 @@ from admission.ddd.admission.domain.service.reinitialiser_emplacements_documents
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_generale.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
@@ -70,6 +71,7 @@ def recalculer_emplacements_documents_non_libres_proposition(
         annee_courante=annee_courante,
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
+        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
     )
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
         proposition_uuid=cmd.uuid_proposition,

@@ -1,28 +1,29 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from typing import Dict, List, Optional
 
@@ -401,20 +402,13 @@ class EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(interface.CommandR
 class EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
+    envoi_par_fac: bool
 
 
 @attr.dataclass(frozen=True, slots=True)
 class RefuserPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RefuserPropositionParFaculteAvecNouveauxMotifsCommand(interface.CommandRequest):
-    uuid_proposition: str
-    gestionnaire: str
-    uuids_motifs: List[str] = attr.Factory(list)
-    autres_motifs: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -447,23 +441,6 @@ class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.Com
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ApprouverPropositionParFaculteAvecNouvellesInformationsCommand(interface.CommandRequest):
-    uuid_proposition: str
-    gestionnaire: str
-    sigle_autre_formation: str = ''
-    avec_conditions_complementaires: Optional[bool] = None
-    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
-    conditions_complementaires_libres: List[str] = attr.Factory(list)
-    avec_complements_formation: Optional[bool] = None
-    uuids_complements_formation: List[str] = attr.Factory(list)
-    commentaire_complements_formation: str = ''
-    nombre_annees_prevoir_programme: Optional[int] = None
-    nom_personne_contact_programme_annuel: str = ''
-    email_personne_contact_programme_annuel: str = ''
-    commentaire_programme_conjoint: str = ''
-
-
-@attr.dataclass(frozen=True, slots=True)
 class RecupererListePaiementsPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
 
@@ -479,6 +456,7 @@ class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
     condition_acces: str = ''
     millesime_condition_acces: Optional[int] = None
+    avec_complements_formation: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -515,3 +493,93 @@ class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
     uuid_proposition: str
     financabilite_regle: str
     etabli_par: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    statut: str
+    statut_authentification: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    etat_authentification: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierBesoinDeDerogationSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    besoin_de_derogation: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierInformationsAcceptationPropositionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    avec_conditions_complementaires: Optional[bool] = None
+    uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
+    conditions_complementaires_libres: List[str] = attr.Factory(list)
+    avec_complements_formation: Optional[bool] = None
+    uuids_complements_formation: List[str] = attr.Factory(list)
+    commentaire_complements_formation: str = ''
+    nombre_annees_prevoir_programme: Optional[int] = None
+    nom_personne_contact_programme_annuel: str = ''
+    email_personne_contact_programme_annuel: str = ''
+    droits_inscription_montant: str = ''
+    droits_inscription_montant_autre: Optional[float] = None
+    dispense_ou_droits_majores: str = ''
+    tarif_particulier: str = ''
+    refacturation_ou_tiers_payant: str = ''
+    annee_de_premiere_inscription_et_statut: str = ''
+    est_mobilite: Optional[bool] = None
+    nombre_de_mois_de_mobilite: str = ''
+    doit_se_presenter_en_sic: Optional[bool] = None
+    communication_au_candidat: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierMotifsRefusPropositionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    type_de_refus: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserAdmissionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserInscriptionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverAdmissionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    objet_message: str
+    corps_message: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverInscriptionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPdfTemporaireDecisionSicQuery(interface.QueryRequest):
+    uuid_proposition: str
+    pdf: str
+    auteur: str

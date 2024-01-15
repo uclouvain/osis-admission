@@ -1,5 +1,6 @@
-{% extends 'admission/exports/recap/base_pdf.html' %}
+{% extends 'admission/exports/fac_decision_certificate.html' %}
 {% load i18n %}
+
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -7,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -23,3 +24,20 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
+
+{% block decision_title %}
+  {% translate 'refusal' %}
+{% endblock %}
+
+{% block decision_content %}
+  <dl>
+    <dt>{% translate 'Refusal reasons:' %}</dt>
+    <dd>
+      <ul>
+        {% for reason in proposition.motifs_refus %}
+          <li>{{ reason.motif }}</li>
+        {% endfor %}
+      </ul>
+    </dd>
+  </dl>
+{% endblock %}

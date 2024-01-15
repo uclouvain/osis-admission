@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_SIC,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.document import (
     RequestAllDocumentsForm,
 )
@@ -72,7 +73,6 @@ __all__ = [
 
 
 class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    template_name = 'admission/document/base.html'
     permission_required = 'admission.view_documents_management'
     urlpatterns = 'documents'
     form_class = RequestAllDocumentsForm
@@ -88,21 +88,36 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         CONTEXT_GENERAL: general_education_commands.ReclamerDocumentsAuCandidatParSICCommand,
     }
 
+    def get_permission_required(self):
+        self.permission_required = (
+            'admission.change_documents_management'
+            if self.request.method == 'POST'
+            else 'admission.view_documents_management'
+        )
+        return super().get_permission_required()
+
     def get_template_names(self):
         self.htmx_template_name = (
             'admission/document/request_all_documents.html'
             if self.request.method == 'POST'
             else 'admission/document/base_htmx.html'
         )
+        if self.admission.status == ChoixStatutPropositionGenerale.EN_BROUILLON.name:
+            self.template_name = 'admission/document/base_in_progress.html'
+        else:
+            self.template_name = 'admission/document/base.html'
         return super().get_template_names()
 
     @cached_property
-    def is_fac(self):
-        return ProgramManager.belong_to(self.request.user.person)
-
-    @cached_property
     def deadline(self):
-        return datetime.date.today() + datetime.timedelta(days=15)
+        today_date = datetime.date.today()
+
+        if today_date.month == 9 and today_date.day >= 15:
+            # If date between the 15/09 and the 30/09 -> return 30/09
+            return datetime.date(today_date.year, today_date.month, 30)
+        else:
+            # Otherwise return today + 15 days
+            return datetime.date.today() + datetime.timedelta(days=15)
 
     @cached_property
     def documents(self) -> List[EmplacementDocumentDTO]:
@@ -138,6 +153,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         kwargs = super().get_form_kwargs()
         kwargs['documents'] = self.requestable_documents
         kwargs['proposition_uuid'] = self.admission_uuid
+        kwargs['only_limited_request_choices'] = self.is_fac
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -203,14 +219,11 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             'training_campus': formation.campus,
             'training_acronym': formation.sigle,
             'training_year': format_academic_year(self.proposition.annee_calculee),
-            'request_deadline': f'<span id="request_deadline">_</span>',  # Will be updated through JS
+            'request_deadline': f'<span class="request_deadline">_</span>',  # Will be updated through JS
             'management_entity_name': management_entity.get('title') if management_entity else '',
             'management_entity_acronym': formation.sigle_entite_gestion,
             'requested_documents': '<ul id="immediate-requested-documents-email-list"></ul>',
-            'later_blocking_requested_documents': '<ul id="later-blocking-requested-documents-email-list"></ul>',
-            'later_non_blocking_requested_documents': (
-                '<ul id="later-non-blocking-requested-documents-email-list"></ul>'
-            ),
+            'later_requested_documents': '<ul id="later-requested-documents-email-list"></ul>',
             'candidate_first_name': self.proposition.prenom_candidat,
             'candidate_last_name': self.proposition.nom_candidat,
             'training_title': {
@@ -220,7 +233,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             'admissions_link_front': get_portal_admission_list_url(),
             'admission_link_front': get_portal_admission_url('general-education', self.admission_uuid),
             'admission_link_back': get_backoffice_admission_url('general-education', self.admission_uuid),
-            'salutation': get_salutation_prefix(self.admission.candidate, self.proposition.langue_contact_candidat),
+            'salutation': get_salutation_prefix(self.admission.candidate),
         }
 
         return mail_template.render_subject(tokens=tokens), mail_template.body_as_html(tokens=tokens)

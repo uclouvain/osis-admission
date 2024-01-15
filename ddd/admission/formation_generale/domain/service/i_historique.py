@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,23 +23,29 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from abc import abstractmethod
 from email.message import EmailMessage
+from typing import Optional
 
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
 
 
 class IHistorique(interface.DomainService):
     @classmethod
+    @abstractmethod
     def historiser_paiement_frais_dossier_suite_soumission(cls, proposition: Proposition):
         raise NotImplementedError
 
     @classmethod
+    @abstractmethod
     def historiser_paiement_frais_dossier_suite_demande_gestionnaire(cls, proposition: Proposition):
         raise NotImplementedError
 
     @classmethod
+    @abstractmethod
     def historiser_demande_paiement_par_gestionnaire(
         cls,
         proposition: Proposition,
@@ -50,6 +56,7 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    @abstractmethod
     def historiser_annulation_demande_paiement_par_gestionnaire(
         cls,
         proposition: Proposition,
@@ -59,10 +66,7 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
-    def historiser_paiement(cls, proposition: Proposition):
-        raise NotImplementedError
-
-    @classmethod
+    @abstractmethod
     def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
         cls,
         proposition: Proposition,
@@ -72,17 +76,33 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    @abstractmethod
     def historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
         cls,
         proposition: Proposition,
         gestionnaire: str,
+        envoi_par_fac: bool,
     ):
         raise NotImplementedError
 
     @classmethod
-    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str):
+    @abstractmethod
+    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
         raise NotImplementedError
 
     @classmethod
-    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: str):
+    @abstractmethod
+    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_refus_sic(cls, proposition: Proposition, message: EmailMessage, gestionnaire: str):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_acceptation_sic(
+        cls, proposition: Proposition, gestionnaire: str, message: Optional[EmailMessage] = None
+    ):
         raise NotImplementedError

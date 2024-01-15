@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire %}
+{% with initial=original_admission.checklist.initial.decision_facultaire current=original_admission.checklist.current.decision_facultaire can_update_checklist_tab=can_change_faculty_decision %}
   <div
       id="fac-decision-container"
       hx-target="this"
       hx-swap-oob="true"
   >
     {% has_perm 'admission.checklist_faculty_decision_transfer_to_fac' as can_transfer_to_fac %}
-    {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic' as can_transfer_to_sic %}
+    {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic_without_decision' as can_transfer_to_sic %}
     {% has_perm 'admission.checklist_change_faculty_decision' as can_change_faculty_decision %}
     {% not_bool can_change_faculty_decision as cannot_change_faculty_decision %}
 
@@ -67,31 +67,28 @@
       {% include 'admission/general_education/includes/checklist/fac_decision_send_to_fac_modal.html' %}
     {% endif %}
 
-    {% if is_fac %}
-
-      {% if original_admission.status == 'A_COMPLETER_POUR_FAC' %}
-        {% translate "Documents requested by the faculty are still expected from the candidate. The application could be sent to the SIC once they have been received." as cannot_transfer_message %}
-      {% elif not can_transfer_to_sic %}
-        {% blocktranslate with statuses=fac_statuses_for_transfer asvar cannot_transfer_message trimmed %}
-          The global status of the application must be one of the following in order to submit the dossier to the SIC: {{ statuses }}.
-        {% endblocktranslate %}
-      {% endif %}
-
-      <button
-          class="btn btn-primary"
-          {% if can_transfer_to_sic %}
-          data-toggle="modal"
-          data-target="#fac-decision-send-to-sic-modal"
-          {% else %}
-          disabled
-          data-toggle="tooltip"
-          title="{{ cannot_transfer_message }}"
-          {% endif %}
-      >
-        {% translate 'Send to SIC' %}
-      </button>
-      {% include 'admission/general_education/includes/checklist/fac_decision_send_to_sic_modal.html' %}
+    {% if original_admission.status == 'A_COMPLETER_POUR_FAC' %}
+      {% translate "Documents requested by the faculty are still expected from the candidate. The application could be sent to the SIC once they have been received." as cannot_transfer_message %}
+    {% elif not can_transfer_to_sic %}
+      {% blocktranslate with statuses=fac_statuses_for_transfer asvar cannot_transfer_message trimmed %}
+        The global status of the application must be one of the following in order to submit the dossier to the SIC: {{ statuses }}.
+      {% endblocktranslate %}
     {% endif %}
+
+    <button
+        class="btn btn-primary"
+        {% if can_transfer_to_sic %}
+        data-toggle="modal"
+        data-target="#fac-decision-send-to-sic-modal"
+        {% else %}
+        disabled
+        data-toggle="tooltip"
+        title="{{ cannot_transfer_message }}"
+        {% endif %}
+    >
+      {% translate 'Send to SIC' %}
+    </button>
+    {% include 'admission/general_education/includes/checklist/fac_decision_send_to_sic_modal.html' %}
 
     <div class="mt-1" style="margin-bottom: 5px;"><strong>{% translate 'Faculty process' %}</strong></div>
     <div class="form-group btn-group status-group" role="group">
@@ -125,11 +122,11 @@
             {% translate 'Reason for refusal' %}
             {% if can_change_faculty_decision %}
               <button
-                  class="btn btn-primary"
+                  class="btn btn-default"
                   data-toggle="modal"
                   data-target="#fac-decision-refusal-modal"
               >
-                <i class="fa fa-pen"></i>
+                <i class="fa fa-edit"></i>
               </button>
             {% endif %}
           </div>
@@ -145,12 +142,12 @@
                       {% endif %}
                       <li>{{ reason.categorie }}<ul>
                     {% endifchanged %}
-                    <li>{{ reason.motif }}</li>
-                    {% if forloop.last %}
+                  <li>{{ reason.motif }}</li>
+                  {% if forloop.last %}
                     </ul></li>
-                    {% endif %}
+                  {% endif %}
                   {% endfor %}
-                  </ul>
+                </ul>
               </dd>
             </dl>
           </div>
@@ -163,11 +160,11 @@
             {% translate 'Approval' %}
             {% if can_change_faculty_decision %}
               <button
-                  class="btn btn-primary"
+                  class="btn btn-default"
                   data-toggle="modal"
                   data-target="#fac-decision-approval-modal"
               >
-                <i class="fa fa-pen"></i>
+                <i class="fa fa-edit"></i>
               </button>
             {% endif %}
           </div>
@@ -228,9 +225,9 @@
       {% include 'admission/general_education/includes/checklist/fac_decision_confirm_modal.html' with target_status="GEST_BLOCAGE" target_url=change_status_url_to_be_completed_sic %}
     {% endif %}
   </div>
-{% endwith %}
 
-{% if request.htmx %}
-  {# Update the checklist menu  #}
-  {% include "admission/general_education/checklist_menu.html" with current_item='decision_facultaire' %}
-{% endif %}
+  {% if request.htmx %}
+    {# Update the checklist menu item status #}
+    {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='decision_facultaire' %}
+  {% endif %}
+{% endwith %}

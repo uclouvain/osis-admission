@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,10 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from rules import predicate
 
+from admission.auth.predicates import not_in_general_statuses_predicate_message
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -36,6 +38,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_OU_FRAIS_DOSSIER_EN_ATTENTE,
 )
 from osis_role.errors import predicate_failed_msg
 
@@ -101,44 +104,38 @@ def is_submitted(self, user: User, obj: GeneralEducationAdmission):
 
 
 @predicate(bind=True)
-@predicate_failed_msg(
-    message=_("The global status of the application must be one of the following to realize this action: %(statuses)s.")
-    % {
-        'statuses': STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
-    }
-)
+@predicate_failed_msg(message=_('The proposition must not be cancelled to realize this action.'))
+def not_cancelled(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status != ChoixStatutPropositionGenerale.ANNULEE.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC))
 def in_fac_status(self, user: User, obj: GeneralEducationAdmission):
     return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC
 
 
 @predicate(bind=True)
-@predicate_failed_msg(
-    message=_("The global status of the application must be one of the following to realize this action: %(statuses)s.")
-    % {
-        'statuses': STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
-    }
-)
+@predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS))
 def in_fac_status_extended(self, user: User, obj: GeneralEducationAdmission):
     return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS
 
 
 @predicate(bind=True)
-@predicate_failed_msg(
-    message=_("The global status of the application must be one of the following to realize this action: %(statuses)s.")
-    % {
-        'statuses': STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
-    }
-)
+@predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC))
 def in_sic_status(self, user: User, obj: GeneralEducationAdmission):
     return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC
 
 
 @predicate(bind=True)
-@predicate_failed_msg(
-    message=_("The global status of the application must be one of the following to realize this action: %(statuses)s.")
-    % {
-        'statuses': STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
-    }
-)
+@predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS))
 def in_sic_status_extended(self, user: User, obj: GeneralEducationAdmission):
     return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_OU_FRAIS_DOSSIER_EN_ATTENTE)
+)
+def in_sic_status_or_application_fees(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_OU_FRAIS_DOSSIER_EN_ATTENTE

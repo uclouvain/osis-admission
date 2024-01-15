@@ -30,6 +30,10 @@ import uuid
 import factory
 from dateutil.relativedelta import relativedelta
 
+from admission.contrib.models.base import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from osis_profile.models import EducationalExperienceYear, ProfessionalExperience, EducationalExperience
 from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result, Grade, ActivityType
@@ -43,6 +47,8 @@ class EducationalExperienceYearFactory(factory.django.DjangoModelFactory):
     transcript = factory.LazyFunction(lambda: [uuid.uuid4()])
     transcript_translation = factory.LazyFunction(lambda: [uuid.uuid4()])
     academic_year = factory.SubFactory(AcademicYearFactory, current=True)
+    fwb_registered_credit_number = 20
+    fwb_acquired_credit_number = 15
 
     class Meta:
         model = EducationalExperienceYear
@@ -81,3 +87,13 @@ class ProfessionalExperienceFactory(factory.django.DjangoModelFactory):
         lambda experience: experience.start_date + relativedelta(months=2) - relativedelta(days=1)
     )
     type = ActivityType.WORK.name
+
+
+class AdmissionEducationalValuatedExperiencesFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = AdmissionEducationalValuatedExperiences
+
+
+class AdmissionProfessionalValuatedExperiencesFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = AdmissionProfessionalValuatedExperiences

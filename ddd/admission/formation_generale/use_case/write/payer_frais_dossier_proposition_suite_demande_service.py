@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.formation_generale.commands import PayerFraisDossierPropositionSuiteDemandeCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -31,18 +31,23 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
+from admission.ddd.admission.formation_generale.domain.service.i_reference import IReferenceTranslator
+from admission.ddd.admission.formation_generale.events import FraisDossierPayeEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
 def payer_frais_dossier_proposition_suite_demande(
+    message_bus: 'MessageBus',
     cmd: 'PayerFraisDossierPropositionSuiteDemandeCommand',
     proposition_repository: 'IPropositionRepository',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
     historique: 'IHistorique',
+    reference_translator: 'IReferenceTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+    reference = reference_translator.get_reference(entity_id=proposition_id)
 
     # WHEN
     paiement_frais_dossier_service.verifier_paiement_frais_dossier(
@@ -54,4 +59,12 @@ def payer_frais_dossier_proposition_suite_demande(
     proposition_repository.save(proposition)
     historique.historiser_paiement_frais_dossier_suite_demande_gestionnaire(proposition)
 
+    message_bus.publish(
+        FraisDossierPayeEvent(
+            entity_id=proposition_id,
+            numero_dossier=reference,
+            montant=MONTANT_FRAIS_DOSSIER,
+            matricule=proposition.matricule_candidat,
+        )
+    )
     return proposition_id

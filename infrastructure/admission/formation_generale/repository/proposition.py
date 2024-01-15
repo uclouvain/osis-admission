@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
-from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO
+from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO, CampusDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.type_bourse import TypeBourse
@@ -65,6 +65,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+    DROITS_INSCRIPTION_MONTANT_VALEURS,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -83,6 +84,7 @@ from admission.infrastructure.admission.formation_generale.repository._comptabil
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from admission.infrastructure.utils import dto_to_dict
 from base.models.academic_year import AcademicYear
+from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -240,6 +242,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'financability_rule_established_by': financabilite_regle_etabli_par_person,
                 'fac_approval_certificate': entity.certificat_approbation_fac,
                 'fac_refusal_certificate': entity.certificat_refus_fac,
+                'sic_approval_certificate': entity.certificat_approbation_sic,
+                'sic_annexe_approval_certificate': entity.certificat_approbation_sic_annexe,
+                'sic_refusal_certificate': entity.certificat_refus_sic,
                 'other_refusal_reasons': entity.autres_motifs_refus,
                 'other_training_accepted_by_fac': other_training,
                 'with_additional_approval_conditions': entity.avec_conditions_complementaires,
@@ -265,6 +270,18 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if entity.etat_equivalence_titre_acces
                 else '',
                 'foreign_access_title_equivalency_effective_date': entity.date_prise_effet_equivalence_titre_acces,
+                'dispensation_needed': entity.besoin_de_derogation,
+                'tuition_fees_amount': entity.droits_inscription_montant,
+                'tuition_fees_amount_other': entity.droits_inscription_montant_autre,
+                'tuition_fees_dispensation': entity.dispense_ou_droits_majores,
+                'particular_cost': entity.tarif_particulier,
+                'rebilling_or_third_party_payer': entity.refacturation_ou_tiers_payant,
+                'first_year_inscription_and_status': entity.annee_de_premiere_inscription_et_statut,
+                'is_mobility': entity.est_mobilite,
+                'mobility_months_amount': entity.nombre_de_mois_de_mobilite,
+                'must_report_to_sic': entity.doit_se_presenter_en_sic,
+                'communication_to_the_candidate': entity.communication_au_candidat,
+                'refusal_type': entity.type_de_refus,
             },
         )
 
@@ -409,6 +426,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_demandes=admission.requested_documents,
             checklist_initiale=checklist_initiale and StatutsChecklistGenerale.from_dict(checklist_initiale),
             checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
+            type_de_refus=admission.refusal_type,
             motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
             autres_motifs_refus=admission.other_refusal_reasons,
             financabilite_regle_calcule=admission.financability_computed_rule,
@@ -419,6 +437,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else None,
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
+            certificat_approbation_sic=admission.sic_approval_certificate,
+            certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
+            certificat_refus_sic=admission.sic_refusal_certificate,
             autre_formation_choisie_fac_id=FormationIdentityBuilder.build(
                 sigle=admission.other_training_accepted_by_fac.acronym,
                 annee=admission.other_training_accepted_by_fac.academic_year.year,
@@ -462,10 +483,31 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.foreign_access_title_equivalency_state
             else None,
             date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
+            besoin_de_derogation=admission.dispensation_needed,
+            droits_inscription_montant=admission.tuition_fees_amount,
+            droits_inscription_montant_autre=admission.tuition_fees_amount_other,
+            dispense_ou_droits_majores=admission.tuition_fees_dispensation,
+            tarif_particulier=admission.particular_cost,
+            refacturation_ou_tiers_payant=admission.rebilling_or_third_party_payer,
+            annee_de_premiere_inscription_et_statut=admission.first_year_inscription_and_status,
+            est_mobilite=admission.is_mobility,
+            nombre_de_mois_de_mobilite=admission.mobility_months_amount,
+            doit_se_presenter_en_sic=admission.must_report_to_sic,
+            communication_au_candidat=admission.communication_to_the_candidate,
         )
 
     @classmethod
     def _load_dto(cls, admission: GeneralEducationAdmission) -> 'PropositionDTO':
+        campus = (
+            CampusDb.objects.select_related('country')
+            .filter(
+                teaching_campus__educationgroupversion__version_name='',
+                teaching_campus__educationgroupversion__transition_name='',
+                teaching_campus__educationgroupversion__offer_id=admission.training_id,
+            )
+            .first()
+        )
+
         return PropositionDTO(
             uuid=admission.uuid,
             creee_le=admission.created_at,
@@ -481,13 +523,46 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle=admission.training.acronym,
                 code=admission.training.partial_acronym,
                 annee=admission.training.academic_year.year,
+                date_debut=admission.training.academic_year.start_date,
                 intitule=admission.training.title
                 if get_language() == settings.LANGUAGE_CODE_FR
                 else admission.training.title_english,
-                campus=admission.teaching_campus or '',  # from annotation
+                intitule_fr=admission.training.title,
+                intitule_en=admission.training.title_english,
+                campus=CampusDTO(
+                    nom=campus.name,
+                    code_postal=campus.postal_code,
+                    ville=campus.city,
+                    pays_iso_code=campus.country.iso_code if campus.country else '',
+                    nom_pays=campus.country.name if campus.country else '',
+                    rue=campus.street,
+                    numero_rue=campus.street_number,
+                    boite_postale=campus.postal_box,
+                    localisation=campus.location,
+                    email=campus.email,
+                )
+                if campus
+                else None,
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
-                campus_inscription=admission.training.enrollment_campus.name,
+                campus_inscription=CampusDTO(
+                    nom=admission.training.enrollment_campus.name,
+                    code_postal=admission.training.enrollment_campus.postal_code,
+                    ville=admission.training.enrollment_campus.city,
+                    pays_iso_code=admission.training.enrollment_campus.country.iso_code
+                    if admission.training.enrollment_campus.country
+                    else '',
+                    nom_pays=admission.training.enrollment_campus.country.name
+                    if admission.training.enrollment_campus.country
+                    else '',
+                    rue=admission.training.enrollment_campus.street,
+                    numero_rue=admission.training.enrollment_campus.street_number,
+                    boite_postale=admission.training.enrollment_campus.postal_box,
+                    localisation=admission.training.enrollment_campus.location,
+                    email=admission.training.enrollment_campus.email,
+                )
+                if admission.training.enrollment_campus
+                else None,
                 sigle_entite_gestion=admission.training_management_faculty
                 or admission.sigle_entite_gestion,  # from annotation
             ),
@@ -525,6 +600,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else None,
             certificat_refus_fac=admission.fac_refusal_certificate,
             certificat_approbation_fac=admission.fac_approval_certificate,
+            certificat_approbation_sic=admission.sic_approval_certificate,
+            certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
+            certificat_refus_sic=admission.sic_refusal_certificate,
             documents_additionnels=admission.additional_documents,
             poste_diplomatique=PosteDiplomatiqueTranslator.build_dto(admission.diplomatic_post)
             if admission.diplomatic_post
@@ -539,27 +617,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     ) -> 'PropositionGestionnaireDTO':
         is_french_language = get_language() == settings.LANGUAGE_CODE_FR
         proposition = cls._load_dto(admission)
-        annee_courante = (
-            GetCurrentAcademicYear()
-            .get_starting_academic_year(
-                datetime.date.today(),
-                AcademicYearRepository,
-            )
-            .year
-        )
-        curriculum = ProfilCandidatTranslator.get_curriculum(
-            matricule=proposition.matricule_candidat,
-            annee_courante=annee_courante,
-        )
-        candidat_a_reussi_experience_academique_belge = any(
-            annee.resultat == Result.SUCCESS.name or annee.resultat == Result.SUCCESS_WITH_RESIDUAL_CREDITS.name
-            for experience in curriculum.experiences_academiques
-            for annee in experience.annees
-            if experience.pays == BE_ISO_CODE
-        )
-        poursuite_de_cycle_a_specifier = (
-            proposition.formation.type == TrainingType.BACHELOR.name and candidat_a_reussi_experience_academique_belge
-        )
+        poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name
         additional_condition_title_field = 'name_fr' if is_french_language else 'name_en'
         additional_training_title_field = 'full_title' if is_french_language else 'full_title_en'
 
@@ -597,6 +655,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             )
             if admission.submitted_profile
             else None,
+            type_de_refus=admission.refusal_type,
             motifs_refus=[
                 MotifRefusDTO(motif=mark_safe(reason.name), categorie=reason.category.name)
                 for reason in admission.refusal_reasons.all()
@@ -635,7 +694,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,
             email_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_email,
             commentaire_programme_conjoint=admission.join_program_fac_comment,
-            candidat_a_reussi_experience_academique_belge=candidat_a_reussi_experience_academique_belge,
             condition_acces=admission.admission_requirement,
             millesime_condition_acces=admission.admission_requirement_year.year
             if admission.admission_requirement_year
@@ -644,6 +702,18 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             statut_equivalence_titre_acces=admission.foreign_access_title_equivalency_status,
             etat_equivalence_titre_acces=admission.foreign_access_title_equivalency_state,
             date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
+            besoin_de_derogation=admission.dispensation_needed,
+            droits_inscription_montant=admission.tuition_fees_amount,
+            droits_inscription_montant_valeur=DROITS_INSCRIPTION_MONTANT_VALEURS.get(admission.tuition_fees_amount),
+            droits_inscription_montant_autre=admission.tuition_fees_amount_other,
+            dispense_ou_droits_majores=admission.tuition_fees_dispensation,
+            tarif_particulier=admission.particular_cost,
+            refacturation_ou_tiers_payant=admission.rebilling_or_third_party_payer,
+            annee_de_premiere_inscription_et_statut=admission.first_year_inscription_and_status,
+            est_mobilite=admission.is_mobility,
+            nombre_de_mois_de_mobilite=admission.mobility_months_amount,
+            doit_se_presenter_en_sic=admission.must_report_to_sic,
+            communication_au_candidat=admission.communication_to_the_candidate,
         )
 
     @classmethod

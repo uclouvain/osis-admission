@@ -35,6 +35,7 @@
           {% if checked %}
           checked="checked"
           {% endif %}
+          {% if can_choose_access_title is False %}disabled{% endif %}
       />
     </label>
   </div>

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,16 +37,23 @@ from django.db.models import (
     Q,
     Value,
     When,
+    Exists,
+    OuterRef,
 )
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
 from admission.contrib.models import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
 from admission.views import PaginatedList
+from base.models.enums.education_group_types import TrainingType
+from osis_profile.models import EducationalExperienceYear
+from osis_profile.models.enums.curriculum import Result
 
 
 class ListerToutesDemandes(IListerToutesDemandes):
@@ -80,7 +87,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
             .order_by('-viewed_at')
         )
 
-        roles = []
         if demandeur:
             prefetch_viewers_queryset = prefetch_viewers_queryset.exclude(person__uuid=demandeur)
 
@@ -100,10 +106,29 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     | Q(generaleducationadmission__double_degree_scholarship_id__isnull=False),
                     output_field=BooleanField(),
                 ),
+                est_premiere_annee=ExpressionWrapper(
+                    Q(training__education_group_type__name=TrainingType.BACHELOR.name)
+                    & ~Q(generaleducationadmission__cycle_pursuit=PoursuiteDeCycle.YES.name),
+                    output_field=BooleanField(),
+                ),
+                cycle_pursuit=Case(
+                    When(
+                        Q(training__education_group_type__name=TrainingType.BACHELOR.name)
+                        & Exists(
+                            EducationalExperienceYear.objects.filter(
+                                Q(result=Result.SUCCESS.name) | Q(result=Result.SUCCESS_WITH_RESIDUAL_CREDITS.name),
+                                educational_experience__person=OuterRef('candidate'),
+                                educational_experience__country__iso_code=BE_ISO_CODE,
+                            )
+                        ),
+                        then=F('generaleducationadmission__cycle_pursuit'),
+                    ),
+                    default=Value(''),
+                ),
             )
             .select_related(
                 'candidate__country_of_citizenship',
-                'last_update_author__user',
+                'last_update_author',
                 'training__academic_year',
                 'training__enrollment_campus',
                 'training__education_group_type',
@@ -143,6 +168,9 @@ class ListerToutesDemandes(IListerToutesDemandes):
             terms = formation.split()
             training_filters = Q()
             for term in terms:
+                if term.endswith('-1'):
+                    training_filters &= Q(est_premiere_annee=True)
+                    term = term[:-2]
                 # The term can be a part of the acronym or of the training title
                 training_filters &= Q(Q(training__acronym__icontains=term) | Q(training__title__icontains=term))
             qs = qs.filter(training_filters)
@@ -228,7 +256,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
             etat_demande=admission.status,  # From annotation
             type_demande=admission.type_demande,
             derniere_modification_le=admission.modified_at,
-            derniere_modification_par=admission.last_update_author.user.username
+            derniere_modification_par='{first_name} {last_name}'.format(
+                first_name=admission.last_update_author.first_name,
+                last_name=admission.last_update_author.last_name,
+            )
             if admission.last_update_author_id
             else '',
             derniere_modification_par_candidat=admission.candidate_id == admission.last_update_author_id,
@@ -241,4 +272,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 for viewer in admission.other_admission_viewers
             ],
             date_confirmation=admission.submitted_at,
+            est_premiere_annee=admission.est_premiere_annee,
+            poursuite_de_cycle=admission.cycle_pursuit,
         )

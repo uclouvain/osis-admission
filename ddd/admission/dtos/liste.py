@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -61,3 +61,5 @@ class DemandeRechercheDTO(interface.DTO):
     derniere_modification_par_candidat: bool
     dernieres_vues_par: List[VisualiseurAdmissionDTO]
     date_confirmation: Optional[datetime.datetime]
+    est_premiere_annee: Optional[bool]
+    poursuite_de_cycle: str

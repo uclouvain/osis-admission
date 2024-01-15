@@ -42,12 +42,19 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.exceptions import InvalidMimeTypeException, DocumentPostProcessingException
 from admission.tasks.merge_admission_documents import general_education_admission_document_merging_from_task
+from admission.tests.factories.curriculum import (
+    EducationalExperienceYearFactory,
+    EducationalExperienceFactory,
+    ProfessionalExperienceFactory, AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+)
 from admission.tests.factories.form_item import DocumentAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from osis_document.enums import PostProcessingType
+from osis_profile.models.enums.curriculum import TranscriptType
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -86,6 +93,10 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
             'token-passport-2': uuid.uuid4(),
             'token-id-photo': uuid.uuid4(),
             'pdf_recap_file_token': uuid.uuid4(),
+            'certificate': uuid.uuid4(),
+            'certificate-2': uuid.uuid4(),
+            'transcript': uuid.uuid4(),
+            'transcript-2': uuid.uuid4(),
         }
 
         cls.tokens_by_uuid = {str(document_uuid): token for token, document_uuid in cls.uuid_documents_by_token.items()}
@@ -389,3 +400,74 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
 
             self.admission.refresh_from_db()
             self.assertEqual(self.admission.specific_question_answers, {})
+
+    def test_only_cv_experiences_valuated_by_admission_must_be_processed(self):
+        other_admission = GeneralEducationAdmissionFactory(
+            candidate=self.admission.candidate,
+            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+        )
+        educational_experience = EducationalExperienceFactory(
+            person=self.admission.candidate,
+            transcript_type=TranscriptType.ONE_A_YEAR.name,
+        )
+        educational_experience_year = EducationalExperienceYearFactory(
+            educational_experience=educational_experience,
+            academic_year=self.admission.training.academic_year,
+            transcript=[
+                self.uuid_documents_by_token['transcript'],
+                self.uuid_documents_by_token['transcript-2'],
+            ],
+        )
+        non_educational_experience = ProfessionalExperienceFactory(
+            person=self.admission.candidate,
+            certificate=[
+                self.uuid_documents_by_token['certificate'],
+                self.uuid_documents_by_token['certificate-2'],
+            ],
+        )
+
+        # No valuated experience -> no merge
+        general_education_admission_document_merging_from_task(task_uuid=self.admission_task.task.uuid)
+
+        educational_experience_year.refresh_from_db()
+        self.assertNotEqual(educational_experience_year.transcript, [self.PDF_MERGE_UUID])
+
+        non_educational_experience.refresh_from_db()
+        self.assertNotEqual(non_educational_experience.certificate, [self.PDF_MERGE_UUID])
+
+        # Valuated by another admission -> no merge
+        educational_valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            educationalexperience=educational_experience,
+        )
+
+        non_educational_valuation = AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=other_admission,
+            professionalexperience=non_educational_experience,
+        )
+
+        general_education_admission_document_merging_from_task(task_uuid=self.admission_task.task.uuid)
+
+        educational_experience_year.refresh_from_db()
+        self.assertNotEqual(educational_experience_year.transcript, [self.PDF_MERGE_UUID])
+
+        non_educational_experience.refresh_from_db()
+        self.assertNotEqual(non_educational_experience.certificate, [self.PDF_MERGE_UUID])
+
+        # Valuated by the current admission -> merge
+        self.admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.admission.save()
+
+        educational_valuation.baseadmission = self.admission
+        educational_valuation.save()
+
+        non_educational_valuation.baseadmission = self.admission
+        non_educational_valuation.save()
+
+        general_education_admission_document_merging_from_task(task_uuid=self.admission_task.task.uuid)
+
+        educational_experience_year.refresh_from_db()
+        self.assertEqual(educational_experience_year.transcript, [self.PDF_MERGE_UUID])
+
+        non_educational_experience.refresh_from_db()
+        self.assertEqual(non_educational_experience.certificate, [self.PDF_MERGE_UUID])

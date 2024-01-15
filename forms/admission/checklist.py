@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,10 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import itertools
+import json
 from collections import defaultdict
-from typing import Optional
+from typing import Optional, List
 
 from ckeditor.widgets import CKEditorWidget
 from dal import forward
@@ -42,25 +44,36 @@ from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import RefusalReason, AdditionalApprovalCondition
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.domain.model.enums.condition_acces import recuperer_conditions_acces_par_formation
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,
 )
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument, TypeEmplacementDocument
 
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle, ChoixStatutChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    PoursuiteDeCycle,
+    BesoinDeDerogation,
+    DroitsInscriptionMontant,
+    TypeDeRefus,
+    ChoixStatutChecklist,
+)
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     FilterFieldWidget,
     get_initial_choices_for_additionnal_approval_conditions,
     autocomplete,
     get_example_text,
-    EMPTY_CHOICE_AS_LIST,
     CustomDateInput,
+    EMPTY_CHOICE_AS_LIST,
+    EMPTY_CHOICE,
 )
 from admission.forms import get_academic_year_choices
+from admission.forms.admission.document import ChangeRequestDocumentForm
 from admission.forms.autocomplete import Select2MultipleWithTagWhenNoResultWidget
 from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
@@ -88,9 +101,9 @@ class CommentForm(forms.Form):
         required=False,
     )
 
-    def __init__(self, form_url, comment=None, *args, **kwargs):
-        user_is_sic = kwargs.pop('user_is_sic', False)
-        user_is_fac = kwargs.pop('user_is_fac', False)
+    def __init__(self, form_url, comment=None, label=None, *args, **kwargs):
+        disabled = kwargs.pop('disabled', False)
+
         super().__init__(*args, **kwargs)
 
         form_for_sic = f'__{COMMENT_TAG_SIC}' in self.prefix
@@ -98,13 +111,16 @@ class CommentForm(forms.Form):
 
         self.fields['comment'].widget.attrs['hx-post'] = form_url
 
-        label = (
-            _("Faculty comment for the SIC")
-            if form_for_fac
-            else _('SIC comment for the faculty')
-            if form_for_sic
-            else _('Comment')
-        )
+        if form_for_fac:
+            label = _('Faculty comment for the SIC')
+            self.permission = 'admission.checklist_change_fac_comment'
+        elif form_for_sic:
+            label = _('SIC comment for the faculty')
+            self.permission = 'admission.checklist_change_sic_comment'
+        else:
+            if not label:
+                label = _('Comment')
+            self.permission = 'admission.checklist_change_comment'
 
         self.fields['comment'].label = label
 
@@ -115,7 +131,8 @@ class CommentForm(forms.Form):
                 date=comment.modified_at.strftime("%d/%m/%Y"),
                 time=comment.modified_at.strftime("%H:%M"),
             )
-        if form_for_sic and not user_is_sic or form_for_fac and not user_is_fac:
+
+        if disabled:
             self.fields['comment'].disabled = True
 
 
@@ -127,6 +144,15 @@ class StatusForm(forms.Form):
     status = forms.ChoiceField(
         choices=ChoixStatutChecklist.choices(),
         required=True,
+    )
+
+
+class ExperienceStatusForm(StatusForm):
+    authentification = forms.TypedChoiceField(
+        required=False,
+        coerce=lambda val: val == '1',
+        empty_value=None,
+        choices=(('0', 'No'), ('1', _('Yes'))),
     )
 
 
@@ -172,7 +198,6 @@ class ChoixFormationForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         formation = kwargs.pop('formation')
-        self.has_success_be_experience = kwargs.pop('has_success_be_experience')
         super().__init__(*args, **kwargs)
         today = datetime.date.today()
         try:
@@ -202,9 +227,8 @@ class ChoixFormationForm(forms.Form):
         cleaned_data = super().clean()
         formation = cleaned_data.get('formation')
 
-        if formation and self.has_success_be_experience:
-            # The bachelor cycle continuation field is shown and required if the training is a bachelor and the user has
-            # successfully completed a belgian academic experience
+        if formation:
+            # The bachelor cycle continuation field is shown and required if the training is a bachelor
             if self.initial_training_type == TrainingType.BACHELOR.name:
                 if not cleaned_data.get('poursuite_cycle'):
                     self.add_error('poursuite_cycle', FIELD_REQUIRED_MESSAGE)
@@ -541,7 +565,7 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
     admission_requirement_year = AcademicYearField(
         past_only=True,
         required=False,
-        label=_('Admission requirement'),
+        label=_('Admission requirement year'),
     )
 
     def __init__(self, *args, **kwargs):
@@ -559,7 +583,11 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
         fields = [
             'admission_requirement',
             'admission_requirement_year',
+            'with_prerequisite_courses',
         ]
+        widgets = {
+            'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+        }
 
 
 class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
@@ -627,9 +655,344 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
         return cleaned_data
 
 
+class SicDecisionApprovalForm(forms.ModelForm):
+    SEPARATOR = ';'
+
+    prerequisite_courses = MultipleChoiceFieldWithBetterError(
+        label=_('List of LUs of the additional module or others'),
+        widget=Select2MultipleWithTagWhenNoResultWidget(
+            url='admission:autocomplete:learning-unit-years',
+            attrs={
+                'data-token-separators': '[{}]'.format(SEPARATOR),
+                'data-tags': 'true',
+                'data-allow-clear': 'false',
+                **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+            },
+        ),
+        required=False,
+        help_text=_(
+            'You can search for an additional training by name or acronym, or paste in a list of acronyms separated '
+            'by the "%(separator)s" character and ending with the same character.'
+        )
+        % {'separator': SEPARATOR},
+    )
+
+    all_additional_approval_conditions = forms.MultipleChoiceField(
+        label=_('Additional conditions'),
+        required=False,
+        widget=autocomplete.Select2Multiple(
+            attrs={
+                'data-allow-clear': 'false',
+                'data-tags': 'true',
+            },
+        ),
+    )
+
+    class Media:
+        js = ('js/dependsOn.min.js',)
+
+    class Meta:
+        model = GeneralEducationAdmission
+        fields = [
+            'prerequisite_courses',
+            'prerequisite_courses_fac_comment',
+            'program_planned_years_number',
+            'annual_program_contact_person_name',
+            'annual_program_contact_person_email',
+            'with_additional_approval_conditions',
+            'with_prerequisite_courses',
+            'tuition_fees_amount',
+            'tuition_fees_amount_other',
+            'tuition_fees_dispensation',
+            'particular_cost',
+            'rebilling_or_third_party_payer',
+            'first_year_inscription_and_status',
+            'is_mobility',
+            'mobility_months_amount',
+            'must_report_to_sic',
+            'communication_to_the_candidate',
+        ]
+        labels = {
+            'annual_program_contact_person_name': _('First name and last name'),
+            'annual_program_contact_person_email': pgettext_lazy('admission', 'Email'),
+        }
+        widgets = {
+            'prerequisite_courses_fac_comment': CKEditorWidget(config_name='comment_link_only'),
+            'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'with_additional_approval_conditions': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'program_planned_years_number': forms.Select(
+                choices=EMPTY_CHOICE_AS_LIST
+                + [(number, number) for number in range(DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME + 1)],
+            ),
+            'particular_cost': forms.TextInput(),
+            'rebilling_or_third_party_payer': forms.TextInput(),
+            'first_year_inscription_and_status': forms.TextInput(),
+            'is_mobility': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
+        }
+
+    def __init__(
+        self,
+        academic_year,
+        additional_approval_conditions_for_diploma,
+        documents: List[EmplacementDocumentDTO],
+        *args,
+        **kwargs,
+    ):
+        instance: Optional[GeneralEducationAdmission] = kwargs.get('instance', None)
+        data = kwargs.get('data', {})
+
+        super().__init__(*args, **kwargs)
+
+        # Documents
+        documents_choices = []
+        initial_document_choices = []
+        self.documents = {}
+
+        for document in documents:
+            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
+                if document.document_uuids:
+                    label = '<span class="fa-solid fa-paperclip"></span> '
+                else:
+                    label = '<span class="fa-solid fa-link-slash"></span> '
+                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
+                    label += '<span class="fa-solid fa-building-columns"></span> '
+                label += document.libelle
+
+                document_field = ChangeRequestDocumentForm.create_change_request_document_field(
+                    label=label,
+                    document_identifier=document.identifiant,
+                    request_status=document.statut_reclamation,
+                    proposition_uuid=self.instance.uuid,
+                    only_limited_request_choices=False,
+                )
+
+                self.fields[document.identifiant] = document_field
+                self.documents[document.identifiant] = document_field
+
+                initial_document_choices.append(document.identifiant)
+                documents_choices.append((document.identifiant, mark_safe(label)))
+
+        # Initialize conditions field
+        self.is_admission = self.instance.type_demande == TypeDemande.ADMISSION.name
+        self.is_vip = (
+            self.instance.international_scholarship_id is not None
+            or self.instance.erasmus_mundus_scholarship_id is not None
+            or self.instance.double_degree_scholarship_id is not None
+        )
+        self.is_hue = not self.instance.candidate.country_of_citizenship.european_union
+        self.academic_year = academic_year
+        self.data_existing_conditions = set()
+        self.data_free_conditions = set()
+        self.predefined_approval_conditions = []
+        free_approval_conditions = []
+
+        # Initialize additional approval conditions field
+        if data:
+            for condition in data.getlist(self.add_prefix('all_additional_approval_conditions'), []):
+                if is_uuid(condition):
+                    self.data_existing_conditions.add(condition)
+                else:
+                    self.data_free_conditions.add(condition)
+
+            free_approval_conditions = self.data_free_conditions
+
+        elif instance:
+            # Additional conditions
+            existing_approval_conditions = instance.additional_approval_conditions.all()
+            free_approval_conditions = instance.free_additional_approval_conditions
+            self.initial['all_additional_approval_conditions'] = [
+                c.uuid for c in existing_approval_conditions
+            ] + free_approval_conditions
+
+        self.predefined_approval_conditions = AdditionalApprovalCondition.objects.all()
+
+        all_additional_approval_conditions_choices = get_initial_choices_for_additionnal_approval_conditions(
+            predefined_approval_conditions=self.predefined_approval_conditions,
+            free_approval_conditions=itertools.chain(
+                additional_approval_conditions_for_diploma,
+                free_approval_conditions,
+            ),
+        )
+        self.fields['all_additional_approval_conditions'].choices = all_additional_approval_conditions_choices
+        self.fields['all_additional_approval_conditions'].widget.choices = all_additional_approval_conditions_choices
+
+        self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
+
+        # Initialize additional trainings fields
+        lue_acronyms = {}
+
+        if self.is_bound:
+            lue_acronyms = {
+                (acronym, academic_year) for acronym in self.data.getlist(self.add_prefix('prerequisite_courses'))
+            }
+
+        elif self.instance:
+            lue_acronyms = set(self.instance.prerequisite_courses.all().values_list('acronym', 'academic_year__year'))
+            self.initial['prerequisite_courses'] = [acronym[0] for acronym in lue_acronyms]
+
+        learning_units = (
+            message_bus_instance.invoke(LearningUnitAndPartimSearchCommand(code_annee_values=lue_acronyms))
+            if lue_acronyms
+            else []
+        )
+
+        self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
+
+        if not self.is_vip:
+            del self.fields['particular_cost']
+            del self.fields['rebilling_or_third_party_payer']
+            del self.fields['first_year_inscription_and_status']
+
+        if not self.is_hue:
+            del self.fields['is_mobility']
+            del self.fields['mobility_months_amount']
+
+        if not self.is_admission:
+            del self.fields['must_report_to_sic']
+
+    def clean_all_additional_approval_conditions(self):
+        # This field can contain uuids of existing conditions or free conditions as strings
+        cleaned_data = self.cleaned_data.get('all_additional_approval_conditions', [])
+
+        self.cleaned_data['additional_approval_conditions'] = list(self.data_existing_conditions)
+        self.cleaned_data['free_additional_approval_conditions'] = list(self.data_free_conditions)
+
+        return cleaned_data
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if not cleaned_data.get('with_additional_approval_conditions'):
+            cleaned_data['all_additional_approval_conditions'] = []
+            cleaned_data['additional_approval_conditions'] = []
+            cleaned_data['free_additional_approval_conditions'] = []
+
+        if cleaned_data.get('with_prerequisite_courses'):
+            if cleaned_data.get('prerequisite_courses'):
+                cleaned_data['prerequisite_courses'] = LearningUnitYear.objects.filter(
+                    acronym__in=cleaned_data.get('prerequisite_courses', []),
+                    academic_year__year=self.academic_year,
+                ).values_list('uuid', flat=True)
+
+        else:
+            cleaned_data['prerequisite_courses'] = []
+            cleaned_data['prerequisite_courses_fac_comment'] = ''
+
+        if cleaned_data.get('rights_amount') == DroitsInscriptionMontant.AUTRE.name:
+            if not cleaned_data.get('rights_amount_other'):
+                self.add_error(
+                    'tuition_fees_amount_other',
+                    ValidationError(
+                        self.fields['tuition_fees_amount_other'].error_messages['required'],
+                        code='required',
+                    ),
+                )
+
+        return cleaned_data
+
+
+class SicDecisionRefusalForm(FacDecisionRefusalForm):
+    refusal_type = forms.ChoiceField(
+        label=_('Refusal type'),
+        choices=EMPTY_CHOICE + TypeDeRefus.choices(),
+    )
+
+
+class SicDecisionDerogationForm(forms.Form):
+    dispensation_needed = forms.ChoiceField(
+        choices=BesoinDeDerogation.choices(),
+        widget=forms.RadioSelect(
+            attrs={
+                'hx-trigger': 'changed',
+            }
+        ),
+    )
+
+
+class SicDecisionFinalRefusalForm(forms.Form):
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['body'].widget.attrs['data-config'] = json.dumps(
+            {
+                **settings.CKEDITOR_CONFIGS['link_only'],
+                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                'language': get_language(),
+            }
+        )
+
+
+class SicDecisionFinalApprovalForm(forms.Form):
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        is_inscription = kwargs.pop('is_inscription')
+        super().__init__(*args, **kwargs)
+        if is_inscription:
+            del self.fields['subject']
+            del self.fields['body']
+        else:
+            self.fields['body'].widget.attrs['data-config'] = json.dumps(
+                {
+                    **settings.CKEDITOR_CONFIGS['link_only'],
+                    'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                    'language': get_language(),
+                }
+            )
+
+
 class FinancabiliteApprovalForm(forms.ModelForm):
     class Meta:
         model = GeneralEducationAdmission
         fields = [
             'financability_rule',
         ]
+
+
+def can_edit_experience_authentication(checklist_experience_data):
+    checklist_experience_data = checklist_experience_data or {}
+
+    extra = checklist_experience_data.get('extra', {})
+
+    return (
+        checklist_experience_data.get('statut') == ChoixStatutChecklist.GEST_EN_COURS.name
+        and extra.get('authentification') == '1'
+    )
+
+
+class SinglePastExperienceAuthenticationForm(forms.Form):
+    state = forms.ChoiceField(
+        label=_('Past experiences authentication'),
+        choices=EtatAuthentificationParcours.choices(),
+        required=False,
+        widget=forms.RadioSelect,
+    )
+
+    def __init__(self, checklist_experience_data, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        checklist_experience_data = checklist_experience_data or {}
+
+        extra = checklist_experience_data.get('extra', {})
+
+        self.initial['state'] = extra.get('etat_authentification')
+
+        self.prefix = extra.get('identifiant', '')
+
+        self.fields['state'].disabled = not can_edit_experience_authentication(checklist_experience_data)

@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@
             >
               <td class="auto-width">
                 <i class="fa-solid fa-school"></i>
-                {% if document.type in EMPLACEMENTS_FAC or document.est_emplacement_systeme_fac %}
+                {% if document.type in EMPLACEMENTS_FAC or document.est_emplacement_systeme_fac or document.type in EMPLACEMENTS_SIC or document.est_emplacement_systeme_sic %}
                   <i class="fa-solid fa-building-columns"></i>
                 {% endif %}
                 {{ document.libelle }}
@@ -70,44 +70,40 @@
     </table>
   </div>
 
-  <div class="row mt-1">
-    <div class="col-md-6 ">
-      <button
-          class="btn btn-primary"
-          data-toggle="collapse"
-          data-target="#upload-internal-document-form"
-          hx-get="{% url request.resolver_match.namespace|add:':document:free-internal-upload' uuid=view.kwargs.uuid %}"
-          hx-target="#upload-internal-document-form"
-          hx-trigger="click once"
-      >
-        <i class="fa-solid fa-upload"></i>
-        {% translate 'Upload a document' %}
-        <i class="fa-solid fa-paperclip"></i>
-      </button>
-    </div>
+  <div class="flex-content mt-1" style="gap: 5px">
+    <button
+        class="btn btn-primary"
+        data-toggle="collapse"
+        data-target="#upload-internal-document-form"
+        hx-get="{% url request.resolver_match.namespace|add:':document:free-internal-upload' uuid=view.kwargs.uuid %}"
+        hx-target="#upload-internal-document-form"
+        hx-trigger="click once"
+    >
+      <i class="fa-solid fa-upload"></i>
+      {% translate 'Upload a document' %}
+      <i class="fa-solid fa-paperclip"></i>
+    </button>
 
-    <div class="col-md-6 text-right">
-      <button
-          class="btn btn-primary"
-          data-toggle="modal"
-          data-target="#request-all-form-modal"
-          data-backdrop="static"
-          data-keyboard="false"
-      >
-        <i class="fa-solid fa-envelope"></i>
-        {% translate 'Request the documents from the candidate' %}
-      </button>
-      <button
-          class="btn btn-default htmx-button mt-1"
-          hx-post="{% url request.resolver_match.namespace|add:':document:analysis-folder-generation' uuid=view.kwargs.uuid %}"
-          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-          hx-swap="none"
-      >
-        <i class="fa-solid fa-arrows-rotate"></i>
-        {% translate 'Generate an analysis folder' %}
-      </button>
+    <button
+        class="btn btn-primary"
+        data-toggle="modal"
+        data-target="#request-all-form-modal"
+        data-backdrop="static"
+        data-keyboard="false"
+    >
+      <i class="fa-solid fa-envelope"></i>
+      {% translate 'Request the documents from the candidate' %}
+    </button>
 
-    </div>
+    <button
+        class="btn btn-default htmx-button"
+        hx-post="{% url request.resolver_match.namespace|add:':document:analysis-folder-generation' uuid=view.kwargs.uuid %}"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        hx-swap="none"
+    >
+      <i class="fa-solid fa-arrows-rotate"></i>
+      {% translate 'Generate an analysis folder' %}
+    </button>
   </div>
 
 

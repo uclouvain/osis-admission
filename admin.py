@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Dict
 
 from django import forms
 from django.conf import settings
@@ -35,6 +36,7 @@ from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext
 from hijack.contrib.admin import HijackUserAdminMixin
+from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
 from admission.auth.roles.adre import AdreSecretary
@@ -75,7 +77,6 @@ from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
-from osis_document.contrib import FileField
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
@@ -536,6 +537,12 @@ class DiplomaticPostAdmin(admin.ModelAdmin):
     list_display = ['name_fr', 'name_en', 'email']
 
 
+class OnlinePaymentAdmin(admin.ModelAdmin):
+    search_fields = ['admission', 'payment_id']
+    list_display = ['admission', 'payment_id', 'status', 'method']
+    list_filter = ['status', 'method']
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
@@ -551,6 +558,7 @@ admin.site.register(RefusalReasonCategory, RefusalReasonCategoryAdmin)
 admin.site.register(RefusalReason, RefusalReasonAdmin)
 admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
 admin.site.register(DiplomaticPost, DiplomaticPostAdmin)
+admin.site.register(OnlinePayment, OnlinePaymentAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
@@ -756,6 +764,11 @@ class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
 
     def get_hijack_user(self, obj):
         return obj.person.user
+
+    def _build_model_from_csv_row(self, csv_row: Dict):
+        central_manager = super()._build_model_from_csv_row(csv_row)
+        central_manager.scopes = csv_row.get('SCOPES', 'ALL').split("|")
+        return central_manager
 
 
 class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):

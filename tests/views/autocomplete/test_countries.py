@@ -46,18 +46,21 @@ class CountriesAutocompleteTestCase(TestCase):
             name='Belgique',
             name_en='Belgium',
             active=True,
+            european_union=True,
         )
         cls.fr_country = CountryFactory(
             iso_code='FR',
             name='France',
             name_en='France',
             active=True,
+            european_union=True,
         )
         cls.former_country = CountryFactory(
             iso_code='FC',
             name='Ancien pays',
             name_en='Former country',
             active=False,
+            european_union=False,
         )
 
         cls.user = User.objects.create_user(
@@ -83,9 +86,24 @@ class CountriesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': self.former_country.pk, 'text': 'Ancien pays', 'selected_text': 'Ancien pays'},
-                    {'id': self.be_country.pk, 'text': 'Belgique', 'selected_text': 'Belgique'},
-                    {'id': self.fr_country.pk, 'text': 'France', 'selected_text': 'France'},
+                    {
+                        'id': self.former_country.pk,
+                        'text': 'Ancien pays',
+                        'selected_text': 'Ancien pays',
+                        'european_union': False,
+                    },
+                    {
+                        'id': self.be_country.pk,
+                        'text': 'Belgique',
+                        'selected_text': 'Belgique',
+                        'european_union': True,
+                    },
+                    {
+                        'id': self.fr_country.pk,
+                        'text': 'France',
+                        'selected_text': 'France',
+                        'european_union': True,
+                    },
                 ],
             },
         )
@@ -106,9 +124,24 @@ class CountriesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': self.former_country.iso_code, 'text': 'Ancien pays', 'selected_text': 'Ancien pays'},
-                    {'id': self.be_country.iso_code, 'text': 'Belgique', 'selected_text': 'Belgique'},
-                    {'id': self.fr_country.iso_code, 'text': 'France', 'selected_text': 'France'},
+                    {
+                        'id': self.former_country.iso_code,
+                        'text': 'Ancien pays',
+                        'selected_text': 'Ancien pays',
+                        'european_union': False,
+                    },
+                    {
+                        'id': self.be_country.iso_code,
+                        'text': 'Belgique',
+                        'selected_text': 'Belgique',
+                        'european_union': True,
+                    },
+                    {
+                        'id': self.fr_country.iso_code,
+                        'text': 'France',
+                        'selected_text': 'France',
+                        'european_union': True,
+                    },
                 ],
             },
         )
@@ -129,8 +162,18 @@ class CountriesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': self.be_country.pk, 'text': 'Belgique', 'selected_text': 'Belgique'},
-                    {'id': self.fr_country.pk, 'text': 'France', 'selected_text': 'France'},
+                    {
+                        'id': self.be_country.pk,
+                        'text': 'Belgique',
+                        'selected_text': 'Belgique',
+                        'european_union': True,
+                    },
+                    {
+                        'id': self.fr_country.pk,
+                        'text': 'France',
+                        'selected_text': 'France',
+                        'european_union': True,
+                    },
                 ],
             },
         )
@@ -151,7 +194,12 @@ class CountriesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': self.former_country.pk, 'text': 'Ancien pays', 'selected_text': 'Ancien pays'},
+                    {
+                        'id': self.former_country.pk,
+                        'text': 'Ancien pays',
+                        'selected_text': 'Ancien pays',
+                        'european_union': False,
+                    },
                 ],
             },
         )
@@ -172,7 +220,12 @@ class CountriesAutocompleteTestCase(TestCase):
             {
                 'pagination': {'more': False},
                 'results': [
-                    {'id': self.be_country.pk, 'text': 'Belgique', 'selected_text': 'Belgique'},
+                    {
+                        'id': self.be_country.pk,
+                        'text': 'Belgique',
+                        'selected_text': 'Belgique',
+                        'european_union': True,
+                    },
                 ],
             },
         )
@@ -196,7 +249,12 @@ class CountriesAutocompleteTestCase(TestCase):
                 {
                     'pagination': {'more': False},
                     'results': [
-                        {'id': self.be_country.pk, 'text': 'Belgium', 'selected_text': 'Belgium'},
+                        {
+                            'id': self.be_country.pk,
+                            'text': 'Belgium',
+                            'selected_text': 'Belgium',
+                            'european_union': True,
+                        },
                     ],
                 },
             )

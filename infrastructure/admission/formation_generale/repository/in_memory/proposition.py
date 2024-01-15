@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,8 +40,10 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+    DROITS_INSCRIPTION_MONTANT_VALEURS,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
@@ -231,7 +233,7 @@ class PropositionInMemoryRepository(
             uuid=proposition.entity_id.uuid,
             reference=formater_reference(
                 reference=proposition.reference,
-                nom_campus_inscription=formation.campus_inscription,
+                nom_campus_inscription=formation.campus_inscription.nom,
                 sigle_entite_gestion=formation.sigle_entite_gestion,
                 annee=proposition.formation_id.annee,
             ),
@@ -272,6 +274,9 @@ class PropositionInMemoryRepository(
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
             certificat_refus_fac=proposition.certificat_refus_fac,
             certificat_approbation_fac=proposition.certificat_approbation_fac,
+            certificat_approbation_sic=proposition.certificat_approbation_sic,
+            certificat_approbation_sic_annexe=proposition.certificat_approbation_sic_annexe,
+            certificat_refus_sic=proposition.certificat_refus_sic,
             documents_additionnels=proposition.documents_additionnels,
             poste_diplomatique=poste_diplomatique,
             financabilite_regle_calcule=proposition.financabilite_regle_calcule,
@@ -312,7 +317,6 @@ class PropositionInMemoryRepository(
             nationalite_ue_candidat=candidat.pays_nationalite_europeen,
             photo_identite_candidat=candidat.photo_identite,
             poursuite_de_cycle_a_specifier=proposition.poursuite_de_cycle_a_specifier,
-            candidat_a_reussi_experience_academique_belge=proposition.poursuite_de_cycle_a_specifier,
             poursuite_de_cycle=proposition.poursuite_de_cycle if proposition.poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=any(
                 proposition.statut == ChoixStatutPropositionGenerale.EN_BROUILLON for proposition in propositions
@@ -329,6 +333,7 @@ class PropositionInMemoryRepository(
                 genre=proposition.profil_soumis_candidat.genre,
                 nationalite=proposition.profil_soumis_candidat.nationalite,
                 nom_pays_nationalite=cls.countries.get(proposition.profil_soumis_candidat.nationalite, ''),
+                date_naissance=proposition.profil_soumis_candidat.date_naissance,
                 pays=proposition.profil_soumis_candidat.pays,
                 nom_pays=cls.countries.get(proposition.profil_soumis_candidat.pays, ''),
                 code_postal=proposition.profil_soumis_candidat.code_postal,
@@ -339,6 +344,7 @@ class PropositionInMemoryRepository(
             )
             if proposition.profil_soumis_candidat
             else None,
+            type_de_refus=proposition.type_de_refus,
             motifs_refus=[MotifRefusDTO(motif=motif.intitule, categorie=motif.categorie) for motif in motifs_refus],
             autre_formation_choisie_fac=formation_choisie_fac
             and BaseFormationDTO(
@@ -346,7 +352,7 @@ class PropositionInMemoryRepository(
                 annee=formation_choisie_fac.annee,
                 uuid='',
                 intitule=formation_choisie_fac.intitule,
-                lieu_enseignement=formation_choisie_fac.campus,
+                lieu_enseignement=formation_choisie_fac.campus.name,
             ),
             avec_conditions_complementaires=proposition.avec_conditions_complementaires,
             conditions_complementaires=proposition.conditions_complementaires_libres,
@@ -369,4 +375,33 @@ class PropositionInMemoryRepository(
             if proposition.etat_equivalence_titre_acces
             else '',
             date_prise_effet_equivalence_titre_acces=proposition.date_prise_effet_equivalence_titre_acces,
+            besoin_de_derogation=proposition.besoin_de_derogation,
+            droits_inscription_montant=proposition.droits_inscription_montant,
+            droits_inscription_montant_valeur=DROITS_INSCRIPTION_MONTANT_VALEURS.get(
+                proposition.droits_inscription_montant
+            ),
+            droits_inscription_montant_autre=proposition.droits_inscription_montant_autre,
+            dispense_ou_droits_majores=proposition.dispense_ou_droits_majores,
+            tarif_particulier=proposition.tarif_particulier,
+            refacturation_ou_tiers_payant=proposition.refacturation_ou_tiers_payant,
+            annee_de_premiere_inscription_et_statut=proposition.annee_de_premiere_inscription_et_statut,
+            est_mobilite=proposition.est_mobilite,
+            nombre_de_mois_de_mobilite=proposition.nombre_de_mois_de_mobilite,
+            doit_se_presenter_en_sic=proposition.doit_se_presenter_en_sic,
+            communication_au_candidat=proposition.communication_au_candidat,
+        )
+
+    @classmethod
+    def initialiser_checklist_proposition(cls, proposition_id: 'PropositionIdentity'):
+        from admission.infrastructure.admission.formation_generale.domain.service.in_memory.question_specifique import (
+            QuestionSpecifiqueInMemoryTranslator,
+        )
+
+        proposition = cls.get(proposition_id)
+        Checklist.initialiser(
+            proposition=proposition,
+            formation=FormationGeneraleInMemoryTranslator.get(proposition.formation_id),
+            profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
+            annee_courante=proposition.annee_calculee,
+            questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
         )

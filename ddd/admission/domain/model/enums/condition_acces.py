@@ -105,26 +105,6 @@ CHOIX_PAR_FORMATION: Dict[str, List[ConditionAcces]] = {
 }
 
 
-class TypeEquivalenceTitreAcces(ChoiceEnum):
-    NON_CONCERNE = _('Not concerned')
-    EQUIVALENCE_CESS = _('CESS equivalence')
-    EQUIVALENCE_GRADE_ACADEMIQUE_FWB = _('FWB academic degree equivalence')
-    EQUIVALENCE_DE_NIVEAU = _('Level equivalence')
-    NON_RENSEIGNE = _('Not specified')
-
-
-class StatutEquivalenceTitreAcces(ChoiceEnum):
-    COMPLETE = _('Completed')
-    RESTRICTIVE = _('Restricted')
-    EN_ATTENTE = _('Waiting')
-    NON_RENSEIGNE = _('Not specified')
-
-
-class EtatEquivalenceTitreAcces(ChoiceEnum):
-    DEFINITIVE = _('Definitive')
-    PROVISOIRE = _('Provisional')
-
-
 class TypeTitreAccesSelectionnable(ChoiceEnum):
     EXPERIENCE_ACADEMIQUE = _('Academic experience')
     EXPERIENCE_NON_ACADEMIQUE = _('Non-academic experience')

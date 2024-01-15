@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             code_formation=proposition.formation.code,
             intitule_formation=proposition.formation.intitule,
             type_formation=proposition.formation.type,
-            lieu_formation=proposition.formation.campus,
+            lieu_formation=proposition.formation.campus.nom,
             nationalite_candidat='',
             nationalite_ue_candidat=None,
             vip=any(
@@ -111,6 +111,8 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             derniere_modification_par_candidat=False,
             dernieres_vues_par=[],
             date_confirmation=proposition.soumise_le,
+            est_premiere_annee=None,
+            poursuite_de_cycle='',
         )
 
     @classmethod
@@ -137,6 +139,8 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             derniere_modification_par_candidat=False,
             dernieres_vues_par=[],
             date_confirmation=proposition.soumise_le,
+            est_premiere_annee=None,
+            poursuite_de_cycle='',
         )
 
     @classmethod
@@ -152,7 +156,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             code_formation=proposition.formation.sigle,
             intitule_formation=proposition.formation.intitule,
             type_formation=proposition.formation.type,
-            lieu_formation=proposition.formation.campus,
+            lieu_formation=proposition.formation.campus.nom,
             nationalite_candidat=proposition.pays_nationalite_candidat,
             nationalite_ue_candidat=proposition.pays_nationalite_ue_candidat,
             vip=False,
@@ -163,4 +167,6 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             derniere_modification_par_candidat=False,
             dernieres_vues_par=[],
             date_confirmation=proposition.soumise_le,
+            est_premiere_annee=None,
+            poursuite_de_cycle='',
         )

@@ -139,6 +139,11 @@ class CompletePersonFactory(PersonFactory):
             registered_credit_number=10,
             acquired_credit_number=10,
         )
+        ProfessionalExperienceFactory(
+            person=self,
+            start_date=datetime.date(current_year - 1, 1, 1),
+            end_date=datetime.date(current_year - 1, 3, 31),
+        )
 
         # Create highschool belgian diploma
         BelgianHighSchoolDiplomaFactory(
@@ -166,6 +171,20 @@ class CompletePersonForBachelorFactory(CompletePersonFactory):
         BelgianHighSchoolDiplomaFactory(
             person=self,
             academic_graduation_year=academic_year,
+        )
+        experience = EducationalExperienceFactory(
+            person=self,
+            obtained_diploma=True,
+            country=CountryFactory(iso_code="BE"),
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=AcademicYearFactory(year=current_year - 1),
+        )
+        ProfessionalExperienceFactory(
+            person=self,
+            start_date=datetime.date(current_year - 1, 1, 1),
+            end_date=datetime.date(current_year - 1, 3, 31),
         )
 
 

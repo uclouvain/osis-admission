@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -46,17 +46,11 @@ from .envoyer_proposition_a_fac_lors_de_la_decision_facultaire_service import (
     envoyer_proposition_a_fac_lors_de_la_decision_facultaire,
 )
 from .refuser_proposition_par_faculte_service import refuser_proposition_par_faculte
-from .refuser_proposition_par_faculte_avec_nouveaux_motifs_service import (
-    refuser_proposition_par_faculte_avec_nouveaux_motifs,
-)
 from .specifier_motifs_refus_proposition_par_faculte_service import specifier_motifs_refus_proposition_par_faculte
 from .specifier_informations_acceptation_proposition_par_faculte_service import (
     specifier_informations_acceptation_proposition_par_faculte,
 )
 from .approuver_proposition_par_faculte_service import approuver_proposition_par_faculte
-from .approuver_proposition_par_faculte_avec_nouvelles_informations_service import (
-    approuver_proposition_par_faculte_avec_nouvelles_informations,
-)
 from .modifier_checklist_choix_formation_service import modifier_checklist_choix_formation
 from .specifier_paiement_va_etre_ouvert_par_candidat_service import specifier_paiement_va_etre_ouvert_par_candidat
 from .modifier_choix_formation_par_gestionnaire_service import modifier_choix_formation_par_gestionnaire
@@ -69,3 +63,9 @@ from .specifier_equivalence_titre_acces_etranger_proposition_service import (
     specifier_equivalence_titre_acces_etranger_proposition,
 )
 from .specifier_experience_en_tant_que_titre_acces_service import specifier_experience_en_tant_que_titre_acces
+from .modifier_statut_checklist_experience_parcours_anterieur_service import (
+    modifier_statut_checklist_experience_parcours_anterieur,
+)
+from .modifier_authentification_experience_parcours_anterieur_service import (
+    modifier_authentification_experience_parcours_anterieur,
+)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
+
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 from osis_comment.contrib.mixins import CommentEntryAPIMixin
@@ -31,9 +33,12 @@ from osis_comment.models import CommentEntry
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
+from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.formation_generale.commands import RecupererResumePropositionQuery
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
 from base.models.utils.utils import ChoiceEnum
+from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 
 __all__ = [
@@ -63,6 +68,7 @@ class CheckListTagsEnum(ChoiceEnum):
     donnees_personnelles = _('Personal data')
     specificites_formation = _('Training specificities')
     decision_facultaire = _('Decision of the faculty')
+    decision_sic = _('Decision of SIC')
 
 
 class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
@@ -70,12 +76,41 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
     permission_required = 'admission.view_enrolment_application'
     template_name = "admission/details/comments.html"
     extra_context = {
-        'COMMENT_TAG_FAC': f'{COMMENT_TAG_FAC},{COMMENT_TAG_GLOBAL}',
-        'COMMENT_TAG_SIC': f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}',
         'checklist_tags': CheckListTagsEnum.choices(),
-        'ckeditor_config': CKEDITOR_CONFIGS['minimal'],
-        'CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS': CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS,
     }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['ckeditor_config'] = json.dumps(CKEDITOR_CONFIGS['minimal'])
+
+        if self.is_general:
+            context['COMMENT_TAG_FAC'] = f'{COMMENT_TAG_FAC},{COMMENT_TAG_GLOBAL}'
+            context['COMMENT_TAG_SIC'] = f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}'
+            context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS
+            context['checklist_tabs'] = CheckListTagsEnum.choices()
+
+            # Get the names of every experience
+            proposition_resume: ResumePropositionDTO = message_bus_instance.invoke(
+                RecupererResumePropositionQuery(uuid_proposition=self.admission_uuid),
+            )
+
+            experiences_names_by_uuid = {}
+
+            for experience in proposition_resume.curriculum.experiences_academiques:
+                experiences_names_by_uuid[experience.uuid] = experience.titre_formate
+
+            for experience in proposition_resume.curriculum.experiences_non_academiques:
+                experiences_names_by_uuid[experience.uuid] = experience.titre_formate
+
+            if proposition_resume.etudes_secondaires:
+                experiences_names_by_uuid[
+                    proposition_resume.etudes_secondaires.uuid
+                ] = proposition_resume.etudes_secondaires.titre_formate
+
+            context['experiences_names_by_uuid'] = experiences_names_by_uuid
+
+        return context
 
 
 class AdmissionCommentApiView(CommentEntryAPIMixin):
@@ -106,3 +141,15 @@ class AdmissionCommentApiView(CommentEntryAPIMixin):
 
     def has_delete_permission(self, comment):
         return self.has_change_permission(comment)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        tags = self.request.query_params.get('tags', '')
+
+        # Apply the 'contained_by' filter (in addition to the default `contains` filter) to retrieve the comments whose
+        # the tags are exactly the same as those requested
+        if tags:
+            queryset = queryset.filter(tags__contained_by=tags.split(','))
+
+        return queryset

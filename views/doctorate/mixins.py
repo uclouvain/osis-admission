@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -58,6 +58,7 @@ from admission.ddd.admission.formation_continue.commands import (
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
+    RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.parcours_doctoral.commands import RecupererDoctoratQuery
@@ -78,6 +79,9 @@ from admission.utils import (
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
     add_messages_into_htmx_response,
+    person_is_sic,
+    person_is_fac_cdd,
+    access_title_country,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
@@ -122,6 +126,14 @@ class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMix
     @property
     def is_general(self):
         return self.current_context == CONTEXT_GENERAL
+
+    @cached_property
+    def is_sic(self):
+        return person_is_sic(self.request.user.person)
+
+    @cached_property
+    def is_fac(self):
+        return person_is_fac_cdd(self.request.user.person)
 
 
 class LoadDossierViewMixin(AdmissionViewMixin):
@@ -188,6 +200,14 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         hash_url = self.request.GET.get('next_hash_url', '')
         return f'{url}#{hash_url}' if hash_url else url
 
+    @cached_property
+    def selectable_access_titles(self):
+        return message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+            )
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         admission_status = self.admission.status
@@ -214,6 +234,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 raise Http404(e.message)
         elif self.is_general:
             context['admission'] = self.proposition
+            context['access_title_country'] = access_title_country(self.selectable_access_titles.values())
         else:
             context['admission'] = self.admission
 

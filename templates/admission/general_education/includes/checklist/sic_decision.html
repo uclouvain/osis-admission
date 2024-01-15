@@ -1,0 +1,225 @@
+{% load i18n static enums admission bootstrap3 %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% with initial=original_admission.checklist.initial.decision_sic current=original_admission.checklist.current.decision_sic %}
+  <div
+      id="sic-decision-container"
+      hx-target="this"
+      hx-swap-oob="true"
+  >
+
+    <div class="form-group btn-group status-group" role="group">
+      {% if not resume_proposition.proposition|sic_can_edit %}
+        {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" class='warning' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' disabled=True %}
+      {% elif current.statut == 'GEST_BLOCAGE' or current.statut == 'GEST_REUSSITE' %}
+        {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' open_modal='#sic-decision-confirm-modal-INITIAL_CANDIDAT' %}
+        {% checklist_state_button tab='decision_sic' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" class='warning' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' disabled=True %}
+      {% else %}
+        {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' %}
+        {% checklist_state_button tab='decision_sic' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' %}
+        {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' %}
+        {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" open_modal='#sic-decision-refusal-modal' class='warning' %}
+        {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" open_modal='#sic-decision-approval-modal' class='warning'  %}
+        {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' %}
+      {% endif %}
+      {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'refusal' %}
+        {% checklist_state_button tab='decision_sic' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' open_modal='#sic-decision-refusal-final-modal' %}
+      {% else %}
+        {% checklist_state_button tab='decision_sic' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' disabled=True %}
+      {% endif %}
+      {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' %}
+        {% checklist_state_button tab='decision_sic' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' open_modal='#sic-decision-approval-final-modal' %}
+      {% else %}
+        {% checklist_state_button tab='decision_sic' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' disabled=True %}
+      {% endif %}
+    </div>
+
+    {% if sic_decision_sent_at and sic_decision_sent_by %}
+      <div class="alert alert-info">{% blocktrans with date=sic_decision_sent_at author=sic_decision_sent_by %}The SIC decision mail was sent to the candidate the {{ date }} by {{ author }}.{% endblocktrans %}</div>
+    {% endif %}
+
+    {% bootstrap_form comment_forms.decision_sic %}
+
+    {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'derogation' %}
+      <form
+          hx-post="{% url view.base_namespace|add:':sic-decision-dispensation' uuid=view.kwargs.uuid %}"
+          hx-trigger="change"
+          hx-swap="none"
+      >
+        {% bootstrap_form sic_decision_dispensation_form %}
+      </form>
+
+      {% bootstrap_form comment_forms.decision_sic__derogation %}
+    {% elif original_admission.dispensation_need != 'NON_CONCERNE' %}
+      <dl>
+        <dt>{% trans 'Dispensation needed' %}</dt>
+        <dd>{{ original_admission.get_dispensation_needed_display }}</dd>
+
+        <dt>{% trans 'Comment about dispensation' %}</dt>
+        <dd>
+          <div class="form-group">
+            <textarea class="form-control" disabled>{{ comment_forms.decision_sic__derogation.fields.comment.initial|default_if_none:"" }}</textarea>
+          </div>
+        </dd>
+      </dl>
+    {% endif %}
+
+    {% if current.extra.en_cours == 'refusal' or current.extra.blocage == 'refusal' %}
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-refusal-modal"><i class="fas fa-edit"></i></button>
+          <h4 class="panel-title">{% trans "Refusal" %}</h4>
+        </div>
+        <div class="panel-body">
+          <dl>
+            <dt>{% trans "Refusal type" %}</dt>
+            <dd>{{ admission.type_de_refus|enum_display:'TypeDeRefus' }}</dd>
+
+            <dt>{% blocktrans context "admission" %}Reasons{% endblocktrans %}</dt>
+            <dd>
+              <ul>
+                {% for reason in admission.motifs_refus %}
+                  {% ifchanged reason.categorie %}
+                    {% if not forloop.first %}
+                      </ul></li>
+                    {% endif %}
+                    <li>{{ reason.categorie }}<ul>
+                  {% endifchanged %}
+                  <li>{{ reason.motif }}</li>
+                  {% if forloop.last %}
+                  </ul></li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </dd>
+          </dl>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if current.extra.en_cours == 'approval' or current.statut == 'GEST_REUSSITE' %}
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-approval-modal"><i class="fas fa-edit"></i></button>
+          <h4 class="panel-title">{% trans "Approval" %}</h4>
+        </div>
+        <div class="panel-body">
+          {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
+          {% if admission.avec_conditions_complementaires %}
+            {% if admission.conditions_complementaires %}
+              <dl>
+                <dt>{% translate _('Additional conditions') %}</dt>
+                <dd>
+                  <ul>
+                    {% for condition in admission.conditions_complementaires %}
+                      <li>{{ condition }}</li>
+                    {% endfor %}
+                  </ul>
+                </dd>
+              </dl>
+            {% else %}
+              {% field_data _('Additional conditions') '' %}
+            {% endif %}
+          {% endif %}
+
+          {% field_data _('Are there any prerequisite courses?') admission.avec_complements_formation %}
+          {% if admission.avec_complements_formation %}
+            {% if admission.complements_formation %}
+              <dl>
+                <dt>{% translate _('Prerequisite courses') %}</dt>
+                <dd>
+                  <ul>
+                    {% for formation in admission.complements_formation %}
+                      <li>{{ formation.code }} - {{ formation.full_title }}</li>
+                    {% endfor %}
+                  </ul>
+                </dd>
+              </dl>
+            {% else %}
+              {% field_data _('Prerequisite courses') '' %}
+            {% endif %}
+            {% field_data _('Other information about prerequisite courses') admission.commentaire_complements_formation|safe %}
+          {% endif %}
+
+          {% field_data _('Number of years required for the full program (including prerequisite courses)') admission.nombre_annees_prevoir_programme %}
+
+          {% display admission.nom_personne_contact_programme_annuel_annuel '-' admission.email_personne_contact_programme_annuel_annuel as contact_person %}
+          {% field_data _('Contact person for the design of the annual program') contact_person %}
+
+          {% field_data _('Tuition fees amount') admission.droits_inscription_montant|enum_display:'DroitsInscriptionMontant' %}
+          {% if admission.droits_inscription_montant == 'OTHER' %}
+            {% field_data _('Amount (without EUR/)') admission.droits_inscription_montant_autre %}
+          {% endif %}
+          {% field_data _('Dispensation or increased fees') admission.dispense_ou_droits_majores|enum_display:'DispenseOuDroitsMajores' %}
+
+          {% if sic_decision_approval_form.is_vip %}
+            {% field_data _('Particular cost') admission.tarif_particulier %}
+            {% field_data _('Rebilling or third-party payer') admission.refacturation_ou_tiers_payant %}
+            {% field_data _('First year of inscription + status') admission.annee_de_premiere_inscription_et_statut %}
+          {% endif %}
+
+          {% if sic_decision_approval_form.is_hue %}
+            {% field_data _('The candidate is doing a mobility') admission.est_mobilite %}
+            {% if admission.est_mobilite %}
+              {% field_data _('Mobility months amount') admission.nombre_de_mois_de_mobilite|enum_display:'MobiliteNombreDeMois' %}
+            {% endif %}
+          {% endif %}
+
+          {% if sic_decision_approval_form.is_admission %}
+            {% field_data _('The candidate must report to SIC') admission.doit_se_presenter_en_sic %}
+          {% endif %}
+          {% field_data _('Communication to the candidate') admission.communication_au_candidat|safe %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if current.statut == 'GEST_BLOCAGE' or current.statut == 'GEST_REUSSITE' %}
+      {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
+      {% include 'admission/general_education/includes/checklist/sic_decision_confirm_modal.html' with target_status='INITIAL_CANDIDAT' target_url=change_status_url %}
+    {% endif %}
+
+    {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'refusal' %}
+      {% include "admission/general_education/includes/checklist/sic_decision_refusal_final_modal.html" %}
+    {% endif %}
+    {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' %}
+      {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
+    {% endif %}
+  </div>
+{% endwith %}
+
+{% if request.htmx %}
+  {# Update the checklist menu  #}
+  {% include "admission/general_education/checklist_menu.html" with current_item='decision_sic' %}
+{% endif %}

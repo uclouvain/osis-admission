@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from rest_framework import serializers
 
 from admission.api.serializers.fields import (
@@ -113,6 +114,27 @@ class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelS
             "uuid",
             "status",
         ]
+
+
+class DoctoratDTOSerializer(DTOSerializer):
+    class Meta:
+        source = DoctoratDTO
+
+
+class FormationGeneraleDTOSerializer(DTOSerializer):
+    campus = serializers.CharField(source='campus.nom', default='')
+    campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
+
+    class Meta:
+        source = FormationDTO
+
+
+class FormationContinueDTOSerializer(DTOSerializer):
+    campus = serializers.CharField(source='campus.nom', default='')
+    campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
+
+    class Meta:
+        source = FormationDTO
 
 
 class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
@@ -213,11 +235,14 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
         }
     )
 
+    formation = FormationGeneraleDTOSerializer()
+
     # This is to prevent schema from breaking on JSONField
     erreurs = None
     reponses_questions_specifiques = None
     elements_confirmation = None
     documents_demandes = None
+    droits_inscription_montant_autre = None
 
     class Meta:
         source = FormationGeneralePropositionDTO
@@ -261,6 +286,8 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
             ]
         }
     )
+
+    formation = FormationContinueDTOSerializer()
 
     # This is to prevent schema from breaking on JSONField
     erreurs = None
@@ -459,10 +486,14 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             ]
         }
     )
+
+    formation = FormationGeneraleDTOSerializer()
+
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
     elements_confirmation = None
     documents_demandes = None
+    droits_inscription_montant_autre = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -522,6 +553,9 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             ]
         }
     )
+
+    formation = FormationContinueDTOSerializer()
+
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
     elements_confirmation = None
@@ -561,6 +595,8 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'copie_titre_sejour',
             'pdf_recapitulatif',
             'documents_additionnels',
+            'motivations',
+            'moyens_decouverte_formation',
         ]
         extra_kwargs = {
             'nom_siege_social': {'max_length': 255},
@@ -606,18 +642,3 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
 class SectorDTOSerializer(serializers.Serializer):
     sigle = serializers.ReadOnlyField()
     intitule = serializers.ReadOnlyField()
-
-
-class DoctoratDTOSerializer(DTOSerializer):
-    class Meta:
-        source = DoctoratDTO
-
-
-class FormationGeneraleDTOSerializer(DTOSerializer):
-    class Meta:
-        source = FormationDTO
-
-
-class FormationContinueDTOSerializer(DTOSerializer):
-    class Meta:
-        source = FormationDTO

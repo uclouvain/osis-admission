@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from typing import List, Optional
 
 from django.conf import settings
@@ -33,6 +34,7 @@ from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.contrib.models.continuing_education import ContinuingEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
+from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -42,6 +44,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
+    ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
@@ -49,6 +52,7 @@ from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from base.models.academic_year import AcademicYear
+from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.person import Person
@@ -151,6 +155,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'vat_number': entity.numero_tva_entreprise,
                 'professional_email': entity.adresse_mail_professionnelle,
                 'billing_address_type': entity.type_adresse_facturation.name if entity.type_adresse_facturation else '',
+                'motivations': entity.motivations,
+                'ways_to_find_out_about_the_course': [way.name for way in entity.moyens_decouverte_formation],
                 **adresse_facturation,
             },
         )
@@ -204,11 +210,25 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
             else None,
             documents_additionnels=admission.additional_documents,
+            motivations=admission.motivations,
+            moyens_decouverte_formation=[
+                ChoixMoyensDecouverteFormation[way] for way in admission.ways_to_find_out_about_the_course
+            ],
         )
 
     @classmethod
     def _load_dto(cls, admission: ContinuingEducationAdmission) -> 'PropositionDTO':
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
+        campus = (
+            CampusDb.objects.select_related('country')
+            .filter(
+                teaching_campus__educationgroupversion__version_name='',
+                teaching_campus__educationgroupversion__transition_name='',
+                teaching_campus__educationgroupversion__offer_id=admission.training_id,
+            )
+            .first()
+        )
+
         return PropositionDTO(
             uuid=admission.uuid,
             statut=admission.status,
@@ -221,11 +241,44 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle=admission.training.acronym,
                 code=admission.training.partial_acronym,
                 annee=admission.training.academic_year.year,
+                date_debut=admission.training.academic_year.start_date,
                 intitule=admission.training.title if language_is_french else admission.training.title_english,
-                campus=admission.teaching_campus or '',  # from annotation
+                intitule_fr=admission.training.title,
+                intitule_en=admission.training.title_english,
+                campus=CampusDTO(
+                    nom=campus.name,
+                    code_postal=campus.postal_code,
+                    ville=campus.city,
+                    pays_iso_code=campus.country.iso_code if campus.country else '',
+                    nom_pays=campus.country.name if campus.country else '',
+                    rue=campus.street,
+                    numero_rue=campus.street_number,
+                    boite_postale=campus.postal_box,
+                    localisation=campus.location,
+                    email=campus.email,
+                )
+                if campus is not None
+                else None,
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
-                campus_inscription=admission.training.enrollment_campus.name,
+                campus_inscription=CampusDTO(
+                    nom=admission.training.enrollment_campus.name,
+                    code_postal=admission.training.enrollment_campus.postal_code,
+                    ville=admission.training.enrollment_campus.city,
+                    pays_iso_code=admission.training.enrollment_campus.country.iso_code
+                    if admission.training.enrollment_campus.country
+                    else '',
+                    nom_pays=admission.training.enrollment_campus.country.name
+                    if admission.training.enrollment_campus.country
+                    else '',
+                    rue=admission.training.enrollment_campus.street,
+                    numero_rue=admission.training.enrollment_campus.street_number,
+                    boite_postale=admission.training.enrollment_campus.postal_box,
+                    localisation=admission.training.enrollment_campus.location,
+                    email=admission.training.enrollment_campus.email,
+                )
+                if admission.training.enrollment_campus is not None
+                else None,
                 sigle_entite_gestion=admission.training_management_faculty
                 or admission.sigle_entite_gestion,  # from annotation
             ),
@@ -267,4 +320,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             elements_confirmation=admission.confirmation_elements,
             pdf_recapitulatif=admission.pdf_recap,
             documents_additionnels=admission.additional_documents,
+            motivations=admission.motivations,
+            moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,
         )

@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 from functools import partial
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import phonenumbers
 from dal import forward
@@ -35,7 +35,7 @@ from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
 
-from admission.constants import SUPPORTED_MIME_TYPES
+from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
 from admission.forms import autocomplete
@@ -51,6 +51,10 @@ ALL_EMPTY_CHOICE = (('', _('All')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
 EMPTY_CHOICE_AS_LIST = [list(EMPTY_CHOICE[0])]
+FORM_SET_PREFIX = '__prefix__'
+FOLLOWING_FORM_SET_PREFIX = '__prefix_1__'
+OSIS_DOCUMENT_UPLOADER_CLASS = 'document-uploader'
+OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX = '__{}__'.format(OSIS_DOCUMENT_UPLOADER_CLASS)
 
 DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
     'data-minimum-input-length': 3,
@@ -210,8 +214,13 @@ def format_training(training: FormationDTO):
 
 
 class AdmissionFileUploadField(FileUploadField):
-    def __init__(self, **kwargs):
-        kwargs.setdefault('mimetypes', SUPPORTED_MIME_TYPES)
+    """
+    A file upload field that supports only one file and by default only PDF file.
+    """
+
+    def __init__(self, forced_mimetypes=None, **kwargs):
+        kwargs['max_files'] = 1
+        kwargs['mimetypes'] = forced_mimetypes or [PDF_MIME_TYPE]
         super().__init__(**kwargs)
 
 
@@ -226,12 +235,22 @@ RadioBooleanField = partial(
 
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
+        to_field_name = kwargs.get('to_field_name', '')
+
+        forward_params = [
+            forward.Const(True, 'active'),
+        ]
+
+        # The ids of the returned results will be the 'id_field' fields of the country model instead of 'pk'
+        if to_field_name:
+            forward_params.append(forward.Const(to_field_name, 'id_field'))
+
         kwargs.setdefault(
             'widget',
             autocomplete.ListSelect2(
                 url="admission:autocomplete:countries",
                 attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
-                forward=[forward.Const(True, 'active')],
+                forward=forward_params,
             ),
         )
         kwargs.setdefault('queryset', Country.objects.none())
@@ -315,3 +334,14 @@ def get_diplomatic_post_initial_choices(diplomatic_post):
             diplomatic_post.name_fr if get_language() == settings.LANGUAGE_CODE else diplomatic_post.name_en,
         ),
     )
+
+
+def disable_unavailable_forms(forms_by_access: Dict[forms.Form, bool]):
+    """
+    Disable forms that are not available for the current user.
+    :param forms_by_access: Association between the form and its availability.
+    """
+    for form, is_available in forms_by_access.items():
+        if not is_available:
+            for field in form.fields:
+                form.fields[field].disabled = True

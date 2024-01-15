@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from unittest import TestCase
 
@@ -61,6 +62,10 @@ class ProfilCandidatTestCase(TestCase):
             'systeme_evaluation': EvaluationSystem.ECTS_CREDITS.name,
             'nom_formation': 'Computer science',
             'type_enseignement': TeachingTypeEnum.FULL_TIME.name,
+            'type_institut': '',
+            'nom_formation_equivalente_communaute_fr': '',
+            'cycle_formation': '',
+            'est_autre_formation': None,
         }
 
     def test_recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes_sans_etablissement(self):
@@ -88,6 +93,12 @@ class ProfilCandidatTestCase(TestCase):
                                 credits_inscrits=10,
                                 traduction_releve_notes=[],
                                 releve_notes=['uuid-releve-notes-1'],
+                                avec_bloc_1=None,
+                                avec_complement=None,
+                                allegement='',
+                                est_reorientation_102=None,
+                                credits_inscrits_communaute_fr=None,
+                                credits_acquis_communaute_fr=None,
                             )
                         ],
                     )
@@ -113,6 +124,12 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-0'],
+                            avec_bloc_1=None,
+                            avec_complement=None,
+                            allegement='',
+                            est_reorientation_102=None,
+                            credits_inscrits_communaute_fr=None,
+                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -130,6 +147,12 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-1'],
+                            avec_bloc_1=None,
+                            avec_complement=None,
+                            allegement='',
+                            est_reorientation_102=None,
+                            credits_inscrits_communaute_fr=None,
+                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -147,6 +170,12 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-2'],
+                            avec_bloc_1=None,
+                            avec_complement=None,
+                            allegement='',
+                            est_reorientation_102=None,
+                            credits_inscrits_communaute_fr=None,
+                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -164,6 +193,12 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-3'],
+                            avec_bloc_1=None,
+                            avec_complement=None,
+                            allegement='',
+                            est_reorientation_102=None,
+                            credits_inscrits_communaute_fr=None,
+                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -181,6 +216,12 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-4'],
+                            avec_bloc_1=None,
+                            avec_complement=None,
+                            allegement='',
+                            est_reorientation_102=None,
+                            credits_inscrits_communaute_fr=None,
+                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),
@@ -198,6 +239,12 @@ class ProfilCandidatTestCase(TestCase):
                             credits_inscrits=10,
                             traduction_releve_notes=[],
                             releve_notes=['uuid-releve-notes-5'],
+                            avec_bloc_1=None,
+                            avec_complement=None,
+                            allegement='',
+                            est_reorientation_102=None,
+                            credits_inscrits_communaute_fr=None,
+                            credits_acquis_communaute_fr=None,
                         )
                     ],
                 ),

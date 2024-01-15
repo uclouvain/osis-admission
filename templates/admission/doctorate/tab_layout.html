@@ -116,7 +116,7 @@
       </div>
       <div>
         {% block actions-group %}
-          <div class="btn-group">
+          <div class="btn-group hidden" id="actions-group-container">
             <button
                 type="button"
                 class="btn btn-default"
@@ -167,8 +167,10 @@
       </div>
     </div>
     <div class="panel-body">
+    {% if not without_menu %}
       {% admission_tabs %}
       {% current_subtabs as subtabs_context %}
+    {% endif %}
       {% if subtabs_context.subtabs|length > 1 %}
         <div class="row" style="display: flex">
         <div class="col-md-2 visible-md visible-lg border-right">
@@ -209,7 +211,7 @@
       {% endif %}
     </div>
   </div>
-
+  {% block extra_content %}{% endblock %}
 {% endblock %}
 
 {% block script %}
@@ -219,6 +221,10 @@
   <script>
     $(function () {
       initializePopover();
+      const actionsGroupContainer = $('#actions-group-container');
+      if (actionsGroupContainer.find('li').length > 0) {
+        actionsGroupContainer.removeClass('hidden');
+      }
     });
   </script>
   {% if form %}

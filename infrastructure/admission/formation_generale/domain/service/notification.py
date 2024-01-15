@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
+from typing import List, Dict
 
 from django.conf import settings
-from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
@@ -37,23 +37,38 @@ from osis_notification.contrib.notification import EmailNotification
 
 from admission.contrib.models import AdmissionTask
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
+from admission.ddd import MAIL_INSCRIPTION_DEFAUT
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
-from admission.infrastructure.parcours_doctoral.epreuve_confirmation.domain.service.notification import (
-    send_mail_to_generic_email,
-)
 from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
     ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL,
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL,
 )
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
-from admission.utils import get_portal_admission_url, get_backoffice_admission_url, get_salutation_prefix
+from admission.utils import (
+    get_portal_admission_url,
+    get_backoffice_admission_url,
+    get_salutation_prefix,
+    format_academic_year,
+)
 from base.models.person import Person
+from epc.models.email_fonction_programme import EmailFonctionProgramme
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+
+
+class NotificationException(Exception):
+    pass
 
 
 class Notification(INotification):
@@ -115,10 +130,7 @@ class Notification(INotification):
         with translation.override(admission.candidate.language):
             common_tokens = cls.get_common_tokens(proposition, admission.candidate)
             common_tokens['admission_reference'] = admission.formatted_reference
-            common_tokens['salutation'] = get_salutation_prefix(
-                person=admission.candidate,
-                language=admission.candidate.language,
-            )
+            common_tokens['salutation'] = get_salutation_prefix(person=admission.candidate)
             common_tokens['payment_sentence'] = (
                 "<p>{}</p>".format(_('Application fees where also received.'))
                 if proposition.checklist_actuelle.frais_dossier.statut == ChoixStatutChecklist.SYST_REUSSITE
@@ -196,11 +208,17 @@ class Notification(INotification):
     def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
         admission = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
-            .select_related('candidate__country_of_citizenship')
+            .select_related('candidate__country_of_citizenship', 'training__enrollment_campus')
             .get(uuid=proposition.entity_id.uuid)
         )
 
-        faculty_email = 'mail-inscription-formation-a-developper@uclouvain.be'  # TODO get the right faculty email
+        program_email: EmailFonctionProgramme = EmailFonctionProgramme.objects.filter(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            programme=admission.training.education_group,
+        ).first()
+
+        if not program_email:
+            raise NotificationException(_('No recipient email found for this program.'))
 
         current_language = settings.LANGUAGE_CODE
 
@@ -213,11 +231,6 @@ class Notification(INotification):
                 sub_namespace=':checklist',
                 url_suffix='#decision_facultaire',
             )
-            common_tokens['admission_link_back_for_uclouvain_documents'] = get_backoffice_admission_url(
-                context='general-education',
-                admission_uuid=proposition.entity_id.uuid,
-                sub_namespace=':documents',
-            )
             common_tokens['candidate_nationality_country'] = getattr(
                 admission.candidate.country_of_citizenship,
                 {
@@ -225,14 +238,150 @@ class Notification(INotification):
                     settings.LANGUAGE_CODE_EN: 'name_en',
                 }[current_language],
             )
+            common_tokens['training_acronym'] = admission.training.acronym
+            common_tokens['training_enrollment_campus_email'] = admission.training.enrollment_campus.email
 
             email_message = generate_email(
                 ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
                 current_language,
                 common_tokens,
-                recipients=[faculty_email],
+                recipients=[program_email.email],
             )
 
-            send_mail_to_generic_email(email_message)
+            EmailNotificationHandler.create(email_message, person=None)
 
             return email_message
+
+    @classmethod
+    def _get_requested_documents_html_lists(
+        cls,
+        requested_documents: List[EmplacementDocument],
+        requested_documents_dtos: List[EmplacementDocumentDTO],
+    ):
+        """
+        Create an html list with the requested and submitted documents and an html list with the requested and not
+        submitted documents.
+        :param requested_documents: List of requested documents with the updated status
+        :param requested_documents_dtos: List of requested documents dtos
+        :return: a dict whose the keys are the documents statuses and the values, the html lists of documents grouped
+        by tab.
+        """
+        updated_documents_by_identifier: Dict[str, EmplacementDocument] = {
+            document.entity_id.identifiant: document for document in requested_documents
+        }
+
+        current_tab_by_status = {
+            StatutEmplacementDocument.A_RECLAMER: None,
+            StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION: None,
+        }
+        html_list_by_status = {
+            StatutEmplacementDocument.A_RECLAMER: '',
+            StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION: '',
+        }
+
+        for document_dto in requested_documents_dtos:
+            updated_document = updated_documents_by_identifier.get(document_dto.identifiant)
+
+            if updated_document and updated_document.statut in html_list_by_status:
+                # Group the documents by tab
+                if current_tab_by_status[updated_document.statut] != document_dto.onglet:
+                    if current_tab_by_status[updated_document.statut] is not None:
+                        html_list_by_status[updated_document.statut] += '</ul></li>'
+
+                    # Add the tab name
+                    html_list_by_status[updated_document.statut] += f'<li>{document_dto.nom_onglet_langue_candidat}<ul>'
+
+                # Add the document name
+                html_list_by_status[updated_document.statut] += f'<li>{document_dto.libelle_langue_candidat}</li>'
+
+                current_tab_by_status[updated_document.statut] = document_dto.onglet
+
+        for status in html_list_by_status:
+            if html_list_by_status[status]:
+                html_list_by_status[status] = f'<ul>{html_list_by_status[status]}</ul></li></ul>'
+
+        return html_list_by_status
+
+    @classmethod
+    def confirmer_reception_documents_envoyes_par_candidat(
+        cls,
+        proposition: PropositionDTO,
+        liste_documents_reclames: List[EmplacementDocument],
+        liste_documents_dto: List[EmplacementDocumentDTO],
+    ):
+        admission: BaseAdmission = BaseAdmission.objects.select_related(
+            'candidate',
+            'training__enrollment_campus',
+        ).get(uuid=proposition.uuid)
+
+        html_list_by_status = cls._get_requested_documents_html_lists(liste_documents_reclames, liste_documents_dto)
+
+        tokens = {
+            'admission_reference': proposition.reference,
+            'candidate_first_name': proposition.prenom_candidat,
+            'candidate_last_name': proposition.nom_candidat,
+            'salutation': get_salutation_prefix(person=admission.candidate),
+            'training_title': admission.training.title
+            if admission.candidate.language == settings.LANGUAGE_CODE_FR
+            else admission.training.title_english,
+            'training_acronym': proposition.formation.sigle,
+            'training_campus': proposition.formation.campus,
+            'requested_submitted_documents': html_list_by_status[StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION],
+            'requested_not_submitted_documents': html_list_by_status[StatutEmplacementDocument.A_RECLAMER],
+            'enrolment_service_email': admission.training.enrollment_campus.email or MAIL_INSCRIPTION_DEFAUT,
+            'training_year': format_academic_year(proposition.annee_calculee),
+            'admission_link_front': get_portal_admission_url('general-education', proposition.uuid),
+            'admission_link_back': get_backoffice_admission_url('general-education', proposition.uuid),
+        }
+
+        email_message = generate_email(
+            ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL
+            if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
+            else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL,
+            admission.candidate.language,
+            tokens,
+            recipients=[admission.candidate.private_email],
+        )
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+    @classmethod
+    def refuser_proposition_par_sic(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message
+
+    @classmethod
+    def accepter_proposition_par_sic(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message

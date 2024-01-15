@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -51,11 +51,13 @@ class ITitreAccesSelectionnableRepository(interface.AbstractRepository):
 
     @classmethod
     def search_dto_by_proposition(
-        cls, proposition_identity: PropositionIdentity
+        cls,
+        proposition_identity: PropositionIdentity,
+        seulement_selectionnes: Optional[bool] = None,
     ) -> Dict[str, TitreAccesSelectionnableDTO]:
         return {
             entity.entity_id.uuid_experience: cls.entity_to_dto(entity)
-            for entity in cls.search_by_proposition(proposition_identity)
+            for entity in cls.search_by_proposition(proposition_identity, seulement_selectionnes)
         }
 
     @classmethod
@@ -74,4 +76,5 @@ class ITitreAccesSelectionnableRepository(interface.AbstractRepository):
             selectionne=entity.selectionne,
             type_titre=entity.entity_id.type_titre.name,
             annee=entity.annee,
+            pays_iso_code=entity.pays_iso_code,
         )
