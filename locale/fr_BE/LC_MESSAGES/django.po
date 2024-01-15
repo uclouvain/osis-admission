@@ -7620,6 +7620,15 @@ msgstr ""
 "Vous semblez avoir des modifications non enregistrées, celles-ci seront "
 "perdues."
 
+msgid ""
+"You are about to submit the application to the Faculty. This action should "
+"normally email the Faculty, but the recipient address is not defined. Please "
+"define it before sending the application."
+msgstr ""
+"Vous êtes sur le point de soumettre le dossier en Faculté. Cette action doit "
+"normalement envoyer un e-mail à la Faculté, mais l'adresse du destinataire "
+"n'est pas définie. Merci de la définir avant d'envoyer le dossier."
+
 #, python-format
 msgid ""
 "You are about to submit the application to the Faculty. This action will "

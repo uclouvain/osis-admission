@@ -47,6 +47,7 @@ from ._should_informations_checklist_etre_completees import (
     ShouldSpecifierMotifRefusFacultaire,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldTitreAccesEtreSelectionne,
+    ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
 )
 from ._should_informations_complementaires_etre_completes import (
     ShouldVisaEtreComplete,

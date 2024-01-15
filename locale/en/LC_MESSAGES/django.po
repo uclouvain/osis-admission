@@ -6882,6 +6882,12 @@ msgstr ""
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
 
+msgid ""
+"You are about to submit the application to the Faculty. This action should "
+"normally email the Faculty, but the recipient address is not defined. Please "
+"define it before sending the application."
+msgstr ""
+
 #, python-format
 msgid ""
 "You are about to submit the application to the Faculty. This action will "
