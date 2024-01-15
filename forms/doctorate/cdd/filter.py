@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -71,12 +71,12 @@ from reference.models.country import Country
 class DoctorateListFilterForm(forms.Form):
     numero = forms.RegexField(
         label=_('Dossier numero'),
-        regex=re.compile(r'^\d{3}\.\d{3}$'),
+        regex=re.compile(r'^\d{4}\.\d{4}$'),
         required=False,
         widget=forms.TextInput(
             attrs={
-                'data-mask': '000.000',
-                'placeholder': '000.000',
+                'data-mask': '0000.0000',
+                'placeholder': '0000.0000',
             },
         ),
     )

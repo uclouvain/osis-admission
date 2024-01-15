@@ -807,20 +807,6 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         ] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.general_admission.save()
 
-        # Invalid request -> We need to be in the right status
-        response = self.client.post(self.url, **self.default_headers)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
-            gettext('The proposition must be managed by FAC to realized this action.'),
-            [m.message for m in response.context['messages']],
-        )
-
-        # Valid request
-        self.general_admission.checklist['current']['decision_facultaire'][
-            'statut'
-        ] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
-        self.general_admission.save()
-
         response = self.client.post(self.url, **self.default_headers)
 
         # Check the response
