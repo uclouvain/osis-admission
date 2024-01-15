@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ from base.models.person import Person
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from education_group.forms.fields import MainCampusChoiceField
 
-REGEX_REFERENCE = r'\d{3}\.\d{3}$'
+REGEX_REFERENCE = r'\d{4}\.\d{4}$'
 
 
 class AllAdmissionsFilterForm(forms.Form):
@@ -69,7 +69,7 @@ class AllAdmissionsFilterForm(forms.Form):
         required=False,
         widget=forms.TextInput(
             attrs={
-                'placeholder': 'L-ESPO22-001.234',
+                'placeholder': 'L-ESPO22-0001.2345',
             },
         ),
     )

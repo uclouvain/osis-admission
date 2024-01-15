@@ -90,7 +90,7 @@ class ListCampusView(ListAPIView):
     }
 
     def list(self, request, *args, **kwargs):
-        campuses = message_bus_instance.invoke(SearchUclouvainCampusesQuery())
+        campuses = message_bus_instance.invoke(SearchUclouvainCampusesQuery(uuids=None))
         campuses.sort(key=lambda campus: self.campus_order_by_uuid.get(campus.uuid, 100))
         serializer = serializers.CampusSerializer(instance=campuses, many=True)
         return Response(serializer.data)
