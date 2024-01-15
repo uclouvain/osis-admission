@@ -33,7 +33,7 @@ from admission.contrib.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from osis_async.models import AsyncTask
 from osis_async.models.enums import TaskState
-from osis_document.enums import PostProcessingType
+from osis_document.enums import PostProcessingType, DocumentExpirationPolicy
 
 
 class ExportPdfTestCase(TestCase):
@@ -71,7 +71,10 @@ class ExportPdfTestCase(TestCase):
         )
         call_command("process_admission_tasks")
         save.assert_called()
-        confirm.assert_called_with('a-token')
+        confirm.assert_called_with(
+            'a-token',
+            document_expiration_policy=DocumentExpirationPolicy.EXPORT_EXPIRATION_POLICY.value
+        )
         post_processing.assert_called()
         async_task.refresh_from_db()
         self.assertEqual(async_task.state, TaskState.DONE.name)
