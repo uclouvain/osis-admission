@@ -168,13 +168,29 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 )
             )
 
-    def test_should_empecher_si_experience_non_trouvee(self):
-        with self.assertRaises(ExperienceNonTrouveeException):
-            self.message_bus.invoke(
-                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
-                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-                    uuid_experience='INCONNUE',
-                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    statut_authentification=False,
-                )
+    def test_should_creer_experience_si_non_trouvee(self):
+        proposition_id = self.message_bus.invoke(
+            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                uuid_experience='INCONNUE',
+                statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
+                statut_authentification=False,
             )
+        )
+
+        proposition = self.proposition_repository.get(proposition_id)
+
+        checklist_experience = proposition.checklist_actuelle.recuperer_enfant(
+            'parcours_anterieur',
+            'INCONNUE',
+        )
+        self.assertEqual(proposition.entity_id, proposition_id)
+        self.assertEqual(checklist_experience.statut, ChoixStatutChecklist.GEST_BLOCAGE)
+        self.assertEqual(
+            checklist_experience.extra,
+            {
+                'identifiant': 'INCONNUE',
+                'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
+                'authentification': '0',
+            },
+        )
