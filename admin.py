@@ -69,6 +69,7 @@ from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormI
 from admission.contrib.models.online_payment import OnlinePayment
 from admission.ddd.admission.enums import CritereItemFormulaireFormation
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
+from admission.services.injection_epc import InjectionEPC
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
@@ -492,6 +493,15 @@ class AccountingAdmin(ReadOnlyFilesMixin, admin.ModelAdmin):
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference']
+    actions = [
+        'injecter_dans_epc',
+    ]
+
+    @admin.action(description='Injecter la demande dans EPC')
+    def injecter_dans_epc(self, request, queryset):
+        for demande in queryset:
+            # Check injection state when it exists
+            InjectionEPC().injecter(demande)
 
     def has_add_permission(self, request):
         return False
