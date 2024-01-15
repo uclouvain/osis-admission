@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,7 +30,8 @@ from osis_common.ddd import interface
 
 def formater_reference(reference: int, nom_campus_inscription: str, sigle_entite_gestion: str, annee: int) -> str:
     """Formater la référence d'une admission"""
-    reference_formatee = '{:07,}'.format(reference).replace(',', '.')
+    reference_formatee = '{:08}'.format(reference)
+    reference_formatee = f'{reference_formatee[:4]}.{reference_formatee[4:]}'
     return f'{nom_campus_inscription[0]}-{sigle_entite_gestion}{annee % 100}-{reference_formatee}'
 
 

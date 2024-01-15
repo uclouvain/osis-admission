@@ -119,7 +119,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             AdmissionViewerFactory(person=cls.other_sic_management, admission=cls.admissions[0]),
         ]
 
-        cls.lite_reference = '{:07,}'.format(cls.admissions[0].reference).replace(',', '.')
+        lite_reference = '{:08}'.format(cls.admissions[0].reference)
+        cls.lite_reference = f'{lite_reference[:4]}.{lite_reference[4:]}'
 
         cls.student = StudentFactory(
             person=cls.admissions[0].candidate,
