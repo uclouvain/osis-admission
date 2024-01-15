@@ -120,6 +120,15 @@ class ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire(BusinessValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire(BusinessValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def validate(self, *args, **kwargs):
+        if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC:
+            raise SituationPropositionNonFACException
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ShouldFacPeutDonnerDecision(BusinessValidator):
     statut: ChoixStatutPropositionGenerale
 

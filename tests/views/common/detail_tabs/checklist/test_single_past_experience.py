@@ -111,13 +111,15 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
     def test_change_unknown_experience(self):
         self.client.force_login(user=self.sic_manager_user)
 
+        unknown_uuid = str(uuid.uuid4())
+
         response = self.client.post(
             resolve_url(
                 self.url_name,
                 uuid=self.general_admission.uuid,
             )
             + '?identifier='
-            + str(uuid.uuid4()),
+            + str(unknown_uuid),
             **self.default_headers,
             data={
                 'status': ChoixStatutChecklist.GEST_BLOCAGE.name,
@@ -126,7 +128,23 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.assertIn(gettext('Experience not found.'), [m.message for m in response.context['messages']])
+        self.assertNotIn(gettext('Experience not found.'), [m.message for m in response.context['messages']])
+
+        self.general_admission.refresh_from_db()
+
+        new_experience_data = next(
+            (
+                experience
+                for experience in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
+                if experience['extra']['identifiant'] == unknown_uuid
+            ),
+            None,
+        )
+
+        self.assertIsNotNone(new_experience_data)
+
+        self.assertEqual(new_experience_data['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
+        self.assertEqual(new_experience_data['extra']['identifiant'], unknown_uuid)
 
     def test_pass_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
