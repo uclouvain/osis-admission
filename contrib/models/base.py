@@ -80,8 +80,8 @@ CAMPUS_LETTRE_DOSSIER = {
     'Namur': 'N',
     'Tournai': 'T',
     'Bruxelles Woluwe': 'W',
-    'Bruxelles Saint-Gilles': 'X',
-    'Autre site': 'G',
+    'Bruxelles Saint-Gilles': 'G',
+    'Autre site': 'X',
 }
 
 
