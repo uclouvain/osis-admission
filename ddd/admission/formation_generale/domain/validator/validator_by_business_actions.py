@@ -78,6 +78,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldVisaEtreComplete,
     ShouldTitreAccesEtreSelectionne,
     ShouldConditionAccesEtreSelectionne,
+    ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldSicPeutDonnerDecision,
@@ -266,6 +267,17 @@ class FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(TwoStepsMulti
                 checklist_actuelle=self.checklist_actuelle,
             ),
         ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire(statut=self.statut)]
 
 
 @attr.dataclass(frozen=True, slots=True)

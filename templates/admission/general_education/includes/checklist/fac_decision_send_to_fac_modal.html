@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -32,17 +32,27 @@
 
 {% block modal_body %}
   <p>
-    {% blocktranslate with recipient='TODO' trimmed %}
-      You are about to submit the application to the Faculty. This action will send an email to {{ recipient }}.
-    {% endblocktranslate %}
+    {% if program_faculty_email %}
+      {% blocktranslate with recipient=program_faculty_email trimmed %}
+        You are about to submit the application to the Faculty. This action will send an email to {{ recipient }}.
+      {% endblocktranslate %}
+    {% else %}
+      {% blocktranslate with recipient=program_faculty_email trimmed %}
+        You are about to submit the application to the Faculty. This action should normally email the Faculty, but the
+        recipient address is not defined. Please define it before sending the application.
+      {% endblocktranslate %}
+    {% endif %}
   </p>
 {% endblock %}
 
 {% block modal_footer %}
   <button
-      class="btn btn-primary"
-      hx-post="{% url view.base_namespace|add:':fac-decision-send-to-faculty' uuid=view.kwargs.uuid %}"
-      data-dismiss="modal"
+    class="btn btn-primary"
+    hx-post="{% url view.base_namespace|add:':fac-decision-send-to-faculty' uuid=view.kwargs.uuid %}"
+    {% if not program_faculty_email %}
+    disabled
+    {% endif %}
+    data-dismiss="modal"
   >
     {% translate 'Confirm' %}
   </button>

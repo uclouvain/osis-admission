@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 from contextlib import suppress
 from enum import Enum
 from typing import List, Optional, Union
@@ -39,7 +38,6 @@ from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
 from admission.contrib.models.checklist import RefusalReason
 from admission.contrib.models.general_education import GeneralEducationAdmission
-from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.bourse import BourseIdentity
@@ -66,6 +64,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     DROITS_INSCRIPTION_MONTANT_VALEURS,
+    PoursuiteDeCycle,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -79,7 +78,6 @@ from admission.ddd.admission.formation_generale.dtos.proposition import Proposit
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.poste_diplomatique import PosteDiplomatiqueTranslator
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from admission.infrastructure.utils import dto_to_dict
@@ -92,11 +90,8 @@ from base.models.person import Person
 from base.models.student import Student
 from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO, PartimSearchDTO
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from epc.models.enums.condition_acces import ConditionAcces
-from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from osis_common.ddd.interface import ApplicationService
-from osis_profile.models.enums.curriculum import Result
 
 
 class PropositionRepository(GlobalPropositionRepository, IPropositionRepository):
@@ -494,6 +489,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             nombre_de_mois_de_mobilite=admission.mobility_months_amount,
             doit_se_presenter_en_sic=admission.must_report_to_sic,
             communication_au_candidat=admission.communication_to_the_candidate,
+            poursuite_de_cycle=PoursuiteDeCycle[admission.cycle_pursuit]
+            if admission.cycle_pursuit
+            else PoursuiteDeCycle.TO_BE_DETERMINED,
+            poursuite_de_cycle_a_specifier=admission.training.education_group_type.name == TrainingType.BACHELOR.name,
         )
 
     @classmethod

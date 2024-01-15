@@ -23,29 +23,19 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.commands import EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
 
 
-def envoyer_proposition_au_sic_lors_de_la_decision_facultaire(
-    cmd: EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
-    proposition_repository: 'IPropositionRepository',
-    historique: 'IHistorique',
-) -> PropositionIdentity:
-    proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
-
-    proposition.soumettre_au_sic_lors_de_la_decision_facultaire(envoi_par_fac=cmd.envoi_par_fac)
-
-    proposition_repository.save(entity=proposition)
-
-    historique.historiser_envoi_sic_par_fac_lors_de_la_decision_facultaire(
-        proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
-        envoi_par_fac=cmd.envoi_par_fac,
+def initialiser_checklist_experience(experience_uuid):
+    return StatutChecklist(
+        libelle=_('To be processed'),
+        statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        extra={
+            'identifiant': experience_uuid,
+            'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
+        },
     )
-
-    return proposition.entity_id
