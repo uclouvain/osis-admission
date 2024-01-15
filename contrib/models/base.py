@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -71,6 +71,18 @@ from program_management.models.education_group_version import EducationGroupVers
 from reference.models.country import Country
 
 REFERENCE_SEQ_NAME = 'admission_baseadmission_reference_seq'
+
+CAMPUS_LETTRE_DOSSIER = {
+    'Bruxelles Saint-Louis': 'B',
+    'Charleroi': 'C',
+    'Louvain-la-Neuve': 'L',
+    'Mons': 'M',
+    'Namur': 'N',
+    'Tournai': 'T',
+    'Bruxelles Woluwe': 'W',
+    'Bruxelles Saint-Gilles': 'X',
+    'Autre site': 'G',
+}
 
 
 def admission_directory_path(admission: 'BaseAdmission', filename: str):
@@ -145,8 +157,13 @@ class BaseAdmissionQuerySet(models.QuerySet):
         """
         return self.annotate(
             formatted_reference=Concat(
-                # First letter of the campus name
-                Left('training__enrollment_campus__name', 1),
+                # Letter of the campus
+                Case(
+                    *(
+                        When(Q(training__enrollment_campus__name__icontains=name), then=Value(letter))
+                        for name, letter in CAMPUS_LETTRE_DOSSIER.items()
+                    )
+                ),
                 Value('-'),
                 # Management entity acronym
                 Coalesce(
@@ -159,7 +176,7 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 Mod('training__academic_year__year', 100),
                 Value('-'),
                 # Formatted numero (e.g. 12 -> 000.012)
-                Replace(ToChar(F('reference'), Value('fm999,000,000')), Value(','), Value('.')),
+                Replace(ToChar(F('reference'), Value('fm9999,0000,0000')), Value(','), Value('.')),
                 output_field=CharField(),
             )
         )
@@ -448,7 +465,8 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         cache.delete('admission_permission_{}'.format(self.uuid))
 
     def __str__(self):
-        return '{:07,}'.format(self.reference).replace(',', '.')
+        reference = '{:08}'.format(self.reference)
+        return f'{reference[:4]}.{reference[4:]}'
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):
