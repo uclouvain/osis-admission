@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@
       {% bootstrap_field form.formation %}
       <div
           id="bachelor-cycle-continuation-container"
-          class="required_field{% if not form.has_success_be_experience or form.initial_training_type != 'BACHELOR' %} hidden{% endif %}"
+          class="required_field{% if form.initial_training_type != 'BACHELOR' %} hidden{% endif %}"
       >
         {% bootstrap_field form.poursuite_cycle %}
       </div>
@@ -51,14 +51,12 @@
       $('#id_annee_academique').change(function() {
           $('#id_formation').val(null).trigger('change');
       });
-      {% if form.has_success_be_experience %}
-          $('#id_formation').on('select2:select select2:clear', function (event) {
-              if(event.params.data.type === 'BACHELOR') {
-                  $('#bachelor-cycle-continuation-container').removeClass('hidden');
-              } else {
-                  $('#bachelor-cycle-continuation-container').addClass('hidden');
-              }
-          });
-      {% endif %}
+      $('#id_formation').on('select2:select select2:clear', function (event) {
+          if(event.params.data.type === 'BACHELOR') {
+              $('#bachelor-cycle-continuation-container').removeClass('hidden');
+          } else {
+              $('#bachelor-cycle-continuation-container').addClass('hidden');
+          }
+      });
   </script>
 </div>

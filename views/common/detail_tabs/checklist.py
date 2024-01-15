@@ -40,6 +40,10 @@ from django.utils.translation import gettext_lazy as _, gettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
+
+from base.models.enums.education_group_types import TrainingType
+from epc.models.email_fonction_programme import EmailFonctionProgramme
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from osis_document.utils import get_file_url
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
@@ -116,6 +120,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
+    PoursuiteDeCycle,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
@@ -354,7 +359,20 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
         )
         context['fac_decision_refusal_form'] = self.fac_decision_refusal_form
         context['fac_decision_approval_form'] = self.fac_decision_approval_form
+        context['program_faculty_email'] = self.program_faculty_email.email if self.program_faculty_email else None
+
         return context
+
+    @cached_property
+    def program_faculty_email(self):
+        return EmailFonctionProgramme.objects.filter(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            programme=self.admission.training.education_group,
+            premiere_annee=bool(
+                self.proposition.poursuite_de_cycle_a_specifier
+                and self.proposition.poursuite_de_cycle != PoursuiteDeCycle.YES.name,
+            ),
+        ).first()
 
     @cached_property
     def fac_decision_refusal_form(self):
@@ -469,7 +487,7 @@ class FacultyDecisionSendToSicView(
     def get_permission_required(self):
         return (
             ('admission.checklist_faculty_decision_transfer_to_sic_with_decision',)
-            if self.request.GET.get('approval') or self.request.GET.get('refusal')
+            if (self.request.GET.get('approval') or self.request.GET.get('refusal') and self.is_fac)
             else ('admission.checklist_faculty_decision_transfer_to_sic_without_decision',)
         )
 
@@ -480,12 +498,12 @@ class FacultyDecisionSendToSicView(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                 )
-                if self.request.GET.get('approval')
+                if self.request.GET.get('approval') and self.is_fac
                 else RefuserPropositionParFaculteCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                 )
-                if self.request.GET.get('refusal')
+                if self.request.GET.get('refusal') and self.is_fac
                 else EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,

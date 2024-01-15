@@ -475,10 +475,10 @@ msgstr ""
 msgid "Additional conditions"
 msgstr ""
 
-msgid "Additional course(s):"
+msgid "Additional conditions:"
 msgstr ""
 
-msgid "Additional conditions:"
+msgid "Additional course(s):"
 msgstr ""
 
 msgid "Additional documents"
@@ -2277,10 +2277,10 @@ msgstr ""
 msgid "Email of the contact person for the design of the annual program"
 msgstr ""
 
-msgid "Email receiving the documents"
+msgid "Email of the enrollment campus"
 msgstr ""
 
-msgid "Email of the enrollment campus"
+msgid "Email receiving the documents"
 msgstr ""
 
 #, python-format
@@ -5043,13 +5043,13 @@ msgstr ""
 msgid "Refusal reasons"
 msgstr ""
 
+msgid "Refusal reasons:"
+msgstr ""
+
 msgid "Refusal to validate"
 msgstr ""
 
 msgid "Refusal type"
-msgstr ""
-
-msgid "Refusal reasons:"
 msgstr ""
 
 msgid "Refuse activity"
@@ -6880,6 +6880,12 @@ msgid "Yes,No,Incomplete field"
 msgstr ""
 
 msgid "You appear to have unsaved changes, which will be lost."
+msgstr ""
+
+msgid ""
+"You are about to submit the application to the Faculty. This action should "
+"normally email the Faculty, but the recipient address is not defined. Please "
+"define it before sending the application."
 msgstr ""
 
 #, python-format

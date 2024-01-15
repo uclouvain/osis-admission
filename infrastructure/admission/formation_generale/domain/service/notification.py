@@ -44,6 +44,7 @@ from admission.ddd.admission.enums.emplacement_document import StatutEmplacement
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    PoursuiteDeCycle,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
@@ -62,6 +63,7 @@ from admission.utils import (
     get_salutation_prefix,
     format_academic_year,
 )
+from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
@@ -206,7 +208,7 @@ class Notification(INotification):
 
     @classmethod
     def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
-        admission = (
+        admission: BaseAdmission = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
             .select_related('candidate__country_of_citizenship', 'training__enrollment_campus')
             .get(uuid=proposition.entity_id.uuid)
@@ -215,6 +217,9 @@ class Notification(INotification):
         program_email: EmailFonctionProgramme = EmailFonctionProgramme.objects.filter(
             type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
             programme=admission.training.education_group,
+            premiere_annee=bool(
+                proposition.poursuite_de_cycle_a_specifier and proposition.poursuite_de_cycle != PoursuiteDeCycle.YES
+            ),
         ).first()
 
         if not program_email:

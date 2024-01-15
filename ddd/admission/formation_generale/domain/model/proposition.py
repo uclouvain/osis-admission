@@ -87,7 +87,9 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     ApprouverParSicValidatorList,
     ApprouverParSicAValiderValidatorList,
     RefuserParSicAValiderValidatorList,
+    SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
 )
+from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
@@ -390,11 +392,14 @@ class Proposition(interface.RootEntity):
         ).validate()
         self.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
 
-    def soumettre_au_sic_lors_de_la_decision_facultaire(self):
-        FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(
-            statut=self.statut,
-            checklist_actuelle=self.checklist_actuelle,
-        ).validate()
+    def soumettre_au_sic_lors_de_la_decision_facultaire(self, envoi_par_fac: bool):
+        if envoi_par_fac:
+            FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(
+                statut=self.statut,
+                checklist_actuelle=self.checklist_actuelle,
+            ).validate()
+        else:
+            SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(statut=self.statut).validate()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
 
     def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self):
@@ -576,7 +581,10 @@ class Proposition(interface.RootEntity):
         try:
             experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
         except StopIteration:
-            raise ExperienceNonTrouveeException
+            # Si l'expérience n'existe pas dans la checklist, on l'initialise
+            experience = initialiser_checklist_experience(experience_uuid=uuid_experience)
+            self.checklist_actuelle.parcours_anterieur.enfants.append(experience)
+
         experience.statut = ChoixStatutChecklist[statut_checklist_cible]
 
         if statut_checklist_authentification is None:
