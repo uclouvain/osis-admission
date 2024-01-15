@@ -586,8 +586,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertCountEqual(cc_recipients, [self.first_fac_manager.email, self.second_fac_manager.email])
 
         content = email_object.as_string()
-        self.assertIn(f'{self.first_fac_manager.first_name } {self.first_fac_manager.last_name}', content)
-        self.assertIn(f'{self.second_fac_manager.first_name } {self.second_fac_manager.last_name}', content)
+        self.assertIn(f'{self.admission_ok.candidate.first_name } {self.admission_ok.candidate.last_name}', content)
         self.assertIn('http://dummyurl/file/foobar', content)
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):

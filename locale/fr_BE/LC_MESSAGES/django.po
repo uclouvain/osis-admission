@@ -541,11 +541,11 @@ msgstr "Conditions complémentaires d'acceptation"
 msgid "Additional conditions"
 msgstr "Conditions complémentaires"
 
-msgid "Additional course(s):"
-msgstr "Complément de formation :"
-
 msgid "Additional conditions:"
 msgstr "Conditions complémentaires :"
+
+msgid "Additional course(s):"
+msgstr "Complément de formation :"
 
 msgid "Additional documents"
 msgstr "Documents complémentaires"
@@ -2473,11 +2473,11 @@ msgid "Email of the contact person for the design of the annual program"
 msgstr ""
 "E-mail de la personne de contact pour la composition du programme annuel"
 
-msgid "Email receiving the documents"
-msgstr "E-mail recevant les documents"
-
 msgid "Email of the enrollment campus"
 msgstr "Email du campus d'inscription"
+
+msgid "Email receiving the documents"
+msgstr "E-mail recevant les documents"
 
 #, python-format
 msgid ""
@@ -5591,14 +5591,14 @@ msgstr "Catégorie d'un motif de refus"
 msgid "Refusal reasons"
 msgstr "Motifs de refus"
 
+msgid "Refusal reasons:"
+msgstr "Motifs de refus :"
+
 msgid "Refusal to validate"
 msgstr "Refus à valider"
 
 msgid "Refusal type"
 msgstr "Type de refus"
-
-msgid "Refusal reasons:"
-msgstr "Motifs de refus :"
 
 msgid "Refuse activity"
 msgstr "Refuser l'activité"

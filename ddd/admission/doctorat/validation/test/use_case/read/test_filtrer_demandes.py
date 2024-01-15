@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -100,9 +100,10 @@ class TestFiltrerDemandes(TestCase):
             )
         )
         self.assertEqual(len(resultats), 1)
+        reference = '{:08}'.format(proposition_recherchee.reference)
         self.assertEqual(
             resultats[0].numero_demande,
-            'L-SST20-' + '{:07,}'.format(proposition_recherchee.reference).replace(',', '.'),
+            f'L-SST20-{reference[:4]}.{reference[4:]}',
         )
         self.assertEqual(resultats[0].statut_cdd, demande_recherchee.statut_cdd.name)
         self.assertEqual(resultats[0].uuid, proposition_recherchee.entity_id.uuid)
