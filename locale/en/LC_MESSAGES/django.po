@@ -713,6 +713,9 @@ msgstr ""
 msgid "Approvals"
 msgstr ""
 
+msgid "Approved"
+msgstr ""
+
 msgctxt "admission decision"
 msgid "Approved"
 msgstr ""
