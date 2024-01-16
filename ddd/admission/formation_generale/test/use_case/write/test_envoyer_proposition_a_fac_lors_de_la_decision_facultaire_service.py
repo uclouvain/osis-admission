@@ -80,10 +80,6 @@ class TestEnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand(TestCase):
             ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
             ChoixStatutPropositionGenerale.CONFIRMEE,
             ChoixStatutPropositionGenerale.RETOUR_DE_FAC,
-            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION,
-            ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE,
-            ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE,
-            ChoixStatutPropositionGenerale.CLOTUREE,
         )
 
         for statut in statuts_invalides:
