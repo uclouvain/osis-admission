@@ -489,7 +489,7 @@ class FacultyDecisionSendToSicView(
     def get_permission_required(self):
         return (
             ('admission.checklist_faculty_decision_transfer_to_sic_with_decision',)
-            if (self.request.GET.get('approval') or self.request.GET.get('refusal')) and self.is_fac
+            if (self.request.GET.get('approval') or self.request.GET.get('refusal') and self.is_fac)
             else ('admission.checklist_faculty_decision_transfer_to_sic_without_decision',)
         )
 
