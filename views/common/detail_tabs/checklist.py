@@ -121,6 +121,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
     PoursuiteDeCycle,
+    STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
@@ -342,7 +343,7 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
         context['in_sic_statuses'] = self.admission.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS
         context['in_fac_statuses'] = self.admission.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS
         context['sic_statuses_for_transfer'] = ChoixStatutPropositionGenerale.get_specific_values(
-            STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC
+            STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION
         )
         context['fac_statuses_for_transfer'] = ChoixStatutPropositionGenerale.get_specific_values(
             STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC
@@ -487,7 +488,7 @@ class FacultyDecisionSendToSicView(
     def get_permission_required(self):
         return (
             ('admission.checklist_faculty_decision_transfer_to_sic_with_decision',)
-            if (self.request.GET.get('approval') or self.request.GET.get('refusal') and self.is_fac)
+            if (self.request.GET.get('approval') or self.request.GET.get('refusal')) and self.is_fac
             else ('admission.checklist_faculty_decision_transfer_to_sic_without_decision',)
         )
 
