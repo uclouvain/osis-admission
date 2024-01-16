@@ -251,6 +251,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'admission.checklist_change_faculty_decision',
             self.admission,
         )
+        context['bg_classes'] = {}
         return context
 
 
@@ -1260,8 +1261,6 @@ class ChecklistView(
 
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
-
-            context['bg_classes'] = {}
 
             children = (
                 context['original_admission']
