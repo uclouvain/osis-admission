@@ -399,7 +399,8 @@
               <dt>{% trans "Other demand(s) by the candidate." %}</dt>
               <dd>
                 {% for autre_demande in autres_demandes %}
-                  <a href="{% admission_url autre_demande.uuid autre_demande.type_formation %}">{{ autre_demande.numero_demande }}</a>
+                  {% admission_url autre_demande.uuid autre_demande.type_formation as autre_demande_url %}
+                  {% if autre_demande_url %}<a href="autre_demande_url">{{ autre_demande.numero_demande }}</a>{% else %}{{ autre_demande.numero_demande }}{% endif %}
                   {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
                     {{ autre_demande.sigle_formation }}-1 - {% trans "First year of" %} {{ autre_demande.intitule_formation|lower }} ({{ autre_demande.lieu_formation }})
                   {% else %}
