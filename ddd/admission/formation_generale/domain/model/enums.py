@@ -83,6 +83,13 @@ STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC = {
     ChoixStatutPropositionGenerale.CLOTUREE.name,
 }
 
+# Le gestionnaire SIC a la main et peut envoyer le dossier à la faculté pour que celle-ci donne sa décision
+STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION = {
+    ChoixStatutPropositionGenerale.CONFIRMEE.name,
+    ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+    ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
+}
+
 # Le gestionnaire SIC a la main ou attend le paiement
 STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_OU_FRAIS_DOSSIER_EN_ATTENTE = (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC

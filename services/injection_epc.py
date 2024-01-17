@@ -424,8 +424,10 @@ class InjectionEPC:
 def admission_response_from_epc_callback(donnees):
     donnees = json.loads(donnees.decode("utf-8").replace("\'", "\""))
     dossier_uuid = donnees['dossier_uuid']
-    logger.info(f"[INJECTION EPC - RETOUR] Reception d'une reponse d'EPC pour l'admission avec uuid "
-                f"{dossier_uuid} - Donnees recues : {donnees}")
+    logger.info(
+        f"[INJECTION EPC - RETOUR] Reception d'une reponse d'EPC pour l'admission avec uuid "
+        f"{dossier_uuid} - Donnees recues : {donnees}"
+    )
     admission = get_object_or_404(BaseAdmission, uuid=dossier_uuid)
     if donnees['success']:
         logger.info("[INJECTION EPC - RETOUR] L'injection est terminee")

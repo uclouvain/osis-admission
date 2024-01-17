@@ -799,6 +799,9 @@ msgstr "Autorisation à valider"
 msgid "Approvals"
 msgstr "Approbations"
 
+msgid "Approved"
+msgstr "Autorisée"
+
 msgctxt "admission decision"
 msgid "Approved"
 msgstr "Approuvée"
