@@ -4389,6 +4389,9 @@ msgstr "Modification d'une formation académique"
 msgid "Modification of the secondary studies"
 msgstr "Modification des études secondaires"
 
+msgid "Modification of the specificities of the curriculum"
+msgstr "Modification des spécificités du curriculum"
+
 msgid "Modification requested"
 msgstr "Modification demandée"
 
@@ -4596,6 +4599,9 @@ msgstr "Bourse non trouvée."
 
 msgid "No specific profile"
 msgstr "Pas de profil particulier"
+
+msgid "No specific question available for this dossier."
+msgstr "Aucune question spécifique n'est disponible pour cette demande."
 
 msgid "No training found."
 msgstr "Formation non trouvée."

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from copy import copy
 
 from django.db import transaction
@@ -187,6 +188,9 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, FormV
                     self.clean_high_school_diploma_alternative()
 
         return super().form_valid(form)
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
 
     def get_forms(self, context_data=None):
         if context_data is None:
