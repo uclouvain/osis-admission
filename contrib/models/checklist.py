@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,11 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 
 from ckeditor.fields import RichTextField
 from django.conf import settings
 from django.db import models
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 
@@ -44,13 +46,18 @@ class RefusalReasonCategory(models.Model):
         verbose_name=_('Name'),
     )
 
+    order = models.FloatField(
+        default=0,
+        verbose_name=_('Order'),
+    )
+
     def __str__(self):
         return self.name
 
     class Meta:
         verbose_name = _('Refusal reason category')
         verbose_name_plural = _('Refusal reason categories')
-        ordering = ['name']
+        ordering = ['order']
 
 
 class RefusalReason(models.Model):
@@ -72,13 +79,18 @@ class RefusalReason(models.Model):
         verbose_name=_('Category'),
     )
 
+    order = models.FloatField(
+        default=0,
+        verbose_name=_('Order'),
+    )
+
     def __str__(self):
-        return self.name
+        return mark_safe(self.name)
 
     class Meta:
         verbose_name = _('Refusal reason')
         verbose_name_plural = _('Refusal reasons')
-        ordering = ['name']
+        ordering = ['order']
 
 
 class AdditionalApprovalCondition(models.Model):

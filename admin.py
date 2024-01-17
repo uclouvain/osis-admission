@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from typing import Dict
 
 from django import forms
@@ -515,13 +516,13 @@ class DisplayTranslatedNameMixin:
 
 
 class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'order']
     search_fields = ['name']
 
 
 class RefusalReasonAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
     autocomplete_fields = ['category']
-    list_display = ['safe_name', 'category']
+    list_display = ['safe_name', 'category', 'order']
     list_filter = ['category']
 
     @admin.display(description=_('Name'))

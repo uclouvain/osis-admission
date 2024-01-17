@@ -960,7 +960,9 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
     def test_refusal_decision_form_initialization(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        refusal_reason = RefusalReasonFactory()
+        third_refusal_reason = RefusalReasonFactory(category__order=-1, order=-1)
+        first_refusal_reason = RefusalReasonFactory(category__order=-2, order=-2)
+        second_refusal_reason = RefusalReasonFactory(category=first_refusal_reason.category, order=-1)
 
         # No reason
         self.general_admission.refusal_reasons.all().delete()
@@ -976,8 +978,17 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         self.assertEqual(form.initial.get('reasons'), [])
 
+        choices = form.fields['reasons'].choices
+
+        # The choices are sorted by category order and then by reason order
+        self.assertEqual(choices[0][0], first_refusal_reason.category.name)
+        self.assertEqual(choices[0][1][0], [first_refusal_reason.uuid, first_refusal_reason.name])
+        self.assertEqual(choices[0][1][1], [second_refusal_reason.uuid, second_refusal_reason.name])
+        self.assertEqual(choices[1][0], third_refusal_reason.category.name)
+        self.assertEqual(choices[1][1][0], [third_refusal_reason.uuid, third_refusal_reason.name])
+
         # One existing reason is selected
-        self.general_admission.refusal_reasons.add(refusal_reason)
+        self.general_admission.refusal_reasons.add(first_refusal_reason)
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -986,7 +997,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         form = response.context['fac_decision_refusal_form']
 
-        self.assertEqual(form.initial.get('reasons'), [refusal_reason.uuid])
+        self.assertEqual(form.initial.get('reasons'), [first_refusal_reason.uuid])
 
         # One other reason is selected
         self.general_admission.refusal_reasons.all().delete()
