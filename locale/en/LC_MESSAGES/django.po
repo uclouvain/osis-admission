@@ -646,7 +646,7 @@ msgstr ""
 msgid "Application accepted"
 msgstr ""
 
-msgid "Application confirmed (by student)"
+msgid "Application confirmed"
 msgstr ""
 
 msgid "Application denied"
@@ -1469,13 +1469,13 @@ msgctxt "equivalence_status"
 msgid "Completed"
 msgstr ""
 
-msgid "Completed (by student) for Fac"
-msgstr ""
-
-msgid "Completed (by student) for SIC"
-msgstr ""
-
 msgid "Completed after the request"
+msgstr ""
+
+msgid "Completed for Fac"
+msgstr ""
+
+msgid "Completed for SIC"
 msgstr ""
 
 msgid "Configuration"
@@ -6368,16 +6368,16 @@ msgstr ""
 msgid "To be completed"
 msgstr ""
 
-msgid "To be completed (by student) for Fac"
-msgstr ""
-
-msgid "To be completed (by student) for the Enrolment Office (SIC)"
-msgstr ""
-
 msgid "To be completed after application"
 msgstr ""
 
 msgid "To be completed by SIC"
+msgstr ""
+
+msgid "To be completed for Fac"
+msgstr ""
+
+msgid "To be completed for the Enrolment Office (SIC)"
 msgstr ""
 
 msgid "To be processed"
