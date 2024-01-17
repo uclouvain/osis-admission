@@ -789,6 +789,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
         free_approval_conditions = []
 
         # Initialize additional approval conditions field
+        self.fields['with_additional_approval_conditions'].required = True
         if data:
             for condition in data.getlist(self.add_prefix('all_additional_approval_conditions'), []):
                 if is_uuid(condition):
@@ -818,6 +819,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
         self.fields['all_additional_approval_conditions'].choices = all_additional_approval_conditions_choices
         self.fields['all_additional_approval_conditions'].widget.choices = all_additional_approval_conditions_choices
 
+        self.fields['with_prerequisite_courses'].required = True
         self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
 
         # Initialize additional trainings fields
@@ -848,9 +850,16 @@ class SicDecisionApprovalForm(forms.ModelForm):
         if not self.is_hue:
             del self.fields['is_mobility']
             del self.fields['mobility_months_amount']
+        else:
+            self.fields['is_mobility'].required = True
+            self.fields['mobility_months_amount'].required = False
 
         if not self.is_admission:
             del self.fields['must_report_to_sic']
+        else:
+            self.fields['must_report_to_sic'].required = True
+
+        self.fields['communication_to_the_candidate'].required = False
 
     def clean_all_additional_approval_conditions(self):
         # This field can contain uuids of existing conditions or free conditions as strings
@@ -886,6 +895,16 @@ class SicDecisionApprovalForm(forms.ModelForm):
                     'tuition_fees_amount_other',
                     ValidationError(
                         self.fields['tuition_fees_amount_other'].error_messages['required'],
+                        code='required',
+                    ),
+                )
+
+        if cleaned_data.get('is_mobility'):
+            if not cleaned_data.get('mobility_months_amount'):
+                self.add_error(
+                    'mobility_months_amount',
+                    ValidationError(
+                        self.fields['mobility_months_amount'].error_messages['required'],
                         code='required',
                     ),
                 )

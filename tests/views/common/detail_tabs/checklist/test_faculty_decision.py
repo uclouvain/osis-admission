@@ -223,12 +223,19 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
     def test_send_to_faculty_is_forbidden_with_sic_user_if_the_admission_is_not_in_sic_statuses(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        self.general_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name
-        self.general_admission.save()
+        invalid_statuses = ChoixStatutPropositionGenerale.get_names_except(
+            ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
+            ChoixStatutPropositionGenerale.CONFIRMEE,
+            ChoixStatutPropositionGenerale.RETOUR_DE_FAC,
+        )
 
-        response = self.client.post(self.url, **self.default_headers)
+        for status in invalid_statuses:
+            self.general_admission.status = status
+            self.general_admission.save()
 
-        self.assertEqual(response.status_code, 403)
+            response = self.client.post(self.url, **self.default_headers)
+
+            self.assertEqual(response.status_code, 403)
 
     @freezegun.freeze_time('2022-01-01')
     def test_send_to_faculty_with_sic_user_in_valid_sic_statuses(self):

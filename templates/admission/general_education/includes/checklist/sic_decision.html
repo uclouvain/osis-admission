@@ -55,14 +55,14 @@
         {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' %}
       {% endif %}
       {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'refusal' %}
-        {% checklist_state_button tab='decision_sic' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' open_modal='#sic-decision-refusal-final-modal' %}
+        {% checklist_state_button tab='decision_sic' label=_("REFUSEE") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' open_modal='#sic-decision-refusal-final-modal' %}
       {% else %}
-        {% checklist_state_button tab='decision_sic' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("REFUSEE") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' disabled=True %}
       {% endif %}
       {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' %}
-        {% checklist_state_button tab='decision_sic' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' open_modal='#sic-decision-approval-final-modal' %}
+        {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' open_modal='#sic-decision-approval-final-modal' %}
       {% else %}
-        {% checklist_state_button tab='decision_sic' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' disabled=True %}
+        {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' disabled=True %}
       {% endif %}
     </div>
 
@@ -221,5 +221,6 @@
 
 {% if request.htmx %}
   {# Update the checklist menu  #}
-  {% include "admission/general_education/checklist_menu.html" with current_item='decision_sic' %}
+  {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='decision_sic' %}
+  {% include "admission/includes/admission_status.html" %}
 {% endif %}
