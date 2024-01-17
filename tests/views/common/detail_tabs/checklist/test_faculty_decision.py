@@ -43,7 +43,7 @@ from osis_notification.models import EmailNotification
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.checklist import AdditionalApprovalCondition
+from admission.contrib.models.checklist import AdditionalApprovalCondition, RefusalReasonCategory
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -960,9 +960,11 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
     def test_refusal_decision_form_initialization(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        third_refusal_reason = RefusalReasonFactory(category__order=-1, order=-1)
-        first_refusal_reason = RefusalReasonFactory(category__order=-2, order=-2)
-        second_refusal_reason = RefusalReasonFactory(category=first_refusal_reason.category, order=-1)
+        RefusalReasonCategory.objects.all().delete()
+
+        third_refusal_reason = RefusalReasonFactory(category__order=2, order=1)
+        first_refusal_reason = RefusalReasonFactory(category__order=1, order=1)
+        second_refusal_reason = RefusalReasonFactory(category=first_refusal_reason.category, order=2)
 
         # No reason
         self.general_admission.refusal_reasons.all().delete()

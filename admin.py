@@ -37,6 +37,8 @@ from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext
 from hijack.contrib.admin import HijackUserAdminMixin
+from ordered_model.admin import OrderedModelAdmin
+
 from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
@@ -515,14 +517,14 @@ class DisplayTranslatedNameMixin:
     search_fields = ['name_fr', 'name_en']
 
 
-class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
-    list_display = ['name', 'order']
+class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
+    list_display = ['name', 'move_up_down_links', 'order']
     search_fields = ['name']
 
 
-class RefusalReasonAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
+class RefusalReasonAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
     autocomplete_fields = ['category']
-    list_display = ['safe_name', 'category', 'order']
+    list_display = ['safe_name', 'category', 'move_up_down_links', 'order']
     list_filter = ['category']
 
     @admin.display(description=_('Name'))

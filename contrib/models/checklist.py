@@ -31,9 +31,10 @@ from django.conf import settings
 from django.db import models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from ordered_model.models import OrderedModel
 
 
-class RefusalReasonCategory(models.Model):
+class RefusalReasonCategory(OrderedModel):
     uuid = models.UUIDField(
         db_index=True,
         default=uuid.uuid4,
@@ -46,21 +47,15 @@ class RefusalReasonCategory(models.Model):
         verbose_name=_('Name'),
     )
 
-    order = models.FloatField(
-        default=0,
-        verbose_name=_('Order'),
-    )
-
     def __str__(self):
         return self.name
 
-    class Meta:
+    class Meta(OrderedModel.Meta):
         verbose_name = _('Refusal reason category')
         verbose_name_plural = _('Refusal reason categories')
-        ordering = ['order']
 
 
-class RefusalReason(models.Model):
+class RefusalReason(OrderedModel):
     uuid = models.UUIDField(
         db_index=True,
         default=uuid.uuid4,
@@ -79,18 +74,14 @@ class RefusalReason(models.Model):
         verbose_name=_('Category'),
     )
 
-    order = models.FloatField(
-        default=0,
-        verbose_name=_('Order'),
-    )
+    order_with_respect_to = 'category'
 
     def __str__(self):
         return mark_safe(self.name)
 
-    class Meta:
+    class Meta(OrderedModel.Meta):
         verbose_name = _('Refusal reason')
         verbose_name_plural = _('Refusal reasons')
-        ordering = ['order']
 
 
 class AdditionalApprovalCondition(models.Model):
