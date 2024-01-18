@@ -85,7 +85,11 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
     registration_as = ChoixInscriptionATitre.PRIVE.name
     checklist = factory.Dict({'default': True})  # This default value is overriden in a post generation method
     motivations = 'My motivations'
-    ways_to_find_out_about_the_course = factory.List(ChoixMoyensDecouverteFormation.get_names())
+    ways_to_find_out_about_the_course = [
+        ChoixMoyensDecouverteFormation.AMIS.name,
+        ChoixMoyensDecouverteFormation.LINKEDIN.name,
+    ]
+    interested_mark = False
 
     @factory.post_generation
     def create_candidate_role(self, create, extracted, **kwargs):

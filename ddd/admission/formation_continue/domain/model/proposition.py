@@ -111,6 +111,7 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         motivations: str,
         moyens_decouverte_formation: List[str],
+        marque_d_interet: Optional[bool],
     ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -118,6 +119,7 @@ class Proposition(interface.RootEntity):
         self.moyens_decouverte_formation = [
             ChoixMoyensDecouverteFormation[moyen] for moyen in moyens_decouverte_formation
         ]
+        self.marque_d_interet = marque_d_interet
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionContinue.ANNULEE

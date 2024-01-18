@@ -110,6 +110,11 @@ class PropositionInMemoryRepository(
                 formation_id=FormationIdentityFactory(sigle="USCC3", annee=2020),
             ),
             PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC32'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="USCC3", annee=2022),
+            ),
+            PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC42'),
                 matricule_candidat='0123456789',
                 formation_id=FormationIdentityFactory(sigle="USCC4", annee=2020),

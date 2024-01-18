@@ -25,4 +25,4 @@
 # ##############################################################################
 from ._should_curriculum_etre_complete import ShouldRenseignerExperiencesCurriculum
 from ._should_informations_complementaires_etre_completees import ShouldRenseignerInformationsAdditionnelles
-from ._should_choix_formation_etre_complete import ShouldRenseignerChoixDeFormation
+from ._should_choix_formation_etre_complete import ShouldRenseignerChoixDeFormation, ShouldFormationEtreOuverte

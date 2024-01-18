@@ -30,8 +30,10 @@ import attr
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMoyensDecouverteFormation
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ChoixDeFormationNonRenseigneException,
+    FormationEstFermeeException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
+from base.models.enums.state_iufc import StateIUFC
 from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
 
 
@@ -48,3 +50,12 @@ class ShouldRenseignerChoixDeFormation(BusinessValidator):
             and not self.moyens_decouverte_formation
         ):
             raise ChoixDeFormationNonRenseigneException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldFormationEtreOuverte(BusinessValidator):
+    informations_specifiques_formation: Optional[InformationsSpecifiquesDTO]
+
+    def validate(self, *args, **kwargs):
+        if self.informations_specifiques_formation and self.informations_specifiques_formation.etat == StateIUFC.CLOSED:
+            raise FormationEstFermeeException(self.informations_specifiques_formation.sigle_formation)

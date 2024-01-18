@@ -78,6 +78,7 @@ from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.state_iufc import StateIUFC
 from base.tests import QueriesAssertionsMixin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 
@@ -724,6 +725,36 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['errors'], [])
+
+    def test_continuing_proposition_with_closed_training(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+
+        admission = ContinuingEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            with_access_conditions_met=True,
+        )
+        admission.training.specificiufcinformations.state = StateIUFC.CLOSED.name
+        admission.training.specificiufcinformations.save()
+
+        admission_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=admission.uuid)
+
+        expected_error = {
+            "status_code": "FORMATION-CONTINUE-6",
+            "detail": _("Your application cannot be submitted because the %(acronym)s course is closed.")
+            % {"acronym": admission.training.acronym},
+        }
+
+        # Verification
+        response = self.client.get(admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_content = response.json()
+        self.assertEqual(json_content.get('errors', []), [expected_error])
+
+        # Submission
+        response = self.client.post(admission_url, self.submitted_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_content = response.json()
+        self.assertEqual(json_content.get('non_field_errors', []), [expected_error])
 
     def test_continuing_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)

@@ -621,6 +621,7 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             'aide_a_la_formation',
             'inscription_au_role_obligatoire',
             'etat_formation',
+            'marque_d_interet',
         ]
         extra_kwargs = {
             'nom_siege_social': {'max_length': 255},

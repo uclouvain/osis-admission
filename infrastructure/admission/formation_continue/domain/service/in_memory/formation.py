@@ -82,6 +82,7 @@ class FormationContinueInformationsSpecifiquesInMemoryRepositoryFactory(Informat
                 sigle_formation='USCC3',
                 annee=2022,
             ),
+            etat=StateIUFC.CLOSED,
         ),
         InformationsSpecifiquesFactory(
             entity_id=FormationContinueIdentite(
