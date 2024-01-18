@@ -265,7 +265,7 @@ def get_group_by_choices(
 
 class FacDecisionRefusalForm(forms.Form):
     reasons = forms.MultipleChoiceField(
-        label=pgettext_lazy('admission', 'Reasons'),
+        label=_('Reasons'),
         widget=FilterFieldWidget(
             with_search=True,
             with_free_options=True,
@@ -314,8 +314,11 @@ class FacDecisionRefusalForm(forms.Form):
         if reasons:
             cleaned_data['other_reasons'] = sorted(self.other_reasons)
             cleaned_data['reasons'] = self.categorized_reasons
-        else:
+        elif self.fields['reasons'].required:
             self.add_error('reasons', FIELD_REQUIRED_MESSAGE)
+        else:
+            cleaned_data['other_reasons'] = []
+            cleaned_data['reasons'] = []
 
         return cleaned_data
 
@@ -917,6 +920,10 @@ class SicDecisionRefusalForm(FacDecisionRefusalForm):
         label=_('Refusal type'),
         choices=EMPTY_CHOICE + TypeDeRefus.choices(),
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['reasons'].required = False
 
 
 class SicDecisionDerogationForm(forms.Form):

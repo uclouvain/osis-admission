@@ -4972,10 +4972,6 @@ msgstr ""
 msgid "Reasons"
 msgstr ""
 
-msgctxt "admission"
-msgid "Reasons"
-msgstr ""
-
 msgid "Rebilling or third-party payer"
 msgstr ""
 

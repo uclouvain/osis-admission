@@ -5515,11 +5515,7 @@ msgid "Reason for refusal"
 msgstr "Motif de refus"
 
 msgid "Reasons"
-msgstr "Raisons"
-
-msgctxt "admission"
-msgid "Reasons"
-msgstr "Raisons"
+msgstr "Motifs"
 
 msgid "Rebilling or third-party payer"
 msgstr "Refacturation ou tiers-payant"

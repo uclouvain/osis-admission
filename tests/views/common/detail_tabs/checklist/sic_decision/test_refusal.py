@@ -148,7 +148,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         form = response.context['sic_decision_refusal_form']
 
         self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('reasons', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('refusal_type', []))
 
     def test_refusal_decision_form_submitting_with_valid_data_existing_reason(self):
         self.client.force_login(user=self.sic_manager_user)
