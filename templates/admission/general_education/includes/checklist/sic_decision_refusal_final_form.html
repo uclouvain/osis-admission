@@ -97,13 +97,5 @@
       {# Update the content of the tab #}
       {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
     {% endif %}
-    <script>
-        $(document).ready(function () {
-            {% if sic_decision_refusal_final_form.is_valid %}
-                $('#sic-decision-refusal-final-modal').modal('hide');
-                $('.modal-backdrop').hide();
-            {% endif %}
-        });
-    </script>
   {% endif %}
 </form>
