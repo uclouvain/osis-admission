@@ -55,6 +55,10 @@
 {% endif %}
 
 {% if is_continuing %}
+  {% if proposition.etat_formation == 'CLOSED' %}
+    {% field_data _('I am interested in this course even if it is closed') proposition.marque_d_interet %}
+  {% endif %}
+
   {% field_data _('Motivations') proposition.motivations %}
 
   {% if proposition.inscription_au_role_obligatoire == True %}

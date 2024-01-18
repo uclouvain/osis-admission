@@ -3380,6 +3380,9 @@ msgstr ""
 "diplômes, relevés de notes, autorisation d’inscription, …) afin de s’assurer "
 "de l’authenticité des documents transmis par mes soins."
 
+msgid "I am interested in this course even if it is closed"
+msgstr "Je marque mon intérêt pour cette formation même si celle-ci est fermée"
+
 #, python-format
 msgid ""
 "I am pleased to inform you that the faculty has authorised you to enrol for "
@@ -8009,6 +8012,14 @@ msgstr ""
 
 msgid "Your Belgian student status"
 msgstr "Situation d’assimilation qui vous correspond"
+
+#, python-format
+msgid ""
+"Your application cannot be submitted because the %(acronym)s course is "
+"closed."
+msgstr ""
+"Il n'est pas possible de soumettre votre dossier d'admission car la "
+"formation %(acronym)s est fermée."
 
 msgid "Your data have been saved."
 msgstr "Vos données ont été sauvegardées."

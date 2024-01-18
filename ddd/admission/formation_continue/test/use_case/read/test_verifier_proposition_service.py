@@ -43,6 +43,7 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
     ExperiencesCurriculumNonRenseigneesException,
     InformationsComplementairesNonRenseigneesException,
     ChoixDeFormationNonRenseigneException,
+    FormationEstFermeeException,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
@@ -280,3 +281,9 @@ class TestVerifierPropositionService(TestCase):
         ):
             proposition_id = self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC3'))
             self.assertEqual(proposition_id, proposition_sans_infos_formation_iufc.entity_id)
+
+    def test_should_retourner_erreur_si_formation_continue_est_fermee(self):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC32'))
+
+        self.assertHasInstance(context.exception.exceptions, FormationEstFermeeException)

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.96
+  version: 1.0.97
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -10401,6 +10401,9 @@ components:
           nullable: true
         etat_formation:
           type: string
+        marque_d_interet:
+          type: boolean
+          nullable: true
       required:
       - uuid
       - reference
@@ -10433,6 +10436,11 @@ components:
           type: boolean
         etat:
           type: string
+          readOnly: true
+        emails_gestionnaires:
+          type: array
+          items:
+            type: string
           readOnly: true
       required:
       - sigle_formation
@@ -10927,6 +10935,9 @@ components:
           type: array
           items:
             type: string
+        marque_d_interet:
+          type: boolean
+          nullable: true
       required:
       - sigle_formation
       - annee_formation
@@ -11733,6 +11744,9 @@ components:
           type: array
           items:
             type: string
+        marque_d_interet:
+          type: boolean
+          nullable: true
         reponses_questions_specifiques:
           type: object
       required:

@@ -35,9 +35,22 @@ __all__ = [
 
 class InformationsSpecifiquesFormationContinueDTOSerializer(DTOSerializer):
     etat = serializers.SerializerMethodField()
+    emails_gestionnaires = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Define custom schemas as the default schema type of a SerializerMethodField is string
+        self.fields['emails_gestionnaires'].field_schema = {
+            'type': 'array',
+            'items': {'type': 'string'},
+        }
 
     def get_etat(self, obj):
         return obj.etat.name if obj.etat else ''
+
+    def get_emails_gestionnaires(self, obj):
+        return self.context['manager_emails']
 
     class Meta:
         source = InformationsSpecifiquesDTO

@@ -70,3 +70,13 @@ class ChoixDeFormationNonRenseigneException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Mandatory fields are missing in the 'Course choice' tab.")
         super().__init__(message, **kwargs)
+
+
+class FormationEstFermeeException(BusinessException):
+    status_code = "FORMATION-CONTINUE-6"
+
+    def __init__(self, sigle_formation: str, **kwargs):
+        message = _('Your application cannot be submitted because the %(acronym)s course is closed.') % {
+            "acronym": sigle_formation,
+        }
+        super().__init__(message, **kwargs)

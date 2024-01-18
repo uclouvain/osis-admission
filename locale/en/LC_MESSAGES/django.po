@@ -3100,6 +3100,9 @@ msgid ""
 "authorisation, etc.) in order to ensure their authenticity."
 msgstr ""
 
+msgid "I am interested in this course even if it is closed"
+msgstr ""
+
 #, python-format
 msgid ""
 "I am pleased to inform you that the faculty has authorised you to enrol for "
@@ -7238,6 +7241,12 @@ msgid ""
 msgstr ""
 
 msgid "Your Belgian student status"
+msgstr ""
+
+#, python-format
+msgid ""
+"Your application cannot be submitted because the %(acronym)s course is "
+"closed."
 msgstr ""
 
 msgid "Your data have been saved."
