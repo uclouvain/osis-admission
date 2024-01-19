@@ -55,19 +55,6 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
-        MailTemplate.objects.create(
-            identifier=ADMISSION_EMAIL_SIC_REFUSAL,
-            language=settings.LANGUAGE_CODE_FR,
-            subject='foo',
-            body='bar',
-        )
-        MailTemplate.objects.create(
-            identifier=ADMISSION_EMAIL_SIC_APPROVAL,
-            language=settings.LANGUAGE_CODE_FR,
-            subject='foo',
-            body='bar',
-        )
-
         cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
         EntityVersionFactory(entity=cls.first_doctoral_commission)
 

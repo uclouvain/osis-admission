@@ -36,7 +36,7 @@ from django.urls import reverse
 from django.utils import translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, gettext
+from django.utils.translation import gettext_lazy as _, gettext, get_language
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
@@ -794,6 +794,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             "admission_email": self.proposition.formation.campus_inscription.email,
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
         }
+        if get_language() == settings.LANGUAGE_CODE_FR:
+            if self.proposition.genre_candidat == "M":
+                tokens['greetings'] = "Cher"
+            elif self.proposition.genre_candidat == "F":
+                tokens['greetings'] = "Chère"
+            else:
+                tokens['greetings'] = "Cher·ère"
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
@@ -944,6 +951,8 @@ class SicRefusalFinalDecisionView(
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
 
+        # Invalidate cached_property for status update
+        del self.proposition
         return super().form_valid(form)
 
 
@@ -984,6 +993,8 @@ class SicApprovalFinalDecisionView(
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
 
+        # Invalidate cached_property for status update
+        del self.proposition
         return super().form_valid(form)
 
 
@@ -1030,11 +1041,17 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             status = self.kwargs['status']
             extra = {}
 
+        if status == 'GEST_BLOCAGE' and extra == {'blocage': 'closed'}:
+            global_status = ChoixStatutPropositionGenerale.CLOTUREE.name
+        else:
+            global_status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+
         change_admission_status(
             tab='decision_sic',
             admission_status=status,
             extra=extra,
             admission=admission,
+            global_status=global_status,
         )
 
         return self.render_to_response(self.get_context_data())
@@ -1709,7 +1726,7 @@ class ChangeStatusSerializer(serializers.Serializer):
     extra = serializers.DictField(default={}, required=False)
 
 
-def change_admission_status(tab, admission_status, extra, admission, replace_extra=False):
+def change_admission_status(tab, admission_status, extra, admission, replace_extra=False, global_status=None):
     """Change the status of the admission of a specific tab"""
     update_fields = ['checklist']
 
@@ -1735,9 +1752,8 @@ def change_admission_status(tab, admission_status, extra, admission, replace_ext
     else:
         tab_data['extra'].update(serializer.validated_data['extra'])
 
-    # Decision SIC
-    if tab == 'decision_sic':
-        admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+    if global_status is not None:
+        admission.status = global_status
         update_fields.append('status')
 
     admission.save(update_fields=update_fields)

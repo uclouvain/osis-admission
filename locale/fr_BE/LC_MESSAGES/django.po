@@ -3061,6 +3061,9 @@ msgstr "Mention obtenue"
 msgid "Graduation of {program_name}"
 msgstr "L'obtention de votre diplôme de {program_name}"
 
+msgid "Greetings depending on the gender of the candidate"
+msgstr "Salutations en fonction du genre du candidat"
+
 msgid "Grounds for denied"
 msgstr "Motif de refus"
 
@@ -5515,11 +5518,7 @@ msgid "Reason for refusal"
 msgstr "Motif de refus"
 
 msgid "Reasons"
-msgstr "Raisons"
-
-msgctxt "admission"
-msgid "Reasons"
-msgstr "Raisons"
+msgstr "Motifs"
 
 msgid "Rebilling or third-party payer"
 msgstr "Refacturation ou tiers-payant"

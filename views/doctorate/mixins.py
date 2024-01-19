@@ -82,6 +82,7 @@ from admission.utils import (
     person_is_sic,
     person_is_fac_cdd,
     access_title_country,
+    add_close_modal_into_htmx_response,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
@@ -311,6 +312,7 @@ class AdmissionFormMixin(AdmissionViewMixin):
                 response.headers['HX-Refresh'] = 'true'
             else:
                 add_messages_into_htmx_response(request=self.request, response=response)
+                add_close_modal_into_htmx_response(response=response)
             return response
 
         return super().form_valid(form)
