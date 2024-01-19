@@ -57,12 +57,11 @@ class SearchAccountView(HtmxMixin, FormView):
 
     @property
     def candidate(self):
-        admission = BaseAdmission.objects.get(uuid=self.kwargs['uuid'])
         return Person.objects.values(
             'first_name', 'middle_name', 'last_name', 'email', 'gender', 'birth_date', 'civil_state',
             'birth_place', 'country_of_citizenship__name', 'national_number', 'id_card_number',
             'passport_number', 'last_registration_id', 'global_id',
-        ).get(pk=admission.candidate_id)
+        ).get(baseadmissions__uuid=self.kwargs['uuid'])
 
     @property
     def experience(self):
