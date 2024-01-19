@@ -1218,8 +1218,7 @@ def checklist_experience_action_links(
                 uuid=proposition_uuid_str,
             ),
         }
-    elif (experience.valorisee_par_admissions and proposition_uuid in experience.valorisee_par_admissions
-          and experience.derniere_annee == current_year):
+    elif proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year:
         if experience.__class__ == ExperienceAcademiqueDTO:
             return {
                 'update_url': resolve_url(
