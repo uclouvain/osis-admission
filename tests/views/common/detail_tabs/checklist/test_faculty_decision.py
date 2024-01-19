@@ -48,6 +48,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
     DecisionFacultaireEnum,
+    PoursuiteDeCycle,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.notification import NotificationException
 from admission.tests.factories.comment import CommentEntryFactory
@@ -64,6 +65,7 @@ from admission.tests.factories.history import HistoryEntryFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from admission.tests.factories.secondary_studies import ForeignHighSchoolDiplomaFactory
+from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -193,6 +195,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
 
         cls.training = GeneralEducationTrainingFactory(
             management_entity=cls.first_doctoral_commission,
+            education_group_type__name=TrainingType.BACHELOR.name,
             academic_year=cls.academic_years[0],
             enrollment_campus__email='mons@campus.be',
         )
@@ -206,6 +209,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
             training=self.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            cycle_pursuit=PoursuiteDeCycle.NO.name,
         )
         self.default_checklist = copy.deepcopy(self.general_admission.checklist)
         self.url = resolve_url(
@@ -248,7 +252,15 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         program_email = EmailFonctionProgrammeFactory(
             programme=self.general_admission.training.education_group,
             type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            premiere_annee=False,
         )
+
+        # There is a recipient but not for the first year so we trigger an exception
+        with self.assertRaises(NotificationException):
+            self.client.post(self.url, **self.default_headers)
+
+        program_email.premiere_annee = True
+        program_email.save()
 
         response = self.client.post(self.url, **self.default_headers)
 
