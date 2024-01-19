@@ -827,8 +827,7 @@ def part_of_dict(member, container):
 
 @register.simple_tag
 def is_current_checklist_status(current, state, extra):
-    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {})) \
-        if current and state else False
+    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {}))
 
 
 @register.simple_tag
