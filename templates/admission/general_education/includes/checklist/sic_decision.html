@@ -111,8 +111,9 @@
             <dt>{% trans "Refusal type" %}</dt>
             <dd>{{ admission.type_de_refus|enum_display:'TypeDeRefus' }}</dd>
 
-            <dt>{% blocktrans context "admission" %}Reasons{% endblocktrans %}</dt>
+            <dt>{% trans "Reasons" %}</dt>
             <dd>
+              {% if admission.motifs_refus %}
               <ul>
                 {% for reason in admission.motifs_refus %}
                   {% ifchanged reason.categorie %}
@@ -127,6 +128,9 @@
                   {% endif %}
                 {% endfor %}
               </ul>
+              {% else %}
+                -
+              {% endif %}
             </dd>
           </dl>
         </div>
