@@ -83,9 +83,6 @@
   <div>
     <img id="logo" src="{% static "img/logo_uclouvain.png" %}">
   </div>
-  <div>
-    Service des inscriptions (SIC)
-  </div>
 
   <div class="row">
     <div class="col-6">
@@ -103,7 +100,7 @@
 
   <div class="text-end">Louvain-la-Neuve, {% if LANGUAGE_CODE == 'fr-be' %}Le {% endif %}{% now "d/m/Y" %}</div>
 
-  <p>Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
+  <p class="mt-4">Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
 
   <p>
     {% with name=proposition.prenom_candidat|add:" "|add:proposition.nom_candidat %}
@@ -111,24 +108,11 @@
     {% endwith %}
   </p>
 
-  <p>
-    Après examen de votre dossier, j’ai le regret de vous faire savoir que votre demande d’admission au programme de «
-    {% if proposition.poursuite_de_cycle == 'TO_BE_DETERMINED' or proposition.poursuite_de_cycle == 'NO' %}
-      {% trans "First year of" %} {{ proposition.formation.intitule|lower }} ({{ proposition.formation.sigle }}-1)
-    {% else %}
-      {{ proposition.formation.intitule }} ({{ proposition.formation.sigle }})
-    {% endif %}
-     » pour l’année académique {{ proposition.formation.annee|get_academic_year }} ne peut faire
-    l’objet d’une réponse favorable. Les critères établis par les autorités académiques de notre université ne sont pas
-    rencontrés (cfr <a href="https://uclouvain.be/fr/etudier/inscriptions/futurs-etudiants.html">https://uclouvain.be/fr/etudier/inscriptions/futurs-etudiants.html</a>).
-  </p>
-
   {% include "admission/exports/includes/sic_refusal/"|add:proposition.type_de_refus|add:".html" %}
 
   <p>
     Conscient de la déception que ce courrier pourrait susciter, je vous prie néanmoins d'agréer, Madame, Monsieur,
-    l'expression de mes salutations distinguées.Conscient de la déception que ce courrier pourrait susciter, je vous
-    prie néanmoins d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.
+    l'expression de mes salutations distinguées.
   </p>
 
   <div class="row">

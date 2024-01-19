@@ -24,6 +24,17 @@
 {% endcomment %}
 
 <p>
+  Après examen de votre dossier, j’ai le regret de vous faire savoir que votre demande d’admission au programme de «
+  {% if proposition|est_premiere_annee %}
+    {{ proposition.formation.intitule|intitule_premiere_annee }} ({{ proposition.formation.sigle }}-1)
+  {% else %}
+    {{ proposition.formation.intitule }} ({{ proposition.formation.sigle }})
+  {% endif %}
+   » pour l’année académique {{ proposition.formation.annee|get_academic_year }} ne peut faire
+  l’objet d’une réponse favorable.
+</p>
+
+<p>
   La date tardive à laquelle nous avons reçu le complément de dossier, indispensable à l'analyse de votre demande, ne
   nous permet plus de traiter celle-ci dans un délai raisonnable pour cette année académique. En effet, comme
   mentionné sur le site, ce complément devait nous parvenir endéans les 15 jours calendrier suivant la réception du
