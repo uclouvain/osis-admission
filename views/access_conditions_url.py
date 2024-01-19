@@ -28,8 +28,7 @@ from urllib.parse import unquote
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import RedirectView
 
-from admission.api.views.submission import get_access_conditions_url
-
+from admission.utils import get_access_conditions_url
 
 __all__ = [
     'AccessConditionsURL',

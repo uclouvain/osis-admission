@@ -23,12 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from contextlib import suppress
 from typing import Union
 
-from django.conf import settings
 from django.utils import timezone
-from django.utils.translation import get_language
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -66,22 +63,19 @@ from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
+    get_access_conditions_url,
 )
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from base.models.enums.education_group_types import TrainingType
-from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
-from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
 __all__ = [
     "VerifyDoctoralProjectView",
     "SubmitDoctoralPropositionView",
     "SubmitGeneralEducationPropositionView",
     "SubmitContinuingEducationPropositionView",
-    "get_access_conditions_url",
 ]
 
 
@@ -175,39 +169,6 @@ class SubmitDoctoralPropositionSchema(VerifySchema):
         elif method == 'POST':
             return 'submit_proposition'
         return super().get_operation_id(path, method)
-
-
-def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
-    if training_type == TrainingType.PHD.name:
-        return (
-            "https://uclouvain.be/en/study/inscriptions/doctorate-and-doctoral-training.html"
-            if get_language() == settings.LANGUAGE_CODE_EN
-            else "https://uclouvain.be/fr/etudier/inscriptions/conditions-doctorats.html"
-        )
-    else:
-        # Get the last year being published
-        today = timezone.now().today()
-        year = (
-            AcademicCalendar.objects.filter(
-                reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
-                start_date__lte=today,
-            )
-            .order_by('-start_date')
-            .values_list('data_year__year', flat=True)
-            .first()
-        )
-
-        sigle = training_acronym
-        with suppress(ProgramTreeNotFoundException):  # pragma: no cover
-            # Try to get the acronym from the parent, if it exists
-            sigle = message_bus_instance.invoke(
-                GetSigleFormationParenteQuery(
-                    code_formation=partial_training_acronym,
-                    annee=year,
-                )
-            )
-
-        return f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
 
 
 class SubmitPropositionMixin:
