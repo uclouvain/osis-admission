@@ -194,6 +194,15 @@ def add_messages_into_htmx_response(request, response):
         )
 
 
+def add_close_modal_into_htmx_response(response):
+    if 'HX-Trigger' in response:
+        trigger = json.loads(response['HX-Trigger'])
+        trigger['closeModal'] = ""
+        response['HX-Trigger'] = json.dumps(trigger)
+    else:
+        response['HX-Trigger'] = json.dumps({'closeModal': ""})
+
+
 def get_portal_admission_list_url() -> str:
     """Return the url of the list of the admissions in the portal."""
     return f'{settings.OSIS_PORTAL_URL}admission/'

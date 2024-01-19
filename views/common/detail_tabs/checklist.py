@@ -944,6 +944,8 @@ class SicRefusalFinalDecisionView(
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
 
+        # Invalidate cached_property for status update
+        del self.proposition
         return super().form_valid(form)
 
 
@@ -984,6 +986,8 @@ class SicApprovalFinalDecisionView(
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
 
+        # Invalidate cached_property for status update
+        del self.proposition
         return super().form_valid(form)
 
 
@@ -1030,11 +1034,17 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             status = self.kwargs['status']
             extra = {}
 
+        if status == 'GEST_BLOCAGE' and extra == {'blocage': 'closed'}:
+            global_status = ChoixStatutPropositionGenerale.CLOTUREE.name
+        else:
+            global_status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+
         change_admission_status(
             tab='decision_sic',
             admission_status=status,
             extra=extra,
             admission=admission,
+            global_status=global_status,
         )
 
         return self.render_to_response(self.get_context_data())
@@ -1709,7 +1719,7 @@ class ChangeStatusSerializer(serializers.Serializer):
     extra = serializers.DictField(default={}, required=False)
 
 
-def change_admission_status(tab, admission_status, extra, admission, replace_extra=False):
+def change_admission_status(tab, admission_status, extra, admission, replace_extra=False, global_status=None):
     """Change the status of the admission of a specific tab"""
     update_fields = ['checklist']
 
@@ -1735,9 +1745,8 @@ def change_admission_status(tab, admission_status, extra, admission, replace_ext
     else:
         tab_data['extra'].update(serializer.validated_data['extra'])
 
-    # Decision SIC
-    if tab == 'decision_sic':
-        admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+    if global_status is not None:
+        admission.status = global_status
         update_fields.append('status')
 
     admission.save(update_fields=update_fields)

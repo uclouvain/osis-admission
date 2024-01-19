@@ -792,6 +792,10 @@
               }
           });
 
+          document.body.addEventListener("closeModal", function(event) {
+              $('.modal.in').modal('hide');
+          });
+
           {# When a form is submitted #}
           const base_details_url = "{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='custom_identifier' %}";
           documentContent.on('formValidation', function(event) {
