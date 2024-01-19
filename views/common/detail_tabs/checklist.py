@@ -936,10 +936,7 @@ class ChecklistView(
                     years_range = exp.annees \
                         if type(exp) == ExperienceAcademiqueDTO else range(exp.date_debut.year, exp.date_fin.year)
                     for annee in years_range:
-                        if annee in experiences.keys():
-                            experiences[annee] += [exp]
-                        else:
-                            experiences[annee] = [exp]
+                        experiences.setdefault(annee, []).append(exp)
                 experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
 
         return experiences
