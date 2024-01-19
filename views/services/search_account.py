@@ -38,7 +38,6 @@ from admission.ddd.admission.commands import InitialiserPropositionFusionPersonn
 from admission.forms.admission.person_merge_proposal_form import PersonMergeProposalForm
 from base.models.person import Person
 from base.views.common import display_success_messages
-from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
 
@@ -51,6 +50,10 @@ class SearchAccountView(HtmxMixin, FormView):
     urlpatterns = {'search-account-modal': 'search-account-modal/<uuid:uuid>'}
 
     form_class = PersonMergeProposalForm
+
+    @property
+    def admission(self):
+        return BaseAdmission.objects.get(uuid=self.kwargs['uuid'])
 
     @property
     def candidate(self):
@@ -66,7 +69,8 @@ class SearchAccountView(HtmxMixin, FormView):
         from infrastructure.messages_bus import message_bus_instance
         return message_bus_instance.invoke(
             RechercherParcoursAnterieurQuery(
-                global_id=self.candidate['global_id']
+                global_id=self.candidate['global_id'],
+                uuid_proposition=self.admission.uuid,
             )
         )
 
@@ -74,13 +78,15 @@ class SearchAccountView(HtmxMixin, FormView):
         context = super().get_context_data()
         context['uuid'] = self.kwargs['uuid']
         context['candidate'] = self.candidate
-        context['professional_experience'] = self.experience['professional']
-        context['educational_experience'] = self.experience['educational']
+        context['professional_experience'] = self.experience.experiences_non_academiques
+        context['educational_experience'] = self.experience.experiences_academiques
+        context['annee_diplome_etudes_secondaires'] = self.experience.annee_diplome_etudes_secondaires
         search_context = self.request.session.get('search_context', {})
         context.update(**search_context)
         return context
 
     def form_valid(self, form):
+        from infrastructure.messages_bus import message_bus_instance
         display_success_messages(self.request, messages_to_display="La proposition de fusion a été créée avec succès")
         message_bus_instance.invoke(
             InitialiserPropositionFusionPersonneCommand(
@@ -101,6 +107,7 @@ class SearchAccountView(HtmxMixin, FormView):
                 expiration_carte_id=form.cleaned_data['id_card_expiry_date'],
                 educational_curex_uuids=self.get_educational_curex_form_values(),
                 professional_curex_uuids=self.get_professional_curex_form_values(),
+                annee_diplome_etudes_secondaires=self.get_high_school_graduation_year(),
             )
         )
         return HttpResponse(status=200, headers={'HX-Refresh': 'true'})
@@ -115,6 +122,9 @@ class SearchAccountView(HtmxMixin, FormView):
 
     def get_educational_curex_form_values(self):
         return self.request.POST.getlist('educational')
+
+    def get_high_school_graduation_year(self):
+        return self.request.POST.getlist('high_school_graduation_year')
 
     def get_success_url(self):
         return reverse(

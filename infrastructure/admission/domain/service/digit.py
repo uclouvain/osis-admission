@@ -99,7 +99,9 @@ class DigitService(IDigitService):
 
             person_merge_proposal, created = PersonMergeProposal.objects.get_or_create(
                 original_person=original_person,
-                last_similarity_result_update=datetime.datetime.now(),
+                defaults={
+                    "last_similarity_result_update": datetime.datetime.now()
+                },
             )
 
             if created:

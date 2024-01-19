@@ -153,6 +153,7 @@ class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
     expiration_carte_id: str
     educational_curex_uuids: List[str]
     professional_curex_uuids: List[str]
+    annee_diplome_etudes_secondaires: List[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -171,8 +172,9 @@ class RefuserPropositionFusionCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RechercherParcoursAnterieurQuery(interface.CommandRequest):
+class RechercherParcoursAnterieurQuery(interface.QueryRequest):
     global_id: str
+    uuid_proposition: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -181,5 +183,5 @@ class SoumettreTicketPersonneCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class GetStatutTicketPersonneQuery(interface.CommandRequest):
+class GetStatutTicketPersonneQuery(interface.QueryRequest):
     global_id: str

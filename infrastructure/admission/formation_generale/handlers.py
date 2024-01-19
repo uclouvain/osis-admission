@@ -94,7 +94,6 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
 )
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from admission.infrastructure.admission.repository.digit import DigitRepository
-from admission.infrastructure.admission.repository.osis_profile import OsisProfileRepository
 from admission.infrastructure.admission.repository.proposition_fusion_personne import \
     PropositionPersonneFusionRepository
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
@@ -514,7 +513,8 @@ COMMAND_HANDLERS = {
     ),
     RechercherParcoursAnterieurQuery: lambda msg_bus, cmd: rechercher_parcours_anterieur(
         cmd,
-        osis_profile_repository=OsisProfileRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
     ),
     SoumettreTicketPersonneCommand: lambda msg_bus, cmd: soumettre_ticket_creation_personne(
         cmd,

@@ -23,15 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.repository.i_osis_profile import IOsisProfileRepository
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
 
 def rechercher_parcours_anterieur(
     cmd: 'RechercherParcoursAnterieurQuery',
-    osis_profile_repository: 'IOsisProfileRepository',
+    profil_candidat_translator: 'IProfilCandidatTranslator',
+    academic_year_repository: 'IAcademicYearRepository',
 ):
-    return osis_profile_repository.get_curriculum(
-        global_id=cmd.global_id,
+    annee_courante = (
+        GetCurrentAcademicYear()
+        .get_starting_academic_year(
+            datetime.date.today(),
+            academic_year_repository,
+        )
+        .year
+    )
+    return profil_candidat_translator.get_curriculum(
+        matricule=cmd.global_id,
+        annee_courante=annee_courante,
+        uuid_proposition=cmd.uuid_proposition,
     )

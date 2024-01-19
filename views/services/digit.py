@@ -44,6 +44,7 @@ from django.views.generic import FormView
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import RechercherCompteExistantQuery, DefairePropositionFusionCommand, \
     SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
+from base.models.person import Person
 from base.views.common import display_error_messages
 
 from django.utils.translation import gettext_lazy as _
@@ -54,16 +55,14 @@ class RequestDigitAccountCreationView(FormView):
     urlpatterns = {'request-digit-person-creation': 'request-digit-person-creation/<uuid:uuid>'}
 
     def post(self, request, *args, **kwargs):
-
-        admission = BaseAdmission.objects.get(uuid=kwargs['uuid'])
-
-        response = create_digit_person(admission.candidate.global_id)
+        candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
+        response = self.create_digit_person(candidate.global_id)
         return response
 
-
-def create_digit_person(global_id: str):
-    from infrastructure.messages_bus import message_bus_instance
-    return message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=global_id))
+    @staticmethod
+    def create_digit_person(global_id: str):
+        from infrastructure.messages_bus import message_bus_instance
+        return message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=global_id))
 
 
 class SearchDigitAccountView(FormView):
@@ -72,27 +71,27 @@ class SearchDigitAccountView(FormView):
 
     def post(self, request, *args, **kwargs):
 
-        admission = BaseAdmission.objects.get(uuid=kwargs['uuid'])
+        candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
 
-        if self._is_valid_for_search(request, admission):
-            return redirect(to=reverse('admission:doctorate:person', kwargs={'uuid': kwargs['uuid']}))
+        if self._is_valid_for_search(request, candidate):
+            return redirect(to=self.request.META.get('HTTP_REFERER'))
 
         matches = search_digit_account(
-            global_id=admission.candidate.global_id,
-            last_name=admission.candidate.last_name,
-            first_name=admission.candidate.first_name,
-            birth_date=str(admission.candidate.birth_date)
+            global_id=candidate.global_id,
+            last_name=candidate.last_name,
+            first_name=candidate.first_name,
+            birth_date=str(candidate.birth_date)
         )
 
         request.session['search_context'] = {'matches': matches}
-        return redirect(reverse('admission:services:search-account-modal', kwargs={'uuid': admission.uuid}))
+        return redirect(reverse('admission:services:search-account-modal', kwargs={'uuid': kwargs['uuid']}))
 
     @staticmethod
-    def _is_valid_for_search(request, admission):
+    def _is_valid_for_search(request, candidate):
         candidate_required_fields = [
             "last_name", "first_name", "birth_date",
         ]
-        missing_fields = [field for field in candidate_required_fields if not getattr(admission.candidate, field)]
+        missing_fields = [field for field in candidate_required_fields if not getattr(candidate, field)]
         has_missing_fields = any(missing_fields)
 
         if has_missing_fields:
@@ -154,14 +153,13 @@ class UndoMergeAccountView(FormView):
     urlpatterns = {'undo-merge': 'undo-merge/<uuid:uuid>'}
 
     def post(self, request, *args, **kwargs):
-
-        admission = BaseAdmission.objects.get(uuid=kwargs['uuid'])
+        candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
 
         from infrastructure.messages_bus import message_bus_instance
 
         message_bus_instance.invoke(
             DefairePropositionFusionCommand(
-                global_id=admission.candidate.global_id,
+                global_id=candidate.global_id,
             )
         )
 
@@ -175,13 +173,13 @@ class DiscardMergeAccountView(FormView):
 
     def post(self, request, *args, **kwargs):
 
-        admission = BaseAdmission.objects.get(uuid=kwargs['uuid'])
+        candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
 
         from infrastructure.messages_bus import message_bus_instance
 
         message_bus_instance.invoke(
             RefuserPropositionFusionCommand(
-                global_id=admission.candidate.global_id,
+                global_id=candidate.global_id,
             )
         )
 

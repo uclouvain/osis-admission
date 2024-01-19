@@ -46,8 +46,7 @@
                     <tr>
                         <th></th>
                         <th>Années</th>
-                        <th>Expérience</th>
-                        <th>Role</th>
+                        <th>Fonction</th>
                         <th>Lieu</th>
                     </tr>
                 </thead>
@@ -56,9 +55,8 @@
                     <tr>
                         <td><input type="checkbox" name="professional" value="{{ experience.uuid }}" checked/></td>
                         <td>{{ experience.date_debut|date:"Y" }} - {{ experience.date_fin|date:"Y" }}</td>
-                        <td>{{ experience.type|default_if_none_or_empty:'Non spécifié' }}</td>
                         <td>{{ experience.fonction|default_if_none_or_empty:'Non spécifié' }}</td>
-                        <td>{{ experience.institut_name|default_if_none_or_empty:'Non spécifié' }}</td>
+                        <td>{{ experience.employeur|default_if_none_or_empty:'Non spécifié' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -70,7 +68,7 @@
                     <tr>
                         <th></th>
                         <th>Années</th>
-                        <th>Expérience</th>
+                        <th>Formation</th>
                         <th>Lieu</th>
                     </tr>
                 </thead>
@@ -79,12 +77,17 @@
                     <tr>
                         <td><input type="checkbox" name="educational" value="{{ experience.uuid }}" checked/></td>
                         <td>{{ experience.annees|display_academic_years_range }}</td>
-                        <td>{{ experience.program.title|default_if_none_or_empty:'Non spécifié' }}</td>
-                        <td>{{ experience.institute.name|default_if_none_or_empty:'Non spécifié' }}</td>
+                        <td>{{ experience.nom_formation|default_if_none_or_empty:'Non spécifié' }}</td>
+                        <td>{{ experience.nom_institut|default_if_none_or_empty:'Non spécifié' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+            <h6>{% trans 'High school graduation year' %}</h6>
+            <div class="input-group">
+                <input class="form-control" type="number" name="high_school_graduation_year" value="{{ annee_diplome_etudes_secondaires }}">
+            </div>
 
             </form>
 
@@ -108,7 +111,7 @@
             <div class="panel-body digit-data" style="padding-left: 15px !important;">
 
                 <span
-                    hx-get="{% url 'admission:services:previous-experience' %}"
+                    hx-get="{% url 'admission:services:previous-experience' uuid %}"
                     hx-vals="js:{matricule: document.querySelector('#selectedMatricule').value}"
                     hx-trigger="load, selectMergePerson from:document"
                 ></span>

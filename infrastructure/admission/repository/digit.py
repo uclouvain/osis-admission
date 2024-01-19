@@ -40,8 +40,9 @@ class DigitRepository(IDigitRepository):
         person = Person.objects.get(global_id=global_id)
 
         # get proposal merge person if any is linked
-        if PersonMergeProposal.objects.filter(original_person=person).exists():
-            person = PersonMergeProposal.objects.get(original_person=person).proposal_merge_person
+        proposition = PersonMergeProposal.objects.filter(original_person=person)
+        if proposition.exists():
+            person = proposition.get().proposal_merge_person
 
         ticket_response = _request_person_ticket_creation(person)
 

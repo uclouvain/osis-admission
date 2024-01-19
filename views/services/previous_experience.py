@@ -38,7 +38,7 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
 
     template_name = "admission/previous_experience.html"
     htmx_template_name = "admission/previous_experience.html"
-    urlpatterns = {'previous-experience': 'previous-experience/'}
+    urlpatterns = {'previous-experience': 'previous-experience/<uuid:admission_uuid>'}
 
     @property
     def experience(self):
@@ -46,11 +46,13 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
         return message_bus_instance.invoke(
             RechercherParcoursAnterieurQuery(
                 global_id=self.request.GET.get('matricule'),
+                uuid_proposition=self.request.GET.get('admission_uuid')
             )
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        context['professional_experience'] = self.experience['professional']
-        context['educational_experience'] = self.experience['educational']
+        context['professional_experience'] = self.experience.experiences_academiques
+        context['educational_experience'] = self.experience.experiences_non_academiques
+        context['high_school_graduation_year'] = self.experience.annee_diplome_etudes_secondaires
         return context

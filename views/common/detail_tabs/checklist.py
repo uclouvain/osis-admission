@@ -922,14 +922,17 @@ class ChecklistView(
                                  self.proposition_fusion.professional_curex_uuids)
             if curex_a_fusionner:
                 curex_existant = message_bus_instance.invoke(
-                    RechercherParcoursAnterieurQuery(global_id=self.proposition_fusion.matricule)
+                    RechercherParcoursAnterieurQuery(
+                        global_id=self.proposition_fusion.matricule,
+                        uuid_proposition=self.admission_uuid,
+                    )
                 )
                 experiences = {
                     annee: [exp for exp in exp_list if str(exp.uuid) in curex_a_fusionner]
                     for annee, exp_list in experiences.items()
                 }
                 # add existing curex by years
-                for exp in (curex_existant['educational'] + curex_existant['professional']):
+                for exp in (curex_existant.experiences_academiques + curex_existant.experiences_non_academiques):
                     years_range = exp.annees \
                         if type(exp) == ExperienceAcademiqueDTO else range(exp.date_debut.year, exp.date_fin.year)
                     for annee in years_range:
