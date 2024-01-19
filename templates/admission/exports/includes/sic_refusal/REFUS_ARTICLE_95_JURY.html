@@ -24,20 +24,33 @@
 {% endcomment %}
 
 <p>
+  Après examen de votre dossier, j’ai le regret de vous faire savoir que votre demande d’admission au programme de «
+  {% if proposition|est_premiere_annee %}
+    {{ proposition.formation.intitule|intitule_premiere_annee }} ({{ proposition.formation.sigle }}-1)
+  {% else %}
+    {{ proposition.formation.intitule }} ({{ proposition.formation.sigle }})
+  {% endif %}
+   » pour l’année académique {{ proposition.formation.annee|get_academic_year }} ne peut faire
+  l’objet d’une réponse favorable.
+</p>
+
+<p>
   Conformément à l’article 111, §1er, 4° du décret du 7 novembre 2013 définissant le paysage de l’enseignement
   supérieur et l’organisation académique des études, le jury d'admission a estimé que votre candidature ne
   répond pas aux conditions d'accès pour accéder au programme visé.
 </p>
 
+{% if proposition.motifs_refus %}
 <p>
   En effet, le jury a estimé que:
 </p>
 
 <ul>
-  {% for motif in propositon.motifs_refus %}
+  {% for motif in proposition.motifs_refus %}
     <li>{{ motif.motif }}</li>
   {% endfor %}
 </ul>
+{% endif %}
 
 <p>
   Toutefois, si vous estimez que les motifs de cette décision d'irrecevabilité ne sont pas fondés et que vous disposez

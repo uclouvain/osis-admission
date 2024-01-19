@@ -154,7 +154,12 @@ templates.register(
         Token(
             name='admission_training',
             description=_("Training of the admission"),
-            example="AGRO3DP / Doctorat en sciences agronomiques et ingénierie biologique",
+            example="Première année de bachelier en sciences informatiques (Louvain-la-Neuve) - SINF11BA",
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher·ère",
         ),
     ],
 )
