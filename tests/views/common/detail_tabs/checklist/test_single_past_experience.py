@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import uuid
 
 import freezegun
@@ -146,6 +147,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertEqual(new_experience_data['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
         self.assertEqual(new_experience_data['extra']['identifiant'], unknown_uuid)
 
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
     def test_pass_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -202,6 +206,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
 
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
     def test_change_the_checklist_status_to_a_status_with_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -224,6 +231,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertEqual(experience_checklist['extra'].get('authentification'), '1')
 
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
     def test_change_the_checklist_status_to_a_status_without_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -245,6 +255,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
 
         self.assertEqual(experience_checklist['extra'].get('authentification'), '0')
+
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -408,3 +421,6 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_EN_COURS.name)
         self.assertEqual(experience_checklist['extra']['authentification'], '1')
         self.assertEqual(experience_checklist['extra']['etat_authentification'], EtatAuthentificationParcours.FAUX.name)
+
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())

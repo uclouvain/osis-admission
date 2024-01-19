@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ def specifier_motifs_refus_proposition_par_faculte(
     proposition.specifier_motifs_refus_par_fac(
         uuids_motifs=cmd.uuids_motifs,
         autres_motifs=cmd.autres_motifs,
+        auteur_modification=cmd.gestionnaire,
     )
 
     proposition_repository.save(entity=proposition)

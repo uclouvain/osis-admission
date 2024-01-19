@@ -40,7 +40,6 @@ class AccountingFormView(AccountingMixinView, FormView):
     permission_required = 'admission.view_admission_accounting'
     urlpatterns = 'accounting'
     update_requested_documents = True
-    update_admission_author = True
     form_class = AccountingForm
 
     def get_context_data(self, **kwargs):
@@ -69,6 +68,7 @@ class AccountingFormView(AccountingMixinView, FormView):
         message_bus_instance.invoke(
             CompleterComptabilitePropositionCommand(
                 uuid_proposition=self.admission_uuid,
+                auteur_modification=self.request.user.person.global_id,
                 **form.cleaned_data,
             )
         )

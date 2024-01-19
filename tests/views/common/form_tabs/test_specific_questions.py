@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import uuid
 from unittest import mock
 
@@ -38,6 +39,7 @@ from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms import EMPTY_CHOICE
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
@@ -275,6 +277,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.master_training,
             candidate__language=settings.LANGUAGE_CODE_EN,
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
@@ -302,6 +305,12 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.regular_registration_proof, [])
         self.assertEqual(general_admission.is_external_modification, None)
         self.assertEqual(general_admission.registration_change_form, [])
+        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            general_admission.requested_documents,
+        )
 
         # With data
         response = self.client.post(
@@ -365,6 +374,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.bachelor_training_with_quota,
             candidate__language=settings.LANGUAGE_CODE_EN,
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=self.academic_years[1],
             is_non_resident=False,
@@ -401,6 +411,12 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         )
         self.assertEqual(general_admission.is_external_modification, False)
         self.assertEqual(general_admission.registration_change_form, [])
+        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            general_admission.requested_documents,
+        )
 
         # With data -> modification
         response = self.client.post(

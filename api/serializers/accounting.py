@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -131,6 +131,8 @@ class GeneralEducationAccountingDTOSerializer(DoctorateEducationAccountingDTOSer
 
 
 class CompleterComptabilitePropositionDoctoraleCommandSerializer(DTOSerializer):
+    auteur_modification = None
+
     class Meta:
         source = doctorate_education_commands.CompleterComptabilitePropositionCommand
         extra_kwargs = {
@@ -142,6 +144,8 @@ class CompleterComptabilitePropositionDoctoraleCommandSerializer(DTOSerializer):
 
 
 class CompleterComptabilitePropositionGeneraleCommandSerializer(DTOSerializer):
+    auteur_modification = None
+
     class Meta:
         source = general_education_commands.CompleterComptabilitePropositionCommand
         extra_kwargs = {

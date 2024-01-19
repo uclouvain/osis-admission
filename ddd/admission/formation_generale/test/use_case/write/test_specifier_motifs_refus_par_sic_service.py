@@ -34,7 +34,6 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
-    DecisionFacultaireEnum,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
@@ -73,6 +72,7 @@ class TestSpecifierMotifsRefusPropositionParSic(TestCase):
                 type_de_refus='REFUS_AGREGATION',
                 uuids_motifs=['uuid-nouveau-motif-refus'],
                 autres_motifs=[],
+                gestionnaire='0123456789',
             )
         )
 
@@ -98,6 +98,7 @@ class TestSpecifierMotifsRefusPropositionParSic(TestCase):
                 type_de_refus='REFUS_AGREGATION',
                 uuids_motifs=[],
                 autres_motifs=['Autre motif'],
+                gestionnaire='0123456789',
             )
         )
 

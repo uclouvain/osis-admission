@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -53,6 +53,7 @@ class TestCompleterQuestionsSpecifiquesParGestionnaireService(TestCase):
         proposition_id = self.message_bus.invoke(
             CompleterQuestionsSpecifiquesParGestionnaireCommand(
                 uuid_proposition='uuid-MASTER-SCI',
+                gestionnaire='0123456789',
                 reponses_questions_specifiques={
                     '35db2d60-9874-41fc-9f5a-ebfea38277d0': 'valeur',
                 },
@@ -91,6 +92,7 @@ class TestCompleterQuestionsSpecifiquesParGestionnaireService(TestCase):
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(
                 CompleterQuestionsSpecifiquesParGestionnaireCommand(
+                    gestionnaire='0123456789',
                     uuid_proposition='INCONNUE',
                     reponses_questions_specifiques={},
                     documents_additionnels=[],
@@ -102,6 +104,7 @@ class TestCompleterQuestionsSpecifiquesParGestionnaireService(TestCase):
         with self.assertRaises(PosteDiplomatiqueNonTrouveException):
             self.message_bus.invoke(
                 CompleterQuestionsSpecifiquesParGestionnaireCommand(
+                    gestionnaire='0123456789',
                     uuid_proposition='uuid-MASTER-SCI',
                     reponses_questions_specifiques={},
                     documents_additionnels=[],

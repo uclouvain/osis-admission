@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import copy
+import datetime
 import uuid
 from email import message_from_string
 from email.policy import default
@@ -270,6 +271,8 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         # Check that the admission has been updated
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # Check that a notification has been planned
         email_notifications = EmailNotification.objects.all()
@@ -399,8 +402,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_send_to_sic_with_fac_user_in_specific_statuses_to_refuse(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_to_refuse(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
@@ -433,6 +436,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.other_refusal_reasons = ['test']
         self.general_admission.save()
 
+        frozen_time.move_to('2022-01-03')
+
         # Valid request
         response = self.client.post(self.url + '?refusal=1', **self.default_headers)
 
@@ -453,6 +458,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
                 'decision': DecisionFacultaireEnum.EN_DECISION.value,
             },
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_refusal_certificate, [self.file_uuid])
@@ -502,8 +509,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             ['proposition', 'fac-decision', 'refusal-send-to-sic', 'status-changed'],
         )
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
@@ -540,6 +547,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.program_planned_years_number = 5
         self.general_admission.save()
 
+        frozen_time.move_to('2022-01-03')
+
         # Valid request
         response = self.client.post(self.url + '?approval=1', **self.default_headers)
 
@@ -554,6 +563,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_approval_certificate, [self.file_uuid])
@@ -762,8 +773,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertIn('access_titles_names', pdf_context)
         self.assertEqual(len(pdf_context['access_titles_names']), 0)
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_send_to_sic_with_fac_user_in_specific_statuses_without_approving_or_refusing(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_without_approving_or_refusing(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
@@ -780,6 +791,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             [m.message for m in response.context['messages']],
         )
 
+        frozen_time.move_to('2022-01-02')
+
         # Valid request
         self.general_admission.checklist['current']['decision_facultaire'][
             'statut'
@@ -795,6 +808,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
 
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -816,8 +831,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             ['proposition', 'fac-decision', 'send-to-sic', 'status-changed'],
         )
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_send_to_sic_with_sic_user_in_specific_statuses_without_approving_or_refusing(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_send_to_sic_with_sic_user_in_specific_statuses_without_approving_or_refusing(self, frozen_time):
         self.client.force_login(user=self.sic_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
@@ -825,6 +840,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             'statut'
         ] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.general_admission.save()
+
+        frozen_time.move_to('2022-01-02')
 
         response = self.client.post(self.url, **self.default_headers)
 
@@ -835,6 +852,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
 
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -1004,7 +1023,8 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('reasons', []))
 
-    def test_refusal_decision_form_submitting_with_valid_data(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_refusal_decision_form_submitting_with_valid_data(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
         refusal_reason = RefusalReasonFactory()
@@ -1040,6 +1060,10 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
             {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        frozen_time.move_to('2022-01-02')
 
         # Choose another reason
         response = self.client.post(
@@ -1061,7 +1085,10 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         self.assertFalse(self.general_admission.refusal_reasons.exists())
         self.assertEqual(self.general_admission.other_refusal_reasons, ['My other reason'])
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
+    @freezegun.freeze_time('2022-01-01')
     def test_refusal_decision_form_submitting_with_transfer_to_sic(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -1112,6 +1139,8 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
             {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_refusal_certificate, [self.file_uuid])
@@ -1445,6 +1474,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             ],
         )
 
+    @freezegun.freeze_time('2022-01-01')
     def test_approval_decision_form_submitting_with_valid_data(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -1494,6 +1524,8 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.general_admission.fac_approval_certificate, [])
         self.assertEqual(self.general_admission.with_additional_approval_conditions, True)
         approval_conditions = self.general_admission.additional_approval_conditions.all()
@@ -1514,6 +1546,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.general_admission.join_program_fac_comment, 'Comment about the join program')
 
+    @freezegun.freeze_time('2022-01-01')
     def test_approval_decision_form_submitting_with_transfer_to_sic(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -1564,6 +1597,8 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.general_admission.fac_approval_certificate, [self.file_uuid])
         self.assertEqual(self.general_admission.with_additional_approval_conditions, True)
         approval_conditions = self.general_admission.additional_approval_conditions.all()

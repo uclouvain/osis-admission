@@ -25,7 +25,7 @@
 # ##############################################################################
 from contextlib import suppress
 from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 import attrs
 from django.conf import settings
@@ -132,6 +132,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 .select_related(
                     'other_training_accepted_by_fac__academic_year',
                     'admission_requirement_year',
+                    'last_update_author',
                 )
                 .get(uuid=entity_id.uuid)
             )
@@ -162,6 +163,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if entity.autre_formation_choisie_fac_id
             else None
         )
+
+        last_update_author_person = None
+        if entity.auteur_derniere_modification:
+            last_update_author_person = Person.objects.filter(global_id=entity.auteur_derniere_modification).first()
 
         candidate = Person.objects.get(global_id=entity.matricule_candidat)
 
@@ -235,6 +240,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'financability_computed_rule_on': entity.financabilite_regle_calcule_le,
                 'financability_rule': entity.financabilite_regle,
                 'financability_rule_established_by': financabilite_regle_etabli_par_person,
+                'last_update_author': last_update_author_person,
                 'fac_approval_certificate': entity.certificat_approbation_fac,
                 'fac_refusal_certificate': entity.certificat_refus_fac,
                 'sic_approval_certificate': entity.certificat_approbation_sic,
@@ -493,6 +499,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             if admission.cycle_pursuit
             else PoursuiteDeCycle.TO_BE_DETERMINED,
             poursuite_de_cycle_a_specifier=admission.training.education_group_type.name == TrainingType.BACHELOR.name,
+            auteur_derniere_modification=admission.last_update_author.global_id if admission.last_update_author else '',
         )
 
     @classmethod

@@ -58,6 +58,7 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
                 etat_authentification=EtatAuthentificationParcours.VRAI.name,
+                gestionnaire='0123456789',
             )
         )
 
@@ -84,6 +85,7 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='INCONNUE',
                     uuid_experience=self.experience_uuid,
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,
+                    gestionnaire='0123456789',
                 )
             )
 
@@ -94,5 +96,6 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience='INCONNUE',
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,
+                    gestionnaire='0123456789',
                 )
             )
