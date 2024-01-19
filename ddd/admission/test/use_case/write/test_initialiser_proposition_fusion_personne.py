@@ -60,7 +60,8 @@ class TestInitialiserPropositionFusionPersonne(SimpleTestCase):
             dernier_noma_connu='John Doe',
             expiration_carte_id='2030-01-01',
             educational_curex_uuids=['uc1', 'uc2'],
-            professional_curex_uuids=['pc1', 'pc2']
+            professional_curex_uuids=['pc1', 'pc2'],
+            annee_diplome_etudes_secondaires=2020,
         )
         result = initialiser_proposition_fusion_personne(cmd, self.repository)
         self.assertEqual(result, PropositionFusionPersonneIdentity(

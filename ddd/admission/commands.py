@@ -153,7 +153,7 @@ class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
     expiration_carte_id: str
     educational_curex_uuids: List[str]
     professional_curex_uuids: List[str]
-    annee_diplome_etudes_secondaires: List[str]
+    annee_diplome_etudes_secondaires: int
 
 
 @attr.dataclass(frozen=True, slots=True)
