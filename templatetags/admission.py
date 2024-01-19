@@ -70,6 +70,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     RegleDeFinancement,
     RegleCalculeResultatAvecFinancable,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
+    ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -1244,3 +1245,11 @@ def get_intitule_in_candidate_language(proposition: PropositionGestionnaireDTO):
 @register.filter
 def sic_can_edit(proposition: PropositionGestionnaireDTO):
     return proposition.statut in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC
+
+
+@register.filter
+def sic_in_final_statut(checklist_statut):
+    return checklist_statut['statut'] == ChoixStatutChecklist.GEST_REUSSITE.name or (
+        checklist_statut['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and checklist_statut['extra']['blocage'] != 'to_be_completed'
+    )

@@ -120,5 +120,6 @@ class CentralManager(EntityRoleModel):
             'admission.checklist_select_access_title': is_entity_manager & in_sic_status,
             'admission.checklist_change_sic_comment': is_entity_manager & in_sic_status,
             'admission.checklist_change_comment': is_entity_manager & in_sic_status,
+            'admission.checklist_change_sic_decision': is_entity_manager & in_sic_status,
         }
         return RuleSet(ruleset)
