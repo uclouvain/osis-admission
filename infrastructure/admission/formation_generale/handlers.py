@@ -23,18 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from admission.ddd.admission.commands import \
+    (RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand,
+     DefairePropositionFusionCommand, RechercherParcoursAnterieurQuery, SoumettreTicketPersonneCommand,
+     RefuserPropositionFusionCommand)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.write import *
-from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
-    specifier_financabilite_regle,
-)
-from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
-    specifier_financabilite_resultat_calcul,
-)
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import \
+    specifier_financabilite_regle
+from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import \
+    specifier_financabilite_resultat_calcul
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
+from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
+from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import rechercher_parcours_anterieur
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -45,11 +49,19 @@ from admission.ddd.admission.use_case.write import (
     remplacer_emplacement_document,
     remplir_emplacement_document_par_gestionnaire,
 )
+from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne import \
+    defaire_proposition_fusion_personne
+from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import \
+    initialiser_proposition_fusion_personne
+from admission.ddd.admission.use_case.write.refuser_proposition_fusion_personne import \
+    refuser_proposition_fusion_personne
+from admission.ddd.admission.use_case.write.soumettre_ticket_creation_personne import soumettre_ticket_creation_personne
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.infrastructure.admission.domain.service.bourse import BourseTranslator
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
+from admission.infrastructure.admission.domain.service.digit import DigitService
 from admission.infrastructure.admission.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
@@ -81,6 +93,9 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
     EmplacementDocumentRepository,
 )
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
+from admission.infrastructure.admission.repository.digit import DigitRepository
+from admission.infrastructure.admission.repository.proposition_fusion_personne import \
+    PropositionPersonneFusionRepository
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
@@ -434,6 +449,22 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
         )
     ),
+    RechercherCompteExistantQuery: lambda msg_bus, cmd: rechercher_compte_existant(
+        cmd,
+        digit_service=DigitService()
+    ),
+    InitialiserPropositionFusionPersonneCommand: lambda msg_bus, cmd: initialiser_proposition_fusion_personne(
+        cmd,
+        proposition_fusion_personne_repository=PropositionPersonneFusionRepository()
+    ),
+    DefairePropositionFusionCommand: lambda msg_bus, cmd: defaire_proposition_fusion_personne(
+        cmd,
+        proposition_fusion_personne_repository=PropositionPersonneFusionRepository()
+    ),
+    RefuserPropositionFusionCommand: lambda msg_bus, cmd: refuser_proposition_fusion_personne(
+        cmd,
+        proposition_fusion_personne_repository=PropositionPersonneFusionRepository()
+    ),
     ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
         cmd,
         proposition_repository=PropositionRepository(),
@@ -479,5 +510,14 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
         )
+    ),
+    RechercherParcoursAnterieurQuery: lambda msg_bus, cmd: rechercher_parcours_anterieur(
+        cmd,
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+    ),
+    SoumettreTicketPersonneCommand: lambda msg_bus, cmd: soumettre_ticket_creation_personne(
+        cmd,
+        digit_repository=DigitRepository()
     ),
 }

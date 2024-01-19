@@ -99,6 +99,7 @@
         id="tabs-content"
         class="tab-content"
     >
+
       {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation next_url=next_base_url|add:'assimilation' %}
         <div role="tabpanel" class="tab-pane in active" id="assimilation">
           <div class="form-group btn-group status-group" role="group">
@@ -128,6 +129,16 @@
 
       {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
+
+        {% search_account_digit_result_msg original_admission %}
+
+        <form id="create-digit-person-form" method="POST" action="{% url 'admission:services:digit:request-digit-person-creation' uuid=uuid %}">
+            {% csrf_token %}
+            <button id="create-person-form-btn" type="submit" class="btn btn-primary pull-right" disabled>
+                Créer personne dans DigIT
+            </button>
+        </form>
+
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
             {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' %}
@@ -830,7 +841,18 @@
               }
           })
 
-      })(jQuery);
+      })(jQuery)
+
+        $('#merge-experience-form').on('submit', (e) => {
+            e.preventDefault();
+            htmx.ajax('GET', e.target.action, {
+                source: '#merge-experience-btn',
+                target: '#form-ajax-modal',
+                indicator: '#htmx-overlay',
+                swap: 'innerHTML',
+            }).then(() => $('#form-ajax-modal').modal('show'));
+        })
+    </script>
   </script>
 {% endblock script %}
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-29 16:31+0200\n"
+"POT-Creation-Date: 2024-01-10 16:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -552,6 +552,13 @@ msgstr "Instantiations des éléments de formulaire pour admission"
 msgid "Admission form items"
 msgstr "Éléments de formulaire pour admission"
 
+msgid ""
+"Admission is not yet valid for searching UCLouvain. The following fields are "
+"required: "
+msgstr ""
+"L'admission n'est pas encore pour rechercher une correspondance UCLouvain. "
+"Les champs suivants sont requis: "
+
 msgid "Admission requirement"
 msgstr "Condition d'accès"
 
@@ -900,6 +907,9 @@ msgstr "Auteur"
 msgid "Authors"
 msgstr "Auteurs et autrices"
 
+msgid "Available information"
+msgstr "Informations complémentaires"
+
 msgid "Awaiting approval"
 msgstr "En révision"
 
@@ -1245,6 +1255,9 @@ msgstr "Demande annulée"
 
 msgid "Candidate"
 msgstr "Candidat"
+
+msgid "Candidate information"
+msgstr "Information du candidat"
 
 msgid "Candidate nationality"
 msgstr "Nationalité du candidat"
@@ -2070,6 +2083,9 @@ msgstr "Code poste diplomatique"
 msgid "Disabled"
 msgstr "Désactivé"
 
+msgid "Discard fusion"
+msgstr "Rejeter la fusion"
+
 msgid "Dispensed"
 msgstr "Dispensé"
 
@@ -2275,6 +2291,9 @@ msgstr "Modifier la communication de cette conférence"
 msgctxt "admission"
 msgid "Education"
 msgstr "Formation"
+
+msgid "Educational experience"
+msgstr "Expériences académiques"
 
 msgid "Educational experience not found."
 msgstr "Expérience académique non trouvée."
@@ -2766,6 +2785,9 @@ msgstr "Financement"
 
 msgid "Funding type"
 msgstr "Type de financement"
+
+msgid "Fusion proposal"
+msgstr "Proposition de fusion"
 
 msgid "GEOGRAPHY"
 msgstr "Géographie"
@@ -4047,6 +4069,15 @@ msgstr "Affiliations"
 msgid "Membre CA not found."
 msgstr "Membre du comité d'accompagnement non trouvé."
 
+msgid "Merge all non-empty data from digit match to merge form"
+msgstr "Fusionner toutes les données valides provenant de la correspondance"
+
+msgid "Merge all non-empty data from original to merge form"
+msgstr "Fusionner toutes les données valides provenant de l'original"
+
+msgid "Merge with existing entry"
+msgstr "Fusionner avec l'entrée existante"
+
 msgid "Merging of each document field of a continuing proposition into one PDF"
 msgstr "Fusion de chaque champ document d'une proposition continue en un PDF"
 
@@ -4381,6 +4412,9 @@ msgstr "Non libre"
 
 msgid "Not fundable"
 msgstr "Non-finançable"
+
+msgid "Not specified"
+msgstr "Non précisée"
 
 msgctxt "admission-header"
 msgid "Not specified"
@@ -4968,6 +5002,9 @@ msgstr "Professionnel"
 msgid "Professional email"
 msgstr "Adresse e-mail professionnelle"
 
+msgid "Professional experience"
+msgstr "Expérience professionnelle"
+
 msgid "Professional experiences"
 msgstr "Expériences professionnelles"
 
@@ -5535,6 +5572,9 @@ msgstr "Enregistrer et transmettre en SIC"
 
 msgid "Save and view result"
 msgstr "Enregistrer et voir le résultat"
+
+msgid "Save fusion proposal"
+msgstr "Enregistrer la proposition de fusion"
 
 msgid "Scholarship"
 msgstr "Boursier"
@@ -6803,6 +6843,9 @@ msgstr "Non disponible"
 msgid "Undecided"
 msgstr "Non décidé"
 
+msgid "Undo"
+msgstr "Défaire"
+
 msgid ""
 "Unemployment certificate issued by the relevant body, justifying the period "
 "concerned"
@@ -6896,6 +6939,9 @@ msgstr "Validée"
 
 msgid "Values"
 msgstr "Valeurs"
+
+msgid "Verify"
+msgstr "Vérifier"
 
 msgid "Via Facebook"
 msgstr "Sur Facebook"

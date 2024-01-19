@@ -23,8 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import TestCase
-
 import freezegun
 
 from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
@@ -39,6 +37,7 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.tests import TestCase
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 

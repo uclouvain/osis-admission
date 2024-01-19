@@ -105,6 +105,9 @@ class CoordonneesDTOFactory(factory.Factory):
 
 
 class EtudesSecondairesDTOFactory(factory.Factory):
+
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
     class Meta:
         model = EtudesSecondairesDTO
         abstract = False

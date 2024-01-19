@@ -1,0 +1,69 @@
+{% load i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% if result_code == 'ERROR' %}
+    <div class="alert alert-danger">
+      <strong>Erreur</strong> Impossible de rechercher un compte existant
+    </div>
+{% elif result_code == 'MATCH_FOUND' %}
+    <div class="alert alert-warning">
+        <form id="search-existing-account-form" method="POST" action="{% url 'admission:services:digit:search-account' uuid=uuid %}">
+            {% csrf_token %}
+            <button id="search-existing-account-btn" type="submit" class="btn btn-xs btn-warning pull-right">
+                {% trans "Verify" %}
+            </button>
+        </form>
+        <strong>Correspondance trouvée</strong> Veuillez vérifier s'il y a lieu de fusionner les informations
+    </div>
+{% elif result_code == 'REFUSED' %}
+    <div class="alert alert-danger">
+        <form id="undo-merge-proposal" method="POST" action="{% url 'admission:services:digit:undo-merge' uuid=uuid %}">
+            {% csrf_token %}
+            <button id="undo-merge-proposal-btn" type="submit" class="btn btn-xs btn-danger pull-right">
+                {% trans 'Undo' %}
+            </button>
+        </form>
+        <strong>Fusion refusée</strong> Une précédente proposition de fusion avec une personne existante a été refusée
+    </div>
+{% elif result_code != 'MERGED' %}
+    <div class="alert alert-info">
+      <strong>En cours</strong> La recherche d'un potentiel compte existant est en cours
+    </div>
+{% endif %}
+
+{% block script %}
+    <script>
+        $('#search-existing-account-form').on('submit', (e) => {
+            e.preventDefault();
+            htmx.ajax('POST', e.target.action, {
+                source: '#search-existing-account-btn',
+                target: '#form-ajax-modal',
+                indicator: '#htmx-overlay',
+                swap: 'innerHTML',
+            }).then(() => $('#form-ajax-modal').modal('show'));
+        })
+    </script>
+{% endblock %}

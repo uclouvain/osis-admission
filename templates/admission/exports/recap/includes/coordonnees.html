@@ -37,18 +37,19 @@
 {% endwith %}
 
 {% panel _("Legal domicile") %}
-  <div class="row">
-    <div class="col-md-4">{% field_data _("Street") coordonnees.domicile_legal.rue %}</div>
-    {% trans "Number" context "address" as address_number_label %}
-    <div class="col-md-4">{% field_data address_number_label coordonnees.domicile_legal.numero_rue %}</div>
-    <div class="col-md-4">{% field_data _("Box") coordonnees.domicile_legal.boite_postale hide_empty=True %} </div>
-  </div>
-  <div class="row">
-    <div class="col-md-4">{% field_data _("Country") coordonnees.domicile_legal.nom_pays %}</div>
-    <div class="col-md-4">{% field_data _("Postcode") coordonnees.domicile_legal.code_postal %}</div>
-    <div class="col-md-4">{% field_data _("City") coordonnees.domicile_legal.ville %}</div>
-  </div>
+    <div class="row">
+        <div class="col-md-4">{% field_data _("Street") coordonnees.domicile_legal.rue %}</div>
+        {% trans "Number" context "address" as address_number_label %}
+        <div class="col-md-4">{% field_data address_number_label coordonnees.domicile_legal.numero_rue %}</div>
+        <div class="col-md-4">{% field_data _("Box") coordonnees.domicile_legal.boite_postale hide_empty=True %} </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">{% field_data _("Country") coordonnees.domicile_legal.nom_pays %}</div>
+        <div class="col-md-4">{% field_data _("Postcode") coordonnees.domicile_legal.code_postal %}</div>
+        <div class="col-md-4">{% field_data _("City") coordonnees.domicile_legal.ville %}</div>
+      </div>
 {% endpanel %}
+
 {% if coordonnees.adresse_correspondance %}
   {% trans "Postal address" context "admission" as contact_address_label %}
   {% panel contact_address_label %}
@@ -65,6 +66,7 @@
     </div>
   {% endpanel %}
 {% endif %}
+
 {% panel _("Contact") %}
   <div class="row">
     {% trans "Telephone (mobile)" context "admission" as mobile_phone_label %}

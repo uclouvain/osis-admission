@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,22 +22,14 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
+# ##############################################################################
 
-from admission.ddd.admission.commands import *
-from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.read.get_proposition_fusion_service import get_proposition_fusion_personne
-from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
-from admission.infrastructure.admission.repository.proposition_fusion_personne import \
-    PropositionPersonneFusionRepository
+from admission.ddd.admission.commands import GetStatutTicketPersonneQuery
+from admission.ddd.admission.repository.i_digit import IDigitRepository
 
-COMMAND_HANDLERS = {
-    ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
-        cmd,
-        lister_toutes_demandes_service=ListerToutesDemandes(),
-    ),
-    GetPropositionFusionQuery: lambda msg_bus, cmd: get_proposition_fusion_personne(
-        cmd,
-        proposition_fusion_repository=PropositionPersonneFusionRepository()
-    ),
-}
+
+def recuperer_statut_ticket_personne(
+    cmd: 'GetStatutTicketPersonneQuery',
+    digit_repository: 'IDigitRepository',
+) -> str:
+    return digit_repository.retrieve_person_ticket_status(global_id=cmd.global_id)
