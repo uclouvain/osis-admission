@@ -36,7 +36,7 @@ from django.urls import reverse
 from django.utils import translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, gettext
+from django.utils.translation import gettext_lazy as _, gettext, get_language
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
@@ -794,6 +794,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             "admission_email": self.proposition.formation.campus_inscription.email,
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
         }
+        if get_language() == settings.LANGUAGE_CODE_FR:
+            if self.proposition.genre_candidat == "M":
+                tokens['greetings'] = "Cher"
+            elif self.proposition.genre_candidat == "F":
+                tokens['greetings'] = "Chère"
+            else:
+                tokens['greetings'] = "Cher·ère"
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
