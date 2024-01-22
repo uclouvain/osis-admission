@@ -64,7 +64,7 @@ def _retrieve_person_ticket_status(request_id: int):
     return requests.get(
         headers={'Content-Type': 'application/json'},
         data=json.dumps({'requestId': request_id}),
-        url=settings.DIGIT_ACCOUNT_CREATION_URL
+        url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
     ).json()
 
 
@@ -101,6 +101,6 @@ def _request_person_ticket_creation(person: Person):
             ],
             "physicalPerson": True,
         }),
-        url=settings.DIGIT_ACCOUNT_CREATION_URL,
+        url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
     )
     return response.json()
