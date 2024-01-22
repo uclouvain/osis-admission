@@ -114,7 +114,7 @@ class DigitService(IDigitService):
                         "firstname": prenom,
                         "birthDate": date_naissance,
                     }),
-                    url=f"{settings.ESB_API_URL}{settings.DIGIT_ACCOUNT_SEARCH_URL}"
+                    url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
                 )
 
                 similarity_data = response.json()
