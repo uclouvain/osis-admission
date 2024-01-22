@@ -132,7 +132,7 @@ def request_digit_account_creation(data):
             ],
             "physicalPerson": True,
         }),
-        url=settings.DIGIT_ACCOUNT_CREATION_URL,
+        url=f"{settings.ESB_API_URL}{settings.DIGIT_ACCOUNT_CREATION_URL}"
     )
     return response
 

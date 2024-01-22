@@ -107,14 +107,14 @@ class DigitService(IDigitService):
                 response = requests.post(
                     headers={
                         'Content-Type': 'application/json',
-                        'Authorization': f"{settings.DIGIT_AUTH_TYPE} {settings.DIGIT_AUTH_TOKEN}",
+                        'Authorization': settings.ESB_AUTHORIZATION,
                     },
                     data=json.dumps({
                         "lastname": nom,
                         "firstname": prenom,
                         "birthDate": date_naissance,
                     }),
-                    url=settings.DIGIT_ACCOUNT_SEARCH_URL,
+                    url=f"{settings.ESB_API_URL}{settings.DIGIT_ACCOUNT_SEARCH_URL}"
                 )
 
                 similarity_data = response.json()
