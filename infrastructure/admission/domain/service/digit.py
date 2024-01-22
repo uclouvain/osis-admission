@@ -85,11 +85,10 @@ from osis_profile.models import (
 )
 from osis_profile.models.education import LanguageKnowledge
 
-MOCK_DIGIT_SERVICE_CALL = False
+MOCK_DIGIT_SERVICE_CALL = settings.MOCK_DIGIT_SERVICE_CALL
 
 
 class DigitService(IDigitService):
-
     @classmethod
     def rechercher_compte_existant(cls, matricule: str, nom: str, prenom: str, date_naissance: str,) -> str:
         if MOCK_DIGIT_SERVICE_CALL:
