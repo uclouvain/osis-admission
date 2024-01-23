@@ -44,7 +44,7 @@ def approuver_admission_par_sic(
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     # WHEN
-    proposition.approuver_par_sic()
+    proposition.approuver_par_sic(auteur_modification=cmd.auteur)
 
     # THEN
     pdf_generation.generer_attestation_accord_sic(

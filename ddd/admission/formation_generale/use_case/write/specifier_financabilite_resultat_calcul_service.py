@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.formation_generale.commands import SpecifierFinancabiliteResultatCalculCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -40,8 +41,9 @@ def specifier_financabilite_resultat_calcul(
 
     # THEN
     proposition.specifier_financabilite_resultat_calcul(
-        cmd.financabilite_regle_calcule,
-        cmd.financabilite_regle_calcule_le,
+        financabilite_regle_calcule=cmd.financabilite_regle_calcule,
+        financabilite_regle_calcule_le=cmd.financabilite_regle_calcule_le,
+        auteur_modification=cmd.gestionnaire,
     )
     proposition_repository.save(proposition)
 

@@ -137,6 +137,8 @@ class PastExperiencesStatusViewTestCase(TestCase):
             self.general_admission.checklist['current']['parcours_anterieur']['statut'],
             ChoixStatutChecklist.GEST_BLOCAGE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
     def test_change_the_checklist_status_to_success(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -192,6 +194,8 @@ class PastExperiencesStatusViewTestCase(TestCase):
             self.general_admission.checklist['current']['parcours_anterieur']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -392,7 +396,8 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             ],
         )
 
-    def test_post_form_with_with_prerequisite_courses(self):
+    @freezegun.freeze_time('2023-01-01', as_kwarg='frozen_time')
+    def test_post_form_with_with_prerequisite_courses(self, frozen_time):
         self.client.force_login(user=self.sic_manager_user)
 
         # Add prerequisite courses
@@ -403,6 +408,8 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         AdmissionPrerequisiteCoursesFactory(
             admission=self.general_admission,
         )
+
+        frozen_time.move_to('2023-01-02')
 
         # With prerequisite courses
         response = self.client.post(
@@ -422,6 +429,12 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertEqual(self.general_admission.with_prerequisite_courses, True)
         self.assertEqual(self.general_admission.prerequisite_courses_fac_comment, 'Test')
         self.assertEqual(self.general_admission.prerequisite_courses.count(), 1)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
+        frozen_time.move_to('2023-01-03')
 
         # Without prerequisite courses
         response = self.client.post(
@@ -441,6 +454,8 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertEqual(self.general_admission.with_prerequisite_courses, False)
         self.assertEqual(self.general_admission.prerequisite_courses_fac_comment, '')
         self.assertEqual(self.general_admission.prerequisite_courses.count(), 0)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
     def test_post_form_with_admission_requirement_without_access_titles(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -702,6 +717,7 @@ class PastExperiencesAccessTitleEquivalencyViewTestCase(TestCase):
                 FIELD_REQUIRED_MESSAGE, form.errors.get('foreign_access_title_equivalency_effective_date', [])
             )
 
+    @freezegun.freeze_time('2023-01-01')
     def test_submit_form_with_valid_equivalency_type(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -738,6 +754,8 @@ class PastExperiencesAccessTitleEquivalencyViewTestCase(TestCase):
             )
             self.assertEqual(self.general_admission.foreign_access_title_equivalency_state, '')
             self.assertEqual(self.general_admission.foreign_access_title_equivalency_effective_date, None)
+            self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+            self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         for equivalency_type in [
             TypeEquivalenceTitreAcces.NON_CONCERNE.name,

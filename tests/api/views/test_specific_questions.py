@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 import uuid
 from unittest.mock import patch
 
@@ -1098,6 +1098,8 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             '4bdffb42-552d-415d-9e4c-725f10dce228',
         )
         self.assertEqual(admission.diplomatic_post, self.diplomatic_post)
+        self.assertEqual(admission.modified_at, datetime.datetime.today())
+        self.assertEqual(admission.last_update_author, self.candidate.user.person)
 
         # Unknown diplomatic post
         response = self.client.put(

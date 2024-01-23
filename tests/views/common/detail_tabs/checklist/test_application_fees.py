@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,9 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import json
 from typing import List
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -73,6 +75,7 @@ class ApplicationFeesViewTestCase(TestCase):
 
         cls.default_headers = {'HTTP_HX-Request': 'true'}
 
+    @freezegun.freeze_time('2022-01-01')
     def test_ask_the_payment_of_the_application_fees_to_the_candidate(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -104,6 +107,8 @@ class ApplicationFeesViewTestCase(TestCase):
             general_admission.checklist['current']['frais_dossier']['libelle'],
             'Must pay',
         )
+        self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
 
         # Check that a notification has been sent
         message_created = EmailNotification.objects.filter(person=general_admission.candidate).exists()
@@ -213,7 +218,11 @@ class ApplicationFeesViewTestCase(TestCase):
             ['proposition', 'application-fees-payment', 'request', 'status-changed'],
         )
 
-    def test_cancel_the_request_of_the_payment_of_the_application_fees_initial_for_a_not_concerned_candidate(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_cancel_the_request_of_the_payment_of_the_application_fees_initial_for_a_not_concerned_candidate(
+        self,
+        frozen_time,
+    ):
         self.client.force_login(user=self.sic_manager_user)
 
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
@@ -231,6 +240,8 @@ class ApplicationFeesViewTestCase(TestCase):
         response = self.client.post(url, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
+
+        frozen_time.move_to('2022-01-02')
 
         # Cancel
         url = resolve_url(
@@ -254,6 +265,8 @@ class ApplicationFeesViewTestCase(TestCase):
             general_admission.checklist['current']['frais_dossier']['libelle'],
             'Not concerned',
         )
+        self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
 
         # Check that two entries in the history have been added
         history_items: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=general_admission.uuid)
@@ -280,7 +293,11 @@ class ApplicationFeesViewTestCase(TestCase):
             ['proposition', 'application-fees-payment', 'request', 'status-changed'],
         )
 
-    def test_cancel_the_request_of_the_payment_of_the_application_fees_initial_for_a_not_dispensed_candidate(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_cancel_the_request_of_the_payment_of_the_application_fees_initial_for_a_not_dispensed_candidate(
+        self,
+        frozen_time,
+    ):
         self.client.force_login(user=self.sic_manager_user)
 
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
@@ -298,6 +315,8 @@ class ApplicationFeesViewTestCase(TestCase):
         response = self.client.post(url, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
+
+        frozen_time.move_to('2022-01-02')
 
         # Cancel
         url = resolve_url(
@@ -321,6 +340,8 @@ class ApplicationFeesViewTestCase(TestCase):
             general_admission.checklist['current']['frais_dossier']['libelle'],
             'Dispensed',
         )
+        self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
 
         # Check that two entries in the history have been added
         history_items: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=general_admission.uuid)
@@ -347,7 +368,8 @@ class ApplicationFeesViewTestCase(TestCase):
             ['proposition', 'application-fees-payment', 'request', 'status-changed'],
         )
 
-    def test_change_checklist_status_from_not_concerned_to_dispensed(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_change_checklist_status_from_not_concerned_to_dispensed(self, frozen_time):
         self.client.force_login(user=self.sic_manager_user)
 
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
@@ -363,6 +385,8 @@ class ApplicationFeesViewTestCase(TestCase):
 
         general_admission.save()
 
+        frozen_time.move_to('2022-01-02')
+
         # Change the status
         url = resolve_url(
             'admission:general-education:application-fees',
@@ -385,12 +409,15 @@ class ApplicationFeesViewTestCase(TestCase):
             general_admission.checklist['current']['frais_dossier']['libelle'],
             'Dispensed',
         )
+        self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
 
         # Check that no entry in the history has been added
         has_history_items = HistoryEntry.objects.filter(object_uuid=general_admission.uuid).exists()
         self.assertFalse(has_history_items)
 
-    def test_change_checklist_status_from_dispensed_to_not_concerned(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_change_checklist_status_from_dispensed_to_not_concerned(self, frozen_time):
         self.client.force_login(user=self.sic_manager_user)
 
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
@@ -403,6 +430,8 @@ class ApplicationFeesViewTestCase(TestCase):
         general_admission.checklist['current']['frais_dossier']['libelle'] = 'Dispensed'
 
         general_admission.save()
+
+        frozen_time.move_to('2022-01-02')
 
         # Change the status
         url = resolve_url(
@@ -426,6 +455,8 @@ class ApplicationFeesViewTestCase(TestCase):
             general_admission.checklist['current']['frais_dossier']['libelle'],
             'Not concerned',
         )
+        self.assertEqual(general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(general_admission.modified_at, datetime.datetime.today())
 
         # Check that no entry in the history has been added
         has_history_items = HistoryEntry.objects.filter(object_uuid=general_admission.uuid).exists()

@@ -64,6 +64,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
                 condition_acces=ConditionAcces.BAC.name,
                 millesime_condition_acces=2021,
                 avec_complements_formation=True,
+                gestionnaire='0123456789',
             )
         )
         proposition = self.proposition_repository.get(proposition_id)
@@ -88,6 +89,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
             SpecifierConditionAccesPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
                 avec_complements_formation=True,
+                gestionnaire='0123456789',
             )
         )
 
@@ -100,6 +102,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
             SpecifierConditionAccesPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
                 avec_complements_formation=False,
+                gestionnaire='0123456789',
             )
         )
 
@@ -123,6 +126,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.BAC.name,
                 millesime_condition_acces=2021,
+                gestionnaire='0123456789',
             )
         )
 
@@ -152,6 +156,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.BAC.name,
                 millesime_condition_acces=2021,
+                gestionnaire='0123456789',
             )
         )
 
@@ -164,5 +169,6 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
             self.message_bus.invoke(
                 SpecifierConditionAccesPropositionCommand(
                     uuid_proposition='INCONNUE',
+                    gestionnaire='0123456789',
                 )
             )
