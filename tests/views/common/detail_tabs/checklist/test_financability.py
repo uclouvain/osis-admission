@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,8 +23,10 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from unittest import mock
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -91,6 +93,7 @@ class FinancabiliteChangeStatusViewTestCase(TestCase):
         )
 
 
+@freezegun.freeze_time('2022-01-01')
 class FinancabiliteApprovalViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -144,6 +147,8 @@ class FinancabiliteApprovalViewTestCase(TestCase):
             self.general_admission.checklist['current']['financabilite']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
 
 class FinancabiliteComputeRuleViewTestCase(TestCase):

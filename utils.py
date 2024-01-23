@@ -27,6 +27,7 @@ import json
 import os
 import uuid
 from collections import defaultdict
+from contextlib import suppress
 from typing import Dict, Union, Iterable
 
 import weasyprint
@@ -36,7 +37,8 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
-from django.utils.translation import pgettext, override
+from django.utils import timezone
+from django.utils.translation import pgettext, override, get_language
 from rest_framework.generics import get_object_or_404
 
 from admission.auth.roles.central_manager import CentralManager
@@ -56,9 +58,14 @@ from admission.mail_templates import (
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
+from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from osis_common.ddd.interface import BusinessException, QueryRequest
+from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
 
 def get_cached_admission_perm_obj(admission_uuid):
@@ -272,3 +279,39 @@ def access_title_country(selectable_access_titles: Iterable[TitreAccesSelectionn
             country = title.pays_iso_code
             last_experience_year = title.annee
     return country
+
+
+def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
+    # Circular import otherwise
+    from infrastructure.messages_bus import message_bus_instance
+
+    if training_type == TrainingType.PHD.name:
+        return (
+            "https://uclouvain.be/en/study/inscriptions/doctorate-and-doctoral-training.html"
+            if get_language() == settings.LANGUAGE_CODE_EN
+            else "https://uclouvain.be/fr/etudier/inscriptions/conditions-doctorats.html"
+        )
+    else:
+        # Get the last year being published
+        today = timezone.now().today()
+        year = (
+            AcademicCalendar.objects.filter(
+                reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
+                start_date__lte=today,
+            )
+            .order_by('-start_date')
+            .values_list('data_year__year', flat=True)
+            .first()
+        )
+
+        sigle = training_acronym
+        with suppress(ProgramTreeNotFoundException):  # pragma: no cover
+            # Try to get the acronym from the parent, if it exists
+            sigle = message_bus_instance.invoke(
+                GetSigleFormationParenteQuery(
+                    code_formation=partial_training_acronym,
+                    annee=year,
+                )
+            )
+
+        return f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"

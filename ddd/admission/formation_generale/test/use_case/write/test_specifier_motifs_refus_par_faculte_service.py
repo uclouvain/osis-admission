@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ class TestSpecifierMotifsRefusPropositionParFaculte(TestCase):
             'uuid_proposition': 'uuid-MASTER-SCI-APPROVED',
             'uuids_motifs': ['uuid-nouveau-motif-refus'],
             'autres_motifs': [],
+            'gestionnaire': '0123456789',
         }
 
     def test_should_etre_ok_si_motif_connu_specifie_en_statut_traitement_fac(self):
@@ -84,6 +85,7 @@ class TestSpecifierMotifsRefusPropositionParFaculte(TestCase):
                 uuid_proposition='uuid-MASTER-SCI-APPROVED',
                 uuids_motifs=['uuid-nouveau-motif-refus'],
                 autres_motifs=[],
+                gestionnaire='0123456789',
             )
         )
 
@@ -109,6 +111,7 @@ class TestSpecifierMotifsRefusPropositionParFaculte(TestCase):
                 uuid_proposition='uuid-MASTER-SCI-APPROVED',
                 uuids_motifs=[],
                 autres_motifs=['Autre motif'],
+                gestionnaire='0123456789',
             )
         )
 
@@ -134,6 +137,7 @@ class TestSpecifierMotifsRefusPropositionParFaculte(TestCase):
                 uuid_proposition='uuid-MASTER-SCI-APPROVED',
                 uuids_motifs=[],
                 autres_motifs=[],
+                gestionnaire='0123456789',
             )
         )
 

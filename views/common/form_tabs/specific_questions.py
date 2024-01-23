@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ class SpecificQuestionsFormView(SpecificQuestionsMixinView, FormView):
     template_name = 'admission/forms/specific_questions.html'
     permission_required = 'admission.change_admission_specific_questions'
     urlpatterns = 'specific-questions'
+    update_requested_documents = True
 
     def get_form_class(self):
         if self.is_general:
@@ -72,6 +73,7 @@ class SpecificQuestionsFormView(SpecificQuestionsMixinView, FormView):
             message_bus_instance.invoke(
                 CompleterQuestionsSpecifiquesParGestionnaireCommand(
                     uuid_proposition=self.proposition.uuid,
+                    gestionnaire=self.request.user.person.global_id,
                     **form.cleaned_data,
                 )
             )

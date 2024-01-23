@@ -41,7 +41,7 @@ def approuver_inscription_par_sic(
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     # WHEN
-    proposition.approuver_par_sic()
+    proposition.approuver_par_sic(auteur_modification=cmd.auteur)
 
     # THEN
     proposition_repository.save(entity=proposition)

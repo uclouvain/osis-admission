@@ -45,7 +45,7 @@ def refuser_proposition_par_faculte(
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.refuser_par_fac()
+    proposition.refuser_par_fac(auteur_modification=cmd.gestionnaire)
 
     # THEN
     gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)

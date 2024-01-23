@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ class TestModifierChoixFormationParGestionnaireService(SimpleTestCase):
 
         self.message_bus = message_bus_in_memory_instance
         self.cmd = ModifierChoixFormationParGestionnaireCommand(
+            gestionnaire='0123456789',
             bourse_erasmus_mundus=BourseInMemoryTranslator.bourse_em_1.entity_id.uuid,
             bourse_internationale=BourseInMemoryTranslator.bourse_ifg_2.entity_id.uuid,
             bourse_double_diplome=BourseInMemoryTranslator.bourse_dd_2.entity_id.uuid,

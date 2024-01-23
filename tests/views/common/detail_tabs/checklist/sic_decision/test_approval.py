@@ -23,7 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -53,6 +55,7 @@ from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from reference.tests.factories.country import CountryFactory
 
 
+@freezegun.freeze_time('2021-11-01')
 class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -378,6 +381,8 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.general_admission.mobility_months_amount, '')
         self.assertEqual(self.general_admission.must_report_to_sic, None)
         self.assertEqual(self.general_admission.communication_to_the_candidate, 'Communication')
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
     def test_approval_decision_form_has_is_mobility(self):
         self.client.force_login(user=self.sic_manager_user)

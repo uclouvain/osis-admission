@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,10 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 import uuid
 from unittest.mock import patch
 
+import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
@@ -685,6 +686,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         response = self.client.get(self.admission_url)
         self.assertFalse(response.json().get('a_nationalite_ue'))
 
+    @freezegun.freeze_time('2023-01-01')
     def test_put_accounting_values_with_student(self):
         self.client.force_authenticate(user=self.student.user)
 
@@ -701,3 +703,8 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         expected_response_data['a_nationalite_ue'] = None
 
         self.assertEqual(response.json(), expected_response_data)
+
+        # Check the updated admission
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.last_update_author, self.student)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
