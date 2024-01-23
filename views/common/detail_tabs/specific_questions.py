@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ from admission.calendar.admission_calendar import (
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
 
 
@@ -42,7 +42,7 @@ __all__ = [
 ]
 
 
-class SpecificQuestionsMixinView(LoadDossierViewMixin):
+class SpecificQuestionsMixinView(AdmissionFormMixin, LoadDossierViewMixin):
     urlpatterns = 'specific-questions'
     specific_questions_tab = OngletsDemande.INFORMATIONS_ADDITIONNELLES
 

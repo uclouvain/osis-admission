@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -86,7 +86,12 @@ class BaseAccountingView(
         """Edit the accounting of a proposition"""
         serializer = self.put_serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        result = message_bus_instance.invoke(self.put_accounting_cmd_class(**serializer.data))
+        result = message_bus_instance.invoke(
+            self.put_accounting_cmd_class(
+                auteur_modification=request.user.person.global_id,
+                **serializer.data,
+            )
+        )
         self.get_permission_object().update_detailed_status(author=request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

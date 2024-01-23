@@ -278,7 +278,7 @@ class FacDecisionRefusalForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        all_reasons = RefusalReason.objects.select_related('category').all().order_by('category__name', 'name')
+        all_reasons = RefusalReason.objects.select_related('category').all().order_by('category__order', 'order')
 
         choices = get_group_by_choices(
             queryset=all_reasons,

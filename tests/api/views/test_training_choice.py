@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 import uuid
 from unittest.mock import patch
 
@@ -311,6 +311,7 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+@freezegun.freeze_time('2023-01-01')
 class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
     file_uuid = str(uuid.uuid4())
 
@@ -397,6 +398,8 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
         self.assertEqual(admission.specific_question_answers, expected)
+        self.assertEqual(admission.modified_at, datetime.datetime.today())
+        self.assertEqual(admission.last_update_author, self.candidate.user.person)
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)

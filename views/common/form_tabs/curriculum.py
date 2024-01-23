@@ -87,6 +87,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         'without_menu': True,
     }
     update_requested_documents = True
+    update_admission_author = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -293,7 +294,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
                     admission = self.admission
                     experience_checklist = Checklist.initialiser_checklist_experience(instance.uuid).to_dict()
                     admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
-                    admission.save()
+                    admission.save(update_fields=['checklist'])
 
         return self.form_valid(base_form)
 
@@ -502,6 +503,7 @@ class CurriculumNonEducationalExperienceFormView(AdmissionFormMixin, LoadDossier
         'without_menu': True,
     }
     update_requested_documents = True
+    update_admission_author = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -536,9 +538,6 @@ class CurriculumNonEducationalExperienceFormView(AdmissionFormMixin, LoadDossier
         context['CURRICULUM_ACTIVITY_LABEL'] = CURRICULUM_ACTIVITY_LABEL
         context['existing_experience'] = self.existing_experience
         return context
-
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         cleaned_data = form.cleaned_data
@@ -588,7 +587,7 @@ class CurriculumNonEducationalExperienceFormView(AdmissionFormMixin, LoadDossier
                     admission = self.admission
                     experience_checklist = Checklist.initialiser_checklist_experience(instance.uuid).to_dict()
                     admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
-                    admission.save()
+                    admission.save(update_fields=['checklist'])
 
         return super().form_valid(form)
 
@@ -624,7 +623,9 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
                     experiences.pop(index)
                     break
 
-            admission.save()
+        admission.last_update_author = self.request.user.person
+
+        admission.save()
 
         self.admission.update_requested_documents()
 

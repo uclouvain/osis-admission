@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
+import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
@@ -32,6 +34,7 @@ from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmi
 from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande, DocumentsIdentification
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
@@ -68,6 +71,7 @@ class CoordonneesFormTestCase(TestCase):
             training__academic_year=academic_years[0],
             candidate__phone_mobile='987654321',
             candidate__private_email='joe.foe@example.com',
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
@@ -339,8 +343,14 @@ class CoordonneesFormTestCase(TestCase):
         self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
         self.assertTrue(response.context['force_form'])
 
+    @freezegun.freeze_time('2023-01-01')
     def test_general_coordinates_form_post_main_form(self):
         self.client.force_login(user=self.sic_manager_user)
+
+        self.assertNotIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.general_admission.requested_documents,
+        )
 
         response = self.client.post(
             self.general_url,
@@ -360,6 +370,15 @@ class CoordonneesFormTestCase(TestCase):
         candidate = Person.objects.get(pk=self.general_admission.candidate.pk)
         self.assertEqual(candidate.phone_mobile, '+3223742211')
         self.assertEqual(candidate.private_email, 'joe.foe@example.com')  # Not updated (disabled field)
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.general_admission.requested_documents,
+        )
 
     def test_general_coordinates_form_post_residential_address(self):
         self.client.force_login(user=self.sic_manager_user)

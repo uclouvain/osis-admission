@@ -42,6 +42,7 @@ def modifier_authentification_experience_parcours_anterieur(
 
     proposition.specifier_authentification_experience_parcours_anterieur(
         uuid_experience=cmd.uuid_experience,
+        auteur_modification=cmd.gestionnaire,
         etat_authentification=cmd.etat_authentification,
     )
 

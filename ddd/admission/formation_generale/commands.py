@@ -86,6 +86,7 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ModifierChoixFormationParGestionnaireCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
 
     bourse_double_diplome: Optional[str] = ''
     bourse_internationale: Optional[str] = ''
@@ -97,6 +98,7 @@ class ModifierChoixFormationParGestionnaireCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class ModifierChecklistChoixFormationCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
 
     type_demande: str
     sigle_formation: str
@@ -149,6 +151,7 @@ class GetComptabiliteQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class CompleterComptabilitePropositionCommand(interface.CommandRequest):
     uuid_proposition: str
+    auteur_modification: str
 
     # Absence de dettes
     attestation_absence_dette_etablissement: List[str]
@@ -238,6 +241,7 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
     documents_additionnels: List[str] = attr.Factory(list)
@@ -414,6 +418,7 @@ class RefuserPropositionParFaculteCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierMotifsRefusPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
     uuids_motifs: List[str] = attr.Factory(list)
     autres_motifs: List[str] = attr.Factory(list)
 
@@ -427,6 +432,7 @@ class ApprouverPropositionParFaculteCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
     sigle_autre_formation: str = ''
     uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
     avec_conditions_complementaires: Optional[bool] = None
@@ -449,11 +455,13 @@ class RecupererListePaiementsPropositionQuery(interface.QueryRequest):
 class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     statut: str
+    gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
     condition_acces: str = ''
     millesime_condition_acces: Optional[int] = None
     avec_complements_formation: Optional[bool] = None
@@ -462,6 +470,7 @@ class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
     type_equivalence_titre_acces: str = ''
     statut_equivalence_titre_acces: str = ''
     etat_equivalence_titre_acces: str = ''
@@ -484,6 +493,7 @@ class RecupererTitresAccesSelectionnablesPropositionQuery(interface.QueryRequest
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
     financabilite_regle_calcule: str
     financabilite_regle_calcule_le: datetime.datetime
 
@@ -493,12 +503,14 @@ class SpecifierFinancabiliteRegleCommand(interface.CommandRequest):
     uuid_proposition: str
     financabilite_regle: str
     etabli_par: str
+    gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
+    gestionnaire: str
     statut: str
     statut_authentification: Optional[bool]
 
@@ -507,6 +519,7 @@ class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.Comman
 class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
+    gestionnaire: str
     etat_authentification: str
 
 
@@ -514,11 +527,13 @@ class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.Comma
 class SpecifierBesoinDeDerogationSicCommand(interface.CommandRequest):
     uuid_proposition: str
     besoin_de_derogation: str
+    gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierInformationsAcceptationPropositionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
     avec_conditions_complementaires: Optional[bool] = None
     uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
     conditions_complementaires_libres: List[str] = attr.Factory(list)
@@ -543,6 +558,7 @@ class SpecifierInformationsAcceptationPropositionParSicCommand(interface.Command
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierMotifsRefusPropositionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
+    gestionnaire: str
     type_de_refus: str
     uuids_motifs: List[str] = attr.Factory(list)
     autres_motifs: List[str] = attr.Factory(list)
