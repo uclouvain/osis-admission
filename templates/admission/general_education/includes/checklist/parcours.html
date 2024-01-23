@@ -37,33 +37,7 @@
 
 <div id="{{ prefix }}-parcours" class="tab-content parcours">
   {# Vue complète #}
-  <div role="tabpanel" class="table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ prefix }}-parcours-complete">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>{% trans "Years" %}</th>
-          <th>{# Diplomant #}</th>
-          <th>{% trans "Experiences" %}</th>
-          <th>{% trans "Access title" %}</th>
-          <th>{% trans "Registered credits" %}</th>
-          <th>{% trans "Credits earned" %}</th>
-          <th>{% trans "Reduction" %}</th>
-          <th>{% trans "Course change" %}</th>
-          <th>{% trans "Institute" context "admission" %}</th>
-          {% if show_actions %}
-            <th>{% trans "Action" %}</th>
-          {% endif %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for year, year_experiences in experiences.items %}
-          {% for experience in year_experiences %}
-            {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
-          {% endfor %}
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    {% include 'admission/general_education/includes/checklist/parcours_complete_view.html' %}
 
   {# Vue formations académiques #}
   <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
