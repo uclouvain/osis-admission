@@ -30,7 +30,7 @@
           <th>{% trans "Years" %}</th>
           <th>{# Diplomant #}</th>
           <th>{% trans "Experiences" %}</th>
-          <th>{% trans "Access title" %}</th>
+          {% if show_titre_acces %}<th>{% trans "Access title" %}</th>{% endif %}
           <th>{% trans "Registered credits" %}</th>
           <th>{% trans "Credits earned" %}</th>
           <th>{% trans "Reduction" %}</th>
@@ -44,7 +44,7 @@
       <tbody>
         {% for year, year_experiences in experiences.items %}
           {% for experience in year_experiences %}
-            {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
+            {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions show_titre_acces=show_titre_acces %}
           {% endfor %}
         {% endfor %}
       </tbody>

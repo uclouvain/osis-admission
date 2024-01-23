@@ -33,7 +33,7 @@
       {% endif %}
     </td>
     <td>{{ experience.nom_formation_equivalente_communaute_fr|default:experience.nom_formation }}</td>
-    <td>{% access_title_checkbox experience.uuid 'EXPERIENCE_ACADEMIQUE' year %}</td>
+    {% if show_titre_acces %}<td>{% access_title_checkbox experience.uuid 'EXPERIENCE_ACADEMIQUE' year %}</td>{% endif %}
     {% with experience_annee=experience|get_experience_year:year %}
       <td>
         <div style="display: flex; align-items: baseline; gap: 5px">
@@ -93,7 +93,7 @@
         {% endif %}
       {% endwith %}
     </td>
-    <td>{% access_title_checkbox experience.uuid 'EXPERIENCE_NON_ACADEMIQUE' year %}</td>
+    {% if show_titre_acces %}<td>{% access_title_checkbox experience.uuid 'EXPERIENCE_NON_ACADEMIQUE' year %}</td>{% endif %}
     <td></td>
     <td></td>
     <td></td>
@@ -110,15 +110,17 @@
         {% translate "Bachelor's course entrance exam" %}
       {% endif %}
     </td>
-    <td>
-      {% if experience.diplome_belge %}
-        {% access_title_checkbox experience.diplome_belge.uuid 'ETUDES_SECONDAIRES' year %}
-      {% elif experience.diplome_etranger %}
-        {% access_title_checkbox experience.diplome_etranger.uuid 'ETUDES_SECONDAIRES' year %}
-      {% elif experience.alternative_secondaires %}
-        {% access_title_checkbox experience.alternative_secondaires.uuid 'ETUDES_SECONDAIRES' None %}
-      {% endif %}
-    </td>
+    {% if show_titre_acces %}
+        <td>
+          {% if experience.diplome_belge %}
+            {% access_title_checkbox experience.diplome_belge.uuid 'ETUDES_SECONDAIRES' year %}
+          {% elif experience.diplome_etranger %}
+            {% access_title_checkbox experience.diplome_etranger.uuid 'ETUDES_SECONDAIRES' year %}
+          {% elif experience.alternative_secondaires %}
+            {% access_title_checkbox experience.alternative_secondaires.uuid 'ETUDES_SECONDAIRES' None %}
+          {% endif %}
+        </td>
+    {% endif %}
     <td></td>
     <td></td>
     <td></td>

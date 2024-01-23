@@ -37,7 +37,7 @@
 
 <div id="{{ prefix }}-parcours" class="tab-content parcours">
   {# Vue complète #}
-    {% include 'admission/general_education/includes/checklist/parcours_complete_view.html' %}
+    {% include 'admission/general_education/includes/checklist/parcours_complete_view.html' with show_titre_acces=True show_actions=show_actions %}
 
   {# Vue formations académiques #}
   <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
