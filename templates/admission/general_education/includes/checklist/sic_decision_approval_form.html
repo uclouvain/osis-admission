@@ -84,13 +84,16 @@
         id="sic-decision-additional-approval-conditions-container"
         class="required_field hidden"
     >
-      <div class="form-group">
+      <div class="form-group{% if sic_decision_approval_form.all_additional_approval_conditions.errors %} has-error{% endif %}">
         <label class="control-label">
           {{ sic_decision_approval_form.all_additional_approval_conditions.field.label }}
           <strong>({% translate 'contact language'%} </strong>
           <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
         </label>
        {{ sic_decision_approval_form.all_additional_approval_conditions }}
+        {% for error in sic_decision_approval_form.all_additional_approval_conditions.errors %}
+          <div class="help-block">{{ error }}</div>
+        {% endfor %}
       </div>
     </div>
 
@@ -100,7 +103,14 @@
         class="hidden"
     >
       {% bootstrap_field sic_decision_approval_form.prerequisite_courses classes='required_field' %}
-      {% bootstrap_field sic_decision_approval_form.prerequisite_courses_fac_comment %}
+      <div class="form-group">
+        <label class="control-label">
+          {{ sic_decision_approval_form.prerequisite_courses_fac_comment.field.label }}
+          <strong>({% translate 'contact language'%} </strong>
+          <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
+        </label>
+       {{ sic_decision_approval_form.prerequisite_courses_fac_comment }}
+      </div>
     </div>
 
     <div class="required_field">
@@ -148,7 +158,15 @@
     {% if sic_decision_approval_form.is_admission %}
       {% bootstrap_field sic_decision_approval_form.must_report_to_sic %}
     {% endif %}
-    {% bootstrap_field sic_decision_approval_form.communication_to_the_candidate %}
+
+    <div class="form-group">
+      <label class="control-label">
+        {{ sic_decision_approval_form.communication_to_the_candidate.field.label }}
+        <strong>({% translate 'contact language'%} </strong>
+        <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
+      </label>
+     {{ sic_decision_approval_form.communication_to_the_candidate }}
+    </div>
 
   </div>
 

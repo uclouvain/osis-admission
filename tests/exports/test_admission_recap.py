@@ -970,7 +970,7 @@ class SectionsAttachmentsTestCase(TestCase):
             pays_nationalite_europeen=True,
             nom_pays_nationalite='Belgique',
             sexe='M',
-            genre='M',
+            genre='H',
             photo_identite=['uuid-photo-identite'],
             pays_naissance='BE',
             nom_pays_naissance='Belgique',

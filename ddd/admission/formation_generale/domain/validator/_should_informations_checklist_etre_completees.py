@@ -83,9 +83,6 @@ class ShouldSpecifierInformationsAcceptationFacultaire(BusinessValidator):
             self.avec_conditions_complementaires is None
             or self.avec_conditions_complementaires
             and not (self.conditions_complementaires_libres or self.conditions_complementaires_existantes)
-            or self.avec_complements_formation is None
-            or self.avec_complements_formation
-            and not self.complements_formation
             or not self.nombre_annees_prevoir_programme
         ):
             raise InformationsAcceptationFacultaireNonSpecifieesException

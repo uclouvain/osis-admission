@@ -187,9 +187,14 @@
   </p>
 
   <ul>
-    {% for condition in proposition.conditions_complementaires %}
-      <li>{{ condition }}</li>
-    {% endfor %}
+    <li>Si l’inscription définitive de l’étudiant·e est dépendante de conditions d’admission spécifiques,
+      détaillez-les ci-après : <ul>
+      {% for condition in proposition.conditions_complementaires %}
+        <li>{{ condition }}</li>
+      {% empty %}
+        <li>Non-concerné·e</li>
+      {% endfor %}
+      </ul></li>
   </ul>
 
   <div class="row">

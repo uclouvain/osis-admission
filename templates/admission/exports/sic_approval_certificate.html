@@ -123,7 +123,7 @@
 
   <p>
     {% with name=proposition.prenom_candidat|add:" "|add:proposition.nom_candidat %}
-      {% if proposition.genre_candidat == "M" %}{% blocktrans with name=name context "M" %}Dear {{ name }},{% endblocktrans %}
+      {% if proposition.genre_candidat == "H" %}{% blocktrans with name=name context "M" %}Dear {{ name }},{% endblocktrans %}
       {% elif proposition.genre_candidat == "F" %}{% blocktrans with name=name context "F" %}Dear {{ name }},{% endblocktrans %}
       {% else %}{% blocktrans with name=name %}Dear {{ name }},{% endblocktrans %}
       {% endif %}
@@ -166,7 +166,7 @@
     <p>{% trans "Additional course(s):" %}
       <ul>
       {% for learning_unit in proposition.complements_formation %}
-        <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %} ({{ learning_unit.credits }} ECTS)</li>
+        <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %}{% if learning_unit.credits %} ({{ learning_unit.credits }} ECTS){% endif %}</li>
       {% endfor %}
       </ul>
     </p>
@@ -188,7 +188,7 @@
     {% endif %}
     <ul>
       <li>{% trans "The official French-language enrolment authorisation signed by you." %}</li>
-      {% if not proposition.candidate.nationalite_ue_candidat %}
+      {% if not proposition.nationalite_ue_candidat %}
         <li>{% trans "Copy of your student visa D (permission to stay longer than 90 days in Belgium) issued by the Belgian Embassy or Consulate." %}</li>
       {% endif %}
       {% for document in documents %}
@@ -245,7 +245,7 @@
       {% if director.signature %}<img src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
       <p>
         {{ director.first_name }} {{ director.last_name }},<br>
-        {% trans "Director" %}
+        {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
       </p>
       <img id="sigle" src="{% static "img/sedes.png" %}">
     </div>

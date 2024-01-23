@@ -1,4 +1,4 @@
-{% load i18n bootstrap3 %}
+{% load i18n bootstrap3 waffle_tags %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -59,7 +59,7 @@
     <button
         class="btn btn-danger"
         name="save"
-        {% if original_admission.type_demande == 'INSCRIPTION' %}disabled{% endif %}
+        {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
     >
       <i class="fa fa-envelope"></i>
       {% translate 'Send' context 'admission' %}

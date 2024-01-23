@@ -77,7 +77,7 @@
       <dd>
         <ul>
           {% for learning_unit in proposition.complements_formation %}
-            <li>{% display learning_unit.code ' - ' learning_unit.full_title %}</li>
+            <li>{{ learning_unit.code }} - {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %}</li>
           {% endfor %}
         </ul>
       </dd>
