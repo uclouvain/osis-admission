@@ -40,6 +40,8 @@ from django.utils.translation import gettext_lazy as _, gettext, get_language
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
@@ -50,7 +52,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
-from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
@@ -153,9 +154,8 @@ from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.api.utils import get_remote_metadata, get_remote_token
-from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
+from osis_profile.utils import curriculum as curriculum_utils
 from osis_role.templatetags.osis_role import has_perm
 
 __all__ = [
@@ -1421,47 +1421,13 @@ class ChecklistView(
 
         return context
 
-    def _get_experiences(self, resume: ResumePropositionDTO):
-        experiences = {}
-
-        for experience_academique in resume.curriculum.experiences_academiques:
-            for annee_academique in experience_academique.annees:
-                experiences.setdefault(annee_academique.annee, [])
-                if experience_academique.a_obtenu_diplome:
-                    experiences[annee_academique.annee].insert(0, experience_academique)
-                else:
-                    experiences[annee_academique.annee].append(experience_academique)
-
-        experiences_non_academiques = {}
-        for experience_non_academique in resume.curriculum.experiences_non_academiques:
-            date_courante = experience_non_academique.date_debut
-            while True:
-                annee = (
-                    date_courante.year if date_courante.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE else date_courante.year - 1
-                )
-                if experience_non_academique not in experiences_non_academiques.get(annee, []):
-                    experiences_non_academiques.setdefault(annee, []).append(experience_non_academique)
-                if date_courante == experience_non_academique.date_fin:
-                    break
-                date_courante = min(
-                    date_courante.replace(year=date_courante.year + 1), experience_non_academique.date_fin
-                )
-        for annee, experiences_annee in experiences_non_academiques.items():
-            experiences_annee.sort(key=lambda x: x.date_fin, reverse=True)
-            experiences.setdefault(annee, []).extend(experiences_annee)
-
-        etudes_secondaires = resume.etudes_secondaires
-        if etudes_secondaires:
-            if etudes_secondaires.annee_diplome_etudes_secondaires:
-                experiences.setdefault(etudes_secondaires.annee_diplome_etudes_secondaires, []).append(
-                    etudes_secondaires
-                )
-            elif etudes_secondaires.alternative_secondaires:
-                experiences.setdefault(0, []).append(etudes_secondaires)
-
-        experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
-
-        return experiences
+    @staticmethod
+    def _get_experiences(resume: ResumePropositionDTO):
+        return curriculum_utils.groupe_curriculum_par_annee_decroissante(
+            experiences_academiques=resume.curriculum.experiences_academiques,
+            experiences_professionnelles=resume.curriculum.experiences_non_academiques,
+            etudes_secondaires=resume.etudes_secondaires
+        )
 
     def _get_financabilite(self):
         # TODO
