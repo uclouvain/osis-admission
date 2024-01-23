@@ -636,7 +636,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         proposition = cls._load_dto(admission)
         poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name
         additional_condition_title_field = 'name_fr' if is_french_language else 'name_en'
-        additional_training_title_field = 'full_title' if is_french_language else 'full_title_en'
 
         return PropositionGestionnaireDTO(
             **dto_to_dict(proposition),
@@ -701,13 +700,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             ]
             + admission.free_additional_approval_conditions,
             avec_complements_formation=admission.with_prerequisite_courses,
-            complements_formation=[
-                LearningUnitPartimDTO(
-                    code=learning_unit_partim.code,
-                    full_title=getattr(learning_unit_partim, additional_training_title_field),
-                )
-                for learning_unit_partim in prerequisite_courses
-            ],
+            complements_formation=prerequisite_courses,
             commentaire_complements_formation=admission.prerequisite_courses_fac_comment,
             nombre_annees_prevoir_programme=admission.program_planned_years_number,
             nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,

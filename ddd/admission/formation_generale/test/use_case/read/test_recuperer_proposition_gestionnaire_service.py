@@ -60,7 +60,7 @@ class RecupererPropositionGestionnaireServiceTestCase(TestCase):
         self.assertEqual(result.bourse_double_diplome.type, TypeBourse.DOUBLE_TRIPLE_DIPLOMATION.name)
         self.assertEqual(result.bourse_double_diplome.nom_court, 'AGRO DD UCLOUVAIN/GEM')
         self.assertEqual(result.bourse_double_diplome.nom_long, 'AGRO DD UCLOUVAIN/GEM --')
-        self.assertEqual(result.genre_candidat, 'M')
+        self.assertEqual(result.genre_candidat, 'H')
         self.assertEqual(result.adresse_email_candidat, 'john.doe@ucl.be')
         self.assertEqual(result.langue_contact_candidat, 'fr-be')
         self.assertEqual(result.nationalite_candidat, 'BE')

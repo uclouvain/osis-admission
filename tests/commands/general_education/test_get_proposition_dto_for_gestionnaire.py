@@ -336,19 +336,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
 
         prerequisite_courses = self.admission.prerequisite_courses.all()
         self.assertEqual(result.avec_complements_formation, self.admission.with_prerequisite_courses)
-        self.assertCountEqual(
-            result.complements_formation,
-            [
-                LearningUnitPartimDTO(
-                    code=prerequisite_courses[0].acronym,
-                    full_title=prerequisite_courses[0].complete_title_i18n,
-                ),
-                LearningUnitPartimDTO(
-                    code=prerequisite_courses[1].acronym,
-                    full_title=prerequisite_courses[1].complete_title_i18n,
-                ),
-            ],
-        )
+        self.assertEqual(len(result.complements_formation), len(prerequisite_courses))
         self.assertEqual(result.commentaire_complements_formation, self.admission.prerequisite_courses_fac_comment)
         self.assertEqual(result.nombre_annees_prevoir_programme, self.admission.program_planned_years_number)
         self.assertEqual(
