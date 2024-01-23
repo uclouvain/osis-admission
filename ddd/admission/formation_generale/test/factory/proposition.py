@@ -215,6 +215,7 @@ class PropositionFactory(factory.Factory):
         PosteDiplomatiqueIdentityFactory,
         code=1,
     )
+    auteur_derniere_modification = ''
 
     class Params:
         est_bachelier_en_reorientation = factory.Trait(

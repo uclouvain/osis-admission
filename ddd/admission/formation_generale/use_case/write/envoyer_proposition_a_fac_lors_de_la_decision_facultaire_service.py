@@ -39,7 +39,7 @@ def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.soumettre_a_fac_lors_de_la_decision_facultaire()
+    proposition.soumettre_a_fac_lors_de_la_decision_facultaire(auteur_modification=cmd.gestionnaire)
 
     proposition_repository.save(entity=proposition)
 

@@ -23,7 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -48,6 +50,7 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 
 
+@freezegun.freeze_time('2021-11-01')
 class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -189,6 +192,8 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
             self.general_admission.checklist['current']['decision_sic']['extra'],
             {'en_cours': 'refusal'},
         )
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
     def test_refusal_decision_form_submitting_with_valid_data_other_reason(self):
         self.client.force_login(user=self.sic_manager_user)

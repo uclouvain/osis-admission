@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@ class AdmissionTrainingChoiceFormView(AdmissionFormMixin, LoadDossierViewMixin, 
     template_name = 'admission/forms/training_choice.html'
     permission_required = 'admission.change_admission_training_choice'
     update_requested_documents = True
-    update_admission_author = True
     urlpatterns = 'training-choice'
     form_class = TrainingChoiceForm
     specific_questions_tab = Onglets.CHOIX_FORMATION
@@ -55,6 +54,7 @@ class AdmissionTrainingChoiceFormView(AdmissionFormMixin, LoadDossierViewMixin, 
         message_bus_instance.invoke(
             ModifierChoixFormationParGestionnaireCommand(
                 uuid_proposition=self.admission_uuid,
+                gestionnaire=self.request.user.person.global_id,
                 bourse_double_diplome=form.cleaned_data['double_degree_scholarship'],
                 bourse_internationale=form.cleaned_data['international_scholarship'],
                 bourse_erasmus_mundus=form.cleaned_data['erasmus_mundus_scholarship'],

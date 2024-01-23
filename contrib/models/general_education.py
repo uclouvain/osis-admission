@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from contextlib import suppress
 
 from django.contrib.postgres.fields import ArrayField
@@ -422,7 +423,9 @@ class GeneralEducationAdmission(BaseAdmission):
 
         if author:
             self.last_update_author = author
+            self.modified_at = datetime.datetime.now()
             update_fields.append('last_update_author')
+            update_fields.append('modified_at')
 
         with suppress(BusinessException):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
@@ -440,7 +443,7 @@ class GeneralEducationAdmission(BaseAdmission):
 
         message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
 
-    def update_financability_computed_rule(self):
+    def update_financability_computed_rule(self, author: 'Person'):
         from admission.ddd.admission.formation_generale.commands import (
             SpecifierFinancabiliteResultatCalculCommand,
         )
@@ -452,6 +455,7 @@ class GeneralEducationAdmission(BaseAdmission):
         message_bus_instance.invoke(
             SpecifierFinancabiliteResultatCalculCommand(
                 uuid_proposition=self.uuid,
+                gestionnaire=author.global_id,
                 financabilite_regle_calcule=financabilite_regle_calcule,
                 financabilite_regle_calcule_le=timezone.now(),
             )

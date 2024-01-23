@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,15 +23,19 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
+import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
@@ -73,13 +77,13 @@ class CoordonneesTestCase(APITestCase):
         doctoral_commission = EntityFactory()
         promoter = PromoterFactory()
         cls.promoter_user = promoter.person.user
-        admission = DoctorateAdmissionFactory(
+        cls.admission = DoctorateAdmissionFactory(
             supervision_group=promoter.process,
             candidate=cls.address.person,
             training__management_entity=doctoral_commission,
         )
         AdmissionAcademicCalendarFactory.produce_all_required()
-        cls.admission_url = resolve_url('coordonnees', uuid=admission.uuid)
+        cls.admission_url = resolve_url('coordonnees', uuid=cls.admission.uuid)
         # Users
         cls.candidate_user = cls.address.person.user
         cls.candidate_user_without_admission = cls.other_address.person.user
@@ -135,6 +139,7 @@ class CoordonneesTestCase(APITestCase):
         self.assertEqual(address.person.phone_mobile, "+32 490 00 00 01")
         self.assertEqual(address.person.emergency_contact_phone, "+32 490 00 00 02")
 
+    @freezegun.freeze_time('2023-01-01')
     def test_coordonnees_update_candidate_with_admission(self):
         self.client.force_authenticate(self.candidate_user)
         response = self.client.put(self.admission_url, self.updated_data)
@@ -147,6 +152,33 @@ class CoordonneesTestCase(APITestCase):
         self.assertEqual(address.person.private_email, "joe.poe@example.be")
         self.assertEqual(address.person.phone_mobile, "+32 490 00 00 01")
         self.assertEqual(address.person.emergency_contact_phone, "+32 490 00 00 02")
+
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.last_update_author, self.candidate_user.person)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+
+    @freezegun.freeze_time('2023-01-01')
+    def test_coordonnees_update_candidate_with_general_admission(self):
+        admission = GeneralEducationAdmissionFactory()
+
+        self.client.force_authenticate(admission.candidate.user)
+
+        response = self.client.put(resolve_url('general_coordinates', uuid=admission.uuid), self.updated_data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+
+        address = PersonAddress.objects.get(
+            person=admission.candidate,
+            label=PersonAddressType.RESIDENTIAL.name,
+        )
+        self.assertEqual(address.street, "Rue de la sobriété")
+        self.assertEqual(address.person.private_email, "joe.poe@example.be")
+        self.assertEqual(address.person.phone_mobile, "+32 490 00 00 01")
+        self.assertEqual(address.person.emergency_contact_phone, "+32 490 00 00 02")
+
+        admission.refresh_from_db()
+        self.assertEqual(admission.last_update_author, admission.candidate)
+        self.assertEqual(admission.modified_at, datetime.datetime.now())
 
     def test_coordonnees_update_candidate_with_contact(self):
         self.client.force_authenticate(self.candidate_user)

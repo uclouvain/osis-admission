@@ -67,6 +67,7 @@ class TestSpecifierBesoinDeDerogation(TestCase):
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-MASTER-SCI-APPROVED',
             'besoin_de_derogation': BesoinDeDerogation.AVIS_DIRECTION_DEMANDE.name,
+            'gestionnaire': '0123456789',
         }
 
     def test_should_etre_ok_si_statut_correct(self):
