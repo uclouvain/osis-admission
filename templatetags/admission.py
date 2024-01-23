@@ -73,7 +73,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO, PropositionDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -89,7 +89,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import format_academic_year
+from admission.utils import format_academic_year, get_access_conditions_url
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 
 from base.models.person import Person
@@ -1252,4 +1252,16 @@ def sic_in_final_statut(checklist_statut):
     return checklist_statut['statut'] == ChoixStatutChecklist.GEST_REUSSITE.name or (
         checklist_statut['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
         and checklist_statut['extra']['blocage'] != 'to_be_completed'
+    )
+
+
+@register.filter
+def access_conditions_url(proposition: PropositionDTO):
+    training = BaseAdmission.objects.values(
+        'training__education_group_type__name', 'training__acronym', 'training__partial_acronym'
+    ).get(uuid=proposition.uuid)
+    return get_access_conditions_url(
+        training_type=training['training__education_group_type__name'],
+        training_acronym=training['training__acronym'],
+        partial_training_acronym=training['training__partial_acronym'],
     )
