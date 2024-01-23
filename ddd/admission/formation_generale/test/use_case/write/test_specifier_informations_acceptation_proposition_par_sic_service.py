@@ -31,17 +31,12 @@ from admission.ddd.admission.domain.model.complement_formation import Complement
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
-from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    SpecifierInformationsAcceptationPropositionParFaculteCommand,
     SpecifierInformationsAcceptationPropositionParSicCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
-)
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    SituationPropositionNonFACException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
@@ -52,7 +47,6 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
@@ -95,6 +89,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
             'nombre_de_mois_de_mobilite': '',
             'doit_se_presenter_en_sic': None,
             'communication_au_candidat': '',
+            'gestionnaire': '0123456789',
         }
 
     def test_should_etre_ok_avec_min_informations(self):
@@ -159,6 +154,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
                 nombre_de_mois_de_mobilite='6',
                 doit_se_presenter_en_sic=False,
                 communication_au_candidat='Communication',
+                gestionnaire='0123456789',
             )
         )
 

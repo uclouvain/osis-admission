@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -73,6 +73,7 @@ class TestSpecifierFinancabiliteResultatCalcul(TestCase):
             uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
             financabilite_regle_calcule='SECONDE_INSCRIPTION_MEME_CYCLE',
             financabilite_regle_calcule_le=timezone.now(),
+            gestionnaire='0123456789',
         )
 
     def test_should_specifier_resultat_calcul_etre_ok(self):

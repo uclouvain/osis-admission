@@ -27,15 +27,12 @@
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
-from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import (
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
@@ -84,6 +81,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_experience=self.experience_uuid,
                 statut=ChoixStatutChecklist.SYST_REUSSITE.name,
                 statut_authentification=None,
+                gestionnaire='0123456789',
             )
         )
 
@@ -110,6 +108,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_experience=self.experience_uuid,
                 statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                 statut_authentification=True,
+                gestionnaire='0123456789',
             )
         )
 
@@ -137,6 +136,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_experience=self.experience_uuid,
                 statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                 statut_authentification=False,
+                gestionnaire='0123456789',
             )
         )
 
@@ -165,6 +165,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_experience=self.experience_uuid,
                     statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                     statut_authentification=False,
+                    gestionnaire='0123456789',
                 )
             )
 
@@ -175,6 +176,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_experience='INCONNUE',
                 statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                 statut_authentification=False,
+                gestionnaire='0123456789',
             )
         )
 

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ def specifier_paiement_plus_necessaire(
     # THEN
     proposition.specifier_paiement_frais_dossier_plus_necessaire_par_gestionnaire(
         statut_checklist_cible=cmd.statut_checklist_frais_dossier,
+        auteur_modification=cmd.gestionnaire,
     )
     proposition_repository.save(proposition)
 

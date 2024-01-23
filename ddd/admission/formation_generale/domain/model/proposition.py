@@ -106,6 +106,7 @@ class Proposition(interface.RootEntity):
     formation_id: 'FormationIdentity'
     matricule_candidat: str
     reference: int
+    auteur_derniere_modification: str = ''
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
     statut: ChoixStatutPropositionGenerale = ChoixStatutPropositionGenerale.EN_BROUILLON
@@ -213,17 +214,20 @@ class Proposition(interface.RootEntity):
         self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
         self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
+        self.auteur_derniere_modification = self.matricule_candidat
 
         self.comptabilite.affiliation_sport = None  # Ce choix dépend du campus de formation
 
     def modifier_choix_formation_par_gestionnaire(
         self,
+        auteur_modification: str,
         bourses_ids: Dict[str, BourseIdentity],
         bourse_double_diplome: Optional[str],
         bourse_internationale: Optional[str],
         bourse_erasmus_mundus: Optional[str],
         reponses_questions_specifiques: Dict,
     ):
+        self.auteur_derniere_modification = auteur_modification
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.bourse_double_diplome_id = bourses_ids.get(bourse_double_diplome) if bourse_double_diplome else None
         self.bourse_internationale_id = bourses_ids.get(bourse_internationale) if bourse_internationale else None
@@ -231,10 +235,12 @@ class Proposition(interface.RootEntity):
 
     def modifier_checklist_choix_formation(
         self,
+        auteur_modification: str,
         type_demande: 'TypeDemande',
         formation_id: FormationIdentity,
         poursuite_de_cycle: 'PoursuiteDeCycle',
     ):
+        self.auteur_derniere_modification = auteur_modification
         self.type_demande = type_demande
         self.formation_id = formation_id
         self.annee_calculee = formation_id.annee
@@ -242,6 +248,7 @@ class Proposition(interface.RootEntity):
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionGenerale.ANNULEE
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def soumettre(
         self,
@@ -269,20 +276,24 @@ class Proposition(interface.RootEntity):
             self.formulaire_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def payer_frais_dossier(self):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
+        self.auteur_derniere_modification = self.matricule_candidat
 
         self.checklist_actuelle.frais_dossier = StatutChecklist(
             libelle=__('Payed'),
             statut=ChoixStatutChecklist.SYST_REUSSITE,
         )
 
-    def reclamer_documents_par_sic(self):
+    def reclamer_documents_par_sic(self, auteur_modification: str):
         self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC
+        self.auteur_derniere_modification = auteur_modification
 
-    def reclamer_documents_par_fac(self):
+    def reclamer_documents_par_fac(self, auteur_modification: str):
         self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC
+        self.auteur_derniere_modification = auteur_modification
 
     def specifier_refus_par_fac(self):
         self.checklist_actuelle.decision_facultaire = StatutChecklist(
@@ -299,16 +310,23 @@ class Proposition(interface.RootEntity):
             libelle=__('Approval'),
         )
 
-    def specifier_motifs_refus_par_fac(self, uuids_motifs: List[str], autres_motifs: List[str]):
+    def specifier_motifs_refus_par_fac(
+        self,
+        uuids_motifs: List[str],
+        autres_motifs: List[str],
+        auteur_modification: str,
+    ):
         SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
             statut=self.statut,
         ).validate()
         self.specifier_refus_par_fac()
         self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
         self.autres_motifs_refus = autres_motifs
+        self.auteur_derniere_modification = auteur_modification
 
     def specifier_informations_acceptation_par_fac(
         self,
+        auteur_modification: str,
         sigle_autre_formation: str,
         avec_conditions_complementaires: Optional[bool],
         uuids_conditions_complementaires_existantes: Optional[List[str]],
@@ -325,6 +343,7 @@ class Proposition(interface.RootEntity):
             statut=self.statut,
         ).validate()
         self.specifier_acceptation_par_fac()
+        self.auteur_derniere_modification = auteur_modification
         self.autre_formation_choisie_fac_id = (
             FormationIdentity(
                 sigle=sigle_autre_formation,
@@ -360,7 +379,7 @@ class Proposition(interface.RootEntity):
 
         self.commentaire_programme_conjoint = commentaire_programme_conjoint
 
-    def refuser_par_fac(self):
+    def refuser_par_fac(self, auteur_modification: str):
         RefuserParFacValidatorList(
             statut=self.statut,
             motifs_refus=self.motifs_refus,
@@ -370,8 +389,9 @@ class Proposition(interface.RootEntity):
         self.specifier_refus_par_fac()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
         self.certificat_approbation_fac = []
+        self.auteur_derniere_modification = auteur_modification
 
-    def approuver_par_fac(self):
+    def approuver_par_fac(self, auteur_modification: str):
         ApprouverParFacValidatorList(
             statut=self.statut,
             avec_conditions_complementaires=self.avec_conditions_complementaires,
@@ -385,14 +405,16 @@ class Proposition(interface.RootEntity):
         self.specifier_acceptation_par_fac()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
         self.certificat_refus_fac = []
+        self.auteur_derniere_modification = auteur_modification
 
-    def soumettre_a_fac_lors_de_la_decision_facultaire(self):
+    def soumettre_a_fac_lors_de_la_decision_facultaire(self, auteur_modification: str):
         SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList(
             statut=self.statut,
         ).validate()
+        self.auteur_derniere_modification = auteur_modification
         self.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
 
-    def soumettre_au_sic_lors_de_la_decision_facultaire(self, envoi_par_fac: bool):
+    def soumettre_au_sic_lors_de_la_decision_facultaire(self, envoi_par_fac: bool, auteur_modification: str):
         if envoi_par_fac:
             FacPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(
                 statut=self.statut,
@@ -401,15 +423,21 @@ class Proposition(interface.RootEntity):
         else:
             SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList(statut=self.statut).validate()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
+        self.auteur_derniere_modification = auteur_modification
 
-    def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self):
+    def specifier_paiement_frais_dossier_necessaire_par_gestionnaire(self, auteur_modification: str):
         self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
         self.checklist_actuelle.frais_dossier = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             libelle=__('Must pay'),
         )
+        self.auteur_derniere_modification = auteur_modification
 
-    def specifier_paiement_frais_dossier_plus_necessaire_par_gestionnaire(self, statut_checklist_cible: str):
+    def specifier_paiement_frais_dossier_plus_necessaire_par_gestionnaire(
+        self,
+        statut_checklist_cible: str,
+        auteur_modification: str,
+    ):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
         self.checklist_actuelle.frais_dossier = {
             ChoixStatutChecklist.INITIAL_NON_CONCERNE.name: StatutChecklist(
@@ -421,12 +449,14 @@ class Proposition(interface.RootEntity):
                 libelle=__('Dispensed'),
             ),
         }[statut_checklist_cible]
+        self.auteur_derniere_modification = auteur_modification
 
     def completer_documents_par_candidat(self):
         self.statut = {
             ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
             ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC,
         }.get(self.statut)
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def completer_curriculum(
         self,
@@ -437,9 +467,11 @@ class Proposition(interface.RootEntity):
         self.curriculum = curriculum
         self.equivalence_diplome = equivalence_diplome
         self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def completer_comptabilite(
         self,
+        auteur_modification: str,
         attestation_absence_dette_etablissement: List[str],
         demande_allocation_etudes_fr_be: Optional[bool],
         enfant_personnel: Optional[bool],
@@ -492,6 +524,7 @@ class Proposition(interface.RootEntity):
         prenom_titulaire_compte: Optional[str],
         nom_titulaire_compte: Optional[str],
     ):
+        self.auteur_derniere_modification = auteur_modification
         self.comptabilite = Comptabilite(
             attestation_absence_dette_etablissement=attestation_absence_dette_etablissement,
             demande_allocation_d_etudes_communaute_francaise_belgique=demande_allocation_etudes_fr_be,
@@ -562,6 +595,7 @@ class Proposition(interface.RootEntity):
         self,
         statut_checklist_cible: str,
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
+        auteur_modification: str,
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
             statut=ChoixStatutChecklist[statut_checklist_cible],
@@ -571,12 +605,14 @@ class Proposition(interface.RootEntity):
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
+        self.auteur_derniere_modification = auteur_modification
 
     def specifier_statut_checklist_experience_parcours_anterieur(
         self,
         statut_checklist_cible: str,
         statut_checklist_authentification: Optional[bool],
         uuid_experience: str,
+        auteur_modification: str,
     ):
         try:
             experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
@@ -592,9 +628,12 @@ class Proposition(interface.RootEntity):
         else:
             experience.extra['authentification'] = '1' if statut_checklist_authentification else '0'
 
+        self.auteur_derniere_modification = auteur_modification
+
     def specifier_authentification_experience_parcours_anterieur(
         self,
         uuid_experience: str,
+        auteur_modification: str,
         etat_authentification: str,
     ):
         try:
@@ -603,9 +642,11 @@ class Proposition(interface.RootEntity):
             raise ExperienceNonTrouveeException
 
         experience.extra['etat_authentification'] = etat_authentification
+        self.auteur_derniere_modification = auteur_modification
 
     def specifier_condition_acces(
         self,
+        auteur_modification: str,
         condition_acces: str,
         millesime_condition_acces: Optional[int],
         avec_complements_formation: Optional[bool],
@@ -625,6 +666,7 @@ class Proposition(interface.RootEntity):
             if len(titres_selectionnes) == 1:
                 nouveau_millesime_condition_acces = titres_selectionnes[0].annee
 
+        self.auteur_derniere_modification = auteur_modification
         self.condition_acces = nouvelle_condition_acces
         self.millesime_condition_acces = nouveau_millesime_condition_acces
         self.avec_complements_formation = avec_complements_formation
@@ -635,11 +677,13 @@ class Proposition(interface.RootEntity):
 
     def specifier_equivalence_titre_acces(
         self,
+        auteur_modification: str,
         type_equivalence_titre_acces: str,
         statut_equivalence_titre_acces: str,
         etat_equivalence_titre_acces: str,
         date_prise_effet_equivalence_titre_acces: Optional[datetime.date],
     ):
+        self.auteur_derniere_modification = auteur_modification
         self.type_equivalence_titre_acces = getattr(TypeEquivalenceTitreAcces, type_equivalence_titre_acces, None)
         self.statut_equivalence_titre_acces = getattr(StatutEquivalenceTitreAcces, statut_equivalence_titre_acces, None)
         self.etat_equivalence_titre_acces = getattr(EtatEquivalenceTitreAcces, etat_equivalence_titre_acces, None)
@@ -651,12 +695,14 @@ class Proposition(interface.RootEntity):
         documents_additionnels: List[str],
         poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
     ):
+        self.auteur_derniere_modification = self.matricule_candidat
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.documents_additionnels = documents_additionnels
         self.poste_diplomatique = poste_diplomatique
 
     def completer_informations_complementaires_par_gestionnaire(
         self,
+        auteur_modification: str,
         reponses_questions_specifiques: Dict,
         documents_additionnels: List[str],
         poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
@@ -667,6 +713,7 @@ class Proposition(interface.RootEntity):
         formulaire_modification_inscription: List[str],
         est_non_resident_au_sens_decret: Optional[bool],
     ):
+        self.auteur_derniere_modification = auteur_modification
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.documents_additionnels = documents_additionnels
 
@@ -683,13 +730,21 @@ class Proposition(interface.RootEntity):
         self,
         financabilite_regle_calcule: RegleCalculeResultatAvecFinancable,
         financabilite_regle_calcule_le: datetime.datetime,
+        auteur_modification: str,
     ):
         self.financabilite_regle_calcule = financabilite_regle_calcule
         self.financabilite_regle_calcule_le = financabilite_regle_calcule_le
+        self.auteur_derniere_modification = auteur_modification
 
-    def specifier_financabilite_regle(self, financabilite_regle: RegleCalculeResultatAvecFinancable, etabli_par: str):
+    def specifier_financabilite_regle(
+        self,
+        financabilite_regle: RegleCalculeResultatAvecFinancable,
+        etabli_par: str,
+        auteur_modification: str,
+    ):
         self.financabilite_regle = financabilite_regle
         self.financabilite_regle_etabli_par = etabli_par
+        self.auteur_derniere_modification = auteur_modification
 
         self.checklist_actuelle.financabilite = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_REUSSITE,
@@ -697,14 +752,13 @@ class Proposition(interface.RootEntity):
             extra={},
         )
 
-    def specifier_besoin_de_derogation(
-        self,
-        besoin_de_derogation: BesoinDeDerogation,
-    ):
+    def specifier_besoin_de_derogation(self, besoin_de_derogation: BesoinDeDerogation, auteur_modification: str):
         self.besoin_de_derogation = besoin_de_derogation
+        self.auteur_derniere_modification = auteur_modification
 
     def specifier_informations_acceptation_par_sic(
         self,
+        auteur_modification: str,
         avec_conditions_complementaires: Optional[bool],
         uuids_conditions_complementaires_existantes: Optional[List[str]],
         conditions_complementaires_libres: Optional[List[str]],
@@ -732,6 +786,7 @@ class Proposition(interface.RootEntity):
             libelle=__('Approval'),
             extra={'en_cours': "approval"},
         )
+        self.auteur_derniere_modification = auteur_modification
 
         self.avec_conditions_complementaires = avec_conditions_complementaires
         self.conditions_complementaires_existantes = (
@@ -770,6 +825,7 @@ class Proposition(interface.RootEntity):
 
     def specifier_motifs_refus_par_sic(
         self,
+        auteur_modification: str,
         type_de_refus: TypeDeRefus,
         uuids_motifs: List[str],
         autres_motifs: List[str],
@@ -781,11 +837,12 @@ class Proposition(interface.RootEntity):
             libelle=__('Refusal'),
             extra={'en_cours': "refusal"},
         )
+        self.auteur_derniere_modification = auteur_modification
         self.type_de_refus = type_de_refus
         self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
         self.autres_motifs_refus = autres_motifs
 
-    def refuser_par_sic(self):
+    def refuser_par_sic(self, auteur_modification: str):
         RefuserParSicValidatorList(
             statut=self.statut,
             motifs_refus=self.motifs_refus,
@@ -798,10 +855,11 @@ class Proposition(interface.RootEntity):
             extra={'blocage': 'refusal'},
         )
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE
+        self.auteur_derniere_modification = auteur_modification
         self.certificat_approbation_sic = []
         self.certificat_approbation_sic_annexe = []
 
-    def approuver_par_sic(self):
+    def approuver_par_sic(self, auteur_modification: str):
         ApprouverParSicValidatorList(
             statut=self.statut,
             avec_conditions_complementaires=self.avec_conditions_complementaires,
@@ -817,4 +875,5 @@ class Proposition(interface.RootEntity):
             libelle=__('Approval'),
         )
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE
+        self.auteur_derniere_modification = auteur_modification
         self.certificat_refus_sic = []

@@ -38,6 +38,7 @@ def specifier_motifs_refus_proposition_par_sic(
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     proposition.specifier_motifs_refus_par_sic(
+        auteur_modification=cmd.gestionnaire,
         type_de_refus=cmd.type_de_refus,
         uuids_motifs=cmd.uuids_motifs,
         autres_motifs=cmd.autres_motifs,

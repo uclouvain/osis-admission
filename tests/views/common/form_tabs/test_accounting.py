@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import uuid
 from unittest import mock
 
@@ -47,6 +48,7 @@ from admission.ddd.admission.enums import (
     LienParente,
     ChoixAssimilation6,
 )
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.accounting import AccountingForm
 from admission.tests.factories.curriculum import EducationalExperienceYearFactory, EducationalExperienceFactory
@@ -114,6 +116,7 @@ class GeneralAccountingFormViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
@@ -375,6 +378,7 @@ class GeneralAccountingFormViewTestCase(TestCase):
         self.assertRedirects(response, self.detail_url, fetch_redirect_response=False)
 
         # Check admission updates
+        self.general_admission.refresh_from_db()
         accounting: Accounting = self.general_admission.accounting
 
         self.assertEqual(accounting.institute_absence_debts_certificate, [])
@@ -390,6 +394,12 @@ class GeneralAccountingFormViewTestCase(TestCase):
         self.assertEqual(accounting.account_holder_first_name, '')
         self.assertEqual(accounting.account_holder_last_name, '')
         self.assertEqual(accounting.sport_affiliation, ChoixAffiliationSport.NON.name)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.general_admission.requested_documents,
+        )
 
     def test_post_general_accounting_form_with_iban_number(self):
         self.client.force_login(self.sic_manager_user)

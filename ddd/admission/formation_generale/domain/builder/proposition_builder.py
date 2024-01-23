@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -61,4 +61,5 @@ class PropositionBuilder(interface.RootEntityBuilder):
             bourse_internationale_id=bourses_ids.get(cmd.bourse_internationale) if cmd.bourse_internationale else None,
             bourse_erasmus_mundus_id=bourses_ids.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None,
             reference=proposition_repository.recuperer_reference_suivante(),
+            auteur_derniere_modification=cmd.matricule_candidat,
         )

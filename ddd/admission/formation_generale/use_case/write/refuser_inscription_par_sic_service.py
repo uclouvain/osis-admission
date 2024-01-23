@@ -42,7 +42,7 @@ def refuser_inscription_par_sic(
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.refuser_par_sic()
+    proposition.refuser_par_sic(auteur_modification=cmd.auteur)
 
     # THEN
     pdf_generation.generer_attestation_refus_inscription_sic(
