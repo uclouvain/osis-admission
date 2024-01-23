@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from contextlib import suppress
 from enum import Enum
 from typing import List, Optional, Union, Dict
@@ -756,7 +757,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     'additional_approval_conditions',
                     Prefetch(
                         'refusal_reasons',
-                        queryset=RefusalReason.objects.select_related('category').order_by('category__name', 'name'),
+                        queryset=RefusalReason.objects.select_related('category').order_by('category__order', 'order'),
                     ),
                 )
                 .get(uuid=entity_id.uuid)

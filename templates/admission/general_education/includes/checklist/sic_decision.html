@@ -114,7 +114,7 @@
             <dt>{% trans "Reasons" %}</dt>
             <dd>
               {% if admission.motifs_refus %}
-              <ul>
+              <ul class="refusal-reasons-list">
                 {% for reason in admission.motifs_refus %}
                   {% ifchanged reason.categorie %}
                     {% if not forloop.first %}
