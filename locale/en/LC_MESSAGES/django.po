@@ -67,6 +67,12 @@ msgid "%(state)s on %(date)s"
 msgstr ""
 
 #, python-format
+msgid "%(years)s year"
+msgid_plural "%(years)s years"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
 msgid "(%(minutes)s ago)"
 msgstr ""
 
@@ -871,9 +877,6 @@ msgid "Author"
 msgstr ""
 
 msgid "Authorize"
-msgstr ""
-
-msgid "Authorized program"
 msgstr ""
 
 msgid "Authors"
@@ -2185,6 +2188,9 @@ msgstr ""
 msgid "Dossier numero"
 msgstr ""
 
+msgid "Dossier reference:"
+msgstr ""
+
 msgid "Dossier status"
 msgstr ""
 
@@ -2519,7 +2525,7 @@ msgstr ""
 msgid "Faculty comment for the SIC:"
 msgstr ""
 
-msgid "Faculty opinion:"
+msgid "Faculty decision:"
 msgstr ""
 
 msgid "Faculty process"
@@ -2590,6 +2596,9 @@ msgid "Financing rule"
 msgstr ""
 
 msgid "First name"
+msgstr ""
+
+msgid "First name Last name:"
 msgstr ""
 
 msgid "First name and last name"
@@ -4040,6 +4049,9 @@ msgstr ""
 msgid "Nationality"
 msgstr ""
 
+msgid "Nationality:"
+msgstr ""
+
 msgid "Negative assessment by lead supervisor"
 msgstr ""
 
@@ -4316,6 +4328,9 @@ msgid "Other"
 msgstr ""
 
 msgid "Other address"
+msgstr ""
+
+msgid "Other authorized program"
 msgstr ""
 
 msgid "Other cotutelle-related documents"
@@ -6294,6 +6309,13 @@ msgid ""
 msgstr ""
 
 msgid ""
+"This document is an internal document containing the details of the "
+"faculty's decision. Under no circumstances will it be sent in this form to "
+"the candidate. The candidate will receive a letter from SIC containing the "
+"various details of the faculty's decision."
+msgstr ""
+
+msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
 "find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
@@ -7107,6 +7129,9 @@ msgid "actions"
 msgstr ""
 
 msgid "approval"
+msgstr ""
+
+msgid "approval for another training"
 msgstr ""
 
 msgctxt "payment"

@@ -78,7 +78,7 @@ templates.register(
         Token(
             name='training_enrollment_campus_email',
             description=_("Email of the enrollment campus"),
-            example="http://dev.studies.uclouvain.be/somewhere",
+            example="inscription-lln@uclouvain.be",
         ),
         Token(
             name='candidate_nationality_country',

@@ -26,10 +26,21 @@
 {% endcomment %}
 
 {% block decision_title %}
-  {% translate 'approval' %}
+  {% if proposition.autre_formation_choisie_fac %}
+    {% translate 'approval for another training' %}
+  {% else %}
+    {% translate 'approval' %}
+  {% endif %}
 {% endblock %}
 
 {% block decision_content %}
+  {% if proposition.autre_formation_choisie_fac %}
+    {% display proposition.autre_formation_choisie_fac.sigle ' - ' proposition.autre_formation_choisie_fac.intitule as course_title %}
+    {% field_data _('Other authorized program') course_title inline=True %}
+  {% endif %}
+
+  {% field_data _('Date the application was sent to the faculty') sic_to_fac_history_entry.created|date:'d/m/Y' inline=True %}
+
   {% if access_titles_names %}
     <dl>
       <dt>{% translate 'Valuated diplomas or experiences:' %}</dt>
@@ -44,9 +55,6 @@
   {% else %}
     {% field_data _('Valuated diplomas or experiences:') '' inline=True %}
   {% endif %}
-
-  {% display proposition.autre_formation_choisie_fac.sigle ' - ' proposition.autre_formation_choisie_fac.intitule as course_title %}
-  {% field_data _('Authorized program') course_title inline=True %}
 
   {% if proposition.avec_conditions_complementaires %}
     <dl>
@@ -80,7 +88,12 @@
 
   {% field_data _('Message to candidate concerning the prerequisite courses') proposition.commentaire_complements_formation|safe inline=True %}
 
-  {% field_data _('Number of years required for the full program') proposition.nombre_annees_prevoir_programme inline=True %}
+  {% blocktranslate trimmed count years=proposition.nombre_annees_prevoir_programme|default:0 asvar number_of_years %}
+    {{ years }} year
+    {% plural %}
+    {{ years }} years
+  {% endblocktranslate %}
+  {% field_data _('Number of years required for the full program') number_of_years inline=True %}
 
   {% display proposition.nom_personne_contact_programme_annuel_annuel ' - ' proposition.email_personne_contact_programme_annuel_annuel as contact %}
   {% field_data _('Contact person for the design of the annual program (PAE)') contact inline=True %}
