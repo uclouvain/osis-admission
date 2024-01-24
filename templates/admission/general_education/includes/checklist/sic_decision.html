@@ -225,10 +225,11 @@
       {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
     {% endif %}
   </div>
-{% endwith %}
 
-{% if request.htmx %}
-  {# Update the checklist menu  #}
-  {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='decision_sic' %}
-  {% include "admission/includes/admission_status.html" %}
-{% endif %}
+  {% if request.htmx %}
+    {# Update the checklist menu  #}
+    {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='decision_sic' %}
+    {% include "admission/includes/admission_status.html" %}
+  {% endif %}
+
+{% endwith %}
