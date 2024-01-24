@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 import datetime
 import uuid
 from typing import List
@@ -31,15 +30,15 @@ from typing import List
 import factory
 from attr import dataclass
 
-from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    ExperienceAcademiqueDTO,
-    AnneeExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from base.models.enums.civil_state import CivilState
 from base.tests.factories.person import generate_global_id
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO, CurriculumDTO,
+)
 
 
 class IdentificationDTOFactory(factory.Factory):
@@ -225,3 +224,5 @@ class ProfilCandidatFactory(factory.Factory):
     etudes_secondaires = factory.SubFactory(EtudesSecondairesDTOFactory)
     curriculum = factory.SubFactory(CurriculumDTOFactory)
     conditions_comptabilite = factory.SubFactory(ConditionsComptabiliteDTOFactory)
+
+

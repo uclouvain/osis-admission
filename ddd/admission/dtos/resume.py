@@ -29,11 +29,12 @@ import attr
 from django.utils.functional import cached_property
 
 from admission.ddd.admission.doctorat.preparation import dtos as dtos_doctorat
-from admission.ddd.admission.doctorat.preparation.dtos import CurriculumDTO
-from admission.ddd.admission.dtos import IdentificationDTO, CoordonneesDTO, EtudesSecondairesDTO
+from admission.ddd.admission.dtos import IdentificationDTO, CoordonneesDTO
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.formation_continue import dtos as dtos_formation_continue
 from admission.ddd.admission.formation_generale import dtos as dtos_formation_generale
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import CurriculumDTO
 from osis_common.ddd import interface
 
 AdmissionPropositionDTO = Union[

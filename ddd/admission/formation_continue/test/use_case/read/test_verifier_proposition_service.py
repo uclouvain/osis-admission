@@ -35,7 +35,6 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
 )
-from admission.ddd.admission.dtos import EtudesSecondairesDTO
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
@@ -53,6 +52,7 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 
 
 @freezegun.freeze_time('2023-01-01')

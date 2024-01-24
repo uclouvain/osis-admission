@@ -45,7 +45,6 @@ from admission.calendar.admission_calendar import (
 )
 from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.ddd import FR_ISO_CODE, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
@@ -53,27 +52,18 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    AnneeExperienceAcademiqueDTO,
     ConnaissanceLangueDTO,
     CotutelleDTO,
-    CurriculumDTO,
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
     DoctoratDTO,
-    ExperienceAcademiqueDTO,
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    AlternativeSecondairesDTO,
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-)
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -161,6 +151,16 @@ from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+    EtudesSecondairesDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO, CurriculumDTO,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.curriculum import (
     ActivitySector,

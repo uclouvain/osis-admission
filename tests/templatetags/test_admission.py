@@ -45,14 +45,12 @@ from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.test.factory.profil import (
     ExperienceAcademiqueDTOFactory,
-    ExperienceNonAcademiqueDTOFactory,
-    EtudesSecondairesDTOFactory,
+    ExperienceNonAcademiqueDTOFactory, EtudesSecondairesDTOFactory,
 )
 from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
 from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL

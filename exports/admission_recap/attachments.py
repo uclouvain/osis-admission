@@ -28,17 +28,16 @@ from typing import List, Optional, Dict
 
 import img2pdf
 from django.utils.translation import override
+from osis_document.api.utils import get_raw_content_remotely
 
 from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.validator._should_comptabilite_etre_completee import recuperer_champs_requis_dto
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -59,9 +58,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_
 from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.utils import format_academic_year
 from base.models.enums.education_group_types import TrainingType
-from base.models.enums.got_diploma import GotDiploma
-from osis_document.api.utils import get_raw_content_remotely
-from osis_profile.models.enums.curriculum import TranscriptType, ActivityType
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from osis_profile.models.enums.curriculum import TranscriptType
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 

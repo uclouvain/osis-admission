@@ -1,4 +1,4 @@
-{% load admission_parcours i18n %}
+{% load parcours_externe i18n %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -37,7 +37,9 @@
 
 <div id="{{ prefix }}-parcours" class="tab-content parcours">
   {# Vue complète #}
-    {% include 'admission/general_education/includes/checklist/parcours_complete_view.html' with show_titre_acces=True show_actions=show_actions %}
+  <div role="tabpanel" class="table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ prefix }}-parcours-complete">
+    {% include 'osis_profile/parcours_externe_complet.html' with show_titre_acces=True show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" %}
+  </div>
 
   {# Vue formations académiques #}
   <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
@@ -62,7 +64,7 @@
         {% with experiences_formations=experiences|filter_experiences_trainings %}
           {% for year, year_experiences in experiences_formations.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
+              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" %}
             {% empty %}
               {% ifchanged %}
               <tr class="bg-primary">
@@ -99,7 +101,7 @@
         {% with experiences_financabilite=experiences|filter_experiences_financability %}
           {% for year, year_experiences in experiences_financabilite.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
+              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" %}
             {% endfor %}
           {% endfor %}
         {% endwith %}

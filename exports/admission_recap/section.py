@@ -33,8 +33,6 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
 )
 from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -69,6 +67,7 @@ from admission.exports.admission_recap.constants import (
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_profile.models.enums.curriculum import ActivityType
 
 

@@ -26,7 +26,7 @@
 from typing import List, Dict
 
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
 from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result
 
