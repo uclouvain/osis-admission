@@ -87,6 +87,24 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
+    def historiser_specification_motifs_refus_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
+    ):
+        pass
+
+    @classmethod
+    def historiser_specification_informations_acceptation_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
+    ):
+        pass
+
+    @classmethod
     def historiser_refus_sic(cls, proposition: Proposition, message: EmailMessage, gestionnaire: str):
         pass
 

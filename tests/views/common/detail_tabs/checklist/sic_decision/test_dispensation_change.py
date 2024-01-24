@@ -25,8 +25,10 @@
 # ##############################################################################
 
 from django.conf import settings
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from osis_history.models import HistoryEntry
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.checklist import AdditionalApprovalCondition
@@ -93,3 +95,32 @@ class SicDecisionChangeStatusViewTestCase(SicPatchMixin, TestCase):
             self.general_admission.checklist['current']['decision_sic']['extra'],
             {'en_cours': 'approval'},
         )
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+
+        # Check that an history entry is created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.general_admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+
+        self.assertCountEqual(
+            ['proposition', 'sic-decision', 'status-changed'],
+            entries[0].tags,
+        )
+
+        self.assertEqual(
+            entries[0].author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+
+        # Check that no additional history entry is created
+        self.assertEqual(len(HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)), 1)

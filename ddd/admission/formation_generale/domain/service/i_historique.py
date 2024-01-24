@@ -158,3 +158,23 @@ class IHistorique(interface.DomainService):
         uuid_experience: str,
     ):
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_specification_motifs_refus_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_specification_informations_acceptation_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
+    ):
+        raise NotImplementedError
