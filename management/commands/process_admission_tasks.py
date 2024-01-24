@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ class Command(BaseCommand):
                     self.task_operation_by_type[task_type](task_uuid)
                 update_task(task_uuid, progression=100, state=TaskState.DONE, completed_at=now())
             except Exception as e:
-                update_task(task_uuid, progression=0, state=TaskState.PENDING)
+                update_task(task_uuid, state=TaskState.ERROR, exception=e)
                 errors.append(e)
 
         if errors:
