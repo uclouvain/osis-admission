@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -37,13 +37,12 @@
 {% endblock %}
 
 {% block modal_footer %}
+  <button type="button" class="btn btn-primary" data-dismiss="modal" aria-label="Close">
+    {% trans "Back to page" context 'admission' %}
+  </button>
   <a class="btn btn-danger" id="continue-link" href="#">
     {% trans "Exit without saving" %}
   </a>
-  <button type="button" class="btn btn-primary" id="save-link">
-    <i class="fas fa-floppy-disk"></i>
-    {% trans "Save" context 'admission' %}
-  </button>
 {% endblock %}
 
 
@@ -104,15 +103,6 @@
               // Show modal and change its 'continue' link so that it link to the same link that clicked
               $('#prevent-quitting-modal').modal('show');
               document.querySelector('a#continue-link').setAttribute('href', e.target.href)
-              document.querySelector('button#save-link').addEventListener('click', function () {
-                const event = new MouseEvent('click', {
-                  view: window,
-                  bubbles: true,
-                  cancelable: true,
-                });
-                const submitButton = form.querySelector('button[type="submit"]') ?? document.querySelector(`button[form="${form.id}"`);
-                submitButton.dispatchEvent(event);
-              });
               // Do not show browser popup
               doBrowserPrevent = false;
               return false;

@@ -903,6 +903,10 @@ msgstr ""
 msgid "Back to checklist"
 msgstr ""
 
+msgctxt "admission"
+msgid "Back to page"
+msgstr ""
+
 msgid "Back to the list"
 msgstr ""
 
