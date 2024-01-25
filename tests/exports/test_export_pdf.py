@@ -72,8 +72,7 @@ class ExportPdfTestCase(TestCase):
         call_command("process_admission_tasks")
         save.assert_called()
         confirm.assert_called_with(
-            'a-token',
-            document_expiration_policy=DocumentExpirationPolicy.EXPORT_EXPIRATION_POLICY.value
+            'a-token', document_expiration_policy=DocumentExpirationPolicy.EXPORT_EXPIRATION_POLICY.value
         )
         post_processing.assert_called()
         async_task.refresh_from_db()
@@ -94,4 +93,5 @@ class ExportPdfTestCase(TestCase):
         save.assert_called()
         confirm.assert_not_called()
         async_task.refresh_from_db()
-        self.assertEqual(async_task.state, TaskState.PENDING.name)
+        self.assertEqual(async_task.state, TaskState.ERROR.name)
+        self.assertTrue(async_task.traceback)
