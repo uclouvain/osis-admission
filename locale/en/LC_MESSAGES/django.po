@@ -3920,6 +3920,9 @@ msgstr ""
 msgid "Modification of the secondary studies"
 msgstr ""
 
+msgid "Modification of the specificities of the curriculum"
+msgstr ""
+
 msgid "Modification requested"
 msgstr ""
 
@@ -4120,6 +4123,9 @@ msgid "No scholarship found."
 msgstr ""
 
 msgid "No specific profile"
+msgstr ""
+
+msgid "No specific question available for this dossier."
 msgstr ""
 
 msgid "No training found."
