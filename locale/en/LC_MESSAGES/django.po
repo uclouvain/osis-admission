@@ -2102,6 +2102,12 @@ msgstr ""
 msgid "Do not reorder values, and keep the same count"
 msgstr ""
 
+#, python-format
+msgid ""
+"Do you confirm the sending of this email to the <a href=\"mailto:"
+"%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
+msgstr ""
+
 msgid "Do you have a Belgian National Register Number (NISS)?"
 msgstr ""
 
@@ -2300,6 +2306,12 @@ msgctxt "admission"
 msgid "Email"
 msgstr ""
 
+msgid "Email content"
+msgstr ""
+
+msgid "Email object"
+msgstr ""
+
 msgid "Email of the contact person for the design of the annual program"
 msgstr ""
 
@@ -2320,10 +2332,20 @@ msgid ""
 "fee to finalize an application for general education"
 msgstr ""
 
+msgid ""
+"Email sent to the candidate to inform him that the checking of the "
+"authentication of its background is in progress."
+msgstr ""
+
 msgid "Email sent to the candidate when SIC approves an admission."
 msgstr ""
 
 msgid "Email sent to the candidate when SIC refuses an admission."
+msgstr ""
+
+msgid ""
+"Email sent to the checkers to inform them to check the background "
+"authentication of the candidate."
 msgstr ""
 
 msgid ""
@@ -3294,6 +3316,9 @@ msgid "Institute"
 msgstr ""
 
 msgid "Institute address"
+msgstr ""
+
+msgid "Institute contacted"
 msgstr ""
 
 msgid "Institute name"

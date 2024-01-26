@@ -216,3 +216,46 @@ class Historique(IHistorique):
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
             tags=["proposition", "sic-decision", "refusal", "status-changed"],
         )
+
+    @classmethod
+    def historiser_demande_verification_titre_acces(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+
+        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+        recipient = message['To']
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            f'Mail envoyé à "{recipient}" le {now} par {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            f'Mail sent to "{recipient}" on {now} by {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'experience-authentication', 'authentication-request', 'message'],
+            extra_data={'experience_id': uuid_experience},
+        )
+
+    @classmethod
+    def historiser_information_candidat_verification_parcours_en_cours(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+
+        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            f'Mail envoyé à le/la candidat·e le {now} par {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            f'Mail sent to the candidate on {now} by {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'experience-authentication', 'institute-contact', 'message'],
+            extra_data={'experience_id': uuid_experience},
+        )
