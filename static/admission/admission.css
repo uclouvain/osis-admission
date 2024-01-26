@@ -318,3 +318,30 @@ select.select2-hidden-accessible + span {
 .select2-selection.select2-selection--single {
   padding: 6px 12px;
 }
+
+#document-spinner {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 20%;
+}
+
+#document-spinner.htmx-request {
+  display: block;
+}
+
+#document-spinner .fa-spinner {
+  font-size: 3em;
+}
+
+#document-spinner.htmx-request .fa-spinner {
+  -moz-animation: spin-loader 2s linear infinite;
+  -webkit-animation: spin-loader 2s linear infinite;
+  animation: spin-loader 2s linear infinite;
+}
