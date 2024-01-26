@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0140_sic_mail_templates'),
+        ('admission', '0141_refusal_reason_and_category_order'),
     ]
 
     operations = [
