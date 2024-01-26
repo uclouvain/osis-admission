@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-10 16:13+0100\n"
+"POT-Creation-Date: 2024-01-26 15:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1421,6 +1421,9 @@ msgstr "Nationalité"
 msgid "City"
 msgstr "Ville"
 
+msgid "Civil state"
+msgstr "État civil"
+
 msgid "Civil status"
 msgstr "État civil"
 
@@ -1812,6 +1815,9 @@ msgid "Country of birth"
 msgstr "Pays de naissance"
 
 msgid "Country of citizenship"
+msgstr "Pays de nationalité"
+
+msgid "Country of citizenship name"
 msgstr "Pays de nationalité"
 
 msgctxt "admission"
@@ -2899,6 +2905,9 @@ msgstr "Texte d'aide"
 
 msgid "Hide the checklist menu"
 msgstr "Cacher le menu de la checklist"
+
+msgid "High school graduation year"
+msgstr "Année d'obtention du diplôme d'études secondaires"
 
 msgctxt "tab"
 msgid "History"
@@ -4121,6 +4130,9 @@ msgid ""
 msgstr ""
 "Formule 2 (La défense et la soutenance sont organisées le même jour, et "
 "soumises à une condition de recevabilité)"
+
+msgid "Middle name"
+msgstr "Autres prénoms"
 
 msgid "Missing"
 msgstr "Manquants"

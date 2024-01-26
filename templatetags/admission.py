@@ -54,6 +54,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos import EtudesSecondairesDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
@@ -90,6 +91,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.utils import format_academic_year
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 
+from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
@@ -1014,8 +1016,9 @@ def is_profile_coordinates_different(profil_candidat: ProfilCandidatDTO, coordon
 
 
 @register.filter
-def render_display_field_name(field_name: str) -> str:
-    return _(field_name.replace('_', ' ').capitalize())
+def render_display_field_name(field_name: str, context: str = None) -> str:
+    msg = field_name.replace('_', ' ').capitalize()
+    return pgettext(context, msg) if context else _(msg)
 
 
 @register.inclusion_tag('admission/search_account_digit_result_message.html')
@@ -1062,12 +1065,22 @@ def map_fields_items(digit_fields):
 
 
 @register.inclusion_tag('admission/includes/input_field_data.html')
-def input_field_data(label, value, editable=True, mask=None):
+def input_field_data(label, value, editable=True, mask=None, select_key=None):
+    if isinstance(value, datetime.date):
+        value = value.strftime("%d/%m/%Y")
+    if label == 'gender' and value is not None:
+        select_key = value
+        value = ChoixGenre.get_value(select_key)
+    if label == 'civil_state' and value is not None:
+        select_key = value
+        value = CivilState.get_value(select_key)
     return {
         'label': label,
         'value': str(value) if value else None,
         'editable': editable,
         'mask': mask,
+        'context': 'admission' if label == 'email' else None,
+        'select_key': select_key,
     }
 
 

@@ -44,11 +44,7 @@
             {% for label, value in candidate.items %}
                 <div class="flex-merge-input">
                     <div class="input-field-data">
-                    {% if label == "birth_date" %}
-                        {% input_field_data label value|date:"d/m/Y" False %}
-                    {% else %}
                         {% input_field_data label value False %}
-                    {% endif %}
                     </div>
                     <div class="merge-btn-container">
                         <button data-merge-source="original" data-merge-label="{{ label }}" class="btn btn-xs btn-default btn-merge">

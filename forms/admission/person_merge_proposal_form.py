@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.forms import HiddenInput
+from django.utils.translation import gettext as _
 
 from admission.forms.admission.person import AdmissionPersonForm
 from base.models.person import Person
@@ -74,4 +75,9 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'has_national_number',
             'unknown_birth_date',
             'already_registered',
+        ]
+        force_translations = [
+            _('Civil state'),
+            _('Middle name'),
+            _('Country of citizenship name')
         ]

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-10 16:13+0100\n"
+"POT-Creation-Date: 2024-01-26 15:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1305,6 +1305,9 @@ msgstr ""
 msgid "City"
 msgstr ""
 
+msgid "Civil state"
+msgstr ""
+
 msgid "Civil status"
 msgstr ""
 
@@ -1639,6 +1642,9 @@ msgid "Country of birth"
 msgstr ""
 
 msgid "Country of citizenship"
+msgstr ""
+
+msgid "Country of citizenship name"
 msgstr ""
 
 msgctxt "admission"
@@ -2659,6 +2665,9 @@ msgstr ""
 msgid "Hide the checklist menu"
 msgstr ""
 
+msgid "High school graduation year"
+msgstr ""
+
 msgctxt "tab"
 msgid "History"
 msgstr ""
@@ -3666,6 +3675,9 @@ msgstr ""
 msgid ""
 "Method 2 (The private defense and the public defense are organised the same "
 "day, and subjected to an admissibility condition)"
+msgstr ""
+
+msgid "Middle name"
 msgstr ""
 
 msgid "Missing"
