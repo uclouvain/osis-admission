@@ -111,9 +111,10 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_upload')
+
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value: value
+        patched.side_effect = lambda _, value, *args: value
 
         # Targeted url
         self.form_url = resolve_url(

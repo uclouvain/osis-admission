@@ -164,11 +164,9 @@ class PoolQuestionApiTestCase(APITestCase):
         self.assertDictEqual(expected, response.json())
 
     @freezegun.freeze_time('2022-08-01')
-    @patch('osis_document.api.utils.get_remote_metadata')
-    @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_pool_question_api_update_with_residency(self, confirm, get_remote_metadata):
-        confirm.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-        get_remote_metadata.return_value = {"name": "test.pdf"}
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    def test_pool_question_api_update_with_residency(self, confirm):
+        confirm.return_value = []
         # Pool questions are inconsistent and should be removed
         admission = GeneralEducationAdmissionFactory(
             training__education_group_type__name=TrainingType.BACHELOR.name,

@@ -194,16 +194,9 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
-        patcher.start()
-        self.addCleanup(patcher.stop)
-
-        patcher = patch(
-            "osis_document.api.utils.confirm_remote_upload",
-            side_effect=lambda token, *args, **kwargs: token,
-        )
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, *args: value
 
         # Reset student
         self.student.country_of_citizenship = None
@@ -416,7 +409,6 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         expected_response_data.pop('uuid_proposition')
         expected_response_data['derniers_etablissements_superieurs_communaute_fr_frequentes'] = None
         expected_response_data['a_nationalite_ue'] = None
-
         self.assertEqual(response.json(), expected_response_data)
 
 
@@ -483,16 +475,9 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
-        patcher.start()
-        self.addCleanup(patcher.stop)
-
-        patcher = patch(
-            "osis_document.api.utils.confirm_remote_upload",
-            side_effect=lambda token, *args, **kwargs: token,
-        )
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, *args: value
 
         # Reset student
         self.student.country_of_citizenship = None

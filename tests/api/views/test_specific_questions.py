@@ -1183,13 +1183,9 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
     def setUp(self):
         # Mock osis-document
-        self.confirm_remote_upload_patcher = patch('osis_document.api.utils.confirm_remote_upload')
-        patched = self.confirm_remote_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-
-        self.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
-        patched = self.get_remote_metadata_patcher.start()
-        patched.return_value = {"name": "test.pdf"}
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.return_value = ['4bdffb42-552d-415d-9e4c-725f10dce228']
 
         self.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = self.get_remote_token_patcher.start()

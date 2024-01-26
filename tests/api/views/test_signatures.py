@@ -50,9 +50,9 @@ from osis_notification.models import EmailNotification
 class RequestSignaturesApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.patcher = patch('osis_document.contrib.fields.FileField._confirm_upload')
+        cls.patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = cls.patcher.start()
-        patched.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        patched.return_value = ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"]
         cls.admission = DoctorateAdmissionFactory(
             cotutelle=False,
             project_title="title",
@@ -71,7 +71,7 @@ class RequestSignaturesApiTestCase(APITestCase):
 
     def setUp(self):
         patched = self.patcher.start()
-        patched.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        patched.return_value = ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"]
         self.addCleanup(self.patcher.stop)
 
     def test_user_not_logged_assert_not_authorized(self):

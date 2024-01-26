@@ -142,12 +142,12 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch(
-            "osis_document.api.utils.confirm_remote_upload",
-            side_effect=lambda token, *args, **kwargs: self.uuid_documents_by_token[token],
-        )
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        # patcher = patch(
+        #     "osis_document.api.utils.confirm_remote_upload",
+        #     side_effect=lambda token, *args, **kwargs: self.uuid_documents_by_token[token],
+        # )
+        # patcher.start()
+        # self.addCleanup(patcher.stop)
 
         patcher = patch('osis_document.api.utils.get_remote_tokens')
         patched = patcher.start()
@@ -163,6 +163,10 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
             token: self.metadata_by_token.get(token, self.pdf_file_metadata) for token in tokens
         }
         self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, *args: value
 
         patcher = patch('osis_document.utils.save_raw_content_remotely')
         patched = patcher.start()

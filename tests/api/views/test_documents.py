@@ -136,11 +136,9 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch(
-            "osis_document.api.utils.get_remote_metadata",
-            return_value={"name": "myfile.myext", "mimetype": "application/pdf"},
-        )
-        patcher.start()
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, *args: value
         self.addCleanup(patcher.stop)
 
         patcher = patch(
@@ -155,6 +153,13 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         patched.side_effect = lambda uuids, **kwargs: {
             document_uuid: f'token-{index}' for index, document_uuid in enumerate(uuids)
         }
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.get_remote_metadata",
+            return_value={"name": "myfile.myext", "mimetype": "application/pdf"},
+        )
+        patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch('osis_document.api.utils.get_several_remote_metadata')

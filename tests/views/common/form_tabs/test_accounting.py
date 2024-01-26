@@ -136,9 +136,10 @@ class GeneralAccountingFormViewTestCase(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_upload')
+
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value: value
+        patched.side_effect = lambda _, value, *args: value
 
         # Mock iban validator
         iban_validator_patcher = mock.patch("reference.services.iban_validator.IBANValidatorService.validate")

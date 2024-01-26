@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
+
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
@@ -80,6 +82,11 @@ class ChecklistViewTestCase(TestCase):
         }
 
     def setUp(self) -> None:
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.return_value = [str(uuid.uuid4())]
+        self.addCleanup(patcher.stop)
+
         patcher = mock.patch('admission.templatetags.admission.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)

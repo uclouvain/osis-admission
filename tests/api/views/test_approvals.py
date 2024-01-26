@@ -252,11 +252,9 @@ class ApproveByPdfApiTestCase(ApprovalMixin, APITestCase):
         response = self.client.post(self.url, {"uuid_membre": str(self.ca_member.uuid), **self.approved_data})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch('osis_document.api.utils.get_remote_metadata')
-    @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_approve_proposition_api_by_pdf(self, confirm_remote_upload, get_remote_metadata):
-        get_remote_metadata.return_value = {"name": "test.pdf"}
-        confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    def test_approve_proposition_api_by_pdf(self, confirm_upload):
+        confirm_upload.return_value = ['4bdffb42-552d-415d-9e4c-725f10dce228']
         self.client.force_authenticate(user=self.admission.candidate.user)
         response = self.client.post(self.url, {"uuid_membre": str(self.promoter.uuid), **self.approved_data})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())

@@ -75,9 +75,9 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         patched = cls.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
 
-        cls.file_confirm_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_upload')
+        cls.file_confirm_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = cls.file_confirm_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        patched.return_value = ['4bdffb42-552d-415d-9e4c-725f10dce228']
 
         cls.get_mandates_service_patcher = patch('reference.services.mandates.MandatesService.get')
         patched = cls.get_mandates_service_patcher.start()

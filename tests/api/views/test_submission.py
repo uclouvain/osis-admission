@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from email import message_from_string
 from unittest.mock import patch, PropertyMock, MagicMock
 
@@ -387,9 +388,9 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class ContinuingPropositionSubmissionTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
-        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        confirm_upload.return_value = ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"]
         AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Validation errors
@@ -459,19 +460,9 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch(
-            'osis_document.api.utils.get_remote_metadata',
-            return_value={
-                'name': 'myfile',
-                'mimetype': PDF_MIME_TYPE,
-            },
-        )
-        patcher.start()
-        self.addCleanup(patcher.stop)
-
-        patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        patched.return_value = [str(uuid.uuid4())]
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch('osis_document.api.utils.get_remote_tokens')

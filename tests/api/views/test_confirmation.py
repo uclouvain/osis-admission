@@ -106,9 +106,9 @@ class ConfirmationAPIViewTestCase(APITestCase):
         )
         cls.supervised_admission_url = resolve_url('admission_api_v1:supervised_confirmation', uuid=admission.uuid)
 
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUp(self, confirm_upload):
-        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        confirm_upload.return_value = ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"]
         self.confirmation_papers = [
             ConfirmationPaperFactory(
                 admission=self.doctorate,
@@ -195,13 +195,13 @@ class ConfirmationAPIViewTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_put_confirmation_promoter(self, confirm_upload):
         confirmation_paper_uuid = self.confirmation_papers[1].uuid
 
         token = WriteTokenFactory()
 
-        confirm_upload.return_value = token.upload.uuid
+        confirm_upload.return_value = [token.upload.uuid]
 
         self.client.force_authenticate(user=self.promoter)
 
@@ -423,13 +423,13 @@ class LastConfirmationAPIViewTestCase(APITestCase):
             'Ce champ est obligatoire.',
         )
 
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_put_confirmation_student(self, confirm_upload):
         confirmation_paper_uuid = self.confirmation_papers[1].uuid
 
         token = WriteTokenFactory()
 
-        confirm_upload.return_value = token.upload.uuid
+        confirm_upload.return_value = [token.upload.uuid]
 
         self.client.force_authenticate(user=self.student.user)
         response = self.client.put(
@@ -546,13 +546,13 @@ class LastConfirmationAPIViewTestCase(APITestCase):
             'Ce champ est obligatoire.',
         )
 
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_post_confirmation_student(self, confirm_upload):
         confirmation_paper_uuid = self.confirmation_papers[1].uuid
 
         token = WriteTokenFactory()
 
-        confirm_upload.return_value = token.upload.uuid
+        confirm_upload.return_value = [token.upload.uuid]
 
         self.client.force_authenticate(user=self.student.user)
         response = self.client.post(
@@ -675,13 +675,9 @@ class LastConfirmationCanvasAPIViewTestCase(APITestCase):
         cls.admission_url = resolve_url(path_name, uuid=admission.uuid)
 
         # Mock osis-document
-        cls.confirm_remote_upload_patcher = patch('osis_document.api.utils.confirm_remote_upload')
-        patched = cls.confirm_remote_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-
-        cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
-        patched = cls.get_remote_metadata_patcher.start()
-        patched.return_value = {"name": "test.pdf"}
+        cls.confirm_multiple_upload = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = cls.confirm_multiple_upload.start()
+        patched.return_value = ["4bdffb42-552d-415d-9e4c-725f10dce228"]
 
         cls.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = cls.get_remote_token_patcher.start()
@@ -697,8 +693,7 @@ class LastConfirmationCanvasAPIViewTestCase(APITestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.confirm_remote_upload_patcher.stop()
-        cls.get_remote_metadata_patcher.stop()
+        cls.confirm_multiple_upload.stop()
         cls.get_remote_token_patcher.stop()
         cls.save_raw_content_remotely_patcher.stop()
         cls.get_pdf.stop()
