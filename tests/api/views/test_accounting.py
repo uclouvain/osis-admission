@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest.mock import patch
@@ -198,11 +199,27 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        patcher = patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "myfile"} for token in tokens},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
         )
         patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, att_values, __: att_values
         self.addCleanup(patcher.stop)
 
         # Reset student
@@ -487,11 +504,27 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        patcher = patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "myfile"} for token in tokens},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
         )
         patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, att_values, __: att_values
         self.addCleanup(patcher.stop)
 
         # Reset student

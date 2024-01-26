@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest import mock
@@ -112,9 +113,17 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_upload')
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value: value
+        patched.side_effect = lambda _, attvalues, __: attvalues
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        patched = patcher.start()
+        patched.side_effect = lambda tokens: {token: {'name': 'myfile', 'mimetype': PDF_MIME_TYPE} for token in tokens}
+        self.addCleanup(patcher.stop)
 
     def test_update_education_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
@@ -669,9 +678,17 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_upload')
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value: value
+        patched.side_effect = lambda _, attvalues, __: attvalues
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        patched = patcher.start()
+        patched.side_effect = lambda tokens: {token: {'name': 'myfile', 'mimetype': PDF_MIME_TYPE} for token in tokens}
+        self.addCleanup(patcher.stop)
 
     def test_update_education_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)

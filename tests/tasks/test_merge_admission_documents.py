@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from unittest.mock import patch
 
@@ -45,7 +46,8 @@ from admission.tasks.merge_admission_documents import general_education_admissio
 from admission.tests.factories.curriculum import (
     EducationalExperienceYearFactory,
     EducationalExperienceFactory,
-    ProfessionalExperienceFactory, AdmissionEducationalValuatedExperiencesFactory,
+    ProfessionalExperienceFactory,
+    AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
 )
 from admission.tests.factories.form_item import DocumentAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
@@ -142,12 +144,32 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        patcher = patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {
+                token: {"name": "myfile.myext", "mimetype": "application/pdf"} for token in tokens
+            },
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: self.uuid_documents_by_token[token],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
+
+        self.patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = self.patcher.start()
+        patched.side_effect = lambda _, att_values, __: [
+            self.uuid_documents_by_token.get(value, value) for value in att_values
+        ]
+        self.addCleanup(self.patcher.stop)
 
         patcher = patch('osis_document.api.utils.get_remote_tokens')
         patched = patcher.start()

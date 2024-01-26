@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
@@ -36,8 +37,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     PoursuiteDeCycle,
 )
-from admission.tests.factories.curriculum import EducationalExperienceYearFactory, EducationalExperienceFactory, \
-    AdmissionProfessionalValuatedExperiencesFactory, AdmissionEducationalValuatedExperiencesFactory
+from admission.tests.factories.curriculum import (
+    EducationalExperienceYearFactory,
+    EducationalExperienceFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+    AdmissionEducationalValuatedExperiencesFactory,
+)
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
@@ -85,6 +90,10 @@ class ChecklistViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch('admission.templatetags.admission.get_remote_metadata', return_value=self.file_metadata)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch("osis_document.api.utils.declare_remote_files_as_deleted")
         patcher.start()
         self.addCleanup(patcher.stop)
 

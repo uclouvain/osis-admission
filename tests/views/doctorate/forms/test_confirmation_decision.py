@@ -67,6 +67,10 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         patched = cls.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
 
+        cls.get_several_remote_metadata_patcher = patch("osis_document.api.utils.get_several_remote_metadata")
+        patched = cls.get_several_remote_metadata_patcher.start()
+        patched.side_effect = lambda tokens: {token: {"name": "myfile"} for token in tokens}
+
         cls.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = cls.get_remote_token_patcher.start()
         patched.return_value = 'foobar'
@@ -75,9 +79,9 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         patched = cls.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
 
-        cls.file_confirm_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_upload')
+        cls.file_confirm_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = cls.file_confirm_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        patched.side_effect = lambda _, att_values, __: ["4bdffb42-552d-415d-9e4c-725f10dce228" for value in att_values]
 
         cls.get_mandates_service_patcher = patch('reference.services.mandates.MandatesService.get')
         patched = cls.get_mandates_service_patcher.start()
@@ -157,6 +161,7 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         cls.save_raw_content_remotely_patcher.stop()
         cls.get_mandates_service_patcher.stop()
         cls.file_confirm_upload_patcher.stop()
+        cls.get_several_remote_metadata_patcher.stop()
         super().tearDownClass()
 
     def test_confirmation_success_decision_without_confirmation_paper(self):

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from typing import List
 from unittest.mock import patch
@@ -108,11 +109,27 @@ class GetSpecificQuestionsTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        patcher = patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "myfile"} for token in tokens},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
         )
         patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, att_values, __: att_values
         self.addCleanup(patcher.stop)
 
         self.document_uuid = uuid.uuid4()

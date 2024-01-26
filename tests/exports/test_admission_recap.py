@@ -320,9 +320,25 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        patcher = mock.patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "myfile", "mimetype": PDF_MIME_TYPE} for token in tokens},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
         patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, att_values, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92' for value in att_values]
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
@@ -814,7 +830,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(13):
+        with self.assertNumQueriesLessThan(14):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -839,7 +855,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(14):
+        with self.assertNumQueriesLessThan(15):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -903,11 +919,23 @@ class SectionsAttachmentsTestCase(TestCase):
         )
         cls.get_remote_metadata_patcher.start()
 
+        cls.get_several_remote_metadata_patcher = mock.patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "myfile"} for token in tokens},
+        )
+        cls.get_several_remote_metadata_patcher.start()
+
         cls.confirm_remote_upload_patcher = mock.patch(
             "osis_document.api.utils.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
         )
         cls.confirm_remote_upload_patcher.start()
+
+        cls.confirm_multiple_upload_patcher = mock.patch(
+            'osis_document.contrib.fields.FileField._confirm_multiple_upload'
+        )
+        patched = cls.confirm_multiple_upload_patcher.start()
+        patched.side_effect = lambda _, att_values, __: att_values
 
         cls.academic_year = AcademicYearFactory(current=True)
         AcademicCalendarFactory(
@@ -1527,6 +1555,8 @@ class SectionsAttachmentsTestCase(TestCase):
         cls.get_remote_token_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.confirm_remote_upload_patcher.stop()
+        cls.confirm_multiple_upload_patcher.stop()
+        cls.get_several_remote_metadata_patcher.stop()
         super().tearDownClass()
 
     def setUp(self) -> None:

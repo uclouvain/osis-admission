@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest.mock import patch
@@ -1006,9 +1007,25 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
 
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, att_values, __: ['4bdffb42-552d-415d-9e4c-725f10dce228' for value in att_values]
+        self.addCleanup(patcher.stop)
+
         self.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
+
+        patcher = patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "test.pdf"} for token in tokens},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
         self.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = self.get_remote_token_patcher.start()
@@ -1190,6 +1207,22 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         self.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
+
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, att_values, __: ['4bdffb42-552d-415d-9e4c-725f10dce228' for value in att_values]
+        self.addCleanup(patcher.stop)
+
+        patcher = patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "test.pdf"} for token in tokens},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
         self.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = self.get_remote_token_patcher.start()

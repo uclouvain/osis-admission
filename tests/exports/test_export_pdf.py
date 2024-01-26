@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -48,12 +48,16 @@ class ExportPdfTestCase(TestCase):
         self.addCleanup(patcher.stop)
 
     @patch('osis_document.api.utils.launch_post_processing')
-    @patch('osis_document.api.utils.get_remote_metadata')
+    @patch('osis_document.api.utils.get_several_remote_metadata')
     @patch('osis_document.utils.save_raw_content_remotely')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_pdf_archive(self, confirm, save, get_metadata, post_processing):
-        get_metadata.return_value = {"name": "test.pdf"}
+    @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+    def test_pdf_archive(self, multiple_confirm, confirm, save, get_metadata, post_processing):
+        get_metadata.side_effect = lambda tokens: {token: {"name": "test.pdf"} for token in tokens}
         save.return_value = 'a-token'
+        multiple_confirm.side_effect = lambda _, att_values, __: [
+            '4bdffb42-552d-415d-9e4c-725f10dce228' for _ in att_values
+        ]
         confirm.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
         post_processing.return_value = {
             PostProcessingType.MERGE.name: {
@@ -80,8 +84,12 @@ class ExportPdfTestCase(TestCase):
 
     @patch('osis_document.utils.save_raw_content_remotely')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_pdf_archive_with_error(self, confirm, save):
+    @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+    def test_pdf_archive_with_error(self, multiple_confirm, confirm, save):
         save.side_effect = Exception("API not working")
+        multiple_confirm.side_effect = lambda _, att_values, __: [
+            '4bdffb42-552d-415d-9e4c-725f10dce228' for _ in att_values
+        ]
         async_task = AsyncTask.objects.create(name="Export pdf")
         AdmissionTask.objects.create(
             admission=self.admission,

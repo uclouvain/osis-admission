@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -106,9 +106,12 @@ class ConfirmationAPIViewTestCase(APITestCase):
         )
         cls.supervised_admission_url = resolve_url('admission_api_v1:supervised_confirmation', uuid=admission.uuid)
 
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUp(self, confirm_upload):
-        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        confirm_upload.side_effect = lambda _, att_values, __: [
+            "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92" for value in att_values
+        ]
+
         self.confirmation_papers = [
             ConfirmationPaperFactory(
                 admission=self.doctorate,
@@ -195,13 +198,13 @@ class ConfirmationAPIViewTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_put_confirmation_promoter(self, confirm_upload):
         confirmation_paper_uuid = self.confirmation_papers[1].uuid
 
         token = WriteTokenFactory()
 
-        confirm_upload.return_value = token.upload.uuid
+        confirm_upload.side_effect = lambda _, att_values, __: [token.upload.uuid for value in att_values]
 
         self.client.force_authenticate(user=self.promoter)
 
@@ -423,13 +426,13 @@ class LastConfirmationAPIViewTestCase(APITestCase):
             'Ce champ est obligatoire.',
         )
 
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_put_confirmation_student(self, confirm_upload):
         confirmation_paper_uuid = self.confirmation_papers[1].uuid
 
         token = WriteTokenFactory()
 
-        confirm_upload.return_value = token.upload.uuid
+        confirm_upload.side_effect = lambda _, att_values, __: [token.upload.uuid for value in att_values]
 
         self.client.force_authenticate(user=self.student.user)
         response = self.client.put(
@@ -546,13 +549,13 @@ class LastConfirmationAPIViewTestCase(APITestCase):
             'Ce champ est obligatoire.',
         )
 
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_post_confirmation_student(self, confirm_upload):
         confirmation_paper_uuid = self.confirmation_papers[1].uuid
 
         token = WriteTokenFactory()
 
-        confirm_upload.return_value = token.upload.uuid
+        confirm_upload.side_effect = lambda _, att_values, __: [token.upload.uuid for value in att_values]
 
         self.client.force_authenticate(user=self.student.user)
         response = self.client.post(
@@ -679,9 +682,22 @@ class LastConfirmationCanvasAPIViewTestCase(APITestCase):
         patched = cls.confirm_remote_upload_patcher.start()
         patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
 
+        cls.confirm_multiple_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = cls.confirm_multiple_upload_patcher.start()
+        patched.side_effect = lambda _, att_values, __: ['4bdffb42-552d-415d-9e4c-725f10dce228' for value in att_values]
+
         cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = cls.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
+
+        cls.declare_remote_files_as_deleted_patcher = patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        cls.declare_remote_files_as_deleted_patcher.start()
+
+        cls.get_several_remote_metadata_patcher = patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "test.pdf"} for token in tokens},
+        )
+        cls.get_several_remote_metadata_patcher.start()
 
         cls.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = cls.get_remote_token_patcher.start()
@@ -702,6 +718,9 @@ class LastConfirmationCanvasAPIViewTestCase(APITestCase):
         cls.get_remote_token_patcher.stop()
         cls.save_raw_content_remotely_patcher.stop()
         cls.get_pdf.stop()
+        cls.declare_remote_files_as_deleted_patcher.stop()
+        cls.get_several_remote_metadata_patcher.stop()
+        cls.confirm_multiple_upload_patcher.stop()
         super().tearDownClass()
 
     def setUp(self):

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from email import message_from_string
@@ -120,6 +121,15 @@ class DocumentViewTestCase(TestCase):
 
         patcher = patch('admission.templatetags.admission.get_remote_metadata', return_value=self.file_metadata)
         patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, att_values, __: [uuid.uuid4() for token in att_values]
         self.addCleanup(patcher.stop)
 
         patcher = patch('osis_document.api.utils.get_remote_metadata', return_value=self.file_metadata)

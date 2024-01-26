@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -78,13 +78,19 @@ class DoctorateConfirmationCanvasExportViewTestCase(TestCase):
         patched = cls.confirm_remote_upload_patcher.start()
         patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
 
-        cls.file_confirm_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_upload')
+        cls.file_confirm_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = cls.file_confirm_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        patched.side_effect = lambda _, att_values, __: ["4bdffb42-552d-415d-9e4c-725f10dce228" for _ in att_values]
 
         cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = cls.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
+
+        cls.get_several_remote_metadata_patcher = patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "myfile"} for token in tokens},
+        )
+        cls.get_several_remote_metadata_patcher.start()
 
         cls.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
         patched = cls.get_remote_token_patcher.start()
@@ -101,6 +107,7 @@ class DoctorateConfirmationCanvasExportViewTestCase(TestCase):
         cls.get_remote_token_patcher.stop()
         cls.save_raw_content_remotely_patcher.stop()
         cls.file_confirm_upload_patcher.stop()
+        cls.get_several_remote_metadata_patcher.stop()
         super().tearDownClass()
 
     def setUp(self):

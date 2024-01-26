@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -50,9 +50,9 @@ from osis_notification.models import EmailNotification
 class RequestSignaturesApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.patcher = patch('osis_document.contrib.fields.FileField._confirm_upload')
+        cls.patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = cls.patcher.start()
-        patched.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        patched.side_effect = lambda _, att_values, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92" for value in att_values]
         cls.admission = DoctorateAdmissionFactory(
             cotutelle=False,
             project_title="title",
@@ -70,8 +70,9 @@ class RequestSignaturesApiTestCase(APITestCase):
         cls.url = resolve_url("admission_api_v1:request-signatures", uuid=cls.admission.uuid)
 
     def setUp(self):
+        self.patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = self.patcher.start()
-        patched.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        patched.side_effect = lambda _, att_values, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92" for value in att_values]
         self.addCleanup(self.patcher.stop)
 
     def test_user_not_logged_assert_not_authorized(self):

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from unittest.mock import ANY, patch
 
@@ -78,6 +79,19 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = self.patcher.start()
+        patched.side_effect = lambda _, att_values, __: [str(uuid.uuid4()) for value in att_values]
+        self.addCleanup(self.patcher.stop)
+        patcher = patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "myfile"} for token in tokens},
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = patch("osis_document.api.utils.confirm_remote_upload", return_value=str(uuid.uuid4()))

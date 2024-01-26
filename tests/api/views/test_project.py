@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import json
 import uuid
@@ -660,9 +661,11 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
-        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        confirm_upload.side_effect = lambda _, att_values, __: [
+            "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92" for value in att_values
+        ]
         cls.admission = DoctorateAdmissionFactory(
             supervision_group=_ProcessFactory(),
             cotutelle=False,
@@ -847,11 +850,13 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 @freezegun.freeze_time('2020-12-15')
 class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         AdmissionAcademicCalendarFactory.produce_all_required()
 
-        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        confirm_upload.side_effect = lambda _, att_values, __: [
+            "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92" for value in att_values
+        ]
         # Create candidates
         # Complete candidate
         cls.first_candidate = CompletePersonFactory()

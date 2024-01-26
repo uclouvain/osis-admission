@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from unittest import mock
 
@@ -44,6 +45,15 @@ class SicPatchMixin(TestCase):
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
         self.addCleanup(self.get_remote_metadata_patcher.stop)
+
+        patcher = mock.patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, att_values, __: [str(self.file_uuid) for token in att_values]
+        self.addCleanup(patcher.stop)
 
         self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
         patched = self.get_several_remote_metadata_patcher.start()

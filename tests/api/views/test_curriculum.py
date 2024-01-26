@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from unittest.mock import ANY
 
@@ -149,9 +150,25 @@ class BaseCurriculumTestCase:
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        patcher = mock.patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            "osis_document.api.utils.get_several_remote_metadata",
+            side_effect=lambda tokens: {token: {"name": "myfile"} for token in tokens},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
         patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, att_values, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92' for _ in att_values]
         self.addCleanup(patcher.stop)
 
         # Mock datetime to return the 2020 year as the current year
