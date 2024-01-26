@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest import mock
@@ -146,6 +147,15 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: self.uuid_documents_by_token[token],
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            side_effect=lambda _, tokens, __: [
+                self.uuid_documents_by_token[token] for token in tokens if token in self.uuid_documents_by_token
+            ],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
