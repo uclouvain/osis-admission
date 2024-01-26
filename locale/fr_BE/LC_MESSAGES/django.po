@@ -2371,6 +2371,9 @@ msgstr "Dossier non trouvé."
 msgid "Dossier numero"
 msgstr "Numéro de dossier"
 
+msgid "Dossier reference:"
+msgstr "Numéro de dossier :"
+
 msgid "Dossier status"
 msgstr "Statut dossier"
 
@@ -2796,6 +2799,9 @@ msgstr "Règle de financement"
 
 msgid "First name"
 msgstr "Prénom"
+
+msgid "First name Last name:"
+msgstr "Prénom Nom :"
 
 msgid "First name and last name"
 msgstr "Prénom et nom"
@@ -4514,6 +4520,9 @@ msgstr "Nom de l'entité de gestion"
 
 msgid "Nationality"
 msgstr "Nationalité"
+
+msgid "Nationality:"
+msgstr "Nationalité :"
 
 msgid "Negative assessment by lead supervisor"
 msgstr "Avis négatif du promoteur de référence"
