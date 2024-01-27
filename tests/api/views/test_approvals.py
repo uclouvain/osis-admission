@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from unittest.mock import patch
 
 from django.shortcuts import resolve_url
@@ -254,9 +255,13 @@ class ApproveByPdfApiTestCase(ApprovalMixin, APITestCase):
 
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_approve_proposition_api_by_pdf(self, confirm_remote_upload, get_remote_metadata):
+    @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+    def test_approve_proposition_api_by_pdf(self, confirm_multiple_upload, confirm_remote_upload, get_remote_metadata):
         get_remote_metadata.return_value = {"name": "test.pdf"}
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        confirm_multiple_upload.side_effect = (
+            lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+        )
         self.client.force_authenticate(user=self.admission.candidate.user)
         response = self.client.post(self.url, {"uuid_membre": str(self.promoter.uuid), **self.approved_data})
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())

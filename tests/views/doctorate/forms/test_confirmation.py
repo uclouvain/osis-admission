@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -204,6 +204,10 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
         patched = cls.confirm_remote_upload_patcher.start()
         patched.side_effect = lambda token, **kwargs: token
 
+        cls.confirm_multiple_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = cls.confirm_multiple_upload_patcher.start()
+        patched.side_effect = lambda _, value, __: value
+
         cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = cls.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
@@ -270,6 +274,7 @@ class DoctorateAdmissionConfirmationOpinionFormViewTestCase(TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.confirm_remote_upload_patcher.stop()
+        cls.confirm_multiple_upload_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.get_remote_token_patcher.stop()
         super().tearDownClass()
