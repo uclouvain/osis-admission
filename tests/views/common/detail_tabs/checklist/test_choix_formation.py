@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+
 import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
@@ -143,6 +145,8 @@ class ChoixFormationFormViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.cycle_pursuit, 'YES')
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
     def test_get_without_htmx(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -185,6 +189,8 @@ class ChoixFormationFormViewTestCase(TestCase):
 
         master_general_admission.refresh_from_db()
         self.assertEqual(master_general_admission.cycle_pursuit, PoursuiteDeCycle.TO_BE_DETERMINED.name)
+        self.assertEqual(master_general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(master_general_admission.modified_at, datetime.datetime.today())
 
         master_general_admission.cycle_pursuit = PoursuiteDeCycle.YES.name
         master_general_admission.save()

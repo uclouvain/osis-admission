@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from unittest.mock import ANY, patch
 
@@ -81,6 +82,12 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = patch("osis_document.api.utils.confirm_remote_upload", return_value=str(uuid.uuid4()))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch(
+            'osis_document.contrib.fields.FileField._confirm_multiple_upload',
+            side_effect=lambda _, value, __: [str(uuid.uuid4())] if value else [],
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 

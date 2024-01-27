@@ -28,6 +28,7 @@ import datetime
 import uuid
 from unittest import mock
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -39,6 +40,7 @@ from admission.contrib.models.base import AdmissionEducationalValuatedExperience
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
@@ -87,6 +89,7 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
@@ -148,9 +151,10 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_upload')
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value: value
+        patched.side_effect = lambda _, value, __: value
+        self.addCleanup(patcher.stop)
 
         # Targeted url
         self.form_url = resolve_url(
@@ -1458,6 +1462,7 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(first_form.cleaned_data['fwb_acquired_credit_number'], 10)
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
+    @freezegun.freeze_time('2023-01-01')
     def test_post_form_with_existing_years(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -1512,6 +1517,15 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(years[1].result, Result.SUCCESS.name)
         self.assertEqual(years[1].acquired_credit_number, 20)
         self.assertEqual(years[1].registered_credit_number, 20)
+
+        # Check the admission
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.general_admission.requested_documents,
+        )
 
     def test_post_form_with_created_and_deleted_years(self):
         self.client.force_login(self.sic_manager_user)
@@ -1647,6 +1661,7 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         )
 
 
+@freezegun.freeze_time('2022-01-01')
 class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -1664,6 +1679,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
@@ -1782,6 +1798,13 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.checklist['current']['parcours_anterieur']['enfants'],
             [],
+        )
+
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.general_admission.requested_documents,
         )
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)

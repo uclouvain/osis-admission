@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
             return response
 
         if self.request.GET:
-            cache.set(self.cache_key, self.request.GET)
+            cache.set(self.cache_key, self.request.GET, timeout=None)
 
         self.filters = self.form.cleaned_data
 

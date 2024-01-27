@@ -23,7 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -47,6 +49,7 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 
 
+@freezegun.freeze_time('2022-01-01')
 class SicDecisionDispensationViewTestCase(SicPatchMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -98,3 +101,5 @@ class SicDecisionDispensationViewTestCase(SicPatchMixin, TestCase):
 
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.dispensation_needed, BesoinDeDerogation.NON_CONCERNE.name)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())

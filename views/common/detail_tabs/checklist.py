@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 from typing import Dict, Set, Optional, List
 
 from django.conf import settings
@@ -40,12 +40,6 @@ from django.utils.translation import gettext_lazy as _, gettext, get_language
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
-
-from base.models.enums.education_group_types import TrainingType
-from epc.models.email_fonction_programme import EmailFonctionProgramme
-from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
-from osis_document.utils import get_file_url
-from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
@@ -56,30 +50,25 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
-from admission.ddd import MONTANT_FRAIS_DOSSIER, MOIS_DEBUT_ANNEE_ACADEMIQUE
+from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE
+from admission.ddd import MONTANT_FRAIS_DOSSIER
+from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
     ResumeCandidatDTO,
     ResumePropositionDTO,
 )
-from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
-from admission.ddd.admission.enums.emplacement_document import (
-    DocumentsAssimilation,
-    OngletsDemande,
-    DocumentsEtudesSecondaires,
-)
-from admission.ddd import MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
     StatutEmplacementDocument,
-    EMPLACEMENTS_SIC,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+)
+from admission.ddd.admission.enums.emplacement_document import (
+    OngletsDemande,
+    DocumentsEtudesSecondaires,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
@@ -115,7 +104,6 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
@@ -126,18 +114,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import (
-    ChoixFormationForm,
-    FinancabiliteApprovalForm,
-    ExperienceStatusForm,
-    can_edit_experience_authentication,
-)
-from admission.forms.admission.checklist import (
-    ChoixFormationForm,
-    StatusForm,
-    PastExperiencesAdmissionRequirementForm,
-    PastExperiencesAdmissionAccessTitleForm,
-)
 from admission.forms.admission.checklist import ChoixFormationForm, SicDecisionDerogationForm, FinancabiliteApprovalForm
 from admission.forms.admission.checklist import (
     CommentForm,
@@ -150,14 +126,18 @@ from admission.forms.admission.checklist import (
     SicDecisionFinalApprovalForm,
 )
 from admission.forms.admission.checklist import (
+    ExperienceStatusForm,
+    can_edit_experience_authentication,
+)
+from admission.forms.admission.checklist import (
     StatusForm,
     PastExperiencesAdmissionRequirementForm,
     PastExperiencesAdmissionAccessTitleForm,
     SinglePastExperienceAuthenticationForm,
 )
 from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
-from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.mail_templates.checklist import ADMISSION_EMAIL_SIC_REFUSAL, ADMISSION_EMAIL_SIC_APPROVAL
+from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
     get_portal_admission_list_url,
     get_backoffice_admission_url,
@@ -168,9 +148,13 @@ from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionForm
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.condition_acces import ConditionAcces
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_document.api.utils import get_remote_metadata, get_remote_token
+from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_role.templatetags.osis_role import has_perm
 
@@ -441,6 +425,7 @@ class FacultyDecisionView(
             extra=extra,
             admission=admission,
             replace_extra=True,
+            author=self.request.user.person,
         )
 
         return super().form_valid(form)
@@ -550,6 +535,7 @@ class FacultyRefusalDecisionView(
             'uuid_proposition': self.admission_uuid,
             'uuids_motifs': form.cleaned_data['reasons'],
             'autres_motifs': form.cleaned_data['other_reasons'],
+            'gestionnaire': self.request.user.person.global_id,
         }
 
         try:
@@ -608,6 +594,7 @@ class FacultyApprovalDecisionView(
             'nom_personne_contact_programme_annuel': form.cleaned_data['annual_program_contact_person_name'],
             'email_personne_contact_programme_annuel': form.cleaned_data['annual_program_contact_person_email'],
             'commentaire_programme_conjoint': form.cleaned_data['join_program_fac_comment'],
+            'gestionnaire': self.request.user.person.global_id,
         }
         try:
             message_bus_instance.invoke(SpecifierInformationsAcceptationPropositionParFaculteCommand(**base_params))
@@ -850,6 +837,7 @@ class SicApprovalDecisionView(
             message_bus_instance.invoke(
                 SpecifierInformationsAcceptationPropositionParSicCommand(
                     uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
                     avec_conditions_complementaires=form.cleaned_data['with_additional_approval_conditions'],
                     uuids_conditions_complementaires_existantes=form.cleaned_data['additional_approval_conditions'],
                     conditions_complementaires_libres=form.cleaned_data['free_additional_approval_conditions'],
@@ -900,6 +888,7 @@ class SicRefusalDecisionView(
             message_bus_instance.invoke(
                 SpecifierMotifsRefusPropositionParSicCommand(
                     uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
                     type_de_refus=form.cleaned_data['refusal_type'],
                     uuids_motifs=form.cleaned_data['reasons'],
                     autres_motifs=form.cleaned_data['other_reasons'],
@@ -1013,6 +1002,7 @@ class SicDecisionDispensationView(AdmissionFormMixin, HtmxPermissionRequiredMixi
                 SpecifierBesoinDeDerogationSicCommand(
                     uuid_proposition=self.admission_uuid,
                     besoin_de_derogation=form.cleaned_data['dispensation_needed'],
+                    gestionnaire=self.request.user.person.global_id,
                 )
             )
         except BusinessException as exception:
@@ -1052,6 +1042,7 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             extra=extra,
             admission=admission,
             global_status=global_status,
+            author=self.request.user.person,
         )
 
         return self.render_to_response(self.get_context_data())
@@ -1566,6 +1557,7 @@ class PastExperiencesStatusView(
                 ModifierStatutChecklistParcoursAnterieurCommand(
                     uuid_proposition=self.admission_uuid,
                     statut=form.cleaned_data['status'],
+                    gestionnaire=self.request.user.person.global_id,
                 )
             )
             self.valid_operation = True
@@ -1605,6 +1597,7 @@ class PastExperiencesAdmissionRequirementView(
             message_bus_instance.invoke(
                 SpecifierConditionAccesPropositionCommand(
                     uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
                     condition_acces=form.cleaned_data['admission_requirement'],
                     millesime_condition_acces=form.cleaned_data['admission_requirement_year']
                     and form.cleaned_data['admission_requirement_year'].year,
@@ -1704,6 +1697,7 @@ class PastExperiencesAccessTitleEquivalencyView(
             message_bus_instance.invoke(
                 SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(
                     uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
                     type_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_type'],
                     statut_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_status'],
                     etat_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_state'],
@@ -1726,9 +1720,12 @@ class ChangeStatusSerializer(serializers.Serializer):
     extra = serializers.DictField(default={}, required=False)
 
 
-def change_admission_status(tab, admission_status, extra, admission, replace_extra=False, global_status=None):
+def change_admission_status(tab, admission_status, extra, admission, author, replace_extra=False, global_status=None):
     """Change the status of the admission of a specific tab"""
-    update_fields = ['checklist']
+    update_fields = ['checklist', 'last_update_author', 'modified_at']
+
+    admission.last_update_author = author
+    admission.modified_at = datetime.datetime.today()
 
     serializer = ChangeStatusSerializer(
         data={
@@ -1775,6 +1772,7 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
             admission_status=self.kwargs['status'],
             extra=request.data.dict(),
             admission=admission,
+            author=self.request.user.person,
         )
 
         return Response(serializer_data, status=status.HTTP_200_OK)
@@ -1810,7 +1808,9 @@ class ChangeExtraView(AdmissionFormMixin, FormView):
         tab_data = admission.checklist['current'][tab_name]
         tab_data.setdefault('extra', {})
         tab_data['extra'].update(form.cleaned_data)
-        admission.save(update_fields=['checklist'])
+        admission.modified_at = datetime.datetime.today()
+        admission.last_update_author = self.request.user.person
+        admission.save(update_fields=['checklist', 'modified_at', 'last_update_author'])
         return super().form_valid(form)
 
 
@@ -1890,6 +1890,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
             message_bus_instance.invoke(
                 ModifierChecklistChoixFormationCommand(
                     uuid_proposition=str(self.kwargs['uuid']),
+                    gestionnaire=self.request.user.person.global_id,
                     type_demande=form.cleaned_data['type_demande'],
                     sigle_formation=form.cleaned_data['formation'],
                     annee_formation=form.cleaned_data['annee_academique'],
@@ -1966,6 +1967,7 @@ class FinancabiliteChangeStatusView(HtmxPermissionRequiredMixin, FinancabiliteCo
             extra=extra,
             admission=admission,
             replace_extra=True,
+            author=self.request.user.person,
         )
 
         if status == 'GEST_BLOCAGE' and extra.get('to_be_completed') == '0':
@@ -1994,6 +1996,7 @@ class FinancabiliteApprovalView(HtmxPermissionRequiredMixin, FinancabiliteContex
                 uuid_proposition=self.admission_uuid,
                 financabilite_regle=form.cleaned_data['financability_rule'],
                 etabli_par=self.request.user.person.uuid,
+                gestionnaire=self.request.user.person.global_id,
             )
         )
 
@@ -2012,7 +2015,7 @@ class FinancabiliteComputeRuleView(HtmxPermissionRequiredMixin, FinancabiliteCon
 
     def post(self, request, *args, **kwargs):
         admission = self.get_permission_object()
-        admission.update_financability_computed_rule()
+        admission.update_financability_computed_rule(author=self.request.user.person)
         return self.render_to_response(self.get_context_data())
 
 
@@ -2093,6 +2096,7 @@ class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
             ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                 uuid_proposition=self.admission_uuid,
                 uuid_experience=self.experience_uuid,
+                gestionnaire=self.request.user.person.global_id,
                 statut=form.cleaned_data['status'],
                 statut_authentification=form.cleaned_data['authentification'],
             )
@@ -2124,6 +2128,7 @@ class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
             ModifierAuthentificationExperienceParcoursAnterieurCommand(
                 uuid_proposition=self.admission_uuid,
                 uuid_experience=self.experience_uuid,
+                gestionnaire=self.request.user.person.global_id,
                 etat_authentification=form.cleaned_data['state'],
             )
         )

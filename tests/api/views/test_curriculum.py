@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from unittest.mock import ANY
 
@@ -152,6 +153,11 @@ class BaseCurriculumTestCase:
         patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
 
         # Mock datetime to return the 2020 year as the current year
@@ -621,13 +627,14 @@ class GeneralEducationCurriculumTestCase(
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    @freezegun.freeze_time('2020-11-01')
     def test_put_curriculum(self):
         self.client.force_authenticate(user=self.user)
 
         response = self.client.put(self.url, data=self.put_data)
 
         self.assertEqual(response.status_code, HTTP_200_OK)
-        updated_admission = GeneralEducationAdmission.objects.get(uuid=self.admission.uuid)
+        updated_admission: GeneralEducationAdmission = GeneralEducationAdmission.objects.get(uuid=self.admission.uuid)
         self.assertEqual(response.json().get('errors'), updated_admission.detailed_status)
 
         self.assertEqual(
@@ -638,6 +645,9 @@ class GeneralEducationCurriculumTestCase(
         )
         self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
         self.assertEqual(updated_admission.diploma_equivalence, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
+
+        self.assertEqual(updated_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(updated_admission.last_update_author, self.user.person)
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -711,12 +721,14 @@ class PersonCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
+@freezegun.freeze_time('2020-11-01')
 class ProfessionalExperienceTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Mocked data
         cls.admission = DoctorateAdmissionFactory()
         cls.other_admission = DoctorateAdmissionFactory()
+        cls.general_admission = GeneralEducationAdmissionFactory(candidate=cls.admission.candidate)
 
         cls.academic_year_2018 = AcademicYearFactory(year=2018)
         cls.academic_year_2020 = AcademicYearFactory(year=2020)
@@ -732,6 +744,10 @@ class ProfessionalExperienceTestCase(APITestCase):
         # Targeted urls
         cls.agnostic_url = resolve_url('cv_professional_experiences-list')
         cls.admission_url = resolve_url('cv_professional_experiences-list', uuid=cls.admission.uuid)
+        cls.general_admission_url = resolve_url(
+            'general_cv_professional_experiences-list',
+            uuid=cls.general_admission.uuid,
+        )
 
     def setUp(self) -> None:
         # Mock datetime to return the 2020 year as the current year
@@ -754,6 +770,12 @@ class ProfessionalExperienceTestCase(APITestCase):
         self.admission_details_url = resolve_url(
             'cv_professional_experiences-detail',
             uuid=self.admission.uuid,
+            experience_id=self.professional_experience.uuid,
+        )
+
+        self.general_admission_details_url = resolve_url(
+            'general_cv_professional_experiences-detail',
+            uuid=self.general_admission.uuid,
             experience_id=self.professional_experience.uuid,
         )
 
@@ -873,6 +895,42 @@ class ProfessionalExperienceTestCase(APITestCase):
         self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
         self.assertEqual(experience.activity, 'Volunteering - activity')
 
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.modified_at, self.today_datetime)
+        self.assertEqual(self.admission.last_update_author, self.user.person)
+
+    def test_post_professional_experience_with_general_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(
+            self.general_admission_url,
+            data={
+                'institute_name': 'Second institute',
+                'start_date': '2019-01-01',
+                'end_date': '2020-01-01',
+                'type': ActivityType.VOLUNTEERING.name,
+                'certificate': [],
+                'role': 'Helper',
+                'sector': ActivitySector.PRIVATE.name,
+                'activity': 'Volunteering - activity',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        json_response = response.json()
+
+        # Check response data
+        experience: ProfessionalExperience = ProfessionalExperience.objects.filter(
+            uuid=json_response.get('uuid'),
+        ).first()
+
+        self.assertIsNotNone(experience)
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, self.today_datetime)
+        self.assertEqual(self.general_admission.last_update_author, self.user.person)
+
     def test_put_professional_experience(self):
         self.client.force_authenticate(user=self.user)
 
@@ -898,6 +956,36 @@ class ProfessionalExperienceTestCase(APITestCase):
         )
 
         self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
+
+    def test_put_professional_experience_with_general_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data={
+                'start_date': '2020-01-01',
+                'end_date': '2021-01-01',
+                'type': ActivityType.WORK.name,
+                'sector': ActivitySector.PRIVATE.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        json_response = response.json()
+
+        # Check response data
+        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name),
+
+        experience = ProfessionalExperience.objects.get(
+            uuid=self.professional_experience.uuid,
+        )
+
+        self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, self.today_datetime)
+        self.assertEqual(self.general_admission.last_update_author, self.user.person)
 
     def test_put_valuated_professional_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
@@ -933,6 +1021,31 @@ class ProfessionalExperienceTestCase(APITestCase):
             ).exists()
         )
 
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.modified_at, self.today_datetime)
+        self.assertEqual(self.admission.last_update_author, self.user.person)
+
+    def test_delete_professional_experience_with_general_education_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.assertTrue(
+            ProfessionalExperience.objects.filter(
+                uuid=self.professional_experience.uuid,
+            ).exists()
+        )
+
+        self.client.delete(self.general_admission_details_url)
+
+        self.assertFalse(
+            ProfessionalExperience.objects.filter(
+                uuid=self.professional_experience.uuid,
+            ).exists()
+        )
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, self.today_datetime)
+        self.assertEqual(self.general_admission.last_update_author, self.user.person)
+
     def test_delete_valuated_professional_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)
 
@@ -944,6 +1057,7 @@ class ProfessionalExperienceTestCase(APITestCase):
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
+@freezegun.freeze_time('2020-11-01')
 class EducationalExperienceTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -1015,6 +1129,10 @@ class EducationalExperienceTestCase(APITestCase):
         # Targeted urls
         cls.agnostic_url = resolve_url('cv_educational_experiences-list')
         cls.admission_url = resolve_url('cv_educational_experiences-list', uuid=cls.admission.uuid)
+        cls.general_admission_url = resolve_url(
+            'general_cv_educational_experiences-list',
+            uuid=cls.general_admission.uuid,
+        )
 
     def setUp(self) -> None:
         # Mock datetime to return the 2020 year as the current year
@@ -1281,6 +1399,67 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(first_educational_experience_year.transcript, [])
         self.assertEqual(first_educational_experience_year.transcript_translation, [])
 
+    def test_post_educational_experience_with_general_education_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(
+            self.general_admission_url,
+            data={
+                'program': self.diploma.uuid,
+                'education_name': 'Biology',
+                'institute_name': 'Second institute',
+                'country': self.country.iso_code,
+                'institute': None,
+                'institute_address': 'Louvain-la-Neuve',
+                'study_system': '',
+                'evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
+                'linguistic_regime': self.linguistic_regime.code,
+                'transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
+                'obtained_diploma': True,
+                'obtained_grade': Grade.GREAT_DISTINCTION.name,
+                'graduate_degree': [],
+                'graduate_degree_translation': [],
+                'transcript': [],
+                'transcript_translation': [],
+                'rank_in_diploma': '10 on 100',
+                'expected_graduation_date': '2022-08-30',
+                'dissertation_title': 'Title',
+                'dissertation_score': '15/20',
+                'dissertation_summary': [],
+                'educationalexperienceyear_set': [
+                    {
+                        'academic_year': 2020,
+                        'result': Result.SUCCESS.name,
+                        'registered_credit_number': 15.4,
+                        'acquired_credit_number': 15.4,
+                        'transcript': [],
+                        'transcript_translation': [],
+                    }
+                ],
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        json_response = response.json()
+
+        # Check saved data
+        experience: EducationalExperience = EducationalExperience.objects.filter(
+            uuid=json_response.get('uuid'),
+        ).first()
+
+        self.assertIsNotNone(experience)
+
+        first_educational_experience_year = EducationalExperienceYear.objects.filter(
+            educational_experience=experience
+        ).first()
+
+        self.assertIsNotNone(first_educational_experience_year)
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, self.today_datetime)
+        self.assertEqual(self.general_admission.last_update_author, self.user.person)
+
     def test_put_educational_experience(self):
         self.client.force_authenticate(user=self.user)
 
@@ -1320,6 +1499,50 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(educational_experience_years[1].academic_year, self.academic_year_2019)
         self.assertEqual(educational_experience_years[1].registered_credit_number, 14)
         self.assertEqual(educational_experience_years[1].acquired_credit_number, 14)
+
+    def test_put_educational_experience_with_general_education_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        json_response = response.json()
+
+        # Check response data
+        self.assertEqual(json_response.get('obtained_grade'), Grade.GREATER_DISTINCTION.name)
+        self.assertEqual(json_response.get('study_system'), TeachingTypeEnum.SOCIAL_PROMOTION.name)
+
+        json_first_educational_experience_year = json_response.get('educationalexperienceyear_set')[0]
+        self.assertEqual(json_first_educational_experience_year.get('academic_year'), 2020)
+        self.assertEqual(json_first_educational_experience_year.get('registered_credit_number'), 25)
+        self.assertEqual(json_first_educational_experience_year.get('acquired_credit_number'), 25)
+
+        # Check saved data
+        experience = EducationalExperience.objects.get(
+            uuid=self.educational_experience.uuid,
+        )
+
+        self.assertEqual(experience.obtained_grade, Grade.GREATER_DISTINCTION.name)
+
+        educational_experience_years = EducationalExperienceYear.objects.filter(educational_experience=experience)
+
+        self.assertEqual(len(educational_experience_years), 2)
+
+        self.assertEqual(educational_experience_years[0].academic_year, self.academic_year_2020)
+        self.assertEqual(educational_experience_years[0].registered_credit_number, 25)
+        self.assertEqual(educational_experience_years[0].acquired_credit_number, 25)
+
+        self.assertEqual(educational_experience_years[1].academic_year, self.academic_year_2019)
+        self.assertEqual(educational_experience_years[1].registered_credit_number, 14)
+        self.assertEqual(educational_experience_years[1].acquired_credit_number, 14)
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, self.today_datetime)
+        self.assertEqual(self.general_admission.last_update_author, self.user.person)
 
     def test_put_valuated_educational_experience_is_forbidden_with_doctorate_if_valuation_with_doctorate(self):
         self.client.force_authenticate(user=self.user)
@@ -1463,6 +1686,27 @@ class EducationalExperienceTestCase(APITestCase):
                 uuid=self.educational_experience.uuid,
             ).exists()
         )
+
+    def test_delete_educational_experience_with_general_education_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.assertTrue(
+            EducationalExperience.objects.filter(
+                uuid=self.educational_experience.uuid,
+            ).exists()
+        )
+
+        self.client.delete(self.general_admission_details_url)
+
+        self.assertFalse(
+            EducationalExperience.objects.filter(
+                uuid=self.educational_experience.uuid,
+            ).exists()
+        )
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, self.today_datetime)
+        self.assertEqual(self.general_admission.last_update_author, self.user.person)
 
     def test_delete_valuated_educational_experience_is_forbidden(self):
         self.client.force_authenticate(user=self.user)

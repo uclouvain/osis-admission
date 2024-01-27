@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 
+import datetime
 import uuid
 from unittest.mock import patch
 
@@ -311,6 +312,7 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+@freezegun.freeze_time('2023-01-01')
 class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
     file_uuid = str(uuid.uuid4())
 
@@ -376,6 +378,11 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
 
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
+        self.addCleanup(patcher.stop)
+
     def test_training_choice_update_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate.user)
 
@@ -397,6 +404,8 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
         self.assertEqual(admission.specific_question_answers, expected)
+        self.assertEqual(admission.modified_at, datetime.datetime.today())
+        self.assertEqual(admission.last_update_author, self.candidate.user.person)
 
     def test_training_choice_update_using_api_candidate_with_wrong_proposition(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -495,6 +504,11 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         patcher = patch('osis_document.api.utils.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
 
     def test_training_choice_update_using_api_candidate(self):
@@ -637,6 +651,11 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
         patcher = patch('osis_document.api.utils.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
+
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
 
     def test_admission_type_update_using_api_candidate(self):

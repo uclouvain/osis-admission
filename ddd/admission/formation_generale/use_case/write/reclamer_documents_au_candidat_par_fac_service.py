@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ def reclamer_documents_au_candidat_par_fac(
         a_echeance_le=cmd.a_echeance_le,
     )
 
-    proposition.reclamer_documents_par_fac()
+    proposition.reclamer_documents_par_fac(auteur_modification=cmd.auteur)
 
     proposition_repository.save(proposition)
     emplacement_document_repository.save_multiple(entities=documents_reclames, auteur=cmd.auteur)

@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import copy
+import datetime
 import uuid
 from email import message_from_string
 from email.policy import default
@@ -42,7 +43,7 @@ from osis_notification.models import EmailNotification
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.checklist import AdditionalApprovalCondition
+from admission.contrib.models.checklist import AdditionalApprovalCondition, RefusalReasonCategory
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -270,6 +271,8 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         # Check that the admission has been updated
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # Check that a notification has been planned
         email_notifications = EmailNotification.objects.all()
@@ -356,18 +359,29 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.confirm_remote_upload_patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = str(self.file_uuid)
+        self.addCleanup(self.confirm_remote_upload_patcher.stop)
+
+        self.confirm_multiple_remote_upload_patcher = mock.patch(
+            'osis_document.contrib.fields.FileField._confirm_multiple_upload'
+        )
+        patched = self.confirm_multiple_remote_upload_patcher.start()
+        patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
+        self.addCleanup(self.confirm_multiple_remote_upload_patcher.stop)
 
         self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
+        self.addCleanup(self.get_remote_metadata_patcher.stop)
 
         self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')
         patched = self.get_remote_token_patcher.start()
         patched.return_value = 'foobar'
+        self.addCleanup(self.get_remote_token_patcher.stop)
 
         self.save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
+        self.addCleanup(self.save_raw_content_remotely_patcher.stop)
 
         patcher = mock.patch('admission.exports.utils.change_remote_metadata')
         self.change_remote_metadata_patcher = patcher.start()
@@ -399,8 +413,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 403)
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_send_to_sic_with_fac_user_in_specific_statuses_to_refuse(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_to_refuse(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
@@ -433,6 +447,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.other_refusal_reasons = ['test']
         self.general_admission.save()
 
+        frozen_time.move_to('2022-01-03')
+
         # Valid request
         response = self.client.post(self.url + '?refusal=1', **self.default_headers)
 
@@ -453,6 +469,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
                 'decision': DecisionFacultaireEnum.EN_DECISION.value,
             },
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_refusal_certificate, [self.file_uuid])
@@ -502,8 +520,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             ['proposition', 'fac-decision', 'refusal-send-to-sic', 'status-changed'],
         )
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
@@ -540,6 +558,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.program_planned_years_number = 5
         self.general_admission.save()
 
+        frozen_time.move_to('2022-01-03')
+
         # Valid request
         response = self.client.post(self.url + '?approval=1', **self.default_headers)
 
@@ -554,6 +574,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_approval_certificate, [self.file_uuid])
@@ -762,8 +784,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertIn('access_titles_names', pdf_context)
         self.assertEqual(len(pdf_context['access_titles_names']), 0)
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_send_to_sic_with_fac_user_in_specific_statuses_without_approving_or_refusing(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_without_approving_or_refusing(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
@@ -780,6 +802,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             [m.message for m in response.context['messages']],
         )
 
+        frozen_time.move_to('2022-01-02')
+
         # Valid request
         self.general_admission.checklist['current']['decision_facultaire'][
             'statut'
@@ -795,6 +819,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
 
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -816,8 +842,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             ['proposition', 'fac-decision', 'send-to-sic', 'status-changed'],
         )
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_send_to_sic_with_sic_user_in_specific_statuses_without_approving_or_refusing(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_send_to_sic_with_sic_user_in_specific_statuses_without_approving_or_refusing(self, frozen_time):
         self.client.force_login(user=self.sic_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
@@ -825,6 +851,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             'statut'
         ] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.general_admission.save()
+
+        frozen_time.move_to('2022-01-02')
 
         response = self.client.post(self.url, **self.default_headers)
 
@@ -835,6 +863,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
 
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -891,18 +921,29 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         self.confirm_remote_upload_patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = str(self.file_uuid)
+        self.addCleanup(self.confirm_remote_upload_patcher.stop)
+
+        self.confirm_remote_upload_patcher = mock.patch(
+            'osis_document.contrib.fields.FileField._confirm_multiple_upload'
+        )
+        patched = self.confirm_remote_upload_patcher.start()
+        patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
+        self.addCleanup(self.confirm_remote_upload_patcher.stop)
 
         self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
+        self.addCleanup(self.get_remote_metadata_patcher.stop)
 
         self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')
         patched = self.get_remote_token_patcher.start()
         patched.return_value = 'foobar'
+        self.addCleanup(self.get_remote_token_patcher.stop)
 
         self.save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
+        self.addCleanup(self.save_raw_content_remotely_patcher.stop)
 
         patcher = mock.patch('admission.exports.utils.change_remote_metadata')
         self.change_remote_metadata_patcher = patcher.start()
@@ -941,7 +982,11 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
     def test_refusal_decision_form_initialization(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        refusal_reason = RefusalReasonFactory()
+        RefusalReasonCategory.objects.all().delete()
+
+        third_refusal_reason = RefusalReasonFactory(category__order=2, order=1)
+        first_refusal_reason = RefusalReasonFactory(category__order=1, order=1)
+        second_refusal_reason = RefusalReasonFactory(category=first_refusal_reason.category, order=2)
 
         # No reason
         self.general_admission.refusal_reasons.all().delete()
@@ -957,8 +1002,17 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         self.assertEqual(form.initial.get('reasons'), [])
 
+        choices = form.fields['reasons'].choices
+
+        # The choices are sorted by category order and then by reason order
+        self.assertEqual(choices[0][0], first_refusal_reason.category.name)
+        self.assertEqual(choices[0][1][0], [first_refusal_reason.uuid, first_refusal_reason.name])
+        self.assertEqual(choices[0][1][1], [second_refusal_reason.uuid, second_refusal_reason.name])
+        self.assertEqual(choices[1][0], third_refusal_reason.category.name)
+        self.assertEqual(choices[1][1][0], [third_refusal_reason.uuid, third_refusal_reason.name])
+
         # One existing reason is selected
-        self.general_admission.refusal_reasons.add(refusal_reason)
+        self.general_admission.refusal_reasons.add(first_refusal_reason)
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -967,7 +1021,7 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         form = response.context['fac_decision_refusal_form']
 
-        self.assertEqual(form.initial.get('reasons'), [refusal_reason.uuid])
+        self.assertEqual(form.initial.get('reasons'), [first_refusal_reason.uuid])
 
         # One other reason is selected
         self.general_admission.refusal_reasons.all().delete()
@@ -1004,7 +1058,8 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('reasons', []))
 
-    def test_refusal_decision_form_submitting_with_valid_data(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_refusal_decision_form_submitting_with_valid_data(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
         refusal_reason = RefusalReasonFactory()
@@ -1040,6 +1095,10 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
             {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        frozen_time.move_to('2022-01-02')
 
         # Choose another reason
         response = self.client.post(
@@ -1061,7 +1120,10 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         self.assertFalse(self.general_admission.refusal_reasons.exists())
         self.assertEqual(self.general_admission.other_refusal_reasons, ['My other reason'])
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
+    @freezegun.freeze_time('2022-01-01')
     def test_refusal_decision_form_submitting_with_transfer_to_sic(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -1112,6 +1174,8 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['extra'],
             {'decision': DecisionFacultaireEnum.EN_DECISION.value},
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
         # A certificate has been generated
         self.assertEqual(self.general_admission.fac_refusal_certificate, [self.file_uuid])
@@ -1198,18 +1262,29 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.confirm_remote_upload_patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = str(self.file_uuid)
+        self.addCleanup(self.confirm_remote_upload_patcher.stop)
+
+        self.confirm_remote_upload_patcher = mock.patch(
+            'osis_document.contrib.fields.FileField._confirm_multiple_upload'
+        )
+        patched = self.confirm_remote_upload_patcher.start()
+        patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
+        self.addCleanup(self.confirm_remote_upload_patcher.stop)
 
         self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
+        self.addCleanup(self.get_remote_metadata_patcher.stop)
 
         self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')
         patched = self.get_remote_token_patcher.start()
         patched.return_value = 'foobar'
+        self.addCleanup(self.get_remote_token_patcher.stop)
 
         self.save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
+        self.addCleanup(self.save_raw_content_remotely_patcher.stop)
 
         patcher = mock.patch('admission.exports.utils.change_remote_metadata')
         self.change_remote_metadata_patcher = patcher.start()
@@ -1445,6 +1520,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             ],
         )
 
+    @freezegun.freeze_time('2022-01-01')
     def test_approval_decision_form_submitting_with_valid_data(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -1494,6 +1570,8 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.general_admission.fac_approval_certificate, [])
         self.assertEqual(self.general_admission.with_additional_approval_conditions, True)
         approval_conditions = self.general_admission.additional_approval_conditions.all()
@@ -1514,6 +1592,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.general_admission.join_program_fac_comment, 'Comment about the join program')
 
+    @freezegun.freeze_time('2022-01-01')
     def test_approval_decision_form_submitting_with_transfer_to_sic(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -1564,6 +1643,8 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             self.general_admission.checklist['current']['decision_facultaire']['statut'],
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.general_admission.fac_approval_certificate, [self.file_uuid])
         self.assertEqual(self.general_admission.with_additional_approval_conditions, True)
         approval_conditions = self.general_admission.additional_approval_conditions.all()

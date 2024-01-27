@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 
+import datetime
 import uuid
 from unittest.mock import patch
 
@@ -1018,6 +1019,11 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
 
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+        self.addCleanup(patcher.stop)
+
     @classmethod
     def setUpTestData(cls):
         # Data
@@ -1098,6 +1104,8 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             '4bdffb42-552d-415d-9e4c-725f10dce228',
         )
         self.assertEqual(admission.diplomatic_post, self.diplomatic_post)
+        self.assertEqual(admission.modified_at, datetime.datetime.today())
+        self.assertEqual(admission.last_update_author, self.candidate.user.person)
 
         # Unknown diplomatic post
         response = self.client.put(
@@ -1196,6 +1204,11 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         self.save_raw_content_remotely_patcher = patch('osis_document.utils.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
+
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+        self.addCleanup(patcher.stop)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

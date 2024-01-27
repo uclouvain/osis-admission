@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import re
 from dataclasses import dataclass
@@ -73,7 +74,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO, PropositionDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -89,7 +90,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import format_academic_year
+from admission.utils import format_academic_year, get_access_conditions_url
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 
 from base.models.person import Person
@@ -783,7 +784,7 @@ def concat(*args):
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
-def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects')):
+def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects'), **kwargs):
     """Display the answers of the specific questions based on a list of configurations."""
     return {
         'fields': configurations,
@@ -791,6 +792,7 @@ def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], ti
         'all_inline': context.get('all_inline'),
         'load_files': context.get('load_files'),
         'hide_files': context.get('hide_files'),
+        'edit_link_button': kwargs.get('edit_link_button'),
     }
 
 
@@ -1252,4 +1254,16 @@ def sic_in_final_statut(checklist_statut):
     return checklist_statut['statut'] == ChoixStatutChecklist.GEST_REUSSITE.name or (
         checklist_statut['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
         and checklist_statut['extra']['blocage'] != 'to_be_completed'
+    )
+
+
+@register.filter
+def access_conditions_url(proposition: PropositionDTO):
+    training = BaseAdmission.objects.values(
+        'training__education_group_type__name', 'training__acronym', 'training__partial_acronym'
+    ).get(uuid=proposition.uuid)
+    return get_access_conditions_url(
+        training_type=training['training__education_group_type__name'],
+        training_acronym=training['training__acronym'],
+        partial_training_acronym=training['training__partial_acronym'],
     )

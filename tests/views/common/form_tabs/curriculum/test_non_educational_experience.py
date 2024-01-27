@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest import mock
@@ -40,6 +41,7 @@ from admission.contrib.models.base import (
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
@@ -74,6 +76,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
@@ -109,9 +112,9 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_upload')
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value: value
+        patched.side_effect = lambda _, value, __: value
 
         # Targeted url
         self.form_url = resolve_url(
@@ -308,6 +311,15 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(self.experience.institute_name, 'Institute')
         self.assertEqual(self.experience.activity, '')
 
+        # Check the admission
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.general_admission.requested_documents,
+        )
+
     def test_submit_valid_form_for_other_activity(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -407,6 +419,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         )
 
 
+@freezegun.freeze_time('2022-01-01')
 class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -422,6 +435,7 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
             candidate__country_of_citizenship=CountryFactory(european_union=False),
             candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
@@ -507,6 +521,12 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.checklist['current']['parcours_anterieur']['enfants'],
             [],
+        )
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.general_admission.requested_documents,
         )
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
