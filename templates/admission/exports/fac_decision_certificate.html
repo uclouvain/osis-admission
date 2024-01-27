@@ -37,7 +37,7 @@
     #main-container dl {
       margin-top: 2em;
     }
-    
+
     footer {
       padding: 20px 0;
       height: 130px;
@@ -54,6 +54,19 @@
     }
 
   </style>
+{% endblock %}
+
+{% block header %}
+  <div class="header-container">
+    <div>
+      <img src="{% static 'img/logo_uclouvain.png' %}" alt="{% translate "UCLouvain logo"%}"/>
+    </div>
+    <div>
+      <p>{% translate 'Dossier reference:' %} {{ proposition.reference }}</p>
+      <p>{% translate 'First name Last name:' %} {{ proposition.prenom_candidat }} {{ proposition.nom_candidat }}</p>
+      <p>{% translate 'Nationality:' %} {{ proposition.nationalite_candidat }}</p>
+    </div>
+  </div>
 {% endblock %}
 
 {% block content %}
