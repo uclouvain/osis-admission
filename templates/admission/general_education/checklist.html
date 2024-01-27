@@ -428,7 +428,7 @@
 
     <div id="document-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
-      <div id="document-content">
+      <div id="document-content" hx-indicator="#document-spinner">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
             <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
@@ -526,6 +526,8 @@
               const currentSelect = $(`${selectedTab}-documents-select`);
               $('.documents-tab').addClass('hidden').filter(`${selectedTab}-documents`).removeClass('hidden');
               currentSelect.prop("selectedIndex", currentSelect.find('option').length > 1 ? 1 : 0);
+              const htmxOverlay = $('#document-spinner');
+              htmxOverlay.addClass('htmx-request');
               htmx.ajax(
                   'GET',
                   '{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}',
@@ -540,6 +542,7 @@
                   if (currentSelect.length) {
                       refreshDocumentsSelectButtons(currentSelect);
                   }
+                  htmxOverlay.removeClass('htmx-request');
               });
           }
 
@@ -809,6 +812,8 @@
 
                   {# Refresh the details of a document if the form has an impact on it #}
                   if (event.originalEvent.detail.refresh_details) {
+                    const htmxOverlay = $('#document-spinner');
+                    htmxOverlay.addClass('htmx-request');
                       htmx.ajax(
                           'GET',
                           base_details_url.replace('custom_identifier', event.originalEvent.detail.refresh_details),
@@ -816,7 +821,9 @@
                               target: '#document-details',
                               swap: 'outerHTML',
                           }
-                      )
+                      ).finally(() => {
+                        htmxOverlay.removeClass('htmx-request');
+                      });
                   }
               }
           })
