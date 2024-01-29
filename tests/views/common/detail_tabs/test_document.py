@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from email import message_from_string
@@ -129,6 +130,12 @@ class DocumentViewTestCase(TestCase):
         patcher = patch(
             'osis_document.api.utils.confirm_remote_upload',
             side_effect=lambda **kwargs: uuid.uuid4(),
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch(
+            'osis_document.contrib.fields.FileField._confirm_multiple_upload',
+            side_effect=lambda _, value, __: [uuid.uuid4()] if value else [],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
