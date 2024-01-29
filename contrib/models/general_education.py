@@ -346,6 +346,7 @@ class GeneralEducationAdmission(BaseAdmission):
     communication_to_the_candidate = models.TextField(
         default='',
         verbose_name=_("Communication to the candidate"),
+        blank=True,
     )
 
     diplomatic_post = models.ForeignKey(
