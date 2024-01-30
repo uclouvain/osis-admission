@@ -488,6 +488,7 @@ class SpecifierExperienceEnTantQueTitreAccesCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererTitresAccesSelectionnablesPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+    seulement_selectionnes: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -79,6 +79,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldTitreAccesEtreSelectionne,
     ShouldConditionAccesEtreSelectionne,
     ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldSelectionnerTitreAccesPourEnvoyerASIC,
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldSicPeutDonnerDecision,
@@ -335,6 +336,8 @@ class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidato
 
     nombre_annees_prevoir_programme: Optional[int]
 
+    titres_selectionnes: List[TitreAccesSelectionnable]
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -350,6 +353,9 @@ class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidato
                 avec_complements_formation=self.avec_complements_formation,
                 complements_formation=self.complements_formation,
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            ),
+            ShouldSelectionnerTitreAccesPourEnvoyerASIC(
+                titres_selectionnes=self.titres_selectionnes,
             ),
         ]
 

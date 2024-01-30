@@ -264,7 +264,7 @@ class GeneralEducationAdmission(BaseAdmission):
     prerequisite_courses_fac_comment = models.TextField(
         blank=True,
         default='',
-        verbose_name=_('Other information about prerequisite courses'),
+        verbose_name=_('Other communication for the candidate about the prerequisite courses'),
     )
     program_planned_years_number = models.SmallIntegerField(
         blank=True,

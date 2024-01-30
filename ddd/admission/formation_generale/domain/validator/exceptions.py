@@ -207,3 +207,14 @@ class PdfSicInconnu(BusinessException):
     def __init__(self, **kwargs):
         message = _("Unknown PDF type.")
         super().__init__(message, **kwargs)
+
+
+class TitreAccesEtreSelectionnePourEnvoyerASICException(BusinessException):
+    status_code = "FORMATION-GENERALE-24"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving '
+            'access to the chosen program.'
+        )
+        super().__init__(message, **kwargs)
