@@ -1,5 +1,5 @@
 {% extends 'admission/exports/fac_decision_certificate.html' %}
-{% load i18n %}
+{% load i18n admission %}
 
 {% comment 'License' %}
   * OSIS stands for Open Student Information System. It's an application
@@ -30,6 +30,8 @@
 {% endblock %}
 
 {% block decision_content %}
+  {% field_data _('Date the application was sent to the faculty') sic_to_fac_history_entry.created|date:'d/m/Y' inline=True %}
+  
   <dl>
     <dt>{% translate 'Refusal reasons:' %}</dt>
     <dd>
