@@ -205,7 +205,7 @@
               {% else %}
                 {% field_data _('Prerequisite courses') '' %}
               {% endif %}
-              {% field_data _('Other information about prerequisite courses') admission.commentaire_complements_formation|safe %}
+              {% field_data _('Other communication for the candidate about the prerequisite courses') admission.commentaire_complements_formation|safe %}
             {% endif %}
 
             {% field_data _('Number of years required for the full program (including prerequisite courses)') admission.nombre_annees_prevoir_programme %}

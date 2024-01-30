@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,4 +36,7 @@ def recuperer_titres_acces_selectionnables_proposition(
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
 ) -> Dict[str, TitreAccesSelectionnableDTO]:
     proposition_identity = PropositionIdentity(uuid=cmd.uuid_proposition)
-    return titre_acces_selectionnable_repository.search_dto_by_proposition(proposition_identity=proposition_identity)
+    return titre_acces_selectionnable_repository.search_dto_by_proposition(
+        proposition_identity=proposition_identity,
+        seulement_selectionnes=cmd.seulement_selectionnes,
+    )
