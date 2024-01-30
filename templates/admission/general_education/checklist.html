@@ -376,8 +376,12 @@
       <div role="tabpanel" class="tab-pane" id="decision_sic">
         {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
 
+        {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
+        {% include 'admission/general_education/includes/checklist/sic_decision_confirm_modal.html' with target_status='INITIAL_CANDIDAT' target_url=change_status_url %}
         {% include "admission/general_education/includes/checklist/sic_decision_approval_modal.html" %}
         {% include "admission/general_education/includes/checklist/sic_decision_refusal_modal.html" %}
+        {% include "admission/general_education/includes/checklist/sic_decision_refusal_final_modal.html" %}
+        {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
 
         <div class="info-part">
           <dl>
