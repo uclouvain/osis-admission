@@ -731,8 +731,8 @@ msgstr ""
 msgid "Application accepted"
 msgstr "Inscription autorisée"
 
-msgid "Application confirmed (by student)"
-msgstr "Demande confirmée (par étudiant)"
+msgid "Application confirmed"
+msgstr "Demande confirmée"
 
 msgid "Application denied"
 msgstr "Inscription refusée"
@@ -1001,6 +1001,10 @@ msgstr ""
 
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
+
+msgctxt "admission"
+msgid "Back to page"
+msgstr "Revenir à la page"
 
 msgid "Back to the list"
 msgstr "Retour à la liste"
@@ -1589,14 +1593,14 @@ msgctxt "equivalence_status"
 msgid "Completed"
 msgstr "Complète"
 
-msgid "Completed (by student) for Fac"
-msgstr "Complétée (par étudiant) pour Fac"
-
-msgid "Completed (by student) for SIC"
-msgstr "Complétée (par étudiant) pour SIC"
-
 msgid "Completed after the request"
 msgstr "Complété après la réclamation"
+
+msgid "Completed for Fac"
+msgstr "Complétée pour Fac"
+
+msgid "Completed for SIC"
+msgstr "Complétée pour SIC"
 
 msgid "Configuration"
 msgstr "Configuration"
@@ -2371,6 +2375,9 @@ msgstr "Dossier non trouvé."
 msgid "Dossier numero"
 msgstr "Numéro de dossier"
 
+msgid "Dossier reference:"
+msgstr "Numéro de dossier :"
+
 msgid "Dossier status"
 msgstr "Statut dossier"
 
@@ -2796,6 +2803,9 @@ msgstr "Règle de financement"
 
 msgid "First name"
 msgstr "Prénom"
+
+msgid "First name Last name:"
+msgstr "Prénom Nom :"
 
 msgid "First name and last name"
 msgstr "Prénom et nom"
@@ -4389,6 +4399,9 @@ msgstr "Modification d'une formation académique"
 msgid "Modification of the secondary studies"
 msgstr "Modification des études secondaires"
 
+msgid "Modification of the specificities of the curriculum"
+msgstr "Modification des spécificités du curriculum"
+
 msgid "Modification requested"
 msgstr "Modification demandée"
 
@@ -4512,6 +4525,9 @@ msgstr "Nom de l'entité de gestion"
 msgid "Nationality"
 msgstr "Nationalité"
 
+msgid "Nationality:"
+msgstr "Nationalité :"
+
 msgid "Negative assessment by lead supervisor"
 msgstr "Avis négatif du promoteur de référence"
 
@@ -4596,6 +4612,9 @@ msgstr "Bourse non trouvée."
 
 msgid "No specific profile"
 msgstr "Pas de profil particulier"
+
+msgid "No specific question available for this dossier."
+msgstr "Aucune question spécifique n'est disponible pour cette demande."
 
 msgid "No training found."
 msgstr "Formation non trouvée."
@@ -7053,17 +7072,17 @@ msgstr "À"
 msgid "To be completed"
 msgstr "À compléter"
 
-msgid "To be completed (by student) for Fac"
-msgstr "A compléter (par étudiant) pour Fac"
-
-msgid "To be completed (by student) for the Enrolment Office (SIC)"
-msgstr "A compléter (par étudiant) pour SIC"
-
 msgid "To be completed after application"
 msgstr "À compléter après inscription"
 
 msgid "To be completed by SIC"
 msgstr "À compléter par SIC"
+
+msgid "To be completed for Fac"
+msgstr "A compléter pour Fac"
+
+msgid "To be completed for the Enrolment Office (SIC)"
+msgstr "A compléter pour SIC"
 
 msgid "To be processed"
 msgstr "À traiter"

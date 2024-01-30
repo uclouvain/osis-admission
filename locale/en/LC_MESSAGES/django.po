@@ -646,7 +646,7 @@ msgstr ""
 msgid "Application accepted"
 msgstr ""
 
-msgid "Application confirmed (by student)"
+msgid "Application confirmed"
 msgstr ""
 
 msgid "Application denied"
@@ -901,6 +901,10 @@ msgid "Bachelor's course entrance exam"
 msgstr ""
 
 msgid "Back to checklist"
+msgstr ""
+
+msgctxt "admission"
+msgid "Back to page"
 msgstr ""
 
 msgid "Back to the list"
@@ -1469,13 +1473,13 @@ msgctxt "equivalence_status"
 msgid "Completed"
 msgstr ""
 
-msgid "Completed (by student) for Fac"
-msgstr ""
-
-msgid "Completed (by student) for SIC"
-msgstr ""
-
 msgid "Completed after the request"
+msgstr ""
+
+msgid "Completed for Fac"
+msgstr ""
+
+msgid "Completed for SIC"
 msgstr ""
 
 msgid "Configuration"
@@ -2185,6 +2189,9 @@ msgstr ""
 msgid "Dossier numero"
 msgstr ""
 
+msgid "Dossier reference:"
+msgstr ""
+
 msgid "Dossier status"
 msgstr ""
 
@@ -2590,6 +2597,9 @@ msgid "Financing rule"
 msgstr ""
 
 msgid "First name"
+msgstr ""
+
+msgid "First name Last name:"
 msgstr ""
 
 msgid "First name and last name"
@@ -3920,6 +3930,9 @@ msgstr ""
 msgid "Modification of the secondary studies"
 msgstr ""
 
+msgid "Modification of the specificities of the curriculum"
+msgstr ""
+
 msgid "Modification requested"
 msgstr ""
 
@@ -4040,6 +4053,9 @@ msgstr ""
 msgid "Nationality"
 msgstr ""
 
+msgid "Nationality:"
+msgstr ""
+
 msgid "Negative assessment by lead supervisor"
 msgstr ""
 
@@ -4120,6 +4136,9 @@ msgid "No scholarship found."
 msgstr ""
 
 msgid "No specific profile"
+msgstr ""
+
+msgid "No specific question available for this dossier."
 msgstr ""
 
 msgid "No training found."
@@ -6368,16 +6387,16 @@ msgstr ""
 msgid "To be completed"
 msgstr ""
 
-msgid "To be completed (by student) for Fac"
-msgstr ""
-
-msgid "To be completed (by student) for the Enrolment Office (SIC)"
-msgstr ""
-
 msgid "To be completed after application"
 msgstr ""
 
 msgid "To be completed by SIC"
+msgstr ""
+
+msgid "To be completed for Fac"
+msgstr ""
+
+msgid "To be completed for the Enrolment Office (SIC)"
 msgstr ""
 
 msgid "To be processed"

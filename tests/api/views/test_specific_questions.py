@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest.mock import patch
@@ -1018,6 +1019,11 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
 
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+        self.addCleanup(patcher.stop)
+
     @classmethod
     def setUpTestData(cls):
         # Data
@@ -1198,6 +1204,11 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         self.save_raw_content_remotely_patcher = patch('osis_document.utils.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
+
+        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+        self.addCleanup(patcher.stop)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -255,7 +255,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     @patch('osis_document.api.utils.get_remote_token')
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    @patch('osis_document.contrib.fields.FileField._confirm_upload')
+    @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
     def test_remove_proof_if_not_needed(
         self,
         file_confirm_upload,
@@ -266,7 +266,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         get_remote_metadata.return_value = {"name": "test.pdf"}
         get_remote_token.return_value = "test"
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-        file_confirm_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        file_confirm_upload.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
 
         # Communication
         activity = ActivityFactory(
@@ -388,7 +388,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     @patch('osis_document.api.utils.get_remote_token')
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    @patch('osis_document.contrib.fields.FileField._confirm_upload')
+    @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
     def test_submit_parent_seminar(
         self,
         file_confirm_upload,
@@ -399,7 +399,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         get_remote_metadata.return_value = {"name": "test.pdf"}
         get_remote_token.return_value = "test"
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-        file_confirm_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        file_confirm_upload.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
 
         activity = SeminarCommunicationFactory(doctorate=self.doctorate)
         self.assertEqual(Activity.objects.filter(status='SOUMISE').count(), 0)
@@ -411,7 +411,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
     @patch('osis_document.api.utils.get_remote_token')
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    @patch('osis_document.contrib.fields.FileField._confirm_upload')
+    @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
     def test_submit_activities_with_error(
         self,
         file_confirm_upload,
@@ -422,7 +422,7 @@ class DoctorateTrainingActivityViewTestCase(TestCase):
         get_remote_metadata.return_value = {"name": "test.pdf"}
         get_remote_token.return_value = "test"
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
-        file_confirm_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        file_confirm_upload.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
 
         self.service.title = ""
         self.service.save()
