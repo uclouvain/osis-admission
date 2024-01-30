@@ -52,6 +52,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     SituationPropositionNonFACException,
     TitreAccesEtreSelectionneException,
     ConditionAccesEtreSelectionneException,
+    TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
@@ -136,6 +137,15 @@ class ShouldFacPeutDonnerDecision(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC:
             raise SituationPropositionNonFACException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldSelectionnerTitreAccesPourEnvoyerASIC(BusinessValidator):
+    titres_selectionnes: List[TitreAccesSelectionnable]
+
+    def validate(self, *args, **kwargs):
+        if not self.titres_selectionnes:
+            raise TitreAccesEtreSelectionnePourEnvoyerASICException
 
 
 @attr.dataclass(frozen=True, slots=True)

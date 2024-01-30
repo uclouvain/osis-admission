@@ -63,8 +63,16 @@ def approuver_proposition_par_faculte(
     )
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
+    titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
+        proposition_identity=proposition.entity_id,
+        seulement_selectionnes=True,
+    )
+
     # WHEN
-    proposition.approuver_par_fac(auteur_modification=cmd.gestionnaire)
+    proposition.approuver_par_fac(
+        auteur_modification=cmd.gestionnaire,
+        titres_selectionnes=titres_selectionnes,
+    )
 
     # THEN
     gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
@@ -74,7 +82,7 @@ def approuver_proposition_par_faculte(
         proposition_repository=proposition_repository,
         unites_enseignement_translator=unites_enseignement_translator,
         profil_candidat_translator=profil_candidat_translator,
-        titre_acces_selectionnable_repository=titre_acces_selectionnable_repository,
+        titres_selectionnes=titres_selectionnes,
         annee_courante=annee_courante,
     )
 

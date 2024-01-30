@@ -31,6 +31,7 @@ from email import message_from_string
 from email.policy import default
 from typing import List
 from unittest import mock
+from unittest.mock import patch
 
 import freezegun
 from django.conf import settings
@@ -57,7 +58,10 @@ from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
 )
-from admission.tests.factories.faculty_decision import RefusalReasonFactory, AdditionalApprovalConditionFactory
+from admission.tests.factories.faculty_decision import (
+    RefusalReasonFactory,
+    AdditionalApprovalConditionFactory,
+)
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
@@ -65,15 +69,25 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.history import HistoryEntryFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from admission.tests.factories.secondary_studies import ForeignHighSchoolDiplomaFactory
+from admission.tests.factories.secondary_studies import (
+    ForeignHighSchoolDiplomaFactory,
+    HighSchoolDiplomaAlternativeFactory,
+)
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
-from osis_profile.models import EducationalExperience, ProfessionalExperience
+from osis_profile.models import (
+    EducationalExperience,
+    ProfessionalExperience,
+    BelgianHighSchoolDiploma,
+    ForeignHighSchoolDiploma,
+    HighSchoolDiplomaAlternative,
+)
 
 
 class FacultyDecisionViewTestCase(TestCase):
@@ -528,6 +542,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.with_additional_approval_conditions = None
         self.general_admission.with_prerequisite_courses = None
         self.general_admission.program_planned_years_number = None
+        self.general_admission.are_secondary_studies_access_title = True
         self.general_admission.save()
 
         # Simulate a transfer from the SIC to the FAC
@@ -556,11 +571,31 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.with_additional_approval_conditions = False
         self.general_admission.with_prerequisite_courses = False
         self.general_admission.program_planned_years_number = 5
+        self.general_admission.are_secondary_studies_access_title = False
         self.general_admission.save()
+
+        # Invalid request -> We need to choose an access title
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            gettext(
+                'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving '
+                'access to the chosen program.'
+            ),
+            [m.message for m in response.context['messages']],
+        )
+
+        # Check that the admission has not been updated
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
 
         frozen_time.move_to('2022-01-03')
 
         # Valid request
+        self.general_admission.are_secondary_studies_access_title = True
+        self.general_admission.save(update_fields=['are_secondary_studies_access_title'])
+
         response = self.client.post(self.url + '?approval=1', **self.default_headers)
 
         # Check the response
@@ -597,7 +632,13 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(pdf_context['manager'].matricule, self.fac_manager_user.person.global_id)
 
         self.assertIn('access_titles_names', pdf_context)
-        self.assertEqual(pdf_context['access_titles_names'], [])
+        belgian_diploma_year = self.general_admission.candidate.graduated_from_high_school_year.year
+        self.assertEqual(
+            pdf_context['access_titles_names'],
+            [
+                f'{belgian_diploma_year}-{belgian_diploma_year + 1} : Études secondaires ou alternative',
+            ],
+        )
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(
@@ -628,7 +669,14 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         )
 
     @freezegun.freeze_time('2022-01-01')
-    def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve_with_secondary_studies_as_access_title(self):
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve_with_secondary_studies_as_access_title(
+        self,
+        confirm_multiple_upload,
+    ):
+        confirm_multiple_upload.side_effect = (
+            lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        )
         self.client.force_login(user=self.fac_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
@@ -637,6 +685,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.with_prerequisite_courses = False
         self.general_admission.program_planned_years_number = 1
         self.general_admission.save()
+
+        secondary_studies_base_title = gettext('Secondary school or alternative')
 
         # > Belgian diploma
         candidate = self.general_admission.candidate
@@ -649,7 +699,6 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
 
         self.assertIn('access_titles_names', pdf_context)
-        secondary_studies_base_title = gettext('Secondary school or alternative')
         self.assertEqual(len(pdf_context['access_titles_names']), 1)
         self.assertEqual(
             pdf_context['access_titles_names'][0],
@@ -673,7 +722,81 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
 
         self.assertIn('access_titles_names', pdf_context)
-        secondary_studies_base_title = gettext('Secondary school or alternative')
+        self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        self.assertEqual(
+            pdf_context['access_titles_names'][0],
+            f'{candidate.graduated_from_high_school_year.year}-{candidate.graduated_from_high_school_year.year + 1} : '
+            f'{secondary_studies_base_title}',
+        )
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save()
+
+        # > High school diploma alternative
+        BelgianHighSchoolDiploma.objects.filter(person=candidate).delete()
+        ForeignHighSchoolDiploma.objects.filter(person=candidate).delete()
+        HighSchoolDiplomaAlternative.objects.filter(person=candidate).delete()
+        diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=candidate)
+
+        candidate.graduated_from_high_school = GotDiploma.NO.name
+        candidate.graduated_from_high_school_year = None
+        candidate.save()
+
+        self.get_pdf_from_template_patcher.reset_mock()
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has not been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+
+        diploma_alternative.first_cycle_admission_exam = ['token.pdf']
+        diploma_alternative.save()
+
+        self.get_pdf_from_template_patcher.reset_mock()
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
+        self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        self.assertEqual(pdf_context['access_titles_names'][0], secondary_studies_base_title)
+
+        # The candidate specified that he has no secondary education but without more information
+        diploma_alternative.delete()
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save()
+
+        self.get_pdf_from_template_patcher.reset_mock()
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has not been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+
+        # The candidate specified that he has secondary education but without more information
+        candidate.graduated_from_high_school = GotDiploma.YES.name
+        candidate.graduated_from_high_school_year = self.general_admission.training.academic_year
+        candidate.save()
+
+        self.get_pdf_from_template_patcher.reset_mock()
+
+        response = self.client.post(self.url + '?approval=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
         self.assertEqual(len(pdf_context['access_titles_names']), 1)
         self.assertEqual(
             pdf_context['access_titles_names'][0],
@@ -727,12 +850,9 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         response = self.client.post(self.url + '?approval=1', **self.default_headers)
         self.assertEqual(response.status_code, 200)
 
-        # Check the template context
-        self.get_pdf_from_template_patcher.assert_called_once()
-        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
-
-        self.assertIn('access_titles_names', pdf_context)
-        self.assertEqual(len(pdf_context['access_titles_names']), 0)
+        # Check that the admission has not been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
 
     @freezegun.freeze_time('2022-01-01')
     def test_send_to_sic_with_fac_user_in_specific_statuses_to_approve_with_a_cv_non_academic_experience_as_title(self):
@@ -777,12 +897,9 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         response = self.client.post(self.url + '?approval=1', **self.default_headers)
         self.assertEqual(response.status_code, 200)
 
-        # Check the template context
-        self.get_pdf_from_template_patcher.assert_called_once()
-        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
-
-        self.assertIn('access_titles_names', pdf_context)
-        self.assertEqual(len(pdf_context['access_titles_names']), 0)
+        # Check that the admission has not been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
 
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_send_to_sic_with_fac_user_in_specific_statuses_without_approving_or_refusing(self, frozen_time):
@@ -1245,6 +1362,10 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
 
         AdditionalApprovalCondition.objects.all().delete()
 
+    def assertDjangoMessage(self, response, message):
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(message, messages)
+
     def setUp(self) -> None:
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
@@ -1604,29 +1725,53 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             AdditionalApprovalConditionFactory(),
         ]
 
-        response = self.client.post(
-            self.url,
-            data={
-                "fac-decision-approval-prerequisite_courses": [
-                    prerequisite_courses[0].acronym,
-                ],
-                'fac-decision-approval-another_training': True,
-                'fac-decision-approval-other_training_accepted_by_fac': self.general_admission.training.uuid,
-                'fac-decision-approval-with_prerequisite_courses': 'True',
-                'fac-decision-approval-with_additional_approval_conditions': 'True',
-                'fac-decision-approval-all_additional_approval_conditions': [
-                    approval_conditions[0].uuid,
-                    'Free condition',
-                ],
-                'fac-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
-                'fac-decision-approval-program_planned_years_number': 5,
-                'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
-                'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
-                'fac-decision-approval-join_program_fac_comment': 'Comment about the join program',
-                'save-transfer': '1',
-            },
-            **self.default_headers,
+        data = {
+            "fac-decision-approval-prerequisite_courses": [
+                prerequisite_courses[0].acronym,
+            ],
+            'fac-decision-approval-another_training': True,
+            'fac-decision-approval-other_training_accepted_by_fac': self.general_admission.training.uuid,
+            'fac-decision-approval-with_prerequisite_courses': 'True',
+            'fac-decision-approval-with_additional_approval_conditions': 'True',
+            'fac-decision-approval-all_additional_approval_conditions': [
+                approval_conditions[0].uuid,
+                'Free condition',
+            ],
+            'fac-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
+            'fac-decision-approval-program_planned_years_number': 5,
+            'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
+            'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
+            'fac-decision-approval-join_program_fac_comment': 'Comment about the join program',
+            'save-transfer': '1',
+        }
+
+        response = self.client.post(self.url, data=data, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['fac_decision_approval_form']
+
+        self.assertTrue(form.is_valid())
+
+        self.assertDjangoMessage(
+            response=response,
+            message=gettext(
+                'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving '
+                'access to the chosen program.'
+            ),
         )
+
+        # Check that the admission has not been updated
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+
+        # Add the access title
+        self.general_admission.are_secondary_studies_access_title = True
+        self.general_admission.save(update_fields=['are_secondary_studies_access_title'])
+
+        response = self.client.post(self.url, data=data, **self.default_headers)
 
         # Check the response
         self.assertEqual(response.status_code, 200)

@@ -86,6 +86,7 @@ from admission.templatetags.admission import (
     authentication_css_class,
     experience_details_template,
     is_list,
+    label_with_user_icon,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -770,6 +771,10 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         self.assertFalse(is_list(0.0))
         self.assertFalse(is_list(''))
         self.assertTrue(is_list([]))
+
+    def test_label_with_user_icon(self):
+        self.assertEqual(label_with_user_icon('foo'), 'foo <i class="fas fa-user"></i>')
+        self.assertEqual(label_with_user_icon(''), ' <i class="fas fa-user"></i>')
 
 
 class AdmissionTagsTestCase(TestCase):

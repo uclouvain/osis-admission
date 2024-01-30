@@ -2229,6 +2229,9 @@ msgstr "Nationalité du diplôme"
 msgid "Diploma translation"
 msgstr "Traduction du diplôme"
 
+msgid "Diploma(s) or non-academic activity(ies) giving access to"
+msgstr "Diplôme(s) ou activité(s) non-académique(s) donnant accès"
+
 msgid "Diplomatic post"
 msgstr "Poste diplomatique"
 
@@ -4830,6 +4833,9 @@ msgstr "Une autre adresse"
 msgid "Other authorized program"
 msgstr "Autre formation autorisée"
 
+msgid "Other communication for the candidate about the prerequisite courses"
+msgstr "Autre communication au candidat à propos des compléments"
+
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
@@ -5190,6 +5196,13 @@ msgid ""
 msgstr ""
 "Veuillez consulter les dispositions particulières de votre commission "
 "doctorale de domaine pour le choix des activités."
+
+msgid ""
+"Please select in the previous experience, the diploma(s), or non-academic "
+"activity(ies) giving access to the chosen program."
+msgstr ""
+"Veuillez préciser dans le parcours antérieur le(s) diplôme(s), ou la/les "
+"activité(s) donnant accès à la formation choisie."
 
 msgid ""
 "Please select the Belgian student status situation that most applies to you"
@@ -5967,6 +5980,9 @@ msgstr ""
 
 msgid "Secondary education type"
 msgstr "Type d'enseignement"
+
+msgid "Secondary school"
+msgstr "Études secondaires"
 
 msgid "Secondary school diploma"
 msgstr "Diplôme d'études secondaires"

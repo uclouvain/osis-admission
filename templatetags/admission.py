@@ -36,7 +36,7 @@ from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
-from django.utils.safestring import SafeString
+from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
@@ -959,6 +959,11 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
             settings.LANGUAGE_CODE_EN: history_entry.message_en,
         }[get_language()]
     return ''
+
+
+@register.filter
+def label_with_user_icon(label):
+    return mark_safe(f'{label} <i class="fas fa-user"></i>')
 
 
 @register.filter
