@@ -1092,27 +1092,11 @@ class ChecklistView(
         documents_by_tab = {
             'assimilation': assimilation_documents,
             'financabilite': {
-                'RELEVE_NOTES',
-                'TRADUCTION_RELEVE_NOTES',
-                'RELEVE_NOTES_ANNUEL',
-                'TRADUCTION_RELEVE_NOTES_ANNUEL',
-                'DIPLOME',
-                'TRADUCTION_DIPLOME',
                 'DIPLOME_EQUIVALENCE',
-                'DIPLOME_BELGE_DIPLOME',
                 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
-                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE',
-                'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE',
-                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE',
-                'DIPLOME_ETRANGER_DIPLOME',
-                'DIPLOME_ETRANGER_TRADUCTION_DIPLOME',
                 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
                 'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
-                'DIPLOME_ETRANGER_RELEVE_NOTES',
-                'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES',
-                'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE',
                 'CURRICULUM',
-                'CERTIFICAT_EXPERIENCE',
             },
             'frais_dossier': assimilation_documents,
             'choix_formation': {
@@ -1369,6 +1353,21 @@ class ChecklistView(
                             order += 1
 
                 children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
+
+                # Some tabs also contain the documents of each experience
+                past_experiences_documents = []
+                for experience_uuid in ordered_experiences:
+                    current_uuid = f'parcours_anterieur__{experience_uuid}'
+                    if context['documents'].get(current_uuid):
+                        past_experiences_documents.append(
+                            [
+                                context['checklist_tabs'][current_uuid],  # Name of the experience
+                                context['documents'][current_uuid],  # List of documents of the experience
+                            ]
+                        )
+
+                context['documents']['parcours_anterieur'].extend(past_experiences_documents)
+                context['documents']['financabilite'].extend(past_experiences_documents)
 
             original_admission = self.admission
 
