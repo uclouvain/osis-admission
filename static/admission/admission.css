@@ -95,6 +95,10 @@ textarea {
   color: #a94442;
 }
 
+.panel-with-default-header-font-size .panel-title {
+  font-size: inherit;
+}
+
 .min_field {
   width: max-content;
 }

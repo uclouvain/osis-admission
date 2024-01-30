@@ -138,6 +138,16 @@ class GetAccessTitlesViewTestCase(TestCase):
         self.assertEqual(access_titles[educational_experience_uuid].annee, self.academic_years[1].year)
         self.assertEqual(access_titles[educational_experience_uuid].selectionne, False)
 
+        # Only retrieve selected access titles if specified
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 0)
+
         # The diploma has not been obtained
         educational_experience.obtained_diploma = False
         educational_experience.save()
@@ -262,6 +272,16 @@ class GetAccessTitlesViewTestCase(TestCase):
         self.assertEqual(access_titles[belgian_high_school_diploma.uuid].annee, 2022)
         self.assertEqual(access_titles[belgian_high_school_diploma.uuid].selectionne, False)
 
+        # Only retrieve selected access titles if specified
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 0)
+
         # The diploma has been selected as access title
         general_admission.are_secondary_studies_access_title = True
         general_admission.save()
@@ -269,6 +289,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
                 uuid_proposition=general_admission.uuid,
+                seulement_selectionnes=True,
             )
         )
 

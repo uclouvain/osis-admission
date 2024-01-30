@@ -85,6 +85,7 @@ from admission.templatetags.admission import (
     need_to_display_specific_questions,
     authentication_css_class,
     experience_details_template,
+    label_with_user_icon,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -761,6 +762,10 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             'fa-solid fa-file-circle-check text-success',
             authentication_css_class(EtatAuthentificationParcours.VRAI.name),
         )
+
+    def test_label_with_user_icon(self):
+        self.assertEqual(label_with_user_icon('foo'), 'foo <i class="fas fa-user"></i>')
+        self.assertEqual(label_with_user_icon(''), ' <i class="fas fa-user"></i>')
 
 
 class AdmissionTagsTestCase(TestCase):

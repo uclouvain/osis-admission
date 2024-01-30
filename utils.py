@@ -23,12 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import itertools
 import json
 import os
 import uuid
 from collections import defaultdict
 from contextlib import suppress
-from typing import Dict, Union, Iterable
+from typing import Dict, Union, Iterable, List
 
 import weasyprint
 from django.conf import settings
@@ -48,7 +49,15 @@ from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmi
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
+from admission.ddd.admission.doctorat.preparation.dtos import CurriculumDTO, ExperienceAcademiqueDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
+from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
+from admission.ddd.admission.dtos import EtudesSecondairesDTO
+from admission.ddd.admission.dtos.etudes_secondaires import (
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+)
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.mail_templates import (
@@ -315,3 +324,69 @@ def get_access_conditions_url(training_type, training_acronym, partial_training_
             )
 
         return f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
+
+
+def get_access_titles_names(
+    access_titles: Dict[str, TitreAccesSelectionnableDTO],
+    curriculum_dto: CurriculumDTO,
+    etudes_secondaires_dto: EtudesSecondairesDTO,
+) -> List[str]:
+    """
+    Returns the list of access titles formatted names in reverse chronological order.
+    """
+    access_titles_names = []
+
+    # Sort the access titles by year and only keep the selected ones
+    access_titles_list = sorted(
+        (access_title for access_title in access_titles.values() if access_title.selectionne),
+        key=lambda title: title.annee,
+        reverse=True,
+    )
+
+    curriculum_experiences_by_uuid = {
+        experience.uuid: experience
+        for experience in itertools.chain(
+            curriculum_dto.experiences_academiques,
+            curriculum_dto.experiences_non_academiques,
+            [etudes_secondaires_dto.experience],
+        )
+    }
+
+    for access_title in access_titles_list:
+        experience_name = ''
+
+        if access_title.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name:
+            # Secondary studies
+            experience = curriculum_experiences_by_uuid.get(access_title.uuid_experience)
+            if isinstance(experience, DiplomeBelgeEtudesSecondairesDTO):
+                experience_name = '{title} ({year}) - {institute}'.format(
+                    title=str(etudes_secondaires_dto.diplome_belge),
+                    year=format_academic_year(access_title.annee),
+                    institute=etudes_secondaires_dto.diplome_belge.nom_institut,
+                )
+            elif isinstance(experience, DiplomeEtrangerEtudesSecondairesDTO):
+                experience_name = '{title} ({year}) - {country}'.format(
+                    title=str(etudes_secondaires_dto.diplome_etranger),
+                    year=format_academic_year(access_title.annee),
+                    country=etudes_secondaires_dto.diplome_etranger.pays_nom,
+                )
+        else:
+            # Curriculum experiences
+            experience = curriculum_experiences_by_uuid.get(access_title.uuid_experience)
+            if isinstance(experience, ExperienceAcademiqueDTO):
+                experience_name = '{title} ({year}) - {institute}'.format(
+                    title=f'{experience.nom_formation} ({experience.nom_formation_equivalente_communaute_fr})'
+                    if experience.nom_formation_equivalente_communaute_fr
+                    else experience.nom_formation,
+                    year=format_academic_year(access_title.annee),
+                    institute=experience.nom_institut,
+                )
+            elif isinstance(experience, ExperienceNonAcademiqueDTO):
+                experience_name = '{title} ({year})'.format(
+                    title=str(experience),
+                    year=format_academic_year(access_title.annee),
+                )
+
+        access_titles_names.append(experience_name)
+
+    return access_titles_names

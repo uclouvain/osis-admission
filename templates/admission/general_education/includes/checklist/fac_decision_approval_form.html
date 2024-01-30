@@ -42,7 +42,7 @@
         {{ fac_decision_approval_form.another_training.label_tag }}
       </dd>
       <dt>
-        <label class="switch">
+        <label class="switch" for="{{ fac_decision_approval_form.another_training.id_for_label }}">
           {{ fac_decision_approval_form.another_training }}
           <span class="slider round"></span>
         </label>
@@ -53,8 +53,22 @@
         id="fac-decision-other-training-container"
         class="required_field hidden"
     >
-      {% bootstrap_field fac_decision_approval_form.other_training_accepted_by_fac %}
+      {% bootstrap_field fac_decision_approval_form.other_training_accepted_by_fac label=fac_decision_approval_form.other_training_accepted_by_fac.label|label_with_user_icon %}
     </div>
+
+    {% panel title=_('Diploma(s) or non-academic activity(ies) giving access to')|label_with_user_icon additional_class='panel-with-default-header-font-size' %}
+      <div id='fac-decision-access-titles' hx-preserve="true">
+        {% if selected_access_titles_names %}
+          <ul>
+            {% for access_title in selected_access_titles_names %}
+              <li>{{ access_title }}</li>
+            {% endfor  %}
+          </ul>
+        {% else %}
+          {% translate 'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving access to the chosen program.' %}
+        {% endif %}
+      </div>
+    {% endpanel %}
 
     {% bootstrap_field fac_decision_approval_form.with_additional_approval_conditions %}
     <div
@@ -66,8 +80,9 @@
           {{ fac_decision_approval_form.all_additional_approval_conditions.field.label }}
           <strong>({% translate 'contact language'%} </strong>
           <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
+          {{ ''|label_with_user_icon }}
         </label>
-       {{ fac_decision_approval_form.all_additional_approval_conditions }}
+        {% bootstrap_field fac_decision_approval_form.all_additional_approval_conditions label='' %}
       </div>
     </div>
 
@@ -76,15 +91,24 @@
         id="fac-decision-additional-trainings-container"
         class="hidden"
     >
-      {% bootstrap_field fac_decision_approval_form.prerequisite_courses classes='required_field' %}
-      {% bootstrap_field fac_decision_approval_form.prerequisite_courses_fac_comment %}
+      {% bootstrap_field fac_decision_approval_form.prerequisite_courses form_group_class='form-group required_field' label=fac_decision_approval_form.prerequisite_courses.label|label_with_user_icon %}
+
+      <div class="form-group">
+        <label class="control-label">
+          {{ fac_decision_approval_form.prerequisite_courses_fac_comment.field.label }}
+          <strong>({% translate 'contact language'%} </strong>
+          <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
+          {{ ''|label_with_user_icon }}
+        </label>
+        {% bootstrap_field fac_decision_approval_form.prerequisite_courses_fac_comment label='' %}
+      </div>
     </div>
 
     <div class="required_field">
-      {% bootstrap_field fac_decision_approval_form.program_planned_years_number %}
+      {% bootstrap_field fac_decision_approval_form.program_planned_years_number label=fac_decision_approval_form.program_planned_years_number.label|label_with_user_icon %}
     </div>
 
-    <fieldset class="custom-fieldset">
+    <fieldset class="custom-fieldset" style="margin-bottom: 15px;">
       <legend>
         <strong>
           {% translate 'Contact person for the design of the annual program' %}
@@ -92,15 +116,23 @@
       </legend>
       <div class="row">
         <div class="col-md-6">
-          {% bootstrap_field fac_decision_approval_form.annual_program_contact_person_name %}
+          {% bootstrap_field fac_decision_approval_form.annual_program_contact_person_name label=fac_decision_approval_form.annual_program_contact_person_name.label|label_with_user_icon %}
         </div>
         <div class="col-md-6">
-          {% bootstrap_field fac_decision_approval_form.annual_program_contact_person_email %}
+          {% bootstrap_field fac_decision_approval_form.annual_program_contact_person_email label=fac_decision_approval_form.annual_program_contact_person_email.label|label_with_user_icon %}
         </div>
       </div>
     </fieldset>
 
-    {% bootstrap_field fac_decision_approval_form.join_program_fac_comment %}
+    <div class="form-group">
+      <label class="control-label">
+        {{ fac_decision_approval_form.join_program_fac_comment.field.label }}
+        <strong>({% translate 'contact language'%} </strong>
+        <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
+        {{ ''|label_with_user_icon }}
+      </label>
+      {% bootstrap_field fac_decision_approval_form.join_program_fac_comment label='' %}
+    </div>
 
     <p>
       {% if can_transfer_to_sic %}
