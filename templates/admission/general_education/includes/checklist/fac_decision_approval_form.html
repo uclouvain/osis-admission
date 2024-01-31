@@ -34,6 +34,7 @@
 
     {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic_with_decision' as can_transfer_to_sic %}
     {% has_perm 'admission.checklist_change_faculty_decision' as can_change_faculty_decision %}
+    {% candidate_language admission.langue_contact_candidat as candidate_language_tag %}
 
     {% bootstrap_form_errors fac_decision_approval_form %}
 
@@ -77,15 +78,7 @@
         id="fac-decision-additional-approval-conditions-container"
         class="required_field hidden"
     >
-      <div class="form-group">
-        <label class="control-label">
-          {{ fac_decision_approval_form.all_additional_approval_conditions.field.label }}
-          <strong>({% translate 'contact language'%} </strong>
-          <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
-          {{ ''|label_with_user_icon }}
-        </label>
-        {% bootstrap_field fac_decision_approval_form.all_additional_approval_conditions label='' %}
-      </div>
+      {% bootstrap_field fac_decision_approval_form.all_additional_approval_conditions label=fac_decision_approval_form.all_additional_approval_conditions.label|add:candidate_language_tag|label_with_user_icon %}
     </div>
 
     {% bootstrap_field fac_decision_approval_form.with_prerequisite_courses label=fac_decision_approval_form.with_prerequisite_courses.label|label_with_user_icon %}
@@ -94,16 +87,7 @@
         class="hidden"
     >
       {% bootstrap_field fac_decision_approval_form.prerequisite_courses form_group_class='form-group required_field' label=fac_decision_approval_form.prerequisite_courses.label|label_with_user_icon %}
-
-      <div class="form-group">
-        <label class="control-label">
-          {{ fac_decision_approval_form.prerequisite_courses_fac_comment.field.label }}
-          <strong>({% translate 'contact language'%} </strong>
-          <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
-          {{ ''|label_with_user_icon }}
-        </label>
-        {% bootstrap_field fac_decision_approval_form.prerequisite_courses_fac_comment label='' %}
-      </div>
+      {% bootstrap_field fac_decision_approval_form.prerequisite_courses_fac_comment label=fac_decision_approval_form.prerequisite_courses_fac_comment.label|add:candidate_language_tag|label_with_user_icon %}
     </div>
 
     <div class="required_field">
@@ -126,15 +110,7 @@
       </div>
     </fieldset>
 
-    <div class="form-group">
-      <label class="control-label">
-        {{ fac_decision_approval_form.join_program_fac_comment.field.label }}
-        <strong>({% translate 'contact language'%} </strong>
-        <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
-        {{ ''|label_with_user_icon }}
-      </label>
-      {% bootstrap_field fac_decision_approval_form.join_program_fac_comment label='' %}
-    </div>
+    {% bootstrap_field fac_decision_approval_form.join_program_fac_comment label=fac_decision_approval_form.join_program_fac_comment.label|add:candidate_language_tag|label_with_user_icon %}
 
     <p>
       {% if can_transfer_to_sic %}

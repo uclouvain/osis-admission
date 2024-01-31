@@ -1235,6 +1235,14 @@ def footer_campus(proposition):
     }
 
 
+@register.simple_tag
+def candidate_language(language):
+    return mark_safe(
+        f' <strong>({_("contact language")} </strong>'
+        f'<span class="label label-admission-primary">{formatted_language(language)}</span>)'
+    )
+
+
 @register.filter
 def admission_has_refusal(admission):
     return admission.type_de_refus and (admission.motifs_refus or admission.autres_motifs_refus)
