@@ -45,7 +45,6 @@ from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -87,6 +86,7 @@ from admission.templatetags.admission import (
     experience_details_template,
     is_list,
     label_with_user_icon,
+    candidate_language,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -775,6 +775,22 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
     def test_label_with_user_icon(self):
         self.assertEqual(label_with_user_icon('foo'), 'foo <i class="fas fa-user"></i>')
         self.assertEqual(label_with_user_icon(''), ' <i class="fas fa-user"></i>')
+
+    def test_candidate_language(self):
+        self.assertEqual(
+            candidate_language(''),
+            f' <strong>(langue de contact </strong><span class="label label-admission-primary"></span>)',
+        )
+
+        self.assertEqual(
+            candidate_language(settings.LANGUAGE_CODE_FR),
+            f' <strong>(langue de contact </strong><span class="label label-admission-primary">FR</span>)',
+        )
+
+        self.assertEqual(
+            candidate_language(settings.LANGUAGE_CODE_EN),
+            f' <strong>(langue de contact </strong><span class="label label-admission-primary">EN</span>)',
+        )
 
 
 class AdmissionTagsTestCase(TestCase):
