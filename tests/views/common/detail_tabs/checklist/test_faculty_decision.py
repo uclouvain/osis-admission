@@ -1592,6 +1592,52 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         response = self.client.post(
             self.url,
             data={
+                "fac-decision-approval-prerequisite_courses": [],
+                'fac-decision-approval-another_training': True,
+                'fac-decision-approval-with_prerequisite_courses': 'True',
+                'fac-decision-approval-with_additional_approval_conditions': 'True',
+                'fac-decision-approval-all_additional_approval_conditions': [],
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['fac_decision_approval_form']
+
+        self.assertFalse(form.is_valid())
+
+        # Missing fields
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_training_accepted_by_fac', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('program_planned_years_number', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('all_additional_approval_conditions', []))
+
+        response = self.client.post(
+            self.url,
+            data={
+                'fac-decision-approval-another_training': False,
+                'fac-decision-approval-with_prerequisite_courses': 'False',
+                'fac-decision-approval-with_additional_approval_conditions': 'False',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['fac_decision_approval_form']
+
+        self.assertFalse(form.is_valid())
+
+        # Missing fields
+        self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_training_accepted_by_fac', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('program_planned_years_number', []))
+        self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
+        self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('all_additional_approval_conditions', []))
+
+        response = self.client.post(
+            self.url,
+            data={
                 "fac-decision-approval-prerequisite_courses": [prerequisite_courses[0].acronym, "UNKNOWN_ACRONYM"],
                 'fac-decision-approval-another_training': True,
                 'fac-decision-approval-with_prerequisite_courses': 'True',
@@ -1609,9 +1655,6 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         form = response.context['fac_decision_approval_form']
 
         self.assertFalse(form.is_valid())
-
-        # Other course
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_training_accepted_by_fac', []))
 
         # Prerequisite courses
         self.assertCountEqual(
