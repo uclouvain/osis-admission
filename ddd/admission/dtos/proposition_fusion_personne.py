@@ -23,28 +23,29 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation.trans_real import get_languages
-from django.views.generic import TemplateView
+import attr
 
-from admission.views.doctorate.mixins import LoadDossierViewMixin
-
-__all__ = ['AdmissionPersonDetailView']
-
-from base.models.person_merge_proposal import PersonMergeProposal
-from osis_common.utils.models import get_object_or_none
+from osis_common.ddd import interface
 
 
-class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
-    permission_required = 'admission.view_admission_person'
-    template_name = 'admission/details/person_backoffice.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['person'] = self.admission.candidate
-        context['contact_language'] = get_languages().get(self.admission.candidate.language)
-        if self.is_doctorate and 'dossier' in context:
-            context['profil_candidat'] = context['dossier'].profil_soumis_candidat
-        elif self.is_general:
-            context['profil_candidat'] = context['admission'].profil_soumis_candidat
-        return context
+@attr.dataclass(frozen=True, slots=True, eq=False)
+class PropositionFusionPersonneDTO(interface.DTO):
+    status: str
+    matricule: str
+    original_person_uuid: str
+    last_name: str
+    first_name: str
+    other_name: str
+    sex: str
+    gender: str
+    birth_date: str
+    birth_country: str
+    birth_place: str
+    civil_state: str
+    country_of_citizenship: str
+    national_number: str
+    passport_number: str
+    id_card_number: str
+    id_card_expiry_date: str
+    professional_curex_uuids: str
+    educational_curex_uuids: str

@@ -124,3 +124,64 @@ class RemplirEmplacementDocumentParGestionnaireCommand(interface.CommandRequest)
     identifiant_emplacement: str
     uuid_document: str
     auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RechercherCompteExistantQuery(interface.QueryRequest):
+    matricule: str
+    nom: str
+    prenom: str
+    date_naissance: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialiserPropositionFusionPersonneCommand(interface.CommandRequest):
+    original_global_id: str
+    nom: str
+    prenom: str
+    autres_prenoms: str
+    date_naissance: str
+    lieu_naissance: str
+    email: str
+    genre: str
+    etat_civil: str
+    nationalite: str
+    numero_national: str
+    numero_carte_id: str
+    numero_passeport: str
+    dernier_noma_connu: str
+    expiration_carte_id: str
+    educational_curex_uuids: List[str]
+    professional_curex_uuids: List[str]
+    annee_diplome_etudes_secondaires: int
+
+
+@attr.dataclass(frozen=True, slots=True)
+class GetPropositionFusionQuery(interface.QueryRequest):
+    global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class DefairePropositionFusionCommand(interface.CommandRequest):
+    global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserPropositionFusionCommand(interface.CommandRequest):
+    global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RechercherParcoursAnterieurQuery(interface.QueryRequest):
+    global_id: str
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SoumettreTicketPersonneCommand(interface.CommandRequest):
+    global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class GetStatutTicketPersonneQuery(interface.QueryRequest):
+    global_id: str

@@ -1,0 +1,76 @@
+{% load static i18n bootstrap3 admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% if professional_experience or educational_experience %}
+
+<h6>{% trans 'Professional experience' %}</h6>
+<table class="table table-reponsive">
+    <thead>
+        <tr>
+            <th>Années</th>
+            <th>Expérience</th>
+            <th>Role</th>
+            <th>Lieu</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for experience in professional_experience %}
+        <tr>
+            <td>{{ experience.date_debut|date:"Y" }} - {{ experience.date_fin|date:"Y" }}</td>
+            <td>{{ experience.type|default_if_none_or_empty:'Non spécifié' }}</td>
+            <td>{{ experience.fonction|default_if_none_or_empty:'Non spécifié' }}</td>
+            <td>{{ experience.institute_name|default_if_none_or_empty:'Non spécifié' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h6>{% trans 'Educational experience' %}</h6>
+<table class="table table-reponsive">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Années</th>
+            <th>Expérience</th>
+            <th>Lieu</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for experience in educational_experience %}
+        <tr>
+            <td>{{ experience.annees.first.annee }} - {{ experience.annees.last.annee }}</td>
+            <td>{{ experience.nom_formation|default_if_none_or_empty:'Non spécifié' }}</td>
+            <td>{{ experience.nom_institut|default_if_none_or_empty:'Non spécifié' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+
+    <h6>Pas de parcours antérieur disponible pour la personne sélectionnée</h6>
+
+{% endif %}

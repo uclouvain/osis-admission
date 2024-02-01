@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,22 +22,24 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
+# ##############################################################################
 
-from admission.ddd.admission.commands import *
-from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.read.get_proposition_fusion_service import get_proposition_fusion_personne
-from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
-from admission.infrastructure.admission.repository.proposition_fusion_personne import \
-    PropositionPersonneFusionRepository
+from django.test import SimpleTestCase
 
-COMMAND_HANDLERS = {
-    ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
-        cmd,
-        lister_toutes_demandes_service=ListerToutesDemandes(),
-    ),
-    GetPropositionFusionQuery: lambda msg_bus, cmd: get_proposition_fusion_personne(
-        cmd,
-        proposition_fusion_repository=PropositionPersonneFusionRepository()
-    ),
-}
+from admission.ddd.admission.commands import DefairePropositionFusionCommand
+from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne import (
+    defaire_proposition_fusion_personne
+)
+from admission.infrastructure.admission.repository.in_memory.proposition_fusion_personne import \
+    PropositionPersonneFusionInMemoryRepository
+
+
+class DefairePropositionFusionPersonneTests(SimpleTestCase):
+
+    def setUp(self):
+        self.repository = PropositionPersonneFusionInMemoryRepository()
+
+    def test_defaire_proposition_fusion_personne_with_valid_inputs(self):
+        cmd = DefairePropositionFusionCommand(global_id="123")
+        result = defaire_proposition_fusion_personne(cmd, self.repository)
+        self.assertEqual(result.uuid, "uuid")
