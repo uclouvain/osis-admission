@@ -1112,7 +1112,9 @@ class ChecklistView(
                 'CURRICULUM',
             },
             'donnees_personnelles': assimilation_documents,
-            'specificites_formation': set(),
+            'specificites_formation': {
+                'ADDITIONAL_DOCUMENTS',
+            },
             'decision_facultaire': {
                 'ATTESTATION_ACCORD_FACULTAIRE',
                 'ATTESTATION_REFUS_FACULTAIRE',
