@@ -1252,7 +1252,8 @@ def checklist_experience_action_links(
 
 @register.filter
 def display_academic_years_range(ac_years):
-    return '{} - {}'.format(ac_years[0].annee, ac_years[-1].annee)
+    ac_years = sorted(ac_years, key=lambda x: x.annee)
+    return '{} - {}'.format(ac_years[0].annee, ac_years[-1].annee) if ac_years else "-"
 
 
 @register.filter

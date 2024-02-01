@@ -24,25 +24,27 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if professional_experience or educational_experience %}
-
 <h6>{% trans 'Professional experience' %}</h6>
 <table class="table table-reponsive">
     <thead>
         <tr>
-            <th>Années</th>
-            <th>Expérience</th>
-            <th>Role</th>
-            <th>Lieu</th>
+            <th style="width: 5%;"></th>
+            <th style="width: 15%;">Années</th>
+            <th style="width: 40%;">Fonction</th>
+            <th style="width: 40%;">Lieu</th>
         </tr>
     </thead>
     <tbody>
         {% for experience in professional_experience %}
         <tr>
+            <td>
+            {% if experience.uuid in mergeable_experiences_uuids %}
+                <input type="checkbox" name="professional" value="{{ experience.uuid }}" checked/>
+            {% endif %}
+            </td>
             <td>{{ experience.date_debut|date:"Y" }} - {{ experience.date_fin|date:"Y" }}</td>
-            <td>{{ experience.type|default_if_none_or_empty:'Non spécifié' }}</td>
             <td>{{ experience.fonction|default_if_none_or_empty:'Non spécifié' }}</td>
-            <td>{{ experience.institute_name|default_if_none_or_empty:'Non spécifié' }}</td>
+            <td>{{ experience.employeur|default_if_none_or_empty:'Non spécifié' }}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -52,16 +54,21 @@
 <table class="table table-reponsive">
     <thead>
         <tr>
-            <th></th>
-            <th>Années</th>
-            <th>Expérience</th>
-            <th>Lieu</th>
+            <th style="width: 5%;"></th>
+            <th style="width: 15%;">Années</th>
+            <th style="width: 40%;">Formation</th>
+            <th style="width: 40%;">Lieu</th>
         </tr>
     </thead>
     <tbody>
         {% for experience in educational_experience %}
         <tr>
-            <td>{{ experience.annees.first.annee }} - {{ experience.annees.last.annee }}</td>
+            <td>
+            {% if experience.uuid in mergeable_experiences_uuids %}
+                <input type="checkbox" name="educational" value="{{ experience.uuid }}" checked/>
+            {% endif %}
+            </td>
+            <td>{{ experience.annees|display_academic_years_range }}</td>
             <td>{{ experience.nom_formation|default_if_none_or_empty:'Non spécifié' }}</td>
             <td>{{ experience.nom_institut|default_if_none_or_empty:'Non spécifié' }}</td>
         </tr>
@@ -69,8 +76,15 @@
     </tbody>
 </table>
 
-{% else %}
+<h6>{% trans 'High school graduation year' %}</h6>
+<div style="display: flex; gap: 20px;">
+    <div class="input-group">
+        <label>Fournie par le candidat</label>
+        <input class="form-control" type="number" name="high_school_graduation_year" value="{{ provided_high_school_graduation_year }}">
+    </div>
 
-    <h6>Pas de parcours antérieur disponible pour la personne sélectionnée</h6>
-
-{% endif %}
+    <div class="input-group">
+        <label>Connue du système</label>
+        <input class="form-control" type="number" value="{{ known_high_school_graduation_year }}" disabled>
+    </div>
+</div>

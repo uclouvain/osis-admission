@@ -26,6 +26,7 @@
 
 from django.views.generic import TemplateView
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from base.models.person import Person
 from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
@@ -41,7 +42,25 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
     urlpatterns = {'previous-experience': 'previous-experience/<uuid:admission_uuid>'}
 
     @property
-    def experience(self):
+    def candidate(self):
+        return Person.objects.values(
+            'first_name', 'middle_name', 'last_name', 'email', 'gender', 'birth_date', 'civil_state',
+            'birth_place', 'country_of_citizenship__name', 'national_number', 'id_card_number',
+            'passport_number', 'last_registration_id', 'global_id',
+        ).get(baseadmissions__uuid=self.kwargs['admission_uuid'])
+
+    @property
+    def provided_experience(self):
+        from infrastructure.messages_bus import message_bus_instance
+        return message_bus_instance.invoke(
+            RechercherParcoursAnterieurQuery(
+                global_id=self.candidate['global_id'],
+                uuid_proposition=self.request.GET.get('admission_uuid')
+            )
+        )
+
+    @property
+    def known_experience(self):
         from infrastructure.messages_bus import message_bus_instance
         return message_bus_instance.invoke(
             RechercherParcoursAnterieurQuery(
@@ -52,7 +71,30 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        context['professional_experience'] = self.experience.experiences_academiques
-        context['educational_experience'] = self.experience.experiences_non_academiques
-        context['high_school_graduation_year'] = self.experience.annee_diplome_etudes_secondaires
+        context['professional_experience'] = self.provided_experience.experiences_non_academiques
+        context['educational_experience'] = self.provided_experience.experiences_academiques
+        context['provided_high_school_graduation_year'] = self.provided_experience.annee_diplome_etudes_secondaires
+        if self.known_experience:
+            context['professional_experience'] = self._merge_professional_experiences()
+            context['educational_experience'] = self._merge_academic_experiences()
+            context['mergeable_experiences_uuids'] = self._get_mergeable_experiences_uuids()
+            context['known_high_school_graduation_year'] = self.known_experience.annee_diplome_etudes_secondaires
         return context
+
+    def _merge_professional_experiences(self):
+        return sorted(
+            self.provided_experience.experiences_non_academiques + self.known_experience.experiences_non_academiques,
+            key=lambda exp: exp.date_fin, reverse=True
+        )
+
+    def _merge_academic_experiences(self):
+        return sorted(
+            self.provided_experience.experiences_academiques + self.known_experience.experiences_academiques,
+            key=lambda exp: exp.annees[-1], reverse=True
+        )
+
+    def _get_mergeable_experiences_uuids(self):
+        return [
+            exp.uuid for exp in
+            (self.provided_experience.experiences_non_academiques + self.provided_experience.experiences_academiques)
+        ]

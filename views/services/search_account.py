@@ -63,23 +63,10 @@ class SearchAccountView(HtmxMixin, FormView):
             'passport_number', 'last_registration_id', 'global_id',
         ).get(baseadmissions__uuid=self.kwargs['uuid'])
 
-    @property
-    def experience(self):
-        from infrastructure.messages_bus import message_bus_instance
-        return message_bus_instance.invoke(
-            RechercherParcoursAnterieurQuery(
-                global_id=self.candidate['global_id'],
-                uuid_proposition=self.admission.uuid,
-            )
-        )
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         context['uuid'] = self.kwargs['uuid']
         context['candidate'] = self.candidate
-        context['professional_experience'] = self.experience.experiences_non_academiques
-        context['educational_experience'] = self.experience.experiences_academiques
-        context['annee_diplome_etudes_secondaires'] = self.experience.annee_diplome_etudes_secondaires
         search_context = self.request.session.get('search_context', {})
         context.update(**search_context)
         return context
