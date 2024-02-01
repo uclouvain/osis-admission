@@ -107,6 +107,19 @@
           <h4 class="panel-title">{% trans "Refusal" %}</h4>
         </div>
         <div class="panel-body">
+          {% if current.statut != 'GEST_BLOCAGE' %}
+            <p>
+              <a
+                class="btn btn-default"
+                href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="refus" %}"
+                target="_blank"
+              >
+                <i class="fa fa-magnifying-glass"></i>
+                {% translate 'Visualize refusal' %}
+              </a>
+            </p>
+          {% endif %}
+
           <dl>
             <dt>{% trans "Refusal type" %}</dt>
             <dd>{{ admission.type_de_refus|enum_display:'TypeDeRefus' }}</dd>
@@ -144,6 +157,27 @@
           <h4 class="panel-title">{% trans "Approval" %}</h4>
         </div>
         <div class="panel-body">
+          {% if original_admission.type_demande == 'ADMISSION' and current.statut != 'GEST_REUSSITE' %}
+            <p>
+              <a
+                  class="btn btn-default"
+                  href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord" %}"
+                  target="_blank"
+              >
+                <i class="fa fa-magnifying-glass"></i>
+                {% translate 'Visualize approval' %}
+              </a>
+              <a
+                  class="btn btn-default"
+                  href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
+                  target="_blank"
+              >
+                <i class="fa fa-magnifying-glass"></i>
+                {% translate 'Visualize annexe1' %}
+              </a>
+            </p>
+          {% endif %}
+
           {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
           {% if admission.avec_conditions_complementaires %}
             {% if admission.conditions_complementaires %}
