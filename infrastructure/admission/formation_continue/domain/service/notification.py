@@ -108,7 +108,7 @@ class Notification(INotification):
 
         common_tokens = cls.get_common_tokens(admission)
         common_tokens['recap_link'] = get_file_url(token=read_token)
-        common_tokens['program_managers_emails'] = (_('or') + ' ').join(
+        common_tokens['program_managers_emails'] = (' ' + _('or') + ' ').join(
             [
                 f'<a href="mailto:{program_manager.person.email}">{program_manager.person.email}</a>'
                 for program_manager in program_managers

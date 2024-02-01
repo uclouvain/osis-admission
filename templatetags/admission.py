@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import re
 from dataclasses import dataclass
@@ -783,7 +784,7 @@ def concat(*args):
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
-def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects')):
+def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects'), **kwargs):
     """Display the answers of the specific questions based on a list of configurations."""
     return {
         'fields': configurations,
@@ -791,6 +792,7 @@ def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], ti
         'all_inline': context.get('all_inline'),
         'load_files': context.get('load_files'),
         'hide_files': context.get('hide_files'),
+        'edit_link_button': kwargs.get('edit_link_button'),
     }
 
 
@@ -893,6 +895,11 @@ def get_country_name(country: Optional[Country]):
 def get_ordered_checklist_items(checklist_items: dict):
     """Return the ordered checklist items."""
     return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])
+
+
+@register.filter
+def is_list(value) -> bool:
+    return isinstance(value, list)
 
 
 @register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
