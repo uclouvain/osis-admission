@@ -1480,13 +1480,14 @@ class ChecklistView(
                 if curex_existant:
                     # add existing curex by years
                     for exp in (curex_existant.experiences_academiques + curex_existant.experiences_non_academiques):
-                        years_range = exp.annees \
+                        years_range = [anExp.annee for anExp in exp.annees] \
                             if type(exp) == ExperienceAcademiqueDTO else range(exp.date_debut.year, exp.date_fin.year)
                         for annee in years_range:
                             experiences.setdefault(annee, []).append(exp)
                     experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
 
         return experiences
+
 
     def _get_financabilite(self):
         # TODO

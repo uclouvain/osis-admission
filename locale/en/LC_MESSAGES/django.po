@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-26 15:33+0100\n"
+"POT-Creation-Date: 2024-02-01 16:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -529,14 +529,14 @@ msgstr ""
 msgid "Admission form items"
 msgstr ""
 
-#, python-format
-msgid ""
-"Admission request for the academic year %(academic_year)s to the program:"
-msgstr ""
-
 msgid ""
 "Admission is not yet valid for searching UCLouvain. The following fields are "
 "required: "
+msgstr ""
+
+#, python-format
+msgid ""
+"Admission request for the academic year %(academic_year)s to the program:"
 msgstr ""
 
 msgid "Admission requirement"
@@ -2473,6 +2473,9 @@ msgid "Expected date of graduation"
 msgstr ""
 
 msgid "Expected graduation date (signed diploma)"
+msgstr ""
+
+msgid "Experience merge proposal"
 msgstr ""
 
 msgid "Experience not found."

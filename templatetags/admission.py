@@ -847,7 +847,8 @@ def part_of_dict(member, container):
 
 @register.simple_tag
 def is_current_checklist_status(current, state, extra):
-    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {}))
+    return current.get('statut') == state and part_of_dict(extra, current.get('extra', {})) \
+        if current and state else False
 
 
 @register.simple_tag
@@ -1257,7 +1258,8 @@ def checklist_experience_action_links(
                 uuid=proposition_uuid_str,
             ),
         }
-    elif proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year:
+    elif (experience.valorisee_par_admissions and
+          proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year):
         if experience.__class__ == ExperienceAcademiqueDTO:
             return {
                 'update_url': resolve_url(
