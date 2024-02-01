@@ -293,7 +293,10 @@
             </strong>
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
             <div class="mt-1">
-              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' %}
+              {% if can_update_curriculum %}
+                {% url 'admission:general-education:update:curriculum:global' view.kwargs.uuid as global_curriculum_update_url %}
+              {% endif %}
+              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url %}
             </div>
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
@@ -447,11 +450,13 @@
               >
                 <option disabled selected value>{% translate 'Select a document' %}</option>
                 {% for document in documents %}
-                  <option
-                      value="{{ document.identifiant }}"
-                  >
-                    {{ document.libelle }}
-                  </option>
+                  {% if document|is_list %}
+                    {% for sub_document in document.1 %}
+                      <option value="{{ sub_document.identifiant }}">{{ document.0 }} > {{ sub_document.libelle }}</option>
+                    {% endfor %}
+                  {% else %}
+                    <option value="{{ document.identifiant }}">{{ document.libelle }}</option>
+                  {% endif %}
                 {% endfor %}
               </select>
               <button type="button" class="btn btn-default next-option-button">
@@ -1141,6 +1146,10 @@
 
     #checklist-menu i:nth-child(2) {
       margin: 0 0 0 5px
+    }
+
+    .refusal-reasons-list p {
+      margin-bottom: initial;
     }
 
     .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {

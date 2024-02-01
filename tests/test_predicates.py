@@ -431,7 +431,7 @@ class PredicatesTestCase(TestCase):
             self.assertEqual(
                 result,
                 'The global status of the application must be one of the following in order to realize this action: '
-                'Application confirmed (by student), To be completed (by student) for the Enrolment Office (SIC).',
+                'Application confirmed, To be completed for the Enrolment Office (SIC).',
             )
 
     def not_in_general_statuses_predicate_message_in_french(self):
