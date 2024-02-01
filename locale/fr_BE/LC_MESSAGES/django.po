@@ -1005,6 +1005,10 @@ msgstr ""
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
 
+msgctxt "admission"
+msgid "Back to page"
+msgstr "Revenir à la page"
+
 msgid "Back to the list"
 msgstr "Retour à la liste"
 
