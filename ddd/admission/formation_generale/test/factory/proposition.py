@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ from admission.ddd.admission.formation_generale.domain.model._comptabilite impor
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    DroitsInscriptionMontant,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -86,6 +87,7 @@ class StatutsChecklistGeneraleFactory(factory.Factory):
     financabilite = factory.SubFactory(StatutChecklistFactory)
     specificites_formation = factory.SubFactory(StatutChecklistFactory)
     decision_facultaire = factory.SubFactory(StatutChecklistFactory)
+    decision_sic = factory.SubFactory(StatutChecklistFactory)
 
 
 class _ComptabiliteFactory(factory.Factory):
@@ -213,6 +215,7 @@ class PropositionFactory(factory.Factory):
         PosteDiplomatiqueIdentityFactory,
         code=1,
     )
+    auteur_derniere_modification = ''
 
     class Params:
         est_bachelier_en_reorientation = factory.Trait(
@@ -269,4 +272,36 @@ class PropositionFactory(factory.Factory):
             nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
             email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
             commentaire_programme_conjoint=factory.fuzzy.FuzzyText(),
+        )
+        est_approuvee_par_sic = factory.Trait(
+            avec_conditions_complementaires=True,
+            conditions_complementaires_existantes=factory.List(
+                params=[
+                    ConditionComplementaireApprobationIdentityFactory(),
+                    ConditionComplementaireApprobationIdentityFactory(),
+                ]
+            ),
+            conditions_complementaires_libres=factory.List(
+                params=[
+                    factory.fuzzy.FuzzyText(),
+                    factory.fuzzy.FuzzyText(),
+                ]
+            ),
+            complements_formation=factory.List(
+                params=[
+                    ComplementFormationIdentityFactory(),
+                    ComplementFormationIdentityFactory(),
+                ]
+            ),
+            avec_complements_formation=True,
+            commentaire_complements_formation=factory.fuzzy.FuzzyText(),
+            nombre_annees_prevoir_programme=factory.fuzzy.FuzzyInteger(
+                low=DUREE_MINIMALE_PROGRAMME,
+                high=DUREE_MAXIMALE_PROGRAMME,
+            ),
+            nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
+            email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
+            droits_inscription_montant=DroitsInscriptionMontant.INSCRIPTION_REGULIERE,
+            est_mobilite=False,
+            doit_se_presenter_en_sic=False,
         )

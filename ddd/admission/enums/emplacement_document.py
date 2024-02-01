@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -128,9 +128,17 @@ DocumentsSystemeFAC = {
 }
 
 
+DocumentsSystemeSIC = {
+    'ATTESTATION_ACCORD_SIC': _('Approval certificate of SIC'),
+    'ATTESTATION_ACCORD_ANNEXE_SIC': _('Approval certificate annexe of SIC'),
+    'ATTESTATION_REFUS_SIC': _('Refusal certificate of SIC'),
+}
+
+
 DocumentsSysteme = {
     'DOSSIER_ANALYSE': _('Analysis folder'),
     **DocumentsSystemeFAC,
+    **DocumentsSystemeSIC,
 }
 
 

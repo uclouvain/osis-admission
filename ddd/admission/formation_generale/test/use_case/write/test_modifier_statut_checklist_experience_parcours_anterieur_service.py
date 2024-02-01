@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,15 +27,12 @@
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
-from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import (
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
@@ -75,7 +72,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.assertEqual(experience.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
             self.assertEqual(experience.libelle, 'To be processed')
             self.assertEqual(experience.extra.get('etat_authentification'), 'NON_CONCERNE')
-            self.assertEqual(experience.extra.get('commentaire_authentification'), '')
             self.assertEqual(experience.extra.get('identifiant'), uuids_experiences[index])
 
     def test_should_modifier_vers_statut_checklist_sans_indication_authentification(self):
@@ -85,6 +81,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_experience=self.experience_uuid,
                 statut=ChoixStatutChecklist.SYST_REUSSITE.name,
                 statut_authentification=None,
+                gestionnaire='0123456789',
             )
         )
 
@@ -101,7 +98,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             {
                 'identifiant': self.experience_uuid,
                 'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'commentaire_authentification': "",
             },
         )
 
@@ -112,6 +108,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_experience=self.experience_uuid,
                 statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                 statut_authentification=True,
+                gestionnaire='0123456789',
             )
         )
 
@@ -128,7 +125,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             {
                 'identifiant': self.experience_uuid,
                 'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'commentaire_authentification': '',
                 'authentification': '1',
             },
         )
@@ -140,6 +136,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_experience=self.experience_uuid,
                 statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                 statut_authentification=False,
+                gestionnaire='0123456789',
             )
         )
 
@@ -156,7 +153,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             {
                 'identifiant': self.experience_uuid,
                 'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'commentaire_authentification': '',
                 'authentification': '0',
             },
         )
@@ -169,16 +165,34 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_experience=self.experience_uuid,
                     statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
                     statut_authentification=False,
+                    gestionnaire='0123456789',
                 )
             )
 
-    def test_should_empecher_si_experience_non_trouvee(self):
-        with self.assertRaises(ExperienceNonTrouveeException):
-            self.message_bus.invoke(
-                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
-                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-                    uuid_experience='INCONNUE',
-                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    statut_authentification=False,
-                )
+    def test_should_creer_experience_si_non_trouvee(self):
+        proposition_id = self.message_bus.invoke(
+            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                uuid_experience='INCONNUE',
+                statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
+                statut_authentification=False,
+                gestionnaire='0123456789',
             )
+        )
+
+        proposition = self.proposition_repository.get(proposition_id)
+
+        checklist_experience = proposition.checklist_actuelle.recuperer_enfant(
+            'parcours_anterieur',
+            'INCONNUE',
+        )
+        self.assertEqual(proposition.entity_id, proposition_id)
+        self.assertEqual(checklist_experience.statut, ChoixStatutChecklist.GEST_BLOCAGE)
+        self.assertEqual(
+            checklist_experience.extra,
+            {
+                'identifiant': 'INCONNUE',
+                'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
+                'authentification': '0',
+            },
+        )

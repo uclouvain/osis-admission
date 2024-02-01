@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,9 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from unittest.mock import patch
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
@@ -62,6 +64,7 @@ from reference.tests.factories.country import CountryFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
+@freezegun.freeze_time('2021-12-01')
 class PersonFormTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -136,6 +139,12 @@ class PersonFormTestCase(TestCase):
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch(
+            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            side_effect=lambda _, value, __: value,
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -615,6 +624,11 @@ class PersonFormTestCase(TestCase):
         candidate = Person.objects.get(pk=self.general_admission.candidate.pk)
         self.assertEqual(candidate.first_name, self.form_data['first_name'])
         self.assertEqual(candidate.last_name, self.form_data['last_name'])
+
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
     def test_general_person_form_post_updates_submitted_profile_if_necessary(self):
         self.client.force_login(user=self.sic_manager_user)

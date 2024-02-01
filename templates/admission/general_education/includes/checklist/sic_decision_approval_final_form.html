@@ -1,0 +1,137 @@
+{% load admission i18n bootstrap3 %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<form
+    hx-post="{% url view.base_namespace|add:':sic-decision-approval-final' uuid=view.kwargs.uuid %}"
+    hx-target="this"
+    hx-swap="outerHTML"
+    style="overflow: auto;"
+    id="sic-decision-approval-final-form"
+>
+  <div class="modal-body" style="overflow:auto;">
+    {% if original_admission.checklist.current.donnees_personnelles.statut == 'GEST_BLOCAGE' and original_admission.checklist.current.donnees_personnelles.extra.fraud == '1' %}
+    <div class="alert alert-danger">{% trans "<strong>Warning</strong> the candidate is reported as a <strong>fraudster</strong>" %}</div>
+    {% endif %}
+
+    {% if original_admission.type_demande == 'ADMISSION' %}
+      <div class="form-group"><strong>{% trans "Contact language" %}</strong> <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span></div>
+
+      {% bootstrap_form_errors sic_decision_approval_final_form %}
+
+  {#    <a href="#" id="sic-approval-final-reset-subject" class="btn btn-sm btn-primary reset-button"><i class="fa fa-rotate-right"></i> {% trans "Reset" %}</a>#}
+      {% bootstrap_field sic_decision_approval_final_form.subject %}
+
+  {#    <a href="#" id="sic-approval-final-reset-body" class="btn btn-sm btn-primary reset-button"><i class="fa fa-rotate-right"></i> {% trans "Reset" %}</a>#}
+      {% bootstrap_field sic_decision_approval_final_form.body %}
+
+      <p>{% trans "Do you want to send the approval to the candidate now?" %}</p>
+    {% else %}
+      <p>{% trans "Do you want to authorize this inscription type admission now?" %}</p>
+    {% endif %}
+
+  </div>
+
+  <div class="modal-footer">
+    {% if original_admission.type_demande == 'ADMISSION' %}
+      <a
+          class="btn btn-default"
+          href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord" %}"
+          target="_blank"
+      >
+        <i class="fa fa-magnifying-glass"></i>
+        {% translate 'Visualize approval' %}
+      </a>
+      <a
+          class="btn btn-default"
+          href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
+          target="_blank"
+      >
+        <i class="fa fa-magnifying-glass"></i>
+        {% translate 'Visualize annexe1' %}
+      </a>
+      <button
+          class="btn btn-success"
+          name="save"
+      >
+        <i class="fa fa-envelope"></i>
+        {% translate 'Send' context 'admission' %}
+      </button>
+    {% else %}
+      <button
+          class="btn btn-success"
+          name="save"
+      >
+        <i class="fa fa-thumbs-up"></i>
+        {% translate 'Authorize' %}
+      </button>
+    {% endif %}
+    <button
+        class="btn btn-default"
+        data-dismiss="modal"
+    >
+      {% translate 'Cancel' %}
+    </button>
+  </div>
+
+  {% if original_admission.type_demande == 'ADMISSION' %}
+    {{ sic_decision_approval_final_form.initial.subject|json_script:"sic_decision_approval_final_form_subject" }}
+    {{ sic_decision_approval_final_form.initial.body|json_script:"sic_decision_approval_final_form_body" }}
+
+    <script>
+        $('#sic-approval-final-reset-subject').click((event) => {
+            event.preventDefault();
+            const value = JSON.parse(document.getElementById('sic_decision_approval_final_form_subject').textContent);
+            $('#id_sic-decision-approval-final-subject').val(value);
+        });
+
+        $('#sic-approval-final-reset-body').click((event) => {
+            event.preventDefault();
+            const value = JSON.parse(document.getElementById('sic_decision_approval_final_form_body').textContent);
+            $('#id_sic-decision-approval-final-body').val(value);
+            CKEDITOR.instances['id_sic-decision-approval-final-body'].setData(value);
+        });
+
+        $(document).ready(() => {
+            initializeCKEditor('id_sic-decision-approval-final-body');
+        });
+    </script>
+  {% endif %}
+
+  {% if request.htmx %}
+    {% if sic_decision_approval_final_form.is_valid %}
+      {# Update the content of the tab #}
+      {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
+    {% endif %}
+    <script>
+        $(document).ready(function(){
+            {% if sic_decision_approval_final_form.is_valid %}
+                $('#sic-decision-approval-final-modal').modal('hide');
+                $('.modal-backdrop').hide();
+            {% endif %}
+        });
+    </script>
+  {% endif %}
+</form>

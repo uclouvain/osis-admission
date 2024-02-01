@@ -1,0 +1,115 @@
+{% extends 'admission/exports/recap/base_pdf.html' %}
+{% load i18n admission static %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block extra_head %}
+  <style>
+    #title {
+      text-align: center;
+    }
+
+    #title h1 {
+      font-size: 1.5em;
+    }
+
+    #main-container dl {
+      margin-top: 2em;
+    }
+
+    footer {
+      padding: 20px 0;
+      height: 130px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      align-content: flex-end;
+    }
+
+    #sedes {
+      height: 130px;
+      width: auto;
+    }
+
+  </style>
+{% endblock %}
+
+{% block header %}
+  <div class="header-container">
+    <div>
+      <img src="{% static 'img/logo_uclouvain.png' %}" alt="{% translate "UCLouvain logo"%}"/>
+    </div>
+    <div>
+      <p>{% translate 'Dossier reference:' %} {{ proposition.reference }}</p>
+      <p>{% translate 'First name Last name:' %} {{ proposition.prenom_candidat }} {{ proposition.nom_candidat }}</p>
+      <p>{% translate 'Nationality:' %} {{ proposition.nationalite_candidat }}</p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div id="main-container">
+    <p class="text-center">
+      <em>
+        {% blocktranslate trimmed %}
+          This document is an internal document containing the details of the faculty's decision.
+          Under no circumstances will it be sent in this form to the candidate. The candidate will receive a letter
+          from SIC containing the various details of the faculty's decision.
+        {% endblocktranslate %}
+      </em>
+    </p>
+
+    <div id="title" class="mt-3">
+      <h1>
+        {% translate 'Faculty decision:' %}
+        {% block decision_title %}{% endblock %}
+      </h1>
+    </div>
+
+    <p class="mt-3">
+      {% blocktranslate trimmed with academic_year=proposition.annee_calculee|get_academic_year %}
+        Admission request for the academic year {{ academic_year }} to the program:
+      {% endblocktranslate %}
+      {% display proposition.formation.sigle ' - ' proposition.formation.intitule %}
+    </p>
+
+    {% block decision_content %}{% endblock %}
+
+    {% field_data _('Faculty comment for the SIC:') fac_decision_comment.content|linebreaks inline=True %}
+
+    {% now 'd/m/Y' as today_date %}
+
+    <p class="mt-2">
+      {% blocktranslate trimmed with manager_first_name=manager.prenom manager_last_name=manager.nom date=today_date %}
+        For the jury president, {{ manager_first_name }} {{ manager_last_name }} on {{ date }}.
+      {% endblocktranslate %}
+    </p>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  <img src="{% static 'img/l-background.png' %}" alt=""/>
+  <img id="sedes" src="{% static 'img/sedes.png' %}" alt="{% translate 'UCL seal' %}"/>
+{% endblock %}

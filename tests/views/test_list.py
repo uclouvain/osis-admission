@@ -119,7 +119,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             AdmissionViewerFactory(person=cls.other_sic_management, admission=cls.admissions[0]),
         ]
 
-        cls.lite_reference = '{:07,}'.format(cls.admissions[0].reference).replace(',', '.')
+        lite_reference = '{:08}'.format(cls.admissions[0].reference)
+        cls.lite_reference = f'{lite_reference[:4]}.{lite_reference[4:]}'
 
         cls.student = StudentFactory(
             person=cls.admissions[0].candidate,
@@ -185,6 +186,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 ],
                 date_confirmation=cls.admissions[0].submitted_at,
                 est_premiere_annee=False,
+                poursuite_de_cycle='',
             ),
         ]
 
@@ -375,7 +377,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertTrue('entites' in response.context['filter_form'].errors)
         self.assertEqual(
             response.context['filter_form'].errors['entites'],
-            ["Attention, l'entité suivante n'existe pas à l'UCLouvain : %(entities)s" % {'entities': 'XYZ'}],
+            ["Attention, l'entité suivante n'existe pas à l'UCLouvain : %(entities)s" % {'entities': 'XYZ'}],
         )
 
         # Invalid entities
@@ -385,7 +387,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(
             response.context['filter_form'].errors['entites'],
             [
-                "Attention, les entités suivantes n'existent pas à l'UCLouvain : %(entities)s"
+                "Attention, les entités suivantes n'existent pas à l'UCLouvain : %(entities)s"
                 % {'entities': 'XYZ1, XYZ2'}
             ],
         )

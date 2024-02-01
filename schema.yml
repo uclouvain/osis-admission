@@ -5990,16 +5990,26 @@ components:
                     type: string
                   annee:
                     type: integer
+                  date_debut:
+                    type: string
+                    format: date
+                    nullable: true
                   intitule:
+                    type: string
+                  intitule_fr:
+                    type: string
+                  intitule_en:
                     type: string
                   campus:
                     type: string
+                    default: ''
                   type:
                     type: string
                   code_domaine:
                     type: string
                   campus_inscription:
                     type: string
+                    default: ''
                   sigle_entite_gestion:
                     type: string
                 required:
@@ -6007,10 +6017,10 @@ components:
                 - code
                 - annee
                 - intitule
-                - campus
+                - intitule_fr
+                - intitule_en
                 - type
                 - code_domaine
-                - campus_inscription
                 - sigle_entite_gestion
               reference:
                 type: string
@@ -6025,6 +6035,7 @@ components:
                 format: date-time
               statut:
                 type: string
+                readOnly: true
               links:
                 type: object
                 properties:
@@ -6082,7 +6093,6 @@ components:
             - prenom_candidat
             - nom_candidat
             - creee_le
-            - statut
             - pdf_recapitulatif
         continuing_education_propositions:
           type: array
@@ -6102,16 +6112,26 @@ components:
                     type: string
                   annee:
                     type: integer
+                  date_debut:
+                    type: string
+                    format: date
+                    nullable: true
                   intitule:
+                    type: string
+                  intitule_fr:
+                    type: string
+                  intitule_en:
                     type: string
                   campus:
                     type: string
+                    default: ''
                   type:
                     type: string
                   code_domaine:
                     type: string
                   campus_inscription:
                     type: string
+                    default: ''
                   sigle_entite_gestion:
                     type: string
                 required:
@@ -6119,10 +6139,10 @@ components:
                 - code
                 - annee
                 - intitule
-                - campus
+                - intitule_fr
+                - intitule_en
                 - type
                 - code_domaine
-                - campus_inscription
                 - sigle_entite_gestion
               matricule_candidat:
                 type: string
@@ -9417,16 +9437,26 @@ components:
               type: string
             annee:
               type: integer
+            date_debut:
+              type: string
+              format: date
+              nullable: true
             intitule:
+              type: string
+            intitule_fr:
+              type: string
+            intitule_en:
               type: string
             campus:
               type: string
+              default: ''
             type:
               type: string
             code_domaine:
               type: string
             campus_inscription:
               type: string
+              default: ''
             sigle_entite_gestion:
               type: string
           required:
@@ -9434,10 +9464,10 @@ components:
           - code
           - annee
           - intitule
-          - campus
+          - intitule_fr
+          - intitule_en
           - type
           - code_domaine
-          - campus_inscription
           - sigle_entite_gestion
         annee_calculee:
           type: integer
@@ -10125,16 +10155,26 @@ components:
               type: string
             annee:
               type: integer
+            date_debut:
+              type: string
+              format: date
+              nullable: true
             intitule:
+              type: string
+            intitule_fr:
+              type: string
+            intitule_en:
               type: string
             campus:
               type: string
+              default: ''
             type:
               type: string
             code_domaine:
               type: string
             campus_inscription:
               type: string
+              default: ''
             sigle_entite_gestion:
               type: string
           required:
@@ -10142,10 +10182,10 @@ components:
           - code
           - annee
           - intitule
-          - campus
+          - intitule_fr
+          - intitule_en
           - type
           - code_domaine
-          - campus_inscription
           - sigle_entite_gestion
         annee_calculee:
           type: integer
@@ -10347,16 +10387,26 @@ components:
           type: string
         annee:
           type: integer
+        date_debut:
+          type: string
+          format: date
+          nullable: true
         intitule:
+          type: string
+        intitule_fr:
+          type: string
+        intitule_en:
           type: string
         campus:
           type: string
+          default: ''
         type:
           type: string
         code_domaine:
           type: string
         campus_inscription:
           type: string
+          default: ''
         sigle_entite_gestion:
           type: string
       required:
@@ -10364,10 +10414,10 @@ components:
       - code
       - annee
       - intitule
-      - campus
+      - intitule_fr
+      - intitule_en
       - type
       - code_domaine
-      - campus_inscription
       - sigle_entite_gestion
     FormationContinueDTO:
       type: object
@@ -10378,16 +10428,26 @@ components:
           type: string
         annee:
           type: integer
+        date_debut:
+          type: string
+          format: date
+          nullable: true
         intitule:
+          type: string
+        intitule_fr:
+          type: string
+        intitule_en:
           type: string
         campus:
           type: string
+          default: ''
         type:
           type: string
         code_domaine:
           type: string
         campus_inscription:
           type: string
+          default: ''
         sigle_entite_gestion:
           type: string
       required:
@@ -10395,10 +10455,10 @@ components:
       - code
       - annee
       - intitule
-      - campus
+      - intitule_fr
+      - intitule_en
       - type
       - code_domaine
-      - campus_inscription
       - sigle_entite_gestion
     Tutor:
       type: object

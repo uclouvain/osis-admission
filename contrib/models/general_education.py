@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from contextlib import suppress
 
 from django.contrib.postgres.fields import ArrayField
@@ -43,9 +44,14 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    PoursuiteDeCycle,
     RegleDeFinancement,
     RegleCalculeResultatAvecFinancable,
+    PoursuiteDeCycle,
+    BesoinDeDerogation,
+    DroitsInscriptionMontant,
+    DispenseOuDroitsMajores,
+    MobiliteNombreDeMois,
+    TypeDeRefus,
 )
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
@@ -179,6 +185,30 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name=_('Refusal certificate of faculty'),
         mimetypes=[PDF_MIME_TYPE],
     )
+    sic_approval_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Approval certificate from SIC'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    sic_annexe_approval_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Annexe approval certificate from SIC'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    sic_refusal_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Refusal certificate from SIC'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    refusal_type = models.CharField(
+        verbose_name=_('Refusal type'),
+        max_length=50,
+        default='',
+        choices=TypeDeRefus.choices(),
+    )
     refusal_reasons = models.ManyToManyField(
         blank=True,
         related_name='+',
@@ -258,6 +288,67 @@ class GeneralEducationAdmission(BaseAdmission):
         default='',
         verbose_name=_('Faculty comment about the collaborative program'),
     )
+    dispensation_needed = models.CharField(
+        max_length=50,
+        default='',
+        choices=BesoinDeDerogation.choices(),
+        verbose_name=_('Dispensation needed'),
+    )
+    tuition_fees_amount = models.CharField(
+        max_length=50,
+        default='',
+        choices=DroitsInscriptionMontant.choices(),
+        verbose_name=_("Tuition fees amount"),
+    )
+    tuition_fees_amount_other = models.DecimalField(
+        verbose_name=_("Amount (without EUR/)"),
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+    )
+    tuition_fees_dispensation = models.CharField(
+        max_length=50,
+        default='',
+        choices=DispenseOuDroitsMajores.choices(),
+        verbose_name=_("Dispensation or increased fees"),
+    )
+    particular_cost = models.TextField(
+        default='',
+        verbose_name=_("Particular cost"),
+        blank=True,
+    )
+    rebilling_or_third_party_payer = models.TextField(
+        default='',
+        verbose_name=_("Rebilling or third-party payer"),
+        blank=True,
+    )
+    first_year_inscription_and_status = models.TextField(
+        default='',
+        verbose_name=_("First year of inscription + status"),
+        blank=True,
+    )
+    is_mobility = models.BooleanField(
+        null=True,
+        verbose_name=_('The candidate is doing a mobility'),
+    )
+    mobility_months_amount = models.CharField(
+        max_length=50,
+        default='',
+        choices=MobiliteNombreDeMois.choices(),
+        verbose_name=_("Mobility months amount"),
+    )
+    must_report_to_sic = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('The candidate must report to SIC'),
+    )
+    communication_to_the_candidate = models.TextField(
+        default='',
+        verbose_name=_("Communication to the candidate"),
+        blank=True,
+    )
+
     diplomatic_post = models.ForeignKey(
         blank=True,
         null=True,
@@ -333,7 +424,9 @@ class GeneralEducationAdmission(BaseAdmission):
 
         if author:
             self.last_update_author = author
+            self.modified_at = datetime.datetime.now()
             update_fields.append('last_update_author')
+            update_fields.append('modified_at')
 
         with suppress(BusinessException):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
@@ -351,7 +444,7 @@ class GeneralEducationAdmission(BaseAdmission):
 
         message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
 
-    def update_financability_computed_rule(self):
+    def update_financability_computed_rule(self, author: 'Person'):
         from admission.ddd.admission.formation_generale.commands import (
             SpecifierFinancabiliteResultatCalculCommand,
         )
@@ -363,6 +456,7 @@ class GeneralEducationAdmission(BaseAdmission):
         message_bus_instance.invoke(
             SpecifierFinancabiliteResultatCalculCommand(
                 uuid_proposition=self.uuid,
+                gestionnaire=author.global_id,
                 financabilite_regle_calcule=financabilite_regle_calcule,
                 financabilite_regle_calcule_le=timezone.now(),
             )

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@ class AccountingFormView(AccountingMixinView, FormView):
     permission_required = 'admission.view_admission_accounting'
     urlpatterns = 'accounting'
     update_requested_documents = True
-    update_admission_author = True
     form_class = AccountingForm
 
     def get_context_data(self, **kwargs):
@@ -57,8 +56,8 @@ class AccountingFormView(AccountingMixinView, FormView):
             'derniers_etablissements_superieurs_communaute_fr_frequentes'
         ]
 
-        if self.is_general:
-            kwargs['education_site'] = self.proposition.formation.campus
+        if self.is_general and self.proposition.formation.campus:
+            kwargs['education_site'] = self.proposition.formation.campus.nom
 
         return kwargs
 
@@ -69,6 +68,7 @@ class AccountingFormView(AccountingMixinView, FormView):
         message_bus_instance.invoke(
             CompleterComptabilitePropositionCommand(
                 uuid_proposition=self.admission_uuid,
+                auteur_modification=self.request.user.person.global_id,
                 **form.cleaned_data,
             )
         )

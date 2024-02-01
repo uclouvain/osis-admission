@@ -1,0 +1,131 @@
+{% load admission i18n osis_document static %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<!doctype html>{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}{{ admission.reference }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap5/bootstrap.min.css' %}">
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 1cm 2cm 120px 2cm;
+
+      @bottom-left {
+        content: element(footer);
+        width: 100%;
+        height: 120px;
+      }
+    }
+
+    @media print {
+      footer {
+        position: running(footer);
+        font-size: 8pt;
+      }
+
+      body {
+        font-family: Calibri, Arial, sans-serif;
+        font-size: 11pt;
+        text-align: justify;
+        line-height: 0.5cm;
+      }
+
+      #logo {
+        height: 1.5cm;
+        width: auto;
+      }
+
+      #signature td {
+          height: 2.5cm;
+          text-align: center;
+          vertical-align: top;
+          border: 1px #000 solid;
+      }
+
+      #sigle {
+        width: 3cm;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <footer>
+    <strong>LOUVAIN-LA-NEUVE</strong> | BRUXELLES | MONS | TOURNAI | CHARLEROI | NAMUR<br>
+    Place de l'Université 1 bte L0.01.10, 1348 Louvain-la-Neuve, Belgique<br>
+    <a href="https://uclouvain.be/fr/etudier/inscriptions/contacts.html">https://uclouvain.be/fr/etudier/inscriptions/contacts.html</a><br>
+  </footer>
+
+  <div>
+    <img id="logo" src="{% static "img/logo_uclouvain.png" %}">
+  </div>
+
+  <div class="row">
+    <div class="col-6">
+      <strong>{% trans "Enrolment Office (SIC)" %}</strong>
+    </div>
+    <div class="col-6">
+      {% with candidat=proposition.profil_soumis_candidat %}
+        {{ candidat.nom|upper }} {{ candidat.prenom }}<br><br>
+        {{ candidat.rue }} {{ candidat.numero_rue }} {{ candidat.boite_postale }}<br>
+        {{ candidat.code_postal }} {{ candidat.ville }}<br>
+        {{ candidat.nom_pays }}
+      {% endwith %}
+    </div>
+  </div>
+
+  <div class="text-end">Louvain-la-Neuve, {% if LANGUAGE_CODE == 'fr-be' %}Le {% endif %}{% now "d/m/Y" %}</div>
+
+  <p class="mt-4">Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
+
+  <p>
+    {% with name=proposition.prenom_candidat|add:" "|add:proposition.nom_candidat %}
+      A l'attention de {{ name }},
+    {% endwith %}
+  </p>
+
+  {% include "admission/exports/includes/sic_refusal/"|add:proposition.type_de_refus|add:".html" %}
+
+  <p>
+    Conscient de la déception que ce courrier pourrait susciter, je vous prie néanmoins d'agréer, Madame, Monsieur,
+    l'expression de mes salutations distinguées.
+  </p>
+
+  <div class="row">
+    <div class="col">
+      {% if director.signature %}<img src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+      <p>
+        {{ director.first_name }} {{ director.last_name }},<br>
+        <em>Directrice du Service des inscriptions</em>
+      </p>
+    </div>
+    <div class="col text-end">
+      <img id="sigle" src="{% static "img/sedes.png" %}">
+    </div>
+  </div>
+</body>
+</html>

@@ -23,10 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand,
+    RefuserInscriptionParSicCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
@@ -34,41 +33,35 @@ from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation 
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def approuver_proposition_par_faculte_avec_nouvelles_informations(
-    cmd: ApprouverPropositionParFaculteAvecNouvellesInformationsCommand,
+def refuser_inscription_par_sic(
+    cmd: RefuserInscriptionParSicCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
+    notification: 'INotification',
     pdf_generation: 'IPDFGeneration',
 ) -> PropositionIdentity:
-    # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    # WHEN
-    proposition.specifier_informations_acceptation_par_fac(
-        sigle_autre_formation=cmd.sigle_autre_formation,
-        avec_conditions_complementaires=cmd.avec_conditions_complementaires,
-        uuids_conditions_complementaires_existantes=cmd.uuids_conditions_complementaires_existantes,
-        conditions_complementaires_libres=cmd.conditions_complementaires_libres,
-        avec_complements_formation=cmd.avec_complements_formation,
-        uuids_complements_formation=cmd.uuids_complements_formation,
-        commentaire_complements_formation=cmd.commentaire_complements_formation,
-        nombre_annees_prevoir_programme=cmd.nombre_annees_prevoir_programme,
-        nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
-        email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
-        commentaire_programme_conjoint=cmd.commentaire_programme_conjoint,
-    )
-
-    proposition.approuver_par_fac()
+    proposition.refuser_par_sic(auteur_modification=cmd.auteur)
 
     # THEN
-    pdf_generation.generer_attestation_accord_facultaire(
+    pdf_generation.generer_attestation_refus_inscription_sic(
         proposition_repository=proposition_repository,
         proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
+        gestionnaire=cmd.auteur,
     )
 
     proposition_repository.save(entity=proposition)
 
-    historique.historiser_acceptation_fac(proposition=proposition, gestionnaire=cmd.gestionnaire)
+    message = notification.refuser_proposition_par_sic(
+        proposition=proposition,
+        objet_message=cmd.objet_message,
+        corps_message=cmd.corps_message,
+    )
+    historique.historiser_refus_sic(
+        proposition=proposition,
+        message=message,
+        gestionnaire=cmd.auteur,
+    )
 
     return proposition.entity_id

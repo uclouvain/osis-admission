@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.formation_generale.commands import (
     RefuserPropositionParFaculteCommand,
 )
@@ -31,6 +32,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
 def refuser_proposition_par_faculte(
@@ -38,23 +40,28 @@ def refuser_proposition_par_faculte(
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
     pdf_generation: 'IPDFGeneration',
+    personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
+    unites_enseignement_translator: 'IUnitesEnseignementTranslator',
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.refuser_par_fac()
+    proposition.refuser_par_fac(auteur_modification=cmd.gestionnaire)
 
     # THEN
+    gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
+
     pdf_generation.generer_attestation_refus_facultaire(
-        proposition_repository=proposition_repository,
         proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
+        gestionnaire=gestionnaire_dto,
+        proposition_repository=proposition_repository,
+        unites_enseignement_translator=unites_enseignement_translator,
     )
 
     proposition_repository.save(entity=proposition)
 
     historique.historiser_refus_fac(
         proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
+        gestionnaire=gestionnaire_dto,
     )
 
     return proposition.entity_id

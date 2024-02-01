@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,17 +31,12 @@ from admission.ddd.admission.domain.model.complement_formation import Complement
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
-from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand,
+    SpecifierInformationsAcceptationPropositionParSicCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
-)
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    SituationPropositionNonFACException,
-    InformationsAcceptationFacultaireNonSpecifieesException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
@@ -52,32 +47,29 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestApprouverPropositionParFaculteAvecNouvellesInformations(TestCase):
+class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = ApprouverPropositionParFaculteAvecNouvellesInformationsCommand
+        cls.command = SpecifierInformationsAcceptationPropositionParSicCommand
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(
+            statut=ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
             entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI-APPROVED'),
             matricule_candidat='0000000001',
             formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
             curriculum=['file1.pdf'],
             est_confirmee=True,
             est_approuvee_par_fac=True,
-            statut=ChoixStatutPropositionGenerale.TRAITEMENT_FAC,
         )
         self.proposition_repository.save(self.proposition)
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-MASTER-SCI-APPROVED',
-            'gestionnaire': '00321234',
-            'sigle_autre_formation': '',
             'avec_conditions_complementaires': False,
             'uuids_conditions_complementaires_existantes': [],
             'conditions_complementaires_libres': [],
@@ -87,11 +79,21 @@ class TestApprouverPropositionParFaculteAvecNouvellesInformations(TestCase):
             'nombre_annees_prevoir_programme': 2,
             'nom_personne_contact_programme_annuel': '',
             'email_personne_contact_programme_annuel': '',
-            'commentaire_programme_conjoint': '',
+            'droits_inscription_montant': '',
+            'droits_inscription_montant_autre': None,
+            'dispense_ou_droits_majores': '',
+            'tarif_particulier': '',
+            'refacturation_ou_tiers_payant': '',
+            'annee_de_premiere_inscription_et_statut': '',
+            'est_mobilite': None,
+            'nombre_de_mois_de_mobilite': '',
+            'doit_se_presenter_en_sic': None,
+            'communication_au_candidat': '',
+            'gestionnaire': '0123456789',
         }
 
-    def test_should_etre_ok_si_statut_et_min_informations_corrects(self):
-        self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+    def test_should_etre_ok_avec_min_informations(self):
+        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -100,9 +102,11 @@ class TestApprouverPropositionParFaculteAvecNouvellesInformations(TestCase):
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.RETOUR_DE_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_REUSSITE)
-        self.assertEqual(proposition.autre_formation_choisie_fac_id, None)
+        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_EN_COURS)
+        self.assertEqual(
+            proposition.checklist_actuelle.decision_sic.extra,
+            {'en_cours': 'approval'},
+        )
         self.assertEqual(proposition.avec_conditions_complementaires, False)
         self.assertEqual(proposition.conditions_complementaires_existantes, [])
         self.assertEqual(proposition.conditions_complementaires_libres, [])
@@ -112,18 +116,25 @@ class TestApprouverPropositionParFaculteAvecNouvellesInformations(TestCase):
         self.assertEqual(proposition.nombre_annees_prevoir_programme, 2)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, '')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, '')
-        self.assertEqual(proposition.commentaire_programme_conjoint, '')
+        self.assertEqual(proposition.droits_inscription_montant, '')
+        self.assertIsNone(proposition.droits_inscription_montant_autre)
+        self.assertEqual(proposition.dispense_ou_droits_majores, '')
+        self.assertEqual(proposition.tarif_particulier, '')
+        self.assertEqual(proposition.refacturation_ou_tiers_payant, '')
+        self.assertEqual(proposition.annee_de_premiere_inscription_et_statut, '')
+        self.assertIsNone(proposition.est_mobilite)
+        self.assertEqual(proposition.nombre_de_mois_de_mobilite, '')
+        self.assertIsNone(proposition.doit_se_presenter_en_sic)
+        self.assertEqual(proposition.communication_au_candidat, '')
 
-    def test_should_etre_ok_si_statut_et_max_informations_corrects(self):
-        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC
+    def test_should_etre_ok_si_completee_avec_max_informations(self):
+        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
         self.proposition.annee_calculee = 2020
 
         # Maximum d'informations données
         resultat = self.message_bus.invoke(
             self.command(
                 uuid_proposition='uuid-MASTER-SCI-APPROVED',
-                gestionnaire='00321234',
-                sigle_autre_formation='BACHELIER-ECO',
                 avec_conditions_complementaires=True,
                 uuids_conditions_complementaires_existantes=['uuid-condition-complementaire-1'],
                 conditions_complementaires_libres=['Condition libre 1'],
@@ -133,19 +144,25 @@ class TestApprouverPropositionParFaculteAvecNouvellesInformations(TestCase):
                 nombre_annees_prevoir_programme=3,
                 nom_personne_contact_programme_annuel='John Doe',
                 email_personne_contact_programme_annuel='john.doe@uclouvain.be',
-                commentaire_programme_conjoint='Mon commentaire concernant le programme conjoint',
+                droits_inscription_montant='DROITS_MAJORES',
+                droits_inscription_montant_autre=None,
+                dispense_ou_droits_majores='DISPENSE_DUREE',
+                tarif_particulier='Tarif particulier',
+                refacturation_ou_tiers_payant='Refacturation',
+                annee_de_premiere_inscription_et_statut='Premiere inscription',
+                est_mobilite=True,
+                nombre_de_mois_de_mobilite='6',
+                doit_se_presenter_en_sic=False,
+                communication_au_candidat='Communication',
+                gestionnaire='0123456789',
             )
         )
 
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.RETOUR_DE_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_EN_COURS)
         self.assertEqual(
-            proposition.autre_formation_choisie_fac_id,
-            FormationIdentity(
-                sigle='BACHELIER-ECO',
-                annee=2020,
-            ),
+            proposition.checklist_actuelle.decision_sic.extra,
+            {'en_cours': 'approval'},
         )
         self.assertEqual(proposition.avec_conditions_complementaires, True)
         self.assertEqual(
@@ -173,64 +190,13 @@ class TestApprouverPropositionParFaculteAvecNouvellesInformations(TestCase):
         self.assertEqual(proposition.nombre_annees_prevoir_programme, 3)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, 'John Doe')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, 'john.doe@uclouvain.be')
-        self.assertEqual(proposition.commentaire_programme_conjoint, 'Mon commentaire concernant le programme conjoint')
-
-    def test_should_lever_exception_si_statut_non_conforme(self):
-        statuts_invalides = ChoixStatutPropositionGenerale.get_names_except(
-            ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC,
-            ChoixStatutPropositionGenerale.TRAITEMENT_FAC,
-        )
-
-        for statut in statuts_invalides:
-            self.proposition.statut = ChoixStatutPropositionGenerale[statut]
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
-
-    def test_should_lever_exception_si_presence_conditions_complementaires_non_specifiee(self):
-        self.parametres_commande_par_defaut['avec_conditions_complementaires'] = None
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                InformationsAcceptationFacultaireNonSpecifieesException,
-            )
-
-    def test_should_lever_exception_si_conditions_complementaires_non_specifiees(self):
-        self.parametres_commande_par_defaut['avec_conditions_complementaires'] = True
-        self.parametres_commande_par_defaut['uuids_conditions_complementaires_existantes'] = []
-        self.parametres_commande_par_defaut['conditions_complementaires_libres'] = []
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                InformationsAcceptationFacultaireNonSpecifieesException,
-            )
-
-    def test_should_lever_exception_si_presence_complements_formation_non_specifiee(self):
-        self.parametres_commande_par_defaut['avec_complements_formation'] = None
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                InformationsAcceptationFacultaireNonSpecifieesException,
-            )
-
-    def test_should_lever_exception_si_complements_formation_non_specifiees(self):
-        self.parametres_commande_par_defaut['avec_complements_formation'] = True
-        self.parametres_commande_par_defaut['uuids_complements_formation'] = []
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                InformationsAcceptationFacultaireNonSpecifieesException,
-            )
-
-    def test_should_lever_exception_si_nombre_annees_prevoir_programme_non_specifie(self):
-        self.parametres_commande_par_defaut['nombre_annees_prevoir_programme'] = None
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                InformationsAcceptationFacultaireNonSpecifieesException,
-            )
+        self.assertEqual(proposition.droits_inscription_montant, 'DROITS_MAJORES')
+        self.assertIsNone(proposition.droits_inscription_montant_autre)
+        self.assertEqual(proposition.dispense_ou_droits_majores, 'DISPENSE_DUREE')
+        self.assertEqual(proposition.tarif_particulier, 'Tarif particulier')
+        self.assertEqual(proposition.refacturation_ou_tiers_payant, 'Refacturation')
+        self.assertEqual(proposition.annee_de_premiere_inscription_et_statut, 'Premiere inscription')
+        self.assertIs(proposition.est_mobilite, True)
+        self.assertEqual(proposition.nombre_de_mois_de_mobilite, '6')
+        self.assertIs(proposition.doit_se_presenter_en_sic, False)
+        self.assertEqual(proposition.communication_au_candidat, 'Communication')

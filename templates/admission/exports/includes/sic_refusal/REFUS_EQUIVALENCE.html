@@ -1,0 +1,59 @@
+{% load admission i18n static %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<p>
+  Après examen de votre dossier, j’ai le regret de vous faire savoir que votre demande d’admission au programme de «
+  {% if proposition|est_premiere_annee %}
+    {{ proposition.formation.intitule|intitule_premiere_annee }} ({{ proposition.formation.sigle }}-1)
+  {% else %}
+    {{ proposition.formation.intitule }} ({{ proposition.formation.sigle }})
+  {% endif %}
+   » pour l’année académique {{ proposition.formation.annee|get_academic_year }} ne peut faire
+  l’objet d’une réponse favorable. Les critères établis par les autorités académiques de notre université ne sont pas
+  rencontrés (cfr <a href="https://uclouvain.be/fr/etudier/inscriptions/futurs-etudiants.html">https://uclouvain.be/fr/etudier/inscriptions/futurs-etudiants.html</a>).
+</p>
+
+<p>
+  En effet, vous ne remplissez pas les conditions d’accès à la formation souhaitée. La décision d’équivalence vous
+  autorisant à accéder au programme visé pour l’année académique {{ proposition.formation.annee|get_academic_year }}
+  n'a pas été produite au
+  dossier. La condition d’accès imposée par les articles 93 et 107, 9° du décret du 7 novembre 2013
+  définissant le paysage de l’enseignement supérieur et l’organisation académique des études n’est donc
+  pas remplie. Votre demande est irrecevable.
+</p>
+
+<p>
+  Toutefois, si vous estimez que les motifs de cette décision d'irrecevabilité ne sont pas fondés et que vous disposez
+  d’arguments à faire valoir, un recours peut être exercé auprès de la Déléguée du Gouvernement de la Communauté
+  française de Belgique conformément à l’article 95, § 1er du décret précité. Ce recours doit être
+  introduit par courrier électronique ou par courrier recommandé avec accusé de réception ou remis en
+  mains propres contre accusé de réception.
+</p>
+
+<p>
+  Afin de connaître cette procédure, je vous invite à consulter l’article 19 du Règlement Général des Études et
+  des Examens disponible à l’adresse suivante : <a href="https://uclouvain.be/fr/decouvrir/rgee.html">
+  https://uclouvain.be/fr/decouvrir/rgee.html</a>
+</p>

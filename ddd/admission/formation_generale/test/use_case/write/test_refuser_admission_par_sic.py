@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,8 @@ import factory
 
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.formation_generale.commands import (
-    RefuserPropositionParFaculteAvecNouveauxMotifsCommand,
+    RefuserPropositionParFaculteCommand,
+    RefuserAdmissionParSicCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -52,100 +53,65 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
-class TestRefuserPropositionParFaculteAvecNouveauMotif(TestCase):
+class TestRefuserAdmissionParSic(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = RefuserPropositionParFaculteAvecNouveauxMotifsCommand
+        cls.command = RefuserAdmissionParSicCommand
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(
+            statut=ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
             entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-MASTER-SCI-APPROVED'),
             matricule_candidat='0000000001',
             formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
             curriculum=['file1.pdf'],
             est_confirmee=True,
-            est_refusee_par_fac_raison_connue=True,
-            statut=ChoixStatutPropositionGenerale.TRAITEMENT_FAC,
         )
         self.proposition_repository.save(self.proposition)
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-MASTER-SCI-APPROVED',
-            'gestionnaire': '00321234',
-            'uuids_motifs': ['uuid-nouveau-motif-refus'],
-            'autres_motifs': [],
+            'objet_message': 'foo',
+            'corps_message': 'bar',
+            'auteur': '00321234',
         }
 
-    def test_should_etre_ok_si_motif_connu_specifie(self):
-        self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+    def test_should_etre_ok_si_traitement_sic_et_motif_connu(self):
+        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
+        self.proposition.motifs_refus = [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')]
+        self.proposition.autres_motifs_refus = []
 
-        resultat = self.message_bus.invoke(
-            self.command(
-                uuid_proposition='uuid-MASTER-SCI-APPROVED',
-                gestionnaire='00321234',
-                uuids_motifs=['uuid-nouveau-motif-refus'],
-                autres_motifs=[],
-            )
-        )
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
         # Vérifier résultat de la commande
         self.assertEqual(resultat.uuid, 'uuid-MASTER-SCI-APPROVED')
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.RETOUR_DE_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_BLOCAGE)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE)
+        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_BLOCAGE)
         self.assertEqual(
-            proposition.checklist_actuelle.decision_facultaire.extra,
-            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
+            proposition.checklist_actuelle.decision_sic.extra,
+            {'blocage': 'refusal'},
         )
-        self.assertEqual(proposition.motifs_refus, [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')])
-        self.assertEqual(proposition.autres_motifs_refus, [])
 
-    def test_should_etre_ok_si_motif_libre_specifie(self):
-        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC
+    def test_should_etre_ok_si_completee_pour_sic_et_motif_libre(self):
+        self.proposition.motifs_refus = []
+        self.proposition.autres_motifs_refus = ['Autre motif']
 
-        resultat = self.message_bus.invoke(
-            self.command(
-                uuid_proposition='uuid-MASTER-SCI-APPROVED',
-                gestionnaire='00321234',
-                uuids_motifs=[],
-                autres_motifs=['Autre motif'],
-            )
-        )
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
         # Vérifier résultat de la commande
         self.assertEqual(resultat.uuid, 'uuid-MASTER-SCI-APPROVED')
-
-        # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.RETOUR_DE_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_facultaire.statut, ChoixStatutChecklist.GEST_BLOCAGE)
-        self.assertEqual(
-            proposition.checklist_actuelle.decision_facultaire.extra,
-            {'decision': DecisionFacultaireEnum.EN_DECISION.value},
-        )
-        self.assertEqual(proposition.motifs_refus, [])
-        self.assertEqual(proposition.autres_motifs_refus, ['Autre motif'])
-
-    def test_should_lever_exception_si_statut_non_conforme(self):
-        statuts_invalides = ChoixStatutPropositionGenerale.get_names_except(
-            ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC,
-            ChoixStatutPropositionGenerale.TRAITEMENT_FAC,
-        )
-
-        for statut in statuts_invalides:
-            self.proposition.statut = ChoixStatutPropositionGenerale[statut]
-
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonFACException)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE)
 
     def test_should_lever_exception_si_aucun_motif_specifie(self):
-        self.parametres_commande_par_defaut['uuids_motifs'] = []
-        self.parametres_commande_par_defaut['autres_motifs'] = []
+        self.proposition.motifs_refus = []
+        self.proposition.autres_motifs_refus = []
+
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
             self.assertIsInstance(context.exception.exceptions.pop(), MotifRefusFacultaireNonSpecifieException)

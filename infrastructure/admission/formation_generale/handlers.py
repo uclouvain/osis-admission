@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,11 +29,35 @@ from admission.ddd.admission.commands import \
      RefuserPropositionFusionCommand)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
+from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
+    recuperer_pdf_temporaire_decision_sic,
+)
 from admission.ddd.admission.formation_generale.use_case.write import *
+from admission.ddd.admission.formation_generale.use_case.write.approuver_admission_par_sic_service import (
+    approuver_admission_par_sic,
+)
+from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
+    approuver_inscription_par_sic,
+)
+from admission.ddd.admission.formation_generale.use_case.write.refuser_admission_par_sic_service import (
+    refuser_admission_par_sic,
+)
+from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
+    refuser_inscription_par_sic,
+)
+from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
+    specifier_besoin_de_derogation,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import \
     specifier_financabilite_regle
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import \
     specifier_financabilite_resultat_calcul
+from admission.ddd.admission.formation_generale.use_case.write.specifier_informations_acceptation_proposition_par_sic_service import (
+    specifier_informations_acceptation_proposition_par_sic,
+)
+from admission.ddd.admission.formation_generale.use_case.write.specifier_motifs_refus_proposition_par_sic_service import (
+    specifier_motifs_refus_proposition_par_sic,
+)
 from admission.ddd.admission.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
@@ -385,14 +409,8 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         historique=HistoriqueFormationGenerale(),
         pdf_generation=PDFGeneration(),
-    ),
-    RefuserPropositionParFaculteAvecNouveauxMotifsCommand: (
-        lambda msg_bus, cmd: refuser_proposition_par_faculte_avec_nouveaux_motifs(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            historique=HistoriqueFormationGenerale(),
-            pdf_generation=PDFGeneration(),
-        )
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
     ),
     SpecifierInformationsAcceptationPropositionParFaculteCommand: (
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_faculte(
@@ -400,19 +418,16 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
         )
     ),
-    ApprouverPropositionParFaculteAvecNouvellesInformationsCommand: (
-        lambda msg_bus, cmd: approuver_proposition_par_faculte_avec_nouvelles_informations(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            historique=HistoriqueFormationGenerale(),
-            pdf_generation=PDFGeneration(),
-        )
-    ),
     ApprouverPropositionParFaculteCommand: lambda msg_bus, cmd: approuver_proposition_par_faculte(
         cmd,
         proposition_repository=PropositionRepository(),
         historique=HistoriqueFormationGenerale(),
         pdf_generation=PDFGeneration(),
+        personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
+        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
     ),
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
         cmd,
@@ -481,6 +496,12 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
         )
     ),
+    SpecifierBesoinDeDerogationSicCommand: (
+        lambda msg_bus, cmd: specifier_besoin_de_derogation(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
         cmd,
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
@@ -505,10 +526,63 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
         )
     ),
+    SpecifierInformationsAcceptationPropositionParSicCommand: (
+        lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
     ModifierAuthentificationExperienceParcoursAnterieurCommand: (
         lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
             cmd,
             proposition_repository=PropositionRepository(),
+        )
+    ),
+    SpecifierMotifsRefusPropositionParSicCommand: (
+        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+        )
+    ),
+    RefuserAdmissionParSicCommand: (
+        lambda msg_bus, cmd: refuser_admission_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
+            notification=Notification(),
+            pdf_generation=PDFGeneration(),
+        )
+    ),
+    RefuserInscriptionParSicCommand: (
+        lambda msg_bus, cmd: refuser_inscription_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
+            notification=Notification(),
+            pdf_generation=PDFGeneration(),
+        )
+    ),
+    ApprouverAdmissionParSicCommand: (
+        lambda msg_bus, cmd: approuver_admission_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
+            notification=Notification(),
+            pdf_generation=PDFGeneration(),
+        )
+    ),
+    ApprouverInscriptionParSicCommand: (
+        lambda msg_bus, cmd: approuver_inscription_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
+        )
+    ),
+    RecupererPdfTemporaireDecisionSicQuery: (
+        lambda msg_bus, cmd: recuperer_pdf_temporaire_decision_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            pdf_generation=PDFGeneration(),
         )
     ),
     RechercherParcoursAnterieurQuery: lambda msg_bus, cmd: rechercher_parcours_anterieur(

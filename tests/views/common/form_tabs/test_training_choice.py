@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
+import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -34,6 +36,7 @@ from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms import EMPTY_CHOICE_AS_LIST
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
@@ -58,6 +61,7 @@ from program_management.tests.factories.education_group_version import Education
 from reference.tests.factories.country import CountryFactory
 
 
+@freezegun.freeze_time('2021-12-01')
 class TrainingChoiceFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -87,6 +91,7 @@ class TrainingChoiceFormViewTestCase(TestCase):
                 academic_year=academic_years[0],
             ),
             candidate__language=settings.LANGUAGE_CODE_EN,
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             double_degree_scholarship=cls.scholarships[0],
             international_scholarship=cls.scholarships[3],
@@ -96,6 +101,7 @@ class TrainingChoiceFormViewTestCase(TestCase):
         EducationGroupVersionFactory(
             root_group__main_teaching_campus=cls.first_campus,
             offer=cls.master_admission.training,
+            version_name='',
         )
 
         cls.bachelor_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
@@ -104,6 +110,7 @@ class TrainingChoiceFormViewTestCase(TestCase):
                 academic_year=academic_years[0],
             ),
             candidate__language=settings.LANGUAGE_CODE_EN,
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             double_degree_scholarship=None,
             international_scholarship=None,
@@ -114,6 +121,7 @@ class TrainingChoiceFormViewTestCase(TestCase):
         EducationGroupVersionFactory(
             root_group__main_teaching_campus=cls.first_campus,
             offer=cls.bachelor_admission.training,
+            version_name='',
         )
 
         cls.specific_questions = [
@@ -136,16 +144,20 @@ class TrainingChoiceFormViewTestCase(TestCase):
         ).person.user
 
         cls.master_url = resolve_url(
-            'admission:general-education:update:training-choice', uuid=cls.master_admission.uuid
+            'admission:general-education:update:training-choice',
+            uuid=cls.master_admission.uuid,
         )
         cls.master_detail_url = resolve_url(
-            'admission:general-education:training-choice', uuid=cls.master_admission.uuid
+            'admission:general-education:training-choice',
+            uuid=cls.master_admission.uuid,
         )
         cls.bachelor_url = resolve_url(
-            'admission:general-education:update:training-choice', uuid=cls.bachelor_admission.uuid
+            'admission:general-education:update:training-choice',
+            uuid=cls.bachelor_admission.uuid,
         )
         cls.bachelor_detail_url = resolve_url(
-            'admission:general-education:training-choice', uuid=cls.bachelor_admission.uuid
+            'admission:general-education:training-choice',
+            uuid=cls.bachelor_admission.uuid,
         )
 
     def test_general_training_choice_access(self):
@@ -240,6 +252,7 @@ class TrainingChoiceFormViewTestCase(TestCase):
             ],
         )
 
+    @freezegun.freeze_time('2021-12-01')
     def test_form_submit_for_master_with_valid_data(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -270,6 +283,12 @@ class TrainingChoiceFormViewTestCase(TestCase):
             {
                 str(self.specific_questions[0].form_item.uuid): 'Answer',
             },
+        )
+        self.assertEqual(self.master_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.master_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.master_admission.requested_documents,
         )
 
         # The user specifies that he has no scholarships but selects them
@@ -421,4 +440,11 @@ class TrainingChoiceFormViewTestCase(TestCase):
             {
                 str(self.specific_questions[0].form_item.uuid): 'Answer',
             },
+        )
+
+        self.assertEqual(self.bachelor_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.bachelor_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.bachelor_admission.requested_documents,
         )

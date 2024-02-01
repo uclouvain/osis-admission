@@ -364,6 +364,10 @@ class PredicatesTestCase(TestCase):
             ChoixStatutPropositionGenerale.CONFIRMEE.name,
             ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
             ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
+            ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+            ChoixStatutPropositionGenerale.CLOTUREE.name,
         }
 
         for status in ChoixStatutPropositionGenerale.get_names():
@@ -390,6 +394,10 @@ class PredicatesTestCase(TestCase):
             ChoixStatutPropositionGenerale.CONFIRMEE.name,
             ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
             ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
+            ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+            ChoixStatutPropositionGenerale.CLOTUREE.name,
             ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
             ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
         }
@@ -423,7 +431,7 @@ class PredicatesTestCase(TestCase):
             self.assertEqual(
                 result,
                 'The global status of the application must be one of the following in order to realize this action: '
-                'Application confirmed (by student), To be completed (by student) for the Enrolment Office (SIC).',
+                'Application confirmed, To be completed for the Enrolment Office (SIC).',
             )
 
     def not_in_general_statuses_predicate_message_in_french(self):
@@ -436,6 +444,6 @@ class PredicatesTestCase(TestCase):
             )
             self.assertEqual(
                 result,
-                'Le statut global de la demande doit être l\'un des suivants pour pouvoir réaliser cette action : '
+                'Le statut global de la demande doit être l\'un des suivants pour pouvoir réaliser cette action : '
                 'Demande confirmée (par étudiant), A compléter (par étudiant) pour SIC.',
             )

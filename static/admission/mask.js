@@ -24,6 +24,6 @@
  *
  */
 function getReferenceMask(reference) {
-  return /^\d/.test(reference) ? '000.000' : 'A-AAAS00-000.000';
+  return /^\d/.test(reference) ? '0000.0000' : 'A-AASS00-0000.0000';
 }
 

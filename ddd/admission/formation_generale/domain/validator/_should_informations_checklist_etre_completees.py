@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+    STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
@@ -95,7 +96,7 @@ class ShouldSICPeutSoumettreAFacLorsDeLaDecisionFacultaire(BusinessValidator):
     statut: ChoixStatutPropositionGenerale
 
     def validate(self, *args, **kwargs):
-        if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC:
+        if self.statut.name not in STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION:
             raise SituationPropositionNonSICException
 
 
@@ -120,12 +121,30 @@ class ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire(BusinessValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ShouldSicPeutSoumettreAuSicLorsDeLaDecisionFacultaire(BusinessValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def validate(self, *args, **kwargs):
+        if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC:
+            raise SituationPropositionNonFACException
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ShouldFacPeutDonnerDecision(BusinessValidator):
     statut: ChoixStatutPropositionGenerale
 
     def validate(self, *args, **kwargs):
         if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC:
             raise SituationPropositionNonFACException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldSicPeutDonnerDecision(BusinessValidator):
+    statut: ChoixStatutPropositionGenerale
+
+    def validate(self, *args, **kwargs):
+        if self.statut.name not in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC:
+            raise SituationPropositionNonSICException
 
 
 @attr.dataclass(frozen=True, slots=True)

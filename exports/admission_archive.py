@@ -37,7 +37,7 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
 from base.models.student import Student
 from osis_document.api.utils import confirm_remote_upload, launch_post_processing
-from osis_document.enums import PostProcessingType
+from osis_document.enums import PostProcessingType, DocumentExpirationPolicy
 from osis_profile.models import EducationalExperience
 from osis_signature.enums import SignatureState
 from osis_signature.models import StateHistory
@@ -89,7 +89,10 @@ def admission_pdf_archive(task_uuid, language=None):
         )
 
     # Merge project and gantt into PDF
-    generated_uuid = confirm_remote_upload(token)
+    generated_uuid = confirm_remote_upload(
+        token,
+        document_expiration_policy=DocumentExpirationPolicy.EXPORT_EXPIRATION_POLICY.value
+    )
     output = launch_post_processing(
         uuid_list=[
             str(file_uuid) for file_uuid in [generated_uuid] + admission.project_document + admission.gantt_graph

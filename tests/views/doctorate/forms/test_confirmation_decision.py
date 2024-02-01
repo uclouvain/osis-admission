@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -63,6 +63,10 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         patched = cls.confirm_remote_upload_patcher.start()
         patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
 
+        cls.confirm_multiple_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = cls.confirm_multiple_upload_patcher.start()
+        patched.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+
         cls.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
         patched = cls.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf"}
@@ -75,9 +79,9 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
         patched = cls.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
 
-        cls.file_confirm_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_upload')
+        cls.file_confirm_upload_patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = cls.file_confirm_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        patched.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
 
         cls.get_mandates_service_patcher = patch('reference.services.mandates.MandatesService.get')
         patched = cls.get_mandates_service_patcher.start()
@@ -152,6 +156,7 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.confirm_remote_upload_patcher.stop()
+        cls.confirm_multiple_upload_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.get_remote_token_patcher.stop()
         cls.save_raw_content_remotely_patcher.stop()
@@ -301,7 +306,7 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
             'form',
             None,
             [
-                "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
+                "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
                 "et le procès verbal de l'épreuve ont bien été complétés."
             ],
         )
@@ -413,7 +418,7 @@ class DoctorateConfirmationDecisionViewTestCase(TestCase):
             'form',
             None,
             [
-                "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
+                "L'épreuve de confirmation n'est pas complète : veuillez vous assurer que la date "
                 "et le procès verbal de l'épreuve ont bien été complétés."
             ],
         )

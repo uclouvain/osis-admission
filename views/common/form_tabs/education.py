@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from copy import copy
 
 from django.db import transaction
@@ -65,6 +66,7 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, FormV
         'without_menu': True,
     }
     update_requested_documents = True
+    update_admission_author = True
     permission_required = 'admission.change_admission_secondary_studies'
 
     def get_context_data(self, **kwargs):
@@ -186,6 +188,9 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, FormV
                     self.clean_high_school_diploma_alternative()
 
         return super().form_valid(form)
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
 
     def get_forms(self, context_data=None):
         if context_data is None:

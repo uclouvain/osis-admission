@@ -1,0 +1,66 @@
+{% load admission i18n static %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<p>
+  Après examen de votre dossier, j’ai le regret de vous faire savoir que votre demande d’admission au programme de «
+  {% if proposition|est_premiere_annee %}
+    {{ proposition.formation.intitule|intitule_premiere_annee }} ({{ proposition.formation.sigle }}-1)
+  {% else %}
+    {{ proposition.formation.intitule }} ({{ proposition.formation.sigle }})
+  {% endif %}
+   » pour l’année académique {{ proposition.formation.annee|get_academic_year }} ne peut faire
+  l’objet d’une réponse favorable.
+</p>
+
+<p>
+  Il ressort de l’application de l’article 3 du décret du 11 avril 2014 adaptant le financement des établissements
+  d’enseignement supérieur à la nouvelle organisation des études que la Communauté française de Belgique n’octroie pas
+  de financement aux établissements d’enseignement supérieur pour vos études.
+</p>
+
+<p>
+  À titre exceptionnel, les autorités de l’UCLouvain peuvent décider de participer au financement de certain·es
+  étudiant·es qui répondent à des critères académiques particuliers. Après examen de votre dossier, votre parcours
+  antérieur ne permet pas de vous octroyer cette possibilité.
+</p>
+
+<p>
+  Par conséquent, et en application de l'article 96, § 1er du décret du 7 novembre 2013 définissant le paysage de
+  l'enseignement supérieur et l'organisation académique des études, votre demande d'admission est refusée.
+</p>
+
+<p>
+  Si vous estimez que des circonstances exceptionnelles le justifient, il vous est loisible d’introduire un recours
+  conformément à l’article 96, § 2 du décret précité et à l’article 23 du Règlement Général des Études et des Examens
+  de l’UCLouvain. Ce recours doit être adressé au vice-recteur aux affaires étudiantes dans les cinq jours qui
+  suivent la notification de la présente décision. Ce recours doit être envoyé par lettre recommandée ou
+  déposé au secrétariat du vice-recteur aux affaires étudiantes contre accusé de réception.
+</p>
+
+<p>
+  Je vous invite à consulter la page suivante afin de prendre connaissance des détails de cette
+  procédure : <a href="https://uclouvain.be/fr/decouvrir/recours.html">
+  https://uclouvain.be/fr/decouvrir/recours.html</a>.
+</p>

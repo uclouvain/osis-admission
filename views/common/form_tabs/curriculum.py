@@ -46,6 +46,7 @@ from admission.contrib.models.base import (
 )
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
+from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.forms import (
@@ -60,6 +61,7 @@ from admission.forms.admission.curriculum import (
     AdmissionCurriculumEducationalExperienceYearFormSet,
     AdmissionCurriculumProfessionalExperienceForm,
 )
+from admission.forms.specific_question import ConfigurableFormMixin
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
@@ -70,9 +72,34 @@ from reference.models.enums.cycle import Cycle
 __all__ = [
     'CurriculumEducationalExperienceFormView',
     'CurriculumEducationalExperienceDeleteView',
+    'CurriculumGlobalFormView',
     'CurriculumNonEducationalExperienceFormView',
     'CurriculumNonEducationalExperienceDeleteView',
 ]
+
+
+class CurriculumGlobalFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
+    urlpatterns = {'global': ''}
+    template_name = 'admission/forms/curriculum.html'
+    permission_required = 'admission.change_admission_curriculum'
+    form_class = ConfigurableFormMixin
+    update_requested_documents = True
+    update_admission_author = True
+    specific_questions_tab = Onglets.CURRICULUM
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['form_item_configurations'] = self.specific_questions
+        return kwargs
+
+    def get_initial(self):
+        return {'specific_question_answers': self.admission.specific_question_answers}
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
+
+    def get_success_url(self):
+        return self.request.get_full_path()
 
 
 class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
@@ -87,6 +114,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         'without_menu': True,
     }
     update_requested_documents = True
+    update_admission_author = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -293,7 +321,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
                     admission = self.admission
                     experience_checklist = Checklist.initialiser_checklist_experience(instance.uuid).to_dict()
                     admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
-                    admission.save()
+                    admission.save(update_fields=['checklist'])
 
         return self.form_valid(base_form)
 
@@ -502,6 +530,7 @@ class CurriculumNonEducationalExperienceFormView(AdmissionFormMixin, LoadDossier
         'without_menu': True,
     }
     update_requested_documents = True
+    update_admission_author = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -536,9 +565,6 @@ class CurriculumNonEducationalExperienceFormView(AdmissionFormMixin, LoadDossier
         context['CURRICULUM_ACTIVITY_LABEL'] = CURRICULUM_ACTIVITY_LABEL
         context['existing_experience'] = self.existing_experience
         return context
-
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         cleaned_data = form.cleaned_data
@@ -588,7 +614,7 @@ class CurriculumNonEducationalExperienceFormView(AdmissionFormMixin, LoadDossier
                     admission = self.admission
                     experience_checklist = Checklist.initialiser_checklist_experience(instance.uuid).to_dict()
                     admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
-                    admission.save()
+                    admission.save(update_fields=['checklist'])
 
         return super().form_valid(form)
 
@@ -624,7 +650,9 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
                     experiences.pop(index)
                     break
 
-            admission.save()
+        admission.last_update_author = self.request.user.person
+
+        admission.save()
 
         self.admission.update_requested_documents()
 

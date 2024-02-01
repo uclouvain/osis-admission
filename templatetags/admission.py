@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import re
 from dataclasses import dataclass
@@ -70,9 +71,11 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
     RegleDeFinancement,
     RegleCalculeResultatAvecFinancable,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
+    ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO, PropositionDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     CategorieActivite,
@@ -88,7 +91,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import format_academic_year
+from admission.utils import format_academic_year, get_access_conditions_url
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 
 from base.models.enums.civil_state import CivilState
@@ -107,6 +110,14 @@ PERMISSION_BY_ADMISSION_CLASS = {
     GeneralEducationAdmission: 'generaleducationadmission',
     ContinuingEducationAdmission: 'continuingeducationadmission',
 }
+
+NAMUR = 'Namur'
+TOURNAI = 'Tournai'
+MONS = 'Mons'
+CHARLEROI = 'Charleroi'
+WOLUWE = 'Bruxelles Woluwe'
+SAINT_LOUIS = 'Bruxelles Saint-Louis'
+SAINT_GILLES = 'Bruxelles Saint-Gilles'
 
 register = template.Library()
 
@@ -165,7 +176,7 @@ def display(*args):
         elif nextarg == ",":
             ret, val = ret[:-1], next(iter(ret[-1:]), '')
             ret.append(reduce_list_separated(val, next(iterargs, None)))
-        elif nextarg in ["-", ':']:
+        elif nextarg in ["-", ':', ' - ']:
             ret, val = ret[:-1], next(iter(ret[-1:]), '')
             ret.append(reduce_list_separated(val, next(iterargs, None), separator=f" {nextarg} "))
         elif isinstance(nextarg, str) and len(nextarg) > 1 and re.match(r'\s', nextarg[0]):
@@ -756,6 +767,12 @@ def get_short_academic_year(year: Union[int, str, float]):
     return format_academic_year(year, short=True)
 
 
+@register.filter
+def get_last_inscription_date(year: Union[int, str, float]):
+    """Return the academic year related to a specific year."""
+    return datetime.date(year, 9, 30)
+
+
 @register.filter(is_safe=False)
 def default_if_none_or_empty(value, arg):
     """If value is None or empty, use given default."""
@@ -769,7 +786,7 @@ def concat(*args):
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
-def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects')):
+def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects'), **kwargs):
     """Display the answers of the specific questions based on a list of configurations."""
     return {
         'fields': configurations,
@@ -777,6 +794,7 @@ def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], ti
         'all_inline': context.get('all_inline'),
         'load_files': context.get('load_files'),
         'hide_files': context.get('hide_files'),
+        'edit_link_button': kwargs.get('edit_link_button'),
     }
 
 
@@ -847,6 +865,8 @@ def interpolate(string, **kwargs):
 def admission_url(admission_uuid: str, osis_education_type: str):
     """Get the base URL of a specific admission"""
     admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+    if admission_context is None:
+        return None
     return reverse(f'admission:{admission_context}', kwargs={'uuid': admission_uuid})
 
 
@@ -879,6 +899,11 @@ def get_ordered_checklist_items(checklist_items: dict):
     return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])
 
 
+@register.filter
+def is_list(value) -> bool:
+    return isinstance(value, list)
+
+
 @register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
 def checklist_state_button(context, **kwargs):
     expected_attrs = {
@@ -889,6 +914,7 @@ def checklist_state_button(context, **kwargs):
             'state',
             'class',
             'tab',
+            'tooltip',
             'disabled',
             'open_modal',
             'htmx_post',
@@ -1268,3 +1294,58 @@ def est_premiere_annee(admission: Union[PropositionGestionnaireDTO, DemandeReche
 @register.filter
 def intitule_premiere_annee(intitule: str):
     return _("First year of") + ' ' + intitule.lower()
+
+
+@register.inclusion_tag('admission/exports/includes/footer_campus.html')
+def footer_campus(proposition):
+    CAMPUS = {
+        NAMUR: 'NAMUR',
+        TOURNAI: 'TOURNAI',
+        MONS: 'MONS',
+        CHARLEROI: 'CHARLEROI',
+        WOLUWE: 'BRUXELLES',
+        SAINT_LOUIS: 'BRUXELLES',
+        SAINT_GILLES: 'BRUXELLES',
+    }
+
+    return {
+        'campus': CAMPUS.get(proposition.formation.campus_inscription.nom, 'LLN'),
+        'proposition': proposition,
+    }
+
+
+@register.filter
+def admission_has_refusal(admission):
+    return admission.type_de_refus and (admission.motifs_refus or admission.autres_motifs_refus)
+
+
+@register.filter
+def get_intitule_in_candidate_language(proposition: PropositionGestionnaireDTO):
+    if proposition.langue_contact_candidat == settings.LANGUAGE_CODE_FR:
+        return proposition.formation.intitule_fr
+    return proposition.formation.intitule_en
+
+
+@register.filter
+def sic_can_edit(proposition: PropositionGestionnaireDTO):
+    return proposition.statut in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC
+
+
+@register.filter
+def sic_in_final_statut(checklist_statut):
+    return checklist_statut['statut'] == ChoixStatutChecklist.GEST_REUSSITE.name or (
+        checklist_statut['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+        and checklist_statut['extra']['blocage'] != 'to_be_completed'
+    )
+
+
+@register.filter
+def access_conditions_url(proposition: PropositionDTO):
+    training = BaseAdmission.objects.values(
+        'training__education_group_type__name', 'training__acronym', 'training__partial_acronym'
+    ).get(uuid=proposition.uuid)
+    return get_access_conditions_url(
+        training_type=training['training__education_group_type__name'],
+        training_acronym=training['training__acronym'],
+        partial_training_acronym=training['training__partial_acronym'],
+    )

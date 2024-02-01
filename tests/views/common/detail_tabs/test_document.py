@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from email import message_from_string
@@ -129,6 +130,12 @@ class DocumentViewTestCase(TestCase):
         patcher = patch(
             'osis_document.api.utils.confirm_remote_upload',
             side_effect=lambda **kwargs: uuid.uuid4(),
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch(
+            'osis_document.contrib.fields.FileField._confirm_multiple_upload',
+            side_effect=lambda _, value, __: [uuid.uuid4()] if value else [],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -894,6 +901,8 @@ class DocumentViewTestCase(TestCase):
 
         self.client.force_login(user=self.second_sic_manager_user)
 
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         frozen_time.move_to('2022-01-03')
 
         # Get the editing form
@@ -1012,6 +1021,8 @@ class DocumentViewTestCase(TestCase):
 
         self.client.force_login(user=self.second_fac_manager_user)
 
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         frozen_time.move_to('2022-01-03')
 
         # Get the editing form
@@ -1165,6 +1176,8 @@ class DocumentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(form.fields['request_status'].required, False)
 
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         frozen_time.move_to('2022-01-02')
 
         # Post a valid form
@@ -1205,7 +1218,7 @@ class DocumentViewTestCase(TestCase):
 
         # We indicate that a field has been automatically required by the system
         self.general_admission.requested_documents[self.non_free_document_identifier]['automatically_required'] = True
-        self.general_admission.save()
+        self.general_admission.save(update_fields=['requested_documents'])
 
         response = self.client.get(
             resolve_url(
@@ -1284,8 +1297,8 @@ class DocumentViewTestCase(TestCase):
         self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
 
     # The manager cancels the request of a document
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_sic_manager_cancels_the_request_of_a_free_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_sic_manager_cancels_the_request_of_a_free_document(self, frozen_time):
         self.init_documents(for_sic=True)
 
         self.client.force_login(user=self.sic_manager_user)
@@ -1338,6 +1351,10 @@ class DocumentViewTestCase(TestCase):
         # The admission contains the information about this request
         self.general_admission.refresh_from_db()
         self.assertIsNotNone(self.general_admission.requested_documents.get(document_identifier))
+
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
 
         # A specific question has been created
         related_specific_question_exists = AdmissionFormItemInstantiation.objects.filter(
@@ -1395,8 +1412,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.second_sic_manager_user.person)
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_fac_manager_cancels_the_request_of_a_free_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_fac_manager_cancels_the_request_of_a_free_document(self, frozen_time):
         self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.fac_manager_user)
@@ -1449,6 +1466,10 @@ class DocumentViewTestCase(TestCase):
         # The admission contains the information about this request
         self.general_admission.refresh_from_db()
         self.assertIsNotNone(self.general_admission.requested_documents.get(document_identifier))
+
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
 
         # A specific question has been created
         related_specific_question_exists = AdmissionFormItemInstantiation.objects.filter(
@@ -1617,7 +1638,7 @@ class DocumentViewTestCase(TestCase):
 
         # We indicate that a field has been automatically required by the system
         self.general_admission.requested_documents[self.non_free_document_identifier]['automatically_required'] = True
-        self.general_admission.save()
+        self.general_admission.save(update_fields=['requested_documents'])
 
         response = self.client.get(
             resolve_url(
@@ -1651,8 +1672,8 @@ class DocumentViewTestCase(TestCase):
         self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
 
     # The manager deletes a document
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_sic_manager_deletes_a_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_sic_manager_deletes_a_document(self, frozen_time):
         self.init_documents(for_sic=True)
 
         base_url = 'admission:general-education:document:delete'
@@ -1690,6 +1711,9 @@ class DocumentViewTestCase(TestCase):
 
         # A SIC manager can delete SIC documents
         # Internal document
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         self.general_admission.refresh_from_db()
         document_uuid = uuid.UUID(self.sic_free_non_requestable_internal_document.split('.')[-1])
         self.assertIn(document_uuid, self.general_admission.uclouvain_sic_documents)
@@ -1713,7 +1737,9 @@ class DocumentViewTestCase(TestCase):
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
         self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
-        self.general_admission.save()
+        frozen_time.move_to('2022-01-04')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
 
         self.assertIsNotNone(self.general_admission.requested_documents.get(self.sic_free_requestable_document))
 
@@ -1737,7 +1763,9 @@ class DocumentViewTestCase(TestCase):
 
         # Non free document
         self.general_admission.curriculum = [uuid.uuid4()]
-        self.general_admission.save()
+        frozen_time.move_to('2022-01-05')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['curriculum', 'last_update_author'])
 
         response = self.client.delete(
             resolve_url(
@@ -1757,8 +1785,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_fac_manager_deletes_a_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_fac_manager_deletes_a_document(self, frozen_time):
         self.init_documents(for_fac=True)
 
         base_url = 'admission:general-education:document:delete'
@@ -1796,6 +1824,9 @@ class DocumentViewTestCase(TestCase):
 
         # A FAC manager can delete FAC documents
         # Internal document
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         self.general_admission.refresh_from_db()
         document_uuid = uuid.UUID(self.fac_free_non_requestable_internal_document.split('.')[-1])
         self.assertIn(document_uuid, self.general_admission.uclouvain_fac_documents)
@@ -1818,7 +1849,9 @@ class DocumentViewTestCase(TestCase):
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
         self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
-        self.general_admission.save()
+        frozen_time.move_to('2022-01-04')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
 
         self.assertIsNotNone(self.general_admission.requested_documents.get(self.fac_free_requestable_document))
 
@@ -1853,8 +1886,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     # The manager replaces the document
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_sic_manager_replaces_a_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_sic_manager_replaces_a_document(self, frozen_time):
         self.init_documents(for_sic=True)
 
         base_url = 'admission:general-education:document:replace'
@@ -1893,6 +1926,9 @@ class DocumentViewTestCase(TestCase):
         # A SIC manager can replace SIC documents
         # Internal document
         self.change_remote_metadata_patcher.reset_mock()
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         self.general_admission.refresh_from_db()
         old_document_uuid = uuid.UUID(self.sic_free_non_requestable_internal_document.split('.')[-1])
         self.assertIn(old_document_uuid, self.general_admission.uclouvain_sic_documents)
@@ -1940,7 +1976,9 @@ class DocumentViewTestCase(TestCase):
         self.change_remote_metadata_patcher.reset_mock()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
         self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
-        self.general_admission.save()
+        frozen_time.move_to('2022-01-04')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
 
         old_document_uuid = self.general_admission.requested_documents.get(self.sic_free_requestable_document)
         self.assertIsNotNone(old_document_uuid)
@@ -1980,7 +2018,9 @@ class DocumentViewTestCase(TestCase):
         # Non free document
         old_document_uuid = [uuid.uuid4()]
         self.general_admission.curriculum = old_document_uuid
-        self.general_admission.save()
+        frozen_time.move_to('2022-01-05')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['curriculum', 'last_update_author'])
         self.change_remote_metadata_patcher.reset_mock()
 
         # Get the form with the right configuration depending on the document
@@ -2079,8 +2119,8 @@ class DocumentViewTestCase(TestCase):
             },
         )
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_fac_manager_replaces_a_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_fac_manager_replaces_a_document(self, frozen_time):
         self.init_documents(for_fac=True)
 
         base_url = 'admission:general-education:document:replace'
@@ -2118,6 +2158,9 @@ class DocumentViewTestCase(TestCase):
 
         # A FAC manager can replace FAC documents
         # Internal document
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         self.general_admission.refresh_from_db()
         self.change_remote_metadata_patcher.reset_mock()
         old_document_uuid = uuid.UUID(self.fac_free_non_requestable_internal_document.split('.')[-1])
@@ -2166,7 +2209,9 @@ class DocumentViewTestCase(TestCase):
         self.change_remote_metadata_patcher.reset_mock()
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
         self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
-        self.general_admission.save()
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
 
         old_document_uuid = self.general_admission.requested_documents.get(self.fac_free_requestable_document)
         self.assertIsNotNone(old_document_uuid)
@@ -2216,8 +2261,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     # The manager uploads the document
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_sic_manager_uploads_a_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_sic_manager_uploads_a_document(self, frozen_time):
         self.init_documents(for_sic=True)
 
         base_url = 'admission:general-education:document:upload'
@@ -2256,6 +2301,9 @@ class DocumentViewTestCase(TestCase):
         # A SIC manager can upload SIC documents
         # Internal document
         self.change_remote_metadata_patcher.reset_mock()
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         self.general_admission.refresh_from_db()
         old_document_uuid = uuid.UUID(self.sic_free_non_requestable_internal_document.split('.')[-1])
         self.assertIn(old_document_uuid, self.general_admission.uclouvain_sic_documents)
@@ -2303,7 +2351,9 @@ class DocumentViewTestCase(TestCase):
         self.change_remote_metadata_patcher.reset_mock()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
         self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
-        self.general_admission.save()
+        frozen_time.move_to('2022-01-04')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
 
         old_document_uuid = self.general_admission.requested_documents.get(self.sic_free_requestable_document)
         self.assertIsNotNone(old_document_uuid)
@@ -2344,7 +2394,9 @@ class DocumentViewTestCase(TestCase):
         self.change_remote_metadata_patcher.reset_mock()
         old_document_uuid = [uuid.uuid4()]
         self.general_admission.curriculum = old_document_uuid
-        self.general_admission.save()
+        frozen_time.move_to('2022-01-05')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['curriculum', 'last_update_author'])
 
         # Get the form with the right configuration depending on the document
         response = self.client.get(
@@ -2442,8 +2494,8 @@ class DocumentViewTestCase(TestCase):
             },
         )
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_fac_manager_uploads_a_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_fac_manager_uploads_a_document(self, frozen_time):
         self.init_documents(for_fac=True)
 
         base_url = 'admission:general-education:document:upload'
@@ -2482,6 +2534,9 @@ class DocumentViewTestCase(TestCase):
         # A FAC manager can upload FAC documents
         # Internal document
         self.change_remote_metadata_patcher.reset_mock()
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         self.general_admission.refresh_from_db()
         old_document_uuid = uuid.UUID(self.fac_free_non_requestable_internal_document.split('.')[-1])
         self.assertIn(old_document_uuid, self.general_admission.uclouvain_fac_documents)
@@ -2499,11 +2554,11 @@ class DocumentViewTestCase(TestCase):
         )
 
         # Check last modification data
+        self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
 
         self.assertEqual(response.status_code, 200)
-        self.general_admission.refresh_from_db()
         self.assertNotIn(old_document_uuid, self.general_admission.uclouvain_fac_documents)
         self.assertEqual(len(self.general_admission.uclouvain_fac_documents), 1)
 
@@ -2529,7 +2584,9 @@ class DocumentViewTestCase(TestCase):
         self.change_remote_metadata_patcher.reset_mock()
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
         self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
-        self.general_admission.save()
+        frozen_time.move_to('2022-01-04')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
 
         old_document_uuid = self.general_admission.requested_documents.get(self.fac_free_requestable_document)
         self.assertIsNotNone(old_document_uuid)
@@ -2579,8 +2636,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
     # Lists of documents
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_document_detail_sic_manager(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_document_detail_sic_manager(self, frozen_time):
         self.init_documents(for_sic=True)
 
         self.client.force_login(user=self.second_sic_manager_user)
@@ -2660,6 +2717,10 @@ class DocumentViewTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn(gettext('At least one document must be selected.'), form.errors.get('__all__', []))
 
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
+
         # Post a valid form
         response = self.client.post(
             url,
@@ -2686,9 +2747,9 @@ class DocumentViewTestCase(TestCase):
                 'last_actor': self.second_sic_manager_user.person.global_id,
                 'reason': 'My reason',
                 'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
-                'last_action_at': '2022-01-01T00:00:00',
+                'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
-                'requested_at': '2022-01-01T00:00:00',
+                'requested_at': '2022-01-03T00:00:00',
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
@@ -2696,7 +2757,7 @@ class DocumentViewTestCase(TestCase):
         )
 
         # Check that the proposition status has been changed
-        self.general_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -2726,8 +2787,8 @@ class DocumentViewTestCase(TestCase):
             ).exists()
         )
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_document_detail_fac_manager(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_document_detail_fac_manager(self, frozen_time):
         self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.second_fac_manager_user)
@@ -2772,7 +2833,7 @@ class DocumentViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
         self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
-        self.general_admission.save()
+        self.general_admission.save(update_fields=['specific_question_answers'])
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
@@ -2798,7 +2859,7 @@ class DocumentViewTestCase(TestCase):
         )
 
         self.general_admission.specific_question_answers.pop(specific_question_uuid)
-        self.general_admission.save()
+        self.general_admission.save(update_fields=['specific_question_answers'])
 
         # Post an invalid form -> missing fields
         response = self.client.post(
@@ -2832,6 +2893,10 @@ class DocumentViewTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn(gettext('At least one document must be selected.'), form.errors.get('__all__', []))
 
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
+
         # Post a valid form
         response = self.client.post(
             url,
@@ -2858,9 +2923,9 @@ class DocumentViewTestCase(TestCase):
                 'last_actor': self.second_fac_manager_user.person.global_id,
                 'reason': 'My reason',
                 'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
-                'last_action_at': '2022-01-01T00:00:00',
+                'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
-                'requested_at': '2022-01-01T00:00:00',
+                'requested_at': '2022-01-03T00:00:00',
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
@@ -2868,7 +2933,7 @@ class DocumentViewTestCase(TestCase):
         )
 
         # Check that the proposition status has been changed
-        self.general_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -2937,7 +3002,7 @@ class DocumentViewTestCase(TestCase):
         file_uuid = uuid.uuid4()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
         self.general_admission.specific_question_answers[specific_question_uuid] = [file_uuid]
-        self.general_admission.save()
+        self.general_admission.save(update_fields=['specific_question_answers'])
 
         response = self.client.get(url)
 
@@ -3009,6 +3074,8 @@ class DocumentViewTestCase(TestCase):
         self.client.force_login(user=self.second_sic_manager_user)
 
         frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
 
         # Get the editing form
         response = self.client.get(
@@ -3125,6 +3192,8 @@ class DocumentViewTestCase(TestCase):
         self.client.force_login(user=self.second_fac_manager_user)
 
         frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
 
         # Get the editing form
         response = self.client.get(
@@ -3286,6 +3355,8 @@ class DocumentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(form.fields[self.non_free_document_identifier].required, False)
 
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
         frozen_time.move_to('2022-01-02')
 
         # Post a valid form
@@ -3326,7 +3397,7 @@ class DocumentViewTestCase(TestCase):
 
         # We indicate that a field has been automatically required by the system
         self.general_admission.requested_documents[self.non_free_document_identifier]['automatically_required'] = True
-        self.general_admission.save()
+        self.general_admission.save(update_fields=['requested_documents'])
 
         response = self.client.get(
             resolve_url(
@@ -3402,8 +3473,8 @@ class DocumentViewTestCase(TestCase):
         self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
 
     # The manager cancels the request of a document
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_sic_manager_cancels_the_request_status_of_a_free_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_sic_manager_cancels_the_request_status_of_a_free_document(self, frozen_time):
         self.init_documents(for_sic=True)
 
         self.client.force_login(user=self.sic_manager_user)
@@ -3456,6 +3527,10 @@ class DocumentViewTestCase(TestCase):
         # The admission contains the information about this request
         self.general_admission.refresh_from_db()
         self.assertIsNotNone(self.general_admission.requested_documents.get(document_identifier))
+
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
 
         # A specific question has been created
         related_specific_question_exists = AdmissionFormItemInstantiation.objects.filter(
@@ -3512,8 +3587,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.second_sic_manager_user.person)
 
-    @freezegun.freeze_time('2022-01-01')
-    def test_general_fac_manager_cancels_the_request_status_of_a_free_document(self):
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_fac_manager_cancels_the_request_status_of_a_free_document(self, frozen_time):
         self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.fac_manager_user)
@@ -3566,6 +3641,10 @@ class DocumentViewTestCase(TestCase):
         # The admission contains the information about this request
         self.general_admission.refresh_from_db()
         self.assertIsNotNone(self.general_admission.requested_documents.get(document_identifier))
+
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
 
         # A specific question has been created
         related_specific_question_exists = AdmissionFormItemInstantiation.objects.filter(
@@ -3683,6 +3762,10 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
+        frozen_time.move_to('2022-01-03')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
+
         # A SIC manager can cancel the request
         response = self.client.post(
             resolve_url(
@@ -3702,6 +3785,10 @@ class DocumentViewTestCase(TestCase):
         # Remove the information about the request into the admission
         self.general_admission.refresh_from_db()
         self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
         # Request the document
         response = self.client.post(
@@ -3729,7 +3816,7 @@ class DocumentViewTestCase(TestCase):
 
         # We indicate that a field has been automatically required by the system
         self.general_admission.requested_documents[self.non_free_document_identifier]['automatically_required'] = True
-        self.general_admission.save()
+        self.general_admission.save(update_fields=['requested_documents'])
 
         response = self.client.get(
             resolve_url(
@@ -3744,6 +3831,10 @@ class DocumentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(form.fields[self.non_free_document_identifier].required, False)
         self.assertIn(BLANK_CHOICE[0], form.fields[self.non_free_document_identifier].choices)
+
+        frozen_time.move_to('2022-01-04')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
 
         # Don't request the document anymore
         response = self.client.post(
@@ -3761,6 +3852,10 @@ class DocumentViewTestCase(TestCase):
         self.assertTrue(form.is_valid())
         self.general_admission.refresh_from_db()
         self.assertIsNone(self.general_admission.requested_documents.get(self.non_free_document_identifier))
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
     # The details page is different when the application is in progress
     @freezegun.freeze_time('2022-01-01')

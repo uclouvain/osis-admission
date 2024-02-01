@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,11 +39,12 @@ def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.soumettre_a_fac_lors_de_la_decision_facultaire()
+    proposition.soumettre_a_fac_lors_de_la_decision_facultaire(auteur_modification=cmd.gestionnaire)
 
     proposition_repository.save(entity=proposition)
 
     message = notification.confirmer_envoi_a_fac_lors_de_la_decision_facultaire(proposition=proposition)
+
     historique.historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
         proposition=proposition,
         message=message,

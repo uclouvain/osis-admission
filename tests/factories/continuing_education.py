@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -52,7 +52,11 @@ class ContinuingEducationTrainingFactory(EducationGroupYearFactory):
 
     @factory.post_generation
     def create_related_group_version_factory(self, create, extracted, **kwargs):
-        EducationGroupVersionFactory(offer=self, root_group__academic_year__year=self.academic_year.year)
+        EducationGroupVersionFactory(
+            offer=self,
+            version_name='',
+            root_group__academic_year__year=self.academic_year.year,
+        )
 
 
 class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):

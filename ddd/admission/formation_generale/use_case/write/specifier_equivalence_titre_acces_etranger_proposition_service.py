@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ def specifier_equivalence_titre_acces_etranger_proposition(
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     proposition.specifier_equivalence_titre_acces(
+        auteur_modification=cmd.gestionnaire,
         type_equivalence_titre_acces=cmd.type_equivalence_titre_acces,
         statut_equivalence_titre_acces=cmd.statut_equivalence_titre_acces,
         etat_equivalence_titre_acces=cmd.etat_equivalence_titre_acces,

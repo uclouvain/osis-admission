@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -243,7 +243,7 @@ class FilterTestCase(TestCase):
             data={
                 'taille_page': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
-                'numero': '000.000',
+                'numero': '0000.0000',
             },
         )
         self.assertTrue(form.is_valid())
@@ -270,7 +270,7 @@ class FilterTestCase(TestCase):
             data={
                 'taille_page': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
-                'numero': '000.000',
+                'numero': '0000.0000',
                 'nationalite': self.country.iso_code,
                 'matricule_candidat': self.candidate.global_id,
                 'matricule_promoteur': self.promoter.global_id,
@@ -294,7 +294,7 @@ class FilterTestCase(TestCase):
             data={
                 'taille_page': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
-                'numero': '000.000',
+                'numero': '0000.0000',
                 'nationalite': 'FR',
                 'matricule_candidat': '123456',
                 'matricule_promoteur': '654321',
@@ -312,7 +312,7 @@ class FilterTestCase(TestCase):
             data={
                 'taille_page': PAGINATOR_SIZE_LIST[0],
                 'cdds': [ENTITY_CDE],
-                'numero': '000.001',
+                'numero': '0000.0001',
             },
             load_labels=True,
         )

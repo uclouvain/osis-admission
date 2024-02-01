@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest import mock
@@ -32,6 +33,8 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
+from osis_notification.models import WebNotification
+from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -78,8 +81,6 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
-from osis_notification.models import WebNotification
-from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
 
@@ -174,13 +175,17 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         self.assertEqual(proposition['prenom_candidat'], self.general_education_admission.candidate.first_name)
         self.assertEqual(proposition['nom_candidat'], self.general_education_admission.candidate.last_name)
         self.assertEqual(proposition['statut'], ChoixStatutPropositionGenerale.EN_BROUILLON.name)
-        self.assertEqual(
+
+        self.assertDictEqual(
             proposition['formation'],
             {
                 'sigle': self.general_education_admission.training.acronym,
                 'code': self.general_education_admission.training.partial_acronym,
                 'annee': self.general_education_admission.training.academic_year.year,
+                'date_debut': self.general_education_admission.training.academic_year.start_date.isoformat(),
                 'intitule': self.general_education_admission.training.title,
+                'intitule_fr': self.general_education_admission.training.title,
+                'intitule_en': self.general_education_admission.training.title_english,
                 'campus': self.general_campus_name,
                 'type': self.general_education_admission.training.education_group_type.name,
                 'code_domaine': self.general_education_admission.training.main_domain.code,
@@ -235,13 +240,16 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         self.assertEqual(proposition['nom_candidat'], self.continuing_education_admission.candidate.last_name)
         self.assertEqual(proposition['statut'], ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
 
-        self.assertEqual(
+        self.assertDictEqual(
             proposition['formation'],
             {
                 'sigle': self.continuing_education_admission.training.acronym,
                 'code': self.continuing_education_admission.training.partial_acronym,
                 'annee': self.continuing_education_admission.training.academic_year.year,
+                'date_debut': self.continuing_education_admission.training.academic_year.start_date.isoformat(),
                 'intitule': self.continuing_education_admission.training.title,
+                'intitule_fr': self.continuing_education_admission.training.title,
+                'intitule_en': self.continuing_education_admission.training.title_english,
                 'campus': self.continuing_campus_name,
                 'type': self.continuing_education_admission.training.education_group_type.name,
                 'code_domaine': self.continuing_education_admission.training.main_domain.code,
@@ -590,7 +598,9 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_admission_doctorate_update_using_api_candidate(self):
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    def test_admission_doctorate_update_using_api_candidate(self, confirm_upload):
+        confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.put(self.url, data=self.update_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
@@ -652,9 +662,9 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
-        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         cls.admission = DoctorateAdmissionFactory(
             supervision_group=_ProcessFactory(),
             cotutelle=False,
@@ -839,11 +849,11 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 @freezegun.freeze_time('2020-12-15')
 class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         AdmissionAcademicCalendarFactory.produce_all_required()
 
-        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         # Create candidates
         # Complete candidate
         cls.first_candidate = CompletePersonFactory()
@@ -1010,6 +1020,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                     'last_name': self.first_candidate.last_name,
                     'gender': self.first_candidate.gender,
                     'country_of_citizenship': self.first_candidate.country_of_citizenship.iso_code,
+                    'date_of_birth': None,
                 },
                 'coordinates': {
                     'country': 'BE',

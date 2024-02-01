@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from unittest.mock import ANY, patch
 
@@ -33,6 +34,7 @@ from osis_history.models import HistoryEntry
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.dtos.bourse import BourseDTO
+from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO, BaseFormationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
@@ -82,6 +84,12 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         patcher = patch("osis_document.api.utils.confirm_remote_upload", return_value=str(uuid.uuid4()))
         patcher.start()
         self.addCleanup(patcher.stop)
+        patcher = patch(
+            'osis_document.contrib.fields.FileField._confirm_multiple_upload',
+            side_effect=lambda _, value, __: [str(uuid.uuid4())] if value else [],
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def _get_command_result(self, uuid_proposition=None) -> PropositionGestionnaireDTO:
         return message_bus_instance.invoke(
@@ -98,11 +106,25 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                 sigle=self.admission.training.acronym,
                 code=self.admission.training.partial_acronym,
                 annee=self.admission.training.academic_year.year,
+                date_debut=self.admission.training.academic_year.start_date,
                 intitule=self.admission.training.title,
+                intitule_fr=self.admission.training.title,
+                intitule_en=self.admission.training.title_english,
                 campus=ANY,
                 type=self.admission.training.education_group_type.name,
                 code_domaine=self.admission.training.main_domain.code,
-                campus_inscription='Mons',
+                campus_inscription=CampusDTO(
+                    nom='Mons',
+                    code_postal='',
+                    ville='',
+                    pays_iso_code='',
+                    nom_pays='',
+                    rue='',
+                    numero_rue='',
+                    boite_postale='',
+                    localisation='',
+                    email='',
+                ),
                 sigle_entite_gestion='SCH',
             ),
         )

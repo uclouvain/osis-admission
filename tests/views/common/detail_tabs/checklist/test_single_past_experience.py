@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import uuid
 
 import freezegun
@@ -111,13 +112,15 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
     def test_change_unknown_experience(self):
         self.client.force_login(user=self.sic_manager_user)
 
+        unknown_uuid = str(uuid.uuid4())
+
         response = self.client.post(
             resolve_url(
                 self.url_name,
                 uuid=self.general_admission.uuid,
             )
             + '?identifier='
-            + str(uuid.uuid4()),
+            + str(unknown_uuid),
             **self.default_headers,
             data={
                 'status': ChoixStatutChecklist.GEST_BLOCAGE.name,
@@ -126,7 +129,26 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.assertIn(gettext('Experience not found.'), [m.message for m in response.context['messages']])
+        self.assertNotIn(gettext('Experience not found.'), [m.message for m in response.context['messages']])
+
+        self.general_admission.refresh_from_db()
+
+        new_experience_data = next(
+            (
+                experience
+                for experience in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
+                if experience['extra']['identifiant'] == unknown_uuid
+            ),
+            None,
+        )
+
+        self.assertIsNotNone(new_experience_data)
+
+        self.assertEqual(new_experience_data['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
+        self.assertEqual(new_experience_data['extra']['identifiant'], unknown_uuid)
+
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
     def test_pass_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -184,6 +206,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
 
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
     def test_change_the_checklist_status_to_a_status_with_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -206,6 +231,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertEqual(experience_checklist['extra'].get('authentification'), '1')
 
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
     def test_change_the_checklist_status_to_a_status_without_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -227,6 +255,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
 
         self.assertEqual(experience_checklist['extra'].get('authentification'), '0')
+
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -313,7 +344,6 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
         experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
         experience_checklist['extra']['authentification'] = '0'
-        experience_checklist['extra']['commentaire_authentification'] = 'My default comment'
         experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
 
         self.general_admission.save(update_fields=['checklist'])
@@ -325,10 +355,8 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         form = response.context['form']
 
         self.assertEqual(form.initial['state'], EtatAuthentificationParcours.VRAI.name)
-        self.assertEqual(form.initial['comment'], 'My default comment')
 
         self.assertTrue(form.fields['state'].disabled)
-        self.assertTrue(form.fields['comment'].disabled)
 
     def test_form_initialization_if_the_checklist_status_is_related_to_the_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -336,7 +364,6 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
         experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
         experience_checklist['extra']['authentification'] = '1'
-        experience_checklist['extra']['commentaire_authentification'] = 'My default comment'
         experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
 
         self.general_admission.save(update_fields=['checklist'])
@@ -348,10 +375,8 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         form = response.context['form']
 
         self.assertEqual(form.initial['state'], EtatAuthentificationParcours.VRAI.name)
-        self.assertEqual(form.initial['comment'], 'My default comment')
 
         self.assertFalse(form.fields['state'].disabled)
-        self.assertFalse(form.fields['comment'].disabled)
 
     def test_change_the_authentication_data(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -359,7 +384,6 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
         experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
         experience_checklist['extra']['authentification'] = '1'
-        experience_checklist['extra']['commentaire_authentification'] = 'My default comment'
         experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
 
         self.general_admission.save(update_fields=['checklist'])
@@ -385,7 +409,6 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
             **self.default_headers,
             data={
                 self.first_experience_uuid + '-state': EtatAuthentificationParcours.FAUX.name,
-                self.first_experience_uuid + '-comment': 'My new comment',
             },
         )
 
@@ -397,5 +420,7 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
         self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_EN_COURS.name)
         self.assertEqual(experience_checklist['extra']['authentification'], '1')
-        self.assertEqual(experience_checklist['extra']['commentaire_authentification'], 'My new comment')
         self.assertEqual(experience_checklist['extra']['etat_authentification'], EtatAuthentificationParcours.FAUX.name)
+
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())

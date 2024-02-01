@@ -304,7 +304,10 @@
             </strong>
             {% include 'admission/general_education/includes/checklist/financeabilty_info.html' with current=original_admission.checklist.current.financabilite %}
             <div class="mt-1">
-              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' %}
+              {% if can_update_curriculum %}
+                {% url 'admission:general-education:update:curriculum:global' view.kwargs.uuid as global_curriculum_update_url %}
+              {% endif %}
+              {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=global_curriculum_update_url %}
             </div>
           </div>
           {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
@@ -384,6 +387,52 @@
         </div>
       {% endwith %}
 
+      <div role="tabpanel" class="tab-pane" id="decision_sic">
+        {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
+
+        {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
+        {% include 'admission/general_education/includes/checklist/sic_decision_confirm_modal.html' with target_status='INITIAL_CANDIDAT' target_url=change_status_url %}
+        {% include "admission/general_education/includes/checklist/sic_decision_approval_modal.html" %}
+        {% include "admission/general_education/includes/checklist/sic_decision_refusal_modal.html" %}
+        {% include "admission/general_education/includes/checklist/sic_decision_refusal_final_modal.html" %}
+        {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
+
+        <div class="info-part">
+          <dl>
+            <dt>{% trans "Fraudster status from SIC" %}</dt>
+            <dd>
+              {% if original_admission.checklist.current.donnees_personnelles.statut == 'GEST_BLOCAGE' and original_admission.checklist.current.donnees_personnelles.extra.fraud == '1' %}
+                <span class="bg-danger">{% trans "Fraudster" %}</span>
+              {% else %}
+                {% trans "No fraud identified" %}
+              {% endif %}
+            </dd>
+
+            <dt>{% trans "Fraudster status from ARES" %}</dt>
+            <dd>
+              Not implemented yet.
+            </dd>
+
+            {% if autres_demandes %}
+              <dt>{% trans "Other demand(s) by the candidate." %}</dt>
+              <dd>
+                {% for autre_demande in autres_demandes %}
+                  {% admission_url autre_demande.uuid autre_demande.type_formation as autre_demande_url %}
+                  {% if autre_demande_url %}<a href="autre_demande_url">{{ autre_demande.numero_demande }}</a>{% else %}{{ autre_demande.numero_demande }}{% endif %}
+                  {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
+                    {{ autre_demande.sigle_formation }}-1 - {% trans "First year of" %} {{ autre_demande.intitule_formation|lower }} ({{ autre_demande.lieu_formation }})
+                  {% else %}
+                    {{ autre_demande.sigle_formation }} - {{ autre_demande.intitule_formation }} ({{ autre_demande.lieu_formation }})
+                  {% endif %}
+                  {% if not forloop.last %}<br>{% endif %}
+                {% endfor %}
+              </dd>
+            {% endif %}
+          </dl>
+        </div>
+
+      </div>
+
     </div>
 
     <div id="info-viewer-tab" class="viewer-tab">
@@ -394,7 +443,7 @@
 
     <div id="document-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
-      <div id="document-content">
+      <div id="document-content" hx-indicator="#document-spinner">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
             <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
@@ -416,11 +465,13 @@
               >
                 <option disabled selected value>{% translate 'Select a document' %}</option>
                 {% for document in documents %}
-                  <option
-                      value="{{ document.identifiant }}"
-                  >
-                    {{ document.libelle }}
-                  </option>
+                  {% if document|is_list %}
+                    {% for sub_document in document.1 %}
+                      <option value="{{ sub_document.identifiant }}">{{ document.0 }} > {{ sub_document.libelle }}</option>
+                    {% endfor %}
+                  {% else %}
+                    <option value="{{ document.identifiant }}">{{ document.libelle }}</option>
+                  {% endif %}
                 {% endfor %}
               </select>
               <button type="button" class="btn btn-default next-option-button">
@@ -440,7 +491,9 @@
   {{ block.super }}
   {{ assimilation_form.media.js }}
   {{ fac_decision_refusal_form.media.js }}
-  {{ fac_decision_approval_form.media.js }}
+  {{ fac_decision_refusal_form.media.js }}
+  {{ sic_decision_refusal_form.media.js }}
+  {{ sic_decision_approval_form.media.js }}
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
   <script src="{% static 'admission/ckeditor.js' %}"></script>
   <script>
@@ -490,6 +543,8 @@
               const currentSelect = $(`${selectedTab}-documents-select`);
               $('.documents-tab').addClass('hidden').filter(`${selectedTab}-documents`).removeClass('hidden');
               currentSelect.prop("selectedIndex", currentSelect.find('option').length > 1 ? 1 : 0);
+              const htmxOverlay = $('#document-spinner');
+              htmxOverlay.addClass('htmx-request');
               htmx.ajax(
                   'GET',
                   '{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}',
@@ -504,6 +559,7 @@
                   if (currentSelect.length) {
                       refreshDocumentsSelectButtons(currentSelect);
                   }
+                  htmxOverlay.removeClass('htmx-request');
               });
           }
 
@@ -617,6 +673,8 @@
               }
 
               $('textarea[name="comment"]:visible').each(autogrow);
+
+              $('*[data-toggle=popover]').popover();
           });
 
           let bound = false;
@@ -757,6 +815,10 @@
               }
           });
 
+          document.body.addEventListener("closeModal", function(event) {
+              $('.modal.in').modal('hide');
+          });
+
           {# When a form is submitted #}
           const base_details_url = "{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='custom_identifier' %}";
           documentContent.on('formValidation', function(event) {
@@ -767,6 +829,8 @@
 
                   {# Refresh the details of a document if the form has an impact on it #}
                   if (event.originalEvent.detail.refresh_details) {
+                    const htmxOverlay = $('#document-spinner');
+                    htmxOverlay.addClass('htmx-request');
                       htmx.ajax(
                           'GET',
                           base_details_url.replace('custom_identifier', event.originalEvent.detail.refresh_details),
@@ -774,7 +838,9 @@
                               target: '#document-details',
                               swap: 'outerHTML',
                           }
-                      )
+                      ).finally(() => {
+                        htmxOverlay.removeClass('htmx-request');
+                      });
                   }
               }
           })
@@ -841,6 +907,27 @@
               }
           })
 
+          // SIC decision
+          const sicDecisionContainer = $('#decision_sic');
+
+          sicDecisionContainer.on('change', 'input[name="sic-decision-approval-with_additional_approval_conditions"]', function(event){
+              const container = $('#sic-decision-additional-approval-conditions-container');
+              $(this).val() === 'True' && $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
+          });
+          $('input[name="sic-decision-approval-with_additional_approval_conditions"]:checked').change();
+
+          sicDecisionContainer.on('change', 'input[name="sic-decision-approval-with_prerequisite_courses"]', function(event){
+              const container = $('#sic-decision-additional-trainings-container');
+              $(this).val() === 'True' && $(this)[0].checked ? container.removeClass('hidden') : container.addClass('hidden');
+          });
+          $('input[name="sic-decision-approval-with_prerequisite_courses"]:checked').change();
+
+          sicDecisionContainer.on('click', 'button[name^="save"]', function(event){
+              // To send the updated data from ckeditor instances
+              for (const editor in CKEDITOR.instances) {
+                  CKEDITOR.instances[editor].updateElement();
+              }
+          });
       })(jQuery)
 
         $('#merge-experience-form').on('submit', (e) => {
@@ -860,7 +947,9 @@
 {% block style %}
   {{ block.super }}
   {{ fac_decision_refusal_form.media.css }}
-  {{ fac_decision_approval_form.media.css }}
+  {{ fac_decision_refusal_form.media.css }}
+  {{ sic_decision_refusal_form.media.css }}
+  {{ sic_decision_approval_form.media.css }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
   <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
   <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
@@ -1085,6 +1174,10 @@
       margin: 0 0 0 5px
     }
 
+    .refusal-reasons-list p {
+      margin-bottom: initial;
+    }
+
     .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {
       word-wrap: break-word;
       text-overflow: inherit;
@@ -1130,5 +1223,25 @@
     }
 
 
+    #requested-documents-selects tbody tr.tab-name {
+      background-color: #f5f5f5;
+    }
+
+    #requested-documents-selects td {
+      vertical-align: middle;
+    }
+
+    #requested-documents-selects td .form-group {
+      margin-bottom: 0;
+    }
+
+    #requested-documents-selects select {
+      min-width: max-content;
+    }
+
+    .reset-button {
+      float: right;
+      margin-top: -7px;
+    }
   </style>
 {% endblock style %}

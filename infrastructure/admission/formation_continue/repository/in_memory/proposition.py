@@ -143,7 +143,7 @@ class PropositionInMemoryRepository(
             uuid=proposition.entity_id.uuid,
             reference=formater_reference(
                 reference=proposition.reference,
-                nom_campus_inscription=formation.campus_inscription,
+                nom_campus_inscription=formation.campus_inscription.nom,
                 sigle_entite_gestion=formation.sigle_entite_gestion,
                 annee=proposition.formation_id.annee,
             ),

@@ -48,6 +48,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO as DoctoratPropositionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
 from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.utils.serializers import DTOSerializer
@@ -84,6 +85,9 @@ PROPOSITION_ERROR_SCHEMA = {
     },
 }
 
+STATUT_A_COMPLETER = "A_COMPLETER"
+STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS = "TRAITEMENT_UCLOUVAIN_EN_COURS"
+
 
 class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
     url = serializers.ReadOnlyField(source="get_absolute_url")
@@ -114,6 +118,27 @@ class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelS
             "uuid",
             "status",
         ]
+
+
+class DoctoratDTOSerializer(DTOSerializer):
+    class Meta:
+        source = DoctoratDTO
+
+
+class FormationGeneraleDTOSerializer(DTOSerializer):
+    campus = serializers.CharField(source='campus.nom', default='')
+    campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
+
+    class Meta:
+        source = FormationDTO
+
+
+class FormationContinueDTOSerializer(DTOSerializer):
+    campus = serializers.CharField(source='campus.nom', default='')
+    campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
+
+    class Meta:
+        source = FormationDTO
 
 
 class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
@@ -214,11 +239,16 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
         }
     )
 
+    formation = FormationGeneraleDTOSerializer()
+
+    statut = serializers.SerializerMethodField()
+
     # This is to prevent schema from breaking on JSONField
     erreurs = None
     reponses_questions_specifiques = None
     elements_confirmation = None
     documents_demandes = None
+    droits_inscription_montant_autre = None
 
     class Meta:
         source = FormationGeneralePropositionDTO
@@ -235,6 +265,18 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
             'links',
             'pdf_recapitulatif',
         ]
+
+    def get_statut(self, obj):
+        STATUT_TO_PORTAL_STATUT = {
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name: STATUT_A_COMPLETER,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name: STATUT_A_COMPLETER,
+            ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+            ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+            ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+            ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        }
+        return STATUT_TO_PORTAL_STATUT.get(obj.statut, obj.statut)
 
 
 class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
@@ -262,6 +304,8 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
             ]
         }
     )
+
+    formation = FormationContinueDTOSerializer()
 
     # This is to prevent schema from breaking on JSONField
     erreurs = None
@@ -460,10 +504,14 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
             ]
         }
     )
+
+    formation = FormationGeneraleDTOSerializer()
+
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
     elements_confirmation = None
     documents_demandes = None
+    droits_inscription_montant_autre = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -523,6 +571,9 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
             ]
         }
     )
+
+    formation = FormationContinueDTOSerializer()
+
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
     elements_confirmation = None
@@ -609,18 +660,3 @@ class CompleterPropositionCommandSerializer(InitierPropositionCommandSerializer)
 class SectorDTOSerializer(serializers.Serializer):
     sigle = serializers.ReadOnlyField()
     intitule = serializers.ReadOnlyField()
-
-
-class DoctoratDTOSerializer(DTOSerializer):
-    class Meta:
-        source = DoctoratDTO
-
-
-class FormationGeneraleDTOSerializer(DTOSerializer):
-    class Meta:
-        source = FormationDTO
-
-
-class FormationContinueDTOSerializer(DTOSerializer):
-    class Meta:
-        source = FormationDTO

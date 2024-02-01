@@ -36,6 +36,7 @@ from admission.auth.predicates.general import (
     in_fac_status,
     not_cancelled,
     in_progress,
+    can_send_to_fac_faculty_decision,
 )
 from admission.auth.predicates.common import (
     has_scope,
@@ -112,11 +113,13 @@ class CentralManager(EntityRoleModel):
             'admission.view_checklist': is_entity_manager & is_submitted,
             'admission.change_checklist': is_entity_manager & in_sic_status,
             'admission.change_payment': is_entity_manager & in_sic_status_or_application_fees,
-            'admission.checklist_faculty_decision_transfer_to_fac': is_entity_manager & in_sic_status,
+            'admission.checklist_faculty_decision_transfer_to_fac': is_entity_manager
+            & can_send_to_fac_faculty_decision,
             'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_entity_manager & in_fac_status,
             'admission.checklist_change_past_experiences': is_entity_manager & in_sic_status,
             'admission.checklist_select_access_title': is_entity_manager & in_sic_status,
             'admission.checklist_change_sic_comment': is_entity_manager & in_sic_status,
             'admission.checklist_change_comment': is_entity_manager & in_sic_status,
+            'admission.checklist_change_sic_decision': is_entity_manager & in_sic_status,
         }
         return RuleSet(ruleset)

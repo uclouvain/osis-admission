@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ from admission.contrib.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from osis_async.models import AsyncTask
 from osis_async.models.enums import TaskState
-from osis_document.enums import PostProcessingType
+from osis_document.enums import PostProcessingType, DocumentExpirationPolicy
 
 
 class ExportPdfTestCase(TestCase):
@@ -50,8 +50,9 @@ class ExportPdfTestCase(TestCase):
     @patch('osis_document.api.utils.launch_post_processing')
     @patch('osis_document.api.utils.get_remote_metadata')
     @patch('osis_document.utils.save_raw_content_remotely')
+    @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
     @patch('osis_document.api.utils.confirm_remote_upload')
-    def test_pdf_archive(self, confirm, save, get_metadata, post_processing):
+    def test_pdf_archive(self, confirm, confirm_multiple_upload, save, get_metadata, post_processing):
         get_metadata.return_value = {"name": "test.pdf"}
         save.return_value = 'a-token'
         confirm.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
@@ -63,6 +64,9 @@ class ExportPdfTestCase(TestCase):
                 },
             }
         }
+        confirm_multiple_upload.side_effect = (
+            lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+        )
         async_task = AsyncTask.objects.create(name="Export pdf")
         AdmissionTask.objects.create(
             admission=self.admission,
@@ -71,10 +75,15 @@ class ExportPdfTestCase(TestCase):
         )
         call_command("process_admission_tasks")
         save.assert_called()
-        confirm.assert_called_with('a-token')
+        confirm.assert_called_with(
+            'a-token', document_expiration_policy=DocumentExpirationPolicy.EXPORT_EXPIRATION_POLICY.value
+        )
         post_processing.assert_called()
         async_task.refresh_from_db()
         self.assertEqual(async_task.state, TaskState.DONE.name)
+
+    def _raise_exception(self, text):
+        raise Exception(text)
 
     @patch('osis_document.utils.save_raw_content_remotely')
     @patch('osis_document.api.utils.confirm_remote_upload')
@@ -91,4 +100,5 @@ class ExportPdfTestCase(TestCase):
         save.assert_called()
         confirm.assert_not_called()
         async_task.refresh_from_db()
-        self.assertEqual(async_task.state, TaskState.PENDING.name)
+        self.assertEqual(async_task.state, TaskState.ERROR.name)
+        self.assertTrue(async_task.traceback)

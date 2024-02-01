@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,8 @@ import json
 import os
 import uuid
 from collections import defaultdict
-from typing import Dict, Union
+from contextlib import suppress
+from typing import Dict, Union, Iterable
 
 import weasyprint
 from django.conf import settings
@@ -36,7 +37,8 @@ from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
-from django.utils.translation import pgettext, override
+from django.utils import timezone
+from django.utils.translation import pgettext, override, get_language
 from rest_framework.generics import get_object_or_404
 
 from admission.auth.roles.central_manager import CentralManager
@@ -47,6 +49,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AnneesCurriculumNonSpecifieesException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
+from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
@@ -55,9 +58,14 @@ from admission.mail_templates import (
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
+from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from osis_common.ddd.interface import BusinessException, QueryRequest
+from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
 
 def get_cached_admission_perm_obj(admission_uuid):
@@ -193,6 +201,15 @@ def add_messages_into_htmx_response(request, response):
         )
 
 
+def add_close_modal_into_htmx_response(response):
+    if 'HX-Trigger' in response:
+        trigger = json.loads(response['HX-Trigger'])
+        trigger['closeModal'] = ""
+        response['HX-Trigger'] = json.dumps(trigger)
+    else:
+        response['HX-Trigger'] = json.dumps({'closeModal': ""})
+
+
 def get_portal_admission_list_url() -> str:
     """Return the url of the list of the admissions in the portal."""
     return f'{settings.OSIS_PORTAL_URL}admission/'
@@ -251,3 +268,50 @@ def get_salutation_prefix(person: Person) -> str:
             ChoixGenre.F.name: pgettext('female gender', 'Dear'),
             ChoixGenre.X.name: pgettext('other gender', 'Dear'),
         }.get(person.gender or ChoixGenre.X.name)
+
+
+def access_title_country(selectable_access_titles: Iterable[TitreAccesSelectionnableDTO]) -> str:
+    """Return the iso code of the country of the latest access title having a specify country."""
+    country = ''
+    last_experience_year = 0
+    for title in selectable_access_titles:
+        if title.selectionne and title.pays_iso_code and title.annee > last_experience_year:
+            country = title.pays_iso_code
+            last_experience_year = title.annee
+    return country
+
+
+def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
+    # Circular import otherwise
+    from infrastructure.messages_bus import message_bus_instance
+
+    if training_type == TrainingType.PHD.name:
+        return (
+            "https://uclouvain.be/en/study/inscriptions/doctorate-and-doctoral-training.html"
+            if get_language() == settings.LANGUAGE_CODE_EN
+            else "https://uclouvain.be/fr/etudier/inscriptions/conditions-doctorats.html"
+        )
+    else:
+        # Get the last year being published
+        today = timezone.now().today()
+        year = (
+            AcademicCalendar.objects.filter(
+                reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
+                start_date__lte=today,
+            )
+            .order_by('-start_date')
+            .values_list('data_year__year', flat=True)
+            .first()
+        )
+
+        sigle = training_acronym
+        with suppress(ProgramTreeNotFoundException):  # pragma: no cover
+            # Try to get the acronym from the parent, if it exists
+            sigle = message_bus_instance.invoke(
+                GetSigleFormationParenteQuery(
+                    code_formation=partial_training_acronym,
+                    annee=year,
+                )
+            )
+
+        return f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"

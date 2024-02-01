@@ -42,6 +42,7 @@ def specifier_condition_acces_proposition(
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     proposition.specifier_condition_acces(
+        auteur_modification=cmd.gestionnaire,
         condition_acces=cmd.condition_acces,
         millesime_condition_acces=cmd.millesime_condition_acces,
         titre_acces_selectionnable_repository=titre_acces_selectionnable_repository,

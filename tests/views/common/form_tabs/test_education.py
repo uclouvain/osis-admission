@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
+import datetime
 import uuid
 from unittest import mock
 
@@ -35,7 +37,10 @@ from rest_framework import status
 from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from admission.tests.factories.secondary_studies import (
@@ -49,13 +54,11 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.education_group_type import BachelorEducationGroupTypeFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory, EducationGroupYearBachelorFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
-from osis_profile.models.education import HighSchoolDiploma
 from osis_profile.models.enums.education import (
     EducationalType,
     ForeignDiplomaTypes,
@@ -93,6 +96,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
             training=self.training,
             candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
             candidate__graduated_from_high_school_year=self.academic_years[1],
+            candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
@@ -109,9 +113,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_upload')
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value: value
+        patched.side_effect = lambda _, value, __: value
 
     def test_update_education_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
@@ -209,6 +213,13 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(HighSchoolDiplomaAlternative.objects.filter(person=self.general_admission.candidate).exists())
+
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertIn(
+            f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
+            self.general_admission.requested_documents,
+        )
 
     def test_submit_valid_data_when_the_candidate_has_a_diploma_with_existing_belgian_diploma(self):
         self.client.force_login(self.sic_manager_user)
@@ -436,6 +447,77 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(HighSchoolDiplomaAlternative.objects.filter(person=self.general_admission.candidate).exists())
 
+    def test_submit_answers_to_specific_questions(self):
+        self.client.force_login(self.sic_manager_user)
+
+        text_question = TextAdmissionFormItemFactory()
+        text_question_uuid = str(text_question.uuid)
+
+        text_question_instantiation = AdmissionFormItemInstantiationFactory(
+            form_item=text_question,
+            academic_year=self.training.academic_year,
+            tab=Onglets.CHOIX_FORMATION.name,
+            required=True,
+        )
+
+        self.general_admission.specific_question_answers[text_question_uuid] = 'My first answer'
+        self.general_admission.save(update_fields=['specific_question_answers'])
+
+        # No specific question in the form
+        response = self.client.post(
+            self.form_url,
+            data={
+                'graduated_from_high_school': GotDiploma.NO.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My first answer')
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+        # One specific question in the form
+        text_question_instantiation.tab = Onglets.ETUDES_SECONDAIRES.name
+        text_question_instantiation.save(update_fields=['tab'])
+
+        # But no answer
+        response = self.client.post(
+            self.form_url,
+            data={
+                'graduated_from_high_school': GotDiploma.NO.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertFalse(form.is_valid())
+
+        self.assertIn('specific_question_answers', form.errors)
+
+        self.assertEqual(
+            len(getattr(form.fields['specific_question_answers'].fields[0], 'errors', [])),
+            1,
+        )
+
+        # And one answer
+        response = self.client.post(
+            self.form_url,
+            data={
+                'graduated_from_high_school': GotDiploma.NO.name,
+                'specific_question_answers_0': 'My second answer',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My second answer')
+
     def test_submit_valid_data_when_the_candidate_has_no_diploma_with_existing_belgian_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -588,9 +670,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_upload')
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value: value
+        patched.side_effect = lambda _, value, __: value
 
     def test_update_education_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
@@ -1866,3 +1948,74 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             diploma_alternative.first_cycle_admission_exam,
             [self.files_uuids['first_cycle_admission_exam']],
         )
+
+    def test_submit_answers_to_specific_questions(self):
+        self.client.force_login(self.sic_manager_user)
+
+        text_question = TextAdmissionFormItemFactory()
+        text_question_uuid = str(text_question.uuid)
+
+        text_question_instantiation = AdmissionFormItemInstantiationFactory(
+            form_item=text_question,
+            academic_year=self.training.academic_year,
+            tab=Onglets.CHOIX_FORMATION.name,
+            required=True,
+        )
+
+        self.general_admission.specific_question_answers[text_question_uuid] = 'My first answer'
+        self.general_admission.save(update_fields=['specific_question_answers'])
+
+        # No specific question in the form
+        response = self.client.post(
+            self.form_url,
+            data={
+                'graduated_from_high_school': GotDiploma.NO.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My first answer')
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+        # One specific question in the form
+        text_question_instantiation.tab = Onglets.ETUDES_SECONDAIRES.name
+        text_question_instantiation.save(update_fields=['tab'])
+
+        # But no answer
+        response = self.client.post(
+            self.form_url,
+            data={
+                'graduated_from_high_school': GotDiploma.NO.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        form = response.context['form']
+
+        self.assertFalse(form.is_valid())
+
+        self.assertIn('specific_question_answers', form.errors)
+
+        self.assertEqual(
+            len(getattr(form.fields['specific_question_answers'].fields[0], 'errors', [])),
+            1,
+        )
+
+        # And one answer
+        response = self.client.post(
+            self.form_url,
+            data={
+                'graduated_from_high_school': GotDiploma.NO.name,
+                'specific_question_answers_0': 'My second answer',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My second answer')

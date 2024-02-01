@@ -34,6 +34,7 @@ from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.contrib.models.continuing_education import ContinuingEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
+from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -51,6 +52,7 @@ from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
 from base.models.academic_year import AcademicYear
+from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.person import Person
@@ -217,6 +219,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     @classmethod
     def _load_dto(cls, admission: ContinuingEducationAdmission) -> 'PropositionDTO':
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
+        campus = (
+            CampusDb.objects.select_related('country')
+            .filter(
+                teaching_campus__educationgroupversion__version_name='',
+                teaching_campus__educationgroupversion__transition_name='',
+                teaching_campus__educationgroupversion__offer_id=admission.training_id,
+            )
+            .first()
+        )
+
         return PropositionDTO(
             uuid=admission.uuid,
             statut=admission.status,
@@ -229,11 +241,44 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle=admission.training.acronym,
                 code=admission.training.partial_acronym,
                 annee=admission.training.academic_year.year,
+                date_debut=admission.training.academic_year.start_date,
                 intitule=admission.training.title if language_is_french else admission.training.title_english,
-                campus=admission.teaching_campus or '',  # from annotation
+                intitule_fr=admission.training.title,
+                intitule_en=admission.training.title_english,
+                campus=CampusDTO(
+                    nom=campus.name,
+                    code_postal=campus.postal_code,
+                    ville=campus.city,
+                    pays_iso_code=campus.country.iso_code if campus.country else '',
+                    nom_pays=campus.country.name if campus.country else '',
+                    rue=campus.street,
+                    numero_rue=campus.street_number,
+                    boite_postale=campus.postal_box,
+                    localisation=campus.location,
+                    email=campus.email,
+                )
+                if campus is not None
+                else None,
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
-                campus_inscription=admission.training.enrollment_campus.name,
+                campus_inscription=CampusDTO(
+                    nom=admission.training.enrollment_campus.name,
+                    code_postal=admission.training.enrollment_campus.postal_code,
+                    ville=admission.training.enrollment_campus.city,
+                    pays_iso_code=admission.training.enrollment_campus.country.iso_code
+                    if admission.training.enrollment_campus.country
+                    else '',
+                    nom_pays=admission.training.enrollment_campus.country.name
+                    if admission.training.enrollment_campus.country
+                    else '',
+                    rue=admission.training.enrollment_campus.street,
+                    numero_rue=admission.training.enrollment_campus.street_number,
+                    boite_postale=admission.training.enrollment_campus.postal_box,
+                    localisation=admission.training.enrollment_campus.location,
+                    email=admission.training.enrollment_campus.email,
+                )
+                if admission.training.enrollment_campus is not None
+                else None,
                 sigle_entite_gestion=admission.training_management_faculty
                 or admission.sigle_entite_gestion,  # from annotation
             ),
