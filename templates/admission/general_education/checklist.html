@@ -379,8 +379,12 @@
       <div role="tabpanel" class="tab-pane" id="decision_sic">
         {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
 
+        {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
+        {% include 'admission/general_education/includes/checklist/sic_decision_confirm_modal.html' with target_status='INITIAL_CANDIDAT' target_url=change_status_url %}
         {% include "admission/general_education/includes/checklist/sic_decision_approval_modal.html" %}
         {% include "admission/general_education/includes/checklist/sic_decision_refusal_modal.html" %}
+        {% include "admission/general_education/includes/checklist/sic_decision_refusal_final_modal.html" %}
+        {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
 
         <div class="info-part">
           <dl>
@@ -428,7 +432,7 @@
 
     <div id="document-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
-      <div id="document-content">
+      <div id="document-content" hx-indicator="#document-spinner">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
             <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
@@ -450,11 +454,13 @@
               >
                 <option disabled selected value>{% translate 'Select a document' %}</option>
                 {% for document in documents %}
-                  <option
-                      value="{{ document.identifiant }}"
-                  >
-                    {{ document.libelle }}
-                  </option>
+                  {% if document|is_list %}
+                    {% for sub_document in document.1 %}
+                      <option value="{{ sub_document.identifiant }}">{{ document.0 }} > {{ sub_document.libelle }}</option>
+                    {% endfor %}
+                  {% else %}
+                    <option value="{{ document.identifiant }}">{{ document.libelle }}</option>
+                  {% endif %}
                 {% endfor %}
               </select>
               <button type="button" class="btn btn-default next-option-button">
@@ -526,6 +532,8 @@
               const currentSelect = $(`${selectedTab}-documents-select`);
               $('.documents-tab').addClass('hidden').filter(`${selectedTab}-documents`).removeClass('hidden');
               currentSelect.prop("selectedIndex", currentSelect.find('option').length > 1 ? 1 : 0);
+              const htmxOverlay = $('#document-spinner');
+              htmxOverlay.addClass('htmx-request');
               htmx.ajax(
                   'GET',
                   '{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}',
@@ -540,6 +548,7 @@
                   if (currentSelect.length) {
                       refreshDocumentsSelectButtons(currentSelect);
                   }
+                  htmxOverlay.removeClass('htmx-request');
               });
           }
 
@@ -809,6 +818,8 @@
 
                   {# Refresh the details of a document if the form has an impact on it #}
                   if (event.originalEvent.detail.refresh_details) {
+                    const htmxOverlay = $('#document-spinner');
+                    htmxOverlay.addClass('htmx-request');
                       htmx.ajax(
                           'GET',
                           base_details_url.replace('custom_identifier', event.originalEvent.detail.refresh_details),
@@ -816,7 +827,9 @@
                               target: '#document-details',
                               swap: 'outerHTML',
                           }
-                      )
+                      ).finally(() => {
+                        htmxOverlay.removeClass('htmx-request');
+                      });
                   }
               }
           })

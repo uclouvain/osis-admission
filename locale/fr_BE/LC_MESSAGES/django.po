@@ -78,6 +78,12 @@ msgid "%(state)s on %(date)s"
 msgstr "%(state)s le %(date)s"
 
 #, python-format
+msgid "%(years)s year"
+msgid_plural "%(years)s years"
+msgstr[0] "%(years)s an"
+msgstr[1] "%(years)s ans"
+
+#, python-format
 msgid "(%(minutes)s ago)"
 msgstr "(il y a %(minutes)s)"
 
@@ -971,9 +977,6 @@ msgstr "Auteur"
 msgid "Authorize"
 msgstr "Autoriser"
 
-msgid "Authorized program"
-msgstr "Programme autorisé"
-
 msgid "Authors"
 msgstr "Auteurs et autrices"
 
@@ -1001,6 +1004,10 @@ msgstr ""
 
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
+
+msgctxt "admission"
+msgid "Back to page"
+msgstr "Revenir à la page"
 
 msgid "Back to the list"
 msgstr "Retour à la liste"
@@ -2727,8 +2734,8 @@ msgstr "Commentaire de la Faculté pour le SIC"
 msgid "Faculty comment for the SIC:"
 msgstr "Commentaire de la Faculté pour le SIC :"
 
-msgid "Faculty opinion:"
-msgstr "Avis facultaire :"
+msgid "Faculty decision:"
+msgstr "Décision facultaire :"
 
 msgid "Faculty process"
 msgstr "Traitement facultaire"
@@ -4819,6 +4826,9 @@ msgstr "Autre"
 
 msgid "Other address"
 msgstr "Une autre adresse"
+
+msgid "Other authorized program"
+msgstr "Autre formation autorisée"
 
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
@@ -6984,6 +6994,17 @@ msgstr ""
 "financière de la part de l'UCLouvain."
 
 msgid ""
+"This document is an internal document containing the details of the "
+"faculty's decision. Under no circumstances will it be sent in this form to "
+"the candidate. The candidate will receive a letter from SIC containing the "
+"various details of the faculty's decision."
+msgstr ""
+"Ce document est un document interne qui reprend les éléments de la décision "
+"facultaire. Il n’est en aucun cas transmis sous cette forme au candidat ou à "
+"la candidate. Le ou la candidat·e recevra un courrier de SIC qui insérera "
+"les divers éléments de la décision facultaire."
+
+msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
 "find out how, go to <a href=\"https://www.uclouvain.be/en/study/"
@@ -7919,6 +7940,9 @@ msgstr "actions"
 
 msgid "approval"
 msgstr "accord"
+
+msgid "approval for another training"
+msgstr "accord pour une autre formation"
 
 msgctxt "payment"
 msgid "bancontact"

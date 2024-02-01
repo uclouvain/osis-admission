@@ -212,18 +212,6 @@
         </div>
       </div>
     {% endif %}
-
-    {% if current.statut == 'GEST_BLOCAGE' or current.statut == 'GEST_REUSSITE' %}
-      {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
-      {% include 'admission/general_education/includes/checklist/sic_decision_confirm_modal.html' with target_status='INITIAL_CANDIDAT' target_url=change_status_url %}
-    {% endif %}
-
-    {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'refusal' %}
-      {% include "admission/general_education/includes/checklist/sic_decision_refusal_final_modal.html" %}
-    {% endif %}
-    {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' %}
-      {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
-    {% endif %}
   </div>
 {% endwith %}
 
