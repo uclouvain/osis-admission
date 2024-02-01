@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest import mock
@@ -136,9 +137,9 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_upload')
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value: value
+        patched.side_effect = lambda _, value, __: value
 
     def test_general_specific_questions_access(self):
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(

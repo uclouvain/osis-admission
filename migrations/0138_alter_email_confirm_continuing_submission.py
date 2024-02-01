@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
     <p>
         Nous reviendrons vers vous dans les meilleurs délais. Si vous souhaitez encore modifier votre dossier
         d'admission ou pour toute question complémentaire, veuillez prendre contact avec le·a gestionnaire de la
-        formation: {program_managers_emails}.
+        formation : {program_managers_emails}.
     </p>
 
     <p>
