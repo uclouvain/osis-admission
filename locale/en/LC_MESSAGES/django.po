@@ -2054,6 +2054,13 @@ msgstr ""
 msgid "Director"
 msgstr ""
 
+msgid "Director of the inscription service"
+msgstr ""
+
+msgctxt "F"
+msgid "Director of the inscription service"
+msgstr ""
+
 msgid "Disabled"
 msgstr ""
 

@@ -59,11 +59,14 @@
         width: auto;
       }
 
-      #signature td {
-          height: 2.5cm;
-          text-align: center;
-          vertical-align: top;
-          border: 1px #000 solid;
+      #signature {
+          height: 15mm;
+          width: auto;
+      }
+
+      #sigle {
+          height: 40mm;
+          width: auto;
       }
     }
   </style>
@@ -110,17 +113,14 @@
     <strong>PDF DE REFUS D'INSCRIPTION À FAIRE.</strong>
   </p>
 
-  <div class="row">
-    <div class="col">
-      {% if director.signature %}<img src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
-      <p>
-        {{ director.first_name }} {{ director.last_name }},<br>
-        <em>Directrice du Service des inscriptions</em>
-      </p>
-    </div>
-    <div class="col text-end">
-      <img id="sigle" src="{% static "img/sedes.png" %}">
-    </div>
+  <img class="float-end" id="sigle" src="{% static "img/sedes-filigrane.jpg" %}">
+
+  <div>
+    {% if director.signature %}<img class="ms-5" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+    <p>
+      {{ director.first_name }} {{ director.last_name }},<br>
+      {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
+    </p>
   </div>
 </body>
 </html>

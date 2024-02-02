@@ -2234,6 +2234,13 @@ msgstr "Code poste diplomatique"
 msgid "Director"
 msgstr "Directeur"
 
+msgid "Director of the inscription service"
+msgstr "Directeur du Service des inscriptions"
+
+msgctxt "F"
+msgid "Director of the inscription service"
+msgstr "Directrice du Service des inscriptions"
+
 msgid "Disabled"
 msgstr "Désactivé"
 
