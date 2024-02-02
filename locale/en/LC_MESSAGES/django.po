@@ -5226,6 +5226,12 @@ msgstr ""
 msgid "Role: ADRE secretary"
 msgstr ""
 
+msgid "Role: Admission reader"
+msgstr ""
+
+msgid "Role: Admission readers"
+msgstr ""
+
 msgid "Role: CDD configurator"
 msgstr ""
 
