@@ -104,6 +104,16 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-refusal-modal"><i class="fas fa-edit"></i></button>
+          {% if current.statut != 'GEST_BLOCAGE' %}
+            <a
+              class="btn btn-default pull-right btn-heading-secondary"
+              href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="refus" %}"
+              target="_blank"
+            >
+              <i class="fa fa-magnifying-glass"></i>
+              {% translate 'Visualize refusal' %}
+            </a>
+          {% endif %}
           <h4 class="panel-title">{% trans "Refusal" %}</h4>
         </div>
         <div class="panel-body">
@@ -141,6 +151,24 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-approval-modal"><i class="fas fa-edit"></i></button>
+          {% if original_admission.type_demande == 'ADMISSION' and current.statut != 'GEST_REUSSITE' %}
+            <a
+                class="btn btn-default pull-right btn-heading-secondary"
+                href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord" %}"
+                target="_blank"
+            >
+              <i class="fa fa-magnifying-glass"></i>
+              {% translate 'Visualize approval' %}
+            </a>
+            <a
+                class="btn btn-default pull-right btn-heading-secondary"
+                href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
+                target="_blank"
+            >
+              <i class="fa fa-magnifying-glass"></i>
+              {% translate 'Visualize annexe1' %}
+            </a>
+          {% endif %}
           <h4 class="panel-title">{% trans "Approval" %}</h4>
         </div>
         <div class="panel-body">
