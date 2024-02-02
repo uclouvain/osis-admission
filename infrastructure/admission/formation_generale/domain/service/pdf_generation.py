@@ -28,6 +28,7 @@ from typing import Optional
 from django.conf import settings
 from django.utils import translation
 from django.utils.translation import gettext
+
 from osis_document.utils import confirm_upload
 
 from admission.ddd.admission.enums.emplacement_document import (
