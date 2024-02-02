@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -75,14 +75,14 @@ class RecalculerEmplacementsDocumentsNonLibresPropositionTestCase(SimpleTestCase
         self.addCleanup(self.emplacement_document_repository.reset)
 
     def test_recalculer_emplacements_documents_non_libres_proposition(self):
-        self.assertEqual(len(self.emplacement_document_repository.entities), 4)
+        self.assertEqual(len(self.emplacement_document_repository.entities), 6)
 
         proposition = self.proposition_repository.get(PropositionIdentity('uuid-MASTER-SCI'))
         proposition.curriculum = []
         proposition_id = self.message_bus.invoke(self.cmd)
 
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertTrue(len(self.emplacement_document_repository.entities) > 4)
+        self.assertTrue(len(self.emplacement_document_repository.entities) > 6)
 
         try:
             emplacement_entity_id = EmplacementDocumentIdentity(

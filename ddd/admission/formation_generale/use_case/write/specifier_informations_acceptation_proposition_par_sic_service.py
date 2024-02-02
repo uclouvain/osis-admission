@@ -64,6 +64,7 @@ def specifier_informations_acceptation_proposition_par_sic(
         nombre_de_mois_de_mobilite=cmd.nombre_de_mois_de_mobilite,
         doit_se_presenter_en_sic=cmd.doit_se_presenter_en_sic,
         communication_au_candidat=cmd.communication_au_candidat,
+        doit_fournir_visa_etudes=cmd.doit_fournir_visa_etudes,
     )
 
     proposition_repository.save(entity=proposition)

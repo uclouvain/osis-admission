@@ -722,6 +722,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             'mobility_months_amount',
             'must_report_to_sic',
             'communication_to_the_candidate',
+            'must_provide_student_visa_d',
         ]
         labels = {
             'annual_program_contact_person_name': _('First name and last name'),
@@ -741,6 +742,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             'is_mobility': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
+            'must_provide_student_visa_d': forms.CheckboxInput,
         }
 
     def __init__(
@@ -748,6 +750,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
         academic_year,
         additional_approval_conditions_for_diploma,
         documents: List[EmplacementDocumentDTO],
+        candidate_nationality_is_no_ue_5: bool,
         *args,
         **kwargs,
     ):
@@ -867,8 +870,10 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
         if not self.is_admission:
             del self.fields['must_report_to_sic']
+            del self.fields['must_provide_student_visa_d']
         else:
             self.fields['must_report_to_sic'].required = True
+            self.initial['must_provide_student_visa_d'] = candidate_nationality_is_no_ue_5
 
         self.fields['communication_to_the_candidate'].required = False
 

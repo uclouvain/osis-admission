@@ -2617,6 +2617,9 @@ msgstr ""
 msgid "First year of inscription + status"
 msgstr ""
 
+msgid "Following authorization"
+msgstr ""
+
 msgctxt "female gender"
 msgid ""
 "Following the presentation of the state of the research and the subsequent "
@@ -5554,6 +5557,9 @@ msgstr ""
 msgid "Signatures"
 msgstr ""
 
+msgid "Signed enrollment authorization"
+msgstr ""
+
 msgid "Sir"
 msgstr ""
 
@@ -5670,6 +5676,9 @@ msgid "Street"
 msgstr ""
 
 msgid "Student signature for agreement"
+msgstr ""
+
+msgid "Student visa D"
 msgstr ""
 
 msgid "Study language"
@@ -5883,6 +5892,9 @@ msgid "The candidate has several enrolment applications in progress"
 msgstr ""
 
 msgid "The candidate is doing a mobility"
+msgstr ""
+
+msgid "The candidate must provide a student visa"
 msgstr ""
 
 msgid "The candidate must report to SIC"
