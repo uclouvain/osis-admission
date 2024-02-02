@@ -626,7 +626,15 @@ msgid ""
 "certificate must be provided."
 msgstr ""
 
+msgid ""
+"Analysis file generated when the documents requested from the candidate are "
+"received"
+msgstr ""
+
 msgid "Analysis folder"
+msgstr ""
+
+msgid "Analysis folder for a general education admission"
 msgstr ""
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
@@ -1806,6 +1814,11 @@ msgstr ""
 msgid "Create the confirmation paper success attestation as PDF"
 msgstr ""
 
+msgid ""
+"Create the folder analysis of the proposition containing the requested "
+"documents that the candidate submitted."
+msgstr ""
+
 msgid "Create the recap of the proposition"
 msgstr ""
 
@@ -2612,6 +2625,10 @@ msgid "First year of"
 msgstr ""
 
 msgid "First year of inscription + status"
+msgstr ""
+
+#, python-format
+msgid "Folder analysis of the proposition %(reference)s"
 msgstr ""
 
 msgctxt "female gender"

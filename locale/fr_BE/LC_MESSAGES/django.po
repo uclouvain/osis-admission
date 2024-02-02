@@ -707,8 +707,17 @@ msgstr ""
 "d'un projet. Ces bourses internationales sont notamment attribuées par "
 "l'organisme ARES et une attestation de bourse est dès lors à fournir."
 
+msgid ""
+"Analysis file generated when the documents requested from the candidate are "
+"received"
+msgstr ""
+"Dossier d'analyse généré à la réception des documents réclamés au candidat"
+
 msgid "Analysis folder"
 msgstr "Dossier d'analyse"
+
+msgid "Analysis folder for a general education admission"
+msgstr "Dossier d'analyse pour une demande en formation générale"
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
@@ -1986,6 +1995,13 @@ msgid "Create the confirmation paper success attestation as PDF"
 msgstr ""
 "Création du PDF de l'attestation de réussite de l'épreuve de confirmation"
 
+msgid ""
+"Create the folder analysis of the proposition containing the requested "
+"documents that the candidate submitted."
+msgstr ""
+"Création du dossier d'analyse de la proposition contenant les documents "
+"réclamés que le candidat a soumis."
+
 msgid "Create the recap of the proposition"
 msgstr "Créer le récapitulatif de la la proposition"
 
@@ -2818,6 +2834,10 @@ msgstr "Première année de"
 
 msgid "First year of inscription + status"
 msgstr "Année de première inscription + statut"
+
+#, python-format
+msgid "Folder analysis of the proposition %(reference)s"
+msgstr "Dossier d'analyse de la proposition %(reference)s"
 
 msgctxt "female gender"
 msgid ""
