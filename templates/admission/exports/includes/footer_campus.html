@@ -22,20 +22,35 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-<div>
-  {% if campus == 'LLN' %}
-  <strong>LOUVAIN-LA-NEUVE</strong> | BRUXELLES | MONS | TOURNAI | CHARLEROI | NAMUR<br />
-  {% elif campus == 'BRUXELLES' %}
-  LOUVAIN-LA-NEUVE | <strong>BRUXELLES</strong> | MONS | TOURNAI | CHARLEROI | NAMUR<br />
-  {% elif campus == 'MONS' %}
-  LOUVAIN-LA-NEUVE | BRUXELLES | <strong>MONS</strong> | TOURNAI | CHARLEROI | NAMUR<br />
-  {% elif campus == 'TOURNAI' %}
-  LOUVAIN-LA-NEUVE | BRUXELLES | MONS | <strong>TOURNAI</strong> | CHARLEROI | NAMUR<br />
-  {% elif campus == 'CHARLEROI' %}
-  LOUVAIN-LA-NEUVE | BRUXELLES | MONS | TOURNAI | <strong>CHARLEROI</strong> | NAMUR<br />
-  {% elif campus == 'NAMUR' %}
-  LOUVAIN-LA-NEUVE | BRUXELLES | MONS | TOURNAI | CHARLEROI | <strong>NAMUR</strong><br />
-  {% endif %}
+<style>
+  #footer {
+      font-family: Arial, sans-serif;
+      font-size: 9pt;
+  }
+
+  #footer #campus {
+      font-weight: 500;
+  }
+  #footer #campus strong {
+      font-weight: 700;
+  }
+</style>
+<div id="footer">
+  <span id="campus">
+    {% if campus == 'LLN' %}
+    <strong>LOUVAIN-LA-NEUVE</strong> | BRUXELLES | MONS | TOURNAI | CHARLEROI | NAMUR<br />
+    {% elif campus == 'BRUXELLES' %}
+    LOUVAIN-LA-NEUVE | <strong>BRUXELLES</strong> | MONS | TOURNAI | CHARLEROI | NAMUR<br />
+    {% elif campus == 'MONS' %}
+    LOUVAIN-LA-NEUVE | BRUXELLES | <strong>MONS</strong> | TOURNAI | CHARLEROI | NAMUR<br />
+    {% elif campus == 'TOURNAI' %}
+    LOUVAIN-LA-NEUVE | BRUXELLES | MONS | <strong>TOURNAI</strong> | CHARLEROI | NAMUR<br />
+    {% elif campus == 'CHARLEROI' %}
+    LOUVAIN-LA-NEUVE | BRUXELLES | MONS | TOURNAI | <strong>CHARLEROI</strong> | NAMUR<br />
+    {% elif campus == 'NAMUR' %}
+    LOUVAIN-LA-NEUVE | BRUXELLES | MONS | TOURNAI | CHARLEROI | <strong>NAMUR</strong><br />
+    {% endif %}
+  </span>
   {% with campus_adresse=proposition.formation.campus_inscription %}
     {{ campus_adresse.rue }} {{ campus_adresse.numero_rue }}{% if campus_adresse.boite_postale %} {{ campus_adresse.boite_postale }}{% endif %},
     {% if campus_adresse.localisation %}{{ campus_adresse.localisation }}, {% endif %}
