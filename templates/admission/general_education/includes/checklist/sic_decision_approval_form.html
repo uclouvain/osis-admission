@@ -36,7 +36,11 @@
 
     {% bootstrap_form_errors sic_decision_approval_form %}
 
-    <div id="requested-documents-selects" class="form-group required_field">
+    <div id="sic-approval-requested-documents-selects" class="form-group required_field">
+      <div id="sic-approval-delete-confirm-element" class="hidden delete-confirm-element">
+        <button type="button" class="btn btn-danger delete-confirm-button">{% translate 'Confirm' %}</button>
+        <button type="button" class="btn btn-default delete-cancel-button">{% translate 'Cancel' %}</button>
+      </div>
       <table class="table table-condensed">
         <thead>
           <tr>
@@ -177,6 +181,91 @@
         'input[name=sic-decision-approval-is_mobility]': { values: ['True'] },
       }, { duration: 0, valueOnDisable: '', });
     {% endif %}
+
+        let changesInRequestedDocuments = false;
+        const selectsContainer = $('#sic-approval-requested-documents-selects');
+        const requestedDocumentsSelects = $('#sic-approval-requested-documents-selects select');
+        const confirmElement = $('#sic-approval-delete-confirm-element');
+        let confirmEvents = new Set();
+
+        {# Manage the update of the request status #}
+
+        {# Save the default value of each select #}
+        requestedDocumentsSelects.each(function(){
+            $(this).data('previous', $(this).val());
+        })
+
+        selectsContainer.on('htmx:beforeRequest', 'select', function(event) {
+            const value = $(this).val();
+
+            const elementIsConfirmed = confirmEvents.delete(this.id);
+
+            if (value === '' && !elementIsConfirmed) {
+                {# A confirmation is required #}
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                changesInRequestedDocuments = true;
+            }
+        });
+
+        {# Display a confirmation element it the document is not requested anymore #}
+        selectsContainer.on('change', 'select', function(event) {
+            if ($(this).val() === '') {
+                const clonedConfirmElement = confirmElement.clone();
+                clonedConfirmElement.removeClass('hidden');
+                clonedConfirmElement[0].id += '-' + $(this).attr('name');
+                $(this).closest('.form-group').append(clonedConfirmElement);
+                clonedConfirmElement.children('button:first').focus();
+            }
+        });
+
+        {# Confirm that the document is not requested anymore #}
+        selectsContainer.on('click', '.delete-confirm-button', function(event) {
+            const row = $(this).closest('tr');
+            const select = row.find('select');
+            confirmEvents.add(select[0].id);
+            select[0].dispatchEvent(new CustomEvent('confirmStatusChange'));
+        });
+
+        {# Cancel the cancellation of the request of the document #}
+        selectsContainer.on('click', '.delete-cancel-button', function(event) {
+            const select = $(this).closest('div.form-group').children('select');
+            select[0].value = select.data('previous');
+            $(this).closest('div').remove();
+        });
+
+        selectsContainer.on('formValidation', 'select', function(event) {
+            if (event.originalEvent.detail.is_valid) {
+                const value = $(this).val();
+
+                if (value === '') {
+                    {# Remove the row as the document is not requested anymore #}
+                    const row = $(this).closest('tr');
+                    const parentBody = row.closest('tbody');
+                    if (parentBody.find('tr').length === 2) {
+                        {# Also remove the tab name as the removed document was the only one inside it #}
+                        parentBody.remove();
+                    } else {
+                        row.remove();
+                    }
+                }
+                $(this).data('previous',value);
+            }
+        });
+
+        {# Reset the document list and the document detail if some updates were made #}
+        $('#sic-decision-approval-modal [data-dismiss="modal"]').on('click', function (event) {
+            if (changesInRequestedDocuments) {
+                $('#sic-decision-approval-form').trigger('formValidation', [
+                    {
+                        is_valid: true,
+                        refresh_details: true,
+                        refresh_list: true,
+                    }
+                ]);
+            }
+        });
   </script>
 
   {% if request.htmx %}
