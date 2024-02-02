@@ -85,6 +85,7 @@ from admission.templatetags.admission import (
     need_to_display_specific_questions,
     authentication_css_class,
     experience_details_template,
+    is_list,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -761,6 +762,14 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             'fa-solid fa-file-circle-check text-success',
             authentication_css_class(EtatAuthentificationParcours.VRAI.name),
         )
+
+    def test_is_list(self):
+        self.assertFalse(is_list(None))
+        self.assertFalse(is_list(False))
+        self.assertFalse(is_list(0))
+        self.assertFalse(is_list(0.0))
+        self.assertFalse(is_list(''))
+        self.assertTrue(is_list([]))
 
 
 class AdmissionTagsTestCase(TestCase):

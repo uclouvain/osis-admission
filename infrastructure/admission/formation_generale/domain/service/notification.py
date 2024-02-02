@@ -349,6 +349,21 @@ class Notification(INotification):
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
 
+        # Create the async task to create the folder analysis containing the submitted documents
+        task = AsyncTask.objects.create(
+            name=_('Folder analysis of the proposition %(reference)s') % {'reference': admission.reference},
+            description=_(
+                'Create the folder analysis of the proposition containing the requested documents that the '
+                'candidate submitted.',
+            ),
+            person=admission.candidate,
+        )
+        AdmissionTask.objects.create(
+            task=task,
+            admission=admission,
+            type=AdmissionTask.TaskType.GENERAL_FOLDER.name,
+        )
+
     @classmethod
     def refuser_proposition_par_sic(
         cls,

@@ -454,11 +454,13 @@
               >
                 <option disabled selected value>{% translate 'Select a document' %}</option>
                 {% for document in documents %}
-                  <option
-                      value="{{ document.identifiant }}"
-                  >
-                    {{ document.libelle }}
-                  </option>
+                  {% if document|is_list %}
+                    {% for sub_document in document.1 %}
+                      <option value="{{ sub_document.identifiant }}">{{ document.0 }} > {{ sub_document.libelle }}</option>
+                    {% endfor %}
+                  {% else %}
+                    <option value="{{ document.identifiant }}">{{ document.libelle }}</option>
+                  {% endif %}
                 {% endfor %}
               </select>
               <button type="button" class="btn btn-default next-option-button">

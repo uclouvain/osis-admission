@@ -897,6 +897,11 @@ def get_ordered_checklist_items(checklist_items: dict):
     return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])
 
 
+@register.filter
+def is_list(value) -> bool:
+    return isinstance(value, list)
+
+
 @register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
 def checklist_state_button(context, **kwargs):
     expected_attrs = {
