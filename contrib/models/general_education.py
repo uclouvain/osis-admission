@@ -348,7 +348,23 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name=_("Communication to the candidate"),
         blank=True,
     )
-
+    must_provide_student_visa_d = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('The candidate must provide a student visa'),
+    )
+    student_visa_d = FileField(
+        verbose_name=_("Student visa D"),
+        upload_to=admission_directory_path,
+        blank=True,
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    signed_enrollment_authorization = FileField(
+        verbose_name=_("Signed enrollment authorization"),
+        upload_to=admission_directory_path,
+        blank=True,
+        mimetypes=[PDF_MIME_TYPE],
+    )
     diplomatic_post = models.ForeignKey(
         blank=True,
         null=True,

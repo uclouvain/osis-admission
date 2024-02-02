@@ -752,6 +752,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             prefix='sic-decision-approval',
             additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
             documents=self.sic_decision_approval_form_requestable_documents,
+            candidate_nationality_is_no_ue_5=self.proposition.candidat_a_nationalite_hors_ue_5,
         )
 
     @cached_property
@@ -882,6 +883,7 @@ class SicApprovalDecisionView(
                     nombre_de_mois_de_mobilite=form.cleaned_data.get('mobility_months_amount', ''),
                     doit_se_presenter_en_sic=form.cleaned_data.get('must_report_to_sic', False),
                     communication_au_candidat=form.cleaned_data['communication_to_the_candidate'],
+                    doit_fournir_visa_etudes=form.cleaned_data.get('must_provide_student_visa_d', False),
                 )
             )
         except MultipleBusinessExceptions as multiple_exceptions:

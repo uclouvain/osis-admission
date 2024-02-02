@@ -969,6 +969,46 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.field, 'cotutelle_other_documents')
         self.assertEqual(document.uuids, doctorate_admission.cotutelle_other_documents)
 
+    def test_get_authorization_document(self):
+        base_identifier = OngletsDemande.SUITE_AUTORISATION.name
+
+        general_admission = GeneralEducationAdmissionFactory(
+            student_visa_d=[uuid.uuid4()],
+            signed_enrollment_authorization=[uuid.uuid4()],
+        )
+
+        # Bad identifier
+        document = get_document_from_identifier(
+            general_admission,
+            f'{base_identifier}.UNKNOWN',
+        )
+
+        self.assertIsNone(document)
+
+        # Valid identifier
+
+        # student visa d
+        document = get_document_from_identifier(
+            general_admission,
+            f'{base_identifier}.VISA_ETUDES',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, general_admission)
+        self.assertEqual(document.field, 'student_visa_d')
+        self.assertEqual(document.uuids, general_admission.student_visa_d)
+
+        # signed enrollment authorization
+        document = get_document_from_identifier(
+            general_admission,
+            f'{base_identifier}.AUTORISATION_PDF_SIGNEE',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, general_admission)
+        self.assertEqual(document.field, 'signed_enrollment_authorization')
+        self.assertEqual(document.uuids, general_admission.signed_enrollment_authorization)
+
     def test_get_non_free_doctorate_supervision_document(self):
         base_identifier = OngletsDemande.SUPERVISION.name
 
