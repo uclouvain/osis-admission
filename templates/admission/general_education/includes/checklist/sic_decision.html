@@ -172,6 +172,9 @@
           <h4 class="panel-title">{% trans "Approval" %}</h4>
         </div>
         <div class="panel-body">
+          {% if sic_decision_approval_form.is_admission %}
+            {% field_data _('The candidate must provide a student visa') admission.doit_fournir_visa_etudes %}
+          {% endif %}
           {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
           {% if admission.avec_conditions_complementaires %}
             {% if admission.conditions_complementaires %}
