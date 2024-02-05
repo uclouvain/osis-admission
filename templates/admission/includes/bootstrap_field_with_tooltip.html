@@ -31,7 +31,11 @@
   >
     <div class="label-container">
       <label class="control-label" for="{{ field.id_for_label }}">
-        {{ field.label }}
+        {% if label != None %}
+          {{ label }}
+        {% else %}
+          {{ field.label }}
+        {% endif %}
       </label>
       <a
           tabindex="0"

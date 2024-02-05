@@ -636,12 +636,13 @@ def status_as_class(activity):
 
 
 @register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False):
+def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None):
     return {
         'field': field,
         'classes': classes,
         'show_help': show_help,
         'html_tooltip': html_tooltip,
+        'label': label,
     }
 
 
