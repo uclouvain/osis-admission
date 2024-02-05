@@ -2822,6 +2822,9 @@ msgstr "Première année de"
 msgid "First year of inscription + status"
 msgstr "Année de première inscription + statut"
 
+msgid "Following authorization"
+msgstr "Suite à l'autorisation"
+
 msgctxt "female gender"
 msgid ""
 "Following the presentation of the state of the research and the subsequent "
@@ -6116,6 +6119,9 @@ msgstr "Afficher le menu de la checklist"
 msgid "Signatures"
 msgstr "Signatures"
 
+msgid "Signed enrollment authorization"
+msgstr "Autorisation d'inscription signée"
+
 msgid "Sir"
 msgstr "Monsieur"
 
@@ -6251,6 +6257,9 @@ msgstr "Rue"
 
 msgid "Student signature for agreement"
 msgstr "Signature de l’étudiant·e pour accord"
+
+msgid "Student visa D"
+msgstr "Visa d'études D"
 
 msgid "Study language"
 msgstr "Langue des études"
@@ -6499,6 +6508,9 @@ msgstr "Le candidat a plusieurs demandes d'inscription en cours"
 
 msgid "The candidate is doing a mobility"
 msgstr "Le candidat effectue une mobilité"
+
+msgid "The candidate must provide a student visa"
+msgstr "Le candidat doit fournir un visa d'études"
 
 msgid "The candidate must report to SIC"
 msgstr "Le candidat doit se présenter en SIC"

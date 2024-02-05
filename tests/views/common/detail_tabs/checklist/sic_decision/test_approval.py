@@ -120,6 +120,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.mobility_months_amount = ''
         self.general_admission.must_report_to_sic = None
         self.general_admission.communication_to_the_candidate = ''
+        self.general_admission.must_provide_student_visa_d = False
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -146,6 +147,28 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('mobility_months_amount'), '')
         self.assertEqual(form.initial.get('must_report_to_sic'), None)
         self.assertEqual(form.initial.get('communication_to_the_candidate'), '')
+        self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
+
+        # By default, candidate who are not from UE+5 must provide a student visa
+        self.general_admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='ZB')
+        self.general_admission.candidate.save()
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['sic_decision_approval_form']
+        self.assertEqual(form.initial.get('must_provide_student_visa_d'), True)
+
+        self.general_admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='CH')
+        self.general_admission.candidate.save()
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['sic_decision_approval_form']
+        self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
 
     def test_approval_decision_form_initialization_other_training(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -330,6 +353,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             'sic-decision-approval-rebilling_or_third_party_payer': 'rebilling_or_third_party_payer',
             'sic-decision-approval-first_year_inscription_and_status': 'first_year_inscription_and_status',
             'sic-decision-approval-communication_to_the_candidate': 'Communication',
+            'sic-decision-approval-must_provide_student_visa_d': 'on',
         }
 
         response = self.client.post(self.url, data=data, **self.default_headers)
@@ -384,6 +408,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.general_admission.communication_to_the_candidate, 'Communication')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.must_provide_student_visa_d, True)
 
         # Check that an history entry is created
         entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
@@ -421,8 +446,18 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertIn('is_mobility', form.fields)
         self.assertIn('mobility_months_amount', form.fields)
 
-    def test_approval_decision_form_has_must_report_to_sic(self):
+    def test_approval_decision_form_has_must_report_to_sic_and_must_provide_student_visa_d_for_an_admission(self):
         self.client.force_login(user=self.sic_manager_user)
+
+        self.general_admission.type_demande = TypeDemande.INSCRIPTION.name
+        self.general_admission.save()
+        response = self.client.get(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+        form = response.context['sic_decision_approval_form']
+
+        self.assertNotIn('must_report_to_sic', form.fields)
+        self.assertNotIn('must_provide_student_visa_d', form.fields)
+
         self.general_admission.type_demande = TypeDemande.ADMISSION.name
         self.general_admission.save()
         response = self.client.get(self.url, **self.default_headers)
@@ -430,6 +465,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         form = response.context['sic_decision_approval_form']
 
         self.assertIn('must_report_to_sic', form.fields)
+        self.assertIn('must_provide_student_visa_d', form.fields)
 
     def test_approval_decision_form_has_vip_fields(self):
         self.client.force_login(user=self.sic_manager_user)

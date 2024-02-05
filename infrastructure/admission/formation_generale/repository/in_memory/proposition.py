@@ -283,6 +283,10 @@ class PropositionInMemoryRepository(
             financabilite_regle_calcule_le=proposition.financabilite_regle_calcule_le,
             financabilite_regle=proposition.financabilite_regle,
             financabilite_regle_etabli_par=proposition.financabilite_regle_etabli_par,
+            doit_fournir_visa_etudes=proposition.doit_fournir_visa_etudes,
+            visa_etudes_d=proposition.visa_etudes_d,
+            certificat_autorisation_signe=proposition.certificat_autorisation_signe,
+            type=proposition.type_demande.name if proposition.type_demande else '',
         )
 
     @classmethod
@@ -307,7 +311,6 @@ class PropositionInMemoryRepository(
 
         return PropositionGestionnaireDTO(
             **dto_to_dict(base_proposition),
-            type='',
             date_changement_statut=base_proposition.modifiee_le,
             genre_candidat=candidat.genre,
             noma_candidat=candidat.noma_derniere_inscription_ucl,
@@ -389,6 +392,7 @@ class PropositionInMemoryRepository(
             nombre_de_mois_de_mobilite=proposition.nombre_de_mois_de_mobilite,
             doit_se_presenter_en_sic=proposition.doit_se_presenter_en_sic,
             communication_au_candidat=proposition.communication_au_candidat,
+            nationalite_candidat_code_iso=candidat.pays_nationalite,
         )
 
     @classmethod

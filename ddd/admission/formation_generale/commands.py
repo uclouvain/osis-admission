@@ -554,6 +554,7 @@ class SpecifierInformationsAcceptationPropositionParSicCommand(interface.Command
     nombre_de_mois_de_mobilite: str = ''
     doit_se_presenter_en_sic: Optional[bool] = None
     communication_au_candidat: str = ''
+    doit_fournir_visa_etudes: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
