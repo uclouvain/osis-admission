@@ -284,6 +284,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'must_report_to_sic': entity.doit_se_presenter_en_sic,
                 'communication_to_the_candidate': entity.communication_au_candidat,
                 'refusal_type': entity.type_de_refus,
+                'must_provide_student_visa_d': entity.doit_fournir_visa_etudes,
+                'student_visa_d': entity.visa_etudes_d,
+                'signed_enrollment_authorization': entity.certificat_autorisation_signe,
             },
         )
 
@@ -501,6 +504,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else PoursuiteDeCycle.TO_BE_DETERMINED,
             poursuite_de_cycle_a_specifier=admission.training.education_group_type.name == TrainingType.BACHELOR.name,
             auteur_derniere_modification=admission.last_update_author.global_id if admission.last_update_author else '',
+            doit_fournir_visa_etudes=admission.must_provide_student_visa_d,
+            visa_etudes_d=admission.student_visa_d,
+            certificat_autorisation_signe=admission.signed_enrollment_authorization,
         )
 
     @classmethod
@@ -614,6 +620,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             poste_diplomatique=PosteDiplomatiqueTranslator.build_dto(admission.diplomatic_post)
             if admission.diplomatic_post
             else None,
+            doit_fournir_visa_etudes=admission.must_provide_student_visa_d,
+            visa_etudes_d=admission.student_visa_d,
+            certificat_autorisation_signe=admission.signed_enrollment_authorization,
+            type=admission.type_demande,
         )
 
     @classmethod
@@ -626,11 +636,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         proposition = cls._load_dto(admission)
         poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name
         additional_condition_title_field = 'name_fr' if is_french_language else 'name_en'
-        additional_training_title_field = 'full_title' if is_french_language else 'full_title_en'
 
         return PropositionGestionnaireDTO(
             **dto_to_dict(proposition),
-            type=admission.type_demande,
             date_changement_statut=admission.status_updated_at,  # from annotation
             genre_candidat=admission.candidate.gender,
             noma_candidat=admission.student_registration_id or '',  # from annotation
@@ -643,8 +651,17 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             )
             if admission.candidate.country_of_citizenship
             else '',
+            nationalite_candidat_fr=admission.candidate.country_of_citizenship.name
+            if admission.candidate.country_of_citizenship
+            else '',
+            nationalite_candidat_en=admission.candidate.country_of_citizenship.name_en
+            if admission.candidate.country_of_citizenship
+            else '',
             nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
+            nationalite_candidat_code_iso=admission.candidate.country_of_citizenship.iso_code
+            if admission.candidate.country_of_citizenship
+            else '',
             poursuite_de_cycle_a_specifier=poursuite_de_cycle_a_specifier,
             poursuite_de_cycle=admission.cycle_pursuit if poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
@@ -689,13 +706,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             ]
             + admission.free_additional_approval_conditions,
             avec_complements_formation=admission.with_prerequisite_courses,
-            complements_formation=[
-                LearningUnitPartimDTO(
-                    code=learning_unit_partim.code,
-                    full_title=getattr(learning_unit_partim, additional_training_title_field),
-                )
-                for learning_unit_partim in prerequisite_courses
-            ],
+            complements_formation=prerequisite_courses,
             commentaire_complements_formation=admission.prerequisite_courses_fac_comment,
             nombre_annees_prevoir_programme=admission.program_planned_years_number,
             nom_personne_contact_programme_annuel_annuel=admission.annual_program_contact_person_name,

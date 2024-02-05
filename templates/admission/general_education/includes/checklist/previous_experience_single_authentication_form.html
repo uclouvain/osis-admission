@@ -30,13 +30,23 @@
       method="post"
       action="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid %}?identifier={{ current.extra.identifiant }}"
       hx-post="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid %}?identifier={{ current.extra.identifiant }}"
-      hx-trigger='keyup changed delay:2s from:textarea[name="{{ current.extra.identifiant }}-comment"], change delay:2s from:input[name="{{ current.extra.identifiant }}-state"]'
+      hx-trigger='keyup changed delay:2s from:textarea[name="{{ current.extra.identifiant }}-comment"], change delay:1s from:input[name="{{ current.extra.identifiant }}-state"]'
       hx-swap="outerHTML"
       hx-target="this"
+      class="authentication-form"
+      data-default-state-value="{{ authentication_form.state.value }}"
   >
     {% csrf_token %}
     {% bootstrap_form_errors authentication_form %}
     {% bootstrap_field authentication_form.state %}
+
+    {% if authentication_form.state.value == 'AUTHENTIFICATION_DEMANDEE' or authentication_form.state.value == 'ETABLISSEMENT_CONTACTE' %}
+      {% if experience_authentication_history_entry %}
+          <p class="alert alert-warning">
+            {{ experience_authentication_history_entry|history_entry_message }}
+          </p>
+      {% endif %}
+    {% endif %}
 
     <div id="comment-{{ current.extra.identifiant }}-authentication">
       {% with current_authentication_form='parcours_anterieur__'|add:current.extra.identifiant|add:'__authentication' %}

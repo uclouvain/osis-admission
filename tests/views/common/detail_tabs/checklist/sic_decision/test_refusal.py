@@ -27,8 +27,10 @@ import datetime
 
 import freezegun
 from django.conf import settings
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from osis_history.models import HistoryEntry
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
@@ -157,15 +159,13 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.client.force_login(user=self.sic_manager_user)
         refusal_reason = RefusalReasonFactory()
 
+        data = {
+            'sic-decision-refusal-refusal_type': 'REFUS_DOSSIER_TARDIF',
+            'sic-decision-refusal-reasons': [refusal_reason.uuid],
+        }
+
         # Choose an existing reason
-        response = self.client.post(
-            self.url,
-            data={
-                'sic-decision-refusal-refusal_type': 'REFUS_DOSSIER_TARDIF',
-                'sic-decision-refusal-reasons': [refusal_reason.uuid],
-            },
-            **self.default_headers,
-        )
+        response = self.client.post(self.url, data=data, **self.default_headers)
 
         # Check the response
         self.assertEqual(response.status_code, 200)
@@ -194,6 +194,30 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        # Check that an history entry is created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.general_admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+
+        self.assertCountEqual(
+            ['proposition', 'sic-decision', 'status-changed', 'specify-refusal-reasons'],
+            entries[0].tags,
+        )
+
+        self.assertEqual(
+            entries[0].author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+
+        # Check that no additional history entry is created
+        response = self.client.post(self.url, data=data, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).count(), 1)
 
     def test_refusal_decision_form_submitting_with_valid_data_other_reason(self):
         self.client.force_login(user=self.sic_manager_user)

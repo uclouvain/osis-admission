@@ -163,3 +163,50 @@ templates.register(
         ),
     ],
 )
+
+ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS = (
+    'osis-admission-check-background-authentication-to-checkers'
+)
+templates.register(
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
+    description=_('Email sent to the checkers to inform them to check the background authentication of the candidate.'),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='candidate_nationality_country',
+            description=_("Candidate's country of nationality"),
+            example="Belgique",
+        ),
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+    ],
+)
+
+ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE = (
+    'osis-admission-check-background-authentication-to-candidate'
+)
+templates.register(
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
+    description=_(
+        'Email sent to the candidate to inform him that the checking of the authentication of its background '
+        'is in progress.'
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS
+    + [
+        Token(
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='training_campus',
+            description=_('Teaching campus of the training'),
+            example="Louvain-la-Neuve",
+        ),
+    ],
+)

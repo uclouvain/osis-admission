@@ -304,7 +304,7 @@
         </div>
 
         {% for child in current.enfants %}
-          <div role="tabpanel" class="tab-pane" id="parcours_anterieur__{{ child.extra.identifiant }}">
+          <div role="tabpanel" class="tab-pane single-past-experience-container" id="parcours_anterieur__{{ child.extra.identifiant }}">
             {% with experience=experiences_by_uuid|get_item:child.extra.identifiant %}
               {% if experience.valorisee_par_admissions != None and view.kwargs.uuid not in experience.valorisee_par_admissions %}
                 <p class="alert alert-warning">
@@ -314,7 +314,7 @@
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False hide_files=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
-                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant %}
+                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant %}
                 <div>
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=can_update_curriculum specific_questions=specific_questions_by_tab %}
                 </div>
@@ -322,6 +322,10 @@
             {% endwith %}
           </div>
         {% endfor %}
+        
+        {% include 'admission/general_education/includes/checklist/previous_experience_send_email_to_checkers_modal.html' %}
+        {% include 'admission/general_education/includes/checklist/previous_experience_send_email_to_candidate_modal.html' %}
+        
       {% endwith %}
       {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation next_url=next_base_url|add:'specificites_formation' %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
@@ -917,6 +921,28 @@
                   CKEDITOR.instances[editor].updateElement();
               }
           });
+
+          {# Authentication forms => open a confirmation modal depending on the authentication state #}
+          const authentication_modal_by_state = {
+              'AUTHENTIFICATION_DEMANDEE': $('#previous-experience-send-email-to-checkers-modal'),
+              'ETABLISSEMENT_CONTACTE': $('#previous-experience-send-email-to-candidate-modal'),
+          }
+
+          $('.single-past-experience-container').on('htmx:confirm', '.authentication-form', function(event){
+              const triggeringElement = event.originalEvent.detail.triggeringEvent.target;
+              if (triggeringElement.type === 'radio' && authentication_modal_by_state[triggeringElement.value]) {
+                  {# Delay the request to wait the user confirmation #}
+                  event.preventDefault();
+                  const currentModal = authentication_modal_by_state[triggeringElement.value];
+                  currentModal.find('button[name="confirm"]').one('click', event.originalEvent.detail.issueRequest);
+                  {# Reset the state value if the user cancels the modal #}
+                  currentModal.one('hidden.bs.modal', () => {
+                     $(this).find(`input[type="radio"][value="${$(this).data('defaultStateValue')}"]`).prop('checked', true);
+                  });
+                  {# Show the modal #}
+                  currentModal.modal('show');
+              }
+          })
       })(jQuery);
   </script>
 {% endblock script %}
@@ -925,7 +951,7 @@
 {% block style %}
   {{ block.super }}
   {{ fac_decision_refusal_form.media.css }}
-  {{ fac_decision_refusal_form.media.css }}
+  {{ fac_decision_approval_form.media.css }}
   {{ sic_decision_refusal_form.media.css }}
   {{ sic_decision_approval_form.media.css }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
@@ -1220,6 +1246,10 @@
     .reset-button {
       float: right;
       margin-top: -7px;
+    }
+
+    .panel-heading .btn.btn-heading-secondary {
+      margin-right: 0.5em;
     }
   </style>
 {% endblock style %}

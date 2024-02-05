@@ -44,16 +44,49 @@
     @media print {
       footer {
         position: running(footer);
-        font-size: 8pt;
+        font-size: 9pt;
       }
 
       #page-counter:after {
         content: counter(page) "/" counter(pages);
       }
 
+      #guillemet-droite {
+          position: absolute;
+          right: -5mm;
+          margin-top: 3em;
+          background-color: #9cb7d4;
+          width: 2.5mm;
+          height: 7mm;
+      }
+
+      #guillemet-gauche {
+          position: absolute;
+          left: -12mm;
+          bottom: -12mm;
+          background-color: #5db3e6;
+          width: 8mm;
+          height: 10mm;
+      }
+      #guillemet-gauche:after {
+          content: '';
+          position: absolute;
+          {# We have a 1px blue line otherwise #}
+          right: -1mm;
+          top: -1mm;
+          background-color: #fff;
+          width: 6.5mm;
+          height: 8.5mm;
+      }
+
+      @font-face {
+          font-family: "Garamond";
+          src: url("{% static "admission/fonts/AGaramond-Regular.otf" %}");
+      }
+
       body {
-        font-family: Calibri, Arial, sans-serif;
-        font-size: 11pt;
+        font-family: "Garamond", serif;
+        font-size: 10pt;
         text-align: justify;
         line-height: 0.5cm;
       }
@@ -76,8 +109,8 @@
 
       #sigle-container #sigle {
           position: absolute;
-          width: 3cm;
-          height: auto;
+          width: auto;
+          height: 40mm;
           top: 0;
           right: 0;
           z-index: -1;
@@ -119,11 +152,13 @@
 
   <div class="text-end">{% if LANGUAGE_CODE == 'fr-be' %}Le {% endif %}{% now "d/m/Y" %}</div>
 
-  <p>Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
+  <div id="guillemet-droite"></div>
+
+  <p class="mt-5">Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
 
   <p>
     {% with name=proposition.prenom_candidat|add:" "|add:proposition.nom_candidat %}
-      {% if proposition.genre_candidat == "M" %}{% blocktrans with name=name context "M" %}Dear {{ name }},{% endblocktrans %}
+      {% if proposition.genre_candidat == "H" %}{% blocktrans with name=name context "M" %}Dear {{ name }},{% endblocktrans %}
       {% elif proposition.genre_candidat == "F" %}{% blocktrans with name=name context "F" %}Dear {{ name }},{% endblocktrans %}
       {% else %}{% blocktrans with name=name %}Dear {{ name }},{% endblocktrans %}
       {% endif %}
@@ -166,7 +201,7 @@
     <p>{% trans "Additional course(s):" %}
       <ul>
       {% for learning_unit in proposition.complements_formation %}
-        <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %} ({{ learning_unit.credits }} ECTS)</li>
+        <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %}{% if learning_unit.credits %} ({{ learning_unit.credits }} ECTS){% endif %}</li>
       {% endfor %}
       </ul>
     </p>
@@ -188,7 +223,7 @@
     {% endif %}
     <ul>
       <li>{% trans "The official French-language enrolment authorisation signed by you." %}</li>
-      {% if not proposition.candidate.nationalite_ue_candidat %}
+      {% if proposition.doit_fournir_visa_etudes %}
         <li>{% trans "Copy of your student visa D (permission to stay longer than 90 days in Belgium) issued by the Belgian Embassy or Consulate." %}</li>
       {% endif %}
       {% for document in documents %}
@@ -245,12 +280,14 @@
       {% if director.signature %}<img src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
       <p>
         {{ director.first_name }} {{ director.last_name }},<br>
-        {% trans "Director" %}
+        {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
       </p>
       <img id="sigle" src="{% static "img/sedes.png" %}">
     </div>
   </div>
 
   <p><small>{% trans "This document does not represent a commitment of financial support from UCLouvain." %}</small></p>
+
+  <div id="guillemet-gauche"></div>
 </body>
 </html>

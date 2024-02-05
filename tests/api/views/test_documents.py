@@ -39,6 +39,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.constants import PDF_MIME_TYPE, SUPPORTED_MIME_TYPES, PNG_MIME_TYPE
+from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
     DocumentsReclamesImmediatementNonCompletesException,
@@ -619,6 +620,9 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         ]
         free_file = ['free_file_token']
 
+        admission_tasks = AdmissionTask.objects.filter(admission=self.admission)
+        self.assertEqual(len(admission_tasks), 0)
+
         response = self.client.post(
             self.url,
             {
@@ -715,6 +719,11 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
         self.assertNotIn('Nous vous rappelons que certains documents', email_notification.payload)
         self.assertNotIn('abc@example.com', email_notification.payload)
+
+        # Check that an async task has been created to generate a folder of the proposition
+        admission_tasks = AdmissionTask.objects.filter(admission=self.admission)
+        self.assertEqual(len(admission_tasks), 1)
+        self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.GENERAL_FOLDER.name)
 
     @freezegun.freeze_time('2020-01-02')
     def test_submit_a_part_of_the_documents(self):
