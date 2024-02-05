@@ -490,9 +490,6 @@ msgstr ""
 msgid "Additional documents"
 msgstr ""
 
-msgid "Additional documents that can be requested from the candidate"
-msgstr ""
-
 msgid "Additional documents uploaded by a manager"
 msgstr ""
 
