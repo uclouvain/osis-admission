@@ -787,6 +787,9 @@ class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
 class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
     list_display = ('person', 'education_group_most_recent_acronym', 'cohort', 'changed',)
 
+    def get_hijack_user(self, obj):
+        return obj.person.user
+
 
 class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
     list_select_related = ['person__user']
