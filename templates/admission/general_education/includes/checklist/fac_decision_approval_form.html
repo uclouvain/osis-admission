@@ -56,7 +56,7 @@
         id="fac-decision-other-training-container"
         class="required_field hidden"
     >
-      {% bootstrap_field fac_decision_approval_form.other_training_accepted_by_fac label=fac_decision_approval_form.other_training_accepted_by_fac.label|label_with_user_icon %}
+      {% bootstrap_field_with_tooltip fac_decision_approval_form.other_training_accepted_by_fac label=fac_decision_approval_form.other_training_accepted_by_fac.label|label_with_user_icon %}
     </div>
 
     {% panel title=_('Diploma(s) or non-academic activity(ies) giving access to')|label_with_user_icon additional_class='panel-with-default-header-font-size' %}

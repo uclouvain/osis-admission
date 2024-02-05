@@ -378,6 +378,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
             url="admission:autocomplete:managed-education-trainings",
             attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
+        help_text=_('You can only select courses that are managed by the program manager.'),
     )
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
