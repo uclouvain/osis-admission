@@ -27,9 +27,11 @@ import datetime
 
 import freezegun
 from django.conf import settings
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils.translation import gettext
+from osis_history.models import HistoryEntry
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.checklist import AdditionalApprovalCondition
@@ -367,7 +369,8 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.refresh_from_db()
 
         self.assertEqual(
-            self.general_admission.status, ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name
+            self.general_admission.status,
+            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
         )
         self.assertEqual(
             self.general_admission.checklist['current']['decision_sic']['statut'],
@@ -406,6 +409,31 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.general_admission.must_provide_student_visa_d, True)
+
+        # Check that an history entry is created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.general_admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+
+        self.assertCountEqual(
+            ['proposition', 'sic-decision', 'status-changed', 'specify-approval-info'],
+            entries[0].tags,
+        )
+
+        self.assertEqual(
+            entries[0].author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+
+        # Check that no additional history entry is created
+        response = self.client.post(self.url, data=data, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).count(), 1)
 
     def test_approval_decision_form_has_is_mobility(self):
         self.client.force_login(user=self.sic_manager_user)

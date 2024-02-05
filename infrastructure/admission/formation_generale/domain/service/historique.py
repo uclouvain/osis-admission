@@ -214,7 +214,47 @@ class Historique(IHistorique):
             "Le dossier a été accepté par SIC.",
             "The dossier has been accepted by SIC.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "sic-decision", "refusal", "status-changed"],
+            tags=["proposition", "sic-decision", "approval", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_specification_motifs_refus_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
+    ):
+        if statut_original == proposition.statut:
+            return
+
+        gestionnaire_dto = PersonneConnueUclTranslator().get(matricule=gestionnaire)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            'Des motifs de refus ont été spécifiés par SIC.',
+            'Refusal reasons have been specified by SIC.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'sic-decision', 'specify-refusal-reasons', 'status-changed'],
+        )
+
+    @classmethod
+    def historiser_specification_informations_acceptation_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
+    ):
+        if statut_original == proposition.statut:
+            return
+
+        gestionnaire_dto = PersonneConnueUclTranslator().get(matricule=gestionnaire)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            'Des informations concernant la décision d\'acceptation ont été spécifiés par SIC.',
+            'Approval decision information has been specified by SIC.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'sic-decision', 'specify-approval-info', 'status-changed'],
         )
 
     @classmethod
