@@ -643,6 +643,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             )
             if admission.candidate.country_of_citizenship
             else '',
+            nationalite_candidat_fr=admission.candidate.country_of_citizenship.name
+            if admission.candidate.country_of_citizenship
+            else '',
+            nationalite_candidat_en=admission.candidate.country_of_citizenship.name_en
+            if admission.candidate.country_of_citizenship
+            else '',
             nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
             poursuite_de_cycle_a_specifier=poursuite_de_cycle_a_specifier,

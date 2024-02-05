@@ -755,7 +755,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             authentication_css_class(EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name),
         )
         self.assertEqual(
-            'fa-solid fa-file-circle-check text-danger',
+            'fa-solid fa-file-circle-xmark text-danger',
             authentication_css_class(EtatAuthentificationParcours.FAUX.name),
         )
         self.assertEqual(

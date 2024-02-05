@@ -37,7 +37,7 @@ from osis_notification.contrib.notification import EmailNotification
 
 from admission.contrib.models import AdmissionTask
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
-from admission.ddd import MAIL_INSCRIPTION_DEFAUT
+from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
@@ -56,6 +56,10 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL,
 )
+from admission.mail_templates.checklist import (
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
+)
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
 from admission.utils import (
     get_portal_admission_url,
@@ -63,7 +67,6 @@ from admission.utils import (
     get_salutation_prefix,
     format_academic_year,
 )
-from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
@@ -405,3 +408,79 @@ class Notification(INotification):
         EmailNotificationHandler.create(candidate_email_message, person=candidate)
 
         return candidate_email_message
+
+    @classmethod
+    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+        admission: BaseAdmission = (
+            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            .select_related('candidate__country_of_citizenship', 'training')
+            .get(uuid=proposition.entity_id.uuid)
+        )
+
+        # Notifier le vérificateur par mail
+        current_language = settings.LANGUAGE_CODE
+        with translation.override(current_language):
+            tokens = {
+                'admission_reference': admission.formatted_reference,
+                'candidate_first_name': admission.candidate.first_name,
+                'candidate_last_name': admission.candidate.last_name,
+                'candidate_nationality_country': {
+                    settings.LANGUAGE_CODE_FR: admission.candidate.country_of_citizenship.name,
+                    settings.LANGUAGE_CODE_EN: admission.candidate.country_of_citizenship.name_en,
+                }[current_language],
+                'training_title': {
+                    settings.LANGUAGE_CODE_FR: admission.training.title,
+                    settings.LANGUAGE_CODE_EN: admission.training.title_english,
+                }[current_language],
+                'training_acronym': admission.training.acronym,
+                'training_year': format_academic_year(proposition.annee_calculee),
+                'admission_link_front': get_portal_admission_url('general-education', str(admission.uuid)),
+                'admission_link_back': get_backoffice_admission_url('general-education', str(admission.uuid)),
+            }
+
+            email_message = generate_email(
+                ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
+                admission.candidate.language,
+                tokens,
+                recipients=[MAIL_VERIFICATEUR_CURSUS],
+            )
+
+            EmailNotificationHandler.create(email_message, person=None)
+
+            return email_message
+
+    @classmethod
+    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+        admission: BaseAdmission = (
+            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            .select_related('candidate', 'training')
+            .get(uuid=proposition.entity_id.uuid)
+        )
+
+        # Notifier le candidat par mail
+        with translation.override(admission.candidate.language):
+            tokens = {
+                'admission_reference': admission.formatted_reference,
+                'candidate_first_name': admission.candidate.first_name,
+                'candidate_last_name': admission.candidate.last_name,
+                'training_title': {
+                    settings.LANGUAGE_CODE_FR: admission.training.title,
+                    settings.LANGUAGE_CODE_EN: admission.training.title_english,
+                }[admission.candidate.language],
+                'training_acronym': admission.training.acronym,
+                'training_campus': admission.teaching_campus,
+                'training_year': format_academic_year(proposition.annee_calculee),
+                'admission_link_front': get_portal_admission_url('general-education', str(admission.uuid)),
+                'admission_link_back': get_backoffice_admission_url('general-education', str(admission.uuid)),
+            }
+
+            email_message = generate_email(
+                ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
+                admission.candidate.language,
+                tokens,
+                recipients=[admission.candidate.private_email],
+            )
+
+            EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+            return email_message

@@ -123,6 +123,8 @@ class PropositionGestionnaireDTO(PropositionDTO):
     adresse_email_candidat: str
     langue_contact_candidat: str
     nationalite_candidat: str
+    nationalite_candidat_fr: str
+    nationalite_candidat_en: str
     nationalite_ue_candidat: Optional[bool]
     photo_identite_candidat: List[str]
 

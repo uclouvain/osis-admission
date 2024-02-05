@@ -64,6 +64,8 @@ class RecupererPropositionGestionnaireServiceTestCase(TestCase):
         self.assertEqual(result.adresse_email_candidat, 'john.doe@ucl.be')
         self.assertEqual(result.langue_contact_candidat, 'fr-be')
         self.assertEqual(result.nationalite_candidat, 'BE')
+        self.assertEqual(result.nationalite_candidat_fr, 'Belgique')
+        self.assertEqual(result.nationalite_candidat_en, 'Belgique')
         self.assertEqual(result.nationalite_ue_candidat, True)
         self.assertEqual(result.photo_identite_candidat, ['uuid11'])
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)
