@@ -56,9 +56,14 @@
         content: counter(page) "/" counter(pages);
       }
 
+      @font-face {
+          font-family: "Garamond";
+          src: url("{% static "admission/fonts/AGaramond-Regular.otf" %}");
+      }
+
       body {
-        font-family: Calibri, Arial, sans-serif;
-        font-size: 11pt;
+        font-family: "Garamond", serif;
+        font-size: 10pt;
         text-align: justify;
         line-height: 0.5cm;
       }
@@ -72,12 +77,17 @@
           position: relative;
       }
 
+      #signature {
+          height: 15mm;
+          width: auto;
+      }
+
       #sigle-container #sigle {
           position: absolute;
-          width: 3cm;
+          width: 30mm;
           height: auto;
-          top: -50%;
-          right: 0;
+          top: 0;
+          left: 0;
           z-index: -1;
       }
     }
@@ -187,21 +197,26 @@
   </p>
 
   <ul>
-    {% for condition in proposition.conditions_complementaires %}
-      <li>{{ condition }}</li>
-    {% endfor %}
+    <li>Si l’inscription définitive de l’étudiant·e est dépendante de conditions d’admission spécifiques,
+      détaillez-les ci-après : <ul>
+      {% for condition in proposition.conditions_complementaires %}
+        <li>{{ condition }}</li>
+      {% empty %}
+        <li>Non-concerné·e</li>
+      {% endfor %}
+      </ul></li>
   </ul>
 
-  <div class="row">
-    <div class="col-6">Fait à Louvain la Neuve, le {% now "d/m/Y" %}</div>
+  <div>Fait à Louvain la Neuve, le {% now "d/m/Y" %}</div>
 
-    <div id="sigle-container" class="col-6 text-center">
-      {% if director.signature %}<img src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+  <div id="sigle-container">
+    <img id="sigle" src="{% static "img/sedes.png" %}">
+    <div class="pt-5">
+      {% if director.signature %}<img class="ms-5" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
       <p>
         {{ director.first_name }} {{ director.last_name }},<br>
-        {% trans "Director" %}
+        {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
       </p>
-      <img id="sigle" src="{% static "img/sedes.png" %}">
     </div>
   </div>
 </body>

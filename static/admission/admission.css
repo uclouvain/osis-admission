@@ -95,6 +95,10 @@ textarea {
   color: #a94442;
 }
 
+.panel-with-default-header-font-size .panel-title {
+  font-size: inherit;
+}
+
 .min_field {
   width: max-content;
 }
@@ -169,11 +173,14 @@ fieldset.custom-fieldset > legend {
   margin-right: 1em;
 }
 
-.popover-buttons {
+.popover-buttons, .custom-popover-buttons {
   text-decoration: none !important;
   margin-left: 5px;
 }
 
+.popover p:last-child {
+  margin-bottom: 0;
+}
 
 .field-with-tooltip .label-container {
   max-width: 100%;

@@ -44,16 +44,49 @@
     @media print {
       footer {
         position: running(footer);
-        font-size: 8pt;
+        font-size: 9pt;
       }
 
       #page-counter:after {
         content: counter(page) "/" counter(pages);
       }
 
+      #guillemet-droite {
+          position: absolute;
+          right: -5mm;
+          margin-top: 3em;
+          background-color: #9cb7d4;
+          width: 2.5mm;
+          height: 7mm;
+      }
+
+      #guillemet-gauche {
+          position: absolute;
+          left: -12mm;
+          bottom: -12mm;
+          background-color: #5db3e6;
+          width: 8mm;
+          height: 10mm;
+      }
+      #guillemet-gauche:after {
+          content: '';
+          position: absolute;
+          {# We have a 1px blue line otherwise #}
+          right: -1mm;
+          top: -1mm;
+          background-color: #fff;
+          width: 6.5mm;
+          height: 8.5mm;
+      }
+
+      @font-face {
+          font-family: "Garamond";
+          src: url("{% static "admission/fonts/AGaramond-Regular.otf" %}");
+      }
+
       body {
-        font-family: Calibri, Arial, sans-serif;
-        font-size: 11pt;
+        font-family: "Garamond", serif;
+        font-size: 10pt;
         text-align: justify;
         line-height: 0.5cm;
       }
@@ -70,17 +103,18 @@
           border: 1px #000 solid;
       }
 
-      #sigle-container {
-          position: relative;
+      #signature {
+          height: 15mm;
+          width: auto;
       }
 
-      #sigle-container #sigle {
-          position: absolute;
-          width: 3cm;
-          height: auto;
-          top: 0;
-          right: 0;
-          z-index: -1;
+      #sigle {
+          height: 40mm;
+          width: auto;
+      }
+
+      .on-single-page {
+          page-break-inside: avoid;
       }
     }
   </style>
@@ -119,11 +153,13 @@
 
   <div class="text-end">{% if LANGUAGE_CODE == 'fr-be' %}Le {% endif %}{% now "d/m/Y" %}</div>
 
-  <p>Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
+  <div id="guillemet-droite"></div>
+
+  <p class="mt-5">Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
 
   <p>
     {% with name=proposition.prenom_candidat|add:" "|add:proposition.nom_candidat %}
-      {% if proposition.genre_candidat == "M" %}{% blocktrans with name=name context "M" %}Dear {{ name }},{% endblocktrans %}
+      {% if proposition.genre_candidat == "H" %}{% blocktrans with name=name context "M" %}Dear {{ name }},{% endblocktrans %}
       {% elif proposition.genre_candidat == "F" %}{% blocktrans with name=name context "F" %}Dear {{ name }},{% endblocktrans %}
       {% else %}{% blocktrans with name=name %}Dear {{ name }},{% endblocktrans %}
       {% endif %}
@@ -166,7 +202,7 @@
     <p>{% trans "Additional course(s):" %}
       <ul>
       {% for learning_unit in proposition.complements_formation %}
-        <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %} ({{ learning_unit.credits }} ECTS)</li>
+        <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %}{% if learning_unit.credits %} ({{ learning_unit.credits }} ECTS){% endif %}</li>
       {% endfor %}
       </ul>
     </p>
@@ -188,7 +224,7 @@
     {% endif %}
     <ul>
       <li>{% trans "The official French-language enrolment authorisation signed by you." %}</li>
-      {% if not proposition.candidate.nationalite_ue_candidat %}
+      {% if proposition.doit_fournir_visa_etudes %}
         <li>{% trans "Copy of your student visa D (permission to stay longer than 90 days in Belgium) issued by the Belgian Embassy or Consulate." %}</li>
       {% endif %}
       {% for document in documents %}
@@ -222,18 +258,18 @@
   <p>{% blocktrans %}The University tuition fee is EUR 0.0.{% endblocktrans %}</p>
   {% endif %}
 
-  <p>{% blocktrans with date=proposition.formation.date_debut|date:"d/m/Y" %}Please note that the first term begins on {{ date }}.{% endblocktrans %}</p>
+  <div class="on-single-page">
+    <p>{% blocktrans with date=proposition.formation.date_debut|date:"d/m/Y" %}Please note that the first term begins on {{ date }}.{% endblocktrans %}</p>
 
-  <p>
-    {% blocktrans trimmed %}
-      This enrolment authorisation letter allows you to submit an application for accommodation to the Logistics and Student Accommodation Service (LOGE). To find out how, go to <a href="https://www.uclouvain.be/en/study/accomodation">www.uclouvain.be/en/study/accomodation</a>.
-    {% endblocktrans %}
-  </p>
+    <p>
+      {% blocktrans trimmed %}
+        This enrolment authorisation letter allows you to submit an application for accommodation to the Logistics and Student Accommodation Service (LOGE). To find out how, go to <a href="https://www.uclouvain.be/en/study/accomodation">www.uclouvain.be/en/study/accomodation</a>.
+      {% endblocktrans %}
+    </p>
 
-  <p>{% trans "Our University is pleased to welcome you and wishes you an enriching and fruitful stay." %}</p>
+    <p>{% trans "Our University is pleased to welcome you and wishes you an enriching and fruitful stay." %}</p>
 
-  <div class="row">
-    <div class="col-6">
+    <div class="w-50">
       <table class="w-100" id="student-signature">
         <tr>
           <td class="text-center">{% trans "Date" %}</td>
@@ -241,16 +277,19 @@
         </tr>
       </table>
     </div>
-    <div id="sigle-container" class="col-6 text-center">
-      {% if director.signature %}<img src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+    <p><small>{% trans "This document does not represent a commitment of financial support from UCLouvain." %}</small></p>
+
+    <img class="float-end" id="sigle" src="{% static "img/sedes-filigrane.jpg" %}">
+
+    <div>
+      {% if director.signature %}<img class="ms-5" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
       <p>
         {{ director.first_name }} {{ director.last_name }},<br>
-        {% trans "Director" %}
+        {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
       </p>
-      <img id="sigle" src="{% static "img/sedes.png" %}">
     </div>
   </div>
 
-  <p><small>{% trans "This document does not represent a commitment of financial support from UCLouvain." %}</small></p>
+  <div id="guillemet-gauche"></div>
 </body>
 </html>

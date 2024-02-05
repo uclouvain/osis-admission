@@ -109,10 +109,13 @@ class TestRefuserInscriptionParSic(TestCase):
         proposition = self.proposition_repository.get(resultat)
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE)
 
-    def test_should_lever_exception_si_aucun_motif_specifie(self):
+    def test_should_etre_ok_si_aucun_motif_specifie(self):
         self.proposition.motifs_refus = []
         self.proposition.autres_motifs_refus = []
 
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(context.exception.exceptions.pop(), MotifRefusFacultaireNonSpecifieException)
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+        # Vérifier résultat de la commande
+        self.assertEqual(resultat.uuid, 'uuid-MASTER-SCI-APPROVED')
+        proposition = self.proposition_repository.get(resultat)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE)

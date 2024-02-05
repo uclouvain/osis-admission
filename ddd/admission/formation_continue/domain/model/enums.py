@@ -31,7 +31,7 @@ from base.models.utils.utils import ChoiceEnum
 
 class ChoixStatutPropositionContinue(ChoiceEnum):
     EN_BROUILLON = _('In draft form')
-    CONFIRMEE = _('Application confirmed (by student)')
+    CONFIRMEE = _('Application confirmed')
     ANNULEE = _('Cancelled application')
     INSCRIPTION_AUTORISEE = _('Application accepted')
 

@@ -24,7 +24,8 @@
 #
 # ##############################################################################
 import datetime
-from typing import List
+from typing import List, Dict
+from unittest.mock import patch
 
 import freezegun
 from django.test import TestCase
@@ -38,6 +39,7 @@ from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
 )
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import RecupererTitresAccesSelectionnablesPropositionQuery
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -57,8 +59,10 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
 from osis_profile.models.enums.curriculum import Result
 
 
@@ -137,6 +141,16 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
         self.assertEqual(access_titles[educational_experience_uuid].annee, self.academic_years[1].year)
         self.assertEqual(access_titles[educational_experience_uuid].selectionne, False)
+
+        # Only retrieve selected access titles if specified
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 0)
 
         # The diploma has not been obtained
         educational_experience.obtained_diploma = False
@@ -229,8 +243,13 @@ class GetAccessTitlesViewTestCase(TestCase):
         self.assertIn(non_educational_experience_uuid, access_titles)
         self.assertEqual(access_titles[non_educational_experience_uuid].annee, 2022)
 
-    def test_get_access_title_with_high_school_diploma(self):
-        access_titles: List[TitreAccesSelectionnableDTO]
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    def test_get_access_title_with_high_school_diploma(self, confirm_multiple_upload):
+        confirm_multiple_upload.side_effect = (
+            lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        )
+
+        access_titles: Dict[str, TitreAccesSelectionnableDTO]
 
         general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
@@ -262,6 +281,16 @@ class GetAccessTitlesViewTestCase(TestCase):
         self.assertEqual(access_titles[belgian_high_school_diploma.uuid].annee, 2022)
         self.assertEqual(access_titles[belgian_high_school_diploma.uuid].selectionne, False)
 
+        # Only retrieve selected access titles if specified
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 0)
+
         # The diploma has been selected as access title
         general_admission.are_secondary_studies_access_title = True
         general_admission.save()
@@ -269,6 +298,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
                 uuid_proposition=general_admission.uuid,
+                seulement_selectionnes=True,
             )
         )
 
@@ -316,11 +346,23 @@ class GetAccessTitlesViewTestCase(TestCase):
             )
         )
 
+        self.assertEqual(len(access_titles), 0)
+
+        high_school_diploma_alternative.first_cycle_admission_exam = ['file.pdf']
+        high_school_diploma_alternative.save()
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
         self.assertEqual(len(access_titles), 1)
         self.assertIn(high_school_diploma_alternative.uuid, access_titles)
 
         self.assertEqual(
-            access_titles[high_school_diploma_alternative.uuid].uuid_experience, high_school_diploma_alternative.uuid
+            access_titles[high_school_diploma_alternative.uuid].uuid_experience,
+            high_school_diploma_alternative.uuid,
         )
         self.assertEqual(
             access_titles[high_school_diploma_alternative.uuid].type_titre,
@@ -328,3 +370,58 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
         self.assertEqual(access_titles[high_school_diploma_alternative.uuid].annee, None)
         self.assertEqual(access_titles[high_school_diploma_alternative.uuid].selectionne, True)
+
+        high_school_diploma_alternative.delete()
+
+        # The candidate specified that he has a secondary education but without more information
+        general_admission.candidate.graduated_from_high_school = GotDiploma.YES.name
+        general_admission.candidate.graduated_from_high_school_year = general_admission.training.academic_year
+        general_admission.candidate.save()
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 1)
+
+        self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, access_titles)
+
+        current_access_title = access_titles[OngletsDemande.ETUDES_SECONDAIRES.name]
+
+        self.assertEqual(current_access_title.type_titre, TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name)
+        self.assertEqual(current_access_title.annee, general_admission.candidate.graduated_from_high_school_year.year)
+        self.assertEqual(current_access_title.selectionne, True)
+
+        general_admission.candidate.graduated_from_high_school = GotDiploma.THIS_YEAR.name
+        general_admission.candidate.save()
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 1)
+
+        self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, access_titles)
+
+        current_access_title = access_titles[OngletsDemande.ETUDES_SECONDAIRES.name]
+
+        self.assertEqual(current_access_title.type_titre, TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name)
+        self.assertEqual(current_access_title.annee, general_admission.candidate.graduated_from_high_school_year.year)
+        self.assertEqual(current_access_title.selectionne, True)
+
+        # The candidate specified that he had no secondary education
+        general_admission.candidate.graduated_from_high_school = GotDiploma.NO.name
+        general_admission.candidate.graduated_from_high_school_year = None
+        general_admission.candidate.save()
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 0)

@@ -23,8 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
-import json
 import uuid
 from unittest import mock
 from unittest.mock import patch
@@ -33,6 +33,8 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
+from osis_notification.models import WebNotification
+from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -79,8 +81,6 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
-from osis_notification.models import WebNotification
-from osis_signature.enums import SignatureState
 from reference.tests.factories.country import CountryFactory
 
 
@@ -598,7 +598,9 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_admission_doctorate_update_using_api_candidate(self):
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    def test_admission_doctorate_update_using_api_candidate(self, confirm_upload):
+        confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         self.client.force_authenticate(user=self.candidate.user)
         response = self.client.put(self.url, data=self.update_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
@@ -660,9 +662,9 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
-        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         cls.admission = DoctorateAdmissionFactory(
             supervision_group=_ProcessFactory(),
             cotutelle=False,
@@ -847,11 +849,11 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 @freezegun.freeze_time('2020-12-15')
 class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_upload")
+    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         AdmissionAcademicCalendarFactory.produce_all_required()
 
-        confirm_upload.return_value = "550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"
+        confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         # Create candidates
         # Complete candidate
         cls.first_candidate = CompletePersonFactory()

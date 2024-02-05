@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from unittest.mock import patch
 
@@ -81,6 +82,13 @@ class TestGetDocumentFromIdentifier(TestCase):
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            side_effect=lambda _, tokens, __: tokens,
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -960,6 +968,46 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.obj, doctorate_admission)
         self.assertEqual(document.field, 'cotutelle_other_documents')
         self.assertEqual(document.uuids, doctorate_admission.cotutelle_other_documents)
+
+    def test_get_authorization_document(self):
+        base_identifier = OngletsDemande.SUITE_AUTORISATION.name
+
+        general_admission = GeneralEducationAdmissionFactory(
+            student_visa_d=[uuid.uuid4()],
+            signed_enrollment_authorization=[uuid.uuid4()],
+        )
+
+        # Bad identifier
+        document = get_document_from_identifier(
+            general_admission,
+            f'{base_identifier}.UNKNOWN',
+        )
+
+        self.assertIsNone(document)
+
+        # Valid identifier
+
+        # student visa d
+        document = get_document_from_identifier(
+            general_admission,
+            f'{base_identifier}.VISA_ETUDES',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, general_admission)
+        self.assertEqual(document.field, 'student_visa_d')
+        self.assertEqual(document.uuids, general_admission.student_visa_d)
+
+        # signed enrollment authorization
+        document = get_document_from_identifier(
+            general_admission,
+            f'{base_identifier}.AUTORISATION_PDF_SIGNEE',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, general_admission)
+        self.assertEqual(document.field, 'signed_enrollment_authorization')
+        self.assertEqual(document.uuids, general_admission.signed_enrollment_authorization)
 
     def test_get_non_free_doctorate_supervision_document(self):
         base_identifier = OngletsDemande.SUPERVISION.name

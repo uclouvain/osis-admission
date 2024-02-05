@@ -45,4 +45,5 @@ PLUS_5_ISO_CODES = {
     "MC",  # Monaco
 }
 MAIL_INSCRIPTION_DEFAUT = 'inscription-lln@uclouvain.be'
+MAIL_VERIFICATEUR_CURSUS = 'verificationcursus@uclouvain.be'
 MOIS_DEBUT_ANNEE_ACADEMIQUE = 9

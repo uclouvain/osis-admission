@@ -27,6 +27,13 @@ from unittest import TestCase
 
 import factory
 
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.enums.emplacement_document import (
+    OngletsDemande,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
 )
@@ -44,6 +51,9 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+    emplacement_document_in_memory_repository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -86,6 +96,54 @@ class TestApprouverAdmissionParSic(TestCase):
         self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
         self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
+        # Vérifier que les documents concernés sont bien à réclamer
+        emplacement_autorisation = emplacement_document_in_memory_repository.get(
+            entity_id=EmplacementDocumentIdentity(
+                identifiant=f'{OngletsDemande.SUITE_AUTORISATION.name}.AUTORISATION_PDF_SIGNEE',
+                proposition_id=PropositionIdentity(uuid=self.proposition.entity_id.uuid),
+            )
+        )
+
+        emplacement_visa_etudes = emplacement_document_in_memory_repository.get(
+            entity_id=EmplacementDocumentIdentity(
+                identifiant=f'{OngletsDemande.SUITE_AUTORISATION.name}.VISA_ETUDES',
+                proposition_id=PropositionIdentity(uuid=self.proposition.entity_id.uuid),
+            )
+        )
+
+        self.assertEqual(emplacement_autorisation.statut, StatutEmplacementDocument.A_RECLAMER)
+        self.assertEqual(
+            emplacement_autorisation.statut_reclamation,
+            StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT,
+        )
+
+        self.assertNotEqual(emplacement_visa_etudes.statut, StatutEmplacementDocument.A_RECLAMER)
+
+        # Avec une demande de visa d'études, le visa d'études doit être réclamé
+        self.proposition.doit_fournir_visa_etudes = True
+
+        self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+        # Vérifier résultat de la commande
+        self.assertEqual(resultat.uuid, 'uuid-MASTER-SCI-APPROVED')
+
+        # Vérifier la proposition
+        proposition = self.proposition_repository.get(resultat)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
+        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
+
+        self.assertEqual(emplacement_autorisation.statut, StatutEmplacementDocument.A_RECLAMER)
+        self.assertEqual(
+            emplacement_autorisation.statut_reclamation,
+            StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT,
+        )
+
+        self.assertEqual(emplacement_visa_etudes.statut, StatutEmplacementDocument.A_RECLAMER)
+        self.assertEqual(
+            emplacement_visa_etudes.statut_reclamation,
+            StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT,
+        )
+
     def test_should_lever_exception_si_presence_conditions_complementaires_non_specifiee(self):
         self.proposition.avec_conditions_complementaires = None
         with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -106,20 +164,18 @@ class TestApprouverAdmissionParSic(TestCase):
 
     def test_should_lever_exception_si_presence_complements_formation_non_specifiee(self):
         self.proposition.avec_complements_formation = None
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+        proposition = self.proposition_repository.get(resultat)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
+        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
-    def test_should_lever_exception_si_complements_formation_non_specifiees(self):
+    def test_should_etre_ok_si_complements_formation_non_specifiees(self):
         self.proposition.avec_complements_formation = True
         self.proposition.complements_formation = []
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+        proposition = self.proposition_repository.get(resultat)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
+        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
     def test_should_lever_exception_si_nombre_annees_prevoir_programme_non_specifie(self):
         self.proposition.nombre_annees_prevoir_programme = None
