@@ -561,6 +561,8 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
             cmd,
             proposition_repository=_proposition_repository,
+            notification=_notification,
+            historique=_historique_formation_generale,
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (

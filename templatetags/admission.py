@@ -1086,7 +1086,7 @@ def authentication_css_class(authentication_status):
         {
             EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name: 'fa-solid fa-file-circle-question text-orange',
             EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name: 'fa-solid fa-file-circle-question text-orange',
-            EtatAuthentificationParcours.FAUX.name: 'fa-solid fa-file-circle-check text-danger',
+            EtatAuthentificationParcours.FAUX.name: 'fa-solid fa-file-circle-xmark text-danger',
             EtatAuthentificationParcours.VRAI.name: 'fa-solid fa-file-circle-check text-success',
         }.get(authentication_status, '')
         if authentication_status

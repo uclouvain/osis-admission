@@ -76,3 +76,11 @@ class NotificationInMemory(INotification):
         corps_message: str,
     ) -> EmailMessage:
         pass
+
+    @classmethod
+    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+        pass
+
+    @classmethod
+    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+        pass

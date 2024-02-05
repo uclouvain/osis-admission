@@ -317,6 +317,8 @@ class PropositionInMemoryRepository(
             adresse_email_candidat=candidat.email,
             langue_contact_candidat=candidat.langue_contact,
             nationalite_candidat=candidat.pays_nationalite,
+            nationalite_candidat_fr=candidat.nom_pays_nationalite,
+            nationalite_candidat_en=candidat.nom_pays_nationalite,
             nationalite_ue_candidat=candidat.pays_nationalite_europeen,
             photo_identite_candidat=candidat.photo_identite,
             poursuite_de_cycle_a_specifier=proposition.poursuite_de_cycle_a_specifier,
