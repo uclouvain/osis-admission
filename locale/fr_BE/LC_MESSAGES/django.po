@@ -554,10 +554,7 @@ msgid "Additional course(s):"
 msgstr "Complément de formation :"
 
 msgid "Additional documents"
-msgstr "Documents complémentaires"
-
-msgid "Additional documents that can be requested from the candidate"
-msgstr "Documents additionnels réclamables au candidat"
+msgstr "Documents additionnels"
 
 msgid "Additional documents uploaded by a manager"
 msgstr "Documents additionnels téléversés par un gestionnaire"
