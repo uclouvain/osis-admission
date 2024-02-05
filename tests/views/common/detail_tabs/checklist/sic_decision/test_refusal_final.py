@@ -27,8 +27,10 @@ import datetime
 
 import freezegun
 from django.conf import settings
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from osis_history.models import HistoryEntry
 from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models import GeneralEducationAdmission
@@ -130,6 +132,29 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        # Check that history entries are created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.general_admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 2)
+
+        status_change_entry = next((entry for entry in entries if 'status-changed' in entry.tags), None)
+        message_entry = next((entry for entry in entries if 'message' in entry.tags), None)
+
+        self.assertIsNotNone(status_change_entry)
+        self.assertIsNotNone(message_entry)
+
+        self.assertCountEqual(
+            ['proposition', 'sic-decision', 'refusal', 'status-changed'],
+            status_change_entry.tags,
+        )
+
+        self.assertEqual(
+            status_change_entry.author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
 
     def test_refusal_final_decision_form_submitting_inscription(self):
         self.client.force_login(user=self.sic_manager_user)

@@ -41,6 +41,7 @@ from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
+from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 from rest_framework import serializers, status
@@ -1036,6 +1037,8 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
         else:
             global_status = ChoixStatutPropositionGenerale.CONFIRMEE.name
 
+        admission_status_has_changed = admission.status != global_status
+
         change_admission_status(
             tab='decision_sic',
             admission_status=status,
@@ -1044,6 +1047,18 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             global_status=global_status,
             author=self.request.user.person,
         )
+
+        if admission_status_has_changed:
+            add_history_entry(
+                admission.uuid,
+                'Le statut de la proposition a évolué au cours du processus de décision SIC.',
+                'The status of the proposal has changed during the SIC decision process.',
+                '{first_name} {last_name}'.format(
+                    first_name=self.request.user.person.first_name,
+                    last_name=self.request.user.person.last_name,
+                ),
+                tags=['proposition', 'sic-decision', 'status-changed'],
+            )
 
         return self.render_to_response(self.get_context_data())
 
