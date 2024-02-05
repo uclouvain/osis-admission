@@ -216,7 +216,7 @@ msgid ""
 "<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
 "strong>"
 msgstr ""
-"<strong>Attention</strong> le candidat es signalé <strong>fraudeur</strong>"
+"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong>"
 
 #, python-format
 msgid ""
@@ -554,10 +554,7 @@ msgid "Additional course(s):"
 msgstr "Complément de formation :"
 
 msgid "Additional documents"
-msgstr "Documents complémentaires"
-
-msgid "Additional documents that can be requested from the candidate"
-msgstr "Documents additionnels réclamables au candidat"
+msgstr "Documents additionnels"
 
 msgid "Additional documents uploaded by a manager"
 msgstr "Documents additionnels téléversés par un gestionnaire"
@@ -707,8 +704,17 @@ msgstr ""
 "d'un projet. Ces bourses internationales sont notamment attribuées par "
 "l'organisme ARES et une attestation de bourse est dès lors à fournir."
 
+msgid ""
+"Analysis file generated when the documents requested from the candidate are "
+"received"
+msgstr ""
+"Dossier d'analyse généré à la réception des documents réclamés au candidat"
+
 msgid "Analysis folder"
 msgstr "Dossier d'analyse"
+
+msgid "Analysis folder for a general education admission"
+msgstr "Dossier d'analyse pour une demande en formation générale"
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
@@ -1995,6 +2001,13 @@ msgid "Create the confirmation paper success attestation as PDF"
 msgstr ""
 "Création du PDF de l'attestation de réussite de l'épreuve de confirmation"
 
+msgid ""
+"Create the folder analysis of the proposition containing the requested "
+"documents that the candidate submitted."
+msgstr ""
+"Création du dossier d'analyse de la proposition contenant les documents "
+"réclamés que le candidat a soumis."
+
 msgid "Create the recap of the proposition"
 msgstr "Créer le récapitulatif de la la proposition"
 
@@ -2288,6 +2301,14 @@ msgstr "Titre du mémoire"
 msgid "Do not reorder values, and keep the same count"
 msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
 
+#, python-format
+msgid ""
+"Do you confirm the sending of this email to the <a href=\"mailto:"
+"%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
+msgstr ""
+"Confirmez-vous l'envoi de ce mail à l'adresse <a href=\"mailto:"
+"%(email_address)s\" target=\"_blank\">%(email_address)s</a> ?"
+
 msgid "Do you have a Belgian National Register Number (NISS)?"
 msgstr "Avez-vous un numéro de registre national belge (NISS) ?"
 
@@ -2501,6 +2522,12 @@ msgctxt "admission"
 msgid "Email"
 msgstr "Email"
 
+msgid "Email content"
+msgstr "Contenu du mail"
+
+msgid "Email object"
+msgstr "Objet du mail"
+
 msgid "Email of the contact person for the design of the annual program"
 msgstr ""
 "E-mail de la personne de contact pour la composition du programme annuel"
@@ -2525,11 +2552,25 @@ msgstr ""
 "E-mail envoyé au candidat pour l'informer de la nécessité de payer les frais "
 "de dossier pour finaliser une demande en formation générale"
 
+msgid ""
+"Email sent to the candidate to inform him that the checking of the "
+"authentication of its background is in progress."
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que la vérification de "
+"l'authentification de son parcours est en cours."
+
 msgid "Email sent to the candidate when SIC approves an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC approuve une proposition."
 
 msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
+
+msgid ""
+"Email sent to the checkers to inform them to check the background "
+"authentication of the candidate."
+msgstr ""
+"E-Mail envoyé aux vérificateurs pour les informer de la nécessité de "
+"vérifier l'authentification du parcours du candidat"
 
 msgid ""
 "Email sent to the faculty when the SIC submits the application during the "
@@ -2837,6 +2878,10 @@ msgstr "Première année de"
 
 msgid "First year of inscription + status"
 msgstr "Année de première inscription + statut"
+
+#, python-format
+msgid "Folder analysis of the proposition %(reference)s"
+msgstr "Dossier d'analyse de la proposition %(reference)s"
 
 msgid "Following authorization"
 msgstr "Suite à l'autorisation"
@@ -3669,6 +3714,9 @@ msgstr "Institution"
 
 msgid "Institute address"
 msgstr "Adresse de l'établissement"
+
+msgid "Institute contacted"
+msgstr "Établissement contacté"
 
 msgid "Institute name"
 msgstr "Nom de l'établissement"

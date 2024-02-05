@@ -27,6 +27,7 @@ from abc import abstractmethod
 from email.message import EmailMessage
 from typing import Optional
 
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
@@ -103,7 +104,78 @@ class IHistorique(interface.DomainService):
     @classmethod
     @abstractmethod
     def historiser_acceptation_sic(
-        cls, proposition: Proposition, gestionnaire: str, message: Optional[EmailMessage] = None
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: Optional[EmailMessage] = None,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_modification_authentification_experience_parcours(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        etat_authentification: str,
+        message: Optional[EmailMessage],
+        uuid_experience: str,
+    ):
+        historize_method = {
+            EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name: (
+                cls.historiser_demande_verification_titre_acces
+            ),
+            EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name: (
+                cls.historiser_information_candidat_verification_parcours_en_cours
+            ),
+        }.get(etat_authentification)
+
+        if historize_method:
+            historize_method(
+                proposition=proposition,
+                gestionnaire=gestionnaire,
+                message=message,
+                uuid_experience=uuid_experience,
+            )
+
+    @classmethod
+    @abstractmethod
+    def historiser_demande_verification_titre_acces(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_information_candidat_verification_parcours_en_cours(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_specification_motifs_refus_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_specification_informations_acceptation_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
     ):
         raise NotImplementedError
 
