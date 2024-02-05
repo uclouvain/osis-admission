@@ -2665,9 +2665,6 @@ msgstr ""
 msgid "First year of inscription + status"
 msgstr ""
 
-msgid "Following authorization"
-msgstr ""
-
 #, python-format
 msgid "Folder analysis of the proposition %(reference)s"
 msgstr ""
@@ -4410,9 +4407,6 @@ msgstr ""
 msgid "Other communication for the candidate about the prerequisite courses"
 msgstr ""
 
-msgid "Other communication for the candidate about the prerequisite courses"
-msgstr ""
-
 msgid "Other cotutelle-related documents"
 msgstr ""
 
@@ -4735,11 +4729,6 @@ msgstr ""
 msgid ""
 "Please refer to the specifics disposition of your domain doctoral commission "
 "for your activities choice."
-msgstr ""
-
-msgid ""
-"Please select in the previous experience, the diploma(s), or non-academic "
-"activity(ies) giving access to the chosen program."
 msgstr ""
 
 msgid ""
@@ -5739,9 +5728,6 @@ msgid "Street"
 msgstr ""
 
 msgid "Student signature for agreement"
-msgstr ""
-
-msgid "Student visa D"
 msgstr ""
 
 msgid "Student visa D"
