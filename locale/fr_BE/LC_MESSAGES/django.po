@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-10 16:13+0100\n"
+"POT-Creation-Date: 2024-02-01 16:36+0100\n"
 "PO-Revision-Date: 2023-12-08 17:10+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -595,19 +595,19 @@ msgstr "Instantiations des éléments de formulaire pour admission"
 msgid "Admission form items"
 msgstr "Éléments de formulaire pour admission"
 
-#, python-format
-msgid ""
-"Admission request for the academic year %(academic_year)s to the program:"
-msgstr ""
-"Demande d'admission pour l'année académique %(academic_year)s au programme "
-"de :"
-
 msgid ""
 "Admission is not yet valid for searching UCLouvain. The following fields are "
 "required: "
 msgstr ""
 "L'admission n'est pas encore pour rechercher une correspondance UCLouvain. "
 "Les champs suivants sont requis: "
+
+#, python-format
+msgid ""
+"Admission request for the academic year %(academic_year)s to the program:"
+msgstr ""
+"Demande d'admission pour l'année académique %(academic_year)s au programme "
+"de :"
 
 msgid "Admission requirement"
 msgstr "Condition d'accès"
@@ -1517,6 +1517,9 @@ msgstr "Nationalité"
 msgid "City"
 msgstr "Ville"
 
+msgid "Civil state"
+msgstr "État civil"
+
 msgid "Civil status"
 msgstr "État civil"
 
@@ -1926,6 +1929,9 @@ msgstr "Pays de naissance"
 msgid "Country of citizenship"
 msgstr "Pays de nationalité"
 
+msgid "Country of citizenship name"
+msgstr "Pays de nationalité"
+
 msgctxt "admission"
 msgid "Course"
 msgstr "Formation"
@@ -2254,14 +2260,14 @@ msgstr "Directeur"
 msgid "Disabled"
 msgstr "Désactivé"
 
+msgid "Discard fusion"
+msgstr "Rejeter la fusion"
+
 msgid "Dispensation needed"
 msgstr "Besoin dérogation"
 
 msgid "Dispensation or increased fees"
 msgstr "Dispense ou droits majorés"
-
-msgid "Discard fusion"
-msgstr "Rejeter la fusion"
 
 msgid "Dispensed"
 msgstr "Dispensé"
@@ -2675,6 +2681,9 @@ msgstr "Date (prévue) de délivrance du diplôme"
 
 msgid "Expected graduation date (signed diploma)"
 msgstr "Date (prévue) de délivrance du diplôme (document signé)"
+
+msgid "Experience merge proposal"
+msgstr "Proposition de fusion du parcours antérieur"
 
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
@@ -3142,6 +3151,9 @@ msgstr "Texte d'aide"
 
 msgid "Hide the checklist menu"
 msgstr "Cacher le menu de la checklist"
+
+msgid "High school graduation year"
+msgstr "Année d'obtention du diplôme d'études secondaires"
 
 msgctxt "tab"
 msgid "History"
@@ -4408,6 +4420,9 @@ msgid ""
 msgstr ""
 "Formule 2 (La défense et la soutenance sont organisées le même jour, et "
 "soumises à une condition de recevabilité)"
+
+msgid "Middle name"
+msgstr "Autres prénoms"
 
 msgid "Missing"
 msgstr "Manquants"

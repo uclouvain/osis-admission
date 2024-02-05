@@ -1477,15 +1477,17 @@ class ChecklistView(
                     annee: [exp for exp in exp_list if str(exp.uuid) in curex_a_fusionner]
                     for annee, exp_list in experiences.items()
                 }
-                # add existing curex by years
-                for exp in (curex_existant.experiences_academiques + curex_existant.experiences_non_academiques):
-                    years_range = exp.annees \
-                        if type(exp) == ExperienceAcademiqueDTO else range(exp.date_debut.year, exp.date_fin.year)
-                    for annee in years_range:
-                        experiences.setdefault(annee, []).append(exp)
-                experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
+                if curex_existant:
+                    # add existing curex by years
+                    for exp in (curex_existant.experiences_academiques + curex_existant.experiences_non_academiques):
+                        years_range = [anExp.annee for anExp in exp.annees] \
+                            if type(exp) == ExperienceAcademiqueDTO else range(exp.date_debut.year, exp.date_fin.year)
+                        for annee in years_range:
+                            experiences.setdefault(annee, []).append(exp)
+                    experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
 
         return experiences
+
 
     def _get_financabilite(self):
         # TODO

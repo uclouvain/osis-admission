@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-10 16:13+0100\n"
+"POT-Creation-Date: 2024-02-01 16:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -529,14 +529,14 @@ msgstr ""
 msgid "Admission form items"
 msgstr ""
 
-#, python-format
-msgid ""
-"Admission request for the academic year %(academic_year)s to the program:"
-msgstr ""
-
 msgid ""
 "Admission is not yet valid for searching UCLouvain. The following fields are "
 "required: "
+msgstr ""
+
+#, python-format
+msgid ""
+"Admission request for the academic year %(academic_year)s to the program:"
 msgstr ""
 
 msgid "Admission requirement"
@@ -1397,6 +1397,9 @@ msgstr ""
 msgid "City"
 msgstr ""
 
+msgid "Civil state"
+msgstr ""
+
 msgid "Civil status"
 msgstr ""
 
@@ -1745,6 +1748,9 @@ msgid "Country of birth"
 msgstr ""
 
 msgid "Country of citizenship"
+msgstr ""
+
+msgid "Country of citizenship name"
 msgstr ""
 
 msgctxt "admission"
@@ -2469,6 +2475,9 @@ msgstr ""
 msgid "Expected graduation date (signed diploma)"
 msgstr ""
 
+msgid "Experience merge proposal"
+msgstr ""
+
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
 
@@ -2892,6 +2901,9 @@ msgid "Help text"
 msgstr ""
 
 msgid "Hide the checklist menu"
+msgstr ""
+
+msgid "High school graduation year"
 msgstr ""
 
 msgctxt "tab"
@@ -3936,6 +3948,9 @@ msgstr ""
 msgid ""
 "Method 2 (The private defense and the public defense are organised the same "
 "day, and subjected to an admissibility condition)"
+msgstr ""
+
+msgid "Middle name"
 msgstr ""
 
 msgid "Missing"

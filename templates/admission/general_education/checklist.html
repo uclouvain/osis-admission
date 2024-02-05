@@ -134,7 +134,7 @@
 
         <form id="create-digit-person-form" method="POST" action="{% url 'admission:services:digit:request-digit-person-creation' uuid=uuid %}">
             {% csrf_token %}
-            <button id="create-person-form-btn" type="submit" class="btn btn-primary pull-right" disabled>
+            <button id="create-person-form-btn" type="submit" class="btn btn-primary pull-right hidden" disabled>
                 Créer personne dans DigIT
             </button>
         </form>

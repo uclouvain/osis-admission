@@ -25,9 +25,9 @@
 
 <div class="form-group">
   <label for="{{ label }}" class="control-label">
-    {{ label|render_display_field_name|safe }}
+    {{ label|render_display_field_name:context|safe }}
   </label>
   {% with value|default_if_none_or_empty:_('Not specified') as data_to_display %}
-    <input class="form-control" id="{{ label }}" class="{{ label }}" type="text" value="{{ value|default_if_none_or_empty:"" }}" {% if mask %} data-mask="{{ mask }}" {% endif %} {% if not editable %} disabled {% endif %}/>
+    <input class="form-control" id="{{ label }}" class="{{ label }}" type="text" value="{{ value|default_if_none_or_empty:"" }}" {% if mask %} data-mask="{{ mask }}" {% endif %} {% if select_key %} data-select-key="{{ select_key }}" {% endif %} {% if not editable %} disabled {% endif %}/>
   {% endwith %}
 </div>

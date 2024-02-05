@@ -528,28 +528,32 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumDTO':
-        minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
+    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> Optional['CurriculumDTO']:
 
-        academic_experiences_dtos = cls._get_academic_experiences_dtos(
-            matricule,
-            cls.has_default_language(),
-            uuid_proposition,
-        )
+        try:
+            minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
 
-        non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
-            person__global_id=matricule,
-        )
+            academic_experiences_dtos = cls._get_academic_experiences_dtos(
+                matricule,
+                cls.has_default_language(),
+                uuid_proposition,
+            )
 
-        non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
+            non_academic_experiences: List[ProfessionalExperience] = ProfessionalExperience.objects.filter(
+                person__global_id=matricule,
+            )
 
-        return CurriculumDTO(
-            experiences_academiques=academic_experiences_dtos,
-            annee_diplome_etudes_secondaires=minimal_years.get('highschool_diploma_year'),
-            annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
-            experiences_non_academiques=non_academic_experiences_dtos,
-            annee_minimum_a_remplir=minimal_years.get('minimal_date').year,
-        )
+            non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
+
+            return CurriculumDTO(
+                experiences_academiques=academic_experiences_dtos,
+                annee_diplome_etudes_secondaires=minimal_years.get('highschool_diploma_year'),
+                annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
+                experiences_non_academiques=non_academic_experiences_dtos,
+                annee_minimum_a_remplir=minimal_years.get('minimal_date').year,
+            )
+        except Person.DoesNotExist:
+            return None
 
     @classmethod
     def get_existence_experiences_curriculum(cls, matricule: str) -> 'CurriculumAExperiencesDTO':

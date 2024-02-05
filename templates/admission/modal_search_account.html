@@ -125,6 +125,10 @@
                 if(label === 'national_number') {
                     $(destinationInput).val(valueToCopy).mask('00.00.00-000.00');
                 }
+                else if(label === 'gender' || label === 'civil_state'){
+                    const selectKey = document.querySelector(`.${source}-data #${label}`).dataset.selectKey;
+                    $(destinationInput).val(selectKey);
+                }
                 else if(label === 'country_of_citizenship__name'){
                     $(destinationInput).append(new Option(valueToCopy, valueToCopy, true, true)).trigger("change");
                 }
