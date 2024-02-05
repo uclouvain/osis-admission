@@ -7,7 +7,7 @@ import osis_document.contrib.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0143_alter_generaleducationadmission_communication_to_the_candidate'),
+        ('admission', '0145_authentication_mail_templates'),
     ]
 
     operations = [
