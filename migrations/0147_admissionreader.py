@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('base', '0667_educationgrouptype_cycle'),
-        ('admission', '0143_alter_generaleducationadmission_communication_to_the_candidate'),
+        ('admission', '0146_general_authorization_documents'),
     ]
 
     operations = [
