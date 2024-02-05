@@ -56,9 +56,14 @@
         content: counter(page) "/" counter(pages);
       }
 
+      @font-face {
+          font-family: "Garamond";
+          src: url("{% static "admission/fonts/AGaramond-Regular.otf" %}");
+      }
+
       body {
-        font-family: Calibri, Arial, sans-serif;
-        font-size: 11pt;
+        font-family: "Garamond", serif;
+        font-size: 10pt;
         text-align: justify;
         line-height: 0.5cm;
       }

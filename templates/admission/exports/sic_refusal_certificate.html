@@ -44,12 +44,45 @@
     @media print {
       footer {
         position: running(footer);
-        font-size: 8pt;
+        font-size: 9pt;
+      }
+
+      #guillemet-droite {
+          position: absolute;
+          right: -5mm;
+          margin-top: 3em;
+          background-color: #9cb7d4;
+          width: 2.5mm;
+          height: 7mm;
+      }
+
+      #guillemet-gauche {
+          position: absolute;
+          left: -12mm;
+          bottom: -12mm;
+          background-color: #5db3e6;
+          width: 8mm;
+          height: 10mm;
+      }
+      #guillemet-gauche:after {
+          content: '';
+          position: absolute;
+          {# We have a 1px blue line otherwise #}
+          right: -1mm;
+          top: -1mm;
+          background-color: #fff;
+          width: 6.5mm;
+          height: 8.5mm;
+      }
+
+      @font-face {
+          font-family: "Garamond";
+          src: url("{% static "admission/fonts/AGaramond-Regular.otf" %}");
       }
 
       body {
-        font-family: Calibri, Arial, sans-serif;
-        font-size: 11pt;
+        font-family: "Garamond", serif;
+        font-size: 10pt;
         text-align: justify;
         line-height: 0.5cm;
       }
@@ -67,8 +100,8 @@
       }
 
       #sigle {
-        width: 3cm;
-        height: auto;
+        width: auto;
+        height: 40mm;
       }
     }
   </style>
@@ -100,7 +133,9 @@
 
   <div class="text-end">Louvain-la-Neuve, {% if LANGUAGE_CODE == 'fr-be' %}Le {% endif %}{% now "d/m/Y" %}</div>
 
-  <p class="mt-4">Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
+  <div id="guillemet-droite"></div>
+
+  <p class="mt-5">Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
 
   <p>
     {% with name=proposition.prenom_candidat|add:" "|add:proposition.nom_candidat %}
@@ -127,5 +162,7 @@
       <img id="sigle" src="{% static "img/sedes.png" %}">
     </div>
   </div>
+
+  <div id="guillemet-gauche"></div>
 </body>
 </html>
