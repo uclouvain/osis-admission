@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
 
 from django.test import TestCase
 from django.urls import reverse
@@ -99,4 +100,50 @@ class ManagedGeneralEducationTrainingsAutocompleteTestCase(TestCase):
                 'text': f'{self.first_year_computer_training.acronym} - {self.first_year_computer_training.title} '
                 f'({self.first_year_computer_training_teaching_campus})',
             },
+        )
+
+    def test_search_with_excluded_training(self):
+        self.client.force_login(self.cdd_manager.user)
+
+        response = self.client.get(
+            self.url,
+            data={
+                'forward': json.dumps(
+                    {
+                        'annee_academique': '2021',
+                    }
+                ),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+        self.assertEqual(len(results), 2)
+
+        self.assertCountEqual(
+            [result['id'] for result in results],
+            [str(self.first_year_computer_training.uuid), str(self.first_year_biology_training.uuid)],
+        )
+
+        response = self.client.get(
+            self.url,
+            data={
+                'forward': json.dumps(
+                    {
+                        'excluded_training': str(self.first_year_computer_training.uuid),
+                        'annee_academique': '2021',
+                    }
+                ),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        results = response.json()['results']
+        self.assertEqual(len(results), 1)
+
+        self.assertEqual(
+            results[0]['id'],
+            str(self.first_year_biology_training.uuid),
         )
