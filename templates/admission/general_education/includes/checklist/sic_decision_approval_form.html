@@ -52,7 +52,7 @@
             </th>
           </tr>
         </thead>
-        {% for field in sic_decision_approval_form %}
+        {% for field in sic_decision_approval_documents_form %}
           {% with current_document=requested_documents|get_item_or_none:field.name %}
             {% if current_document %}
               {% ifchanged current_document|get_item:'tab' %}
@@ -323,4 +323,31 @@
     </script>
   {% endif %}
 
+  <style>
+    #sic-approval-requested-documents-selects tbody tr.tab-name {
+      background-color: #f5f5f5;
+    }
+
+    #sic-approval-requested-documents-selects td {
+      vertical-align: middle;
+    }
+
+    #sic-approval-requested-documents-selects td .form-group {
+      margin-bottom: 0;
+    }
+
+    #sic-approval-requested-documents-selects select {
+      min-width: max-content;
+    }
+
+    #sic-approval-requested-documents-selects .delete-confirm-element {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: #fff;
+      transition-duration: 1s;
+    }
+  </style>
 </form>
