@@ -39,7 +39,19 @@
 
     <dl>
       <dd>
-        {{ fac_decision_approval_form.another_training.label_tag }}
+        <label for="{{ fac_decision_approval_form.another_training.id_for_label }}">
+          {{ fac_decision_approval_form.another_training.label }}
+        </label>
+        <a
+          tabindex="0"
+          class="fa fa-question-circle custom-popover-buttons"
+          data-content="<p>{{ fac_decision_approval_form.another_training.help_text }}</p>"
+          data-placement="auto bottom"
+          data-toggle="popover" 
+          data-trigger="focus" 
+          data-html="true"
+          role="button"
+        ></a>
       </dd>
       <dt>
         <label class="switch">

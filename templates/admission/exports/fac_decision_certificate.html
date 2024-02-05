@@ -97,7 +97,11 @@
 
     {% block decision_content %}{% endblock %}
 
-    {% field_data _('Faculty comment for the SIC:') fac_decision_comment.content|linebreaks inline=True %}
+    {% if fac_decision_comment.content %}
+      {% field_data _('Faculty comment for the SIC:') fac_decision_comment.content|linebreaks inline=True %}
+    {% else %}
+      {% field_data _('Faculty comment for the SIC:') '/' inline=True %}
+    {% endif %}
 
     {% now 'd/m/Y' as today_date %}
 

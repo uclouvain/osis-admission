@@ -7701,6 +7701,11 @@ msgstr ""
 "Vous avez la possibilité d'ajouter tout document que vous jugez pertinent "
 "pour votre dossier (justificatifs, preuve de niveau de langue, ...)."
 
+msgid "You can only select courses that are managed by the program manager."
+msgstr ""
+"Vous ne pouvez sélectionner que les formations gérées par le·la même "
+"responsable de programme."
+
 #, python-format
 msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
