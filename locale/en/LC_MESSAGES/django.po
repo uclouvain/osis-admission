@@ -6950,9 +6950,6 @@ msgid ""
 "(supporting documents, proof of language level, etc.)."
 msgstr ""
 
-msgid "You can only select courses that are managed by the program manager."
-msgstr ""
-
 #, python-format
 msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
