@@ -545,13 +545,18 @@ class FacDecisionApprovalForm(forms.ModelForm):
         else:
             cleaned_data['other_training_accepted_by_fac'] = None
 
-        if not cleaned_data.get('with_additional_approval_conditions'):
+        if cleaned_data.get('with_additional_approval_conditions'):
+            if not cleaned_data.get('all_additional_approval_conditions'):
+                self.add_error('all_additional_approval_conditions', FIELD_REQUIRED_MESSAGE)
+        else:
             cleaned_data['all_additional_approval_conditions'] = []
             cleaned_data['additional_approval_conditions'] = []
             cleaned_data['free_additional_approval_conditions'] = []
 
         if cleaned_data.get('with_prerequisite_courses'):
-            if cleaned_data.get('prerequisite_courses'):
+            if not cleaned_data.get('prerequisite_courses'):
+                self.add_error('prerequisite_courses', FIELD_REQUIRED_MESSAGE)
+            else:
                 cleaned_data['prerequisite_courses'] = LearningUnitYear.objects.filter(
                     acronym__in=cleaned_data.get('prerequisite_courses', []),
                     academic_year__year=self.academic_year,
@@ -560,6 +565,9 @@ class FacDecisionApprovalForm(forms.ModelForm):
         else:
             cleaned_data['prerequisite_courses'] = []
             cleaned_data['prerequisite_courses_fac_comment'] = ''
+
+        if not cleaned_data.get('program_planned_years_number'):
+            self.add_error('program_planned_years_number', FIELD_REQUIRED_MESSAGE)
 
         return cleaned_data
 
@@ -714,6 +722,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             'mobility_months_amount',
             'must_report_to_sic',
             'communication_to_the_candidate',
+            'must_provide_student_visa_d',
         ]
         labels = {
             'annual_program_contact_person_name': _('First name and last name'),
@@ -733,6 +742,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             'is_mobility': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
+            'must_provide_student_visa_d': forms.CheckboxInput,
         }
 
     def __init__(
@@ -740,6 +750,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
         academic_year,
         additional_approval_conditions_for_diploma,
         documents: List[EmplacementDocumentDTO],
+        candidate_nationality_is_no_ue_5: bool,
         *args,
         **kwargs,
     ):
@@ -859,8 +870,10 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
         if not self.is_admission:
             del self.fields['must_report_to_sic']
+            del self.fields['must_provide_student_visa_d']
         else:
             self.fields['must_report_to_sic'].required = True
+            self.initial['must_provide_student_visa_d'] = candidate_nationality_is_no_ue_5
 
         self.fields['communication_to_the_candidate'].required = False
 

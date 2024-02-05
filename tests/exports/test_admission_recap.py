@@ -101,7 +101,10 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
+    OngletsDemande,
+    DocumentsSuiteAutorisation,
 )
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import RecupererQuestionsSpecifiquesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
@@ -131,6 +134,7 @@ from admission.exports.admission_recap.section import (
     get_supervision_section,
     get_dynamic_questions_by_tab,
     get_training_choice_section,
+    get_authorization_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
 from admission.tests import QueriesAssertionsMixin, TestCase
@@ -1372,6 +1376,10 @@ class SectionsAttachmentsTestCase(TestCase):
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
             certificat_refus_sic=[],
+            doit_fournir_visa_etudes=False,
+            visa_etudes_d=['uuid-visa-etudes-d'],
+            certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],
+            type=TypeDemande.ADMISSION.name,
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
@@ -3150,6 +3158,114 @@ class SectionsAttachmentsTestCase(TestCase):
         )
         self.assertEqual(attachments[1].uuids, signature_membre_ca.pdf)
         self.assertFalse(attachments[1].required)
+
+    def test_authorization_attachments_with_doctorate_proposition(self):
+        section = get_authorization_section(
+            context=self.doctorate_context,
+            load_content=False,
+        )
+
+        self.assertEqual(len(section.attachments), 0)
+
+    def test_authorization_attachments_with_continuing_proposition(self):
+        section = get_authorization_section(
+            context=self.continuing_context,
+            load_content=False,
+        )
+
+        self.assertEqual(len(section.attachments), 0)
+
+    def test_authorization_attachments_with_general_proposition(self):
+        with mock.patch.multiple(
+            self.general_bachelor_context.proposition,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+        ):
+            section = get_authorization_section(
+                context=self.general_bachelor_context,
+                load_content=False,
+            )
+
+            self.assertEqual(section.attachments, [])
+
+        with mock.patch.multiple(
+            self.general_bachelor_context.proposition,
+            statut=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+        ):
+            section = get_authorization_section(
+                context=self.general_bachelor_context,
+                load_content=False,
+            )
+
+            self.assertEqual(len(section.attachments), 1)
+
+            authorization_certificate = section.attachments[0]
+
+            self.assertEqual(
+                authorization_certificate.identifier,
+                'AUTORISATION_PDF_SIGNEE',
+            )
+            self.assertEqual(
+                authorization_certificate.label,
+                DocumentsSuiteAutorisation['AUTORISATION_PDF_SIGNEE'],
+            )
+            self.assertEqual(
+                authorization_certificate.uuids,
+                self.general_bachelor_context.proposition.certificat_autorisation_signe,
+            )
+
+        with mock.patch.multiple(
+            self.general_bachelor_context.proposition,
+            statut=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+            doit_fournir_visa_etudes=True,
+        ):
+            section = get_authorization_section(
+                context=self.general_bachelor_context,
+                load_content=False,
+            )
+
+            self.assertEqual(len(section.attachments), 2)
+
+            self.assertEqual(
+                section.attachments[0].identifier,
+                'AUTORISATION_PDF_SIGNEE',
+            )
+
+            self.assertEqual(
+                section.attachments[1].identifier,
+                'VISA_ETUDES',
+            )
+            self.assertEqual(
+                section.attachments[1].label,
+                DocumentsSuiteAutorisation['VISA_ETUDES'],
+            )
+            self.assertEqual(section.attachments[1].uuids, self.general_bachelor_context.proposition.visa_etudes_d)
+
+        with mock.patch.multiple(
+            self.general_bachelor_context.proposition,
+            statut=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+            doit_fournir_visa_etudes=True,
+            type=TypeDemande.INSCRIPTION.name,
+        ):
+            section = get_authorization_section(
+                context=self.general_bachelor_context,
+                load_content=False,
+            )
+
+            self.assertEqual(len(section.attachments), 0)
+
+        section = get_authorization_section(
+            context=self.general_bachelor_context,
+            load_content=False,
+        )
+
+        self.assertEqual(len(section.attachments), 2)
 
     def test_training_choice_attachments(self):
         section = get_training_choice_section(

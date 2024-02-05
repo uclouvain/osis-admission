@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    OngletsDemande,
 )
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from osis_common.ddd.interface import EntityIdentity, ApplicationService
@@ -108,6 +109,40 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                 uuids_documents=[],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
+                justification_gestionnaire='Ma raison 4',
+                requis_automatiquement=False,
+                libelle='Example',
+                reclame_le=None,
+                a_echeance_le=None,
+                derniere_action_le=datetime.datetime(2023, 1, 1),
+                dernier_acteur='0123456789',
+                document_soumis_par='',
+            ),
+            EmplacementDocument(
+                entity_id=EmplacementDocumentIdentity(
+                    identifiant=f'{OngletsDemande.SUITE_AUTORISATION.name}.VISA_ETUDES',
+                    proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCI-APPROVED'),
+                ),
+                uuids_documents=[],
+                type=TypeEmplacementDocument.NON_LIBRE,
+                statut=StatutEmplacementDocument.NON_ANALYSE,
+                justification_gestionnaire='Ma raison 4',
+                requis_automatiquement=False,
+                libelle='Example',
+                reclame_le=None,
+                a_echeance_le=None,
+                derniere_action_le=datetime.datetime(2023, 1, 1),
+                dernier_acteur='0123456789',
+                document_soumis_par='',
+            ),
+            EmplacementDocument(
+                entity_id=EmplacementDocumentIdentity(
+                    identifiant=f'{OngletsDemande.SUITE_AUTORISATION.name}.AUTORISATION_PDF_SIGNEE',
+                    proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCI-APPROVED'),
+                ),
+                uuids_documents=[],
+                type=TypeEmplacementDocument.NON_LIBRE,
+                statut=StatutEmplacementDocument.NON_ANALYSE,
                 justification_gestionnaire='Ma raison 4',
                 requis_automatiquement=False,
                 libelle='Example',

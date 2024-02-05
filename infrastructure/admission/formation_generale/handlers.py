@@ -542,6 +542,7 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
+            emplacement_document_repository=EmplacementDocumentRepository(),
         )
     ),
     ApprouverInscriptionParSicCommand: (

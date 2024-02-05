@@ -61,6 +61,7 @@ from admission.ddd.admission.dtos.resume import (
     ResumePropositionDTO,
 )
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
+from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
@@ -102,6 +103,8 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererPdfTemporaireDecisionSicQuery,
     RefuserInscriptionParSicCommand,
     ApprouverInscriptionParSicCommand,
+    RecupererTitresAccesSelectionnablesPropositionQuery,
+    RecupererResumePropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -149,6 +152,7 @@ from admission.utils import (
     get_portal_admission_list_url,
     get_backoffice_admission_url,
     get_portal_admission_url,
+    get_access_titles_names,
 )
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
@@ -753,6 +757,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             prefix='sic-decision-approval',
             additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
             documents=self.sic_decision_approval_form_requestable_documents,
+            candidate_nationality_is_no_ue_5=self.proposition.candidat_a_nationalite_hors_ue_5,
         )
 
     @cached_property
@@ -883,6 +888,7 @@ class SicApprovalDecisionView(
                     nombre_de_mois_de_mobilite=form.cleaned_data.get('mobility_months_amount', ''),
                     doit_se_presenter_en_sic=form.cleaned_data.get('must_report_to_sic', False),
                     communication_au_candidat=form.cleaned_data['communication_to_the_candidate'],
+                    doit_fournir_visa_etudes=form.cleaned_data.get('must_provide_student_visa_d', False),
                 )
             )
         except MultipleBusinessExceptions as multiple_exceptions:
@@ -1301,6 +1307,11 @@ class ChecklistView(
             # Access titles
             context['access_title_url'] = self.access_title_url
             context['access_titles'] = self.selectable_access_titles
+            context['selected_access_titles_names'] = get_access_titles_names(
+                access_titles=self.selectable_access_titles,
+                curriculum_dto=command_result.resume.curriculum,
+                etudes_secondaires_dto=command_result.resume.etudes_secondaires,
+            )
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
             context[
@@ -1704,6 +1715,26 @@ class PastExperiencesAccessTitleView(
         context['url'] = self.request.get_full_path()
         context['experience_uuid'] = self.request.GET.get('experience_uuid')
         context['can_choose_access_title'] = True  # True as the user can access to the current view
+
+        # Get the list of the selected access titles
+        access_titles: Dict[str, TitreAccesSelectionnableDTO] = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        if access_titles:
+            command_result: ResumePropositionDTO = message_bus_instance.invoke(
+                RecupererResumePropositionQuery(uuid_proposition=self.admission_uuid),
+            )
+
+            context['selected_access_titles_names'] = get_access_titles_names(
+                access_titles=access_titles,
+                curriculum_dto=command_result.curriculum,
+                etudes_secondaires_dto=command_result.etudes_secondaires,
+            )
+
         return context
 
     def form_valid(self, form):
