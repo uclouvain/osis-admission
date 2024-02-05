@@ -36,7 +36,7 @@ from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
-from django.utils.safestring import SafeString
+from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
@@ -962,6 +962,11 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
 
 
 @register.filter
+def label_with_user_icon(label):
+    return mark_safe(f'{label} <i class="fas fa-user"></i>')
+
+
+@register.filter
 def diplomatic_post_name(diplomatic_post):
     """Get the name of a diplomatic post"""
     if diplomatic_post:
@@ -1081,7 +1086,7 @@ def authentication_css_class(authentication_status):
         {
             EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name: 'fa-solid fa-file-circle-question text-orange',
             EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name: 'fa-solid fa-file-circle-question text-orange',
-            EtatAuthentificationParcours.FAUX.name: 'fa-solid fa-file-circle-check text-danger',
+            EtatAuthentificationParcours.FAUX.name: 'fa-solid fa-file-circle-xmark text-danger',
             EtatAuthentificationParcours.VRAI.name: 'fa-solid fa-file-circle-check text-success',
         }.get(authentication_status, '')
         if authentication_status
@@ -1235,6 +1240,14 @@ def footer_campus(proposition):
         'campus': CAMPUS.get(proposition.formation.campus_inscription.nom, 'LLN'),
         'proposition': proposition,
     }
+
+
+@register.simple_tag
+def candidate_language(language):
+    return mark_safe(
+        f' <strong>({_("contact language")} </strong>'
+        f'<span class="label label-admission-primary">{formatted_language(language)}</span>)'
+    )
 
 
 @register.filter

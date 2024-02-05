@@ -1,5 +1,5 @@
 {% extends "admission/modal/modal.html" %}
-{% load i18n %}
+{% load i18n bootstrap3 %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -26,33 +26,54 @@
 {% endcomment %}
 
 
-{% block modal_id %}sic-decision-confirm-modal-{{ target_status }}{% endblock %}
+{% block modal_id %}previous-experience-send-email-to-checkers-modal{% endblock %}
 
-{% block modal_title %}{% translate "Confirm the status change" %}{% endblock %}
+{% block modal_title %}{% translate "Authentication requested" %}{% endblock %}
+
+{% block modal_class %}modal-lg{% endblock %}
 
 {% block modal_body %}
-  <p>
-    {% if current.statut == 'GEST_REUSSITE' %}
-      {% translate 'An approval mail has been sent to the candidate.' %}
-    {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'refusal' %}
-      {% translate 'A refusal mail has been sent to the candidate.' %}
-    {% endif %}
-    {% translate 'Please confirm the change to this new status.' %}
-  </p>
+  <div class="form-group">
+    <label>
+      {% translate 'Email object' %}
+    </label>
+    <div class="form-control" style="height: fit-content" disabled="">
+      {{ check_authentication_mail_to_checkers.0|safe }}
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>
+      {% translate 'Email content' %}
+    </label>
+    <div class="form-control" style="height: fit-content" disabled="">
+      {{ check_authentication_mail_to_checkers.1|safe }}
+    </div>
+  </div>
 {% endblock %}
 
 {% block modal_footer %}
-  <button
+  <p>
+    {% blocktranslate trimmed with email_address=checker_email_address %}
+      Do you confirm the sending of this email to the
+      <a href="mailto:{{ email_address }}" target="_blank">{{ email_address }}</a> address?
+    {% endblocktranslate %}
+  </p>
+  <div class="pull-right">
+    <button
       class="btn btn-primary"
-      hx-post="{{ target_url }}"
-      hx-swap="none"
+      type="button"
+      name="confirm"
       data-dismiss="modal"
-  >
-    {% translate 'Confirm' %}
-  </button>
-
-  <button type="button" class="btn btn-default" data-dismiss="modal">
-    {% translate 'Cancel' %}
-  </button>
-
+    >
+      {% translate 'Confirm' %}
+    </button>
+    <button
+      class="btn btn-default"
+      type="button"
+      data-dismiss="modal"
+    >
+      {% translate 'Cancel' %}
+    </button>
+  </div>
 {% endblock %}

@@ -28,14 +28,18 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierMotifsRefusPropositionParSicCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
 def specifier_motifs_refus_proposition_par_sic(
     cmd: SpecifierMotifsRefusPropositionParSicCommand,
     proposition_repository: 'IPropositionRepository',
+    historique: 'IHistorique',
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
+
+    statut_original = proposition.statut
 
     proposition.specifier_motifs_refus_par_sic(
         auteur_modification=cmd.gestionnaire,
@@ -45,5 +49,11 @@ def specifier_motifs_refus_proposition_par_sic(
     )
 
     proposition_repository.save(entity=proposition)
+
+    historique.historiser_specification_motifs_refus_sic(
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+        statut_original=statut_original,
+    )
 
     return proposition.entity_id

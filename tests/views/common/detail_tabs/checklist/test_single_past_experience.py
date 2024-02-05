@@ -25,12 +25,17 @@
 # ##############################################################################
 import datetime
 import uuid
+from email import message_from_string
+from email.message import Message
 
 import freezegun
 from django.conf import settings
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils.translation import gettext
+from osis_history.models import HistoryEntry
+from osis_notification.models import EmailNotification
 from rest_framework import status
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
@@ -378,6 +383,7 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
         self.assertFalse(form.fields['state'].disabled)
 
+    @freezegun.freeze_time('2023-01-10')
     def test_change_the_authentication_data(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -424,3 +430,131 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        # Check that no history entry has been created
+        self.assertEqual(HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).count(), 0)
+
+        # Check that no notification has been created
+        self.assertEqual(EmailNotification.objects.filter(created_at=datetime.datetime.today()).count(), 0)
+
+    @freezegun.freeze_time('2023-01-11')
+    def test_change_the_authentication_data_by_informing_the_checkers(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
+        experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        experience_checklist['extra']['authentification'] = '1'
+        experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
+
+        self.general_admission.save(update_fields=['checklist'])
+
+        # Valid data
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+            data={
+                self.first_experience_uuid + '-state': EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.general_admission.refresh_from_db()
+
+        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
+
+        self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_EN_COURS.name)
+        self.assertEqual(experience_checklist['extra']['authentification'], '1')
+        self.assertEqual(
+            experience_checklist['extra']['etat_authentification'],
+            EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name,
+        )
+
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        # Check that the history entry has been created
+        history_items: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+
+        self.assertEqual(len(history_items), 1)
+
+        self.assertEqual(
+            history_items[0].author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+
+        self.assertCountEqual(
+            history_items[0].tags,
+            ['proposition', 'experience-authentication', 'authentication-request', 'message'],
+        )
+
+        # Check that the email has been sent
+        email_notifications = EmailNotification.objects.filter(
+            created_at=datetime.datetime.today(),
+        )
+
+        self.assertEqual(len(email_notifications), 1)
+        self.assertEqual(email_notifications[0].person, None)
+
+        email_object: Message = message_from_string(email_notifications[0].payload)
+        self.assertEqual(email_object['To'], 'verificationcursus@uclouvain.be')
+
+    @freezegun.freeze_time('2023-01-11')
+    def test_change_the_authentication_data_by_informing_the_candidate(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
+        experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        experience_checklist['extra']['authentification'] = '1'
+        experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
+
+        self.general_admission.save(update_fields=['checklist'])
+
+        # Valid data
+        response = self.client.post(
+            self.url,
+            **self.default_headers,
+            data={
+                self.first_experience_uuid + '-state': EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.general_admission.refresh_from_db()
+
+        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
+
+        self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_EN_COURS.name)
+        self.assertEqual(experience_checklist['extra']['authentification'], '1')
+        self.assertEqual(
+            experience_checklist['extra']['etat_authentification'],
+            EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name,
+        )
+
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        # Check that the history entry has been created
+        history_items: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+
+        self.assertEqual(len(history_items), 1)
+
+        self.assertEqual(
+            history_items[0].author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+
+        self.assertCountEqual(
+            history_items[0].tags,
+            ['proposition', 'experience-authentication', 'institute-contact', 'message'],
+        )
+
+        # Check that the email has been sent to the candidate
+        email_notifications = EmailNotification.objects.filter(created_at=datetime.datetime.today())
+
+        self.assertEqual(len(email_notifications), 1)
+        self.assertEqual(email_notifications[0].person, self.general_admission.candidate)
+
+        email_object: Message = message_from_string(email_notifications[0].payload)
+        self.assertEqual(email_object['To'], self.general_admission.candidate.private_email)

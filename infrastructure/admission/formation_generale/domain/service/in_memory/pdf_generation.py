@@ -23,9 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from typing import Optional, List
 
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
@@ -43,7 +43,7 @@ class PDFGenerationInMemory(IPDFGeneration):
         proposition_repository: IPropositionRepository,
         unites_enseignement_translator: IUnitesEnseignementTranslator,
         profil_candidat_translator: IProfilCandidatTranslator,
-        titre_acces_selectionnable_repository: ITitreAccesSelectionnableRepository,
+        titres_selectionnes: List[TitreAccesSelectionnable],
         annee_courante: int,
     ) -> None:
         pass

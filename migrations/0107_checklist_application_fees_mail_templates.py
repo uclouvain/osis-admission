@@ -74,8 +74,8 @@ class Migration(migrations.Migration):
         </p>
 
         <p>
-            Le montant des frais de dossier devra nous parvenir <strong>impérativement dans les 15 jours calendrier
-            </strong>. A défaut, votre demande sera clôturée.
+            Le montant des frais de dossier devra nous parvenir <strong>impérativement dans les 15 jours 
+            calendrier </strong>. A défaut, votre demande sera clôturée.
         </p>
 
         <p>
