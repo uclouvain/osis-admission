@@ -811,7 +811,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
         }
         if get_language() == settings.LANGUAGE_CODE_FR:
-            if self.proposition.genre_candidat == "M":
+            if self.proposition.genre_candidat == "H":
                 tokens['greetings'] = "Cher"
             elif self.proposition.genre_candidat == "F":
                 tokens['greetings'] = "Chère"

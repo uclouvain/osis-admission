@@ -980,6 +980,12 @@ msgstr "Authentification demandée"
 msgid "Author"
 msgstr "Auteur"
 
+msgid "Authorization"
+msgstr "Autorisation"
+
+msgid "Authorization to validate"
+msgstr "Autorisation à valider"
+
 msgid "Authorize"
 msgstr "Autoriser"
 
@@ -1570,6 +1576,9 @@ msgid ""
 msgstr ""
 "Communication au candidat (motif de refus), en langue <span class=\"label "
 "label-admission-primary\">{language_code}</span>"
+
+msgid "Communication to the candidate about additional trainings"
+msgstr "Autre communication au candidat à propos des compléments"
 
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
@@ -2253,6 +2262,13 @@ msgstr "Code poste diplomatique"
 
 msgid "Director"
 msgstr "Directeur"
+
+msgid "Director of the inscription service"
+msgstr "Directeur du Service des inscriptions"
+
+msgctxt "F"
+msgid "Director of the inscription service"
+msgstr "Directrice du Service des inscriptions"
 
 msgid "Disabled"
 msgstr "Désactivé"
@@ -4908,9 +4924,6 @@ msgstr "Autre type d'enseignement"
 msgid "Other given names"
 msgstr "Autres prénoms"
 
-msgid "Other information about prerequisite courses"
-msgstr "Autres informations à propos des compléments de formation"
-
 msgid "Other institute"
 msgstr "Autre institution"
 
@@ -5930,7 +5943,7 @@ msgstr ""
 "d'expertise scientifique"
 
 msgid "SIC Approval"
-msgstr "Approbation SIC"
+msgstr "Autorisation SIC"
 
 msgid "SIC comment for the faculty"
 msgstr "Commentaire de SIC pour la Faculté"
@@ -6943,9 +6956,9 @@ msgid ""
 msgstr ""
 "Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR. Un "
 "acompte obligatoire minimum de 50 EUR devra être payé dans les meilleurs "
-"délais et au plus tard le %(start_year)s. Le solde du montant des droits "
-"d'inscription devra être payé intégralement au plus tard pour le "
-"%(end_year)s. Dès réception de ce document signé par vos soins, les "
+"délais et au plus tard le 31/10/%(start_year)s. Le solde du montant des "
+"droits d'inscription devra être payé intégralement au plus tard pour le "
+"01/02/%(end_year)s. Dès réception de ce document signé par vos soins, les "
 "modalités de payement vous seront communiquées."
 
 msgid "There can be no more CA members in the supervision group."

@@ -881,6 +881,12 @@ msgstr ""
 msgid "Author"
 msgstr ""
 
+msgid "Authorization"
+msgstr ""
+
+msgid "Authorization to validate"
+msgstr ""
+
 msgid "Authorize"
 msgstr ""
 
@@ -1448,6 +1454,9 @@ msgstr ""
 msgid ""
 "Communication to the candidate (refusal reason), in <span class=\"label "
 "label-admission-primary\">{language_code}]</span>"
+msgstr ""
+
+msgid "Communication to the candidate about additional trainings"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -2069,6 +2078,13 @@ msgid "Diplomatic post code"
 msgstr ""
 
 msgid "Director"
+msgstr ""
+
+msgid "Director of the inscription service"
+msgstr ""
+
+msgctxt "F"
+msgid "Director of the inscription service"
 msgstr ""
 
 msgid "Disabled"
@@ -4410,9 +4426,6 @@ msgid "Other education type"
 msgstr ""
 
 msgid "Other given names"
-msgstr ""
-
-msgid "Other information about prerequisite courses"
 msgstr ""
 
 msgid "Other institute"
