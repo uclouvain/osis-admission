@@ -108,6 +108,7 @@ class CentralManager(EntityRoleModel):
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
             'admission.view_documents_management': is_entity_manager & not_cancelled,
+            'admission.edit_documents': is_entity_manager & not_cancelled,
             'admission.change_documents_management': is_entity_manager & in_sic_status,
             'admission.generate_in_progress_analysis_folder': is_entity_manager & in_progress,
             'admission.view_checklist': is_entity_manager & is_submitted,

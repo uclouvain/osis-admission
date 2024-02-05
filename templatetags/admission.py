@@ -580,14 +580,18 @@ def get_image_file_url(file_uuids):
 
 
 @register.inclusion_tag('admission/dummy.html')
-def document_component(document_write_token, document_metadata):
+def document_component(document_write_token, document_metadata, edit_mode=True):
     """Display the right editor component depending on the file type."""
     if document_metadata:
         if document_metadata.get('mimetype') == PDF_MIME_TYPE:
+            attrs = {}
+            if not edit_mode:
+                attrs = {action: False for action in ['pagination', 'zoom', 'comment', 'highlight', 'rotation']}
             return {
                 'template': 'osis_document/editor.html',
                 'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+                'attrs': attrs
             }
         elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
             return {
