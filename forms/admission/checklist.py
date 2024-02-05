@@ -367,6 +367,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
     another_training = forms.BooleanField(
         label=_('Approval for another training'),
         required=False,
+        help_text=_('You can only select courses that are managed by the program manager.'),
     )
 
     other_training_accepted_by_fac = TrainingModelChoiceField(
