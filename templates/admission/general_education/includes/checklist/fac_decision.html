@@ -134,7 +134,7 @@
             <dl>
               <dt>{% translate 'Reasons' %}</dt>
               <dd>
-                <ul>
+                <ul class="refusal-reasons-list">
                   {% for reason in admission.motifs_refus %}
                     {% ifchanged reason.categorie %}
                       {% if not forloop.first %}
@@ -197,7 +197,7 @@
                   <dd>
                     <ul>
                       {% for formation in admission.complements_formation %}
-                        <li>{{ formation.code }} - {{ formation.full_title }}</li>
+                        <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %}</li>
                       {% endfor %}
                     </ul>
                   </dd>
@@ -205,7 +205,7 @@
               {% else %}
                 {% field_data _('Prerequisite courses') '' %}
               {% endif %}
-              {% field_data _('Other information about prerequisite courses') admission.commentaire_complements_formation|safe %}
+              {% field_data _('Other communication for the candidate about the prerequisite courses') admission.commentaire_complements_formation|safe %}
             {% endif %}
 
             {% field_data _('Number of years required for the full program (including prerequisite courses)') admission.nombre_annees_prevoir_programme %}

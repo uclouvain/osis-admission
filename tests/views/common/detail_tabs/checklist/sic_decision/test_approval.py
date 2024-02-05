@@ -27,9 +27,11 @@ import datetime
 
 import freezegun
 from django.conf import settings
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.utils.translation import gettext
+from osis_history.models import HistoryEntry
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.checklist import AdditionalApprovalCondition
@@ -118,6 +120,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.mobility_months_amount = ''
         self.general_admission.must_report_to_sic = None
         self.general_admission.communication_to_the_candidate = ''
+        self.general_admission.must_provide_student_visa_d = False
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -136,14 +139,36 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('all_additional_approval_conditions'), [])
         self.assertEqual(form.initial.get('tuition_fees_amount'), '')
         self.assertEqual(form.initial.get('tuition_fees_amount_other'), None)
-        self.assertEqual(form.initial.get('tuition_fees_dispensation'), '')
+        self.assertEqual(form.initial.get('tuition_fees_dispensation'), 'NON_CONCERNE')
         self.assertEqual(form.initial.get('particular_cost'), '')
         self.assertEqual(form.initial.get('rebilling_or_third_party_payer'), '')
         self.assertEqual(form.initial.get('first_year_inscription_and_status'), '')
         self.assertEqual(form.initial.get('is_mobility'), None)
         self.assertEqual(form.initial.get('mobility_months_amount'), '')
-        self.assertEqual(form.initial.get('must_report_to_sic'), None)
+        self.assertEqual(form.initial.get('must_report_to_sic'), False)
         self.assertEqual(form.initial.get('communication_to_the_candidate'), '')
+        self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
+
+        # By default, candidate who are not from UE+5 must provide a student visa
+        self.general_admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='ZB')
+        self.general_admission.candidate.save()
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['sic_decision_approval_form']
+        self.assertEqual(form.initial.get('must_provide_student_visa_d'), True)
+
+        self.general_admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='CH')
+        self.general_admission.candidate.save()
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['sic_decision_approval_form']
+        self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
 
     def test_approval_decision_form_initialization_other_training(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -306,33 +331,32 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             AdditionalApprovalConditionFactory(),
         ]
 
-        response = self.client.post(
-            self.url,
-            data={
-                'sic-decision-approval-CURRICULUM.CURRICULUM': 'ULTERIEUREMENT_BLOQUANT',
-                "sic-decision-approval-prerequisite_courses": [
-                    prerequisite_courses[0].acronym,
-                ],
-                'sic-decision-approval-with_prerequisite_courses': 'True',
-                'sic-decision-approval-with_additional_approval_conditions': 'True',
-                'sic-decision-approval-all_additional_approval_conditions': [
-                    approval_conditions[0].uuid,
-                    'Free condition',
-                ],
-                'sic-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
-                'sic-decision-approval-program_planned_years_number': 5,
-                'sic-decision-approval-annual_program_contact_person_name': 'John Doe',
-                'sic-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
-                'sic-decision-approval-join_program_fac_comment': 'Comment about the join program',
-                'sic-decision-approval-tuition_fees_amount': 'NOUVEAUX_DROITS_MAJORES',
-                'sic-decision-approval-tuition_fees_dispensation': 'DISPENSE_OFFRE',
-                'sic-decision-approval-particular_cost': 'particular_cost',
-                'sic-decision-approval-rebilling_or_third_party_payer': 'rebilling_or_third_party_payer',
-                'sic-decision-approval-first_year_inscription_and_status': 'first_year_inscription_and_status',
-                'sic-decision-approval-communication_to_the_candidate': 'Communication',
-            },
-            **self.default_headers,
-        )
+        data = {
+            'sic-decision-approval-CURRICULUM.CURRICULUM': 'ULTERIEUREMENT_BLOQUANT',
+            "sic-decision-approval-prerequisite_courses": [
+                prerequisite_courses[0].acronym,
+            ],
+            'sic-decision-approval-with_prerequisite_courses': 'True',
+            'sic-decision-approval-with_additional_approval_conditions': 'True',
+            'sic-decision-approval-all_additional_approval_conditions': [
+                approval_conditions[0].uuid,
+                'Free condition',
+            ],
+            'sic-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
+            'sic-decision-approval-program_planned_years_number': 5,
+            'sic-decision-approval-annual_program_contact_person_name': 'John Doe',
+            'sic-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
+            'sic-decision-approval-join_program_fac_comment': 'Comment about the join program',
+            'sic-decision-approval-tuition_fees_amount': 'NOUVEAUX_DROITS_MAJORES',
+            'sic-decision-approval-tuition_fees_dispensation': 'DISPENSE_OFFRE',
+            'sic-decision-approval-particular_cost': 'particular_cost',
+            'sic-decision-approval-rebilling_or_third_party_payer': 'rebilling_or_third_party_payer',
+            'sic-decision-approval-first_year_inscription_and_status': 'first_year_inscription_and_status',
+            'sic-decision-approval-communication_to_the_candidate': 'Communication',
+            'sic-decision-approval-must_provide_student_visa_d': 'on',
+        }
+
+        response = self.client.post(self.url, data=data, **self.default_headers)
 
         # Check the response
         self.assertEqual(response.status_code, 200)
@@ -345,7 +369,8 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.refresh_from_db()
 
         self.assertEqual(
-            self.general_admission.status, ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name
+            self.general_admission.status,
+            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
         )
         self.assertEqual(
             self.general_admission.checklist['current']['decision_sic']['statut'],
@@ -383,6 +408,32 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.general_admission.communication_to_the_candidate, 'Communication')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+        self.assertEqual(self.general_admission.must_provide_student_visa_d, True)
+
+        # Check that an history entry is created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.general_admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+
+        self.assertCountEqual(
+            ['proposition', 'sic-decision', 'status-changed', 'specify-approval-info'],
+            entries[0].tags,
+        )
+
+        self.assertEqual(
+            entries[0].author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+
+        # Check that no additional history entry is created
+        response = self.client.post(self.url, data=data, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).count(), 1)
 
     def test_approval_decision_form_has_is_mobility(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -395,8 +446,18 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertIn('is_mobility', form.fields)
         self.assertIn('mobility_months_amount', form.fields)
 
-    def test_approval_decision_form_has_must_report_to_sic(self):
+    def test_approval_decision_form_has_must_report_to_sic_and_must_provide_student_visa_d_for_an_admission(self):
         self.client.force_login(user=self.sic_manager_user)
+
+        self.general_admission.type_demande = TypeDemande.INSCRIPTION.name
+        self.general_admission.save()
+        response = self.client.get(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+        form = response.context['sic_decision_approval_form']
+
+        self.assertNotIn('must_report_to_sic', form.fields)
+        self.assertNotIn('must_provide_student_visa_d', form.fields)
+
         self.general_admission.type_demande = TypeDemande.ADMISSION.name
         self.general_admission.save()
         response = self.client.get(self.url, **self.default_headers)
@@ -404,6 +465,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         form = response.context['sic_decision_approval_form']
 
         self.assertIn('must_report_to_sic', form.fields)
+        self.assertIn('must_provide_student_visa_d', form.fields)
 
     def test_approval_decision_form_has_vip_fields(self):
         self.client.force_login(user=self.sic_manager_user)

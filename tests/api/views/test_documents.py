@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from unittest import mock
@@ -38,6 +39,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.constants import PDF_MIME_TYPE, SUPPORTED_MIME_TYPES, PNG_MIME_TYPE
+from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
     DocumentsReclamesImmediatementNonCompletesException,
@@ -146,6 +148,15 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: self.uuid_documents_by_token[token],
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = patch(
+            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            side_effect=lambda _, tokens, __: [
+                self.uuid_documents_by_token[token] for token in tokens if token in self.uuid_documents_by_token
+            ],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -609,6 +620,9 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
         ]
         free_file = ['free_file_token']
 
+        admission_tasks = AdmissionTask.objects.filter(admission=self.admission)
+        self.assertEqual(len(admission_tasks), 0)
+
         response = self.client.post(
             self.url,
             {
@@ -705,6 +719,11 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
         self.assertNotIn('Nous vous rappelons que certains documents', email_notification.payload)
         self.assertNotIn('abc@example.com', email_notification.payload)
+
+        # Check that an async task has been created to generate a folder of the proposition
+        admission_tasks = AdmissionTask.objects.filter(admission=self.admission)
+        self.assertEqual(len(admission_tasks), 1)
+        self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.GENERAL_FOLDER.name)
 
     @freezegun.freeze_time('2020-01-02')
     def test_submit_a_part_of_the_documents(self):

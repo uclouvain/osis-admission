@@ -44,6 +44,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     PropositionNonTrouveeException,
     ExperienceNonTrouveeException,
 )
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from osis_profile.models.enums.curriculum import Result
 
 
@@ -61,6 +62,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 'candidate__foreignhighschooldiploma__academic_graduation_year',
                 'candidate__foreignhighschooldiploma__country',
                 'candidate__highschooldiplomaalternative',
+                'candidate__graduated_from_high_school_year',
             )
             .only(
                 'are_secondary_studies_access_title',
@@ -70,6 +72,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 'candidate__foreignhighschooldiploma__academic_graduation_year__year',
                 'candidate__foreignhighschooldiploma__country__iso_code',
                 'candidate__highschooldiplomaalternative__uuid',
+                'candidate__graduated_from_high_school_year__year',
             )
             .get(uuid=proposition_identity.uuid)
         )
@@ -114,7 +117,10 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             high_school_diploma = admission.candidate.foreignhighschooldiploma
             if getattr(admission.candidate.foreignhighschooldiploma, 'country', None):
                 high_school_diploma_country = admission.candidate.foreignhighschooldiploma.country.iso_code
-        elif getattr(admission.candidate, 'highschooldiplomaalternative', None):
+        elif (
+            getattr(admission.candidate, 'highschooldiplomaalternative', None)
+            and admission.candidate.highschooldiplomaalternative.first_cycle_admission_exam
+        ):
             high_school_diploma = admission.candidate.highschooldiplomaalternative
 
         if high_school_diploma:
@@ -122,6 +128,10 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
 
             if getattr(high_school_diploma, 'academic_graduation_year', None):
                 high_school_diploma_experience_year = high_school_diploma.academic_graduation_year.year
+
+        elif getattr(admission.candidate, 'graduated_from_high_school_year', None):
+            high_school_diploma_experience_uuid = OngletsDemande.ETUDES_SECONDAIRES.name
+            high_school_diploma_experience_year = admission.candidate.graduated_from_high_school_year.year
 
         if high_school_diploma_experience_uuid and (
             not seulement_selectionnes or admission.are_secondary_studies_access_title

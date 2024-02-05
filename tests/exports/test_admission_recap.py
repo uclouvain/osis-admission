@@ -101,7 +101,10 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
+    OngletsDemande,
+    DocumentsSuiteAutorisation,
 )
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import RecupererQuestionsSpecifiquesQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
@@ -131,6 +134,7 @@ from admission.exports.admission_recap.section import (
     get_supervision_section,
     get_dynamic_questions_by_tab,
     get_training_choice_section,
+    get_authorization_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
 from admission.tests import QueriesAssertionsMixin, TestCase
@@ -323,6 +327,10 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
@@ -814,7 +822,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(13):
+        with self.assertNumQueriesLessThan(14):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -839,7 +847,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(14):
+        with self.assertNumQueriesLessThan(15):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -909,6 +917,12 @@ class SectionsAttachmentsTestCase(TestCase):
         )
         cls.confirm_remote_upload_patcher.start()
 
+        cls.confirm_multiple_remote_upload_patcher = mock.patch(
+            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            side_effect=lambda _, value, __: value,
+        )
+        cls.confirm_multiple_remote_upload_patcher.start()
+
         cls.academic_year = AcademicYearFactory(current=True)
         AcademicCalendarFactory(
             reference=AdmissionPoolExternalReorientationCalendar.event_reference,
@@ -970,7 +984,7 @@ class SectionsAttachmentsTestCase(TestCase):
             pays_nationalite_europeen=True,
             nom_pays_nationalite='Belgique',
             sexe='M',
-            genre='M',
+            genre='H',
             photo_identite=['uuid-photo-identite'],
             pays_naissance='BE',
             nom_pays_naissance='Belgique',
@@ -1362,6 +1376,10 @@ class SectionsAttachmentsTestCase(TestCase):
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
             certificat_refus_sic=[],
+            doit_fournir_visa_etudes=False,
+            visa_etudes_d=['uuid-visa-etudes-d'],
+            certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],
+            type=TypeDemande.ADMISSION.name,
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
@@ -1527,6 +1545,7 @@ class SectionsAttachmentsTestCase(TestCase):
         cls.get_remote_token_patcher.stop()
         cls.get_remote_metadata_patcher.stop()
         cls.confirm_remote_upload_patcher.stop()
+        cls.confirm_multiple_remote_upload_patcher.stop()
         super().tearDownClass()
 
     def setUp(self) -> None:
@@ -3139,6 +3158,114 @@ class SectionsAttachmentsTestCase(TestCase):
         )
         self.assertEqual(attachments[1].uuids, signature_membre_ca.pdf)
         self.assertFalse(attachments[1].required)
+
+    def test_authorization_attachments_with_doctorate_proposition(self):
+        section = get_authorization_section(
+            context=self.doctorate_context,
+            load_content=False,
+        )
+
+        self.assertEqual(len(section.attachments), 0)
+
+    def test_authorization_attachments_with_continuing_proposition(self):
+        section = get_authorization_section(
+            context=self.continuing_context,
+            load_content=False,
+        )
+
+        self.assertEqual(len(section.attachments), 0)
+
+    def test_authorization_attachments_with_general_proposition(self):
+        with mock.patch.multiple(
+            self.general_bachelor_context.proposition,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+        ):
+            section = get_authorization_section(
+                context=self.general_bachelor_context,
+                load_content=False,
+            )
+
+            self.assertEqual(section.attachments, [])
+
+        with mock.patch.multiple(
+            self.general_bachelor_context.proposition,
+            statut=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+        ):
+            section = get_authorization_section(
+                context=self.general_bachelor_context,
+                load_content=False,
+            )
+
+            self.assertEqual(len(section.attachments), 1)
+
+            authorization_certificate = section.attachments[0]
+
+            self.assertEqual(
+                authorization_certificate.identifier,
+                'AUTORISATION_PDF_SIGNEE',
+            )
+            self.assertEqual(
+                authorization_certificate.label,
+                DocumentsSuiteAutorisation['AUTORISATION_PDF_SIGNEE'],
+            )
+            self.assertEqual(
+                authorization_certificate.uuids,
+                self.general_bachelor_context.proposition.certificat_autorisation_signe,
+            )
+
+        with mock.patch.multiple(
+            self.general_bachelor_context.proposition,
+            statut=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+            doit_fournir_visa_etudes=True,
+        ):
+            section = get_authorization_section(
+                context=self.general_bachelor_context,
+                load_content=False,
+            )
+
+            self.assertEqual(len(section.attachments), 2)
+
+            self.assertEqual(
+                section.attachments[0].identifier,
+                'AUTORISATION_PDF_SIGNEE',
+            )
+
+            self.assertEqual(
+                section.attachments[1].identifier,
+                'VISA_ETUDES',
+            )
+            self.assertEqual(
+                section.attachments[1].label,
+                DocumentsSuiteAutorisation['VISA_ETUDES'],
+            )
+            self.assertEqual(section.attachments[1].uuids, self.general_bachelor_context.proposition.visa_etudes_d)
+
+        with mock.patch.multiple(
+            self.general_bachelor_context.proposition,
+            statut=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            certificat_autorisation_signe=[],
+            visa_etudes_d=[],
+            doit_fournir_visa_etudes=True,
+            type=TypeDemande.INSCRIPTION.name,
+        ):
+            section = get_authorization_section(
+                context=self.general_bachelor_context,
+                load_content=False,
+            )
+
+            self.assertEqual(len(section.attachments), 0)
+
+        section = get_authorization_section(
+            context=self.general_bachelor_context,
+            load_content=False,
+        )
+
+        self.assertEqual(len(section.attachments), 2)
 
     def test_training_choice_attachments(self):
         section = get_training_choice_section(

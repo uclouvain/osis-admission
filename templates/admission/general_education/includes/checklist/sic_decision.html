@@ -104,6 +104,16 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-refusal-modal"><i class="fas fa-edit"></i></button>
+          {% if current.statut != 'GEST_BLOCAGE' %}
+            <a
+              class="btn btn-default pull-right btn-heading-secondary"
+              href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="refus" %}"
+              target="_blank"
+            >
+              <i class="fa fa-magnifying-glass"></i>
+              {% translate 'Visualize refusal' %}
+            </a>
+          {% endif %}
           <h4 class="panel-title">{% trans "Refusal" %}</h4>
         </div>
         <div class="panel-body">
@@ -114,7 +124,7 @@
             <dt>{% trans "Reasons" %}</dt>
             <dd>
               {% if admission.motifs_refus %}
-              <ul>
+              <ul class="refusal-reasons-list">
                 {% for reason in admission.motifs_refus %}
                   {% ifchanged reason.categorie %}
                     {% if not forloop.first %}
@@ -141,9 +151,30 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-approval-modal"><i class="fas fa-edit"></i></button>
-          <h4 class="panel-title">{% trans "Approval" %}</h4>
+          {% if original_admission.type_demande == 'ADMISSION' and current.statut != 'GEST_REUSSITE' %}
+            <a
+                class="btn btn-default pull-right btn-heading-secondary"
+                href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord" %}"
+                target="_blank"
+            >
+              <i class="fa fa-magnifying-glass"></i>
+              {% translate 'Visualize approval' %}
+            </a>
+            <a
+                class="btn btn-default pull-right btn-heading-secondary"
+                href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
+                target="_blank"
+            >
+              <i class="fa fa-magnifying-glass"></i>
+              {% translate 'Visualize annexe1' %}
+            </a>
+          {% endif %}
+          <h4 class="panel-title">{% if current.statut == 'GEST_REUSSITE' %}{% trans "Authorization" %}{% else %}{% trans "Authorization to validate" %}{% endif %}</h4>
         </div>
         <div class="panel-body">
+          {% if sic_decision_approval_form.is_admission %}
+            {% field_data _('The candidate must provide a student visa') admission.doit_fournir_visa_etudes %}
+          {% endif %}
           {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
           {% if admission.avec_conditions_complementaires %}
             {% if admission.conditions_complementaires %}
@@ -170,7 +201,7 @@
                 <dd>
                   <ul>
                     {% for formation in admission.complements_formation %}
-                      <li>{{ formation.code }} - {{ formation.full_title }}</li>
+                      <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'fr-be' %}{{ formation.full_title }}{% else %}{{ formation.full_title_en }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
                     {% endfor %}
                   </ul>
                 </dd>
@@ -178,7 +209,7 @@
             {% else %}
               {% field_data _('Prerequisite courses') '' %}
             {% endif %}
-            {% field_data _('Other information about prerequisite courses') admission.commentaire_complements_formation|safe %}
+            {% field_data _('Communication to the candidate about additional trainings') admission.commentaire_complements_formation|safe %}
           {% endif %}
 
           {% field_data _('Number of years required for the full program (including prerequisite courses)') admission.nombre_annees_prevoir_programme %}
@@ -212,23 +243,12 @@
         </div>
       </div>
     {% endif %}
-
-    {% if current.statut == 'GEST_BLOCAGE' or current.statut == 'GEST_REUSSITE' %}
-      {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
-      {% include 'admission/general_education/includes/checklist/sic_decision_confirm_modal.html' with target_status='INITIAL_CANDIDAT' target_url=change_status_url %}
-    {% endif %}
-
-    {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'refusal' %}
-      {% include "admission/general_education/includes/checklist/sic_decision_refusal_final_modal.html" %}
-    {% endif %}
-    {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' %}
-      {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
-    {% endif %}
   </div>
-{% endwith %}
 
-{% if request.htmx %}
-  {# Update the checklist menu  #}
-  {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='decision_sic' %}
-  {% include "admission/includes/admission_status.html" %}
-{% endif %}
+  {% if request.htmx %}
+    {# Update the checklist menu  #}
+    {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='decision_sic' %}
+    {% include "admission/includes/admission_status.html" %}
+  {% endif %}
+
+{% endwith %}

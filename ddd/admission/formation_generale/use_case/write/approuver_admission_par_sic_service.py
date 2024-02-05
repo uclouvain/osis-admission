@@ -28,9 +28,11 @@ from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.emplacement_document import EmplacementDocumentService
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 
 
 def approuver_admission_par_sic(
@@ -39,6 +41,7 @@ def approuver_admission_par_sic(
     historique: 'IHistorique',
     notification: 'INotification',
     pdf_generation: 'IPDFGeneration',
+    emplacement_document_repository: 'IEmplacementDocumentRepository',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -59,6 +62,12 @@ def approuver_admission_par_sic(
     )
 
     proposition_repository.save(entity=proposition)
+
+    EmplacementDocumentService.initier_emplacements_documents_approbation_sic(
+        proposition=proposition,
+        emplacement_document_repository=emplacement_document_repository,
+        auteur=cmd.auteur,
+    )
 
     message = notification.accepter_proposition_par_sic(
         proposition=proposition,

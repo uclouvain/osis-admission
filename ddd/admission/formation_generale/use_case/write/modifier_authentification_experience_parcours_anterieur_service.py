@@ -30,12 +30,16 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
 def modifier_authentification_experience_parcours_anterieur(
     cmd: 'ModifierAuthentificationExperienceParcoursAnterieurCommand',
     proposition_repository: 'IPropositionRepository',
+    notification: 'INotification',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
@@ -47,5 +51,18 @@ def modifier_authentification_experience_parcours_anterieur(
     )
 
     proposition_repository.save(proposition)
+
+    message = notification.modifier_authentification_experience_parcours(
+        proposition=proposition,
+        etat_authentification=cmd.etat_authentification,
+    )
+
+    historique.historiser_modification_authentification_experience_parcours(
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+        etat_authentification=cmd.etat_authentification,
+        message=message,
+        uuid_experience=cmd.uuid_experience,
+    )
 
     return proposition_id
