@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
+from admission.views.autocomplete.diploma_title import mapping_study_cycle
 from reference.models.enums.study_type import StudyType
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
@@ -37,6 +38,13 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
+
+        univ_prefix = mapping_study_cycle[StudyType.UNIVERSITY.name] + ' - '
+        snu_prefix = mapping_study_cycle[StudyType.NON_UNIVERSITY.name] + ' - '
+
+        cls.data = {
+            'forward': json.dumps({'display_study_type': True}),
+        }
 
         # Mocked data
         not_active_diploma_title = DiplomaTitleFactory(
@@ -62,29 +70,29 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
 
         cls.not_active_diploma_data = {
             'id': str(not_active_diploma_title.pk),
-            'text': not_active_diploma_title.title,
-            'selected_text': not_active_diploma_title.title,
+            'text': univ_prefix + not_active_diploma_title.title,
+            'selected_text': univ_prefix + not_active_diploma_title.title,
             'cycle': not_active_diploma_title.cycle,
         }
 
         cls.master_title_data = {
             'id': str(master_title.pk),
-            'text': master_title.title,
-            'selected_text': master_title.title,
+            'text': univ_prefix + master_title.title,
+            'selected_text': univ_prefix + master_title.title,
             'cycle': master_title.cycle,
         }
 
         cls.bachelor_title_data = {
             'id': str(bachelor_title.pk),
-            'text': bachelor_title.title,
-            'selected_text': bachelor_title.title,
+            'text': univ_prefix + bachelor_title.title,
+            'selected_text': univ_prefix + bachelor_title.title,
             'cycle': bachelor_title.cycle,
         }
 
         cls.politic_title_data = {
             'id': str(politic_title.pk),
-            'text': politic_title.title,
-            'selected_text': politic_title.title,
+            'text': snu_prefix + politic_title.title,
+            'selected_text': snu_prefix + politic_title.title,
             'cycle': politic_title.cycle,
         }
 
@@ -98,7 +106,16 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
     def test_retrieve_all_active_diploma_titles(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(self.url)
+        response = self.client.get(
+            self.url,
+            data={
+                'forward': json.dumps(
+                    {
+                        'display_study_type': True,
+                    },
+                ),
+            },
+        )
 
         self.assertEqual(response.status_code, 200)
 
@@ -122,7 +139,12 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
         response = self.client.get(
             self.url,
             data={
-                'forward': json.dumps({'study_type': StudyType.NON_UNIVERSITY.name}),
+                'forward': json.dumps(
+                    {
+                        'study_type': StudyType.NON_UNIVERSITY.name,
+                        'display_study_type': True,
+                    },
+                ),
             },
         )
 
@@ -147,6 +169,11 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
             self.url,
             data={
                 'q': 'à louvain',
+                'forward': json.dumps(
+                    {
+                        'display_study_type': True,
+                    },
+                ),
             },
         )
 
