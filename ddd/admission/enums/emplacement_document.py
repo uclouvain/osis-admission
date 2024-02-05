@@ -103,7 +103,7 @@ class OngletsDemande(ChoiceEnum):
 
 class IdentifiantBaseEmplacementDocument(ChoiceEnum):
     QUESTION_SPECIFIQUE = _('Specific question')
-    LIBRE_CANDIDAT = _('Additional documents that can be requested from the candidate')
+    LIBRE_CANDIDAT = _('Additional documents')  # Additional documents that can be requested from the candidate
     LIBRE_GESTIONNAIRE = _('Additional documents uploaded by a manager')
     SYSTEME = _('System')
 
