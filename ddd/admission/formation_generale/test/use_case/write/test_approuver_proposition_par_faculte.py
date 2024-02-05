@@ -40,14 +40,19 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     SituationPropositionNonFACException,
     InformationsAcceptationFacultaireNonSpecifieesException,
+    TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
     _PropositionIdentityFactory,
 )
+from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
+    TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -95,6 +100,12 @@ class TestApprouverPropositionParFaculte(TestCase):
             'uuid_proposition': 'uuid-MASTER-SCI-APPROVED',
             'gestionnaire': '00321234',
         }
+        self.titre_acces_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
+        self.titre_acces = TitreAccesSelectionnableFactory(
+            entity_id__uuid_proposition='uuid-MASTER-SCI-APPROVED',
+            selectionne=True,
+        )
+        self.titre_acces_repository.save(self.titre_acces)
 
     def test_should_etre_ok_si_statut_correct(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
@@ -163,3 +174,21 @@ class TestApprouverPropositionParFaculte(TestCase):
             self.assertIsInstance(
                 context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
             )
+
+    def test_should_lever_exception_si_aucun_titre_acces_est_selectionne(self):
+        self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+        self.titre_acces_repository.delete(self.titre_acces.entity_id)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(context.exception.exceptions.pop(), TitreAccesEtreSelectionnePourEnvoyerASICException)
+
+        titre_acces_non_selectionne = TitreAccesSelectionnableFactory(
+            entity_id__uuid_proposition='uuid-MASTER-SCI-APPROVED',
+            selectionne=False,
+        )
+        self.titre_acces_repository.save(titre_acces_non_selectionne)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(context.exception.exceptions.pop(), TitreAccesEtreSelectionnePourEnvoyerASICException)

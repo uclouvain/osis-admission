@@ -98,6 +98,7 @@ class OngletsDemande(ChoiceEnum):
     SUPERVISION = _('Supervision')
     INFORMATIONS_ADDITIONNELLES = _('Additional information')
     CONFIRMATION = pgettext_lazy('tab', 'Finalization')
+    SUITE_AUTORISATION = _('Following authorization')
 
 
 class IdentifiantBaseEmplacementDocument(ChoiceEnum):
@@ -300,6 +301,14 @@ DocumentsCotutelle = {
 
 DocumentsSupervision = {
     'APPROBATION_PDF': _('Approbation by pdf'),
+}
+
+DocumentsSuiteAutorisation = {
+    'VISA_ETUDES': _(
+        'Copy of your student visa D (permission to stay longer than 90 days in Belgium) issued by the Belgian '
+        'Embassy or Consulate.'
+    ),
+    'AUTORISATION_PDF_SIGNEE': _('The official French-language enrolment authorisation signed by you.'),
 }
 
 

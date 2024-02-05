@@ -87,19 +87,34 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
-    def historiser_refus_fac(cls, proposition: Proposition, gestionnaire: str):
-        pass
-
-    @classmethod
-    def historiser_acceptation_fac(cls, proposition: Proposition, gestionnaire: str):
-        pass
-
-    @classmethod
     def historiser_refus_sic(cls, proposition: Proposition, message: EmailMessage, gestionnaire: str):
         pass
 
     @classmethod
     def historiser_acceptation_sic(
-        cls, proposition: Proposition, gestionnaire: str, message: Optional[EmailMessage] = None
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: Optional[EmailMessage] = None,
+    ):
+        pass
+
+    @classmethod
+    def historiser_demande_verification_titre_acces(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
+    ):
+        pass
+
+    @classmethod
+    def historiser_information_candidat_verification_parcours_en_cours(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
     ):
         pass

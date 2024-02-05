@@ -350,6 +350,11 @@ def get_document_from_identifier(
             obj = SupervisionActor.objects.filter(uuid=actor_uuid).first()
             field = CORRESPONDANCE_CHAMPS_SUPERVISION.get(domain_identifier)
 
+        elif base_identifier == OngletsDemande.SUITE_AUTORISATION.name:
+            # SUITE_AUTORISATION.[DOMAIN_IDENTIFIER]
+            obj = admission
+            field = CORRESPONDANCE_CHAMPS_AUTORISATION.get(domain_identifier)
+
         if obj and field:
             document_uuids = getattr(obj, field, [])
             model_attribute = type(obj)._meta.get_field(field)
@@ -498,6 +503,11 @@ CORRESPONDANCE_CHAMPS_COTUTELLE = {
 
 CORRESPONDANCE_CHAMPS_SUPERVISION = {
     'APPROBATION_PDF': 'pdf_from_candidate',
+}
+
+CORRESPONDANCE_CHAMPS_AUTORISATION = {
+    'VISA_ETUDES': 'student_visa_d',
+    'AUTORISATION_PDF_SIGNEE': 'signed_enrollment_authorization',
 }
 
 CORRESPONDANCE_CHAMPS_SYSTEME = {
