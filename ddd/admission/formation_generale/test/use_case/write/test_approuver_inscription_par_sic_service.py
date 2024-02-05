@@ -106,20 +106,18 @@ class TestApprouverInscriptionParSic(TestCase):
 
     def test_should_lever_exception_si_presence_complements_formation_non_specifiee(self):
         self.proposition.avec_complements_formation = None
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+        proposition = self.proposition_repository.get(resultat)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
+        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
     def test_should_lever_exception_si_complements_formation_non_specifiees(self):
         self.proposition.avec_complements_formation = True
         self.proposition.complements_formation = []
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(
-                context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
-            )
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+        proposition = self.proposition_repository.get(resultat)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE)
+        self.assertEqual(proposition.checklist_actuelle.decision_sic.statut, ChoixStatutChecklist.GEST_REUSSITE)
 
     def test_should_lever_exception_si_nombre_annees_prevoir_programme_non_specifie(self):
         self.proposition.nombre_annees_prevoir_programme = None

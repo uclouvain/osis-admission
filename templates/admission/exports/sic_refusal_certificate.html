@@ -155,7 +155,7 @@
       {% if director.signature %}<img src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
       <p>
         {{ director.first_name }} {{ director.last_name }},<br>
-        <em>Directrice du Service des inscriptions</em>
+        <em>{% if director.gender == 'F' %}Directrice{% else %}Directeur{% endif %} du Service des inscriptions</em>
       </p>
     </div>
     <div class="col text-end">

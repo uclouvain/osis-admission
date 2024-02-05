@@ -52,7 +52,7 @@
     {% endif %}
   </span>
   {% with campus_adresse=proposition.formation.campus_inscription %}
-    {{ campus_adresse.rue }} {{ campus_adresse.numero_rue }}{% if campus_adresse.boite_postale %} {{ campus_adresse.boite_postale }}{% endif %},
+    {{ campus_adresse.rue }} {{ campus_adresse.numero_rue }}{% if campus_adresse.boite_postale %} bte {{ campus_adresse.boite_postale }}{% endif %},
     {% if campus_adresse.localisation %}{{ campus_adresse.localisation }}, {% endif %}
     {{ campus_adresse.code_postal }} {{ campus_adresse.ville }},
     {{ campus_adresse.nom_pays }}
