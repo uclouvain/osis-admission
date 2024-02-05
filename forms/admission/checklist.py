@@ -545,13 +545,18 @@ class FacDecisionApprovalForm(forms.ModelForm):
         else:
             cleaned_data['other_training_accepted_by_fac'] = None
 
-        if not cleaned_data.get('with_additional_approval_conditions'):
+        if cleaned_data.get('with_additional_approval_conditions'):
+            if not cleaned_data.get('all_additional_approval_conditions'):
+                self.add_error('all_additional_approval_conditions', FIELD_REQUIRED_MESSAGE)
+        else:
             cleaned_data['all_additional_approval_conditions'] = []
             cleaned_data['additional_approval_conditions'] = []
             cleaned_data['free_additional_approval_conditions'] = []
 
         if cleaned_data.get('with_prerequisite_courses'):
-            if cleaned_data.get('prerequisite_courses'):
+            if not cleaned_data.get('prerequisite_courses'):
+                self.add_error('prerequisite_courses', FIELD_REQUIRED_MESSAGE)
+            else:
                 cleaned_data['prerequisite_courses'] = LearningUnitYear.objects.filter(
                     acronym__in=cleaned_data.get('prerequisite_courses', []),
                     academic_year__year=self.academic_year,
@@ -560,6 +565,9 @@ class FacDecisionApprovalForm(forms.ModelForm):
         else:
             cleaned_data['prerequisite_courses'] = []
             cleaned_data['prerequisite_courses_fac_comment'] = ''
+
+        if not cleaned_data.get('program_planned_years_number'):
+            self.add_error('program_planned_years_number', FIELD_REQUIRED_MESSAGE)
 
         return cleaned_data
 
