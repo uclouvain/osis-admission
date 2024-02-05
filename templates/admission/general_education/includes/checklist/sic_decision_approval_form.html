@@ -202,15 +202,16 @@
   </div>
 
   <script>
-    $('#id_sic-decision-approval-tuition_fees_amount_other').dependsOn({
-      '#id_sic-decision-approval-tuition_fees_amount': { values: ['AUTRE'] },
-    }, { duration: 0, valueOnDisable: '', });
+    $(document).ready(function() {
+        $('#id_sic-decision-approval-tuition_fees_amount_other').dependsOn({
+            '#id_sic-decision-approval-tuition_fees_amount': {values: ['AUTRE']},
+        }, {duration: 0, valueOnDisable: '',});
 
-    {% if sic_decision_approval_form.is_hue %}
-      $('#id_sic-decision-approval-mobility_months_amount').dependsOn({
-        'input[name=sic-decision-approval-is_mobility]': { values: ['True'] },
-      }, { duration: 0, valueOnDisable: '', });
-    {% endif %}
+        {% if sic_decision_approval_form.is_hue %}
+            $('#id_sic-decision-approval-mobility_months_amount').dependsOn({
+                'input[name=sic-decision-approval-is_mobility]': {values: ['True']},
+            }, {duration: 0, valueOnDisable: '',});
+        {% endif %}
 
         let changesInRequestedDocuments = false;
         const selectsContainer = $('#sic-approval-requested-documents-selects');
@@ -221,11 +222,11 @@
         {# Manage the update of the request status #}
 
         {# Save the default value of each select #}
-        requestedDocumentsSelects.each(function(){
+        requestedDocumentsSelects.each(function () {
             $(this).data('previous', $(this).val());
         })
 
-        selectsContainer.on('htmx:beforeRequest', 'select', function(event) {
+        selectsContainer.on('htmx:beforeRequest', 'select', function (event) {
             const value = $(this).val();
 
             const elementIsConfirmed = confirmEvents.delete(this.id);
@@ -240,7 +241,7 @@
         });
 
         {# Display a confirmation element it the document is not requested anymore #}
-        selectsContainer.on('change', 'select', function(event) {
+        selectsContainer.on('change', 'select', function (event) {
             if ($(this).val() === '') {
                 const clonedConfirmElement = confirmElement.clone();
                 clonedConfirmElement.removeClass('hidden');
@@ -251,7 +252,7 @@
         });
 
         {# Confirm that the document is not requested anymore #}
-        selectsContainer.on('click', '.delete-confirm-button', function(event) {
+        selectsContainer.on('click', '.delete-confirm-button', function (event) {
             const row = $(this).closest('tr');
             const select = row.find('select');
             confirmEvents.add(select[0].id);
@@ -259,13 +260,13 @@
         });
 
         {# Cancel the cancellation of the request of the document #}
-        selectsContainer.on('click', '.delete-cancel-button', function(event) {
+        selectsContainer.on('click', '.delete-cancel-button', function (event) {
             const select = $(this).closest('div.form-group').children('select');
             select[0].value = select.data('previous');
             $(this).closest('div').remove();
         });
 
-        selectsContainer.on('formValidation', 'select', function(event) {
+        selectsContainer.on('formValidation', 'select', function (event) {
             if (event.originalEvent.detail.is_valid) {
                 const value = $(this).val();
 
@@ -280,7 +281,7 @@
                         row.remove();
                     }
                 }
-                $(this).data('previous',value);
+                $(this).data('previous', value);
             }
         });
 
@@ -296,6 +297,7 @@
                 ]);
             }
         });
+    });
   </script>
 
   {% if request.htmx %}
