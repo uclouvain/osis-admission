@@ -169,14 +169,11 @@ fieldset.custom-fieldset > legend {
   margin-right: 1em;
 }
 
-.popover-buttons, .custom-popover-buttons {
+.popover-buttons {
   text-decoration: none !important;
   margin-left: 5px;
 }
 
-.popover p:last-child {
-  margin-bottom: 0;
-}
 
 .field-with-tooltip .label-container {
   max-width: 100%;
