@@ -887,6 +887,10 @@ def list_other_admissions_url(admission_uuid: str, osis_education_type: str):
 def admission_status(status: str, osis_education_type: str):
     """Get the status of a specific admission"""
     admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+
+    if admission_context is None:
+        return status
+
     return (
         {
             'general-education': ChoixStatutPropositionGenerale,

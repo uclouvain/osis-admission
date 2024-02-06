@@ -120,6 +120,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
+    OngletsChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -230,15 +231,8 @@ EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
     extra_context = {
         'checklist_tabs': {
-            'assimilation': _("Belgian student status"),
-            'financabilite': _("Financeability"),
-            'frais_dossier': _("Application fee"),
-            'choix_formation': _("Course choice"),
-            'parcours_anterieur': _("Previous experience"),
-            'donnees_personnelles': _("Personal data"),
-            'specificites_formation': _("Training specificities"),
-            'decision_facultaire': _("Decision of the faculty"),
-            'decision_sic': _("Decision of SIC"),
+            tab_name: OngletsChecklist[tab_name].value
+            for tab_name in OngletsChecklist.get_names_except(OngletsChecklist.experiences_parcours_anterieur)
         },
         'hide_files': True,
         'condition_acces_enum': ConditionAcces,
