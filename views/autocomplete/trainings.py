@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -57,10 +57,21 @@ class ManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView)
         return results
 
     def results(self, results: List[BaseFormationDTO]) -> List[Dict]:
-        return [
-            {
-                'id': str(result.uuid),
-                'text': f'{result.sigle} - {result.intitule} ({result.lieu_enseignement})',
-            }
-            for result in results
-        ]
+        excluded_training = self.forwarded.get('excluded_training')
+
+        formatted_results = []
+
+        for result in results:
+            result_uuid = str(result.uuid)
+
+            if excluded_training and result_uuid == excluded_training:
+                continue
+
+            formatted_results.append(
+                {
+                    'id': result_uuid,
+                    'text': f'{result.sigle} - {result.intitule} ({result.lieu_enseignement})',
+                }
+            )
+
+        return formatted_results

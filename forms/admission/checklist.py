@@ -439,7 +439,14 @@ class FacDecisionApprovalForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, academic_year, additional_approval_conditions_for_diploma, *args, **kwargs):
+    def __init__(
+        self,
+        academic_year,
+        additional_approval_conditions_for_diploma,
+        current_training_uuid,
+        *args,
+        **kwargs,
+    ):
         instance: Optional[GeneralEducationAdmission] = kwargs.get('instance', None)
         data = kwargs.get('data', {})
         initial = kwargs.setdefault('initial', {})
@@ -505,9 +512,12 @@ class FacDecisionApprovalForm(forms.ModelForm):
             self.fields['other_training_accepted_by_fac'].queryset = training_qs
             self.initial['other_training_accepted_by_fac'] = training_qs[0].uuid if training_qs else ''
 
-        self.fields['other_training_accepted_by_fac'].widget.forward = [
-            forward.Const(academic_year, 'annee_academique')
-        ]
+        other_training_forwarded_params = [forward.Const(academic_year, 'annee_academique')]
+
+        if current_training_uuid:
+            other_training_forwarded_params.append(forward.Const(current_training_uuid, 'excluded_training'))
+
+        self.fields['other_training_accepted_by_fac'].widget.forward = other_training_forwarded_params
         self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
 
         # Initialize additional trainings fields

@@ -424,6 +424,7 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='fac-decision-approval',
             additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
+            current_training_uuid=str(self.admission.training.uuid),
         )
 
 
