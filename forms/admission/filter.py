@@ -31,9 +31,12 @@ from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.enums import TypeBourse
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION, CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
 from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS, autocomplete
+from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -161,6 +164,19 @@ class AllAdmissionsFilterForm(forms.Form):
     bourse_double_diplomation = forms.TypedChoiceField(
         label=_('Dual degree scholarship'),
         empty_value=None,
+        required=False,
+    )
+
+    mode_filtres_etats_checklist = forms.ChoiceField(
+        choices=ModeFiltrageChecklist.choices(),
+        label=_('Include or exclude the checklist filters'),
+        required=False,
+        widget=forms.RadioSelect(),
+    )
+
+    filtres_etats_checklist = ChecklistStateFilterField(
+        configurations=ORGANISATION_ONGLETS_CHECKLIST,
+        label=_('Checklist filters'),
         required=False,
     )
 

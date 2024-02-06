@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,26 @@
       </div>
     </details>
   </div>
+  <hr>
+  <div>
+    <button id="toggle-checklist-filters" type="button" class="btn btn-link nopadding" value="off">
+      {% translate "Show the states of the checklist" %}
+    </button>
+    <div id="checklist-filters-container">
+      <div class="btn-group mt-1" data-toggle="buttons">
+        {% for choice in filter_form.mode_filtres_etats_checklist %}
+          <label
+            for="{{ choice.id_for_label  }}"
+            class="btn btn-primary{% if filter_form.mode_filtres_etats_checklist.value == choice.data.value %} active{% endif %}"
+          >
+            {{ choice.tag }}
+            {{ choice.choice_label }}
+          </label>
+        {% endfor %}
+      </div>
+      {% bootstrap_field filter_form.filtres_etats_checklist label='' form_group_class="form-group mt-1" %}
+    </div>
+  </div>
 {% endblock %}
 
 {% block script %}
@@ -57,7 +77,19 @@
 
   <script>
       $(document).ready(function () {
-          initializePopover({ trigger: 'hover' })
+          initializePopover({ trigger: 'hover' });
+
+          $('#toggle-checklist-filters').on('click', function () {
+              if ($(this).val() === 'off') {
+                  $('#checklist-filters-container').show();
+                  $(this).val('on');
+                  $(this)[0].innerText = '{% translate "Hide the states of the checklist" %}';
+              } else {
+                  $('#checklist-filters-container').hide();
+                  $(this).val('off');
+                  $(this)[0].innerText = '{% translate "Show the states of the checklist" %}';
+              }
+          });
 
           const $reference = $('#id_numero');
           $reference.mask(getReferenceMask($reference.val()), {
@@ -70,4 +102,28 @@
           });
       });
   </script>
+{% endblock %}
+
+{% block style %}
+  {{ block.super }}
+
+  <style>
+    #checklist-filters-container .multi-widget {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+    }
+
+    #checklist-filters-container .multi-widget ul {
+      list-style-type: none;
+    }
+
+    #checklist-filters-container .multi-widget input[value*="."] {
+      margin-left: 2em;
+    }
+
+    #checklist-filters-container {
+      display: none;
+    }
+  </style>
 {% endblock %}
