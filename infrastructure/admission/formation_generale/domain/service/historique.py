@@ -109,17 +109,29 @@ class Historique(IHistorique):
     def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
         cls,
         proposition: Proposition,
-        message: EmailMessage,
+        message: Optional[EmailMessage],
         gestionnaire: str,
     ):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
         now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
-        recipient = message['To']
+
+        if message:
+            recipient = message['To']
+            fr_message = (
+                f'Un mail informant de la soumission du dossier en faculté a été envoyé à "{recipient}" le {now}.'
+            )
+            en_message = (
+                f'An e-mail notifying that the dossier has been submitted to the faculty was sent to "{recipient}" on '
+                f'{now}.'
+            )
+        else:
+            fr_message = f"Le dossier a été soumis en faculté le {now}."
+            en_message = f"The dossier has been submitted to the faculty on {now}."
+
         add_history_entry(
             proposition.entity_id.uuid,
-            f"Un mail informant de la soumission du dossier en faculté a été envoyé à \"{recipient}\" le {now}.",
-            f"An e-mail notifying that the dossier has been submitted to the faculty was sent to "
-            f"\"{recipient}\" on {now}.",
+            fr_message,
+            en_message,
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
             tags=["proposition", "fac-decision", "send-to-fac", "status-changed"],
         )
