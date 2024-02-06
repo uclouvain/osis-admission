@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO as PropositionDoctoraleDTO
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
@@ -64,6 +64,8 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
         taille_page: Optional[int] = None,
+        mode_filtres_etats_checklist: Optional[str] = '',
+        filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
     ) -> PaginatedList[DemandeRechercheDTO]:
 
         result = PaginatedList()

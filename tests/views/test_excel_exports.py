@@ -41,7 +41,11 @@ from osis_async.models.enums import TaskState
 
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    OngletsChecklist,
+)
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -344,6 +348,11 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
                 'bourse_internationale': str(international_scholarship.uuid),
                 'bourse_erasmus_mundus': str(erasmus_mundus_scholarship.uuid),
                 'bourse_double_diplomation': str(double_degree_scholarship.uuid),
+                'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
+                'filtres_etats_checklist': {
+                    OngletsChecklist.donnees_personnelles.name: ['A_TRAITER'],
+                    OngletsChecklist.frais_dossier.name: ['PAYES'],
+                },
             }
         )
 
@@ -358,8 +367,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 16)
-        self.assertEqual(len(values), 16)
+        self.assertEqual(len(names), 18)
+        self.assertEqual(len(values), 18)
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
@@ -378,6 +387,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(names[13], _('International scholarship'))
         self.assertEqual(names[14], _('Erasmus Mundus'))
         self.assertEqual(names[15], _('Dual degree scholarship'))
+        self.assertEqual(names[16], _('Include or exclude the checklist filters'))
+        self.assertEqual(names[17], _('Checklist filters'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '1 Janvier 2023')
@@ -396,3 +407,13 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(values[13], international_scholarship.short_name)
         self.assertEqual(values[14], erasmus_mundus_scholarship.short_name)
         self.assertEqual(values[15], double_degree_scholarship.short_name)
+        self.assertEqual(values[16], ModeFiltrageChecklist.INCLUSION.value)
+        self.assertEqual(
+            values[17],
+            str(
+                {
+                    OngletsChecklist.donnees_personnelles.value: [_('To be processed')],
+                    OngletsChecklist.frais_dossier.value: [_('Payed')],
+                }
+            ),
+        )

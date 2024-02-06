@@ -36,6 +36,7 @@ from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.formation_generale.commands import RecupererResumePropositionQuery
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
 from base.models.utils.utils import ChoiceEnum
@@ -48,7 +49,6 @@ __all__ = [
     "COMMENT_TAG_SIC",
     "COMMENT_TAG_FAC",
     "COMMENT_TAG_GLOBAL",
-    "CheckListTagsEnum",
 ]
 __namespace__ = False
 
@@ -60,24 +60,12 @@ CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS = {
 }
 
 
-class CheckListTagsEnum(ChoiceEnum):
-    assimilation = _('Belgian student status')
-    financabilite = _('Financeability')
-    frais_dossier = _('Application fee')
-    choix_formation = _('Course choice')
-    parcours_anterieur = _('Previous experience')
-    donnees_personnelles = _('Personal data')
-    specificites_formation = _('Training specificities')
-    decision_facultaire = _('Decision of the faculty')
-    decision_sic = _('Decision of SIC')
-
-
 class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
     urlpatterns = 'comments'
     permission_required = 'admission.view_enrolment_application'
     template_name = "admission/details/comments.html"
     extra_context = {
-        'checklist_tags': CheckListTagsEnum.choices(),
+        'checklist_tags': OngletsChecklist.choices_except(OngletsChecklist.experiences_parcours_anterieur),
     }
 
     def get_context_data(self, **kwargs):
@@ -89,7 +77,7 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
             context['COMMENT_TAG_FAC'] = f'{COMMENT_TAG_FAC},{COMMENT_TAG_GLOBAL}'
             context['COMMENT_TAG_SIC'] = f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}'
             context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS
-            context['checklist_tabs'] = CheckListTagsEnum.choices()
+            context['checklist_tabs'] = OngletsChecklist.choices_except(OngletsChecklist.experiences_parcours_anterieur)
 
             # Get the names of every experience
             proposition_resume: ResumePropositionDTO = message_bus_instance.invoke(

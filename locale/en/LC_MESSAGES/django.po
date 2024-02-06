@@ -1375,6 +1375,9 @@ msgstr ""
 msgid "Checklist"
 msgstr ""
 
+msgid "Checklist filters"
+msgstr ""
+
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr ""
 
@@ -1987,6 +1990,9 @@ msgstr ""
 msgid "Declared assimilated"
 msgstr ""
 
+msgid "Declared assimilated or not"
+msgstr ""
+
 msgid "Declared not assimilated"
 msgstr ""
 
@@ -2080,6 +2086,9 @@ msgid "Diplomatic post"
 msgstr ""
 
 msgid "Diplomatic post code"
+msgstr ""
+
+msgid "Director"
 msgstr ""
 
 msgid "Director of the inscription service"
@@ -2493,6 +2502,9 @@ msgid "Excel export of admission"
 msgstr ""
 
 msgid "Excel export of admission applications"
+msgstr ""
+
+msgid "Exclude"
 msgstr ""
 
 msgid "Exit without saving"
@@ -2934,6 +2946,9 @@ msgstr ""
 msgid "Hide the checklist menu"
 msgstr ""
 
+msgid "Hide the states of the checklist"
+msgstr ""
+
 msgctxt "tab"
 msgid "History"
 msgstr ""
@@ -3304,6 +3319,12 @@ msgid ""
 msgstr ""
 
 msgid "In person"
+msgstr ""
+
+msgid "Include"
+msgstr ""
+
+msgid "Include or exclude the checklist filters"
 msgstr ""
 
 msgid "Incomplete field"
@@ -4826,6 +4847,9 @@ msgstr ""
 msgid "Previous experience"
 msgstr ""
 
+msgid "Previous experiences"
+msgstr ""
+
 msgid "Previous notes"
 msgstr ""
 
@@ -5612,6 +5636,9 @@ msgid "Show details"
 msgstr ""
 
 msgid "Show the checklist menu"
+msgstr ""
+
+msgid "Show the states of the checklist"
 msgstr ""
 
 msgid "Signatures"
