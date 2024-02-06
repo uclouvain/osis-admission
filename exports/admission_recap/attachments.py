@@ -86,7 +86,7 @@ class Attachment:
         self.identifier = f'{sub_identifier}.{identifier}' if sub_identifier else identifier
         self.label = self._get_label(label, sub_identifier_label, label_interpolation)
 
-        self.uuids = [str(uuid) for uuid in uuids]
+        self.uuids = [str(uuid) for uuid in uuids if uuid]
         self.required = required
 
         if candidate_language_label:
