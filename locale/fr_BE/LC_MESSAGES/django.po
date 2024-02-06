@@ -4677,9 +4677,6 @@ msgstr "Aucun invité"
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
 
-msgid "No recipient email found for this program."
-msgstr "L'email du destinaire n'a pas été trouvé pour cette formation."
-
 msgid "No scholarship found."
 msgstr "Bourse non trouvée."
 
@@ -7011,6 +7008,14 @@ msgstr "Données relatives à la thèse"
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
 
+msgid ""
+"This action should normally email the Faculty, but the recipient address is "
+"not defined. Please define it before sending the application."
+msgstr ""
+"Cette action doit normalement envoyer un e-mail à la Faculté, mais l'adresse "
+"du destinataire n'est pas définie. Merci de la définir avant d'envoyer le "
+"dossier."
+
 msgid "This activity and its potential subactivities will be discontinued"
 msgstr "Cette activité et ses potentielles sous-activités seront supprimées"
 
@@ -7747,14 +7752,8 @@ msgstr ""
 "Vous semblez avoir des modifications non enregistrées, celles-ci seront "
 "perdues."
 
-msgid ""
-"You are about to submit the application to the Faculty. This action should "
-"normally email the Faculty, but the recipient address is not defined. Please "
-"define it before sending the application."
-msgstr ""
-"Vous êtes sur le point de soumettre le dossier en Faculté. Cette action doit "
-"normalement envoyer un e-mail à la Faculté, mais l'adresse du destinataire "
-"n'est pas définie. Merci de la définir avant d'envoyer le dossier."
+msgid "You are about to submit the application to the Faculty."
+msgstr "Vous êtes sur le point de soumettre le dossier en Faculté."
 
 #, python-format
 msgid ""

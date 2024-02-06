@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
@@ -47,7 +47,7 @@ class NotificationInMemory(INotification):
         pass
 
     @classmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> Optional[EmailMessage]:
         pass
 
     @classmethod

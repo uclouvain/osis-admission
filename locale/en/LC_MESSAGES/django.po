@@ -4193,9 +4193,6 @@ msgstr ""
 msgid "No pool was found to match."
 msgstr ""
 
-msgid "No recipient email found for this program."
-msgstr ""
-
 msgid "No scholarship found."
 msgstr ""
 
@@ -6336,6 +6333,11 @@ msgstr ""
 msgid "This account number has been verified"
 msgstr ""
 
+msgid ""
+"This action should normally email the Faculty, but the recipient address is "
+"not defined. Please define it before sending the application."
+msgstr ""
+
 msgid "This activity and its potential subactivities will be discontinued"
 msgstr ""
 
@@ -6994,10 +6996,7 @@ msgstr ""
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
 
-msgid ""
-"You are about to submit the application to the Faculty. This action should "
-"normally email the Faculty, but the recipient address is not defined. Please "
-"define it before sending the application."
+msgid "You are about to submit the application to the Faculty."
 msgstr ""
 
 #, python-format

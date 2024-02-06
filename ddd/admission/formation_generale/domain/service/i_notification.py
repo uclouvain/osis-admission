@@ -53,7 +53,7 @@ class INotification(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> Optional[EmailMessage]:
         raise NotImplementedError
 
     @classmethod
