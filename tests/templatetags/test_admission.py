@@ -773,8 +773,18 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         self.assertTrue(is_list([]))
 
     def test_label_with_user_icon(self):
-        self.assertEqual(label_with_user_icon('foo'), 'foo <i class="fas fa-user"></i>')
-        self.assertEqual(label_with_user_icon(''), ' <i class="fas fa-user"></i>')
+        label = (
+            '{} <i class="fas fa-user" data-content="Information communiquée au candidat." '
+            'data-toggle="popover" data-trigger="hover"></i>'
+        )
+        self.assertEqual(
+            label_with_user_icon('foo'),
+            label.format('foo'),
+        )
+        self.assertEqual(
+            label_with_user_icon(''),
+            label.format(''),
+        )
 
     def test_candidate_language(self):
         self.assertEqual(
