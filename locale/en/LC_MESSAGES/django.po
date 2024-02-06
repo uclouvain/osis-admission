@@ -490,9 +490,6 @@ msgstr ""
 msgid "Additional documents"
 msgstr ""
 
-msgid "Additional documents that can be requested from the candidate"
-msgstr ""
-
 msgid "Additional documents uploaded by a manager"
 msgstr ""
 
@@ -631,7 +628,15 @@ msgid ""
 "certificate must be provided."
 msgstr ""
 
+msgid ""
+"Analysis file generated when the documents requested from the candidate are "
+"received"
+msgstr ""
+
 msgid "Analysis folder"
+msgstr ""
+
+msgid "Analysis folder for a general education admission"
 msgstr ""
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
@@ -879,6 +884,12 @@ msgid "Authentication requested"
 msgstr ""
 
 msgid "Author"
+msgstr ""
+
+msgid "Authorization"
+msgstr ""
+
+msgid "Authorization to validate"
 msgstr ""
 
 msgid "Authorize"
@@ -1459,6 +1470,9 @@ msgid ""
 "label-admission-primary\">{language_code}]</span>"
 msgstr ""
 
+msgid "Communication to the candidate about additional trainings"
+msgstr ""
+
 msgid "Communication with Host Hospitals"
 msgstr ""
 
@@ -1823,6 +1837,11 @@ msgstr ""
 msgid "Create the confirmation paper success attestation as PDF"
 msgstr ""
 
+msgid ""
+"Create the folder analysis of the proposition containing the requested "
+"documents that the candidate submitted."
+msgstr ""
+
 msgid "Create the recap of the proposition"
 msgstr ""
 
@@ -2066,6 +2085,9 @@ msgstr ""
 msgid "Diploma translation"
 msgstr ""
 
+msgid "Diploma(s) or non-academic activity(ies) giving access to"
+msgstr ""
+
 msgid "Diplomatic post"
 msgstr ""
 
@@ -2073,6 +2095,13 @@ msgid "Diplomatic post code"
 msgstr ""
 
 msgid "Director"
+msgstr ""
+
+msgid "Director of the inscription service"
+msgstr ""
+
+msgctxt "F"
+msgid "Director of the inscription service"
 msgstr ""
 
 msgid "Disabled"
@@ -2107,6 +2136,12 @@ msgid "Dissertation title"
 msgstr ""
 
 msgid "Do not reorder values, and keep the same count"
+msgstr ""
+
+#, python-format
+msgid ""
+"Do you confirm the sending of this email to the <a href=\"mailto:"
+"%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
 msgstr ""
 
 msgid "Do you have a Belgian National Register Number (NISS)?"
@@ -2310,6 +2345,12 @@ msgctxt "admission"
 msgid "Email"
 msgstr ""
 
+msgid "Email content"
+msgstr ""
+
+msgid "Email object"
+msgstr ""
+
 msgid "Email of the contact person for the design of the annual program"
 msgstr ""
 
@@ -2330,10 +2371,20 @@ msgid ""
 "fee to finalize an application for general education"
 msgstr ""
 
+msgid ""
+"Email sent to the candidate to inform him that the checking of the "
+"authentication of its background is in progress."
+msgstr ""
+
 msgid "Email sent to the candidate when SIC approves an admission."
 msgstr ""
 
 msgid "Email sent to the candidate when SIC refuses an admission."
+msgstr ""
+
+msgid ""
+"Email sent to the checkers to inform them to check the background "
+"authentication of the candidate."
 msgstr ""
 
 msgid ""
@@ -2638,6 +2689,13 @@ msgid "First year of"
 msgstr ""
 
 msgid "First year of inscription + status"
+msgstr ""
+
+#, python-format
+msgid "Folder analysis of the proposition %(reference)s"
+msgstr ""
+
+msgid "Following authorization"
 msgstr ""
 
 msgctxt "female gender"
@@ -3309,6 +3367,9 @@ msgid "Institute"
 msgstr ""
 
 msgid "Institute address"
+msgstr ""
+
+msgid "Institute contacted"
 msgstr ""
 
 msgid "Institute name"
@@ -4390,6 +4451,9 @@ msgstr ""
 msgid "Other authorized program"
 msgstr ""
 
+msgid "Other communication for the candidate about the prerequisite courses"
+msgstr ""
+
 msgid "Other cotutelle-related documents"
 msgstr ""
 
@@ -4409,9 +4473,6 @@ msgid "Other education type"
 msgstr ""
 
 msgid "Other given names"
-msgstr ""
-
-msgid "Other information about prerequisite courses"
 msgstr ""
 
 msgid "Other institute"
@@ -4715,6 +4776,11 @@ msgstr ""
 msgid ""
 "Please refer to the specifics disposition of your domain doctoral commission "
 "for your activities choice."
+msgstr ""
+
+msgid ""
+"Please select in the previous experience, the diploma(s), or non-academic "
+"activity(ies) giving access to the chosen program."
 msgstr ""
 
 msgid ""
@@ -5463,6 +5529,9 @@ msgstr ""
 msgid "Secondary education type"
 msgstr ""
 
+msgid "Secondary school"
+msgstr ""
+
 msgid "Secondary school diploma"
 msgstr ""
 
@@ -5593,6 +5662,9 @@ msgstr ""
 msgid "Signatures"
 msgstr ""
 
+msgid "Signed enrollment authorization"
+msgstr ""
+
 msgid "Sir"
 msgstr ""
 
@@ -5709,6 +5781,9 @@ msgid "Street"
 msgstr ""
 
 msgid "Student signature for agreement"
+msgstr ""
+
+msgid "Student visa D"
 msgstr ""
 
 msgid "Study language"
@@ -5922,6 +5997,9 @@ msgid "The candidate has several enrolment applications in progress"
 msgstr ""
 
 msgid "The candidate is doing a mobility"
+msgstr ""
+
+msgid "The candidate must provide a student visa"
 msgstr ""
 
 msgid "The candidate must report to SIC"
@@ -7007,6 +7085,9 @@ msgstr ""
 msgid ""
 "You can add any document you feel is relevant to your application "
 "(supporting documents, proof of language level, etc.)."
+msgstr ""
+
+msgid "You can only select courses that are managed by the program manager."
 msgstr ""
 
 #, python-format

@@ -530,18 +530,22 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
         )
     ),
     ModifierAuthentificationExperienceParcoursAnterieurCommand: (
         lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
             cmd,
             proposition_repository=PropositionRepository(),
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (
         lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
         )
     ),
     RefuserAdmissionParSicCommand: (
@@ -569,6 +573,7 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
+            emplacement_document_repository=EmplacementDocumentRepository(),
         )
     ),
     ApprouverInscriptionParSicCommand: (

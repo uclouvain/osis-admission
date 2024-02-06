@@ -191,6 +191,9 @@ class Proposition(interface.RootEntity):
     nombre_de_mois_de_mobilite: Optional['MobiliteNombreDeMois'] = ''
     doit_se_presenter_en_sic: Optional[bool] = None
     communication_au_candidat: str = ''
+    doit_fournir_visa_etudes: Optional[bool] = None
+    visa_etudes_d: List[str] = attr.Factory(list)
+    certificat_autorisation_signe: List[str] = attr.Factory(list)
 
     condition_acces: Optional[ConditionAcces] = None
     millesime_condition_acces: Optional[int] = None
@@ -391,7 +394,7 @@ class Proposition(interface.RootEntity):
         self.certificat_approbation_fac = []
         self.auteur_derniere_modification = auteur_modification
 
-    def approuver_par_fac(self, auteur_modification: str):
+    def approuver_par_fac(self, auteur_modification: str, titres_selectionnes: List[TitreAccesSelectionnable]):
         ApprouverParFacValidatorList(
             statut=self.statut,
             avec_conditions_complementaires=self.avec_conditions_complementaires,
@@ -400,6 +403,7 @@ class Proposition(interface.RootEntity):
             avec_complements_formation=self.avec_complements_formation,
             complements_formation=self.complements_formation,
             nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            titres_selectionnes=titres_selectionnes,
         ).validate()
 
         self.specifier_acceptation_par_fac()
@@ -778,6 +782,7 @@ class Proposition(interface.RootEntity):
         nombre_de_mois_de_mobilite: str,
         doit_se_presenter_en_sic: Optional[bool],
         communication_au_candidat: str,
+        doit_fournir_visa_etudes: Optional[bool],
     ):
         ApprouverParSicAValiderValidatorList(statut=self.statut).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
@@ -822,6 +827,7 @@ class Proposition(interface.RootEntity):
         self.nombre_de_mois_de_mobilite = nombre_de_mois_de_mobilite
         self.doit_se_presenter_en_sic = doit_se_presenter_en_sic
         self.communication_au_candidat = communication_au_candidat
+        self.doit_fournir_visa_etudes = doit_fournir_visa_etudes
 
     def specifier_motifs_refus_par_sic(
         self,

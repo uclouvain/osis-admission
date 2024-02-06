@@ -216,7 +216,7 @@ msgid ""
 "<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
 "strong>"
 msgstr ""
-"<strong>Attention</strong> le candidat es signalé <strong>fraudeur</strong>"
+"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong>"
 
 #, python-format
 msgid ""
@@ -554,10 +554,7 @@ msgid "Additional course(s):"
 msgstr "Complément de formation :"
 
 msgid "Additional documents"
-msgstr "Documents complémentaires"
-
-msgid "Additional documents that can be requested from the candidate"
-msgstr "Documents additionnels réclamables au candidat"
+msgstr "Documents additionnels"
 
 msgid "Additional documents uploaded by a manager"
 msgstr "Documents additionnels téléversés par un gestionnaire"
@@ -714,8 +711,17 @@ msgstr ""
 "d'un projet. Ces bourses internationales sont notamment attribuées par "
 "l'organisme ARES et une attestation de bourse est dès lors à fournir."
 
+msgid ""
+"Analysis file generated when the documents requested from the candidate are "
+"received"
+msgstr ""
+"Dossier d'analyse généré à la réception des documents réclamés au candidat"
+
 msgid "Analysis folder"
 msgstr "Dossier d'analyse"
+
+msgid "Analysis folder for a general education admission"
+msgstr "Dossier d'analyse pour une demande en formation générale"
 
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
@@ -980,6 +986,12 @@ msgstr "Authentification demandée"
 
 msgid "Author"
 msgstr "Auteur"
+
+msgid "Authorization"
+msgstr "Autorisation"
+
+msgid "Authorization to validate"
+msgstr "Autorisation à valider"
 
 msgid "Authorize"
 msgstr "Autoriser"
@@ -1581,6 +1593,9 @@ msgstr ""
 "Communication au candidat (motif de refus), en langue <span class=\"label "
 "label-admission-primary\">{language_code}</span>"
 
+msgid "Communication to the candidate about additional trainings"
+msgstr "Autre communication au candidat à propos des compléments"
+
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
 
@@ -2005,6 +2020,13 @@ msgid "Create the confirmation paper success attestation as PDF"
 msgstr ""
 "Création du PDF de l'attestation de réussite de l'épreuve de confirmation"
 
+msgid ""
+"Create the folder analysis of the proposition containing the requested "
+"documents that the candidate submitted."
+msgstr ""
+"Création du dossier d'analyse de la proposition contenant les documents "
+"réclamés que le candidat a soumis."
+
 msgid "Create the recap of the proposition"
 msgstr "Créer le récapitulatif de la la proposition"
 
@@ -2248,6 +2270,9 @@ msgstr "Nationalité du diplôme"
 msgid "Diploma translation"
 msgstr "Traduction du diplôme"
 
+msgid "Diploma(s) or non-academic activity(ies) giving access to"
+msgstr "Diplôme(s) ou activité(s) non-académique(s) donnant accès"
+
 msgid "Diplomatic post"
 msgstr "Poste diplomatique"
 
@@ -2256,6 +2281,13 @@ msgstr "Code poste diplomatique"
 
 msgid "Director"
 msgstr "Directeur"
+
+msgid "Director of the inscription service"
+msgstr "Directeur du Service des inscriptions"
+
+msgctxt "F"
+msgid "Director of the inscription service"
+msgstr "Directrice du Service des inscriptions"
 
 msgid "Disabled"
 msgstr "Désactivé"
@@ -2290,6 +2322,14 @@ msgstr "Titre du mémoire"
 
 msgid "Do not reorder values, and keep the same count"
 msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
+
+#, python-format
+msgid ""
+"Do you confirm the sending of this email to the <a href=\"mailto:"
+"%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
+msgstr ""
+"Confirmez-vous l'envoi de ce mail à l'adresse <a href=\"mailto:"
+"%(email_address)s\" target=\"_blank\">%(email_address)s</a> ?"
 
 msgid "Do you have a Belgian National Register Number (NISS)?"
 msgstr "Avez-vous un numéro de registre national belge (NISS) ?"
@@ -2507,6 +2547,12 @@ msgctxt "admission"
 msgid "Email"
 msgstr "Email"
 
+msgid "Email content"
+msgstr "Contenu du mail"
+
+msgid "Email object"
+msgstr "Objet du mail"
+
 msgid "Email of the contact person for the design of the annual program"
 msgstr ""
 "E-mail de la personne de contact pour la composition du programme annuel"
@@ -2531,11 +2577,25 @@ msgstr ""
 "E-mail envoyé au candidat pour l'informer de la nécessité de payer les frais "
 "de dossier pour finaliser une demande en formation générale"
 
+msgid ""
+"Email sent to the candidate to inform him that the checking of the "
+"authentication of its background is in progress."
+msgstr ""
+"E-mail envoyé au candidat pour l'informer que la vérification de "
+"l'authentification de son parcours est en cours."
+
 msgid "Email sent to the candidate when SIC approves an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC approuve une proposition."
 
 msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
+
+msgid ""
+"Email sent to the checkers to inform them to check the background "
+"authentication of the candidate."
+msgstr ""
+"E-Mail envoyé aux vérificateurs pour les informer de la nécessité de "
+"vérifier l'authentification du parcours du candidat"
 
 msgid ""
 "Email sent to the faculty when the SIC submits the application during the "
@@ -2846,6 +2906,13 @@ msgstr "Première année de"
 
 msgid "First year of inscription + status"
 msgstr "Année de première inscription + statut"
+
+#, python-format
+msgid "Folder analysis of the proposition %(reference)s"
+msgstr "Dossier d'analyse de la proposition %(reference)s"
+
+msgid "Following authorization"
+msgstr "Suite à l'autorisation"
 
 msgctxt "female gender"
 msgid ""
@@ -3681,6 +3748,9 @@ msgstr "Institution"
 
 msgid "Institute address"
 msgstr "Adresse de l'établissement"
+
+msgid "Institute contacted"
+msgstr "Établissement contacté"
 
 msgid "Institute name"
 msgstr "Nom de l'établissement"
@@ -4879,6 +4949,9 @@ msgstr "Une autre adresse"
 msgid "Other authorized program"
 msgstr "Autre formation autorisée"
 
+msgid "Other communication for the candidate about the prerequisite courses"
+msgstr "Autre communication au candidat à propos des compléments"
+
 msgid "Other cotutelle-related documents"
 msgstr "Autres documents relatifs à la cotutelle"
 
@@ -4899,9 +4972,6 @@ msgstr "Autre type d'enseignement"
 
 msgid "Other given names"
 msgstr "Autres prénoms"
-
-msgid "Other information about prerequisite courses"
-msgstr "Autres informations à propos des compléments de formation"
 
 msgid "Other institute"
 msgstr "Autre institution"
@@ -5239,6 +5309,13 @@ msgid ""
 msgstr ""
 "Veuillez consulter les dispositions particulières de votre commission "
 "doctorale de domaine pour le choix des activités."
+
+msgid ""
+"Please select in the previous experience, the diploma(s), or non-academic "
+"activity(ies) giving access to the chosen program."
+msgstr ""
+"Veuillez préciser dans le parcours antérieur le(s) diplôme(s), ou la/les "
+"activité(s) donnant accès à la formation choisie."
 
 msgid ""
 "Please select the Belgian student status situation that most applies to you"
@@ -5918,7 +5995,7 @@ msgstr ""
 "d'expertise scientifique"
 
 msgid "SIC Approval"
-msgstr "Approbation SIC"
+msgstr "Autorisation SIC"
 
 msgid "SIC comment for the faculty"
 msgstr "Commentaire de SIC pour la Faculté"
@@ -6022,6 +6099,9 @@ msgstr ""
 
 msgid "Secondary education type"
 msgstr "Type d'enseignement"
+
+msgid "Secondary school"
+msgstr "Études secondaires"
 
 msgid "Secondary school diploma"
 msgstr "Diplôme d'études secondaires"
@@ -6154,6 +6234,9 @@ msgstr "Afficher le menu de la checklist"
 
 msgid "Signatures"
 msgstr "Signatures"
+
+msgid "Signed enrollment authorization"
+msgstr "Autorisation d'inscription signée"
 
 msgid "Sir"
 msgstr "Monsieur"
@@ -6290,6 +6373,9 @@ msgstr "Rue"
 
 msgid "Student signature for agreement"
 msgstr "Signature de l’étudiant·e pour accord"
+
+msgid "Student visa D"
+msgstr "Visa d'études D"
 
 msgid "Study language"
 msgstr "Langue des études"
@@ -6538,6 +6624,9 @@ msgstr "Le candidat a plusieurs demandes d'inscription en cours"
 
 msgid "The candidate is doing a mobility"
 msgstr "Le candidat effectue une mobilité"
+
+msgid "The candidate must provide a student visa"
+msgstr "Le candidat doit fournir un visa d'études"
 
 msgid "The candidate must report to SIC"
 msgstr "Le candidat doit se présenter en SIC"
@@ -6922,9 +7011,9 @@ msgid ""
 msgstr ""
 "Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR. Un "
 "acompte obligatoire minimum de 50 EUR devra être payé dans les meilleurs "
-"délais et au plus tard le %(start_year)s. Le solde du montant des droits "
-"d'inscription devra être payé intégralement au plus tard pour le "
-"%(end_year)s. Dès réception de ce document signé par vos soins, les "
+"délais et au plus tard le 31/10/%(start_year)s. Le solde du montant des "
+"droits d'inscription devra être payé intégralement au plus tard pour le "
+"01/02/%(end_year)s. Dès réception de ce document signé par vos soins, les "
 "modalités de payement vous seront communiquées."
 
 msgid "There can be no more CA members in the supervision group."
@@ -7761,6 +7850,11 @@ msgid ""
 msgstr ""
 "Vous avez la possibilité d'ajouter tout document que vous jugez pertinent "
 "pour votre dossier (justificatifs, preuve de niveau de langue, ...)."
+
+msgid "You can only select courses that are managed by the program manager."
+msgstr ""
+"Vous ne pouvez sélectionner que les formations gérées par le·la même "
+"responsable de programme."
 
 #, python-format
 msgid ""

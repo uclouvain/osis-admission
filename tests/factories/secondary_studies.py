@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -43,8 +43,8 @@ class BelgianHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
     high_school_diploma = factory.LazyAttribute(lambda _: [PdfUploadFactory().uuid])
     community = BelgianCommunitiesOfEducation.GERMAN_SPEAKING.name
     educational_type = EducationalType.PROFESSIONAL_EDUCATION.name
-    other_institute_name = ('HS UCL',)
-    other_institute_address = ('Louvain-la-Neuve',)
+    other_institute_name = 'HS UCL'
+    other_institute_address = 'Louvain-la-Neuve'
 
     class Meta:
         model = BelgianHighSchoolDiploma

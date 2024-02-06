@@ -29,6 +29,7 @@ from typing import Dict, List, Optional, Union
 
 import attr
 
+from admission.ddd import PLUS_5_ISO_CODES
 from admission.ddd.admission.dtos.bourse import BourseDTO
 from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -97,6 +98,12 @@ class PropositionDTO(interface.DTO):
     certificat_approbation_sic_annexe: List[str]
     certificat_refus_sic: List[str]
 
+    doit_fournir_visa_etudes: Optional[bool]
+    visa_etudes_d: List[str]
+    certificat_autorisation_signe: List[str]
+
+    type: str
+
     @property
     def candidat_vip(self) -> bool:
         return any(
@@ -115,7 +122,6 @@ class PropositionDTO(interface.DTO):
 
 @attr.dataclass(frozen=True, slots=True)
 class PropositionGestionnaireDTO(PropositionDTO):
-    type: str
     date_changement_statut: Optional[datetime.datetime]
 
     genre_candidat: str
@@ -123,6 +129,9 @@ class PropositionGestionnaireDTO(PropositionDTO):
     adresse_email_candidat: str
     langue_contact_candidat: str
     nationalite_candidat: str
+    nationalite_candidat_fr: str
+    nationalite_candidat_en: str
+    nationalite_candidat_code_iso: str
     nationalite_ue_candidat: Optional[bool]
     photo_identite_candidat: List[str]
 
@@ -174,3 +183,11 @@ class PropositionGestionnaireDTO(PropositionDTO):
     statut_equivalence_titre_acces: str
     etat_equivalence_titre_acces: str
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date]
+
+    @property
+    def candidat_a_nationalite_ue_5(self):
+        return self.nationalite_ue_candidat is True or self.nationalite_candidat_code_iso in PLUS_5_ISO_CODES
+
+    @property
+    def candidat_a_nationalite_hors_ue_5(self):
+        return self.nationalite_ue_candidat is False and self.nationalite_candidat_code_iso not in PLUS_5_ISO_CODES

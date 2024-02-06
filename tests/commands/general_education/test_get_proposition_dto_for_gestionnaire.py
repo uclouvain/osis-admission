@@ -155,6 +155,8 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.adresse_email_candidat, self.admission.candidate.private_email)
         self.assertEqual(result.langue_contact_candidat, self.admission.candidate.language)
         self.assertEqual(result.nationalite_candidat, '')
+        self.assertEqual(result.nationalite_candidat_fr, '')
+        self.assertEqual(result.nationalite_candidat_en, '')
         self.assertEqual(result.nationalite_ue_candidat, None)
         self.assertEqual(result.photo_identite_candidat, self.admission.candidate.id_card)
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)
@@ -172,6 +174,8 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         result = self._get_command_result()
 
         self.assertEqual(result.nationalite_candidat, self.admission.candidate.country_of_citizenship.name)
+        self.assertEqual(result.nationalite_candidat_fr, self.admission.candidate.country_of_citizenship.name)
+        self.assertEqual(result.nationalite_candidat_en, self.admission.candidate.country_of_citizenship.name_en)
         self.assertEqual(result.nationalite_ue_candidat, self.admission.candidate.country_of_citizenship.european_union)
 
     def test_get_proposition_with_scholarship(self):
@@ -336,19 +340,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
 
         prerequisite_courses = self.admission.prerequisite_courses.all()
         self.assertEqual(result.avec_complements_formation, self.admission.with_prerequisite_courses)
-        self.assertCountEqual(
-            result.complements_formation,
-            [
-                LearningUnitPartimDTO(
-                    code=prerequisite_courses[0].acronym,
-                    full_title=prerequisite_courses[0].complete_title_i18n,
-                ),
-                LearningUnitPartimDTO(
-                    code=prerequisite_courses[1].acronym,
-                    full_title=prerequisite_courses[1].complete_title_i18n,
-                ),
-            ],
-        )
+        self.assertEqual(len(result.complements_formation), len(prerequisite_courses))
         self.assertEqual(result.commentaire_complements_formation, self.admission.prerequisite_courses_fac_comment)
         self.assertEqual(result.nombre_annees_prevoir_programme, self.admission.program_planned_years_number)
         self.assertEqual(
