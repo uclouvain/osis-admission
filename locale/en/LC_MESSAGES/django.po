@@ -3309,6 +3309,9 @@ msgid ""
 "project\" part."
 msgstr ""
 
+msgid "Information provided to the candidate."
+msgstr ""
+
 msgid "Initialization of the predefined specific questions"
 msgstr ""
 
