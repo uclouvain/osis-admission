@@ -4948,7 +4948,7 @@ msgstr "Autre formation"
 
 msgctxt "admission"
 msgid "Other reasons"
-msgstr "Autres raisons"
+msgstr "Autres motifs"
 
 msgid "Other refusal reasons"
 msgstr "Autres motifs de refus facultaire"
