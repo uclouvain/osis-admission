@@ -37,7 +37,7 @@ from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
-from django.utils.translation import get_language, gettext_lazy as _, pgettext
+from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -964,7 +964,10 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
 
 @register.filter
 def label_with_user_icon(label):
-    return mark_safe(f'{label} <i class="fas fa-user"></i>')
+    title = gettext('Information provided to the candidate.')
+    return mark_safe(
+        f'{label} <i class="fas fa-user" data-content="{title}" data-toggle="popover" data-trigger="hover"></i>'
+    )
 
 
 @register.filter
