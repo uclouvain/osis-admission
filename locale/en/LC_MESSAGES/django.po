@@ -2077,9 +2077,6 @@ msgstr ""
 msgid "Diplomatic post code"
 msgstr ""
 
-msgid "Director"
-msgstr ""
-
 msgid "Director of the inscription service"
 msgstr ""
 
