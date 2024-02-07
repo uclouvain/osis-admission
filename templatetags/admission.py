@@ -39,6 +39,7 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext
 from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -91,8 +92,6 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.utils import format_academic_year, get_access_conditions_url
-from osis_document.api.utils import get_remote_metadata, get_remote_token
-
 from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
@@ -580,13 +579,13 @@ def get_image_file_url(file_uuids):
 
 
 @register.inclusion_tag('admission/dummy.html')
-def document_component(document_write_token, document_metadata, edit_mode=True):
+def document_component(document_write_token, document_metadata, can_edit=True):
     """Display the right editor component depending on the file type."""
     if document_metadata:
         if document_metadata.get('mimetype') == PDF_MIME_TYPE:
             attrs = {}
-            if not edit_mode:
-                attrs = {action: False for action in ['pagination', 'zoom', 'comment', 'highlight', 'rotation']}
+            if not can_edit:
+                attrs = {action: False for action in ['pagination', 'zoom', 'rotation']}
             return {
                 'template': 'osis_document/editor.html',
                 'value': document_write_token,
