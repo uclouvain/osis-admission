@@ -792,6 +792,11 @@ msgid "Are you the child of a UCLouvain or Martin V staff member?"
 msgstr ""
 
 msgid ""
+"As the email address of the faculty recipient is not defined, no email will "
+"be sent. Do you still want to send the application to the faculty?"
+msgstr ""
+
+msgid ""
 "As you are applying for a limited course as a non-resident (as defined by "
 "government decree) candidate, applications for the 2024-2025 academic year "
 "must be submitted via this <a href=\"https://uclouvain.be/fr/etudier/"
@@ -6328,11 +6333,6 @@ msgid "Thesis-related data"
 msgstr ""
 
 msgid "This account number has been verified"
-msgstr ""
-
-msgid ""
-"This action should normally email the Faculty, but the recipient address is "
-"not defined. Please define it before sending the application."
 msgstr ""
 
 msgid "This activity and its potential subactivities will be discontinued"
