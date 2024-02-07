@@ -212,7 +212,7 @@
   <div id="sigle-container">
     <img id="sigle" src="{% static "img/sedes.png" %}">
     <div class="pt-5">
-      {% if director.signature %}<img class="ms-5" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+      {% if director.signature %}<img class="ms-3" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
       <p>
         {{ director.first_name }} {{ director.last_name }},<br>
         {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
