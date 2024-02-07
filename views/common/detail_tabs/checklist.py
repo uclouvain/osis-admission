@@ -119,7 +119,12 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import ChoixFormationForm, SicDecisionDerogationForm, FinancabiliteApprovalForm
+from admission.forms.admission.checklist import (
+    ChoixFormationForm,
+    SicDecisionDerogationForm,
+    FinancabiliteApprovalForm,
+    SicDecisionApprovalDocumentsForm,
+)
 from admission.forms.admission.checklist import (
     CommentForm,
     AssimilationForm,
@@ -424,6 +429,7 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='fac-decision-approval',
             additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
+            current_training_uuid=str(self.admission.training.uuid),
         )
 
 
@@ -645,6 +651,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['sic_decision_refusal_form'] = self.sic_decision_refusal_form
+        context['sic_decision_approval_documents_form'] = self.sic_decision_approval_documents_form
         context['sic_decision_approval_form'] = self.sic_decision_approval_form
         context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
         context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
@@ -746,6 +753,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         ]
 
     @cached_property
+    def sic_decision_approval_documents_form(self):
+        return SicDecisionApprovalDocumentsForm(
+            instance=self.admission,
+            documents=self.sic_decision_approval_form_requestable_documents,
+        )
+
+    @cached_property
     def sic_decision_approval_form(self):
         return SicDecisionApprovalForm(
             academic_year=self.admission.determined_academic_year.year,
@@ -756,7 +770,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             else None,
             prefix='sic-decision-approval',
             additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
-            documents=self.sic_decision_approval_form_requestable_documents,
             candidate_nationality_is_no_ue_5=self.proposition.candidat_a_nationalite_hors_ue_5,
         )
 
@@ -1072,6 +1085,7 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             tab='decision_sic',
             admission_status=status,
             extra=extra,
+            replace_extra=True,
             admission=admission,
             global_status=global_status,
             author=self.request.user.person,
