@@ -118,6 +118,11 @@ templates.register(
             description=_("Training of the admission"),
             example="AGRO3DP / Doctorat en sciences agronomiques et ingénierie biologique",
         ),
+        Token(
+            name='director',
+            description=_("Director"),
+            example="Virginie Odeurs",
+        ),
     ],
 )
 

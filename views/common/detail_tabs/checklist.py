@@ -33,7 +33,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import resolve_url, redirect, render
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
-from django.utils import translation
+from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, gettext, get_language
@@ -162,6 +162,7 @@ from admission.utils import (
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from epc.models.email_fonction_programme import EmailFonctionProgramme
@@ -210,6 +211,7 @@ __namespace__ = False
 
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
+ENTITY_SIC = 'SIC'
 
 
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
@@ -774,6 +776,22 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         )
 
     @cached_property
+    def sic_director(self):
+        now = timezone.now()
+        director = (
+            Person.objects.filter(
+                mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
+                mandatary__mandate__function=MandateTypes.DIRECTOR.name,
+            )
+            .filter(
+                mandatary__start_date__lte=now,
+                mandatary__end_date__gte=now,
+            )
+            .first()
+        )
+        return director
+
+    @cached_property
     def sic_decision_refusal_final_form(self):
         tokens = {
             "admission_reference": self.proposition.reference,
@@ -785,6 +803,8 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
         }
+        if self.sic_director:
+            tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
