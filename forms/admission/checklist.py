@@ -378,6 +378,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
             url="admission:autocomplete:managed-education-trainings",
             attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
+        help_text=_('You can only select courses that are managed by the program manager.'),
     )
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
@@ -438,7 +439,14 @@ class FacDecisionApprovalForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, academic_year, additional_approval_conditions_for_diploma, *args, **kwargs):
+    def __init__(
+        self,
+        academic_year,
+        additional_approval_conditions_for_diploma,
+        current_training_uuid,
+        *args,
+        **kwargs,
+    ):
         instance: Optional[GeneralEducationAdmission] = kwargs.get('instance', None)
         data = kwargs.get('data', {})
         initial = kwargs.setdefault('initial', {})
@@ -504,9 +512,12 @@ class FacDecisionApprovalForm(forms.ModelForm):
             self.fields['other_training_accepted_by_fac'].queryset = training_qs
             self.initial['other_training_accepted_by_fac'] = training_qs[0].uuid if training_qs else ''
 
-        self.fields['other_training_accepted_by_fac'].widget.forward = [
-            forward.Const(academic_year, 'annee_academique')
-        ]
+        other_training_forwarded_params = [forward.Const(academic_year, 'annee_academique')]
+
+        if current_training_uuid:
+            other_training_forwarded_params.append(forward.Const(current_training_uuid, 'excluded_training'))
+
+        self.fields['other_training_accepted_by_fac'].widget.forward = other_training_forwarded_params
         self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
 
         # Initialize additional trainings fields
@@ -668,6 +679,46 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
         return cleaned_data
 
 
+class SicDecisionApprovalDocumentsForm(forms.Form):
+    def __init__(
+        self,
+        documents: List[EmplacementDocumentDTO],
+        instance: GeneralEducationAdmission,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        # Documents
+        documents_choices = []
+        initial_document_choices = []
+        self.documents = {}
+
+        for document in documents:
+            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
+                if document.document_uuids:
+                    label = '<span class="fa-solid fa-paperclip"></span> '
+                else:
+                    label = '<span class="fa-solid fa-link-slash"></span> '
+                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
+                    label += '<span class="fa-solid fa-building-columns"></span> '
+                label += document.libelle
+
+                document_field = ChangeRequestDocumentForm.create_change_request_document_field(
+                    label=label,
+                    document_identifier=document.identifiant,
+                    request_status=document.statut_reclamation,
+                    proposition_uuid=instance.uuid,
+                    only_limited_request_choices=False,
+                )
+
+                self.fields[document.identifiant] = document_field
+                self.documents[document.identifiant] = document_field
+
+                initial_document_choices.append(document.identifiant)
+                documents_choices.append((document.identifiant, mark_safe(label)))
+
+
 class SicDecisionApprovalForm(forms.ModelForm):
     SEPARATOR = ';'
 
@@ -751,7 +802,6 @@ class SicDecisionApprovalForm(forms.ModelForm):
         self,
         academic_year,
         additional_approval_conditions_for_diploma,
-        documents: List[EmplacementDocumentDTO],
         candidate_nationality_is_no_ue_5: bool,
         *args,
         **kwargs,
@@ -760,35 +810,6 @@ class SicDecisionApprovalForm(forms.ModelForm):
         data = kwargs.get('data', {})
 
         super().__init__(*args, **kwargs)
-
-        # Documents
-        documents_choices = []
-        initial_document_choices = []
-        self.documents = {}
-
-        for document in documents:
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
-                if document.document_uuids:
-                    label = '<span class="fa-solid fa-paperclip"></span> '
-                else:
-                    label = '<span class="fa-solid fa-link-slash"></span> '
-                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
-                    label += '<span class="fa-solid fa-building-columns"></span> '
-                label += document.libelle
-
-                document_field = ChangeRequestDocumentForm.create_change_request_document_field(
-                    label=label,
-                    document_identifier=document.identifiant,
-                    request_status=document.statut_reclamation,
-                    proposition_uuid=self.instance.uuid,
-                    only_limited_request_choices=False,
-                )
-
-                self.fields[document.identifiant] = document_field
-                self.documents[document.identifiant] = document_field
-
-                initial_document_choices.append(document.identifiant)
-                documents_choices.append((document.identifiant, mark_safe(label)))
 
         # Initialize conditions field
         self.is_admission = self.instance.type_demande == TypeDemande.ADMISSION.name

@@ -2077,9 +2077,6 @@ msgstr ""
 msgid "Diplomatic post code"
 msgstr ""
 
-msgid "Director"
-msgstr ""
-
 msgid "Director of the inscription service"
 msgstr ""
 
@@ -3310,6 +3307,9 @@ msgstr ""
 msgid ""
 "Information about a potential cotutelle are to be inputted in the \"Doctoral "
 "project\" part."
+msgstr ""
+
+msgid "Information provided to the candidate."
 msgstr ""
 
 msgid "Initialization of the predefined specific questions"
@@ -7032,6 +7032,9 @@ msgstr ""
 msgid ""
 "You can add any document you feel is relevant to your application "
 "(supporting documents, proof of language level, etc.)."
+msgstr ""
+
+msgid "You can only select courses that are managed by the program manager."
 msgstr ""
 
 #, python-format

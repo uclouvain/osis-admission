@@ -37,7 +37,7 @@ from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
-from django.utils.translation import get_language, gettext_lazy as _, pgettext
+from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
@@ -639,12 +639,13 @@ def status_as_class(activity):
 
 
 @register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False):
+def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None):
     return {
         'field': field,
         'classes': classes,
         'show_help': show_help,
         'html_tooltip': html_tooltip,
+        'label': label,
     }
 
 
@@ -966,7 +967,10 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
 
 @register.filter
 def label_with_user_icon(label):
-    return mark_safe(f'{label} <i class="fas fa-user"></i>')
+    title = gettext('Information provided to the candidate.')
+    return mark_safe(
+        f'{label} <i class="fas fa-user" data-content="{title}" data-toggle="popover" data-trigger="hover"></i>'
+    )
 
 
 @register.filter
