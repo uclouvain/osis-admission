@@ -585,7 +585,7 @@ def document_component(document_write_token, document_metadata, can_edit=True):
         if document_metadata.get('mimetype') == PDF_MIME_TYPE:
             attrs = {}
             if not can_edit:
-                attrs = {action: False for action in ['pagination', 'zoom', 'rotation']}
+                attrs = {action: False for action in ['pagination', 'zoom', 'comment', 'highlight', 'rotation']}
             return {
                 'template': 'osis_document/editor.html',
                 'value': document_write_token,

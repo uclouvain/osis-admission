@@ -509,7 +509,7 @@ class DisplayTagTestCase(TestCase):
                 'template': 'osis_document/editor.html',
                 'value': 'token',
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
-                'attrs': {'pagination': False, 'zoom': False, 'rotation': False}
+                'attrs': {'pagination': False, 'zoom': False, 'comment': False, 'highlight': False, 'rotation': False},
             },
         )
 
