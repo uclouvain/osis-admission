@@ -2260,9 +2260,6 @@ msgstr "Poste diplomatique"
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
 
-msgid "Director"
-msgstr "Directeur"
-
 msgid "Director of the inscription service"
 msgstr "Directeur du Service des inscriptions"
 
@@ -3688,6 +3685,9 @@ msgstr ""
 "Les informations concernant une éventuelle cotutelle sont à indiquer dans la "
 "partie « Projet doctoral »."
 
+msgid "Information provided to the candidate."
+msgstr "Information communiquée au candidat."
+
 msgid "Initialization of the predefined specific questions"
 msgstr "Initialisation des questions spécifiques prédéfinies"
 
@@ -4951,7 +4951,7 @@ msgstr "Autre formation"
 
 msgctxt "admission"
 msgid "Other reasons"
-msgstr "Autres raisons"
+msgstr "Autres motifs"
 
 msgid "Other refusal reasons"
 msgstr "Autres motifs de refus facultaire"
