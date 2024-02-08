@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('base', '0667_educationgrouptype_cycle'),
-        ('admission', '0146_general_authorization_documents'),
+        ('admission', '0147_sic_refusal_mail_template_director'),
     ]
 
     operations = [
