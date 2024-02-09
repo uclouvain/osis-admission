@@ -210,6 +210,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_sic_temporaire(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
@@ -225,6 +226,7 @@ class PDFGeneration(IPDFGeneration):
             raise PdfSicInconnu()
         return pdf_generation_method(
             proposition_repository=proposition_repository,
+            profil_candidat_translator=profil_candidat_translator,
             proposition=proposition,
             gestionnaire=gestionnaire,
             temporaire=True,
@@ -234,6 +236,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_accord_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -243,6 +246,8 @@ class PDFGeneration(IPDFGeneration):
         proposition_dto = proposition_repository.get_dto_for_gestionnaire(
             proposition.entity_id, UnitesEnseignementTranslator
         )
+        profil_candidat_identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+        profil_candidat_coordonnees = profil_candidat_translator.get_coordonnees(proposition.matricule_candidat)
         documents = [
             document
             for document in message_bus_instance.invoke(
@@ -260,6 +265,8 @@ class PDFGeneration(IPDFGeneration):
             filename=f'Autorisation_inscription_Dossier_{proposition_dto.reference}.pdf',
             context={
                 'proposition': proposition_dto,
+                'profil_candidat_identification': profil_candidat_identification,
+                'profil_candidat_coordonnees': profil_candidat_coordonnees,
                 'documents': documents,
                 'director': cls._get_sic_director(),
             },
@@ -274,6 +281,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_accord_annexe_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -282,12 +290,16 @@ class PDFGeneration(IPDFGeneration):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
             )
+            profil_candidat_identification = profil_candidat_translator.get_identification(
+                proposition.matricule_candidat
+            )
             token = admission_generate_pdf(
                 admission=None,
                 template='admission/exports/sic_approval_annexe.html',
                 filename='Formulaire_pour_la_demande_de_visa.pdf',
                 context={
                     'proposition': proposition_dto,
+                    'profil_candidat_identification': profil_candidat_identification,
                     'director': cls._get_sic_director(),
                 },
                 author=gestionnaire,
@@ -300,6 +312,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_refus_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -308,12 +321,18 @@ class PDFGeneration(IPDFGeneration):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
             )
+            profil_candidat_identification = profil_candidat_translator.get_identification(
+                proposition.matricule_candidat
+            )
+            profil_candidat_coordonnees = profil_candidat_translator.get_coordonnees(proposition.matricule_candidat)
             token = admission_generate_pdf(
                 admission=None,
                 template='admission/exports/sic_refusal_certificate.html',
                 filename=f'UCLouvain_{proposition_dto.reference}.pdf',
                 context={
                     'proposition': proposition_dto,
+                    'profil_candidat_identification': profil_candidat_identification,
+                    'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(),
                 },
                 author=gestionnaire,
@@ -326,6 +345,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_refus_inscription_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -334,12 +354,18 @@ class PDFGeneration(IPDFGeneration):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
             )
+            profil_candidat_identification = profil_candidat_translator.get_identification(
+                proposition.matricule_candidat
+            )
+            profil_candidat_coordonnees = profil_candidat_translator.get_coordonnees(proposition.matricule_candidat)
             token = admission_generate_pdf(
                 admission=None,
                 template='admission/exports/sic_inscription_refusal_certificate.html',
                 filename=f'UCLouvain_{proposition_dto.reference}.pdf',
                 context={
                     'proposition': proposition_dto,
+                    'profil_candidat_identification': profil_candidat_identification,
+                    'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(),
                 },
                 author=gestionnaire,

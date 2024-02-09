@@ -128,12 +128,7 @@
       <strong>{% trans "Enrolment Office (SIC)" %}</strong>
     </div>
     <div class="col-6">
-      {% with candidat=proposition.profil_soumis_candidat %}
-        {{ candidat.nom|upper }} {{ candidat.prenom }}<br><br>
-        {{ candidat.rue }} {{ candidat.numero_rue }} {{ candidat.boite_postale }}<br>
-        {{ candidat.code_postal }} {{ candidat.ville }}<br>
-        {{ candidat.nom_pays }}
-      {% endwith %}
+      {% include "admission/exports/includes/profil_adresse.html" %}
     </div>
   </div>
 

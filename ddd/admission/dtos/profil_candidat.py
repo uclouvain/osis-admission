@@ -61,7 +61,9 @@ class ProfilCandidatDTO(interface.DTO):
             genre=identification.get('gender'),
             nationalite=identification.get('country_of_citizenship'),
             nom_pays_nationalite=nom_pays_nationalite,
-            date_naissance=identification.get('birth_date'),
+            date_naissance=datetime.date.fromisoformat(identification.get('birth_date'))
+            if identification.get('birth_date')
+            else None,
             pays=coordinates.get('country'),
             nom_pays=nom_pays_adresse,
             code_postal=coordinates.get('postal_code'),
