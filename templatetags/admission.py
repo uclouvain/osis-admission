@@ -893,6 +893,19 @@ def get_country_name(country: Optional[Country]):
 
 
 @register.filter
+def country_name_from_iso_code(iso_code: str):
+    """Return the country name from an iso code."""
+    if not iso_code:
+        return ''
+    country = Country.objects.filter(iso_code=iso_code).values('name', 'name_en').first()
+    if not country:
+        return ''
+    if get_language() == settings.LANGUAGE_CODE_FR:
+        return country['name']
+    return country['name_en']
+
+
+@register.filter
 def get_ordered_checklist_items(checklist_items: dict):
     """Return the ordered checklist items."""
     return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])

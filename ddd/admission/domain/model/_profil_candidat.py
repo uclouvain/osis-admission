@@ -56,7 +56,7 @@ class ProfilCandidat(interface.ValueObject):
                 'last_name': self.nom,
                 'gender': self.genre,
                 'country_of_citizenship': self.nationalite,
-                'date_of_birth': self.date_naissance,
+                'date_of_birth': self.date_naissance.isoformat() if self.date_naissance else None,
             },
             'coordinates': {
                 'country': self.pays,
@@ -77,7 +77,9 @@ class ProfilCandidat(interface.ValueObject):
             prenom=identification.get('first_name'),
             genre=identification.get('gender'),
             nationalite=identification.get('country_of_citizenship'),
-            date_naissance=identification.get('date_of_birth'),
+            date_naissance=datetime.date.fromisoformat(identification.get('birth_date'))
+            if identification.get('birth_date')
+            else '',
             pays=coordinates.get('country'),
             code_postal=coordinates.get('postal_code'),
             ville=coordinates.get('city'),

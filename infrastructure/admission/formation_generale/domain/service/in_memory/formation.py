@@ -189,6 +189,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             code_domaine=entity.code_domaine,
             campus_inscription=entity.campus_inscription,
             sigle_entite_gestion=entity.sigle_entite_gestion,
+            credits=entity.credits,
         )
 
     @classmethod
