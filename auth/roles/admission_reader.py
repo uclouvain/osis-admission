@@ -1,4 +1,4 @@
-# ##############################################################################
+###############################################################################
 #
 #  OSIS stands for Open Student Information System. It's an application
 #  designed to manage the core business of higher education institutions,
@@ -23,49 +23,28 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 import rules
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from rules import RuleSet
 
-from admission.auth.predicates.common import (
-    has_education_group_of_types,
-    is_part_of_education_group,
-    is_debug,
-)
-from admission.auth.predicates.general import (
-    in_fac_status,
-    is_submitted,
-)
-from base.models.education_group import EducationGroup
+from admission.auth.predicates.common import has_education_group_of_types, is_part_of_education_group
+from admission.auth.predicates.general import is_submitted, in_fac_status
 from base.models.enums.education_group_types import TrainingType
 from continuing_education.models.continuing_education_training import CONTINUING_EDUCATION_TRAINING_TYPES
-from education_group.contrib.models import EducationGroupRoleModel
+from education_group.contrib.models import (
+    EducationGroupWithCohortRoleModel,
+)
 
 
-class ProgramManager(EducationGroupRoleModel):
-    """
-    Gestionnaire d'admission d'un programme
+class AdmissionReader(EducationGroupWithCohortRoleModel):
+    changed = models.DateTimeField(null=True, auto_now=True)
+    person = models.ForeignKey('base.Person', on_delete=models.PROTECT)
 
-    Intervient dans le processus d'admission. Accès aux demandes des 3 contextes (général, doctorat, iufc) via
-    l'affection aux formations.
-    Autres noms "contextualisés" donnés à ces personnes : Gestionnaire CDD, Gestionnaire Facultaire.
-    """
-
-    education_group = models.ForeignKey(EducationGroup, on_delete=models.CASCADE, related_name='+')
-
-    def __str__(self):  # pragma: no cover
-        return f"{self.person} - {self.education_group}"
-
-    @property
-    def education_group_most_recent_acronym(self):  # pragma: no cover
-        return self.education_group.most_recent_acronym
-
-    class Meta:
-        verbose_name = _("Role: Program manager")
-        verbose_name_plural = _("Role: Program managers")
-        group_name = "admission_program_managers"
-        unique_together = ('person', 'education_group')
+    class Meta(EducationGroupWithCohortRoleModel.Meta):
+        verbose_name = _("Role: Admission reader")
+        verbose_name_plural = _("Role: Admission readers")
+        group_name = "admission_reader"
 
     @classmethod
     def rule_set(cls):
@@ -78,6 +57,7 @@ class ProgramManager(EducationGroupRoleModel):
             ),
             # Access a single application
             'admission.view_enrolment_application': is_part_of_education_group,
+            'admission.view_doctorateadmission': is_part_of_education_group,
             # Profile
             'admission.view_admission_person': is_part_of_education_group,
             'admission.view_admission_coordinates': is_part_of_education_group,
@@ -92,26 +72,10 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_specific_questions': is_part_of_education_group,
             # Supervision
             'admission.view_admission_supervision': is_part_of_education_group,
-            'admission.change_admission_supervision': is_part_of_education_group,
-            'admission.add_supervision_member': is_part_of_education_group,
-            'admission.remove_supervision_member': is_part_of_education_group,
             'admission.view_historyentry': is_part_of_education_group,
             # Management
-            'admission.add_internalnote': is_part_of_education_group,
-            'admission.view_internalnote': is_part_of_education_group,
             'admission.view_documents_management': is_part_of_education_group & is_submitted,
-            'admission.edit_documents': is_part_of_education_group & is_submitted,
-            'admission.change_documents_management': is_part_of_education_group & in_fac_status,
             'admission.view_checklist': is_part_of_education_group & is_submitted,
-            'admission.checklist_change_faculty_decision': is_part_of_education_group & in_fac_status,
-            'admission.checklist_faculty_decision_transfer_to_sic_with_decision': is_part_of_education_group
-            & in_fac_status,
-            'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_part_of_education_group
-            & in_fac_status,
-            'admission.checklist_select_access_title': is_part_of_education_group & in_fac_status,
             'admission.checklist_change_fac_comment': is_part_of_education_group & in_fac_status,
-            'admission.view_debug_info': is_part_of_education_group & is_debug,
-            # Exports
-            'admission.download_doctorateadmission_pdf_recap': is_part_of_education_group,
         }
-        return rules.RuleSet(ruleset)
+        return RuleSet(ruleset)

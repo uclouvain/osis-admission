@@ -3314,6 +3314,9 @@ msgid ""
 "project\" part."
 msgstr ""
 
+msgid "Information provided to the candidate."
+msgstr ""
+
 msgid "Initialization of the predefined specific questions"
 msgstr ""
 
@@ -5289,6 +5292,12 @@ msgid "Role: ADRE Secretaries"
 msgstr ""
 
 msgid "Role: ADRE secretary"
+msgstr ""
+
+msgid "Role: Admission reader"
+msgstr ""
+
+msgid "Role: Admission readers"
 msgstr ""
 
 msgid "Role: CDD configurator"

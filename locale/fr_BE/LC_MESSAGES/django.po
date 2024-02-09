@@ -3692,6 +3692,9 @@ msgstr ""
 "Les informations concernant une éventuelle cotutelle sont à indiquer dans la "
 "partie « Projet doctoral »."
 
+msgid "Information provided to the candidate."
+msgstr "Information communiquée au candidat."
+
 msgid "Initialization of the predefined specific questions"
 msgstr "Initialisation des questions spécifiques prédéfinies"
 
@@ -4952,7 +4955,7 @@ msgstr "Autre formation"
 
 msgctxt "admission"
 msgid "Other reasons"
-msgstr "Autres raisons"
+msgstr "Autres motifs"
 
 msgid "Other refusal reasons"
 msgstr "Autres motifs de refus facultaire"
@@ -5857,6 +5860,12 @@ msgstr "Rôle: Secrétaires ADRE"
 
 msgid "Role: ADRE secretary"
 msgstr "Rôle: Secrétaire ADRE"
+
+msgid "Role: Admission reader"
+msgstr "Rôle: Lecteur des demandes d'inscription"
+
+msgid "Role: Admission readers"
+msgstr "Rôle: Lecteurs des demandes d'inscription"
 
 msgid "Role: CDD configurator"
 msgstr "Rôle: Configurateur CDD"

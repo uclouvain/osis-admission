@@ -38,10 +38,10 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
-
 from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
+from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
@@ -784,6 +784,13 @@ class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
         return central_manager
 
 
+class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
+    list_display = ('person', 'education_group_most_recent_acronym', 'cohort', 'changed',)
+
+    def get_hijack_user(self, obj):
+        return obj.person.user
+
+
 class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
     list_select_related = ['person__user']
     list_display = ['person', 'education_group_most_recent_acronym']
@@ -799,6 +806,7 @@ admin.site.register(Candidate, FrontOfficeRoleModelAdmin)
 admin.site.register(CddConfigurator, CddConfiguratorAdmin)
 
 admin.site.register(CentralManager, CentralManagerAdmin)
+admin.site.register(AdmissionReader, AdmissionReaderAdmin)
 admin.site.register(ProgramManager, ProgramManagerAdmin)
 admin.site.register(SicManagement, HijackEntityRoleModelAdmin)
 admin.site.register(AdreSecretary, HijackRoleModelAdmin)
