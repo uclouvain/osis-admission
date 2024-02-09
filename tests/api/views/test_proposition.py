@@ -108,6 +108,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
         cls.admission = GeneralEducationAdmissionFactory(
             status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
             training__management_entity=cls.commission.entity,
+            training__credits=180,
         )
         cls.teaching_campus_name = (
             cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
@@ -140,6 +141,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             'campus_inscription': self.admission.training.enrollment_campus.name,
             'sigle_entite_gestion': self.commission.acronym,
             'code': self.admission.training.partial_acronym,
+            'credits': 180,
         }
         double_degree_scholarship_json = {
             'uuid': str(self.admission.double_degree_scholarship.uuid),
@@ -251,7 +253,10 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             entity_type=EntityType.FACULTY.name,
             acronym='CMC',
         )
-        cls.admission = ContinuingEducationAdmissionFactory(training__management_entity=cls.commission.entity)
+        cls.admission = ContinuingEducationAdmissionFactory(
+            training__management_entity=cls.commission.entity,
+            training__credits=180,
+        )
         cls.admission_with_billing_address = ContinuingEducationAdmissionFactory(
             residence_permit=[uuid.uuid4()],
             registration_as=ChoixInscriptionATitre.PROFESSIONNEL.name,
@@ -268,6 +273,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             billing_address_city='Louvain-la-Neuve',
             billing_address_country=CountryFactory(iso_code=BE_ISO_CODE),
             training__management_entity=cls.commission.entity,
+            training__credits=180,
         )
         cls.teaching_campus_name = (
             cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus.name
@@ -308,6 +314,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             'campus_inscription': self.admission.training.enrollment_campus.name,
             'sigle_entite_gestion': self.commission.acronym,
             'code': self.admission.training.partial_acronym,
+            'credits': 180,
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
         self.assertEqual(json_response['reference'], f'M-CMC22-{str(self.admission)}')

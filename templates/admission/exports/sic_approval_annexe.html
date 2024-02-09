@@ -121,7 +121,7 @@
     Nom : <strong>{{ proposition.profil_soumis_candidat.nom }}</strong><br>
     Prénom : <strong>{{ proposition.profil_soumis_candidat.prenom }}</strong><br>
     Date de naissance : <strong>{{ proposition.profil_soumis_candidat.date_naissance|date:"d/m/Y" }}</strong><br>
-    Nationalité : <strong>{{ proposition.profil_soumis_candidat.nationalite }}</strong><br>
+    Nationalité : <strong>{{ proposition.profil_soumis_candidat.nationalite|country_name_from_iso_code }}</strong><br>
   </p>
 
   <ul class="list-unstyled ms-3">
@@ -150,7 +150,7 @@
   </p>
 
   <p>
-    Le programme d’études susmentionné comprend un nombre total de 120 crédits ECTS,
+    Le programme d’études susmentionné comprend un nombre total de {{ proposition.formation.credits }} crédits ECTS,
     pour l'ensemble de la formation, sous réserve d'ajouts d'enseignements
     complémentaires qui pourront être imposés à l'étudiant·e, ou de dispense(s) qu'il·elle aurait
     obtenue(s) (avec un minimum de 54 crédits par année académique).
