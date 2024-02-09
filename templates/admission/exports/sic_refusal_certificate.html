@@ -151,7 +151,7 @@
   <img class="float-end" id="sigle" src="{% static "img/sedes-filigrane.jpg" %}">
 
   <div>
-    {% if director.signature %}<img class="ms-5" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+    {% if director.signature %}<img class="ms-3" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
     <p>
       {{ director.first_name }} {{ director.last_name }},<br>
       <em>{% if director.gender == 'F' %}Directrice{% else %}Directeur{% endif %} du Service des inscriptions</em>
