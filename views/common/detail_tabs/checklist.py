@@ -789,7 +789,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='decision_sic'
                     ),
-                    prefix='decision_sic__derogation',
+                    prefix='decision_sic',
                 ),
                 'decision_sic__derogation': CommentForm(
                     comment=comment_derogation,
