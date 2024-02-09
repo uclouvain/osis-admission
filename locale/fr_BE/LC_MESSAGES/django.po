@@ -882,6 +882,13 @@ msgstr ""
 "Martin V ?"
 
 msgid ""
+"As the email address of the faculty recipient is not defined, no email will "
+"be sent. Do you still want to send the application to the faculty?"
+msgstr ""
+"L'adresse mail du destinataire facultaire n'étant pas définie, aucun e-mail "
+"ne sera envoyé. Voulez-vous malgré tout envoyer le dossier en faculté ?"
+
+msgid ""
 "As you are applying for a limited course as a non-resident (as defined by "
 "government decree) candidate, applications for the 2024-2025 academic year "
 "must be submitted via this <a href=\"https://uclouvain.be/fr/etudier/"
@@ -4677,9 +4684,6 @@ msgstr "Aucun invité"
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
 
-msgid "No recipient email found for this program."
-msgstr "L'email du destinaire n'a pas été trouvé pour cette formation."
-
 msgid "No scholarship found."
 msgstr "Bourse non trouvée."
 
@@ -7747,14 +7751,8 @@ msgstr ""
 "Vous semblez avoir des modifications non enregistrées, celles-ci seront "
 "perdues."
 
-msgid ""
-"You are about to submit the application to the Faculty. This action should "
-"normally email the Faculty, but the recipient address is not defined. Please "
-"define it before sending the application."
-msgstr ""
-"Vous êtes sur le point de soumettre le dossier en Faculté. Cette action doit "
-"normalement envoyer un e-mail à la Faculté, mais l'adresse du destinataire "
-"n'est pas définie. Merci de la définir avant d'envoyer le dossier."
+msgid "You are about to submit the application to the Faculty."
+msgstr "Vous êtes sur le point de soumettre le dossier en Faculté."
 
 #, python-format
 msgid ""
