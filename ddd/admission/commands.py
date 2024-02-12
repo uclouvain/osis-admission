@@ -185,3 +185,8 @@ class SoumettreTicketPersonneCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class GetStatutTicketPersonneQuery(interface.QueryRequest):
     global_id: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RetrieveStatutTicketPersonneFromDigitCommand(interface.QueryRequest):
+    global_id: str

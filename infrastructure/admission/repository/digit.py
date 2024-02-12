@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import json
+from typing import Optional
 
 import requests
 from django.conf import settings
@@ -36,7 +37,7 @@ from base.models.person_merge_proposal import PersonMergeProposal
 
 class DigitRepository(IDigitRepository):
     @classmethod
-    def submit_person_ticket(cls, global_id: str) -> any:
+    def submit_person_ticket(cls, global_id: str, noma: str) -> any:
         person = Person.objects.get(global_id=global_id)
 
         # get proposal merge person if any is linked
@@ -44,7 +45,7 @@ class DigitRepository(IDigitRepository):
         if proposition.exists():
             person = proposition.get().proposal_merge_person
 
-        ticket_response = _request_person_ticket_creation(person)
+        ticket_response = _request_person_ticket_creation(person, noma)
 
         if ticket_response:
             PersonTicketCreation.objects.get_or_create(
@@ -52,55 +53,90 @@ class DigitRepository(IDigitRepository):
             )
 
     @classmethod
-    def retrieve_person_ticket_status(cls, global_id: str) -> any:
-        stored_ticket = PersonTicketCreation.objects.get(person__global_id=global_id)
-        remote_ticket = _retrieve_person_ticket_status(stored_ticket.request_id)
-        if remote_ticket:
-            PersonTicketCreation.objects.update(status=remote_ticket['status'])
-        return remote_ticket['status']
+    def get_person_ticket_status(cls, global_id: str) -> Optional[str]:
+        try:
+            return PersonTicketCreation.objects.get(person__global_id=global_id).status
+        except PersonTicketCreation.DoesNotExist:
+            return None
+
+    @classmethod
+    def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
+        if PersonTicketCreation.objects.filter(person__global_id=global_id).exists():
+            stored_ticket = PersonTicketCreation.objects.get(person__global_id=global_id)
+            remote_ticket = _retrieve_person_ticket_status(stored_ticket.request_id)
+            if remote_ticket:
+                stored_ticket.status = remote_ticket['status']
+                stored_ticket.save()
+            return remote_ticket['status']
+        else:
+            return None
 
 
 def _retrieve_person_ticket_status(request_id: int):
+    if settings.MOCK_DIGIT_SERVICE_CALL:
+        return {
+         "requestId": "1",
+         "source": "ETU",
+         "sourceId": "123456789",
+         "data": {},
+         "checksum": "0",
+         "parentRequest": "",
+         "dataType": "",
+         "status": "PENDING",
+        }
     return requests.get(
-        headers={'Content-Type': 'application/json'},
+        headers={
+            'Content-Type': 'application/json',
+            'Authorization': settings.ESB_AUTHORIZATION,
+        },
         data=json.dumps({'requestId': request_id}),
         url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
     ).json()
 
 
-def _request_person_ticket_creation(person: Person):
-    response = requests.post(
-        headers={'Content-Type': 'application/json'},
-        data=json.dumps({
-            "provider": {
-                "source": "ETU",
-                "sourceId": "",  # noma
-                "actif": True,
+def _request_person_ticket_creation(person: Person, noma: str):
+    if settings.MOCK_DIGIT_SERVICE_CALL:
+        return {"requestId": "1", "status": "CREATED"}
+    else:
+        response = requests.post(
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': settings.ESB_AUTHORIZATION,
             },
-            "person": {
-                "matricule": person.global_id,
-                "lastName": person.last_name,
-                "firstName": person.first_name,
-                "birthDate": person.birth_date.strftime('%Y-%m-%d'),
-                "gender": person.gender,
-                "nationalRegister": person.national_number,
-                "nationality": person.country_of_citizenship.iso_code,
-            },
-            "addresses": [
-                {
-                    "addressType": "LEG",
-                    "country": address.country.iso_code,
-                    "postalCode": address.postal_code,
-                    "locality": address.city,
-                    "street": address.street,
-                    "number": address.street_number,
-                    "box": address.postal_box,
-                    "additionalAddressDetails": [address.label, address.place, address.location],
-                }
-                for address in person.personaddress_set
-            ],
-            "physicalPerson": True,
-        }),
-        url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
-    )
-    return response.json()
+            data=json.dumps(_get_ticket_data(person, noma)),
+            url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
+        )
+        return response.json()
+
+
+def _get_ticket_data(person: Person, noma: str):
+    return {
+        "provider": {
+            "source": "ETU",
+            "sourceId": noma,
+            "actif": True,
+        },
+        "person": {
+            "matricule": person.global_id,
+            "lastName": person.last_name,
+            "firstName": person.first_name,
+            "birthDate": person.birth_date.strftime('%Y-%m-%d'),
+            "gender": person.gender,
+            "nationalRegister": person.national_number,
+            "nationality": person.country_of_citizenship.iso_code,
+        },
+        "addresses": [
+            {
+                "addressType": "LEG",
+                "country": address.country.iso_code,
+                "postalCode": address.postal_code,
+                "locality": address.city,
+                "street": address.street,
+                "number": address.street_number,
+                "box": address.postal_box,
+                "additionalAddressDetails": [address.label, address.place, address.location],
+            }
+            for address in person.personaddress_set.all()
+        ],
+        "physicalPerson": True,
+    }

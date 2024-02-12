@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from abc import ABCMeta
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
@@ -33,9 +33,13 @@ from osis_common.ddd import interface
 
 class IDigitRepository:
     @classmethod
-    def submit_person_ticket(cls, global_id: str) -> any:
+    def submit_person_ticket(cls, global_id: str, noma: str) -> any:
         raise NotImplementedError
 
     @classmethod
-    def retrieve_person_ticket_status(cls, global_id: str) -> any:
+    def get_person_ticket_status(cls, global_id: str) -> Optional[str]:
+        raise NotImplementedError
+
+    @classmethod
+    def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
         raise NotImplementedError

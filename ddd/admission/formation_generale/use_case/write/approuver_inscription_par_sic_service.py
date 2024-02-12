@@ -30,12 +30,17 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.repository.i_digit import IDigitRepository
+from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
+from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
 
 def approuver_inscription_par_sic(
     cmd: ApprouverInscriptionParSicCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
+    digit: 'IDigitRepository',
+    compteur_noma: 'ICompteurAnnuelPourNomaRepository',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -45,6 +50,16 @@ def approuver_inscription_par_sic(
 
     # THEN
     proposition_repository.save(entity=proposition)
+
+    noma = NomaGenerateurService.generer_noma(
+        compteur=compteur_noma.get_compteur(annee=proposition.annee_calculee).compteur,
+        annee=proposition.annee_calculee
+    )
+
+    digit.submit_person_ticket(
+        global_id=proposition.matricule_candidat,
+        noma=noma
+    )
 
     historique.historiser_acceptation_sic(
         proposition=proposition,

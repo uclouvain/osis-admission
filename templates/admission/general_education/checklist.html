@@ -132,6 +132,10 @@
 
         {% search_account_digit_result_msg original_admission %}
 
+        {% if digit_ticket_status %}
+            {% digit_ticket_status_msg digit_ticket_status %}
+        {% endif %}
+
         <form id="create-digit-person-form" method="POST" action="{% url 'admission:services:digit:request-digit-person-creation' uuid=uuid %}">
             {% csrf_token %}
             <button id="create-person-form-btn" type="submit" class="btn btn-primary pull-right hidden" disabled>

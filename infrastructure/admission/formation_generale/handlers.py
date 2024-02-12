@@ -26,7 +26,7 @@
 from admission.ddd.admission.commands import \
     (RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand,
      DefairePropositionFusionCommand, RechercherParcoursAnterieurQuery, SoumettreTicketPersonneCommand,
-     RefuserPropositionFusionCommand)
+     RefuserPropositionFusionCommand, GetStatutTicketPersonneQuery)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
@@ -63,6 +63,7 @@ from admission.ddd.admission.use_case.read import (
 )
 from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
 from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import rechercher_parcours_anterieur
+from admission.ddd.admission.use_case.read.recuperer_statut_ticket_personne import recuperer_statut_ticket_personne
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -123,6 +124,7 @@ from admission.infrastructure.admission.repository.proposition_fusion_personne i
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
+from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import CompteurAnnuelPourNomaRepository
 
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -574,6 +576,8 @@ COMMAND_HANDLERS = {
             notification=Notification(),
             pdf_generation=PDFGeneration(),
             emplacement_document_repository=EmplacementDocumentRepository(),
+            digit=DigitRepository(),
+            compteur_noma=CompteurAnnuelPourNomaRepository(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -581,6 +585,8 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             historique=HistoriqueFormationGenerale(),
+            digit=DigitRepository(),
+            compteur_noma=CompteurAnnuelPourNomaRepository(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -597,6 +603,10 @@ COMMAND_HANDLERS = {
     ),
     SoumettreTicketPersonneCommand: lambda msg_bus, cmd: soumettre_ticket_creation_personne(
         cmd,
-        digit_repository=DigitRepository()
+        digit_repository=DigitRepository(),
     ),
+    GetStatutTicketPersonneQuery: lambda msg_bus, cmd: recuperer_statut_ticket_personne(
+        cmd,
+        digit_repository=DigitRepository(),
+    )
 }

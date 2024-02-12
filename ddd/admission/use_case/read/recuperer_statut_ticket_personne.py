@@ -23,13 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
 
-from admission.ddd.admission.commands import GetStatutTicketPersonneQuery
+from admission.ddd.admission.commands import GetStatutTicketPersonneQuery, RetrieveStatutTicketPersonneFromDigitCommand
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 
 
 def recuperer_statut_ticket_personne(
     cmd: 'GetStatutTicketPersonneQuery',
     digit_repository: 'IDigitRepository',
-) -> str:
-    return digit_repository.retrieve_person_ticket_status(global_id=cmd.global_id)
+) -> Optional[str]:
+    return digit_repository.get_person_ticket_status(global_id=cmd.global_id)
+
+
+def recuperer_statut_ticket_personne_de_digit(
+    cmd: 'RetrieveStatutTicketPersonneFromDigitCommand',
+    digit_repository: 'IDigitRepository',
+) -> Optional[str]:
+    return digit_repository.retrieve_person_ticket_status_from_digit(global_id=cmd.global_id)
