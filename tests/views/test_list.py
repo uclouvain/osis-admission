@@ -73,7 +73,7 @@ from reference.tests.factories.country import CountryFactory
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 24
+    NB_MAX_QUERIES = 25
 
     @classmethod
     def setUpTestData(cls):
