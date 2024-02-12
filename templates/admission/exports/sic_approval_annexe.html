@@ -118,10 +118,10 @@
 
   <p>
     Confirme que l'étudiant·e ci-dessous :<br>
-    Nom : <strong>{{ proposition.profil_soumis_candidat.nom }}</strong><br>
-    Prénom : <strong>{{ proposition.profil_soumis_candidat.prenom }}</strong><br>
-    Date de naissance : <strong>{{ proposition.profil_soumis_candidat.date_naissance|date:"d/m/Y" }}</strong><br>
-    Nationalité : <strong>{{ proposition.profil_soumis_candidat.nationalite|country_name_from_iso_code }}</strong><br>
+    Nom : <strong>{{ profil_candidat_identification.nom }}</strong><br>
+    Prénom : <strong>{{ profil_candidat_identification.prenom }}</strong><br>
+    Date de naissance : <strong>{{ profil_candidat_identification.date_naissance|date:"d/m/Y" }}</strong><br>
+    Nationalité : <strong>{{ profil_candidat_identification.pays_nationalite|country_name_from_iso_code }}</strong><br>
   </p>
 
   <ul class="list-unstyled ms-3">
