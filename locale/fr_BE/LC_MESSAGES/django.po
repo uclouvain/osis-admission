@@ -1995,6 +1995,9 @@ msgstr "Cours"
 msgid "Courses taken"
 msgstr "Cours suivis"
 
+msgid "Create message"
+msgstr "Créer le message"
+
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
 
@@ -2266,6 +2269,9 @@ msgstr "Poste diplomatique"
 
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
+
+msgid "Director"
+msgstr "Directeur"
 
 msgid "Director of the inscription service"
 msgstr "Directeur du Service des inscriptions"
