@@ -44,8 +44,10 @@ from base.models.organization import Organization
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from osis_common.queue.queue_sender import send_message, logger
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, EducationalExperience, \
-    EducationalExperienceYear, ProfessionalExperience
+from osis_profile.models import (
+    BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, EducationalExperience,
+    EducationalExperienceYear, ProfessionalExperience,
+)
 from osis_profile.models.enums.curriculum import Result, Grade
 from osis_profile.models.enums.education import EducationalType, ForeignDiplomaTypes
 from reference.models.diploma_title import DiplomaTitle
@@ -107,10 +109,9 @@ class InjectionEPC:
     @classmethod
     def recuperer_donnees(cls, admission: BaseAdmission):
         candidat = admission.candidate  # Person
-        comptabilite = admission.accounting
+        comptabilite = getattr(admission, 'accounting', None)
         adresses = candidat.personaddress_set.select_related('country')
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
-        documents = cls._recuperer_documents(admission)
         return {
             'dossier_uuid': str(admission.uuid),
             'signaletique': cls._get_signaletique(candidat=candidat, adresse_domicile=adresse_domicile),
@@ -122,7 +123,8 @@ class InjectionEPC:
             'inscription_offre': cls._get_inscription_offre(admission=admission),
             'donnees_comptables': cls._get_donnees_comptables(admission=admission),
             'adresses': cls._get_adresses(adresses=adresses),
-            'documents': documents
+            'documents': cls._recuperer_documents(admission),
+            'documents_manquants': cls._recuperer_documents_manquants(admission=admission)
         }
 
     @classmethod
@@ -158,6 +160,16 @@ class InjectionEPC:
                         'documents': [str(file) for file in files],
                         'type': field.name
                     })
+        return documents
+
+    @classmethod
+    def _recuperer_documents_manquants(cls, admission: 'BaseAdmission'):
+        documents = []
+        for type_document, details in admission.requested_documents.items():
+            documents.append({
+                'type': type_document,
+                'request_status': details.get('request_status')
+            })
         return documents
 
     @classmethod
@@ -279,10 +291,9 @@ class InjectionEPC:
                 'type_occupation': experience_pro.type,
                 'debut': experience_pro.start_date.strftime("%d/%m/%Y"),
                 'fin': experience_pro.end_date.strftime("%d/%m/%Y"),
-                'type_experience_professionnel': experience_pro.type,
                 'intitule_autre_activite': experience_pro.activity,
                 'etablissement_autre': experience_pro.institute_name,
-                'documents': cls._recuperer_documents(experience_pro)
+                'documents': cls._recuperer_documents(experience_pro),
             }
             for experience_pro in experiences_professionnelles
         ]
@@ -290,7 +301,7 @@ class InjectionEPC:
     @staticmethod
     def _get_inscription_annee_academique(admission: BaseAdmission) -> Dict:
         candidat = admission.candidate  # type: Person
-        comptabilite = admission.accounting  # type: Accounting
+        comptabilite = getattr(admission, 'accounting', None)  # type: Accounting
         assimilation_checklist = admission.checklist.get('current', {}).get('assimilation', {})
         return {
             'annee_academique': admission.training.academic_year.year,
@@ -298,42 +309,53 @@ class InjectionEPC:
             'type_demande': admission.type_demande,
             'carte_sport_lln_woluwe': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.LOUVAIN_WOLUWE.name] + SPORT_TOUT_CAMPUS
+                if comptabilite else False
             ),
             'carte_sport_mons': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.MONS.name] + SPORT_TOUT_CAMPUS
+                if comptabilite else False
             ),
             'carte_sport_tournai': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.TOURNAI.name] + SPORT_TOUT_CAMPUS
+                if comptabilite else False
             ),
             'carte_sport_st_louis': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.SAINT_LOUIS.name] + SPORT_TOUT_CAMPUS
+                if comptabilite else False
             ),
-            'carte_solidaire': comptabilite.solidarity_student or '',
+            'carte_solidaire': comptabilite.solidarity_student or False if comptabilite else False,
             'assimilation_resident_belge': (
                 comptabilite.assimilation_situation ==
                 TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE.name
+                if comptabilite else False
             ),
             'assimilation_refugie': (
                 comptabilite.assimilation_situation ==
                 TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE.name
+                if comptabilite else False
             ),
             'assimilation_revenus': (
                 comptabilite.assimilation_situation ==
                 TypeSituationAssimilation.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT.name
+                if comptabilite else False
             ),
             'assimilation_cpas': (
                 comptabilite.assimilation_situation == TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name
+                if comptabilite else False
             ),
             'assimilation_parents_ue': (
                 comptabilite.assimilation_situation ==
                 TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4.name
+                if comptabilite else False
             ),
             'assimilation_boursier': (
                 comptabilite.assimilation_situation == TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2.name
+                if comptabilite else False
             ),
             'assimilation_ue': (
                 comptabilite.assimilation_situation ==
                 TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE.name
+                if comptabilite else False
             ),
             'date_assimilation': assimilation_checklist.get('extra', {}).get('date_debut', '')
         }

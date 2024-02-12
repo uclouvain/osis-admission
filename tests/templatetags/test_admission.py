@@ -491,6 +491,25 @@ class DisplayTagTestCase(TestCase):
                 'template': 'osis_document/editor.html',
                 'value': 'token',
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+                'attrs': {}
+            },
+        )
+
+        # With metadata for a PDF file in read_only mode
+        component = document_component(
+            'token',
+            {
+                'mimetype': PDF_MIME_TYPE,
+            },
+            can_edit=False
+        )
+        self.assertEqual(
+            component,
+            {
+                'template': 'osis_document/editor.html',
+                'value': 'token',
+                'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+                'attrs': {'pagination': False, 'zoom': False, 'comment': False, 'highlight': False, 'rotation': False},
             },
         )
 
