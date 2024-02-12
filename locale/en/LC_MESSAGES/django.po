@@ -537,6 +537,9 @@ msgstr ""
 msgid "Admission requirement year"
 msgstr ""
 
+msgid "Admission statuses"
+msgstr ""
+
 msgid "Admission to regulated professions"
 msgstr ""
 
@@ -1387,6 +1390,9 @@ msgid "Checklist"
 msgstr ""
 
 msgid "Checklist filters"
+msgstr ""
+
+msgid "Checklist filters mode"
 msgstr ""
 
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
@@ -4183,6 +4189,9 @@ msgstr ""
 msgid "Name of the management entity"
 msgstr ""
 
+msgid "Name of the working list"
+msgstr ""
+
 msgid "Nationality"
 msgstr ""
 
@@ -4667,6 +4676,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Personal email"
+msgstr ""
+
+msgid "Personalized"
 msgstr ""
 
 msgid "PhD"
@@ -6967,6 +6979,12 @@ msgid "Work contract type"
 msgstr ""
 
 msgid "Working contract type"
+msgstr ""
+
+msgid "Working list"
+msgstr ""
+
+msgid "Working lists"
 msgstr ""
 
 msgid ""
