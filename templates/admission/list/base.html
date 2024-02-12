@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -208,12 +208,20 @@
 
     $(document).ready(function () {
         const main_container = document.getElementById('main');
+        const defaultFormValues = {{ default_form_values|safe }};
 
       {# Clear inputs when the form is reset #}
-      const formFields = $('#admission-search :input');
+      const formFields = $('#admission-search :input:not([type=button], [type=submit], [type=reset], [type=hidden])');
       $('#search_form').on('reset', function (evt) {
         $.each(formFields, function (index, field) {
-          $(this).val({{ default_form_values|safe }}[field.id] || null).change();
+            const defaultValue = defaultFormValues[field.id];
+            if (field.type === 'checkbox' || field.type === 'radio') {
+                const isChecked = !!defaultFormValues[field.id] && (Array.isArray(defaultValue) ? defaultValue.includes(field.value) : defaultValue === field.value);
+                $(this).prop('checked', isChecked).change();
+                $(this).parents('label').toggleClass('active', isChecked);
+            } else {
+              $(this).val(defaultValue || null).change();
+            }
         });
         evt.preventDefault();
         $('#search_form button[type=submit]').click();

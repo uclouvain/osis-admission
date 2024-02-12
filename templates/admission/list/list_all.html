@@ -52,9 +52,14 @@
   </div>
   <hr>
   <div>
-    <button id="toggle-checklist-filters" type="button" class="btn btn-link nopadding" value="off">
-      {% translate "Show the states of the checklist" %}
-    </button>
+    <div class="row flex-content no-space">
+      <div class="col-md-2">
+        {% bootstrap_field filter_form.liste_travail %}
+      </div>
+        <button id="toggle-checklist-filters" type="button" class="btn btn-link nopadding" value="off">
+          {% translate "Show the states of the checklist" %}
+        </button>
+    </div>
     <div id="checklist-filters-container">
       <div class="btn-group mt-1" data-toggle="buttons">
         {% for choice in filter_form.mode_filtres_etats_checklist %}
@@ -79,6 +84,7 @@
       $(document).ready(function () {
           initializePopover({ trigger: 'hover' });
 
+          {# Toggle the checklist filters #}
           $('#toggle-checklist-filters').on('click', function () {
               if ($(this).val() === 'off') {
                   $('#checklist-filters-container').show();
@@ -89,6 +95,38 @@
                   $(this).val('off');
                   $(this)[0].innerText = '{% translate "Show the states of the checklist" %}';
               }
+          });
+
+          {# Working lists #}
+          const stateInput = $('#id_etats');
+          const typeInput = $('#id_type');
+          const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
+          const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
+          let selectWorkListInProgress = false;
+
+          $('#id_etats, #id_type, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"]').on('change', function () {
+              {# Reset the selected working list if the values of the dependent inputs change except if this change was triggered from the working list #}
+              if (selectWorkListInProgress) return;
+              $('#id_liste_travail').val('').trigger('change');
+          });
+
+          $('#id_liste_travail').on('select2:select', function (event) {
+              {# When selecting a working list, update the dependent inputs #}
+              const data = event.params.data;
+              selectWorkListInProgress = true;
+
+              stateInput.val(data.admission_statuses).trigger('change');
+              typeInput.val([data.admission_type]).trigger('change');
+              if (!data.checklist_filters_mode) {
+                  filterModeInputs.filter(':checked').prop('checked', false).trigger('change');
+                  filterModeInputs.parents('label').removeClass('active');
+              } else {
+                  filterModeInputs.filter(`[value="${data.checklist_filters_mode}"]`).trigger('click');
+              }
+              data.checklist_filters.forEach(function(value, index) {
+                  checklistFiltersInputs.filter(`[name="filtres_etats_checklist_${index}"]`).val(value).trigger('change');
+              });
+              selectWorkListInProgress = false;
           });
 
           const $reference = $('#id_numero');

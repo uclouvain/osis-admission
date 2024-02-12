@@ -269,6 +269,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             filters = form.cleaned_data
             filters.pop('taille_page', None)
             filters.pop('page', None)
+            filters.pop('liste_travail', None)
 
             ordering_field = self.request.GET.get('o')
             if ordering_field:

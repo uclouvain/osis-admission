@@ -605,6 +605,9 @@ msgstr "Condition d'accès"
 msgid "Admission requirement year"
 msgstr "Millésime de la condition d'accès"
 
+msgid "Admission statuses"
+msgstr "Les statuts de l'admission"
+
 msgid "Admission to regulated professions"
 msgstr "Accès aux professions réglementées"
 
@@ -1498,6 +1501,9 @@ msgstr "Checklist"
 
 msgid "Checklist filters"
 msgstr "Filtres de la checklist"
+
+msgid "Checklist filters mode"
+msgstr "Le mode des filtres de la checklist"
 
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr "Enfant d'un membre du personnel de l'UCLouvain ou de l'entité Martin V"
@@ -4623,6 +4629,9 @@ msgstr "Intitulé du type d'enseignement"
 msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
 
+msgid "Name of the working list"
+msgstr "Nom de la liste de travail"
+
 msgid "Nationality"
 msgstr "Nationalité"
 
@@ -5124,6 +5133,9 @@ msgstr "Données personnelles"
 msgctxt "admission"
 msgid "Personal email"
 msgstr "E-mail privé"
+
+msgid "Personalized"
+msgstr "Personnalisée"
 
 msgid "PhD"
 msgstr "Doctorat"
@@ -7641,6 +7653,12 @@ msgstr "Type de contrat de travail"
 
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
+
+msgid "Working list"
+msgstr "Liste de travail"
+
+msgid "Working lists"
+msgstr "Listes de travail"
 
 msgid ""
 "Would you like to become a <a href='https://uclouvain.be/fr/decouvrir/carte-"

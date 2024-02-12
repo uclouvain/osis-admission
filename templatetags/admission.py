@@ -590,7 +590,7 @@ def document_component(document_write_token, document_metadata, can_edit=True):
                 'template': 'osis_document/editor.html',
                 'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
-                'attrs': attrs
+                'attrs': attrs,
             }
         elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
             return {
