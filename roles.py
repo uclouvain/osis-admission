@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.auth.predicates.common import is_part_of_education_group
 from admission.auth.predicates.doctorate import (
     complementary_training_enabled,
     is_enrolled,
@@ -30,7 +31,7 @@ from admission.auth.predicates.doctorate import (
     submitted_confirmation_paper,
     is_jury_in_progress,
 )
-from admission.auth.predicates.common import is_part_of_education_group
+from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
@@ -53,6 +54,7 @@ role.role_manager.register(Promoter)
 role.role_manager.register(Sceb)
 role.role_manager.register(ProgramManager)
 role.role_manager.register(CentralManager)
+role.role_manager.register(AdmissionReader)
 role.role_manager.register(SicManagement)
 role.role_manager.register(JurySecretary)
 

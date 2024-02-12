@@ -316,10 +316,6 @@ class RefuserParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
             ),
-            ShouldSpecifierMotifRefusFacultaire(
-                motifs_refus=self.motifs_refus,
-                autres_motifs_refus=self.autres_motifs_refus,
-            ),
         ]
 
 
