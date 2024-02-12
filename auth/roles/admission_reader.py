@@ -40,6 +40,7 @@ from education_group.contrib.models import (
 class AdmissionReader(EducationGroupWithCohortRoleModel):
     changed = models.DateTimeField(null=True, auto_now=True)
     person = models.ForeignKey('base.Person', on_delete=models.PROTECT)
+    education_group = models.ForeignKey('base.EducationGroup', null=True, blank=True, on_delete=models.CASCADE)
 
     class Meta(EducationGroupWithCohortRoleModel.Meta):
         verbose_name = _("Role: Admission reader")
