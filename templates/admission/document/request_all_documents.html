@@ -110,6 +110,8 @@
           const defaultMessageElement = $('#hidden-message-content');
           defaultMessageElement.html(defaultMessage);
 
+          $('#request-all-form-modal-send[data-toggle="popover"]').popover();
+
           {# Manage the request all documents form #}
           deadlineInput.mask(deadlineInput.attr('data-mask'));
 
@@ -201,7 +203,7 @@
                 $('#content-reset-confirm-button').click();
                 messageContentContainer.show();
                 $('#content-reset-button').html($('#object-reset-button').html());
-                $('#request-all-form-modal-send').prop('disabled', false);
+                $('#request-all-form-modal-send').prop('disabled', false).popover('destroy');
               } else {
                 messageContentResetConfirmModal.modal('show');
               }

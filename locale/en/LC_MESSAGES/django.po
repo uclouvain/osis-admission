@@ -7184,6 +7184,9 @@ msgstr ""
 msgid "You must set a lead supervisor."
 msgstr ""
 
+msgid "You need to create the message before sending it."
+msgstr ""
+
 msgid "You need to set a member as president."
 msgstr ""
 

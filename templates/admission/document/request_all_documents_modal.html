@@ -54,7 +54,14 @@
       class="btn btn-success"
       name="request-all-form"
       form="request-all-documents-form"
-      {% if not form.is_bound %}disabled{% endif %}
+      {% if not form.is_bound %}
+      disabled
+      data-toggle="popover"
+      data-placement="auto top"
+      data-trigger="hover"
+      data-container="body"
+      data-content="{% translate "You need to create the message before sending it." %}"
+      {% endif %}
   >
     <i class="fa-solid fa-envelope"></i>
     {% translate 'Send' %}
