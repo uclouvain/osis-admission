@@ -27,7 +27,7 @@ from typing import Optional, List
 
 from django.conf import settings
 from django.utils import translation, timezone
-from django.utils.translation import gettext
+from django.utils.translation import gettext, override
 
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from osis_document.utils import confirm_upload
@@ -66,13 +66,17 @@ class PDFGeneration(IPDFGeneration):
     @classmethod
     def _get_sic_director(cls):
         now = timezone.now()
-        director = Person.objects.filter(
-            mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
-            mandatary__mandate__function=MandateTypes.DIRECTOR.name,
-        ).filter(
-            mandatary__start_date__lte=now,
-            mandatary__end_date__gte=now,
-        ).first()
+        director = (
+            Person.objects.filter(
+                mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
+                mandatary__mandate__function=MandateTypes.DIRECTOR.name,
+            )
+            .filter(
+                mandatary__start_date__lte=now,
+                mandatary__end_date__gte=now,
+            )
+            .first()
+        )
         return director
 
     @classmethod
@@ -110,6 +114,7 @@ class PDFGeneration(IPDFGeneration):
         }
 
     @classmethod
+    @override(settings.LANGUAGE_CODE)
     def generer_attestation_accord_facultaire(
         cls,
         proposition: Proposition,

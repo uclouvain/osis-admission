@@ -567,9 +567,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
             cleaned_data['free_additional_approval_conditions'] = []
 
         if cleaned_data.get('with_prerequisite_courses'):
-            if not cleaned_data.get('prerequisite_courses'):
-                self.add_error('prerequisite_courses', FIELD_REQUIRED_MESSAGE)
-            else:
+            if cleaned_data.get('prerequisite_courses'):
                 cleaned_data['prerequisite_courses'] = LearningUnitYear.objects.filter(
                     acronym__in=cleaned_data.get('prerequisite_courses', []),
                     academic_year__year=self.academic_year,

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ class LearningUnitYearAutocomplete(BaseLearningUnitYearAutoComplete):
         results = [
             {
                 'id': dto.code,
-                'text': f"{dto.code} - {getattr(dto, title_attribute)}",
+                'text': f"{dto.code} - {getattr(dto, title_attribute) or dto.full_title}",
             }
             for dto in results
         ]
@@ -102,4 +102,4 @@ class LearningUnitYearAutocomplete(BaseLearningUnitYearAutoComplete):
     @classmethod
     def dtos_to_choices(cls, dtos):
         title_attribute = cls.title_attribute[get_language()]
-        return [(dto.code, f"{dto.code} - {getattr(dto, title_attribute)}") for dto in dtos]
+        return [(dto.code, f"{dto.code} - {getattr(dto, title_attribute) or dto.full_title}") for dto in dtos]
