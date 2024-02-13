@@ -42,6 +42,10 @@ class AdmissionReader(EducationGroupWithCohortRoleModel):
     person = models.ForeignKey('base.Person', on_delete=models.PROTECT)
     education_group = models.ForeignKey('base.EducationGroup', null=True, blank=True, on_delete=models.CASCADE)
 
+    @property
+    def education_group_most_recent_acronym(self):
+        return self.education_group.most_recent_acronym if self.education_group else ""
+
     class Meta(EducationGroupWithCohortRoleModel.Meta):
         verbose_name = _("Role: Admission reader")
         verbose_name_plural = _("Role: Admission readers")
