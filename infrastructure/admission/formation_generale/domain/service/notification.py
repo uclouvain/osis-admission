@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from django.conf import settings
 from django.utils import translation
@@ -210,7 +210,7 @@ class Notification(INotification):
         return email_message
 
     @classmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> Optional[EmailMessage]:
         admission: BaseAdmission = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
             .select_related('candidate__country_of_citizenship', 'training__enrollment_campus')
@@ -226,7 +226,7 @@ class Notification(INotification):
         ).first()
 
         if not program_email:
-            raise NotificationException(_('No recipient email found for this program.'))
+            return
 
         current_language = settings.LANGUAGE_CODE
 

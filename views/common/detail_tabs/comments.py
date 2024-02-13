@@ -30,6 +30,7 @@ from django.views.generic import TemplateView
 from osis_comment.contrib.mixins import CommentEntryAPIMixin
 from osis_comment.models import CommentEntry
 
+from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
@@ -121,7 +122,7 @@ class AdmissionCommentApiView(CommentEntryAPIMixin):
     }
     roles = {
         'sic-comments': {SicManagement, CentralManager},
-        'fac-comments': {ProgramManager},
+        'fac-comments': {ProgramManager, AdmissionReader},
     }
 
     def dispatch(self, request, *args, **kwargs):
