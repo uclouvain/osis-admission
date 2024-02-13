@@ -1995,6 +1995,9 @@ msgstr "Cours"
 msgid "Courses taken"
 msgstr "Cours suivis"
 
+msgid "Create message"
+msgstr "Créer le message"
+
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
 
@@ -2266,6 +2269,9 @@ msgstr "Poste diplomatique"
 
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
+
+msgid "Director"
+msgstr "Directeur"
 
 msgid "Director of the inscription service"
 msgstr "Directeur du Service des inscriptions"
@@ -7984,6 +7990,9 @@ msgstr ""
 
 msgid "You must set a lead supervisor."
 msgstr "Vous devez désigner un promoteur de référence."
+
+msgid "You need to create the message before sending it."
+msgstr "Il est nécessaire de créer le message avant de pouvoir envoyer."
 
 msgid "You need to set a member as president."
 msgstr "Vous devez désigner un membre comme président."
