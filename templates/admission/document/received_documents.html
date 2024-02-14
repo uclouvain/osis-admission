@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -103,30 +103,54 @@
     </table>
   </div>
 
+  {% has_perm 'admission.change_documents_management' as can_change_documents %}
+  {% has_perm 'admission.cancel_document_request' as can_cancel_document_request %}
+
   <div class="flex-content mt-1" style="gap: 5px">
     <button
         class="btn btn-primary"
+        {% if can_change_documents %}
         data-toggle="collapse"
         data-target="#upload-candidate-document-form"
         hx-get="{% url request.resolver_match.namespace|add:':document:free-candidate-request-with-default-file' uuid=view.kwargs.uuid %}"
         hx-target="#upload-candidate-document-form"
         hx-trigger="click once"
+        {% else %}
+        disabled
+        {% endif %}
     >
       <i class="fa-solid fa-upload"></i>
       {% translate 'Upload a received document' %}
       <i class="fa-solid fa-paperclip"></i>
     </button>
 
-    <button
+    <div>
+      <button
         class="btn btn-primary"
+        {% if can_change_documents %}
         data-toggle="modal"
         data-target="#request-all-form-modal"
         data-backdrop="static"
         data-keyboard="false"
-    >
-      <i class="fa-solid fa-envelope"></i>
-      {% translate 'Request the documents from the candidate' %}
-    </button>
+        {% else %}
+        disabled
+        {% endif %}
+      >
+        <i class="fa-solid fa-envelope"></i>
+        {% translate 'Request the documents from the candidate' %}
+      </button>
+
+      {% if can_cancel_document_request %}
+        <button
+          class="btn btn-danger"
+          data-toggle="modal"
+          data-target="#cancel-request-modal"
+        >
+          <i class="fa-solid fa-rectangle-xmark"></i>
+          {% translate 'Cancel the request' %}
+        </button>
+      {% endif %}
+    </div>
   </div>
 
   <div id="upload-candidate-document-form" class="collapse mt-1 media">
