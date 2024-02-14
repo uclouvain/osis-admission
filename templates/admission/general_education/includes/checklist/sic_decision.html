@@ -201,7 +201,7 @@
                 <dd>
                   <ul>
                     {% for formation in admission.complements_formation %}
-                      <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'fr-be' %}{{ formation.full_title }}{% else %}{{ formation.full_title_en }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
+                      <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'en' and formation.full_title_en %}{{ formation.full_title_en }}{% else %}{{ formation.full_title }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
                     {% endfor %}
                   </ul>
                 </dd>
