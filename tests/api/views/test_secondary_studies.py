@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 from unittest.mock import patch
 from uuid import UUID
@@ -437,6 +438,12 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
         patcher = patch(
             "osis_document.api.utils.confirm_remote_upload",
             return_value=self.file_uuid,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = patch(
+            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            side_effect=lambda _, value, __: [self.file_uuid] if value else [],
         )
         patcher.start()
         self.addCleanup(patcher.stop)

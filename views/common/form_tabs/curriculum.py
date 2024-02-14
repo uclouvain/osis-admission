@@ -31,14 +31,31 @@ from django.contrib import messages
 from django.db import transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DeleteView
+from django.views.generic import DeleteView, FormView
 
 from admission.contrib.models.base import (
     AdmissionEducationalValuatedExperiences,
     BaseAdmission,
     AdmissionProfessionalValuatedExperiences,
 )
+from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
+from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
+from admission.forms import (
+    FOLLOWING_FORM_SET_PREFIX,
+    OSIS_DOCUMENT_UPLOADER_CLASS,
+    OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX,
+    FORM_SET_PREFIX,
+)
+from admission.forms.admission.curriculum import (
+    AdmissionCurriculumAcademicExperienceForm,
+    MINIMUM_CREDIT_NUMBER,
+    AdmissionCurriculumEducationalExperienceYearFormSet,
+    AdmissionCurriculumProfessionalExperienceForm,
+)
+from admission.forms.specific_question import ConfigurableFormMixin
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.academic_year import AcademicYear
 from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
@@ -48,9 +65,34 @@ from osis_profile.views.edit_experience_non_academique import EditExperienceNonA
 __all__ = [
     'CurriculumEducationalExperienceFormView',
     'CurriculumEducationalExperienceDeleteView',
+    'CurriculumGlobalFormView',
     'CurriculumNonEducationalExperienceFormView',
     'CurriculumNonEducationalExperienceDeleteView',
 ]
+
+
+class CurriculumGlobalFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
+    urlpatterns = {'global': ''}
+    template_name = 'admission/forms/curriculum.html'
+    permission_required = 'admission.change_admission_curriculum'
+    form_class = ConfigurableFormMixin
+    update_requested_documents = True
+    update_admission_author = True
+    specific_questions_tab = Onglets.CURRICULUM
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['form_item_configurations'] = self.specific_questions
+        return kwargs
+
+    def get_initial(self):
+        return {'specific_question_answers': self.admission.specific_question_answers}
+
+    def update_current_admission_on_form_valid(self, form, admission):
+        admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
+
+    def get_success_url(self):
+        return self.request.get_full_path()
 
 
 class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierViewMixin, EditExperienceAcademiqueView):

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -53,8 +53,13 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
+    DocumentsSuiteAutorisation,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
+from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    CHOIX_DIPLOME_OBTENU,
+    ChoixStatutPropositionGenerale,
+)
 from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.utils import format_academic_year
 from base.models.enums.education_group_types import TrainingType
@@ -79,7 +84,7 @@ class Attachment:
         self.identifier = f'{sub_identifier}.{identifier}' if sub_identifier else identifier
         self.label = self._get_label(label, sub_identifier_label, label_interpolation)
 
-        self.uuids = [str(uuid) for uuid in uuids]
+        self.uuids = [str(uuid) for uuid in uuids if uuid]
         self.required = required
 
         if candidate_language_label:
@@ -672,9 +677,46 @@ def get_training_choice_attachments(specific_questions: List[QuestionSpecifiqueD
     return get_dynamic_questions_attachments(specific_questions)
 
 
-def get_documents_attachments(specific_questions: List[QuestionSpecifiqueDTO]) -> List[Attachment]:
-    """Returns the additional attachments."""
+def get_requestable_free_documents(specific_questions: List[QuestionSpecifiqueDTO]) -> List[Attachment]:
+    """Returns the requestable free attachments."""
     return get_dynamic_questions_attachments(
         specific_questions,
         with_base_identifier=False,
     )
+
+
+def get_authorization_attachments(context: ResumePropositionDTO) -> List[Attachment]:
+    """Returns the authorization attachments."""
+
+    attachments = []
+
+    if context.est_proposition_generale and context.proposition.type == TypeDemande.ADMISSION.name:
+        if (
+            context.proposition.statut == ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
+            or context.proposition.certificat_autorisation_signe
+        ):
+            attachments.append(
+                Attachment(
+                    identifier='AUTORISATION_PDF_SIGNEE',
+                    label=DocumentsSuiteAutorisation['AUTORISATION_PDF_SIGNEE'],
+                    uuids=context.proposition.certificat_autorisation_signe,
+                    required=False,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
+
+        if (
+            context.proposition.statut == ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name
+            and context.proposition.doit_fournir_visa_etudes
+        ) or context.proposition.visa_etudes_d:
+            attachments.append(
+                Attachment(
+                    identifier='VISA_ETUDES',
+                    label=DocumentsSuiteAutorisation['VISA_ETUDES'],
+                    uuids=context.proposition.visa_etudes_d,
+                    required=False,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
+
+    return attachments

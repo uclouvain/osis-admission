@@ -33,7 +33,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import resolve_url, redirect, render
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
-from django.utils import translation
+from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, gettext, get_language
@@ -43,6 +43,7 @@ from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
+from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 from rest_framework import serializers, status
@@ -52,6 +53,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
+from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
@@ -61,6 +63,7 @@ from admission.ddd.admission.dtos.resume import (
     ResumePropositionDTO,
 )
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
+from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
@@ -102,6 +105,8 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererPdfTemporaireDecisionSicQuery,
     RefuserInscriptionParSicCommand,
     ApprouverInscriptionParSicCommand,
+    RecupererTitresAccesSelectionnablesPropositionQuery,
+    RecupererResumePropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
@@ -113,9 +118,15 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import ChoixFormationForm, SicDecisionDerogationForm, FinancabiliteApprovalForm
+from admission.forms.admission.checklist import (
+    ChoixFormationForm,
+    SicDecisionDerogationForm,
+    FinancabiliteApprovalForm,
+    SicDecisionApprovalDocumentsForm,
+)
 from admission.forms.admission.checklist import (
     CommentForm,
     AssimilationForm,
@@ -137,16 +148,23 @@ from admission.forms.admission.checklist import (
     SinglePastExperienceAuthenticationForm,
 )
 from admission.mail_templates import ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL
-from admission.mail_templates.checklist import ADMISSION_EMAIL_SIC_REFUSAL, ADMISSION_EMAIL_SIC_APPROVAL
+from admission.mail_templates.checklist import (
+    ADMISSION_EMAIL_SIC_REFUSAL,
+    ADMISSION_EMAIL_SIC_APPROVAL,
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
+)
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
     get_portal_admission_list_url,
     get_backoffice_admission_url,
     get_portal_admission_url,
+    get_access_titles_names,
 )
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from epc.models.email_fonction_programme import EmailFonctionProgramme
@@ -194,6 +212,7 @@ __namespace__ = False
 
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
+ENTITY_SIC = 'SIC'
 
 
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
@@ -211,6 +230,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         },
         'hide_files': True,
         'condition_acces_enum': ConditionAcces,
+        'checker_email_address': MAIL_VERIFICATEUR_CURSUS,
     }
 
     @cached_property
@@ -245,6 +265,39 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         return context
 
 
+def get_email(template_identifier, language, proposition_dto: PropositionGestionnaireDTO):
+    mail_template = MailTemplate.objects.get(
+        identifier=template_identifier,
+        language=language,
+    )
+
+    # Needed to get the complete reference
+    with translation.override(language):
+        tokens = {
+            'admission_reference': proposition_dto.reference,
+            'candidate_first_name': proposition_dto.prenom_candidat,
+            'candidate_last_name': proposition_dto.nom_candidat,
+            'candidate_nationality_country': {
+                settings.LANGUAGE_CODE_FR: proposition_dto.nationalite_candidat_fr,
+                settings.LANGUAGE_CODE_EN: proposition_dto.nationalite_candidat_en,
+            }[language],
+            'training_acronym': proposition_dto.formation.sigle,
+            'training_title': {
+                settings.LANGUAGE_CODE_FR: proposition_dto.formation.intitule_fr,
+                settings.LANGUAGE_CODE_EN: proposition_dto.formation.intitule_en,
+            }[language],
+            'admissions_link_front': get_portal_admission_list_url(),
+            'admission_link_front': get_portal_admission_url('general-education', str(proposition_dto.uuid)),
+            'admission_link_back': get_backoffice_admission_url('general-education', str(proposition_dto.uuid)),
+            'training_campus': proposition_dto.formation.campus.nom,
+        }
+
+        return (
+            mail_template.render_subject(tokens),
+            mail_template.body_as_html(tokens),
+        )
+
+
 class RequestApplicationFeesContextDataMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -275,31 +328,14 @@ class RequestApplicationFeesContextDataMixin(CheckListDefaultContextMixin):
             == ChoixStatutChecklist.SYST_REUSSITE.name
         )
 
-        # Get the email to submit
-        mail_template = MailTemplate.objects.get(
-            identifier=ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
-            language=self.admission.candidate.language,
+        email_content = get_email(
+            template_identifier=ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
+            language=self.proposition.langue_contact_candidat,
+            proposition_dto=self.proposition,
         )
 
-        proposition = self.proposition
-
-        # Needed to get the complete reference
-        with translation.override(proposition.langue_contact_candidat):
-            tokens = {
-                'admission_reference': proposition.reference,
-                'candidate_first_name': proposition.prenom_candidat,
-                'candidate_last_name': proposition.nom_candidat,
-                'training_title': {
-                    settings.LANGUAGE_CODE_FR: self.admission.training.title,
-                    settings.LANGUAGE_CODE_EN: self.admission.training.title_english,
-                }[proposition.langue_contact_candidat],
-                'admissions_link_front': get_portal_admission_list_url(),
-                'admission_link_front': get_portal_admission_url('general-education', self.admission_uuid),
-                'admission_link_back': get_backoffice_admission_url('general-education', self.admission_uuid),
-            }
-
-            context['request_message_subject'] = mail_template.render_subject(tokens)
-            context['request_message_body'] = mail_template.body_as_html(tokens)
+        context['request_message_subject'] = email_content[0]
+        context['request_message_body'] = email_content[1]
 
         return context
 
@@ -396,6 +432,7 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='fac-decision-approval',
             additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
+            current_training_uuid=str(self.admission.training.uuid),
         )
 
 
@@ -617,6 +654,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['sic_decision_refusal_form'] = self.sic_decision_refusal_form
+        context['sic_decision_approval_documents_form'] = self.sic_decision_approval_documents_form
         context['sic_decision_approval_form'] = self.sic_decision_approval_form
         context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
         context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
@@ -718,6 +756,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         ]
 
     @cached_property
+    def sic_decision_approval_documents_form(self):
+        return SicDecisionApprovalDocumentsForm(
+            instance=self.admission,
+            documents=self.sic_decision_approval_form_requestable_documents,
+        )
+
+    @cached_property
     def sic_decision_approval_form(self):
         return SicDecisionApprovalForm(
             academic_year=self.admission.determined_academic_year.year,
@@ -728,8 +773,24 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             else None,
             prefix='sic-decision-approval',
             additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
-            documents=self.sic_decision_approval_form_requestable_documents,
+            candidate_nationality_is_no_ue_5=self.proposition.candidat_a_nationalite_hors_ue_5,
         )
+
+    @cached_property
+    def sic_director(self):
+        now = timezone.now()
+        director = (
+            Person.objects.filter(
+                mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
+                mandatary__mandate__function=MandateTypes.DIRECTOR.name,
+            )
+            .filter(
+                mandatary__start_date__lte=now,
+                mandatary__end_date__gte=now,
+            )
+            .first()
+        )
+        return director
 
     @cached_property
     def sic_decision_refusal_final_form(self):
@@ -743,6 +804,8 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
         }
+        if self.sic_director:
+            tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
@@ -782,7 +845,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
         }
         if get_language() == settings.LANGUAGE_CODE_FR:
-            if self.proposition.genre_candidat == "M":
+            if self.proposition.genre_candidat == "H":
                 tokens['greetings'] = "Cher"
             elif self.proposition.genre_candidat == "F":
                 tokens['greetings'] = "Chère"
@@ -859,6 +922,7 @@ class SicApprovalDecisionView(
                     nombre_de_mois_de_mobilite=form.cleaned_data.get('mobility_months_amount', ''),
                     doit_se_presenter_en_sic=form.cleaned_data.get('must_report_to_sic', False),
                     communication_au_candidat=form.cleaned_data['communication_to_the_candidate'],
+                    doit_fournir_visa_etudes=form.cleaned_data.get('must_provide_student_visa_d', False),
                 )
             )
         except MultipleBusinessExceptions as multiple_exceptions:
@@ -1036,14 +1100,29 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
         else:
             global_status = ChoixStatutPropositionGenerale.CONFIRMEE.name
 
+        admission_status_has_changed = admission.status != global_status
+
         change_admission_status(
             tab='decision_sic',
             admission_status=status,
             extra=extra,
+            replace_extra=True,
             admission=admission,
             global_status=global_status,
             author=self.request.user.person,
         )
+
+        if admission_status_has_changed:
+            add_history_entry(
+                admission.uuid,
+                'Le statut de la proposition a évolué au cours du processus de décision SIC.',
+                'The status of the proposal has changed during the SIC decision process.',
+                '{first_name} {last_name}'.format(
+                    first_name=self.request.user.person.first_name,
+                    last_name=self.request.user.person.last_name,
+                ),
+                tags=['proposition', 'sic-decision', 'status-changed'],
+            )
 
         return self.render_to_response(self.get_context_data())
 
@@ -1092,27 +1171,11 @@ class ChecklistView(
         documents_by_tab = {
             'assimilation': assimilation_documents,
             'financabilite': {
-                'RELEVE_NOTES',
-                'TRADUCTION_RELEVE_NOTES',
-                'RELEVE_NOTES_ANNUEL',
-                'TRADUCTION_RELEVE_NOTES_ANNUEL',
-                'DIPLOME',
-                'TRADUCTION_DIPLOME',
                 'DIPLOME_EQUIVALENCE',
-                'DIPLOME_BELGE_DIPLOME',
                 'DIPLOME_BELGE_CERTIFICAT_INSCRIPTION',
-                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_UE',
-                'DIPLOME_ETRANGER_PREUVE_DECISION_EQUIVALENCE',
-                'DIPLOME_ETRANGER_DECISION_FINAL_EQUIVALENCE_HORS_UE',
-                'DIPLOME_ETRANGER_DIPLOME',
-                'DIPLOME_ETRANGER_TRADUCTION_DIPLOME',
                 'DIPLOME_ETRANGER_CERTIFICAT_INSCRIPTION',
                 'DIPLOME_ETRANGER_TRADUCTION_CERTIFICAT_INSCRIPTION',
-                'DIPLOME_ETRANGER_RELEVE_NOTES',
-                'DIPLOME_ETRANGER_TRADUCTION_RELEVE_NOTES',
-                'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE',
                 'CURRICULUM',
-                'CERTIFICAT_EXPERIENCE',
             },
             'frais_dossier': assimilation_documents,
             'choix_formation': {
@@ -1128,7 +1191,9 @@ class ChecklistView(
                 'CURRICULUM',
             },
             'donnees_personnelles': assimilation_documents,
-            'specificites_formation': set(),
+            'specificites_formation': {
+                'ADDITIONAL_DOCUMENTS',
+            },
             'decision_facultaire': {
                 'ATTESTATION_ACCORD_FACULTAIRE',
                 'ATTESTATION_REFUS_FACULTAIRE',
@@ -1277,6 +1342,11 @@ class ChecklistView(
             # Access titles
             context['access_title_url'] = self.access_title_url
             context['access_titles'] = self.selectable_access_titles
+            context['selected_access_titles_names'] = get_access_titles_names(
+                access_titles=self.selectable_access_titles,
+                curriculum_dto=command_result.resume.curriculum,
+                etudes_secondaires_dto=command_result.resume.etudes_secondaires,
+            )
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
             context[
@@ -1295,6 +1365,28 @@ class ChecklistView(
                 .get('parcours_anterieur', {})
                 .get('enfants', [])
             )
+
+            context['check_authentication_mail_to_checkers'] = get_email(
+                template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
+                language=settings.LANGUAGE_CODE_FR,
+                proposition_dto=self.proposition,
+            )
+            context['check_authentication_mail_to_candidate'] = get_email(
+                template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
+                language=self.proposition.langue_contact_candidat,
+                proposition_dto=self.proposition,
+            )
+
+            all_experience_authentication_history_entries = HistoryEntry.objects.filter(
+                object_uuid=self.admission_uuid,
+                tags__contains=['proposition', 'experience-authentication', 'message'],
+            ).order_by('-created')
+
+            context['all_experience_authentication_history_entries'] = {}
+            for entry in all_experience_authentication_history_entries:
+                experience_id = entry.extra_data.get('experience_id')
+                if experience_id:
+                    context['all_experience_authentication_history_entries'].setdefault(experience_id, entry)
 
             children_by_identifier = {
                 child['extra']['identifiant']: child for child in children if child.get('extra', {}).get('identifiant')
@@ -1367,6 +1459,21 @@ class ChecklistView(
                             order += 1
 
                 children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
+
+                # Some tabs also contain the documents of each experience
+                past_experiences_documents = []
+                for experience_uuid in ordered_experiences:
+                    current_uuid = f'parcours_anterieur__{experience_uuid}'
+                    if context['documents'].get(current_uuid):
+                        past_experiences_documents.append(
+                            [
+                                context['checklist_tabs'][current_uuid],  # Name of the experience
+                                context['documents'][current_uuid],  # List of documents of the experience
+                            ]
+                        )
+
+                context['documents']['parcours_anterieur'].extend(past_experiences_documents)
+                context['documents']['financabilite'].extend(past_experiences_documents)
 
             original_admission = self.admission
 
@@ -1609,6 +1716,26 @@ class PastExperiencesAccessTitleView(
         context['url'] = self.request.get_full_path()
         context['experience_uuid'] = self.request.GET.get('experience_uuid')
         context['can_choose_access_title'] = True  # True as the user can access to the current view
+
+        # Get the list of the selected access titles
+        access_titles: Dict[str, TitreAccesSelectionnableDTO] = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        if access_titles:
+            command_result: ResumePropositionDTO = message_bus_instance.invoke(
+                RecupererResumePropositionQuery(uuid_proposition=self.admission_uuid),
+            )
+
+            context['selected_access_titles_names'] = get_access_titles_names(
+                access_titles=access_titles,
+                curriculum_dto=command_result.curriculum,
+                etudes_secondaires_dto=command_result.etudes_secondaires,
+            )
+
         return context
 
     def form_valid(self, form):
@@ -2027,6 +2154,16 @@ class SinglePastExperienceMixin(
             disabled=not can_edit_experience_authentication(self.experience),
             label=_('Comment about the authentication'),
         )
+        context['experience_authentication_history_entry'] = (
+            HistoryEntry.objects.filter(
+                object_uuid=self.admission_uuid,
+                tags__contains=['proposition', 'experience-authentication', 'message'],
+                extra_data__experience_id=self.experience_uuid,
+            )
+            .order_by('-created')
+            .first()
+        )
+
         return context
 
     def get_success_url(self):

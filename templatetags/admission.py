@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import re
 from dataclasses import dataclass
@@ -35,8 +36,8 @@ from django.conf import settings
 from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
-from django.utils.safestring import SafeString
-from django.utils.translation import get_language, gettext_lazy as _, pgettext
+from django.utils.safestring import SafeString, mark_safe
+from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
@@ -578,14 +579,18 @@ def get_image_file_url(file_uuids):
 
 
 @register.inclusion_tag('admission/dummy.html')
-def document_component(document_write_token, document_metadata):
+def document_component(document_write_token, document_metadata, can_edit=True):
     """Display the right editor component depending on the file type."""
     if document_metadata:
         if document_metadata.get('mimetype') == PDF_MIME_TYPE:
+            attrs = {}
+            if not can_edit:
+                attrs = {action: False for action in ['pagination', 'zoom', 'comment', 'highlight', 'rotation']}
             return {
                 'template': 'osis_document/editor.html',
                 'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+                'attrs': attrs
             }
         elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
             return {
@@ -634,12 +639,13 @@ def status_as_class(activity):
 
 
 @register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False):
+def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None):
     return {
         'field': field,
         'classes': classes,
         'show_help': show_help,
         'html_tooltip': html_tooltip,
+        'label': label,
     }
 
 
@@ -782,7 +788,7 @@ def concat(*args):
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
-def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects')):
+def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects'), **kwargs):
     """Display the answers of the specific questions based on a list of configurations."""
     return {
         'fields': configurations,
@@ -790,6 +796,7 @@ def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], ti
         'all_inline': context.get('all_inline'),
         'load_files': context.get('load_files'),
         'hide_files': context.get('hide_files'),
+        'edit_link_button': kwargs.get('edit_link_button'),
     }
 
 
@@ -889,9 +896,27 @@ def get_country_name(country: Optional[Country]):
 
 
 @register.filter
+def country_name_from_iso_code(iso_code: str):
+    """Return the country name from an iso code."""
+    if not iso_code:
+        return ''
+    country = Country.objects.filter(iso_code=iso_code).values('name', 'name_en').first()
+    if not country:
+        return ''
+    if get_language() == settings.LANGUAGE_CODE_FR:
+        return country['name']
+    return country['name_en']
+
+
+@register.filter
 def get_ordered_checklist_items(checklist_items: dict):
     """Return the ordered checklist items."""
     return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])
+
+
+@register.filter
+def is_list(value) -> bool:
+    return isinstance(value, list)
 
 
 @register.inclusion_tag('admission/checklist_state_button.html', takes_context=True)
@@ -951,6 +976,14 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
             settings.LANGUAGE_CODE_EN: history_entry.message_en,
         }[get_language()]
     return ''
+
+
+@register.filter
+def label_with_user_icon(label):
+    title = gettext('Information provided to the candidate.')
+    return mark_safe(
+        f'{label} <i class="fas fa-user" data-content="{title}" data-toggle="popover" data-trigger="hover"></i>'
+    )
 
 
 @register.filter
@@ -1073,7 +1106,7 @@ def authentication_css_class(authentication_status):
         {
             EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name: 'fa-solid fa-file-circle-question text-orange',
             EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name: 'fa-solid fa-file-circle-question text-orange',
-            EtatAuthentificationParcours.FAUX.name: 'fa-solid fa-file-circle-check text-danger',
+            EtatAuthentificationParcours.FAUX.name: 'fa-solid fa-file-circle-xmark text-danger',
             EtatAuthentificationParcours.VRAI.name: 'fa-solid fa-file-circle-check text-success',
         }.get(authentication_status, '')
         if authentication_status
@@ -1227,6 +1260,14 @@ def footer_campus(proposition):
         'campus': CAMPUS.get(proposition.formation.campus_inscription.nom, 'LLN'),
         'proposition': proposition,
     }
+
+
+@register.simple_tag
+def candidate_language(language):
+    return mark_safe(
+        f' <strong>({_("contact language")} </strong>'
+        f'<span class="label label-admission-primary">{formatted_language(language)}</span>)'
+    )
 
 
 @register.filter

@@ -52,6 +52,7 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument, TypeEmplacementDocument
 
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -61,6 +62,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DroitsInscriptionMontant,
     TypeDeRefus,
     ChoixStatutChecklist,
+    DispenseOuDroitsMajores,
 )
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
@@ -376,6 +378,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
             url="admission:autocomplete:managed-education-trainings",
             attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
+        help_text=_('You can only select courses that are managed by the program manager.'),
     )
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
@@ -436,7 +439,14 @@ class FacDecisionApprovalForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, academic_year, additional_approval_conditions_for_diploma, *args, **kwargs):
+    def __init__(
+        self,
+        academic_year,
+        additional_approval_conditions_for_diploma,
+        current_training_uuid,
+        *args,
+        **kwargs,
+    ):
         instance: Optional[GeneralEducationAdmission] = kwargs.get('instance', None)
         data = kwargs.get('data', {})
         initial = kwargs.setdefault('initial', {})
@@ -502,9 +512,12 @@ class FacDecisionApprovalForm(forms.ModelForm):
             self.fields['other_training_accepted_by_fac'].queryset = training_qs
             self.initial['other_training_accepted_by_fac'] = training_qs[0].uuid if training_qs else ''
 
-        self.fields['other_training_accepted_by_fac'].widget.forward = [
-            forward.Const(academic_year, 'annee_academique')
-        ]
+        other_training_forwarded_params = [forward.Const(academic_year, 'annee_academique')]
+
+        if current_training_uuid:
+            other_training_forwarded_params.append(forward.Const(current_training_uuid, 'excluded_training'))
+
+        self.fields['other_training_accepted_by_fac'].widget.forward = other_training_forwarded_params
         self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
 
         # Initialize additional trainings fields
@@ -545,13 +558,18 @@ class FacDecisionApprovalForm(forms.ModelForm):
         else:
             cleaned_data['other_training_accepted_by_fac'] = None
 
-        if not cleaned_data.get('with_additional_approval_conditions'):
+        if cleaned_data.get('with_additional_approval_conditions'):
+            if not cleaned_data.get('all_additional_approval_conditions'):
+                self.add_error('all_additional_approval_conditions', FIELD_REQUIRED_MESSAGE)
+        else:
             cleaned_data['all_additional_approval_conditions'] = []
             cleaned_data['additional_approval_conditions'] = []
             cleaned_data['free_additional_approval_conditions'] = []
 
         if cleaned_data.get('with_prerequisite_courses'):
-            if cleaned_data.get('prerequisite_courses'):
+            if not cleaned_data.get('prerequisite_courses'):
+                self.add_error('prerequisite_courses', FIELD_REQUIRED_MESSAGE)
+            else:
                 cleaned_data['prerequisite_courses'] = LearningUnitYear.objects.filter(
                     acronym__in=cleaned_data.get('prerequisite_courses', []),
                     academic_year__year=self.academic_year,
@@ -560,6 +578,9 @@ class FacDecisionApprovalForm(forms.ModelForm):
         else:
             cleaned_data['prerequisite_courses'] = []
             cleaned_data['prerequisite_courses_fac_comment'] = ''
+
+        if not cleaned_data.get('program_planned_years_number'):
+            self.add_error('program_planned_years_number', FIELD_REQUIRED_MESSAGE)
 
         return cleaned_data
 
@@ -658,6 +679,46 @@ class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):
         return cleaned_data
 
 
+class SicDecisionApprovalDocumentsForm(forms.Form):
+    def __init__(
+        self,
+        documents: List[EmplacementDocumentDTO],
+        instance: GeneralEducationAdmission,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        # Documents
+        documents_choices = []
+        initial_document_choices = []
+        self.documents = {}
+
+        for document in documents:
+            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
+                if document.document_uuids:
+                    label = '<span class="fa-solid fa-paperclip"></span> '
+                else:
+                    label = '<span class="fa-solid fa-link-slash"></span> '
+                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
+                    label += '<span class="fa-solid fa-building-columns"></span> '
+                label += document.libelle
+
+                document_field = ChangeRequestDocumentForm.create_change_request_document_field(
+                    label=label,
+                    document_identifier=document.identifiant,
+                    request_status=document.statut_reclamation,
+                    proposition_uuid=instance.uuid,
+                    only_limited_request_choices=False,
+                )
+
+                self.fields[document.identifiant] = document_field
+                self.documents[document.identifiant] = document_field
+
+                initial_document_choices.append(document.identifiant)
+                documents_choices.append((document.identifiant, mark_safe(label)))
+
+
 class SicDecisionApprovalForm(forms.ModelForm):
     SEPARATOR = ';'
 
@@ -714,6 +775,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             'mobility_months_amount',
             'must_report_to_sic',
             'communication_to_the_candidate',
+            'must_provide_student_visa_d',
         ]
         labels = {
             'annual_program_contact_person_name': _('First name and last name'),
@@ -733,13 +795,14 @@ class SicDecisionApprovalForm(forms.ModelForm):
             'is_mobility': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
+            'must_provide_student_visa_d': forms.CheckboxInput,
         }
 
     def __init__(
         self,
         academic_year,
         additional_approval_conditions_for_diploma,
-        documents: List[EmplacementDocumentDTO],
+        candidate_nationality_is_no_ue_5: bool,
         *args,
         **kwargs,
     ):
@@ -747,35 +810,6 @@ class SicDecisionApprovalForm(forms.ModelForm):
         data = kwargs.get('data', {})
 
         super().__init__(*args, **kwargs)
-
-        # Documents
-        documents_choices = []
-        initial_document_choices = []
-        self.documents = {}
-
-        for document in documents:
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
-                if document.document_uuids:
-                    label = '<span class="fa-solid fa-paperclip"></span> '
-                else:
-                    label = '<span class="fa-solid fa-link-slash"></span> '
-                if document.type == TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name:
-                    label += '<span class="fa-solid fa-building-columns"></span> '
-                label += document.libelle
-
-                document_field = ChangeRequestDocumentForm.create_change_request_document_field(
-                    label=label,
-                    document_identifier=document.identifiant,
-                    request_status=document.statut_reclamation,
-                    proposition_uuid=self.instance.uuid,
-                    only_limited_request_choices=False,
-                )
-
-                self.fields[document.identifiant] = document_field
-                self.documents[document.identifiant] = document_field
-
-                initial_document_choices.append(document.identifiant)
-                documents_choices.append((document.identifiant, mark_safe(label)))
 
         # Initialize conditions field
         self.is_admission = self.instance.type_demande == TypeDemande.ADMISSION.name
@@ -785,6 +819,10 @@ class SicDecisionApprovalForm(forms.ModelForm):
             or self.instance.double_degree_scholarship_id is not None
         )
         self.is_hue = not self.instance.candidate.country_of_citizenship.european_union
+        self.is_assimilation = (
+            self.instance.accounting
+            and self.instance.accounting.assimilation_situation != TypeSituationAssimilation.AUCUNE_ASSIMILATION.name
+        )
         self.academic_year = academic_year
         self.data_existing_conditions = set()
         self.data_free_conditions = set()
@@ -845,6 +883,18 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
         self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
 
+        self.fields['program_planned_years_number'].required = True
+
+        self.fields['tuition_fees_amount'].required = True
+        self.fields['tuition_fees_amount'].choices = [(None, '-')] + self.fields['tuition_fees_amount'].choices
+
+        self.fields['tuition_fees_dispensation'].required = True
+        self.fields['tuition_fees_dispensation'].choices = [(None, '-')] + self.fields[
+            'tuition_fees_dispensation'
+        ].choices
+        if not self.is_hue or self.is_assimilation:
+            self.initial['tuition_fees_dispensation'] = DispenseOuDroitsMajores.NON_CONCERNE.name
+
         if not self.is_vip:
             del self.fields['particular_cost']
             del self.fields['rebilling_or_third_party_payer']
@@ -859,8 +909,11 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
         if not self.is_admission:
             del self.fields['must_report_to_sic']
+            del self.fields['must_provide_student_visa_d']
         else:
             self.fields['must_report_to_sic'].required = True
+            self.initial['must_provide_student_visa_d'] = candidate_nationality_is_no_ue_5
+            self.initial['must_report_to_sic'] = False
 
         self.fields['communication_to_the_candidate'].required = False
 
@@ -880,6 +933,14 @@ class SicDecisionApprovalForm(forms.ModelForm):
             cleaned_data['all_additional_approval_conditions'] = []
             cleaned_data['additional_approval_conditions'] = []
             cleaned_data['free_additional_approval_conditions'] = []
+        elif not cleaned_data['all_additional_approval_conditions']:
+            self.add_error(
+                'all_additional_approval_conditions',
+                ValidationError(
+                    self.fields['all_additional_approval_conditions'].error_messages['required'],
+                    code='required',
+                ),
+            )
 
         if cleaned_data.get('with_prerequisite_courses'):
             if cleaned_data.get('prerequisite_courses'):
@@ -892,8 +953,8 @@ class SicDecisionApprovalForm(forms.ModelForm):
             cleaned_data['prerequisite_courses'] = []
             cleaned_data['prerequisite_courses_fac_comment'] = ''
 
-        if cleaned_data.get('rights_amount') == DroitsInscriptionMontant.AUTRE.name:
-            if not cleaned_data.get('rights_amount_other'):
+        if cleaned_data.get('tuition_fees_amount') == DroitsInscriptionMontant.AUTRE.name:
+            if not cleaned_data.get('tuition_fees_amount_other'):
                 self.add_error(
                     'tuition_fees_amount_other',
                     ValidationError(

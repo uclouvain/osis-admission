@@ -83,6 +83,9 @@ from admission.templatetags.admission import (
     need_to_display_specific_questions,
     authentication_css_class,
     experience_details_template,
+    is_list,
+    label_with_user_icon,
+    candidate_language,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -487,6 +490,25 @@ class DisplayTagTestCase(TestCase):
                 'template': 'osis_document/editor.html',
                 'value': 'token',
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+                'attrs': {}
+            },
+        )
+
+        # With metadata for a PDF file in read_only mode
+        component = document_component(
+            'token',
+            {
+                'mimetype': PDF_MIME_TYPE,
+            },
+            can_edit=False
+        )
+        self.assertEqual(
+            component,
+            {
+                'template': 'osis_document/editor.html',
+                'value': 'token',
+                'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+                'attrs': {'pagination': False, 'zoom': False, 'comment': False, 'highlight': False, 'rotation': False},
             },
         )
 
@@ -752,12 +774,50 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             authentication_css_class(EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name),
         )
         self.assertEqual(
-            'fa-solid fa-file-circle-check text-danger',
+            'fa-solid fa-file-circle-xmark text-danger',
             authentication_css_class(EtatAuthentificationParcours.FAUX.name),
         )
         self.assertEqual(
             'fa-solid fa-file-circle-check text-success',
             authentication_css_class(EtatAuthentificationParcours.VRAI.name),
+        )
+
+    def test_is_list(self):
+        self.assertFalse(is_list(None))
+        self.assertFalse(is_list(False))
+        self.assertFalse(is_list(0))
+        self.assertFalse(is_list(0.0))
+        self.assertFalse(is_list(''))
+        self.assertTrue(is_list([]))
+
+    def test_label_with_user_icon(self):
+        label = (
+            '{} <i class="fas fa-user" data-content="Information communiquée au candidat." '
+            'data-toggle="popover" data-trigger="hover"></i>'
+        )
+        self.assertEqual(
+            label_with_user_icon('foo'),
+            label.format('foo'),
+        )
+        self.assertEqual(
+            label_with_user_icon(''),
+            label.format(''),
+        )
+
+    def test_candidate_language(self):
+        self.assertEqual(
+            candidate_language(''),
+            f' <strong>(langue de contact </strong><span class="label label-admission-primary"></span>)',
+        )
+
+        self.assertEqual(
+            candidate_language(settings.LANGUAGE_CODE_FR),
+            f' <strong>(langue de contact </strong><span class="label label-admission-primary">FR</span>)',
+        )
+
+        self.assertEqual(
+            candidate_language(settings.LANGUAGE_CODE_EN),
+            f' <strong>(langue de contact </strong><span class="label label-admission-primary">EN</span>)',
         )
 
 

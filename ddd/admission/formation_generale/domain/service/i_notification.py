@@ -25,9 +25,10 @@
 # ##############################################################################
 from abc import abstractmethod
 from email.message import EmailMessage
-from typing import List
+from typing import List, Optional
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
@@ -52,7 +53,7 @@ class INotification(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> Optional[EmailMessage]:
         raise NotImplementedError
 
     @classmethod
@@ -83,4 +84,30 @@ class INotification(interface.DomainService):
         objet_message: str,
         corps_message: str,
     ) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    def modifier_authentification_experience_parcours(
+        cls,
+        proposition: Proposition,
+        etat_authentification: str,
+    ) -> Optional[EmailMessage]:
+        methode_notification = {
+            EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name: cls.demande_verification_titre_acces,
+            EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name: (
+                cls.informer_candidat_verification_parcours_en_cours
+            ),
+        }.get(etat_authentification)
+
+        if methode_notification:
+            return methode_notification(proposition)
+
+    @classmethod
+    @abstractmethod
+    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
         raise NotImplementedError

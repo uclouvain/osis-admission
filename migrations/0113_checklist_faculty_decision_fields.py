@@ -130,7 +130,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='generaleducationadmission',
             name='prerequisite_courses_fac_comment',
-            field=models.TextField(blank=True, default='', verbose_name='Other information about prerequisite courses'),
+            field=models.TextField(blank=True, default='', verbose_name='Other communication for the candidate about the prerequisite courses',),
         ),
         migrations.AddField(
             model_name='generaleducationadmission',

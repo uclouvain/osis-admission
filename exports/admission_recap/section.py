@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -56,8 +56,9 @@ from admission.exports.admission_recap.attachments import (
     get_languages_attachments,
     get_cotutelle_attachments,
     get_supervision_group_attachments,
-    get_documents_attachments,
+    get_requestable_free_documents,
     get_dynamic_questions_attachments,
+    get_authorization_attachments,
 )
 from admission.exports.admission_recap.constants import (
     TRAINING_TYPES_WITH_EQUIVALENCE,
@@ -515,7 +516,23 @@ def get_confirmation_section(context: ResumePropositionDTO, load_content: bool) 
     )
 
 
-def get_document_section(
+def get_authorization_section(
+    context: ResumePropositionDTO,
+    load_content: bool,
+) -> Section:
+    """Returns the requestable free documents."""
+    return Section(
+        identifier=OngletsDemande.SUITE_AUTORISATION,
+        content_template='admission/dummy.html',
+        context=context,
+        attachments=get_authorization_attachments(
+            context=context,
+        ),
+        load_content=load_content,
+    )
+
+
+def get_requestable_free_document_section(
     context: ResumePropositionDTO,
     specific_questions_by_tab: Dict[str, List[QuestionSpecifiqueDTO]],
     load_content: bool,
@@ -528,7 +545,7 @@ def get_document_section(
         extra_context={
             'specific_questions': specific_questions_by_tab[Onglets.DOCUMENTS.name],
         },
-        attachments=get_documents_attachments(
+        attachments=get_requestable_free_documents(
             specific_questions_by_tab[Onglets.DOCUMENTS.name],
         ),
         load_content=load_content,
@@ -541,6 +558,7 @@ def get_sections(
     load_content=False,
     with_free_requestable_documents=False,
     hide_curriculum=False,
+    with_additional_documents=True,
 ):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
@@ -602,7 +620,11 @@ def get_sections(
 
     if with_free_requestable_documents:
         # Section containing the additional requested documents
-        pdf_sections.append(get_document_section(context, specific_questions_by_tab, load_content))
+        pdf_sections.append(get_requestable_free_document_section(context, specific_questions_by_tab, load_content))
+
+    if with_additional_documents:
+        # Sections containing additional documents
+        pdf_sections.append(get_authorization_section(context, load_content))
 
     return pdf_sections
 

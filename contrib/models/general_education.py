@@ -264,7 +264,7 @@ class GeneralEducationAdmission(BaseAdmission):
     prerequisite_courses_fac_comment = models.TextField(
         blank=True,
         default='',
-        verbose_name=_('Other information about prerequisite courses'),
+        verbose_name=_('Other communication for the candidate about the prerequisite courses'),
     )
     program_planned_years_number = models.SmallIntegerField(
         blank=True,
@@ -346,8 +346,25 @@ class GeneralEducationAdmission(BaseAdmission):
     communication_to_the_candidate = models.TextField(
         default='',
         verbose_name=_("Communication to the candidate"),
+        blank=True,
     )
-
+    must_provide_student_visa_d = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('The candidate must provide a student visa'),
+    )
+    student_visa_d = FileField(
+        verbose_name=_("Student visa D"),
+        upload_to=admission_directory_path,
+        blank=True,
+        mimetypes=[PDF_MIME_TYPE],
+    )
+    signed_enrollment_authorization = FileField(
+        verbose_name=_("Signed enrollment authorization"),
+        upload_to=admission_directory_path,
+        blank=True,
+        mimetypes=[PDF_MIME_TYPE],
+    )
     diplomatic_post = models.ForeignKey(
         blank=True,
         null=True,

@@ -28,15 +28,19 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierInformationsAcceptationPropositionParSicCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
 def specifier_informations_acceptation_proposition_par_sic(
     cmd: SpecifierInformationsAcceptationPropositionParSicCommand,
     proposition_repository: 'IPropositionRepository',
+    historique: 'IHistorique',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
+
+    statut_original = proposition.statut
 
     # THEN
     proposition.specifier_informations_acceptation_par_sic(
@@ -60,8 +64,15 @@ def specifier_informations_acceptation_proposition_par_sic(
         nombre_de_mois_de_mobilite=cmd.nombre_de_mois_de_mobilite,
         doit_se_presenter_en_sic=cmd.doit_se_presenter_en_sic,
         communication_au_candidat=cmd.communication_au_candidat,
+        doit_fournir_visa_etudes=cmd.doit_fournir_visa_etudes,
     )
 
     proposition_repository.save(entity=proposition)
+
+    historique.historiser_specification_informations_acceptation_sic(
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+        statut_original=statut_original,
+    )
 
     return proposition.entity_id

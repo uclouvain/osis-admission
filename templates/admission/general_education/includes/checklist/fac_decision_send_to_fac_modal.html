@@ -37,10 +37,10 @@
         You are about to submit the application to the Faculty. This action will send an email to {{ recipient }}.
       {% endblocktranslate %}
     {% else %}
-      {% blocktranslate with recipient=program_faculty_email trimmed %}
-        You are about to submit the application to the Faculty. This action should normally email the Faculty, but the
-        recipient address is not defined. Please define it before sending the application.
-      {% endblocktranslate %}
+      {% translate 'You are about to submit the application to the Faculty.' %}
+      <div class="alert alert-danger">
+        {% translate 'As the email address of the faculty recipient is not defined, no email will be sent. Do you still want to send the application to the faculty?' %}
+      </div>
     {% endif %}
   </p>
 {% endblock %}
@@ -49,9 +49,6 @@
   <button
     class="btn btn-primary"
     hx-post="{% url view.base_namespace|add:':fac-decision-send-to-faculty' uuid=view.kwargs.uuid %}"
-    {% if not program_faculty_email %}
-    disabled
-    {% endif %}
     data-dismiss="modal"
   >
     {% translate 'Confirm' %}

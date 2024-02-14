@@ -499,24 +499,29 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
         )
     ),
     ModifierAuthentificationExperienceParcoursAnterieurCommand: (
         lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
             cmd,
             proposition_repository=PropositionRepository(),
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (
         lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            historique=HistoriqueFormationGenerale(),
         )
     ),
     RefuserAdmissionParSicCommand: (
         lambda msg_bus, cmd: refuser_admission_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
@@ -526,6 +531,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: refuser_inscription_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
@@ -535,9 +541,11 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: approuver_admission_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
+            emplacement_document_repository=EmplacementDocumentRepository(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -551,6 +559,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recuperer_pdf_temporaire_decision_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             pdf_generation=PDFGeneration(),
         )
     ),

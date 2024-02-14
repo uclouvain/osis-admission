@@ -109,17 +109,29 @@ class Historique(IHistorique):
     def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
         cls,
         proposition: Proposition,
-        message: EmailMessage,
+        message: Optional[EmailMessage],
         gestionnaire: str,
     ):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
         now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
-        recipient = message['To']
+
+        if message:
+            recipient = message['To']
+            fr_message = (
+                f'Un mail informant de la soumission du dossier en faculté a été envoyé à "{recipient}" le {now}.'
+            )
+            en_message = (
+                f'An e-mail notifying that the dossier has been submitted to the faculty was sent to "{recipient}" on '
+                f'{now}.'
+            )
+        else:
+            fr_message = f"Le dossier a été soumis en faculté le {now}."
+            en_message = f"The dossier has been submitted to the faculty on {now}."
+
         add_history_entry(
             proposition.entity_id.uuid,
-            f"Un mail informant de la soumission du dossier en faculté a été envoyé à \"{recipient}\" le {now}.",
-            f"An e-mail notifying that the dossier has been submitted to the faculty was sent to "
-            f"\"{recipient}\" on {now}.",
+            fr_message,
+            en_message,
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
             tags=["proposition", "fac-decision", "send-to-fac", "status-changed"],
         )
@@ -214,5 +226,88 @@ class Historique(IHistorique):
             "Le dossier a été accepté par SIC.",
             "The dossier has been accepted by SIC.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-            tags=["proposition", "sic-decision", "refusal", "status-changed"],
+            tags=["proposition", "sic-decision", "approval", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_specification_motifs_refus_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
+    ):
+        if statut_original == proposition.statut:
+            return
+
+        gestionnaire_dto = PersonneConnueUclTranslator().get(matricule=gestionnaire)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            'Des motifs de refus ont été spécifiés par SIC.',
+            'Refusal reasons have been specified by SIC.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'sic-decision', 'specify-refusal-reasons', 'status-changed'],
+        )
+
+    @classmethod
+    def historiser_specification_informations_acceptation_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionGenerale,
+    ):
+        if statut_original == proposition.statut:
+            return
+
+        gestionnaire_dto = PersonneConnueUclTranslator().get(matricule=gestionnaire)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            'Des informations concernant la décision d\'acceptation ont été spécifiés par SIC.',
+            'Approval decision information has been specified by SIC.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'sic-decision', 'specify-approval-info', 'status-changed'],
+        )
+
+    @classmethod
+    def historiser_demande_verification_titre_acces(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+
+        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+        recipient = message['To']
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            f'Mail envoyé à "{recipient}" le {now} par {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            f'Mail sent to "{recipient}" on {now} by {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'experience-authentication', 'authentication-request', 'message'],
+            extra_data={'experience_id': uuid_experience},
+        )
+
+    @classmethod
+    def historiser_information_candidat_verification_parcours_en_cours(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        message: EmailMessage,
+        uuid_experience: str,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+
+        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            f'Mail envoyé à le/la candidat·e le {now} par {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            f'Mail sent to the candidate on {now} by {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'experience-authentication', 'institute-contact', 'message'],
+            extra_data={'experience_id': uuid_experience},
         )

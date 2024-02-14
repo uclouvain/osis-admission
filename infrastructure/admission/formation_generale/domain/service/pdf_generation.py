@@ -23,11 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from typing import Optional, List
 
 from django.conf import settings
-from django.utils import translation
+from django.utils import translation, timezone
 from django.utils.translation import gettext
+
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from osis_document.utils import confirm_upload
 
 from admission.ddd.admission.enums.emplacement_document import (
@@ -63,9 +65,13 @@ ENTITY_SIC = 'SIC'
 class PDFGeneration(IPDFGeneration):
     @classmethod
     def _get_sic_director(cls):
+        now = timezone.now()
         director = Person.objects.filter(
             mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
             mandatary__mandate__function=MandateTypes.DIRECTOR.name,
+        ).filter(
+            mandatary__start_date__lte=now,
+            mandatary__end_date__gte=now,
         ).first()
         return director
 
@@ -111,7 +117,7 @@ class PDFGeneration(IPDFGeneration):
         proposition_repository: IPropositionRepository,
         unites_enseignement_translator: IUnitesEnseignementTranslator,
         profil_candidat_translator: IProfilCandidatTranslator,
-        titre_acces_selectionnable_repository: ITitreAccesSelectionnableRepository,
+        titres_selectionnes: List[TitreAccesSelectionnable],
         annee_courante: int,
     ) -> None:
         # Get the information to display on the pdf
@@ -123,17 +129,12 @@ class PDFGeneration(IPDFGeneration):
         )
 
         # Get the names of the access titles
-        access_titles = titre_acces_selectionnable_repository.search_by_proposition(
-            proposition_identity=proposition.entity_id,
-            seulement_selectionnes=True,
-        )
-
         secondary_studies_dto = None
         cv_dto = None
 
         context['access_titles_names'] = []
 
-        for access_title in sorted(access_titles, key=lambda title: title.annee, reverse=True):
+        for access_title in sorted(titres_selectionnes, key=lambda title: title.annee, reverse=True):
 
             # Secondary studies
             if access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES:
@@ -209,6 +210,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_sic_temporaire(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
@@ -224,6 +226,7 @@ class PDFGeneration(IPDFGeneration):
             raise PdfSicInconnu()
         return pdf_generation_method(
             proposition_repository=proposition_repository,
+            profil_candidat_translator=profil_candidat_translator,
             proposition=proposition,
             gestionnaire=gestionnaire,
             temporaire=True,
@@ -233,6 +236,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_accord_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -242,6 +246,8 @@ class PDFGeneration(IPDFGeneration):
         proposition_dto = proposition_repository.get_dto_for_gestionnaire(
             proposition.entity_id, UnitesEnseignementTranslator
         )
+        profil_candidat_identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+        profil_candidat_coordonnees = profil_candidat_translator.get_coordonnees(proposition.matricule_candidat)
         documents = [
             document
             for document in message_bus_instance.invoke(
@@ -259,6 +265,8 @@ class PDFGeneration(IPDFGeneration):
             filename=f'Autorisation_inscription_Dossier_{proposition_dto.reference}.pdf',
             context={
                 'proposition': proposition_dto,
+                'profil_candidat_identification': profil_candidat_identification,
+                'profil_candidat_coordonnees': profil_candidat_coordonnees,
                 'documents': documents,
                 'director': cls._get_sic_director(),
             },
@@ -273,6 +281,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_accord_annexe_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -281,12 +290,16 @@ class PDFGeneration(IPDFGeneration):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
             )
+            profil_candidat_identification = profil_candidat_translator.get_identification(
+                proposition.matricule_candidat
+            )
             token = admission_generate_pdf(
                 admission=None,
                 template='admission/exports/sic_approval_annexe.html',
                 filename='Formulaire_pour_la_demande_de_visa.pdf',
                 context={
                     'proposition': proposition_dto,
+                    'profil_candidat_identification': profil_candidat_identification,
                     'director': cls._get_sic_director(),
                 },
                 author=gestionnaire,
@@ -299,6 +312,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_refus_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -307,12 +321,18 @@ class PDFGeneration(IPDFGeneration):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
             )
+            profil_candidat_identification = profil_candidat_translator.get_identification(
+                proposition.matricule_candidat
+            )
+            profil_candidat_coordonnees = profil_candidat_translator.get_coordonnees(proposition.matricule_candidat)
             token = admission_generate_pdf(
                 admission=None,
                 template='admission/exports/sic_refusal_certificate.html',
                 filename=f'UCLouvain_{proposition_dto.reference}.pdf',
                 context={
                     'proposition': proposition_dto,
+                    'profil_candidat_identification': profil_candidat_identification,
+                    'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(),
                 },
                 author=gestionnaire,
@@ -325,6 +345,7 @@ class PDFGeneration(IPDFGeneration):
     def generer_attestation_refus_inscription_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -333,12 +354,18 @@ class PDFGeneration(IPDFGeneration):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
             )
+            profil_candidat_identification = profil_candidat_translator.get_identification(
+                proposition.matricule_candidat
+            )
+            profil_candidat_coordonnees = profil_candidat_translator.get_coordonnees(proposition.matricule_candidat)
             token = admission_generate_pdf(
                 admission=None,
                 template='admission/exports/sic_inscription_refusal_certificate.html',
                 filename=f'UCLouvain_{proposition_dto.reference}.pdf',
                 context={
                     'proposition': proposition_dto,
+                    'profil_candidat_identification': profil_candidat_identification,
+                    'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(),
                 },
                 author=gestionnaire,

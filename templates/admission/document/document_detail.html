@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@
 {% endcomment %}
 
 <div id="document-details">
+  <div id="document-spinner">
+    <span class="fa fa-spinner"></span>
+  </div>
   {% if not document_identifier %}
     <p id="empty-document-details">
       {% translate 'To visualize and edit a document, please select it in the list opposite.' %}
@@ -34,7 +37,7 @@
   {% else %}
     {# Viewer for received or internal documents or default content if there is no document #}
     <div id="document-editor-container">
-      {% document_component document_write_token document_metadata %}
+      {% document_component document_write_token document_metadata perms.admission.can_edit_documents %}
     </div>
 
     {# Actions #}

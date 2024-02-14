@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ from admission.exports.admission_recap.admission_async_recap import (
     continuing_education_admission_pdf_recap_from_task,
     doctorate_education_admission_pdf_recap_from_task,
 )
+from admission.tasks.generate_admission_folder import general_education_admission_analysis_folder_from_task
 from admission.tasks.merge_admission_documents import (
     general_education_admission_document_merging_from_task,
     continuing_education_admission_document_merging_from_task,
@@ -47,15 +48,20 @@ from admission.tasks.merge_admission_documents import (
 
 class Command(BaseCommand):
     task_operation_by_type = {
+        # Doctorate
         AdmissionTask.TaskType.ARCHIVE.name: admission_pdf_archive,
         AdmissionTask.TaskType.CANVAS.name: admission_pdf_canvas,
         AdmissionTask.TaskType.CONFIRMATION_SUCCESS.name: admission_confirmation_success_attestation,
+        # Generate the recap of the proposition when the proposition is submitted
         AdmissionTask.TaskType.GENERAL_RECAP.name: general_education_admission_pdf_recap_from_task,
         AdmissionTask.TaskType.CONTINUING_RECAP.name: continuing_education_admission_pdf_recap_from_task,
         AdmissionTask.TaskType.DOCTORATE_RECAP.name: doctorate_education_admission_pdf_recap_from_task,
+        # Merge the documents of the proposition when the proposition is submitted
         AdmissionTask.TaskType.GENERAL_MERGE.name: general_education_admission_document_merging_from_task,
         AdmissionTask.TaskType.CONTINUING_MERGE.name: continuing_education_admission_document_merging_from_task,
         AdmissionTask.TaskType.DOCTORATE_MERGE.name: doctorate_education_admission_document_merging_from_task,
+        # Generate the analysis folder of the proposition when the candidate submits additional documents
+        AdmissionTask.TaskType.GENERAL_FOLDER.name: general_education_admission_analysis_folder_from_task,
     }
 
     def handle(self, *args, **options):
@@ -73,7 +79,7 @@ class Command(BaseCommand):
                     self.task_operation_by_type[task_type](task_uuid)
                 update_task(task_uuid, progression=100, state=TaskState.DONE, completed_at=now())
             except Exception as e:
-                update_task(task_uuid, progression=0, state=TaskState.PENDING)
+                update_task(task_uuid, state=TaskState.ERROR, exception=e)
                 errors.append(e)
 
         if errors:

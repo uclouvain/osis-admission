@@ -1,0 +1,22 @@
+    <td>
+      {% if experience.diplome_belge %}
+        {% translate "CESS" %}
+      {% elif experience.diplome_etranger %}
+        {{ experience.diplome_etranger.type_diplome|enum_display:'ForeignDiplomaTypes' }}
+      {% elif experience.alternative_secondaires %}
+        {% translate "Bachelor's course entrance exam" %}
+      {% elif experience.annee_diplome_etudes_secondaires %}
+        {% translate "Secondary school" %}
+      {% endif %}
+    </td>
+    <td>
+      {% if experience.diplome_belge %}
+        {% access_title_checkbox experience.diplome_belge.uuid 'ETUDES_SECONDAIRES' year %}
+      {% elif experience.diplome_etranger %}
+        {% access_title_checkbox experience.diplome_etranger.uuid 'ETUDES_SECONDAIRES' year %}
+      {% elif experience.alternative_secondaires %}
+        {% access_title_checkbox experience.alternative_secondaires.uuid 'ETUDES_SECONDAIRES' None %}
+      {% elif experience.annee_diplome_etudes_secondaires %}
+        {% access_title_checkbox 'ETUDES_SECONDAIRES' 'ETUDES_SECONDAIRES' year %}
+      {% endif %}
+    </td>

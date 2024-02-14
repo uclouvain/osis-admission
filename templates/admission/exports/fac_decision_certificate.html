@@ -37,7 +37,7 @@
     #main-container dl {
       margin-top: 2em;
     }
-    
+
     footer {
       padding: 20px 0;
       height: 130px;
@@ -56,12 +56,34 @@
   </style>
 {% endblock %}
 
+{% block header %}
+  <div class="header-container">
+    <div>
+      <img src="{% static 'img/logo_uclouvain.png' %}" alt="{% translate "UCLouvain logo"%}"/>
+    </div>
+    <div>
+      <p>{% translate 'Dossier reference:' %} {{ proposition.reference }}</p>
+      <p>{% translate 'First name Last name:' %} {{ proposition.prenom_candidat }} {{ proposition.nom_candidat }}</p>
+      <p>{% translate 'Nationality:' %} {{ proposition.nationalite_candidat }}</p>
+    </div>
+  </div>
+{% endblock %}
+
 {% block content %}
   <div id="main-container">
+    <p class="text-center">
+      <em>
+        {% blocktranslate trimmed %}
+          This document is an internal document containing the details of the faculty's decision.
+          Under no circumstances will it be sent in this form to the candidate. The candidate will receive a letter
+          from SIC containing the various details of the faculty's decision.
+        {% endblocktranslate %}
+      </em>
+    </p>
 
-    <div id="title">
+    <div id="title" class="mt-3">
       <h1>
-        {% translate 'Faculty opinion:' %}
+        {% translate 'Faculty decision:' %}
         {% block decision_title %}{% endblock %}
       </h1>
     </div>
@@ -70,14 +92,16 @@
       {% blocktranslate trimmed with academic_year=proposition.annee_calculee|get_academic_year %}
         Admission request for the academic year {{ academic_year }} to the program:
       {% endblocktranslate %}
-      <strong>{% display proposition.formation.sigle ' - ' proposition.formation.intitule %}</strong>
+      {% display proposition.formation.sigle ' - ' proposition.formation.intitule %}
     </p>
-
-    {% field_data _('Date the application was sent to the faculty') sic_to_fac_history_entry.created|date:'d/m/Y' inline=True %}
 
     {% block decision_content %}{% endblock %}
 
-    {% field_data _('Faculty comment for the SIC:') fac_decision_comment.content|linebreaks inline=True %}
+    {% if fac_decision_comment.content %}
+      {% field_data _('Faculty comment for the SIC:') fac_decision_comment.content|linebreaks inline=True %}
+    {% else %}
+      {% field_data _('Faculty comment for the SIC:') '' inline=True %}
+    {% endif %}
 
     {% now 'd/m/Y' as today_date %}
 
