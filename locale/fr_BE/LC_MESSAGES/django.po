@@ -2267,6 +2267,9 @@ msgstr "Poste diplomatique"
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
 
+msgid "Director"
+msgstr "Directeur"
+
 msgid "Director of the inscription service"
 msgstr "Directeur du Service des inscriptions"
 
@@ -6554,6 +6557,13 @@ msgid ""
 msgstr ""
 "L’attestation de réussite de l’épreuve de confirmation est en cours de "
 "génération, veuillez revenir plus tard pour y accéder."
+
+msgid ""
+"The Previous experience must be in the \"Sufficient\" status in order to do "
+"this action."
+msgstr ""
+"Le parcours antérieur doit être à l'état \"Suffisant\" pour pouvoir "
+"effectuer cette action."
 
 #, python-format
 msgid ""

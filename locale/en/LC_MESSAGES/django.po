@@ -2082,6 +2082,9 @@ msgstr ""
 msgid "Diplomatic post code"
 msgstr ""
 
+msgid "Director"
+msgstr ""
+
 msgid "Director of the inscription service"
 msgstr ""
 
@@ -5929,6 +5932,11 @@ msgstr ""
 msgid ""
 "The PDF certificate of having passed the confirmation exam is currently "
 "being generated. Please come back later to access it."
+msgstr ""
+
+msgid ""
+"The Previous experience must be in the \"Sufficient\" status in order to do "
+"this action."
 msgstr ""
 
 #, python-format
