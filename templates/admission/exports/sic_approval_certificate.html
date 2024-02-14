@@ -161,7 +161,7 @@
 
   <div id="guillemet-droite"></div>
 
-  <p class="mt-4">Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
+  <p class="mt-4">{% translate "Your dossier reference:" %} <strong>{{ proposition.reference }}</strong></p>
 
   <p>
     {% with name=proposition.prenom_candidat|add:" "|add:proposition.nom_candidat %}
@@ -208,7 +208,7 @@
     <p>{% trans "Additional course(s):" %}
       <ul>
       {% for learning_unit in proposition.complements_formation %}
-        <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'fr-be' %}{{ learning_unit.full_title }}{% else %}{{ learning_unit.full_title_en }}{% endif %}{% if learning_unit.credits %} ({{ learning_unit.credits }} ECTS){% endif %}</li>
+        <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'en' and learning_unit.full_title_en %}{{ learning_unit.full_title_en }}{% else %}{{ learning_unit.full_title }}{% endif %}{% if learning_unit.credits %} ({{ learning_unit.credits }} ECTS){% endif %}</li>
       {% endfor %}
       </ul>
     </p>

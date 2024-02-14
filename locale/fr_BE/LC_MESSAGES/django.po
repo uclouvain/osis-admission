@@ -8044,6 +8044,9 @@ msgstr "Situation d’assimilation qui vous correspond"
 msgid "Your data have been saved."
 msgstr "Vos données ont été sauvegardées."
 
+msgid "Your dossier reference:"
+msgstr "Votre numéro de dossier :"
+
 msgid ""
 "Your export request has been planned, you will receive a notification as "
 "soon as it is available."
