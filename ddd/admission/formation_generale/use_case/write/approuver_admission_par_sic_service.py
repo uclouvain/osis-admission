@@ -38,6 +38,7 @@ from admission.ddd.admission.repository.i_emplacement_document import IEmplaceme
 def approuver_admission_par_sic(
     cmd: ApprouverAdmissionParSicCommand,
     proposition_repository: 'IPropositionRepository',
+    profil_candidat_translator: 'IProfilCandidatTranslator',
     historique: 'IHistorique',
     notification: 'INotification',
     pdf_generation: 'IPDFGeneration',
@@ -52,11 +53,13 @@ def approuver_admission_par_sic(
     # THEN
     pdf_generation.generer_attestation_accord_sic(
         proposition_repository=proposition_repository,
+        profil_candidat_translator=profil_candidat_translator,
         proposition=proposition,
         gestionnaire=cmd.auteur,
     )
     pdf_generation.generer_attestation_accord_annexe_sic(
         proposition_repository=proposition_repository,
+        profil_candidat_translator=profil_candidat_translator,
         proposition=proposition,
         gestionnaire=cmd.auteur,
     )

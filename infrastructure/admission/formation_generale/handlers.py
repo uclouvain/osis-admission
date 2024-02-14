@@ -521,6 +521,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: refuser_admission_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
@@ -530,6 +531,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: refuser_inscription_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
@@ -539,6 +541,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: approuver_admission_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
@@ -556,6 +559,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recuperer_pdf_temporaire_decision_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             pdf_generation=PDFGeneration(),
         )
     ),

@@ -35,12 +35,14 @@ from admission.ddd.admission.formation_generale.repository.i_proposition import 
 def recuperer_pdf_temporaire_decision_sic(
     cmd: 'RecupererPdfTemporaireDecisionSicQuery',
     proposition_repository: 'IPropositionRepository',
+    profil_candidat_translator: 'IProfilCandidatTranslator',
     pdf_generation: 'IPDFGeneration',
 ) -> 'PropositionDTO':
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
 
     token = pdf_generation.generer_sic_temporaire(
         proposition_repository=proposition_repository,
+        profil_candidat_translator=profil_candidat_translator,
         proposition=proposition,
         gestionnaire=cmd.auteur,
         pdf=cmd.pdf,
