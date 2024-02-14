@@ -883,3 +883,9 @@ class Proposition(interface.RootEntity):
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE
         self.auteur_derniere_modification = auteur_modification
         self.certificat_refus_sic = []
+
+    def annuler_reclamation_documents(self, auteur_modification: str, par_fac: bool):
+        self.statut = (
+            ChoixStatutPropositionGenerale.TRAITEMENT_FAC if par_fac else ChoixStatutPropositionGenerale.CONFIRMEE
+        )
+        self.auteur_derniere_modification = auteur_modification

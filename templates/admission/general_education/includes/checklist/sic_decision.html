@@ -30,7 +30,7 @@
       hx-target="this"
       hx-swap-oob="true"
   >
-
+    {% has_perm 'admission.checklist_change_sic_decision' as can_change_sic_decision %}
     <div class="form-group btn-group status-group" role="group">
       {% if not resume_proposition.proposition|sic_can_edit %}
         {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=True %}
@@ -103,6 +103,7 @@
     {% if current.extra.en_cours == 'refusal' or current.extra.blocage == 'refusal' %}
       <div class="panel panel-default">
         <div class="panel-heading">
+          {% if can_change_sic_decision %}
           <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-refusal-modal"><i class="fas fa-edit"></i></button>
           {% if current.statut != 'GEST_BLOCAGE' %}
             <a
@@ -113,6 +114,7 @@
               <i class="fa fa-magnifying-glass"></i>
               {% translate 'Visualize refusal' %}
             </a>
+          {% endif %}
           {% endif %}
           <h4 class="panel-title">{% trans "Refusal" %}</h4>
         </div>
@@ -150,6 +152,7 @@
     {% if current.extra.en_cours == 'approval' or current.statut == 'GEST_REUSSITE' %}
       <div class="panel panel-default">
         <div class="panel-heading">
+          {% if can_change_sic_decision %}
           <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-approval-modal"><i class="fas fa-edit"></i></button>
           {% if original_admission.type_demande == 'ADMISSION' and current.statut != 'GEST_REUSSITE' %}
             <a
@@ -168,6 +171,7 @@
               <i class="fa fa-magnifying-glass"></i>
               {% translate 'Visualize annexe1' %}
             </a>
+          {% endif %}
           {% endif %}
           <h4 class="panel-title">{% if current.statut == 'GEST_REUSSITE' %}{% trans "Authorization" %}{% else %}{% trans "Authorization to validate" %}{% endif %}</h4>
         </div>

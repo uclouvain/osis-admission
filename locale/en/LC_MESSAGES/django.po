@@ -1242,6 +1242,9 @@ msgstr ""
 msgid "Cancel the application fee request"
 msgstr ""
 
+msgid "Cancel the request"
+msgstr ""
+
 msgid "Cancelled application"
 msgstr ""
 
@@ -2080,6 +2083,9 @@ msgid "Diplomatic post"
 msgstr ""
 
 msgid "Diplomatic post code"
+msgstr ""
+
+msgid "Director"
 msgstr ""
 
 msgid "Director of the inscription service"
@@ -6051,6 +6057,9 @@ msgstr ""
 msgid "The documents have been requested to the candidate"
 msgstr ""
 
+msgid "The documents request have been cancelled"
+msgstr ""
+
 msgid "The dossier has been confirmed as:"
 msgstr ""
 
@@ -6342,6 +6351,11 @@ msgid "Thesis-related data"
 msgstr ""
 
 msgid "This account number has been verified"
+msgstr ""
+
+msgid ""
+"This action will cancel the document request. The applicant will still need "
+"to be informed."
 msgstr ""
 
 msgid "This activity and its potential subactivities will be discontinued"
