@@ -2267,6 +2267,9 @@ msgstr "Poste diplomatique"
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
 
+msgid "Director"
+msgstr "Directeur"
+
 msgid "Director of the inscription service"
 msgstr "Directeur du Service des inscriptions"
 
@@ -8007,6 +8010,9 @@ msgstr "Situation d’assimilation qui vous correspond"
 
 msgid "Your data have been saved."
 msgstr "Vos données ont été sauvegardées."
+
+msgid "Your dossier reference:"
+msgstr "Votre numéro de dossier :"
 
 msgid ""
 "Your export request has been planned, you will receive a notification as "

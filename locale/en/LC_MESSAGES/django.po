@@ -2082,6 +2082,9 @@ msgstr ""
 msgid "Diplomatic post code"
 msgstr ""
 
+msgid "Director"
+msgstr ""
+
 msgid "Director of the inscription service"
 msgstr ""
 
@@ -7196,6 +7199,9 @@ msgid "Your Belgian student status"
 msgstr ""
 
 msgid "Your data have been saved."
+msgstr ""
+
+msgid "Your dossier reference:"
 msgstr ""
 
 msgid ""
