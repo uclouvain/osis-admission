@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -64,5 +64,8 @@ class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, UpdateVi
                 'gender': form.cleaned_data.get('gender'),
                 'country_of_citizenship': form.cleaned_data.get('country_of_citizenship').iso_code
                 if form.cleaned_data.get('country_of_citizenship')
+                else '',
+                'birth_date': form.cleaned_data.get('birth_date').isoformat()
+                if form.cleaned_data.get('birth_date')
                 else '',
             }

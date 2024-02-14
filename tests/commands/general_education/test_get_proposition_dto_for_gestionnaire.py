@@ -73,6 +73,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             double_degree_scholarship=None,
             international_scholarship=None,
             candidate__private_email='john.doe@example.com',
+            training__credits=180,
         )
 
         patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
@@ -126,6 +127,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                     email='',
                 ),
                 sigle_entite_gestion='SCH',
+                credits=180,
             ),
         )
         self.assertEqual(result.reference, f'M-SCH22-{self.admission}')

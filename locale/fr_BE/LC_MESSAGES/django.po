@@ -2267,6 +2267,9 @@ msgstr "Poste diplomatique"
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
 
+msgid "Director"
+msgstr "Directeur"
+
 msgid "Director of the inscription service"
 msgstr "Directeur du Service des inscriptions"
 
