@@ -27,6 +27,8 @@ import datetime
 from typing import List
 
 from django.conf import settings
+from django.forms import forms
+from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
 from django.views.generic import FormView
@@ -68,8 +70,44 @@ from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
+    'CancelDocumentRequestView',
     'DocumentView',
 ]
+
+__namespace__ = False
+
+
+class CancelDocumentRequestView(
+    LoadDossierViewMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    HtmxMixin,
+    FormView,
+):
+    form_class = forms.Form
+    permission_required = 'admission.cancel_document_request'
+    urlpatterns = 'cancel-document-request'
+    name = 'cancel-document-request'
+    template_name = 'admission/no_document.html'
+    htmx_template_name = 'admission/no_document.html'
+    default_htmx_trigger_form_extra = {
+        'refresh_details': 'reset',
+        'refresh_list': True,
+    }
+    message_on_success = _('The documents request have been cancelled')
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(
+            general_education_commands.AnnulerReclamationDocumentsAuCandidatCommand(
+                uuid_proposition=self.admission_uuid,
+                auteur=self.request.user.person.global_id,
+                par_fac=self.is_fac,
+            )
+        )
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return resolve_url(f'{self.base_namespace}:documents', uuid=self.admission_uuid)
 
 
 class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):

@@ -1352,6 +1352,9 @@ msgstr "Annuler"
 msgid "Cancel the application fee request"
 msgstr "Annuler la demande des frais de dossier"
 
+msgid "Cancel the request"
+msgstr "Annuler la réclamation"
+
 msgid "Cancelled application"
 msgstr "Demande annulée"
 
@@ -6810,6 +6813,9 @@ msgstr "Le document n'est plus désigné comme étant à réclamer"
 msgid "The documents have been requested to the candidate"
 msgstr "Les documents ont été réclamés au candidat"
 
+msgid "The documents request have been cancelled"
+msgstr "La réclamation des documents a été annulée"
+
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
 
@@ -7141,6 +7147,13 @@ msgstr "Données relatives à la thèse"
 
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
+
+msgid ""
+"This action will cancel the document request. The applicant will still need "
+"to be informed."
+msgstr ""
+"Cette action va annuler la réclamation des documents en cours. Il restera à "
+"informer le/la candidat·e."
 
 msgid "This activity and its potential subactivities will be discontinued"
 msgstr "Cette activité et ses potentielles sous-activités seront supprimées"

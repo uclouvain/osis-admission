@@ -31,6 +31,7 @@
       hx-swap-oob="true"
   >
     {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=resume_proposition.proposition current=current  %}
+    {% has_perm 'admission.checklist_change_sic_decision' as can_change_sic_decision %}
 
     {% if sic_decision_sent_at and sic_decision_sent_by %}
       <div class="alert alert-info">
@@ -71,6 +72,7 @@
     {% if current.extra.en_cours == 'refusal' or current.extra.blocage == 'refusal' %}
       <div class="panel panel-default">
         <div class="panel-heading">
+          {% if can_change_sic_decision %}
           <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-refusal-modal"><i class="fas fa-edit"></i></button>
           {% if current.statut != 'GEST_BLOCAGE' %}
             <a
@@ -81,6 +83,7 @@
               <i class="fa fa-magnifying-glass"></i>
               {% translate 'Visualize refusal' %}
             </a>
+          {% endif %}
           {% endif %}
           <h4 class="panel-title">{% trans "Refusal" %}</h4>
         </div>
@@ -118,6 +121,7 @@
     {% if current.extra.en_cours == 'approval' or current.statut == 'GEST_REUSSITE' %}
       <div class="panel panel-default">
         <div class="panel-heading">
+          {% if can_change_sic_decision %}
           <button class="btn btn-default pull-right btn-sm" data-toggle="modal" data-target="#sic-decision-approval-modal"><i class="fas fa-edit"></i></button>
           {% if original_admission.type_demande == 'ADMISSION' and current.statut != 'GEST_REUSSITE' %}
             <a
@@ -138,6 +142,7 @@
                 {% translate 'Visualize annexe1' %}
               </a>
             {% endif %}
+          {% endif %}
           {% endif %}
           <h4 class="panel-title">{% if current.statut == 'GEST_REUSSITE' %}{% trans "Authorization" %}{% else %}{% trans "Authorization to validate" %}{% endif %}</h4>
         </div>

@@ -77,6 +77,11 @@ class EmplacementDocument(interface.Entity):
         self.reclame_le = reclame_le
         self.statut = StatutEmplacementDocument.RECLAME
 
+    def annuler_reclamation_au_candidat(self, auteur: str, annule_le: datetime):
+        self.dernier_acteur = auteur
+        self.derniere_action_le = annule_le
+        self.statut = StatutEmplacementDocument.A_RECLAMER
+
     def remplir_par_gestionnaire(self, uuid_document: str, auteur: str):
         if not uuid_document:
             return
