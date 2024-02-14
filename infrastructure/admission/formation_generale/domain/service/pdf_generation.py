@@ -183,6 +183,7 @@ class PDFGeneration(IPDFGeneration):
         proposition.certificat_approbation_fac = [token]
 
     @classmethod
+    @override(settings.LANGUAGE_CODE)
     def generer_attestation_refus_facultaire(
         cls,
         proposition: Proposition,
