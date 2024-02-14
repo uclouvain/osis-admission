@@ -29,7 +29,7 @@ from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
 from admission.auth.predicates.common import has_education_group_of_types, is_part_of_education_group
-from admission.auth.predicates.general import is_submitted, in_fac_status
+from admission.auth.predicates.general import is_submitted
 from base.models.enums.education_group_types import TrainingType
 from continuing_education.models.continuing_education_training import CONTINUING_EDUCATION_TRAINING_TYPES
 from education_group.contrib.models import (
@@ -81,6 +81,6 @@ class AdmissionReader(EducationGroupWithCohortRoleModel):
             # Management
             'admission.view_documents_management': is_part_of_education_group & is_submitted,
             'admission.view_checklist': is_part_of_education_group & is_submitted,
-            'admission.checklist_change_fac_comment': is_part_of_education_group & in_fac_status,
+            'admission.checklist_change_fac_comment': is_part_of_education_group,
         }
         return RuleSet(ruleset)
