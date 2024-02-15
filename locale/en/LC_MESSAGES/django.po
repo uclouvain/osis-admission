@@ -360,9 +360,6 @@ msgstr ""
 msgid "Acronym of the training"
 msgstr ""
 
-msgid "Action"
-msgstr ""
-
 msgid "Actions"
 msgstr ""
 
@@ -765,6 +762,15 @@ msgstr ""
 #, python-format
 msgctxt "admission"
 msgid "Are you sure you want to delete \"%(object)s\"?"
+msgstr ""
+
+#, python-format
+msgid "Are you sure you want to delete this experience (%(experience_name)s)?"
+msgstr ""
+
+#, python-format
+msgid ""
+"Are you sure you want to duplicate this experience (%(experience_name)s)?"
 msgstr ""
 
 #, python-format
@@ -2056,6 +2062,9 @@ msgctxt "admission"
 msgid "Delete"
 msgstr ""
 
+msgid "Delete experience"
+msgstr ""
+
 msgid "Delete the document"
 msgstr ""
 
@@ -2290,6 +2299,12 @@ msgid ""
 msgstr ""
 
 msgid "Dual or triple degree"
+msgstr ""
+
+msgid "Duplicate experience"
+msgstr ""
+
+msgid "Duplication of an experience"
 msgstr ""
 
 msgid "Dynamic questions about \"Specific aspects\" sub-tab"
