@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -50,5 +50,7 @@ CURRICULUM_ACTIVITY_LABEL = {
     ),
     ActivityType.VOLUNTEERING.name: _('Certificate, with dates, justifying your volunteering activities'),
     ActivityType.WORK.name: _('Proof of employment from the employer, with dates, justifying the period in question'),
-    ActivityType.OTHER.name: _('Post-dated certificate justifying your activity mentioned above'),
+    ActivityType.OTHER.name: _(
+        'Certificate justifying your activity, mentioning this activity, for the period concerned'
+    ),
 }

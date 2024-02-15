@@ -80,7 +80,7 @@ class Section:
         content_template,
         context: ResumePropositionDTO,
         sub_identifier='',
-        sub_identifier_label='',
+        sub_identifier_label: any = '',
         sub_identifier_dates='',
         extra_context: dict = None,
         attachments: Optional[List[Attachment]] = None,
@@ -350,7 +350,7 @@ def get_non_educational_experience_section(
     return Section(
         identifier=OngletsDemande.CURRICULUM,
         sub_identifier=non_educational_experience.uuid,
-        sub_identifier_label=ActivityType.get_value(non_educational_experience.type),
+        sub_identifier_label=non_educational_experience,
         sub_identifier_dates=f'{start_date} - {end_date}' if start_date != end_date else start_date,
         content_template='admission/exports/recap/includes/curriculum_professional_experience.html',
         context=context,

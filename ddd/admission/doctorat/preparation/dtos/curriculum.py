@@ -137,6 +137,8 @@ class ExperienceNonAcademiqueDTO(interface.DTO):
     valorisee_par_admissions: Optional[List[str]] = None
 
     def __str__(self):
+        if self.type == ActivityType.OTHER.name:
+            return self.autre_activite
         return str(ActivityType.get_value(self.type))
 
     @property
