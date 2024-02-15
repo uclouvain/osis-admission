@@ -9,7 +9,7 @@ from admission.mail_templates.checklist import ADMISSION_EMAIL_SIC_REFUSAL
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0149_alter_admissionreader_education_group'),
+        ('admission', '0150_fix_birth_date_submitted_profile'),
     ]
 
     operations = [
