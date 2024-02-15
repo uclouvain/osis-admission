@@ -5936,6 +5936,11 @@ msgid ""
 "being generated. Please come back later to access it."
 msgstr ""
 
+msgid ""
+"The Previous experience must be in the \"Sufficient\" status in order to do "
+"this action."
+msgstr ""
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
