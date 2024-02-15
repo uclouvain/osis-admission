@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ from typing import Dict, List
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
@@ -78,7 +79,7 @@ class IPaiementFraisDossier(interface.DomainService):
     @classmethod
     def verifier_paiement_necessaire_par_gestionnaire(cls, proposition: PropositionGenerale) -> None:
         if (
-            not proposition.statut == ChoixStatutPropositionGenerale.CONFIRMEE
+            proposition.statut.name not in STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT
             or proposition.checklist_initiale.frais_dossier.statut == ChoixStatutChecklist.SYST_REUSSITE
             or proposition.checklist_actuelle.frais_dossier.statut == ChoixStatutChecklist.SYST_REUSSITE
         ):
