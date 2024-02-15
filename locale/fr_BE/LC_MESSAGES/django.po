@@ -5697,6 +5697,9 @@ msgstr "Attestation de refus SIC"
 msgid "Refusal certificate of faculty"
 msgstr "Attestation de refus facultaire"
 
+msgid "Refusal document link"
+msgstr "Lien du document de refus"
+
 msgid "Refusal reason"
 msgstr "Motif de refus"
 
