@@ -1400,6 +1400,13 @@ msgstr "Attestation"
 msgid "Certificate for children of staff"
 msgstr "Attestation enfant du personnel"
 
+msgid ""
+"Certificate justifying your activity, mentioning this activity, for the "
+"period concerned"
+msgstr ""
+"Attestation justifiant votre activité, mentionnant cette activité, pour la "
+"période concernée"
+
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
@@ -5309,9 +5316,6 @@ msgstr "Merci de spécifier votre numéro de registre national belge."
 
 msgid "Please specify your old NOMA (matriculation number)."
 msgstr "Merci de spécifier votre ancien NOMA (numéro de matricule)."
-
-msgid "Post-dated certificate justifying your activity mentioned above"
-msgstr "Attestation postdatée justifiant votre activité mentionnée ci-dessus"
 
 msgid "Post-enrolment status"
 msgstr "Statut après inscription"

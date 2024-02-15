@@ -1290,6 +1290,11 @@ msgstr ""
 msgid "Certificate for children of staff"
 msgstr ""
 
+msgid ""
+"Certificate justifying your activity, mentioning this activity, for the "
+"period concerned"
+msgstr ""
+
 msgid "Certificate of achievement"
 msgstr ""
 
@@ -4766,9 +4771,6 @@ msgid "Please specify your Belgian national register number."
 msgstr ""
 
 msgid "Please specify your old NOMA (matriculation number)."
-msgstr ""
-
-msgid "Post-dated certificate justifying your activity mentioned above"
 msgstr ""
 
 msgid "Post-enrolment status"
