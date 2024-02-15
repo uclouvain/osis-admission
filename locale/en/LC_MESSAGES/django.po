@@ -5134,6 +5134,9 @@ msgstr ""
 msgid "Refusal certificate of faculty"
 msgstr ""
 
+msgid "Refusal document link"
+msgstr ""
+
 msgid "Refusal reason"
 msgstr ""
 

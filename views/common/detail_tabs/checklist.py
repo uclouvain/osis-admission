@@ -212,6 +212,7 @@ __namespace__ = False
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
 ENTITY_SIC = 'SIC'
+EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 
 
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
@@ -802,6 +803,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             else "",
             "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
+            "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
         }
         if self.sic_director:
             tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
