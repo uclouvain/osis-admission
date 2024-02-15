@@ -2267,6 +2267,9 @@ msgstr "Poste diplomatique"
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
 
+msgid "Director"
+msgstr "Directeur"
+
 msgid "Director of the inscription service"
 msgstr "Directeur du Service des inscriptions"
 
@@ -5686,6 +5689,9 @@ msgstr "Attestation de refus SIC"
 
 msgid "Refusal certificate of faculty"
 msgstr "Attestation de refus facultaire"
+
+msgid "Refusal document link"
+msgstr "Lien du document de refus"
 
 msgid "Refusal reason"
 msgstr "Motif de refus"

@@ -2082,6 +2082,9 @@ msgstr ""
 msgid "Diplomatic post code"
 msgstr ""
 
+msgid "Director"
+msgstr ""
+
 msgid "Director of the inscription service"
 msgstr ""
 
@@ -5124,6 +5127,9 @@ msgid "Refusal certificate of SIC"
 msgstr ""
 
 msgid "Refusal certificate of faculty"
+msgstr ""
+
+msgid "Refusal document link"
 msgstr ""
 
 msgid "Refusal reason"

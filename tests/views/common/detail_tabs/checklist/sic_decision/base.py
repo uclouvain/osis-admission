@@ -88,6 +88,13 @@ class SicPatchMixin(TestCase):
         patched.return_value = {"name": "test.pdf", 'uploaded_at': '2024-01-01T12:00:00Z', "author": "foo"}
         self.addCleanup(patcher.stop)
 
+        patcher = mock.patch(
+            'admission.infrastructure.admission.formation_generale.domain.service.notification.get_remote_token'
+        )
+        patched = patcher.start()
+        patched.return_value = 'foobar'
+        self.addCleanup(patcher.stop)
+
         # Mock weasyprint
         patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
         patcher.start()
