@@ -27,25 +27,21 @@ from typing import Optional, List
 
 from django.conf import settings
 from django.utils import translation, timezone
-from django.utils.translation import gettext
-
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from osis_document.utils import confirm_upload
-
-from admission.ddd.admission.enums.emplacement_document import (
-    StatutEmplacementDocument,
-    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
-)
-from admission.ddd.admission.formation_generale.commands import RecupererDocumentsPropositionQuery
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
-
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.enums.emplacement_document import (
+    StatutEmplacementDocument,
+    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+    OngletsDemande,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererDocumentsPropositionQuery,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PdfSicInconnu
@@ -53,6 +49,9 @@ from admission.ddd.admission.formation_generale.repository.i_proposition import 
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
+)
+from admission.infrastructure.utils import (
+    CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM,
 )
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
@@ -66,13 +65,17 @@ class PDFGeneration(IPDFGeneration):
     @classmethod
     def _get_sic_director(cls):
         now = timezone.now()
-        director = Person.objects.filter(
-            mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
-            mandatary__mandate__function=MandateTypes.DIRECTOR.name,
-        ).filter(
-            mandatary__start_date__lte=now,
-            mandatary__end_date__gte=now,
-        ).first()
+        director = (
+            Person.objects.filter(
+                mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
+                mandatary__mandate__function=MandateTypes.DIRECTOR.name,
+            )
+            .filter(
+                mandatary__start_date__lte=now,
+                mandatary__end_date__gte=now,
+            )
+            .first()
+        )
         return director
 
     @classmethod
@@ -243,16 +246,28 @@ class PDFGeneration(IPDFGeneration):
         proposition_dto = proposition_repository.get_dto_for_gestionnaire(
             proposition.entity_id, UnitesEnseignementTranslator
         )
-        documents = [
-            document
-            for document in message_bus_instance.invoke(
-                RecupererDocumentsPropositionQuery(
-                    uuid_proposition=proposition_dto.uuid,
-                )
-            )
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name
-            and document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
-        ]
+
+        documents = message_bus_instance.invoke(
+            RecupererDocumentsPropositionQuery(uuid_proposition=proposition_dto.uuid),
+        )
+        documents_names = []
+
+        # Get the list of documents
+        for document in documents:
+            if (
+                document.statut in {StatutEmplacementDocument.A_RECLAMER.name}
+                and document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
+            ):
+                document_identifier = document.identifiant.split('.')
+                if document_identifier[0] == OngletsDemande.CURRICULUM.name and (
+                    document_identifier[-1] in CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
+                ):
+                    # For the curriculum experiences, we would like to get the name of the experience
+                    # (i.e. the name of the document tab minus the 'Curriculum >' prefix)
+                    sub_label = document.nom_onglet_langue_candidat.partition(' > ')[-1]
+                    documents_names.append(f'{sub_label} > {document.libelle_langue_candidat}')
+                else:
+                    documents_names.append(document.libelle_langue_candidat)
 
         token = admission_generate_pdf(
             admission=None,
@@ -260,7 +275,7 @@ class PDFGeneration(IPDFGeneration):
             filename=f'Autorisation_inscription_Dossier_{proposition_dto.reference}.pdf',
             context={
                 'proposition': proposition_dto,
-                'documents': documents,
+                'documents_names': documents_names,
                 'director': cls._get_sic_director(),
             },
             author=gestionnaire,

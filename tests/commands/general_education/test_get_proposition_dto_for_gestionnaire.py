@@ -62,6 +62,11 @@ from reference.tests.factories.country import CountryFactory
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 @freezegun.freeze_time('2023-01-01')
 class GetPropositionDTOForGestionnaireTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.country = CountryFactory()
+
     def setUp(self) -> None:
         school = EntityFactory()
         EntityVersionFactory(entity=school, acronym='SCH')
@@ -73,6 +78,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             double_degree_scholarship=None,
             international_scholarship=None,
             candidate__private_email='john.doe@example.com',
+            candidate__country_of_citizenship=self.country,
         )
 
         patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
@@ -154,10 +160,11 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.noma_candidat, '')
         self.assertEqual(result.adresse_email_candidat, self.admission.candidate.private_email)
         self.assertEqual(result.langue_contact_candidat, self.admission.candidate.language)
-        self.assertEqual(result.nationalite_candidat, '')
-        self.assertEqual(result.nationalite_candidat_fr, '')
-        self.assertEqual(result.nationalite_candidat_en, '')
-        self.assertEqual(result.nationalite_ue_candidat, None)
+        self.assertEqual(result.nationalite_candidat, self.country.name)
+        self.assertEqual(result.nationalite_candidat_fr, self.country.name)
+        self.assertEqual(result.nationalite_candidat_en, self.country.name_en)
+        self.assertEqual(result.nationalite_ue_candidat, self.country.european_union)
+        self.assertEqual(result.nationalite_candidat_code_iso, self.country.iso_code)
         self.assertEqual(result.photo_identite_candidat, self.admission.candidate.id_card)
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)
         self.assertEqual(result.titre_acces, '')

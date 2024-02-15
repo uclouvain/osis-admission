@@ -89,6 +89,9 @@ class SicPatchMixin(TestCase):
         self.addCleanup(patcher.stop)
 
         # Mock weasyprint
-        patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
-        patcher.start()
+        patcher = mock.patch(
+            'admission.exports.utils.get_pdf_from_template',
+            return_value=b'some content',
+        )
+        self.get_pdf_from_template_patcher = patcher.start()
         self.addCleanup(patcher.stop)

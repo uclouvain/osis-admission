@@ -227,8 +227,8 @@
       {% if proposition.doit_fournir_visa_etudes %}
         <li>{% trans "Copy of your student visa D (permission to stay longer than 90 days in Belgium) issued by the Belgian Embassy or Consulate." %}</li>
       {% endif %}
-      {% for document in documents %}
-        <li>{{ document.libelle_langue_candidat }}.</li>
+      {% for document_name in documents_names %}
+        <li>{{ document_name }}.</li>
       {% endfor %}
     </ul>
   </p>
