@@ -26,7 +26,8 @@
 from admission.ddd.admission.commands import \
     (RechercherCompteExistantQuery, InitialiserPropositionFusionPersonneCommand,
      DefairePropositionFusionCommand, RechercherParcoursAnterieurQuery, SoumettreTicketPersonneCommand,
-     RefuserPropositionFusionCommand, GetStatutTicketPersonneQuery)
+     RefuserPropositionFusionCommand, GetStatutTicketPersonneQuery, RetrieveListeTicketsEnAttenteQuery,
+     RetrieveAndStoreStatutTicketPersonneFromDigitCommand)
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
@@ -64,6 +65,7 @@ from admission.ddd.admission.use_case.read import (
 from admission.ddd.admission.use_case.read.rechercher_compte_existant import rechercher_compte_existant
 from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import rechercher_parcours_anterieur
 from admission.ddd.admission.use_case.read.recuperer_statut_ticket_personne import recuperer_statut_ticket_personne
+from admission.ddd.admission.use_case.read.recuperer_tickets_en_attente import recuperer_tickets_en_attente
 from admission.ddd.admission.use_case.write import (
     initialiser_emplacement_document_libre_non_reclamable,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -78,6 +80,8 @@ from admission.ddd.admission.use_case.write.defaire_proposition_fusion_personne 
     defaire_proposition_fusion_personne
 from admission.ddd.admission.use_case.write.initialiser_proposition_fusion_personne import \
     initialiser_proposition_fusion_personne
+from admission.ddd.admission.use_case.write.recuperer_statut_ticket_personne_de_digit import \
+    recuperer_statut_ticket_personne_de_digit
 from admission.ddd.admission.use_case.write.refuser_proposition_fusion_personne import \
     refuser_proposition_fusion_personne
 from admission.ddd.admission.use_case.write.soumettre_ticket_creation_personne import soumettre_ticket_creation_personne
@@ -608,5 +612,15 @@ COMMAND_HANDLERS = {
     GetStatutTicketPersonneQuery: lambda msg_bus, cmd: recuperer_statut_ticket_personne(
         cmd,
         digit_repository=DigitRepository(),
-    )
+    ),
+    RetrieveListeTicketsEnAttenteQuery: lambda msg_bus, cmd: recuperer_tickets_en_attente(
+        cmd,
+        digit_repository=DigitRepository(),
+    ),
+    RetrieveAndStoreStatutTicketPersonneFromDigitCommand: (
+        lambda msg_bus, cmd: recuperer_statut_ticket_personne_de_digit(
+            cmd,
+            digit_repository=DigitRepository(),
+        )
+    ),
 }

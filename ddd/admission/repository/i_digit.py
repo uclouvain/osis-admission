@@ -28,6 +28,7 @@ from typing import List, Optional
 
 from admission.ddd.admission.domain.model.proposition_fusion_personne import PropositionFusionPersonneIdentity
 from admission.ddd.admission.dtos.proposition_fusion_personne import PropositionFusionPersonneDTO
+from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from osis_common.ddd import interface
 
 
@@ -37,9 +38,13 @@ class IDigitRepository:
         raise NotImplementedError
 
     @classmethod
-    def get_person_ticket_status(cls, global_id: str) -> Optional[str]:
+    def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
         raise NotImplementedError
 
     @classmethod
     def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
+        raise NotImplementedError
+
+    @classmethod
+    def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
         raise NotImplementedError

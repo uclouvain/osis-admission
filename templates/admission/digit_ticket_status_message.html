@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -24,16 +24,25 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if digit_ticket_status == 'PENDING' %}
+{% if digit_ticket.statut == 'CREATED' %}
     <div class="alert alert-info">
       <strong>En attente</strong> La demande de création de compte à DigIT est en cours de traitement
     </div>
-{% elif digit_ticket_status == 'CREATED' %}
+{% elif digit_ticket.statut == 'REFUSED' %}
+    <div class="alert alert-danger">
+        <strong>Compte refusé</strong> La demande de création de compte a été refusée par DigIT
+    </div>
+{% elif digit_ticket.statut == 'DONE' %}
     <div class="alert alert-success">
         <strong>Compte créé</strong> Le compte a été créé dans DigIT
     </div>
-{% elif digit_ticket_status == 'REFUSED' %}
+{% elif digit_ticket.statut == 'DONE_WITH_ERRORS' %}
     <div class="alert alert-danger">
-        <strong>Compte refusé</strong> La demande de création de compte a été refusée par DigIT
+        <strong>Erreurs à la création du compte</strong> Il existe des erreurs qui empêchent la création du compte
+        <ul>
+            {% for error_msg in digit_ticket.errors %}
+                <li>{{ error_msg }}</li>
+            {% endfor %}
+        </ul>
     </div>
 {% endif %}

@@ -24,14 +24,15 @@
 #
 # ##############################################################################
 import json
-from typing import Optional
+from typing import Optional, List
 
 import requests
 from django.conf import settings
 
+from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
 from base.models.person import Person
-from base.models.person_creation_ticket import PersonTicketCreation
+from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal
 
 
@@ -53,9 +54,17 @@ class DigitRepository(IDigitRepository):
             )
 
     @classmethod
-    def get_person_ticket_status(cls, global_id: str) -> Optional[str]:
+    def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
         try:
-            return PersonTicketCreation.objects.get(person__global_id=global_id).status
+            ticket = PersonTicketCreation.objects.select_related('person').get(person__global_id=global_id)
+            return StatutTicketPersonneDTO(
+                request_id=ticket.request_id,
+                matricule=ticket.person.global_id,
+                nom=ticket.person.last_name,
+                prenom=ticket.person.first_name,
+                statut=ticket.status,
+                errors=[error['msg'] for error in ticket.errors],
+            )
         except PersonTicketCreation.DoesNotExist:
             return None
 
@@ -66,31 +75,54 @@ class DigitRepository(IDigitRepository):
             remote_ticket = _retrieve_person_ticket_status(stored_ticket.request_id)
             if remote_ticket:
                 stored_ticket.status = remote_ticket['status']
+                stored_ticket.errors = remote_ticket['errors'] if 'errors' in remote_ticket.keys() else []
                 stored_ticket.save()
             return remote_ticket['status']
         else:
             return None
 
+    @classmethod
+    def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
+        tickets = PersonTicketCreation.objects.filter(
+            status=PersonTicketCreationStatus.CREATED.value
+        ).select_related('person').values(
+            'request_id', 'person__last_name', 'person__first_name', 'person__global_id', 'status', 'errors'
+        )
+        return [
+            StatutTicketPersonneDTO(
+                request_id=ticket['request_id'],
+                matricule=ticket['person__global_id'],
+                nom=ticket['person__last_name'],
+                prenom=ticket['person__first_name'],
+                statut=ticket['status'],
+                errors=[error['msg'] for error in ticket['errors']],
+            ) for ticket in tickets
+        ]
+
 
 def _retrieve_person_ticket_status(request_id: int):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {
-         "requestId": "1",
-         "source": "ETU",
-         "sourceId": "123456789",
-         "data": {},
-         "checksum": "0",
-         "parentRequest": "",
-         "dataType": "",
-         "status": "PENDING",
+            "requestId": "1",
+            "status": "DONE_WITH_ERRORS",
+            "errors": [
+                {
+                    "msg": "Le format du numéro national: (85073015002)  est incorrect.",
+                    "errorCode": {
+                        "errorCode": "INISS0003",
+                        "description": "Le format du numéro national est incorrect",
+                        "quarantine": True,
+                        "exclude": False
+                    }
+                },
+            ],
         }
     return requests.get(
         headers={
             'Content-Type': 'application/json',
             'Authorization': settings.ESB_AUTHORIZATION,
         },
-        data=json.dumps({'requestId': request_id}),
-        url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
+        url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_REQUEST_STATUS_URL}/{request_id}"
     ).json()
 
 
