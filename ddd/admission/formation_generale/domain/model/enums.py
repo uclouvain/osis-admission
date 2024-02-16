@@ -98,6 +98,13 @@ STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_OU_FRAIS_DOSSIER_EN_ATTENTE = (
     }
 )
 
+# Le gestionnaire SIC a la main et peut demander le paiement des frais de dossier au candidat
+STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT = {
+    ChoixStatutPropositionGenerale.CONFIRMEE.name,
+    ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+    ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
+}
+
 # Le gestionnaire SIC a la main ou attend une réponse du candidat
 STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS = STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC | {
     ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,

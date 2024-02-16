@@ -28,6 +28,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Optional
 
+from dal import forward
 from django import forms
 from django.forms import BaseFormSet
 from django.utils.dates import MONTHS_ALT
@@ -47,6 +48,7 @@ from admission.forms import (
 )
 from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.mark_safe_lazy import mark_safe_lazy
+from admission.views.autocomplete.diploma_title import get_diploma_label_with_study_type
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -270,6 +272,11 @@ EDUCATIONAL_EXPERIENCE_FIELDS_BY_CONTEXT = {
 }
 
 
+class ProgramModelField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return get_diploma_label_with_study_type(obj)
+
+
 class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, forms.ModelForm):
     start = AcademicYearField(
         label=_('Start'),
@@ -324,21 +331,23 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
         ),
     )
 
-    program = forms.ModelChoiceField(
+    program = ProgramModelField(
         label=pgettext_lazy('admission', 'Course'),
         required=False,
         queryset=DiplomaTitle.objects.all(),
         widget=autocomplete.ModelSelect2(
             url='admission:autocomplete:diploma-title',
+            forward=[forward.Const(val=True, dst='display_study_type')],
         ),
     )
 
-    fwb_equivalent_program = forms.ModelChoiceField(
+    fwb_equivalent_program = ProgramModelField(
         label=_('FWB equivalent course'),
         required=False,
         queryset=DiplomaTitle.objects.all(),
         widget=autocomplete.ModelSelect2(
             url='admission:autocomplete:diploma-title',
+            forward=[forward.Const(val=True, dst='display_study_type')],
         ),
     )
 

@@ -35,7 +35,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import resolve_url, redirect, render
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
-from django.utils import translation
+from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, gettext, get_language
@@ -125,7 +125,12 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import ChoixFormationForm, SicDecisionDerogationForm, FinancabiliteApprovalForm
+from admission.forms.admission.checklist import (
+    ChoixFormationForm,
+    SicDecisionDerogationForm,
+    FinancabiliteApprovalForm,
+    SicDecisionApprovalDocumentsForm,
+)
 from admission.forms.admission.checklist import (
     CommentForm,
     AssimilationForm,
@@ -163,6 +168,7 @@ from admission.utils import (
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from epc.models.email_fonction_programme import EmailFonctionProgramme
@@ -209,6 +215,8 @@ __namespace__ = False
 
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
+ENTITY_SIC = 'SIC'
+EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 
 
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
@@ -428,6 +436,7 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='fac-decision-approval',
             additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
+            current_training_uuid=str(self.admission.training.uuid),
         )
 
 
@@ -649,6 +658,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['sic_decision_refusal_form'] = self.sic_decision_refusal_form
+        context['sic_decision_approval_documents_form'] = self.sic_decision_approval_documents_form
         context['sic_decision_approval_form'] = self.sic_decision_approval_form
         context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
         context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
@@ -750,6 +760,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         ]
 
     @cached_property
+    def sic_decision_approval_documents_form(self):
+        return SicDecisionApprovalDocumentsForm(
+            instance=self.admission,
+            documents=self.sic_decision_approval_form_requestable_documents,
+        )
+
+    @cached_property
     def sic_decision_approval_form(self):
         return SicDecisionApprovalForm(
             academic_year=self.admission.determined_academic_year.year,
@@ -760,9 +777,24 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             else None,
             prefix='sic-decision-approval',
             additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
-            documents=self.sic_decision_approval_form_requestable_documents,
             candidate_nationality_is_no_ue_5=self.proposition.candidat_a_nationalite_hors_ue_5,
         )
+
+    @cached_property
+    def sic_director(self):
+        now = timezone.now()
+        director = (
+            Person.objects.filter(
+                mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
+                mandatary__mandate__function=MandateTypes.DIRECTOR.name,
+            )
+            .filter(
+                mandatary__start_date__lte=now,
+                mandatary__end_date__gte=now,
+            )
+            .first()
+        )
+        return director
 
     @cached_property
     def sic_decision_refusal_final_form(self):
@@ -775,7 +807,10 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             else "",
             "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
+            "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
         }
+        if self.sic_director:
+            tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
@@ -1076,6 +1111,7 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             tab='decision_sic',
             admission_status=status,
             extra=extra,
+            replace_extra=True,
             admission=admission,
             global_status=global_status,
             author=self.request.user.person,
@@ -1633,7 +1669,7 @@ class ApplicationFeesView(
 
 class PastExperiencesStatusView(
     AdmissionFormMixin,
-    CheckListDefaultContextMixin,
+    SicDecisionMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):

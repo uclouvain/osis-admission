@@ -291,7 +291,6 @@ class InjectionEPC:
                 'type_occupation': experience_pro.type,
                 'debut': experience_pro.start_date.strftime("%d/%m/%Y"),
                 'fin': experience_pro.end_date.strftime("%d/%m/%Y"),
-                'type_experience_professionnel': experience_pro.type,
                 'intitule_autre_activite': experience_pro.activity,
                 'etablissement_autre': experience_pro.institute_name,
                 'documents': cls._recuperer_documents(experience_pro),

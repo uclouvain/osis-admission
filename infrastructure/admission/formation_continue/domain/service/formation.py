@@ -106,6 +106,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
             else None,
             sigle_entite_gestion=dto.management_entity_acronym or '',
             code=dto.code,
+            credits=dto.credits,
         )
 
     @classmethod

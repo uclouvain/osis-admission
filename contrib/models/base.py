@@ -31,14 +31,15 @@ from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count, Exists
+from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count
 from django.db.models.fields.json import KeyTextTransform, KeyTransform
-from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, Replace
+from django.db.models.functions import Concat, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
+from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
 from admission.contrib.models.functions import ToChar
@@ -60,11 +61,11 @@ from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_categories import Categories
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.models.person import Person
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
-from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
@@ -166,12 +167,16 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 ),
                 Value('-'),
                 # Management entity acronym
-                Coalesce(
-                    NullIf(F('training_management_faculty'), Value('')),
-                    F('sigle_entite_gestion'),
-                )
-                if with_management_faculty
-                else F('sigle_entite_gestion'),
+                Case(
+                    When(
+                        Q(training__education_group_type__name=TrainingType.PHD.name),
+                        then=F('sigle_entite_gestion'),
+                    ),
+                    default=Coalesce(
+                        NullIf(F('training_management_faculty'), Value('')),
+                        F('sigle_entite_gestion'),
+                    ),
+                ) if with_management_faculty else F('sigle_entite_gestion'),
                 # Academic year
                 Mod('training__academic_year__year', 100),
                 Value('-'),

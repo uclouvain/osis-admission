@@ -59,7 +59,7 @@
       {% bootstrap_field_with_tooltip fac_decision_approval_form.other_training_accepted_by_fac label=fac_decision_approval_form.other_training_accepted_by_fac.label|label_with_user_icon %}
     </div>
 
-    {% panel title=_('Diploma(s) or non-academic activity(ies) giving access to')|label_with_user_icon additional_class='panel-with-default-header-font-size' %}
+    {% panel title=_('Diploma(s) or non-academic activity(ies) giving access to') additional_class='panel-with-default-header-font-size' %}
       <div id='fac-decision-access-titles' hx-preserve="true">
         {% if selected_access_titles_names %}
           <ul>
@@ -86,7 +86,7 @@
         id="fac-decision-additional-trainings-container"
         class="hidden"
     >
-      {% bootstrap_field fac_decision_approval_form.prerequisite_courses form_group_class='form-group required_field' label=fac_decision_approval_form.prerequisite_courses.label|label_with_user_icon %}
+      {% bootstrap_field fac_decision_approval_form.prerequisite_courses label=fac_decision_approval_form.prerequisite_courses.label|label_with_user_icon %}
       {% bootstrap_field fac_decision_approval_form.prerequisite_courses_fac_comment label=fac_decision_approval_form.prerequisite_courses_fac_comment.label|add:candidate_language_tag|label_with_user_icon %}
     </div>
 
@@ -110,7 +110,7 @@
       </div>
     </fieldset>
 
-    {% bootstrap_field fac_decision_approval_form.join_program_fac_comment label=fac_decision_approval_form.join_program_fac_comment.label|add:candidate_language_tag|label_with_user_icon %}
+    {% bootstrap_field fac_decision_approval_form.join_program_fac_comment label=fac_decision_approval_form.join_program_fac_comment.label|add:candidate_language_tag|safe %}
 
     <p>
       {% if can_transfer_to_sic %}

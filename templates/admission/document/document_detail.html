@@ -37,7 +37,8 @@
   {% else %}
     {# Viewer for received or internal documents or default content if there is no document #}
     <div id="document-editor-container">
-      {% document_component document_write_token document_metadata %}
+      {% has_perm 'admission.edit_documents' as can_edit_documents %}
+      {% document_component document_write_token document_metadata can_edit_documents %}
     </div>
 
     {# Actions #}

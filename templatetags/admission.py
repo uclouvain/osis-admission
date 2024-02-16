@@ -37,8 +37,9 @@ from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
-from django.utils.translation import get_language, gettext_lazy as _, pgettext
+from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -92,8 +93,6 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.utils import format_academic_year, get_access_conditions_url
-from osis_document.api.utils import get_remote_metadata, get_remote_token
-
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
@@ -582,14 +581,18 @@ def get_image_file_url(file_uuids):
 
 
 @register.inclusion_tag('admission/dummy.html')
-def document_component(document_write_token, document_metadata):
+def document_component(document_write_token, document_metadata, can_edit=True):
     """Display the right editor component depending on the file type."""
     if document_metadata:
         if document_metadata.get('mimetype') == PDF_MIME_TYPE:
+            attrs = {}
+            if not can_edit:
+                attrs = {action: False for action in ['pagination', 'zoom', 'comment', 'highlight', 'rotation']}
             return {
                 'template': 'osis_document/editor.html',
                 'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+                'attrs': attrs
             }
         elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
             return {
@@ -896,6 +899,19 @@ def get_country_name(country: Optional[Country]):
 
 
 @register.filter
+def country_name_from_iso_code(iso_code: str):
+    """Return the country name from an iso code."""
+    if not iso_code:
+        return ''
+    country = Country.objects.filter(iso_code=iso_code).values('name', 'name_en').first()
+    if not country:
+        return ''
+    if get_language() == settings.LANGUAGE_CODE_FR:
+        return country['name']
+    return country['name_en']
+
+
+@register.filter
 def get_ordered_checklist_items(checklist_items: dict):
     """Return the ordered checklist items."""
     return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])
@@ -967,7 +983,10 @@ def history_entry_message(history_entry: Optional[HistoryEntry]):
 
 @register.filter
 def label_with_user_icon(label):
-    return mark_safe(f'{label} <i class="fas fa-user"></i>')
+    title = gettext('Information provided to the candidate.')
+    return mark_safe(
+        f'{label} <i class="fas fa-user" data-content="{title}" data-toggle="popover" data-trigger="hover"></i>'
+    )
 
 
 @register.filter

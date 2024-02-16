@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@
       class="btn btn-primary btn-sm reset-button"
   >
     <i class="fa-solid fa-arrow-rotate-right"></i>
-    {% translate 'Reset' %}
+    {% if form.is_bound %}{% translate 'Reset' %}{% else %}{% translate 'Create message' %}{% endif %}
   </button>
   {% bootstrap_field form.message_content %}
   <div id="hidden-message-content" class="hidden"></div>
@@ -110,6 +110,8 @@
           const defaultMessageElement = $('#hidden-message-content');
           defaultMessageElement.html(defaultMessage);
 
+          $('#request-all-form-modal-send[data-toggle="popover"]').popover();
+
           {# Manage the request all documents form #}
           deadlineInput.mask(deadlineInput.attr('data-mask'));
 
@@ -127,7 +129,7 @@
           CKEDITOR.on('instanceReady', function(){
               instance = CKEDITOR.instances['id_message_content'];
               {% if not form.is_bound %}
-                  $('#content-reset-confirm-button').click();
+                $('#cke_id_message_content').hide();
               {% endif %}
           });
 
@@ -194,8 +196,17 @@
 
           {# Manage reset confirm modals #}
           $('#content-reset-button').click(function(event){
+              const messageContentContainer = $('#cke_id_message_content');
+
               event.preventDefault();
-              messageContentResetConfirmModal.modal('show');
+              if (messageContentContainer.is(':hidden')) {
+                $('#content-reset-confirm-button').click();
+                messageContentContainer.show();
+                $('#content-reset-button').html($('#object-reset-button').html());
+                $('#request-all-form-modal-send').prop('disabled', false).popover('destroy');
+              } else {
+                messageContentResetConfirmModal.modal('show');
+              }
           });
 
           $('#object-reset-button').click(function(event){

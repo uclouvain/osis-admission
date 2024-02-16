@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-01 16:36+0100\n"
+"POT-Creation-Date: 2024-02-12 17:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -797,6 +797,11 @@ msgid "Are you the child of a UCLouvain or Martin V staff member?"
 msgstr ""
 
 msgid ""
+"As the email address of the faculty recipient is not defined, no email will "
+"be sent. Do you still want to send the application to the faculty?"
+msgstr ""
+
+msgid ""
 "As you are applying for a limited course as a non-resident (as defined by "
 "government decree) candidate, applications for the 2024-2025 academic year "
 "must be submitted via this <a href=\"https://uclouvain.be/fr/etudier/"
@@ -1294,6 +1299,11 @@ msgid "Certificate"
 msgstr ""
 
 msgid "Certificate for children of staff"
+msgstr ""
+
+msgid ""
+"Certificate justifying your activity, mentioning this activity, for the "
+"period concerned"
 msgstr ""
 
 msgid "Certificate of achievement"
@@ -1825,6 +1835,9 @@ msgid "Course units"
 msgstr ""
 
 msgid "Courses taken"
+msgstr ""
+
+msgid "Create message"
 msgstr ""
 
 msgid "Create new doctorate admission"
@@ -3344,6 +3357,9 @@ msgid ""
 "project\" part."
 msgstr ""
 
+msgid "Information provided to the candidate."
+msgstr ""
+
 msgid "Initialization of the predefined specific questions"
 msgstr ""
 
@@ -4237,9 +4253,6 @@ msgstr ""
 msgid "No pool was found to match."
 msgstr ""
 
-msgid "No recipient email found for this program."
-msgstr ""
-
 msgid "No scholarship found."
 msgstr ""
 
@@ -4810,9 +4823,6 @@ msgstr ""
 msgid "Please specify your old NOMA (matriculation number)."
 msgstr ""
 
-msgid "Post-dated certificate justifying your activity mentioned above"
-msgstr ""
-
 msgid "Post-enrolment status"
 msgstr ""
 
@@ -5174,6 +5184,9 @@ msgstr ""
 msgid "Refusal certificate of faculty"
 msgstr ""
 
+msgid "Refusal document link"
+msgstr ""
+
 msgid "Refusal reason"
 msgstr ""
 
@@ -5340,6 +5353,12 @@ msgid "Role: ADRE Secretaries"
 msgstr ""
 
 msgid "Role: ADRE secretary"
+msgstr ""
+
+msgid "Role: Admission reader"
+msgstr ""
+
+msgid "Role: Admission readers"
 msgstr ""
 
 msgid "Role: CDD configurator"
@@ -5976,6 +5995,11 @@ msgid ""
 "being generated. Please come back later to access it."
 msgstr ""
 
+msgid ""
+"The Previous experience must be in the \"Sufficient\" status in order to do "
+"this action."
+msgstr ""
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
@@ -6313,9 +6337,9 @@ msgstr ""
 
 #, python-brace-format
 msgid ""
-"The status of the request is currently \"{current_status}\". Only the status "
-"\"{from_status}\" allows you to move to the \"{to_status}\" status for the "
-"application fee."
+"The status of the request is currently \"{current_status}\". Only the "
+"statuses \"{from_statuses}\" allow you to move to the \"{to_status}\" status "
+"for the application fee."
 msgstr ""
 
 msgid "The submitted information is not consistent with information requested."
@@ -7053,10 +7077,7 @@ msgstr ""
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
 
-msgid ""
-"You are about to submit the application to the Faculty. This action should "
-"normally email the Faculty, but the recipient address is not defined. Please "
-"define it before sending the application."
+msgid "You are about to submit the application to the Faculty."
 msgstr ""
 
 #, python-format
@@ -7230,6 +7251,9 @@ msgid ""
 msgstr ""
 
 msgid "You must set a lead supervisor."
+msgstr ""
+
+msgid "You need to create the message before sending it."
 msgstr ""
 
 msgid "You need to set a member as president."

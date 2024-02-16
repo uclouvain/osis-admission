@@ -64,7 +64,7 @@ class HistoriqueInMemory(IHistorique):
     def historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
         cls,
         proposition: Proposition,
-        message: EmailMessage,
+        message: Optional[EmailMessage],
         gestionnaire: str,
     ):
         pass

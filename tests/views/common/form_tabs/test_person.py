@@ -684,6 +684,7 @@ class PersonFormTestCase(TestCase):
             {
                 'coordinates': default_submitted_profile.get('coordinates'),
                 'identification': {
+                    'birth_date': '1990-01-01',
                     'first_name': 'John',
                     'last_name': 'Doe',
                     'gender': ChoixGenre.H.name,

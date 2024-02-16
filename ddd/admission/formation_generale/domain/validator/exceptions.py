@@ -26,7 +26,10 @@
 
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT,
+)
 from osis_common.ddd.interface import BusinessException
 
 
@@ -117,11 +120,13 @@ class StatutPropositionInvalidePourPaiementInscriptionException(BusinessExceptio
 
     def __init__(self, current_status, **kwargs):
         message = _(
-            'The status of the request is currently "{current_status}". Only the status "{from_status}" allows you '
+            'The status of the request is currently "{current_status}". Only the statuses "{from_statuses}" allow you '
             'to move to the "{to_status}" status for the application fee.'
         ).format(
             current_status=current_status,
-            from_status=ChoixStatutPropositionGenerale.CONFIRMEE.value,
+            from_statuses=ChoixStatutPropositionGenerale.get_specific_values(
+                STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT
+            ),
             to_status=_("Must pay"),
         )
         super().__init__(message, **kwargs)
