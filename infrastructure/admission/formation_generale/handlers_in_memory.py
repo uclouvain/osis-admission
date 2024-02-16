@@ -129,6 +129,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.admission.repository.in_memory.digit import DigitInMemoryRepository
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
@@ -139,6 +140,8 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
+from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import \
+    CompteurAnnuelPourNomaInMemoryRepository
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -162,6 +165,8 @@ _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
 _poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
 _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
 _reference_translator = ReferenceInMemoryTranslator()
+_digit_repository = DigitInMemoryRepository()
+_compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -598,6 +603,8 @@ COMMAND_HANDLERS = {
             notification=_notification,
             pdf_generation=_pdf_generation,
             emplacement_document_repository=_emplacement_document_repository,
+            digit=_digit_repository,
+            compteur_noma=_compteur_noma,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -605,6 +612,8 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
+            digit=_digit_repository,
+            compteur_noma=_compteur_noma,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
