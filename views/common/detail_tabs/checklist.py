@@ -842,8 +842,9 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             "academic_year_start_date": date_format(self.proposition.formation.date_debut),
             "admission_email": self.proposition.formation.campus_inscription.email,
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
+            "greetings": "Dear",
         }
-        if get_language() == settings.LANGUAGE_CODE_FR:
+        if self.proposition.langue_contact_candidat == settings.LANGUAGE_CODE_FR:
             if self.proposition.genre_candidat == "H":
                 tokens['greetings'] = "Cher"
             elif self.proposition.genre_candidat == "F":
@@ -854,7 +855,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
                 ADMISSION_EMAIL_SIC_APPROVAL,
-                settings.LANGUAGE_CODE_FR,
+                self.proposition.langue_contact_candidat,
             )
 
             subject = mail_template.render_subject(tokens=tokens)
