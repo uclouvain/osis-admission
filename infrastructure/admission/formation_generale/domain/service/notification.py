@@ -30,7 +30,7 @@ from django.conf import settings
 from django.utils import translation
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
-from osis_document.api.utils import get_remote_token
+from osis_document.api.utils import get_remote_token, get_remote_tokens
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
@@ -61,6 +61,8 @@ from admission.mail_templates import (
 from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
+    EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
+    EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
 )
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
 from admission.utils import (
@@ -408,6 +410,51 @@ class Notification(INotification):
         corps_message: str,
     ) -> EmailMessage:
         candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        admission = (
+            GeneralEducationAdmission.objects.filter(uuid=proposition.entity_id.uuid)
+            .only(
+                'sic_approval_certificate',
+                'sic_annexe_approval_certificate',
+            )
+            .first()
+        )
+
+        sic_annexe_approval_certificate_url = ''
+        sic_approval_certificate_url = ''
+
+        document_uuids = {
+            field: str(getattr(admission, field)[0]) if getattr(admission, field) else ''
+            for field in ['sic_annexe_approval_certificate', 'sic_approval_certificate']
+        }
+
+        document_uuids_list = [document for document in document_uuids.values() if document]
+
+        if document_uuids_list:
+            document_tokens = get_remote_tokens(document_uuids_list, custom_ttl=ONE_YEAR_SECONDS)
+
+            if document_tokens:
+                if document_uuids['sic_approval_certificate'] and document_tokens.get(
+                    document_uuids['sic_approval_certificate']
+                ):
+                    sic_approval_certificate_url = get_file_url(
+                        document_tokens[document_uuids['sic_approval_certificate']]
+                    )
+                if document_uuids['sic_annexe_approval_certificate'] and document_tokens.get(
+                    document_uuids['sic_annexe_approval_certificate']
+                ):
+                    sic_annexe_approval_certificate_url = get_file_url(
+                        document_tokens[document_uuids['sic_annexe_approval_certificate']]
+                    )
+
+        corps_message = corps_message.replace(
+            EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
+            sic_approval_certificate_url,
+        )
+        corps_message = corps_message.replace(
+            EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
+            sic_annexe_approval_certificate_url,
+        )
 
         email_notification = EmailNotification(
             recipient=candidate.private_email,

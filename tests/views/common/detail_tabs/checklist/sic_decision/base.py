@@ -95,6 +95,13 @@ class SicPatchMixin(TestCase):
         patched.return_value = 'foobar'
         self.addCleanup(patcher.stop)
 
+        patcher = mock.patch(
+            'admission.infrastructure.admission.formation_generale.domain.service.notification.get_remote_tokens'
+        )
+        patched = patcher.start()
+        patched.side_effect = lambda uuids, **kwargs: {file_uuid: 'foobar' for file_uuid in uuids}
+        self.addCleanup(patcher.stop)
+
         # Mock weasyprint
         patcher = mock.patch(
             'admission.exports.utils.get_pdf_from_template',
