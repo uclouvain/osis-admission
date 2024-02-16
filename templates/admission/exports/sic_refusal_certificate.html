@@ -120,12 +120,7 @@
       <strong>{% trans "Enrolment Office (SIC)" %}</strong>
     </div>
     <div class="col-6">
-      {% with candidat=proposition.profil_soumis_candidat %}
-        {{ candidat.nom|upper }} {{ candidat.prenom }}<br><br>
-        {{ candidat.rue }} {{ candidat.numero_rue }} {{ candidat.boite_postale }}<br>
-        {{ candidat.code_postal }} {{ candidat.ville }}<br>
-        {{ candidat.nom_pays }}
-      {% endwith %}
+      {% include "admission/exports/includes/profil_adresse.html" %}
     </div>
   </div>
 
@@ -151,7 +146,7 @@
   <img class="float-end" id="sigle" src="{% static "img/sedes-filigrane.jpg" %}">
 
   <div>
-    {% if director.signature %}<img class="ms-5" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+    {% if director.signature %}<img class="ms-3" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
     <p>
       {{ director.first_name }} {{ director.last_name }},<br>
       <em>{% if director.gender == 'F' %}Directrice{% else %}Directeur{% endif %} du Service des inscriptions</em>

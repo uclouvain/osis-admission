@@ -29,6 +29,11 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
+from admission.auth.predicates.common import (
+    has_scope,
+    is_debug,
+    is_entity_manager,
+)
 from admission.auth.predicates.general import (
     in_sic_status,
     is_submitted,
@@ -37,11 +42,6 @@ from admission.auth.predicates.general import (
     not_cancelled,
     in_progress,
     can_send_to_fac_faculty_decision,
-)
-from admission.auth.predicates.common import (
-    has_scope,
-    is_debug,
-    is_entity_manager,
 )
 from education_group.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
@@ -108,6 +108,7 @@ class CentralManager(EntityRoleModel):
             'admission.view_historyentry': is_entity_manager,
             'admission.download_doctorateadmission_pdf_recap': is_entity_manager,
             'admission.view_documents_management': is_entity_manager & not_cancelled,
+            'admission.edit_documents': is_entity_manager & not_cancelled,
             'admission.change_documents_management': is_entity_manager & in_sic_status,
             'admission.generate_in_progress_analysis_folder': is_entity_manager & in_progress,
             'admission.view_checklist': is_entity_manager & is_submitted,
@@ -118,7 +119,7 @@ class CentralManager(EntityRoleModel):
             'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_entity_manager & in_fac_status,
             'admission.checklist_change_past_experiences': is_entity_manager & in_sic_status,
             'admission.checklist_select_access_title': is_entity_manager & in_sic_status,
-            'admission.checklist_change_sic_comment': is_entity_manager & in_sic_status,
+            'admission.checklist_change_sic_comment': is_entity_manager,
             'admission.checklist_change_comment': is_entity_manager & in_sic_status,
             'admission.checklist_change_sic_decision': is_entity_manager & in_sic_status,
         }

@@ -491,6 +491,25 @@ class DisplayTagTestCase(TestCase):
                 'template': 'osis_document/editor.html',
                 'value': 'token',
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+                'attrs': {}
+            },
+        )
+
+        # With metadata for a PDF file in read_only mode
+        component = document_component(
+            'token',
+            {
+                'mimetype': PDF_MIME_TYPE,
+            },
+            can_edit=False
+        )
+        self.assertEqual(
+            component,
+            {
+                'template': 'osis_document/editor.html',
+                'value': 'token',
+                'base_url': settings.OSIS_DOCUMENT_BASE_URL,
+                'attrs': {'pagination': False, 'zoom': False, 'comment': False, 'highlight': False, 'rotation': False},
             },
         )
 
@@ -773,8 +792,18 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
         self.assertTrue(is_list([]))
 
     def test_label_with_user_icon(self):
-        self.assertEqual(label_with_user_icon('foo'), 'foo <i class="fas fa-user"></i>')
-        self.assertEqual(label_with_user_icon(''), ' <i class="fas fa-user"></i>')
+        label = (
+            '{} <i class="fas fa-user" data-content="Information communiquée au candidat." '
+            'data-toggle="popover" data-trigger="hover"></i>'
+        )
+        self.assertEqual(
+            label_with_user_icon('foo'),
+            label.format('foo'),
+        )
+        self.assertEqual(
+            label_with_user_icon(''),
+            label.format(''),
+        )
 
     def test_candidate_language(self):
         self.assertEqual(

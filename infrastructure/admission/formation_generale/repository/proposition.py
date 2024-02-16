@@ -578,6 +578,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 else None,
                 sigle_entite_gestion=admission.training_management_faculty
                 or admission.sigle_entite_gestion,  # from annotation
+                credits=admission.training.credits,
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,

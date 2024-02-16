@@ -24,18 +24,20 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from django.conf import settings
 from django.utils import translation
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
+from osis_document.api.utils import get_remote_token
+from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
-from admission.contrib.models import AdmissionTask
+from admission.contrib.models import AdmissionTask, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
@@ -70,6 +72,9 @@ from admission.utils import (
 from base.models.person import Person
 from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+
+ONE_YEAR_SECONDS = 366 * 24 * 60 * 60
+EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 
 
 class NotificationException(Exception):
@@ -210,7 +215,7 @@ class Notification(INotification):
         return email_message
 
     @classmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> EmailMessage:
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> Optional[EmailMessage]:
         admission: BaseAdmission = (
             BaseAdmissionProxy.objects.with_training_management_and_reference()
             .select_related('candidate__country_of_citizenship', 'training__enrollment_campus')
@@ -226,7 +231,7 @@ class Notification(INotification):
         ).first()
 
         if not program_email:
-            raise NotificationException(_('No recipient email found for this program.'))
+            return
 
         current_language = settings.LANGUAGE_CODE
 
@@ -375,6 +380,13 @@ class Notification(INotification):
         corps_message: str,
     ) -> EmailMessage:
         candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        document_uuid = (
+            GeneralEducationAdmission.objects.filter(uuid=proposition.entity_id.uuid).values('sic_refusal_certificate')
+        )[0]['sic_refusal_certificate'][0]
+        token = get_remote_token(document_uuid, custom_ttl=ONE_YEAR_SECONDS)
+        document_url = get_file_url(token)
+        corps_message = corps_message.replace(EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN, document_url)
 
         email_notification = EmailNotification(
             recipient=candidate.private_email,

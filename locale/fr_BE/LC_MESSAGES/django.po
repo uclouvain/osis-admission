@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-01 16:36+0100\n"
+"POT-Creation-Date: 2024-02-12 17:06+0100\n"
 "PO-Revision-Date: 2023-12-08 17:10+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -889,6 +889,13 @@ msgstr ""
 "Martin V ?"
 
 msgid ""
+"As the email address of the faculty recipient is not defined, no email will "
+"be sent. Do you still want to send the application to the faculty?"
+msgstr ""
+"L'adresse mail du destinataire facultaire n'étant pas définie, aucun e-mail "
+"ne sera envoyé. Voulez-vous malgré tout envoyer le dossier en faculté ?"
+
+msgid ""
 "As you are applying for a limited course as a non-resident (as defined by "
 "government decree) candidate, applications for the 2024-2025 academic year "
 "must be submitted via this <a href=\"https://uclouvain.be/fr/etudier/"
@@ -1405,6 +1412,13 @@ msgstr "Attestation"
 
 msgid "Certificate for children of staff"
 msgstr "Attestation enfant du personnel"
+
+msgid ""
+"Certificate justifying your activity, mentioning this activity, for the "
+"period concerned"
+msgstr ""
+"Attestation justifiant votre activité, mentionnant cette activité, pour la "
+"période concernée"
 
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
@@ -2006,6 +2020,9 @@ msgstr "Cours"
 
 msgid "Courses taken"
 msgstr "Cours suivis"
+
+msgid "Create message"
+msgstr "Créer le message"
 
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
@@ -3722,6 +3739,9 @@ msgstr ""
 "Les informations concernant une éventuelle cotutelle sont à indiquer dans la "
 "partie « Projet doctoral »."
 
+msgid "Information provided to the candidate."
+msgstr "Information communiquée au candidat."
+
 msgid "Initialization of the predefined specific questions"
 msgstr "Initialisation des questions spécifiques prédéfinies"
 
@@ -4723,9 +4743,6 @@ msgstr "Aucun invité"
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
 
-msgid "No recipient email found for this program."
-msgstr "L'email du destinaire n'a pas été trouvé pour cette formation."
-
 msgid "No scholarship found."
 msgstr "Bourse non trouvée."
 
@@ -5000,7 +5017,7 @@ msgstr "Autre formation"
 
 msgctxt "admission"
 msgid "Other reasons"
-msgstr "Autres raisons"
+msgstr "Autres motifs"
 
 msgid "Other refusal reasons"
 msgstr "Autres motifs de refus facultaire"
@@ -5351,9 +5368,6 @@ msgstr "Merci de spécifier votre numéro de registre national belge."
 
 msgid "Please specify your old NOMA (matriculation number)."
 msgstr "Merci de spécifier votre ancien NOMA (numéro de matricule)."
-
-msgid "Post-dated certificate justifying your activity mentioned above"
-msgstr "Attestation postdatée justifiant votre activité mentionnée ci-dessus"
 
 msgid "Post-enrolment status"
 msgstr "Statut après inscription"
@@ -5735,6 +5749,9 @@ msgstr "Attestation de refus SIC"
 msgid "Refusal certificate of faculty"
 msgstr "Attestation de refus facultaire"
 
+msgid "Refusal document link"
+msgstr "Lien du document de refus"
+
 msgid "Refusal reason"
 msgstr "Motif de refus"
 
@@ -5908,6 +5925,12 @@ msgstr "Rôle: Secrétaires ADRE"
 
 msgid "Role: ADRE secretary"
 msgstr "Rôle: Secrétaire ADRE"
+
+msgid "Role: Admission reader"
+msgstr "Rôle: Lecteur des demandes d'inscription"
+
+msgid "Role: Admission readers"
+msgstr "Rôle: Lecteurs des demandes d'inscription"
 
 msgid "Role: CDD configurator"
 msgstr "Rôle: Configurateur CDD"
@@ -6600,6 +6623,13 @@ msgstr ""
 "L’attestation de réussite de l’épreuve de confirmation est en cours de "
 "génération, veuillez revenir plus tard pour y accéder."
 
+msgid ""
+"The Previous experience must be in the \"Sufficient\" status in order to do "
+"this action."
+msgstr ""
+"Le parcours antérieur doit être à l'état \"Suffisant\" pour pouvoir "
+"effectuer cette action."
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
@@ -6981,13 +7011,13 @@ msgstr "Le statut a bien été modifié pour : %(status)s."
 
 #, python-brace-format
 msgid ""
-"The status of the request is currently \"{current_status}\". Only the status "
-"\"{from_status}\" allows you to move to the \"{to_status}\" status for the "
-"application fee."
+"The status of the request is currently \"{current_status}\". Only the "
+"statuses \"{from_statuses}\" allow you to move to the \"{to_status}\" status "
+"for the application fee."
 msgstr ""
-"Le statut de la demande est actuellement \"{current_status}\". Seul le "
-"statut \"{from_status}\" permet de passer à l'état \"{to_status}\" pour les "
-"frais de dossier."
+"Le statut de la demande est actuellement \"{current_status}\". Seuls les "
+"statuts \"{from_statuses}\" permettent de passer à l'état \"{to_status}\" "
+"pour les frais de dossier."
 
 msgid "The submitted information is not consistent with information requested."
 msgstr ""
@@ -7808,14 +7838,8 @@ msgstr ""
 "Vous semblez avoir des modifications non enregistrées, celles-ci seront "
 "perdues."
 
-msgid ""
-"You are about to submit the application to the Faculty. This action should "
-"normally email the Faculty, but the recipient address is not defined. Please "
-"define it before sending the application."
-msgstr ""
-"Vous êtes sur le point de soumettre le dossier en Faculté. Cette action doit "
-"normalement envoyer un e-mail à la Faculté, mais l'adresse du destinataire "
-"n'est pas définie. Merci de la définir avant d'envoyer le dossier."
+msgid "You are about to submit the application to the Faculty."
+msgstr "Vous êtes sur le point de soumettre le dossier en Faculté."
 
 #, python-format
 msgid ""
@@ -8041,6 +8065,9 @@ msgstr ""
 
 msgid "You must set a lead supervisor."
 msgstr "Vous devez désigner un promoteur de référence."
+
+msgid "You need to create the message before sending it."
+msgstr "Il est nécessaire de créer le message avant de pouvoir envoyer."
 
 msgid "You need to set a member as president."
 msgstr "Vous devez désigner un membre comme président."

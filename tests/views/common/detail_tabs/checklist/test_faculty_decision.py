@@ -260,22 +260,11 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
     def test_send_to_faculty_with_sic_user_in_valid_sic_statuses(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        # If there is no recipient email, trigger an exception
-        with self.assertRaises(NotificationException):
-            self.client.post(self.url, **self.default_headers)
-
         program_email = EmailFonctionProgrammeFactory(
             programme=self.general_admission.training.education_group,
             type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
-            premiere_annee=False,
+            premiere_annee=True,
         )
-
-        # There is a recipient but not for the first year so we trigger an exception
-        with self.assertRaises(NotificationException):
-            self.client.post(self.url, **self.default_headers)
-
-        program_email.premiere_annee = True
-        program_email.save()
 
         response = self.client.post(self.url, **self.default_headers)
 
@@ -325,7 +314,114 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         )
 
         self.assertEqual(
-            history_entry.author, f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}'
+            history_entry.author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+        self.assertCountEqual(
+            history_entry.tags,
+            [
+                'proposition',
+                'fac-decision',
+                'send-to-fac',
+                'status-changed',
+            ],
+        )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_send_to_faculty_with_sic_user_in_valid_sic_statuses_but_without_specified_recipient(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        # Check that no notification has been planned
+        email_notifications = EmailNotification.objects.all()
+
+        self.assertEqual(len(email_notifications), 0)
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+
+        self.assertEqual(len(history_entries), 1)
+        history_entry = history_entries[0]
+
+        self.assertEqual(
+            history_entry.message_fr,
+            'Le dossier a été soumis en faculté le 1 Janvier 2022 00:00.',
+        )
+
+        self.assertEqual(
+            history_entry.message_en,
+            'The dossier has been submitted to the faculty on 1 Janvier 2022 00:00.',
+        )
+
+        self.assertEqual(
+            history_entry.author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        )
+        self.assertCountEqual(
+            history_entry.tags,
+            [
+                'proposition',
+                'fac-decision',
+                'send-to-fac',
+                'status-changed',
+            ],
+        )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_send_to_faculty_with_sic_user_in_valid_sic_statuses_but_with_invalid_recipient(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        # Check the response
+        program_email = EmailFonctionProgrammeFactory(
+            programme=self.general_admission.training.education_group,
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            premiere_annee=False,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
+
+        # Check that no notification has been planned
+        email_notifications = EmailNotification.objects.all()
+
+        self.assertEqual(len(email_notifications), 0)
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+
+        self.assertEqual(len(history_entries), 1)
+        history_entry = history_entries[0]
+
+        self.assertEqual(
+            history_entry.message_fr,
+            'Le dossier a été soumis en faculté le 1 Janvier 2022 00:00.',
+        )
+
+        self.assertEqual(
+            history_entry.message_en,
+            'The dossier has been submitted to the faculty on 1 Janvier 2022 00:00.',
+        )
+
+        self.assertEqual(
+            history_entry.author,
+            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
         )
         self.assertCountEqual(
             history_entry.tags,
@@ -1610,7 +1706,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         # Missing fields
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_training_accepted_by_fac', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('program_planned_years_number', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
+        self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('all_additional_approval_conditions', []))
 
         response = self.client.post(
