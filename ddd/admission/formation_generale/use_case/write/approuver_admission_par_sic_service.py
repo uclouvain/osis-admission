@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
@@ -78,8 +79,8 @@ def approuver_admission_par_sic(
     )
 
     noma = NomaGenerateurService.generer_noma(
-        compteur=compteur_noma.get_compteur(annee=proposition.annee_calculee).compteur,
-        annee=proposition.annee_calculee
+        compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
+        annee=proposition.formation_id.annee
     )
 
     digit.submit_person_ticket(

@@ -52,8 +52,8 @@ def approuver_inscription_par_sic(
     proposition_repository.save(entity=proposition)
 
     noma = NomaGenerateurService.generer_noma(
-        compteur=compteur_noma.get_compteur(annee=proposition.annee_calculee).compteur,
-        annee=proposition.annee_calculee
+        compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
+        annee=proposition.formation_id.annee
     )
 
     digit.submit_person_ticket(
