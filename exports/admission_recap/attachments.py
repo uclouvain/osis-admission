@@ -97,7 +97,7 @@ class Attachment:
 
     @staticmethod
     def _get_label(base_label: str, sub_label: str, label_interpolation: Optional[dict]):
-        label = f'{base_label} - {sub_label}' if sub_label else base_label
+        label = f'{base_label} {sub_label}' if sub_label else base_label
         if label_interpolation:
             return label % label_interpolation
         return label
@@ -356,12 +356,13 @@ def get_curriculum_academic_experience_attachments(
         elif experience.type_releve_notes == TranscriptType.ONE_A_YEAR.name:
             for annee in experience.annees:
                 sub_identifier = str(annee.annee)
+                sub_identifier_label = format_academic_year(annee.annee)
                 attachments.append(
                     Attachment(
                         identifier='RELEVE_NOTES_ANNUEL',
                         label=DocumentsCurriculum['RELEVE_NOTES_ANNUEL'],
                         sub_identifier=sub_identifier,
-                        sub_identifier_label=sub_identifier,
+                        sub_identifier_label=sub_identifier_label,
                         uuids=annee.releve_notes,
                         required=True,
                         candidate_language=context.identification.langue_contact,
@@ -373,7 +374,7 @@ def get_curriculum_academic_experience_attachments(
                             identifier='TRADUCTION_RELEVE_NOTES_ANNUEL',
                             label=DocumentsCurriculum['TRADUCTION_RELEVE_NOTES_ANNUEL'],
                             sub_identifier=sub_identifier,
-                            sub_identifier_label=sub_identifier,
+                            sub_identifier_label=sub_identifier_label,
                             uuids=annee.traduction_releve_notes,
                             required=True,
                             candidate_language=context.identification.langue_contact,

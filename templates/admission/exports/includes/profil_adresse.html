@@ -22,7 +22,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{{ profil_candidat_identification.nom|upper }} {{ profil_candidat_identification.prenom }}<br><br>
+{{ profil_candidat_identification.nom|upper }} {{ profil_candidat_identification.prenom }}<br>
 {% if profil_candidat_coordonnees.adresse_correspondance %}
   {{ profil_candidat_coordonnees.adresse_correspondance.rue }} {{ profil_candidat_coordonnees.adresse_correspondance.numero_rue }} {{ profil_candidat_coordonnees.adresse_correspondance.boite_postale }}<br>
   {{ profil_candidat_coordonnees.adresse_correspondance.code_postal }} {{ profil_candidat_coordonnees.adresse_correspondance.ville }}<br>
