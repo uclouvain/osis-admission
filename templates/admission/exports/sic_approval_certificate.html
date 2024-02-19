@@ -91,6 +91,10 @@
         line-height: 0.5cm;
       }
 
+      ul {
+          margin: 0;
+      }
+
       #logo {
         height: 1.5cm;
         width: auto;
@@ -108,7 +112,14 @@
           width: auto;
       }
 
+      #sigle-container {
+          position: relative;
+      }
+
       #sigle {
+          position: absolute;
+          right: 0;
+          top: -1cm;
           height: 40mm;
           width: auto;
       }
@@ -126,7 +137,7 @@
     <div id="page-counter" class="text-center small">Page </div>
   </footer>
 
-  <div class="row mb-5">
+  <div class="row mb-0">
     <div class="col-6">
       <img id="logo" src="{% static "img/logo_uclouvain.png" %}">
     </div>
@@ -150,7 +161,7 @@
 
   <div id="guillemet-droite"></div>
 
-  <p class="mt-5">Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
+  <p class="mt-4">Votre numéro de dossier : <strong>{{ proposition.reference }}</strong></p>
 
   <p>
     {% with name=proposition.prenom_candidat|add:" "|add:proposition.nom_candidat %}
@@ -253,15 +264,15 @@
   <p>{% blocktrans %}The University tuition fee is EUR 0.0.{% endblocktrans %}</p>
   {% endif %}
 
+  <p>{% blocktrans with date=proposition.formation.date_debut|date:"d/m/Y" %}Please note that the first term begins on {{ date }}.{% endblocktrans %}</p>
+
+  <p>
+    {% blocktrans trimmed %}
+      This enrolment authorisation letter allows you to submit an application for accommodation to the Logistics and Student Accommodation Service (LOGE). To find out how, go to <a href="https://www.uclouvain.be/en/study/accomodation">www.uclouvain.be/en/study/accomodation</a>.
+    {% endblocktrans %}
+  </p>
+
   <div class="on-single-page">
-    <p>{% blocktrans with date=proposition.formation.date_debut|date:"d/m/Y" %}Please note that the first term begins on {{ date }}.{% endblocktrans %}</p>
-
-    <p>
-      {% blocktrans trimmed %}
-        This enrolment authorisation letter allows you to submit an application for accommodation to the Logistics and Student Accommodation Service (LOGE). To find out how, go to <a href="https://www.uclouvain.be/en/study/accomodation">www.uclouvain.be/en/study/accomodation</a>.
-      {% endblocktrans %}
-    </p>
-
     <p>{% trans "Our University is pleased to welcome you and wishes you an enriching and fruitful stay." %}</p>
 
     <div class="w-50">
@@ -274,14 +285,16 @@
     </div>
     <p><small>{% trans "This document does not represent a commitment of financial support from UCLouvain." %}</small></p>
 
-    <img class="float-end" id="sigle" src="{% static "img/sedes-filigrane.jpg" %}">
+    <div id="sigle-container">
+      <img id="sigle" src="{% static "img/sedes-filigrane.jpg" %}">
 
-    <div>
-      {% if director.signature %}<img class="ms-3" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
-      <p>
-        {{ director.first_name }} {{ director.last_name }},<br>
-        {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
-      </p>
+      <div>
+        {% if director.signature %}<img class="ms-3" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+        <p>
+          {{ director.first_name }} {{ director.last_name }},<br>
+          {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
+        </p>
+      </div>
     </div>
   </div>
 
