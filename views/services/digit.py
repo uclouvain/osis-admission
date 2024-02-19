@@ -102,41 +102,6 @@ class SearchDigitAccountView(FormView):
         return has_missing_fields
 
 
-def request_digit_account_creation(data):
-    response = requests.post(
-        headers={'Content-Type': 'application/json'},
-        data=json.dumps({
-            "provider": {
-                "source": "ETU",
-                "sourceId": data["registration_id"],  # noma
-                "actif": True,
-            },
-            "person": {
-                "lastName": data['last_name'],
-                "firstName": data['first_name'],
-                "birthDate": data['birth_date'],
-                "gender": data["gender"],
-                "nationalRegister": data["national_register"],
-                "nationality": data["nationality"],
-            },
-            "addresses": [
-                {
-                    "addressType": "RES",
-                    "country": data["residence_address"].country.iso_code,
-                    "postalCode": data["residence_address"].postal_code,
-                    "locality": data["residence_address"].city,
-                    "street": data["residence_address"].street,
-                    "number": data["residence_address"].street_number,
-                    "box": data["residence_address"].postal_box,
-                }
-            ],
-            "physicalPerson": True,
-        }),
-        url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_CREATION_URL}"
-    )
-    return response
-
-
 def search_digit_account(global_id: str, last_name: str, first_name: str, birth_date: str):
     from infrastructure.messages_bus import message_bus_instance
 

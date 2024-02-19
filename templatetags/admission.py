@@ -1084,6 +1084,13 @@ def search_account_digit_result_msg(admission):
     }
 
 
+@register.inclusion_tag('admission/digit_ticket_status_message.html')
+def digit_ticket_status_msg(digit_ticket):
+    return {
+        'digit_ticket': digit_ticket
+    }
+
+
 @register.filter
 def map_fields_items(digit_fields):
 

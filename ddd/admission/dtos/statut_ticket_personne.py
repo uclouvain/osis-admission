@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,16 +22,22 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from typing import Optional
+##############################################################################
+from typing import List
 
-from admission.ddd.admission.commands import GetStatutTicketPersonneQuery
-from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
-from admission.ddd.admission.repository.i_digit import IDigitRepository
+import attr
+
+from osis_common.ddd import interface
 
 
-def recuperer_statut_ticket_personne(
-    cmd: 'GetStatutTicketPersonneQuery',
-    digit_repository: 'IDigitRepository',
-) -> Optional[StatutTicketPersonneDTO]:
-    return digit_repository.get_person_ticket_status(global_id=cmd.global_id)
+@attr.dataclass(frozen=True, slots=True)
+class StatutTicketPersonneDTO(interface.DTO):
+    request_id: int
+    matricule: str
+    nom: str
+    prenom: str
+    statut: str
+    errors: List[str]
+
+    def __str__(self):
+        return f"{self.request_id} - {self.nom.upper()}, {self.prenom} - {self.statut}"
