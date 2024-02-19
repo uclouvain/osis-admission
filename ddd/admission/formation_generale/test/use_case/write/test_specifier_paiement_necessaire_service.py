@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -116,3 +116,23 @@ class TestSpecifierPaiementNecessaire(TestCase):
         ):
             with self.assertRaises(StatutPropositionInvalidePourPaiementInscriptionException):
                 self.message_bus.invoke(self.command)
+
+    def test_should_lever_exception_si_statut_proposition_pas_valide(self):
+        statuts_invalides = {
+            choix
+            for choix in ChoixStatutPropositionGenerale
+            if choix
+            not in {
+                ChoixStatutPropositionGenerale.CONFIRMEE,
+                ChoixStatutPropositionGenerale.RETOUR_DE_FAC,
+                ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC,
+            }
+        }
+
+        for statut in statuts_invalides:
+            with mock.patch.multiple(
+                self.proposition,
+                statut=statut,
+            ):
+                with self.assertRaises(StatutPropositionInvalidePourPaiementInscriptionException):
+                    self.message_bus.invoke(self.command)

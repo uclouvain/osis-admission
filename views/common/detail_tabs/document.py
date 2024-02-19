@@ -54,7 +54,6 @@ from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
-
 __namespace__ = 'document'
 
 __all__ = [
@@ -202,6 +201,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         from osis_document.api.utils import get_remote_metadata
 
         context = TemplateView().get_context_data(**kwargs)
+        context['view'] = self
 
         # The identifier can be pass either through an url param or a query param.
         document_identifier = self.request.GET.get('identifier', self.kwargs.get('identifier'))

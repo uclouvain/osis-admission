@@ -1636,7 +1636,7 @@ class ApplicationFeesView(
 
 class PastExperiencesStatusView(
     AdmissionFormMixin,
-    CheckListDefaultContextMixin,
+    SicDecisionMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):

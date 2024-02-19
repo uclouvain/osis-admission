@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -125,3 +125,26 @@ class AutocompleteTestCase(TestCase):
                 },
             )
             self.assertEqual(results[0]['id'], first_learning_unit.acronym)
+
+            learning_unit_without_english_title = LearningUnitYearFactory(
+                acronym="FOOBAR4",
+                academic_year__year=2022,
+                specific_title='Informatique D',
+                specific_title_english='',
+                subtype=FULL,
+            )
+
+            response = self.client.get(url, data={'forward': '{"year": "2022"}', 'q': 'FOOBAR4'}, format="json")
+
+            self.assertEqual(response.status_code, 200)
+            results = response.json()['results']
+            self.assertEqual(len(results), 1)
+            self.assertEqual(
+                results[0],
+                {
+                    'id': learning_unit_without_english_title.acronym,
+                    'text': f'{learning_unit_without_english_title.acronym} - '
+                    f'{learning_unit_without_english_title.complete_title}',
+                },
+            )
+            self.assertEqual(results[0]['id'], learning_unit_without_english_title.acronym)

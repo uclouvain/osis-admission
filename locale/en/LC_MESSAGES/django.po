@@ -1290,6 +1290,11 @@ msgstr ""
 msgid "Certificate for children of staff"
 msgstr ""
 
+msgid ""
+"Certificate justifying your activity, mentioning this activity, for the "
+"period concerned"
+msgstr ""
+
 msgid "Certificate of achievement"
 msgstr ""
 
@@ -1813,6 +1818,9 @@ msgid "Course units"
 msgstr ""
 
 msgid "Courses taken"
+msgstr ""
+
+msgid "Create message"
 msgstr ""
 
 msgid "Create new doctorate admission"
@@ -4768,9 +4776,6 @@ msgstr ""
 msgid "Please specify your old NOMA (matriculation number)."
 msgstr ""
 
-msgid "Post-dated certificate justifying your activity mentioned above"
-msgstr ""
-
 msgid "Post-enrolment status"
 msgstr ""
 
@@ -5937,6 +5942,11 @@ msgid ""
 "being generated. Please come back later to access it."
 msgstr ""
 
+msgid ""
+"The Previous experience must be in the \"Sufficient\" status in order to do "
+"this action."
+msgstr ""
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
@@ -6274,9 +6284,9 @@ msgstr ""
 
 #, python-brace-format
 msgid ""
-"The status of the request is currently \"{current_status}\". Only the status "
-"\"{from_status}\" allows you to move to the \"{to_status}\" status for the "
-"application fee."
+"The status of the request is currently \"{current_status}\". Only the "
+"statuses \"{from_statuses}\" allow you to move to the \"{to_status}\" status "
+"for the application fee."
 msgstr ""
 
 msgid "The submitted information is not consistent with information requested."
@@ -7182,6 +7192,9 @@ msgid ""
 msgstr ""
 
 msgid "You must set a lead supervisor."
+msgstr ""
+
+msgid "You need to create the message before sending it."
 msgstr ""
 
 msgid "You need to set a member as president."

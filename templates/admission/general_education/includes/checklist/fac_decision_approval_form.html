@@ -86,7 +86,7 @@
         id="fac-decision-additional-trainings-container"
         class="hidden"
     >
-      {% bootstrap_field fac_decision_approval_form.prerequisite_courses form_group_class='form-group required_field' label=fac_decision_approval_form.prerequisite_courses.label|label_with_user_icon %}
+      {% bootstrap_field fac_decision_approval_form.prerequisite_courses label=fac_decision_approval_form.prerequisite_courses.label|label_with_user_icon %}
       {% bootstrap_field fac_decision_approval_form.prerequisite_courses_fac_comment label=fac_decision_approval_form.prerequisite_courses_fac_comment.label|add:candidate_language_tag|label_with_user_icon %}
     </div>
 

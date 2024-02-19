@@ -23,20 +23,33 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
-from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.enums.emplacement_document import (
+    DocumentsCurriculum,
+    StatutReclamationEmplacementDocument,
+    DocumentsIdentification,
+    StatutEmplacementDocument,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     DroitsInscriptionMontant,
     DispenseOuDroitsMajores,
 )
-from admission.mail_templates.checklist import ADMISSION_EMAIL_SIC_REFUSAL, ADMISSION_EMAIL_SIC_APPROVAL
+from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    ProfessionalExperienceFactory,
+    EducationalExperienceYearFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+    AdmissionEducationalValuatedExperiencesFactory,
+)
 from admission.tests.factories.faculty_decision import RefusalReasonFactory
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
@@ -48,6 +61,7 @@ from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from osis_profile.models.enums.curriculum import TranscriptType, ActivityType
 
 
 class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
@@ -82,6 +96,68 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
             communication_to_the_candidate='',
         )
         cls.general_admission.refusal_reasons.add(RefusalReasonFactory())
+        document_params = {
+            'automatically_required': False,
+            'last_action_at': '2023-01-01T00:00:00',
+            'last_actor': '0123456',
+            'deadline_at': '',
+            'reason': 'My reason',
+            'requested_at': '',
+            'status': 'A_RECLAMER',
+            'type': 'NON_LIBRE',
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+        }
+
+        new_educational_experience = EducationalExperienceFactory(
+            person=cls.general_admission.candidate,
+            transcript_type=TranscriptType.ONE_A_YEAR.name,
+            obtained_diploma=True,
+        )
+
+        new_educational_experience_year = EducationalExperienceYearFactory(
+            educational_experience=new_educational_experience,
+            academic_year__year=2023,
+        )
+
+        new_professional_experience = ProfessionalExperienceFactory(
+            person=cls.general_admission.candidate,
+            start_date=datetime.date(2023, 1, 1),
+            end_date=datetime.date(2023, 3, 31),
+        )
+
+        new_custom_professional_experience = ProfessionalExperienceFactory(
+            person=cls.general_admission.candidate,
+            start_date=datetime.date(2024, 1, 1),
+            end_date=datetime.date(2024, 1, 31),
+            type=ActivityType.OTHER.name,
+            activity='My custom activity',
+        )
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=cls.general_admission,
+            educationalexperience=new_educational_experience,
+        )
+
+        for experience in [new_professional_experience, new_custom_professional_experience]:
+            AdmissionProfessionalValuatedExperiencesFactory(
+                baseadmission=cls.general_admission,
+                professionalexperience=experience,
+            )
+
+        cls.general_admission.requested_documents = {
+            'CURRICULUM.CURRICULUM': document_params,
+            'IDENTIFICATION.CARTE_IDENTITE': document_params,
+            f'CURRICULUM.{new_educational_experience.uuid}.{new_educational_experience_year.academic_year.year}.'
+            f'RELEVE_NOTES_ANNUEL': document_params,
+            f'CURRICULUM.{new_educational_experience.uuid}.{new_educational_experience_year.academic_year.year}.'
+            f'TRADUCTION_RELEVE_NOTES_ANNUEL': document_params,
+            f'CURRICULUM.{new_educational_experience.uuid}.DIPLOME': document_params,
+            f'CURRICULUM.{new_professional_experience.uuid}.CERTIFICAT_EXPERIENCE': document_params,
+            f'CURRICULUM.{new_custom_professional_experience.uuid}.CERTIFICAT_EXPERIENCE': document_params,
+        }
+
+        cls.general_admission.save(update_fields=['requested_documents'])
+
         cls.url = resolve_url(
             'admission:general-education:sic-decision-pdf-preview',
             uuid=cls.general_admission.uuid,
@@ -102,3 +178,41 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, 'http://dummyurlfile/a-token')
+
+        self.get_pdf_from_template_patcher.assert_called_once()
+
+        # Check the documents names
+        call_args = self.get_pdf_from_template_patcher.call_args_list[0]
+        self.assertIn('documents_names', call_args[0][2])
+
+        documents_names = call_args[0][2]['documents_names']
+
+        # By default, we only display the documents names
+        self.assertIn(DocumentsCurriculum['CURRICULUM'], documents_names)
+        self.assertIn(DocumentsIdentification['CARTE_IDENTITE'], documents_names)
+
+        # For the curriculum experiences, we display the names of the experiences before the documents names
+        self.assertIn(
+            f"{ActivityType.WORK.value} 01/2023-03/2023 > {CURRICULUM_ACTIVITY_LABEL[ActivityType.WORK.name]}",
+            documents_names,
+        )
+        self.assertIn(
+            f"My custom activity 01/2024 > {CURRICULUM_ACTIVITY_LABEL[ActivityType.OTHER.name]}",
+            documents_names,
+        )
+
+        self.assertIn(
+            f"Computer science (Institute) 2023-2024 > {DocumentsCurriculum['RELEVE_NOTES_ANNUEL']} 2023-2024",
+            documents_names,
+        )
+
+        self.assertIn(
+            f"Computer science (Institute) 2023-2024 > {DocumentsCurriculum['TRADUCTION_RELEVE_NOTES_ANNUEL']} "
+            f"2023-2024",
+            documents_names,
+        )
+
+        self.assertIn(
+            f"Computer science (Institute) 2023-2024 > {DocumentsCurriculum['DIPLOME']}",
+            documents_names,
+        )

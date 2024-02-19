@@ -1706,7 +1706,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         # Missing fields
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_training_accepted_by_fac', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('program_planned_years_number', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
+        self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('all_additional_approval_conditions', []))
 
         response = self.client.post(
