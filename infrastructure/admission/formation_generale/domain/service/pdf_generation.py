@@ -60,6 +60,7 @@ from base.models.person import Person
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 ENTITY_SIC = 'SIC'
+ENTITY_UCL = 'UCL'
 
 
 class PDFGeneration(IPDFGeneration):
@@ -84,7 +85,7 @@ class PDFGeneration(IPDFGeneration):
         now = timezone.now()
         rector = (
             Person.objects.filter(
-                mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
+                mandatary__mandate__entity__entityversion__acronym=ENTITY_UCL,
                 mandatary__mandate__function=MandateTypes.RECTOR.name,
             )
             .filter(
