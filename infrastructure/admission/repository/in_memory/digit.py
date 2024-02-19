@@ -39,6 +39,7 @@ class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
         statut='CREATED',
         errors=[],
     )
+
     @classmethod
     def submit_person_ticket(cls, global_id: str, noma: str) -> any:
         pass
@@ -46,9 +47,11 @@ class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
     @classmethod
     def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
         return cls.statut_ticket
+
     @classmethod
     def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
         return cls.statut_ticket.statut
+
     @classmethod
     def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
         return [cls.statut_ticket]
