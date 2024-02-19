@@ -35,6 +35,7 @@ from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.commands import DeterminerAnneeAcademiqueEtPotQuery as ContinuingCmd
 from admission.ddd.admission.formation_generale.commands import DeterminerAnneeAcademiqueEtPotQuery as GeneralCmd
 from admission.views.doctorate.mixins import LoadDossierViewMixin
+from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
 from osis_common.ddd.interface import BusinessException
 
 __all__ = ['DebugView']
@@ -73,6 +74,24 @@ class DebugView(LoadDossierViewMixin, TemplateView):
             finally:
                 data['pool_logs'] = buffer.getvalue()
 
+            logger.removeHandler(handler)
+
+        logger = logging.getLogger('CalculFinancabilite')
+        logger.setLevel(logging.INFO)
+        with StringIO() as buffer, freezegun.freeze_time(self.request.GET.get("date-soumission")):
+            handler = logging.StreamHandler(buffer)
+            handler.setLevel(logging.INFO)
+            logger.addHandler(handler)
+            financabilite = message_bus_instance.invoke(
+                DeterminerSiCandidatEstFinancableQuery(
+                    matricule_fgs=self.proposition.matricule_candidat,
+                    sigle_formation=self.proposition.formation.sigle,
+                    annee=self.proposition.formation.annee,
+                    est_en_reorientation=False,
+                )
+            )
+            data['financabilite'] = financabilite
+            data['financabilite_logs'] = buffer.getvalue()
             logger.removeHandler(handler)
 
         return data
