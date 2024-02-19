@@ -41,4 +41,10 @@
     </p>
   {% endif %}
   <pre>{{ pool_logs }}</pre>
+  <h2>Calcul de la financabilité</h2>
+  <p>
+    <strong>Etat</strong>: {{ financabilite.etat }}<br/>
+    {% if financabilite.situation %}<strong>Situation</strong>: {{ financabilite.situation }}{% endif %}
+  </p>
+  <pre>{{ financabilite_logs }}</pre>
 {% endblock %}
