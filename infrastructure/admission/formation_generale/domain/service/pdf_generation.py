@@ -80,6 +80,22 @@ class PDFGeneration(IPDFGeneration):
         return director
 
     @classmethod
+    def _get_sic_rector(cls):
+        now = timezone.now()
+        rector = (
+            Person.objects.filter(
+                mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
+                mandatary__mandate__function=MandateTypes.RECTOR.name,
+            )
+            .filter(
+                mandatary__start_date__lte=now,
+                mandatary__end_date__gte=now,
+            )
+            .first()
+        )
+        return rector
+
+    @classmethod
     def get_base_fac_decision_context(
         cls,
         proposition_id: PropositionIdentity,
@@ -306,7 +322,7 @@ class PDFGeneration(IPDFGeneration):
                 context={
                     'proposition': proposition_dto,
                     'profil_candidat_identification': profil_candidat_identification,
-                    'director': cls._get_sic_director(),
+                    'rector': cls._get_sic_rector(),
                 },
                 author=gestionnaire,
             )
