@@ -1400,6 +1400,13 @@ msgstr "Attestation"
 msgid "Certificate for children of staff"
 msgstr "Attestation enfant du personnel"
 
+msgid ""
+"Certificate justifying your activity, mentioning this activity, for the "
+"period concerned"
+msgstr ""
+"Attestation justifiant votre activité, mentionnant cette activité, pour la "
+"période concernée"
+
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
@@ -1994,6 +2001,9 @@ msgstr "Cours"
 
 msgid "Courses taken"
 msgstr "Cours suivis"
+
+msgid "Create message"
+msgstr "Créer le message"
 
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
@@ -5310,9 +5320,6 @@ msgstr "Merci de spécifier votre numéro de registre national belge."
 msgid "Please specify your old NOMA (matriculation number)."
 msgstr "Merci de spécifier votre ancien NOMA (numéro de matricule)."
 
-msgid "Post-dated certificate justifying your activity mentioned above"
-msgstr "Attestation postdatée justifiant votre activité mentionnée ci-dessus"
-
 msgid "Post-enrolment status"
 msgstr "Statut après inscription"
 
@@ -5653,6 +5660,13 @@ msgstr "Destinataire"
 msgid "Recompute"
 msgstr "Recalculer"
 
+msgid "Rector"
+msgstr "Recteur"
+
+msgctxt "F"
+msgid "Rector"
+msgstr "Rectrice"
+
 msgid "Reduced tuition fee"
 msgstr "Réduction des droits d’inscription"
 
@@ -5689,6 +5703,9 @@ msgstr "Attestation de refus SIC"
 
 msgid "Refusal certificate of faculty"
 msgstr "Attestation de refus facultaire"
+
+msgid "Refusal document link"
+msgstr "Lien du document de refus"
 
 msgid "Refusal reason"
 msgstr "Motif de refus"
@@ -6558,6 +6575,13 @@ msgstr ""
 "L’attestation de réussite de l’épreuve de confirmation est en cours de "
 "génération, veuillez revenir plus tard pour y accéder."
 
+msgid ""
+"The Previous experience must be in the \"Sufficient\" status in order to do "
+"this action."
+msgstr ""
+"Le parcours antérieur doit être à l'état \"Suffisant\" pour pouvoir "
+"effectuer cette action."
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
@@ -6939,13 +6963,13 @@ msgstr "Le statut a bien été modifié pour : %(status)s."
 
 #, python-brace-format
 msgid ""
-"The status of the request is currently \"{current_status}\". Only the status "
-"\"{from_status}\" allows you to move to the \"{to_status}\" status for the "
-"application fee."
+"The status of the request is currently \"{current_status}\". Only the "
+"statuses \"{from_statuses}\" allow you to move to the \"{to_status}\" status "
+"for the application fee."
 msgstr ""
-"Le statut de la demande est actuellement \"{current_status}\". Seul le "
-"statut \"{from_status}\" permet de passer à l'état \"{to_status}\" pour les "
-"frais de dossier."
+"Le statut de la demande est actuellement \"{current_status}\". Seuls les "
+"statuts \"{from_statuses}\" permettent de passer à l'état \"{to_status}\" "
+"pour les frais de dossier."
 
 msgid "The submitted information is not consistent with information requested."
 msgstr ""
@@ -7987,6 +8011,9 @@ msgstr ""
 
 msgid "You must set a lead supervisor."
 msgstr "Vous devez désigner un promoteur de référence."
+
+msgid "You need to create the message before sending it."
+msgstr "Il est nécessaire de créer le message avant de pouvoir envoyer."
 
 msgid "You need to set a member as president."
 msgstr "Vous devez désigner un membre comme président."

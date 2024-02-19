@@ -69,6 +69,7 @@ from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
 )
+from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import SicPatchMixin
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
@@ -85,7 +86,7 @@ from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
 
 @freezegun.freeze_time('2023-01-01')
-class PastExperiencesStatusViewTestCase(TestCase):
+class PastExperiencesStatusViewTestCase(SicPatchMixin):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -108,6 +109,7 @@ class PastExperiencesStatusViewTestCase(TestCase):
         cls.url_name = 'admission:general-education:past-experiences-change-status'
 
     def setUp(self) -> None:
+        super().setUp()
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
             candidate=self.candidate,
