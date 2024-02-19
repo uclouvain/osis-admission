@@ -41,7 +41,7 @@ class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
     )
 
     @classmethod
-    def submit_person_ticket(cls, global_id: str, noma: str) -> any:
+    def submit_person_ticket(cls, global_id: str, noma: str):
         pass
 
     @classmethod

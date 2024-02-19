@@ -38,7 +38,7 @@ from base.models.person_merge_proposal import PersonMergeProposal
 
 class DigitRepository(IDigitRepository):
     @classmethod
-    def submit_person_ticket(cls, global_id: str, noma: str) -> any:
+    def submit_person_ticket(cls, global_id: str, noma: str):
         person = Person.objects.get(global_id=global_id)
 
         # get proposal merge person if any is linked
