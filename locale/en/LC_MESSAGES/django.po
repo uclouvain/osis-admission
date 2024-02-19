@@ -2423,6 +2423,9 @@ msgstr ""
 msgid "Enrolled"
 msgstr ""
 
+msgid "Enrollment authorization document link"
+msgstr ""
+
 msgid "Enrolment Office (SIC)"
 msgstr ""
 
@@ -6811,6 +6814,9 @@ msgid "Viewed by"
 msgstr ""
 
 msgid "Visa"
+msgstr ""
+
+msgid "Visa application document link"
 msgstr ""
 
 msgid "Visualize"

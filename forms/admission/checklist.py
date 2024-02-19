@@ -1037,6 +1037,8 @@ class SicDecisionFinalApprovalForm(forms.Form):
                     **settings.CKEDITOR_CONFIGS['link_only'],
                     'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
                     'language': get_language(),
+                    'allowedContent': True,
+                    'autoParagraph': False,
                 }
             )
 

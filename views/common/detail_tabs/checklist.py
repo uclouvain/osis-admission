@@ -151,6 +151,8 @@ from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_SIC_APPROVAL,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
+    EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
+    EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
 )
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
@@ -158,6 +160,8 @@ from admission.utils import (
     get_backoffice_admission_url,
     get_portal_admission_url,
     get_access_titles_names,
+    get_salutation_prefix,
+    format_academic_year,
 )
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
@@ -833,30 +837,34 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
     @cached_property
     def sic_decision_approval_final_form(self):
+        candidate = self.admission.candidate
+
+        training_title = {
+            settings.LANGUAGE_CODE_FR: self.proposition.formation.intitule_fr,
+            settings.LANGUAGE_CODE_EN: self.proposition.formation.intitule,
+        }[candidate.language]
+
         tokens = {
-            "admission_reference": self.proposition.reference,
-            "candidate": (
-                f"{self.proposition.profil_soumis_candidat.prenom} " f"{self.proposition.profil_soumis_candidat.nom}"
-            )
-            if self.proposition.profil_soumis_candidat
-            else "",
-            "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
-            "academic_year_start_date": date_format(self.proposition.formation.date_debut),
-            "admission_email": self.proposition.formation.campus_inscription.email,
-            "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
+            'admission_reference': self.proposition.reference,
+            'candidate_first_name': self.proposition.prenom_candidat,
+            'candidate_last_name': self.proposition.nom_candidat,
+            'academic_year': format_academic_year(self.proposition.formation.annee),
+            'academic_year_start_date': date_format(self.proposition.formation.date_debut),
+            'admission_email': self.proposition.formation.campus_inscription.email,
+            'enrollment_authorization_document_link': EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
+            'visa_application_document_link': EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
+            'greetings': get_salutation_prefix(self.admission.candidate),
+            'training_title': training_title,
+            'admission_link_front': get_portal_admission_url('general-education', self.admission_uuid),
+            'admission_link_back': get_backoffice_admission_url('general-education', self.admission_uuid),
+            'training_campus': self.proposition.formation.campus.nom,
+            'training_acronym': self.proposition.formation.sigle,
         }
-        if get_language() == settings.LANGUAGE_CODE_FR:
-            if self.proposition.genre_candidat == "H":
-                tokens['greetings'] = "Cher"
-            elif self.proposition.genre_candidat == "F":
-                tokens['greetings'] = "Chère"
-            else:
-                tokens['greetings'] = "Cher·ère"
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
                 ADMISSION_EMAIL_SIC_APPROVAL,
-                settings.LANGUAGE_CODE_FR,
+                self.admission.candidate.language,
             )
 
             subject = mail_template.render_subject(tokens=tokens)
