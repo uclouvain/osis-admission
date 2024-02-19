@@ -5099,6 +5099,13 @@ msgstr ""
 msgid "Recompute"
 msgstr ""
 
+msgid "Rector"
+msgstr ""
+
+msgctxt "F"
+msgid "Rector"
+msgstr ""
+
 msgid "Reduced tuition fee"
 msgstr ""
 
