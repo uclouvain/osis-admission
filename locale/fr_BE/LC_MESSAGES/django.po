@@ -2637,6 +2637,9 @@ msgstr "S'inscrire à un cours"
 msgid "Enrolled"
 msgstr "Inscrit"
 
+msgid "Enrollment authorization document link"
+msgstr "Lien du document d'autorisation d'inscription"
+
 msgid "Enrolment Office (SIC)"
 msgstr "Service des inscriptions (SIC)"
 
@@ -7541,6 +7544,9 @@ msgstr "Vue par"
 
 msgid "Visa"
 msgstr "Visa"
+
+msgid "Visa application document link"
+msgstr "Lien du document de demande de visa"
 
 msgid "Visualize"
 msgstr "Visualiser"
