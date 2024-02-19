@@ -224,5 +224,3 @@ class ProfilCandidatFactory(factory.Factory):
     etudes_secondaires = factory.SubFactory(EtudesSecondairesDTOFactory)
     curriculum = factory.SubFactory(CurriculumDTOFactory)
     conditions_comptabilite = factory.SubFactory(ConditionsComptabiliteDTOFactory)
-
-
