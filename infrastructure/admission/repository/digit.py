@@ -31,6 +31,7 @@ from django.conf import settings
 
 from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
+from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal
@@ -159,16 +160,16 @@ def _get_ticket_data(person: Person, noma: str):
         },
         "addresses": [
             {
-                "addressType": "LEG",
+                "addressType": "RES",
                 "country": address.country.iso_code,
                 "postalCode": address.postal_code,
                 "locality": address.city,
                 "street": address.street,
                 "number": address.street_number,
                 "box": address.postal_box,
-                "additionalAddressDetails": [address.label, address.place, address.location],
+                "additionalAddressDetails": [],
             }
-            for address in person.personaddress_set.all()
+            for address in person.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
         ],
         "physicalPerson": True,
     }
