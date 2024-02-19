@@ -49,16 +49,8 @@ from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmi
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import CurriculumDTO, ExperienceAcademiqueDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.dtos import EtudesSecondairesDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
-)
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.mail_templates import (
@@ -74,6 +66,14 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    EtudesSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO, DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    CurriculumDTO, ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
