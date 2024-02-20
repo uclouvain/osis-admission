@@ -5,7 +5,6 @@ from admission.mail_templates.checklist import ADMISSION_EMAIL_SIC_APPROVAL
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('admission', '0151_fix_birth_date_submitted_profile'),
     ]
@@ -79,7 +78,7 @@ class Migration(migrations.Migration):
                 apply via your local Belgian embassy or consulate. For more information, 
                 consult the <a href="https://dofi.ibz.be/en" target="_blank" style="color: #0000EE;">Belgian Immigration Office</a>.
             </p>
-            
+
             <div style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                 <p style="border: 1px solid #dc3545; padding: 10px; border-radius: 10px; display: inline-block; width: fit-content;">
                     <img
@@ -243,7 +242,7 @@ class Migration(migrations.Migration):
                 consulat de Belgique local·e. Nous vous invitons à consulter le 
                 <a href="https://dofi.ibz.be/fr" target="_blank" style="color: #0000EE;">site officiel de l'Office des étrangers</a>.
             </p>
-            
+
             <div style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                 <p style="border: 1px solid #dc3545; padding: 10px; border-radius: 10px; display: inline-block; width: fit-content;">
                     <img
