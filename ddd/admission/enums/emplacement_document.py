@@ -130,8 +130,8 @@ DocumentsSystemeFAC = {
 
 
 DocumentsSystemeSIC = {
-    'ATTESTATION_ACCORD_SIC': _('Approval certificate of SIC'),
-    'ATTESTATION_ACCORD_ANNEXE_SIC': _('Approval certificate annexe of SIC'),
+    'ATTESTATION_ACCORD_SIC': _('Enrolment authorisation'),
+    'ATTESTATION_ACCORD_ANNEXE_SIC': _('Annex 1 visa form'),
     'ATTESTATION_REFUS_SIC': _('Refusal certificate of SIC'),
 }
 
