@@ -45,10 +45,10 @@ class Migration(migrations.Migration):
                 'fr-be': "Autorisation d'inscription suite à une demande d'admission ({admission_reference})",
             },
             {
-                'en': '''<p>Dear {candidate}</p>
+                'en': '''<p>Dear {candidate_first_name} {candidate_last_name}</p>
 
-            <p>We are pleased to inform you that you are authorised to enrol in the {admission_training}
-             for the {academic_year} academic year.</p>
+            <p>We are pleased to inform you that you are authorised to enrol in the {training_title} - 
+            {training_acronym} for the {academic_year} academic year.</p>
             
             <p>If you require a student visa, please use the attached enrolment authorisation and visa application to 
               apply via your local Belgian embassy or consulate. For more information, 
@@ -73,10 +73,9 @@ class Migration(migrations.Migration):
             <p>Sincerely,<br>
             The Enrolment Office</p>
             ''',
-                'fr-be': '''<p>{greetings} {candidate},</p>
-
-            <p>Nous avons le plaisir de vous informer que vous êtes autorisé·e à vous inscrire au programme
-              {admission_training} pour l'année académique {academic_year}.</p>
+                'fr-be': '''<p>{greetings} {candidate_first_name} {candidate_last_name},</p>
+            <p>Nous avons le plaisir de vous informer que vous êtes autorisé·e à vous inscrire au programme 
+              {training_title} - {training_acronym} pour l'année académique {academic_year}.</p>
             
             <p>Vous trouverez ci-joint votre autorisation d'inscription qui comprend toutes les informations utiles 
               et les éventuelles conditions à remplir préalablement à votre inscription.</p>
