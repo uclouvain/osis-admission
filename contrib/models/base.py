@@ -29,11 +29,12 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.aggregates import StringAgg
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db import models
-from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count, Exists
+from django.db import models, IntegrityError
+from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count
 from django.db.models.fields.json import KeyTextTransform, KeyTransform
-from django.db.models.functions import Concat, Left, Coalesce, NullIf, Mod, Replace
+from django.db.models.functions import Concat, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -559,9 +560,20 @@ class AdmissionViewer(models.Model):
         verbose_name=_('Viewed at'),
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['person', 'admission'],
+                name='admission_viewer_unique',
+            ),
+        ]
+
     @classmethod
     def add_viewer(cls, person, admission):
-        AdmissionViewer.objects.update_or_create(
-            person=person,
-            admission=admission,
-        )
+        try:
+            AdmissionViewer.objects.update_or_create(
+                person=person,
+                admission=admission,
+            )
+        except (IntegrityError, ValidationError):
+            pass
