@@ -6691,7 +6691,6 @@ components:
       - QUALIFICATION_METHOD
       - ARTISTIC_QUALIFICATION
       - PROFESSIONAL_EDUCATION
-      - PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM
       type: string
     ForeignDiplomaTypes:
       enum:
