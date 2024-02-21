@@ -408,7 +408,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.general_admission.communication_to_the_candidate, 'Communication')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
-        self.assertEqual(self.general_admission.must_provide_student_visa_d, True)
+        self.assertEqual(self.general_admission.must_provide_student_visa_d, False)  # False for UE+5 candidates
 
         # Check that an history entry is created
         entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
@@ -451,6 +451,8 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         self.general_admission.type_demande = TypeDemande.INSCRIPTION.name
         self.general_admission.save()
+        self.general_admission.candidate.country_of_citizenship = CountryFactory(european_union=True)
+        self.general_admission.candidate.save()
         response = self.client.get(self.url, **self.default_headers)
         self.assertEqual(response.status_code, 200)
         form = response.context['sic_decision_approval_form']
@@ -465,6 +467,16 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         form = response.context['sic_decision_approval_form']
 
         self.assertIn('must_report_to_sic', form.fields)
+        self.assertNotIn('must_provide_student_visa_d', form.fields)
+
+        # The must provide student visa D field is only available for H(UE+5) countries
+        self.general_admission.candidate.country_of_citizenship = CountryFactory(european_union=False)
+        self.general_admission.candidate.save()
+
+        response = self.client.get(self.url, **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+        form = response.context['sic_decision_approval_form']
+
         self.assertIn('must_provide_student_visa_d', form.fields)
 
     def test_approval_decision_form_has_vip_fields(self):
