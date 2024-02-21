@@ -83,7 +83,7 @@
       <a href="{% url base_namespace|add:":documents" view.kwargs.uuid %}" class="btn btn-primary"><i class="fa fa-folder-open"></i> {% trans "Documents" %}</a>
     </div>
 
-    {% if sic_decision_approval_form.is_admission %}
+    {% if sic_decision_approval_form.must_provide_student_visa_d %}
       <div class="form-group">
         <label for="{{ sic_decision_approval_form.must_provide_student_visa_d.id_for_label }}" class="control-label">
           {{ sic_decision_approval_form.must_provide_student_visa_d.label }}
