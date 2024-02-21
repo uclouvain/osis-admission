@@ -5971,6 +5971,11 @@ msgstr ""
 msgid "The activity title"
 msgstr ""
 
+msgid ""
+"The authorization can not be done while there is one or more documents to be "
+"requested immediately."
+msgstr ""
+
 msgid "The candidate has a scholarship"
 msgstr ""
 

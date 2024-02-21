@@ -86,6 +86,10 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             must_report_to_sic=False,
             communication_to_the_candidate='',
         )
+        cls.general_admission.checklist['current']['parcours_anterieur'][
+            'statut'
+        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        cls.general_admission.save(update_fields=['checklist'])
         cls.general_admission.refusal_reasons.add(RefusalReasonFactory())
         cls.url = resolve_url(
             'admission:general-education:sic-decision-approval-final',
