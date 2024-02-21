@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,28 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
 
-# Import .py file which contains tasks to be executed
-from celery.schedules import crontab
+from admission.ddd.admission.commands import RetrieveAndStoreStatutTicketPersonneFromDigitCommand
+from admission.ddd.admission.repository.i_digit import IDigitRepository
 
-from backoffice.celery import app as celery_app
-from . import process_admission_tasks
-from . import check_academic_calendar
-from . import retrieve_digit_tickets_status
 
-tasks = {
-    'Generate admission files': {
-        'task': 'admission.tasks.process_admission_tasks.run',
-        'schedule': crontab(),  # this runs every minute
-    },
-    '|Admission| Check academic calendar': {
-        'task': 'admission.tasks.check_academic_calendar.run',
-        'schedule': crontab(minute=0, hour=0, day_of_month='*', month_of_year='*', day_of_week=0),
-    },
-    '|Admission| Retrieve digit person tickets status': {
-        'task': 'admission.tasks.retrieve_digit_tickets_status.run',
-        'schedule': crontab(minute='0', hour='*'),
-    }
-}
-
-celery_app.conf.beat_schedule.update(tasks)
+def recuperer_statut_ticket_personne_de_digit(
+    cmd: 'RetrieveAndStoreStatutTicketPersonneFromDigitCommand',
+    digit_repository: 'IDigitRepository',
+) -> Optional[str]:
+    return digit_repository.retrieve_person_ticket_status_from_digit(global_id=cmd.global_id)

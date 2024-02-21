@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,27 +22,22 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from django.conf import settings
-from django.conf.urls import url
+##############################################################################
+from typing import List
 
-from admission.tasks import retrieve_digit_tickets_status
-from osis_common.utils.file_router import FileRouter
+import attr
 
-app_name = 'admission'
+from osis_common.ddd import interface
 
-file_router = FileRouter()
-urlpatterns = file_router('admission/views')
-urlpatterns += [
-    url(
-        'retrieve_digit_person_ticket_status',
-        retrieve_digit_tickets_status.run,
-        name="retrieve_digit_person_ticket_status"
-    )
-]
 
-if settings.DEBUG:
-    import logging
+@attr.dataclass(frozen=True, slots=True)
+class StatutTicketPersonneDTO(interface.DTO):
+    request_id: int
+    matricule: str
+    nom: str
+    prenom: str
+    statut: str
+    errors: List[str]
 
-    logger = logging.getLogger(__name__)
-    logger.debug("\n" + file_router.debug(urlpatterns))
+    def __str__(self):
+        return f"{self.request_id} - {self.nom.upper()}, {self.prenom} - {self.statut}"

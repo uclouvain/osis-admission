@@ -47,14 +47,14 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
+    specifier_besoin_de_derogation,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
-)
-from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
-    specifier_besoin_de_derogation,
 )
 from admission.ddd.admission.formation_generale.use_case.write.specifier_informations_acceptation_proposition_par_sic_service import (
     specifier_informations_acceptation_proposition_par_sic,
@@ -129,6 +129,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
+from admission.infrastructure.admission.repository.in_memory.digit import DigitInMemoryRepository
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
@@ -139,6 +140,8 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
+from infrastructure.shared_kernel.signaletique_etudiant.repository.in_memory.compteur_noma import \
+    CompteurAnnuelPourNomaInMemoryRepository
 
 _formation_generale_translator = FormationGeneraleInMemoryTranslator()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
@@ -162,6 +165,8 @@ _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
 _poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
 _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
 _reference_translator = ReferenceInMemoryTranslator()
+_digit_repository = DigitInMemoryRepository()
+_compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -606,6 +611,8 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            digit=_digit_repository,
+            compteur_noma=_compteur_noma,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -619,6 +626,8 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
+            digit=_digit_repository,
+            compteur_noma=_compteur_noma,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (

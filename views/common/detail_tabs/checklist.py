@@ -57,7 +57,7 @@ from rest_framework.views import APIView
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.commands import ListerToutesDemandesQuery, GetStatutTicketPersonneQuery
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
@@ -1550,6 +1550,11 @@ class ChecklistView(
                 }
             )
             context['can_choose_access_title'] = can_change_access_title
+
+        matr = self.proposition_fusion.matricule if self.proposition_fusion else self.proposition.matricule_candidat
+        context['digit_ticket'] = message_bus_instance.invoke(
+            GetStatutTicketPersonneQuery(global_id=matr)
+        )
 
         return context
 

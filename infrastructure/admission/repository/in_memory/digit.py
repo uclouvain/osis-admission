@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,28 +23,35 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional, List
 
-# Import .py file which contains tasks to be executed
-from celery.schedules import crontab
+from admission.ddd.admission.dtos.statut_ticket_personne import StatutTicketPersonneDTO
+from admission.ddd.admission.repository.i_digit import IDigitRepository
+from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
-from backoffice.celery import app as celery_app
-from . import process_admission_tasks
-from . import check_academic_calendar
-from . import retrieve_digit_tickets_status
 
-tasks = {
-    'Generate admission files': {
-        'task': 'admission.tasks.process_admission_tasks.run',
-        'schedule': crontab(),  # this runs every minute
-    },
-    '|Admission| Check academic calendar': {
-        'task': 'admission.tasks.check_academic_calendar.run',
-        'schedule': crontab(minute=0, hour=0, day_of_month='*', month_of_year='*', day_of_week=0),
-    },
-    '|Admission| Retrieve digit person tickets status': {
-        'task': 'admission.tasks.retrieve_digit_tickets_status.run',
-        'schedule': crontab(minute='0', hour='*'),
-    }
-}
+class DigitInMemoryRepository(InMemoryGenericRepository, IDigitRepository):
+    statut_ticket = StatutTicketPersonneDTO(
+        request_id=1,
+        matricule='123456789',
+        nom='lastname',
+        prenom='firstname',
+        statut='CREATED',
+        errors=[],
+    )
 
-celery_app.conf.beat_schedule.update(tasks)
+    @classmethod
+    def submit_person_ticket(cls, global_id: str, noma: str):
+        pass
+
+    @classmethod
+    def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
+        return cls.statut_ticket
+
+    @classmethod
+    def retrieve_person_ticket_status_from_digit(cls, global_id: str) -> Optional[str]:
+        return cls.statut_ticket.statut
+
+    @classmethod
+    def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
+        return [cls.statut_ticket]
