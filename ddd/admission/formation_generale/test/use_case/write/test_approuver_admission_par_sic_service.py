@@ -23,9 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from unittest import TestCase
 
 import factory
+import freezegun
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
@@ -43,6 +45,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     InformationsAcceptationFacultaireNonSpecifieesException,
+    ParcoursAnterieurNonSuffisantException,
+    DocumentAReclamerImmediatException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
@@ -57,8 +61,11 @@ from admission.infrastructure.admission.repository.in_memory.emplacement_documen
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
+@freezegun.freeze_time('2020-11-01')
 class TestApprouverAdmissionParSic(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -66,6 +73,15 @@ class TestApprouverAdmissionParSic(TestCase):
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
         cls.command = ApprouverAdmissionParSicCommand
+        academic_year_repository = AcademicYearInMemoryRepository()
+        for annee in range(2020, 2022):
+            academic_year_repository.save(
+                AcademicYear(
+                    entity_id=AcademicYearIdentity(year=annee),
+                    start_date=datetime.date(annee, 9, 15),
+                    end_date=datetime.date(annee + 1, 9, 30),
+                )
+            )
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(
@@ -77,6 +93,7 @@ class TestApprouverAdmissionParSic(TestCase):
             est_approuvee_par_sic=True,
             statut=ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION,
         )
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_REUSSITE
         self.proposition_repository.save(self.proposition)
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-MASTER-SCI-APPROVED',
@@ -184,3 +201,21 @@ class TestApprouverAdmissionParSic(TestCase):
             self.assertIsInstance(
                 context.exception.exceptions.pop(), InformationsAcceptationFacultaireNonSpecifieesException
             )
+
+    def test_should_lever_exception_si_parcours_anterieur_non_suffisant(self):
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_EN_COURS
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(context.exception.exceptions.pop(), ParcoursAnterieurNonSuffisantException)
+
+    def test_should_lever_exception_si_document_a_reclamer_immediatement(self):
+        self.proposition.documents_demandes = {
+            'CURRICULUM.CURRICULUM': {
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+        }
+        self.proposition_repository.save(self.proposition)
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+            self.assertIsInstance(context.exception.exceptions.pop(), DocumentAReclamerImmediatException)

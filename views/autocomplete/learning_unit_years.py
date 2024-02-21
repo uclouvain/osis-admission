@@ -89,17 +89,20 @@ class LearningUnitYearAutocomplete(BaseLearningUnitYearAutoComplete):
         return results
 
     def results(self, results) -> List[Dict]:
-        title_attribute = self.title_attribute[get_language()]
         results = [
             {
                 'id': dto.code,
-                'text': f"{dto.code} - {getattr(dto, title_attribute) or dto.full_title}",
+                'text': self.get_learning_unit_title(dto),
             }
             for dto in results
         ]
         return sorted(results, key=lambda elt: elt['text'])
 
     @classmethod
-    def dtos_to_choices(cls, dtos):
+    def get_learning_unit_title(cls, dto):
         title_attribute = cls.title_attribute[get_language()]
-        return [(dto.code, f"{dto.code} - {getattr(dto, title_attribute) or dto.full_title}") for dto in dtos]
+        return f"{dto.code} - {getattr(dto, title_attribute) or dto.full_title}"
+
+    @classmethod
+    def dtos_to_choices(cls, dtos):
+        return [(dto.code, cls.get_learning_unit_title(dto)) for dto in dtos]

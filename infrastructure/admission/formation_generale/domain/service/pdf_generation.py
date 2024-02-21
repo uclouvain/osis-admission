@@ -23,7 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+import itertools
+from builtins import iter
+from typing import Optional, List, Dict, Union
 
 from django.conf import settings
 from django.utils import translation, timezone
@@ -32,10 +34,13 @@ from django.utils.translation import override
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
+from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
@@ -43,6 +48,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererDocumentsPropositionQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
@@ -54,11 +60,13 @@ from admission.infrastructure.admission.domain.service.unites_enseignement_trans
 )
 from admission.infrastructure.utils import (
     CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM,
+    CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
 )
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
+from osis_profile.models.enums.curriculum import ActivityType
 
 ENTITY_SIC = 'SIC'
 ENTITY_UCL = 'UCL'
@@ -273,9 +281,22 @@ class PDFGeneration(IPDFGeneration):
         profil_candidat_identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
         profil_candidat_coordonnees = profil_candidat_translator.get_coordonnees(proposition.matricule_candidat)
 
-        documents = message_bus_instance.invoke(
-            RecupererDocumentsPropositionQuery(uuid_proposition=proposition_dto.uuid),
+        documents_resume: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(
+                uuid_proposition=proposition_dto.uuid,
+                avec_document_libres=True,
+            )
         )
+
+        experiences_curriculum_par_uuid: Dict[str, Union[ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO]] = {
+            str(experience.uuid): experience
+            for experience in itertools.chain(
+                documents_resume.resume.curriculum.experiences_non_academiques,
+                documents_resume.resume.curriculum.experiences_academiques,
+            )
+        }
+
+        documents = documents_resume.emplacements_documents
         documents_names = []
 
         # Get the list of documents
@@ -285,16 +306,22 @@ class PDFGeneration(IPDFGeneration):
                 and document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
             ):
                 document_identifier = document.identifiant.split('.')
-                if document_identifier[0] == OngletsDemande.CURRICULUM.name and (
-                    document_identifier[-1] in CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
+
+                if (
+                    document_identifier[0] == OngletsDemande.CURRICULUM.name
+                    and (document_identifier[-1] in CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM)
+                    and document_identifier[1] in experiences_curriculum_par_uuid
                 ):
                     # For the curriculum experiences, we would like to get the name of the experience
-                    # (i.e. the name of the document tab minus the 'Curriculum >' prefix)
-                    sub_label = document.nom_onglet_langue_candidat.partition(' > ')[-1]
-                    documents_names.append(f'{sub_label} > {document.libelle_langue_candidat}')
+                    documents_names.append(
+                        '{document_label} : {cv_xp_label}'.format(
+                            document_label=document.libelle_langue_candidat,
+                            cv_xp_label=experiences_curriculum_par_uuid[document_identifier[1]].titre_pdf_decision_sic,
+                        )
+                    )
+
                 else:
                     documents_names.append(document.libelle_langue_candidat)
-
 
         token = admission_generate_pdf(
             admission=None,

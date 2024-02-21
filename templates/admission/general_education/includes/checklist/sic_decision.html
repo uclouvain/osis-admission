@@ -160,14 +160,16 @@
               <i class="fa fa-magnifying-glass"></i>
               {% translate 'Visualize approval' %}
             </a>
-            <a
-                class="btn btn-default pull-right btn-heading-secondary"
-                href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
-                target="_blank"
-            >
-              <i class="fa fa-magnifying-glass"></i>
-              {% translate 'Visualize annexe1' %}
-            </a>
+            {% if admission.candidat_a_nationalite_hors_ue_5 %}
+              <a
+                  class="btn btn-default pull-right btn-heading-secondary"
+                  href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
+                  target="_blank"
+              >
+                <i class="fa fa-magnifying-glass"></i>
+                {% translate 'Visualize annexe1' %}
+              </a>
+            {% endif %}
           {% endif %}
           <h4 class="panel-title">{% if current.statut == 'GEST_REUSSITE' %}{% trans "Authorization" %}{% else %}{% trans "Authorization to validate" %}{% endif %}</h4>
         </div>
@@ -201,7 +203,7 @@
                 <dd>
                   <ul>
                     {% for formation in admission.complements_formation %}
-                      <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'fr-be' %}{{ formation.full_title }}{% else %}{{ formation.full_title_en }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
+                      <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'en' and formation.full_title_en %}{{ formation.full_title_en }}{% else %}{{ formation.full_title }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
                     {% endfor %}
                   </ul>
                 </dd>

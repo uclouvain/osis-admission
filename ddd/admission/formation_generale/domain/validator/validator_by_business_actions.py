@@ -35,6 +35,7 @@ from admission.ddd.admission.domain.model.complement_formation import Complement
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
@@ -48,6 +49,7 @@ from admission.ddd.admission.domain.validator import (
     ShouldTypeCompteBancaireRemboursementEtreComplete,
     ShouldAssimilationEtreCompletee,
 )
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
@@ -83,6 +85,8 @@ from admission.ddd.admission.formation_generale.domain.validator import (
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldSicPeutDonnerDecision,
+    ShouldParcoursAnterieurEtreSuffisant,
+    ShouldNePasAvoirDeDocumentReclameImmediat,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
@@ -369,6 +373,9 @@ class ApprouverParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidato
 
     nombre_annees_prevoir_programme: Optional[int]
 
+    checklist: StatutsChecklistGenerale
+    documents_dto: List[EmplacementDocumentDTO]
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -384,6 +391,12 @@ class ApprouverParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidato
                 avec_complements_formation=self.avec_complements_formation,
                 complements_formation=self.complements_formation,
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            ),
+            ShouldParcoursAnterieurEtreSuffisant(
+                statut=self.checklist.parcours_anterieur,
+            ),
+            ShouldNePasAvoirDeDocumentReclameImmediat(
+                documents_dto=self.documents_dto,
             ),
         ]
 

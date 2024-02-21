@@ -67,6 +67,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
@@ -74,7 +75,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
     ModifierChecklistChoixFormationCommand,
     SpecifierPaiementNecessaireCommand,
     EnvoyerRappelPaiementCommand,
@@ -153,6 +154,7 @@ from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
     EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
+    ADMISSION_EMAIL_SIC_APPROVAL_EU,
 )
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
@@ -692,6 +694,10 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             }
             for document in self.sic_decision_approval_form_requestable_documents
         }
+        context['a_des_documents_requis_immediat'] = any(
+            document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+            for document in self.sic_decision_approval_form_requestable_documents
+        )
 
         if self.request.htmx:
             comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic']).first()
@@ -861,9 +867,14 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'training_acronym': self.proposition.formation.sigle,
         }
 
+        if self.admission.candidate.country_of_citizenship.european_union:
+            template_name = ADMISSION_EMAIL_SIC_APPROVAL_EU
+        else:
+            template_name = ADMISSION_EMAIL_SIC_APPROVAL
+
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
-                ADMISSION_EMAIL_SIC_APPROVAL,
+                template_name,
                 self.admission.candidate.language,
             )
 
@@ -937,7 +948,8 @@ class SicApprovalDecisionView(
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
-
+        # Reset cached proposition
+        del self.proposition
         return super().form_valid(form)
 
 
@@ -1245,7 +1257,7 @@ class ChecklistView(
         if not self.request.htmx:
             # Retrieve data related to the proposition
             command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(uuid_proposition=self.admission_uuid),
+                RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
             )
 
             context['resume_proposition'] = command_result.resume
