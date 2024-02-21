@@ -7,7 +7,7 @@ from admission.mail_templates.checklist import ADMISSION_EMAIL_SIC_APPROVAL_EU
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0152_sic_approval_mail_document_link'),
+        ('admission', '0153_sic_approval_mail_document_link_remove_images'),
     ]
 
     operations = [
