@@ -160,14 +160,16 @@
               <i class="fa fa-magnifying-glass"></i>
               {% translate 'Visualize approval' %}
             </a>
-            <a
-                class="btn btn-default pull-right btn-heading-secondary"
-                href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
-                target="_blank"
-            >
-              <i class="fa fa-magnifying-glass"></i>
-              {% translate 'Visualize annexe1' %}
-            </a>
+            {% if admission.candidat_a_nationalite_hors_ue_5 %}
+              <a
+                  class="btn btn-default pull-right btn-heading-secondary"
+                  href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
+                  target="_blank"
+              >
+                <i class="fa fa-magnifying-glass"></i>
+                {% translate 'Visualize annexe1' %}
+              </a>
+            {% endif %}
           {% endif %}
           <h4 class="panel-title">{% if current.statut == 'GEST_REUSSITE' %}{% trans "Authorization" %}{% else %}{% trans "Authorization to validate" %}{% endif %}</h4>
         </div>
