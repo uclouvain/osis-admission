@@ -726,6 +726,9 @@ msgstr ""
 "Annexe 26 ou 26 ou la carte A/B mentionnant le statut de réfugié ou la "
 "décision confirmant la protection du parent"
 
+msgid "Annex 1 visa form"
+msgstr "Formulaire visa annexe 1"
+
 msgid "Annexe approval certificate from SIC"
 msgstr "Annexe au certificat d'approbation SIC"
 
@@ -790,13 +793,7 @@ msgstr "Approbation par pdf"
 msgid "Approval"
 msgstr "Accord"
 
-msgid "Approval certificate annexe of SIC"
-msgstr "Certificat d'approbation annexe SIC"
-
 msgid "Approval certificate from SIC"
-msgstr "Certificat d'approbation SIC"
-
-msgid "Approval certificate of SIC"
 msgstr "Certificat d'approbation SIC"
 
 msgid "Approval certificate of faculty"
@@ -2645,6 +2642,9 @@ msgstr "Service des inscriptions (SIC)"
 
 msgid "Enrolment applications"
 msgstr "Demandes d'inscription"
+
+msgid "Enrolment authorisation"
+msgstr "Autorisation d'inscription"
 
 msgid "Enrolment campus"
 msgstr "Site d'inscription"

@@ -642,6 +642,9 @@ msgid ""
 "confirming the protection of the parent"
 msgstr ""
 
+msgid "Annex 1 visa form"
+msgstr ""
+
 msgid "Annexe approval certificate from SIC"
 msgstr ""
 
@@ -703,13 +706,7 @@ msgstr ""
 msgid "Approval"
 msgstr ""
 
-msgid "Approval certificate annexe of SIC"
-msgstr ""
-
 msgid "Approval certificate from SIC"
-msgstr ""
-
-msgid "Approval certificate of SIC"
 msgstr ""
 
 msgid "Approval certificate of faculty"
@@ -2430,6 +2427,9 @@ msgid "Enrolment Office (SIC)"
 msgstr ""
 
 msgid "Enrolment applications"
+msgstr ""
+
+msgid "Enrolment authorisation"
 msgstr ""
 
 msgid "Enrolment campus"
