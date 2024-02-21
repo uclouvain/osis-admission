@@ -193,26 +193,26 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
 
         # For the curriculum experiences, we display the names of the experiences before the documents names
         self.assertIn(
-            f"{ActivityType.WORK.value} 01/2023-03/2023 > {CURRICULUM_ACTIVITY_LABEL[ActivityType.WORK.name]}",
-            documents_names,
-        )
-        self.assertIn(
-            f"My custom activity 01/2024 > {CURRICULUM_ACTIVITY_LABEL[ActivityType.OTHER.name]}",
+            f"{CURRICULUM_ACTIVITY_LABEL[ActivityType.WORK.name]} : 01/2023-03/2023",
             documents_names,
         )
 
         self.assertIn(
-            f"Computer science (Institute) 2023-2024 > {DocumentsCurriculum['RELEVE_NOTES_ANNUEL']} 2023-2024",
+            f"{CURRICULUM_ACTIVITY_LABEL[ActivityType.OTHER.name]} : My custom activity 01/2024",
             documents_names,
         )
 
         self.assertIn(
-            f"Computer science (Institute) 2023-2024 > {DocumentsCurriculum['TRADUCTION_RELEVE_NOTES_ANNUEL']} "
-            f"2023-2024",
+            f"{DocumentsCurriculum['RELEVE_NOTES_ANNUEL']} 2023-2024 : Computer science",
             documents_names,
         )
 
         self.assertIn(
-            f"Computer science (Institute) 2023-2024 > {DocumentsCurriculum['DIPLOME']}",
+            f"{DocumentsCurriculum['TRADUCTION_RELEVE_NOTES_ANNUEL']} 2023-2024 : Computer science",
+            documents_names,
+        )
+
+        self.assertIn(
+            f"{DocumentsCurriculum['DIPLOME']} : Computer science",
             documents_names,
         )
