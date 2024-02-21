@@ -43,7 +43,7 @@ class DigitRepository(IDigitRepository):
         person = Person.objects.get(global_id=global_id)
 
         # get proposal merge person if any is linked
-        proposition = PersonMergeProposal.objects.filter(original_person=person)
+        proposition = PersonMergeProposal.objects.filter(original_person=person, proposal_merge_person__isnull=False)
         if proposition.exists():
             person = proposition.get().proposal_merge_person
 
