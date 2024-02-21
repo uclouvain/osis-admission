@@ -140,55 +140,64 @@ EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN = 'LIEN_DOCUMENT_AUTO
 EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN = 'LIEN_DOCUMENT_DEMANDE_VISA'
 
 ADMISSION_EMAIL_SIC_APPROVAL = 'osis-admission-sic-approval'
+ADMISSION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
+    Token(
+        name='academic_year',
+        description=_("Academic year of the admission"),
+        example="2023-2024",
+    ),
+    Token(
+        name='academic_year_start_date',
+        description=_("Start date of the academic year of the admission"),
+        example="14 September",
+    ),
+    Token(
+        name='admission_email',
+        description=_("Email receiving the documents"),
+        example="inscription-lln@uclouvain.be",
+    ),
+    Token(
+        name='greetings',
+        description=_("Greetings depending on the gender of the candidate"),
+        example="Cher·ère",
+    ),
+    Token(
+        name='enrollment_authorization_document_link',
+        description=_("Enrollment authorization document link"),
+        example="https://osis.uclouvain.be/...",
+    ),
+    Token(
+        name='visa_application_document_link',
+        description=_("Visa application document link"),
+        example="https://osis.uclouvain.be/...",
+    ),
+    Token(
+        name='training_campus',
+        description=_('Teaching campus of the training'),
+        example="Louvain-la-Neuve",
+    ),
+    Token(
+        name='training_acronym',
+        description=_('Acronym of the training'),
+        example='SPRI2MS/DI',
+    ),
+]
 templates.register(
     ADMISSION_EMAIL_SIC_APPROVAL,
     description=_(
-        'Email sent to the candidate when SIC approves an admission.',
+        'Email sent to the NEU+5 candidate when SIC approves an admission.',
     ),
     tag=GENERAL_ADMISSION_TAG,
-    tokens=CHECKLIST_TOKENS
-    + [
-        Token(
-            name='academic_year',
-            description=_("Academic year of the admission"),
-            example="2023-2024",
-        ),
-        Token(
-            name='academic_year_start_date',
-            description=_("Start date of the academic year of the admission"),
-            example="14 September",
-        ),
-        Token(
-            name='admission_email',
-            description=_("Email receiving the documents"),
-            example="inscription-lln@uclouvain.be",
-        ),
-        Token(
-            name='greetings',
-            description=_("Greetings depending on the gender of the candidate"),
-            example="Cher·ère",
-        ),
-        Token(
-            name='enrollment_authorization_document_link',
-            description=_("Enrollment authorization document link"),
-            example="https://osis.uclouvain.be/...",
-        ),
-        Token(
-            name='visa_application_document_link',
-            description=_("Visa application document link"),
-            example="https://osis.uclouvain.be/...",
-        ),
-        Token(
-            name='training_campus',
-            description=_('Teaching campus of the training'),
-            example="Louvain-la-Neuve",
-        ),
-        Token(
-            name='training_acronym',
-            description=_('Acronym of the training'),
-            example='SPRI2MS/DI',
-        ),
-    ],
+    tokens=ADMISSION_EMAIL_SIC_APPROVAL_TOKENS,
+)
+ADMISSION_EMAIL_SIC_APPROVAL_EU = 'osis-admission-sic-approval-eu'
+templates.register(
+    ADMISSION_EMAIL_SIC_APPROVAL_EU,
+    description=_(
+        'Email sent to the EU+5 candidate when SIC approves an admission.',
+    ),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=ADMISSION_EMAIL_SIC_APPROVAL_TOKENS,
 )
 
 ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS = (
