@@ -35,6 +35,11 @@ from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.emplacement_document import (
+    StatutReclamationEmplacementDocument,
+    StatutEmplacementDocument,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
@@ -44,7 +49,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     DecisionFacultaireEnum,
 )
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutsChecklistGenerale,
+    StatutChecklist,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     MotifRefusFacultaireNonSpecifieException,
     InformationsAcceptationFacultaireNonSpecifieesException,
@@ -53,6 +61,8 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     TitreAccesEtreSelectionneException,
     ConditionAccesEtreSelectionneException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
+    ParcoursAnterieurNonSuffisantException,
+    DocumentAReclamerImmediatException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
@@ -184,3 +194,25 @@ class ShouldConditionAccesEtreSelectionne(BusinessValidator):
             self.condition_acces and self.millesime_condition_acces
         ):
             raise ConditionAccesEtreSelectionneException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldParcoursAnterieurEtreSuffisant(BusinessValidator):
+    statut: StatutChecklist
+
+    def validate(self, *args, **kwargs):
+        if self.statut.statut != ChoixStatutChecklist.GEST_REUSSITE:
+            raise ParcoursAnterieurNonSuffisantException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldNePasAvoirDeDocumentReclameImmediat(BusinessValidator):
+    documents_dto: List[EmplacementDocumentDTO]
+
+    def validate(self, *args, **kwargs):
+        if any(
+            document.statut == StatutEmplacementDocument.A_RECLAMER.name
+            and document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+            for document in self.documents_dto
+        ):
+            raise DocumentAReclamerImmediatException

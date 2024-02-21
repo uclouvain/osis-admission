@@ -6601,6 +6601,13 @@ msgstr "L'acronyme de la bourse d'études"
 msgid "The activity title"
 msgstr "Le titre de l'activité"
 
+msgid ""
+"The authorization can not be done while there is one or more documents to be "
+"requested immediately."
+msgstr ""
+"L’autorisation ne peut avoir lieu tant qu’un ou plusieurs documents sont à "
+"réclamer immédiatement."
+
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
 
