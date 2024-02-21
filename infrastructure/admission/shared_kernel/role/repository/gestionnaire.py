@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from typing import List, Optional, Dict
 
 from django.conf import settings
 from django.db.models import OuterRef, Subquery, Q, F
-from django.db.models.functions import JSONObject
+from django.db.models.functions import JSONObject, Coalesce
 from django.utils.translation import get_language
 
 from admission.auth.roles.program_manager import ProgramManager
@@ -59,7 +59,7 @@ class GestionnaireRepository(IGestionnaireRepository):
             json_training=JSONObject(
                 uuid=F('uuid'),
                 sigle=F('acronym'),
-                intitule=F(translated_title),
+                intitule=Coalesce(F(translated_title), F('title')),
                 lieu_enseignement=F('lieu_enseignement'),
                 annee=F('academic_year__year'),
             ),

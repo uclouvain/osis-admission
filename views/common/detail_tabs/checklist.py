@@ -942,7 +942,8 @@ class SicApprovalDecisionView(
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
-
+        # Reset cached proposition
+        del self.proposition
         return super().form_valid(form)
 
 
