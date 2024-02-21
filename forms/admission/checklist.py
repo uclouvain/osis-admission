@@ -907,11 +907,14 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
         if not self.is_admission:
             del self.fields['must_report_to_sic']
-            del self.fields['must_provide_student_visa_d']
         else:
             self.fields['must_report_to_sic'].required = True
-            self.initial['must_provide_student_visa_d'] = candidate_nationality_is_no_ue_5
             self.initial['must_report_to_sic'] = False
+
+        if self.is_admission and candidate_nationality_is_no_ue_5:
+            self.initial['must_provide_student_visa_d'] = True
+        else:
+            del self.fields['must_provide_student_visa_d']
 
         self.fields['communication_to_the_candidate'].required = False
 
