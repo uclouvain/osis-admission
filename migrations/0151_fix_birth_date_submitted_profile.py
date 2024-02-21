@@ -19,7 +19,7 @@ def fix_birth_date_in_submitted_profile(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0149_alter_admissionreader_education_group'),
+        ('admission', '0150_sic_refusal_mail_document_link'),
     ]
 
     operations = [

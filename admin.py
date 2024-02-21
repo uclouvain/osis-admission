@@ -36,6 +36,7 @@ from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext
+from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
 from osis_document.contrib import FileField
@@ -144,6 +145,9 @@ class AdmissionAdminMixin(ReadOnlyFilesMixin, admin.ModelAdmin):
         'training__academic_year',
     ]
     list_filter = ['status', 'type_demande']
+    formfield_overrides = {
+        models.JSONField: {'widget': JSONEditorWidget},
+    }
 
     def has_add_permission(self, request):
         # Prevent adding from admin site as we lose all business checks
@@ -496,6 +500,7 @@ class AccountingAdmin(ReadOnlyFilesMixin, admin.ModelAdmin):
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference']
+    list_display = ('reference', 'candidate', 'training', 'type_demande', 'created_at', )
     actions = [
         'injecter_dans_epc',
     ]

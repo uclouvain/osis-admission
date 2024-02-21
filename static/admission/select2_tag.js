@@ -38,6 +38,7 @@ document.addEventListener('dal-init-function', function () {
         }
 
         var ajax = null;
+        let ajaxResults = [];
         if (currentElement.attr('data-autocomplete-light-url')) {
             ajax = {
                 url: currentElement.attr('data-autocomplete-light-url'),
@@ -51,6 +52,11 @@ document.addEventListener('dal-init-function', function () {
                         forward: yl.getForwards(currentElement)
                     };
 
+                    return data;
+                },
+                processResults: function (data) {
+                    // Store results ids to not create tag with similar ids, see createTag below.
+                    ajaxResults = data.results.map(result => result.id);
                     return data;
                 },
                 cache: true
@@ -88,6 +94,17 @@ document.addEventListener('dal-init-function', function () {
                 // Insert the tag only if there is no result
                 if (data.length === 0) {
                     data.push(tag);
+                }
+            },
+            createTag: function (params) {
+                // Do not create a tag if its value already exist in the list of result
+                // https://github.com/select2/select2/issues/6091
+                if (ajaxResults.includes(params.term)) {
+                    return null;
+                }
+                return {
+                    id: params.term,
+                    text: params.term,
                 }
             },
         });

@@ -31,7 +31,6 @@ from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from osis_history.models import HistoryEntry
-from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
@@ -42,7 +41,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DroitsInscriptionMontant,
     DispenseOuDroitsMajores,
 )
-from admission.mail_templates.checklist import ADMISSION_EMAIL_SIC_REFUSAL, ADMISSION_EMAIL_SIC_APPROVAL
 from admission.tests.factories.faculty_decision import RefusalReasonFactory
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
@@ -88,6 +86,10 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             must_report_to_sic=False,
             communication_to_the_candidate='',
         )
+        cls.general_admission.checklist['current']['parcours_anterieur'][
+            'statut'
+        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        cls.general_admission.save(update_fields=['checklist'])
         cls.general_admission.refusal_reasons.add(RefusalReasonFactory())
         cls.url = resolve_url(
             'admission:general-education:sic-decision-approval-final',

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
 from osis_profile.models.enums.curriculum import Result
 from reference.tests.factories.country import CountryFactory
-from reference.tests.factories.language import EnglishLanguageFactory, FrenchLanguageFactory
+from reference.tests.factories.language import EnglishLanguageFactory, FrenchLanguageFactory, LanguageFactory
 
 
 class CompletePersonFactory(PersonFactory):
@@ -124,6 +124,7 @@ class CompletePersonFactory(PersonFactory):
             country=CountryFactory(iso_code="BE"),
             transcript=[uuid.uuid4()],
             transcript_translation=[uuid.uuid4()],
+            linguistic_regime=LanguageFactory(code='GK', name='Greek'),
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,

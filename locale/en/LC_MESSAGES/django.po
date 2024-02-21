@@ -647,6 +647,9 @@ msgid ""
 "confirming the protection of the parent"
 msgstr ""
 
+msgid "Annex 1 visa form"
+msgstr ""
+
 msgid "Annexe approval certificate from SIC"
 msgstr ""
 
@@ -708,13 +711,7 @@ msgstr ""
 msgid "Approval"
 msgstr ""
 
-msgid "Approval certificate annexe of SIC"
-msgstr ""
-
 msgid "Approval certificate from SIC"
-msgstr ""
-
-msgid "Approval certificate of SIC"
 msgstr ""
 
 msgid "Approval certificate of faculty"
@@ -2379,6 +2376,12 @@ msgid ""
 "%(author)s."
 msgstr ""
 
+msgid "Email sent to the EU+5 candidate when SIC approves an admission."
+msgstr ""
+
+msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
+msgstr ""
+
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
@@ -2387,9 +2390,6 @@ msgstr ""
 msgid ""
 "Email sent to the candidate to inform him that the checking of the "
 "authentication of its background is in progress."
-msgstr ""
-
-msgid "Email sent to the candidate when SIC approves an admission."
 msgstr ""
 
 msgid "Email sent to the candidate when SIC refuses an admission."
@@ -2446,10 +2446,16 @@ msgstr ""
 msgid "Enrolled"
 msgstr ""
 
+msgid "Enrollment authorization document link"
+msgstr ""
+
 msgid "Enrolment Office (SIC)"
 msgstr ""
 
 msgid "Enrolment applications"
+msgstr ""
+
+msgid "Enrolment authorisation"
 msgstr ""
 
 msgid "Enrolment campus"
@@ -6021,6 +6027,11 @@ msgstr ""
 msgid "The activity title"
 msgstr ""
 
+msgid ""
+"The authorization can not be done while there is one or more documents to be "
+"requested immediately."
+msgstr ""
+
 msgid "The candidate has a scholarship"
 msgstr ""
 
@@ -6872,6 +6883,9 @@ msgstr ""
 msgid "Visa"
 msgstr ""
 
+msgid "Visa application document link"
+msgstr ""
+
 msgid "Visualize"
 msgstr ""
 
@@ -7281,6 +7295,9 @@ msgid "Your Belgian student status"
 msgstr ""
 
 msgid "Your data have been saved."
+msgstr ""
+
+msgid "Your dossier reference:"
 msgstr ""
 
 msgid ""

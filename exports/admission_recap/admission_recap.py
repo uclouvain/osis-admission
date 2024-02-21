@@ -28,7 +28,7 @@ from io import BytesIO
 from typing import Union, Optional
 
 from django.utils.translation import override
-from pikepdf import Pdf, OutlineItem
+from pikepdf import Pdf, OutlineItem, PdfError
 
 from admission.contrib.models import (
     ContinuingEducationAdmission,
@@ -128,10 +128,17 @@ def admission_pdf_recap(
                             metadata=file_metadata.get(token),
                             default_content=default_content,
                         )
-                        with Pdf.open(raw_content) as attachment_content:
-                            version = max(version, attachment_content.pdf_version)
-                            pdf.pages.extend(attachment_content.pages)
-                            page_count += len(attachment_content.pages)
+                        try:
+                            with Pdf.open(raw_content) as attachment_content:
+                                version = max(version, attachment_content.pdf_version)
+                                pdf.pages.extend(attachment_content.pages)
+                                page_count += len(attachment_content.pages)
+                        except PdfError:
+                            # If an error occurs when opening the attachment, we add the default content
+                            with Pdf.open(default_content) as attachment_content:
+                                version = max(version, attachment_content.pdf_version)
+                                pdf.pages.extend(attachment_content.pages)
+                                page_count += len(attachment_content.pages)
 
                 if section.content is not None:
                     outline.root.append(outline_item)
