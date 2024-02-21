@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.shortcuts import redirect
 
 from admission.ddd.admission.commands import RetrieveListeTicketsEnAttenteQuery, \
     RetrieveAndStoreStatutTicketPersonneFromDigitCommand
@@ -30,7 +31,7 @@ from backoffice.celery import app
 
 
 @app.task
-def run():
+def run(request=None):
     from infrastructure.messages_bus import message_bus_instance
 
     # Retrieve list of tickets
@@ -40,3 +41,7 @@ def run():
         message_bus_instance.invoke(
             command=RetrieveAndStoreStatutTicketPersonneFromDigitCommand(global_id=ticket.matricule)
         )
+
+    # Handle response when task is ran as a cmd from admin panel
+    if request:
+        return redirect(request.META.get('HTTP_REFERER'))
