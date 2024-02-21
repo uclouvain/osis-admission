@@ -2356,6 +2356,12 @@ msgid ""
 "%(author)s."
 msgstr ""
 
+msgid "Email sent to the EU+5 candidate when SIC approves an admission."
+msgstr ""
+
+msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
+msgstr ""
+
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
@@ -2364,9 +2370,6 @@ msgstr ""
 msgid ""
 "Email sent to the candidate to inform him that the checking of the "
 "authentication of its background is in progress."
-msgstr ""
-
-msgid "Email sent to the candidate when SIC approves an admission."
 msgstr ""
 
 msgid "Email sent to the candidate when SIC refuses an admission."

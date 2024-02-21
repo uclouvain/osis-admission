@@ -153,6 +153,7 @@ from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
     EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
+    ADMISSION_EMAIL_SIC_APPROVAL_EU,
 )
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
@@ -861,9 +862,14 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'training_acronym': self.proposition.formation.sigle,
         }
 
+        if self.admission.candidate.country_of_citizenship.european_union:
+            template_name = ADMISSION_EMAIL_SIC_APPROVAL_EU
+        else:
+            template_name = ADMISSION_EMAIL_SIC_APPROVAL
+
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
-                ADMISSION_EMAIL_SIC_APPROVAL,
+                template_name,
                 self.admission.candidate.language,
             )
 
