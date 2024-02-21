@@ -57,6 +57,7 @@
 
   <div class="modal-footer">
     {% translate 'The Previous experience must be in the "Sufficient" status in order to do this action.' as previous_experience_disabled_str %}
+    {% translate 'The authorization can not be done while there is one or more documents to be requested immediately.' as has_requested_documents_disabled_str %}
     {% if original_admission.type_demande == 'ADMISSION' %}
       <a
           class="btn btn-default"
@@ -79,13 +80,13 @@
       <button
           class="btn btn-success"
           name="save"
-          {% if original_admission.checklist.current.parcours_anterieur.statut != 'GEST_REUSSITE' %}
+          {% if original_admission.checklist.current.parcours_anterieur.statut != 'GEST_REUSSITE' or a_des_documents_requis_immediat %}
             disabled
             data-toggle="popover"
             data-placement="auto top"
             data-trigger="hover"
             data-container="body"
-            data-content="{{ previous_experience_disabled_str|force_escape }}"
+            data-content="{% if a_des_documents_requis_immediat %}{{ has_requested_documents_disabled_str|force_escape }}{% else %}{{ previous_experience_disabled_str|force_escape }}{% endif %}"
           {% else %}
             {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
           {% endif %}
@@ -97,13 +98,13 @@
       <button
           class="btn btn-success"
           name="save"
-          {% if original_admission.checklist.current.parcours_anterieur.statut != 'GEST_REUSSITE' %}
+          {% if original_admission.checklist.current.parcours_anterieur.statut != 'GEST_REUSSITE' or a_des_documents_requis_immediat %}
             disabled
             data-toggle="popover"
             data-placement="auto top"
             data-trigger="hover"
             data-container="body"
-            data-content="{{ previous_experience_disabled_str|force_escape }}"
+            data-content="{% if a_des_documents_requis_immediat %}{{ has_requested_documents_disabled_str|force_escape }}{% else %}{{ previous_experience_disabled_str|force_escape }}{% endif %}"
           {% else %}
             {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
           {% endif %}

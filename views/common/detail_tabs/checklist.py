@@ -67,6 +67,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
@@ -692,6 +693,10 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             }
             for document in self.sic_decision_approval_form_requestable_documents
         }
+        context['a_des_documents_requis_immediat'] = any(
+            document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+            for document in self.sic_decision_approval_form_requestable_documents
+        )
 
         if self.request.htmx:
             comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic']).first()
