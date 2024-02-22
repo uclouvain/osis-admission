@@ -149,6 +149,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.headers.get('HX-Refresh'), True)
 
         form = response.context['sic_decision_refusal_form']
 
@@ -169,6 +170,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         # Check the response
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get('HX-Refresh'))
 
         form = response.context['sic_decision_refusal_form']
         self.assertTrue(form.is_valid())
@@ -233,6 +235,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         # Check the response
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get('HX-Refresh'))
 
         form = response.context['sic_decision_refusal_form']
         self.assertTrue(form.is_valid())
