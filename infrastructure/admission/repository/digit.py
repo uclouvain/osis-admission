@@ -151,7 +151,7 @@ def _get_ticket_data(person: Person, noma: str):
     return {
         "provider": {
             "source": "ETU",
-            "sourceId": noma,
+            "sourceId": "".join(filter(str.isdigit, noma)),
             "actif": True,
         },
         "person": {
@@ -159,8 +159,8 @@ def _get_ticket_data(person: Person, noma: str):
             "lastName": person.last_name,
             "firstName": person.first_name,
             "birthDate": person.birth_date.strftime('%Y-%m-%d'),
-            "gender": person.gender,
-            "nationalRegister": person.national_number,
+            "gender": person.sex,
+            "nationalRegister": "".join(filter(str.isdigit, person.national_number)),
             "nationality": person.country_of_citizenship.iso_code,
         },
         "addresses": [
@@ -172,7 +172,6 @@ def _get_ticket_data(person: Person, noma: str):
                 "street": address.street,
                 "number": address.street_number,
                 "box": address.postal_box,
-                "additionalAddressDetails": [],
             }
             for address in person.personaddress_set.filter(label=PersonAddressType.RESIDENTIAL.name)
         ],
