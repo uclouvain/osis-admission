@@ -6220,6 +6220,11 @@ msgid ""
 "to submit the dossier to the faculty: %(statuses)s."
 msgstr ""
 
+#, python-format
+msgid ""
+"The inscription type admission was authorised the %(date)s by %(author)s."
+msgstr ""
+
 msgid "The jury is not in progress"
 msgstr ""
 

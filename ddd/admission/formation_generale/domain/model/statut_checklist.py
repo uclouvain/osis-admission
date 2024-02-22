@@ -271,9 +271,10 @@ onglets_parcours_anterieur_experiences = ConfigurationOngletChecklist(
         ConfigurationStatutChecklist(
             identifiant=f'AUTHENTIFICATION.{etat_authentification.name}',
             libelle=etat_authentification.value,
-            statut=None,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
             extra={
                 'etat_authentification': etat_authentification.name,
+                'authentification': '1',
             },
         )
         for etat_authentification in EtatAuthentificationParcours
@@ -436,8 +437,11 @@ onglet_decision_sic = ConfigurationOngletChecklist(
         ConfigurationStatutChecklist(
             identifiant=f'BESOIN_DEROGATION.{etat_besoin_derogation.name}',
             libelle=etat_besoin_derogation.value,
-            statut=None,
-            extra={'etat_besoin_derogation': etat_besoin_derogation.name},
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={
+                'etat_besoin_derogation': etat_besoin_derogation.name,
+                'en_cours': 'derogation',
+            },
         )
         for etat_besoin_derogation in BesoinDeDerogation
     ]

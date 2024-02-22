@@ -28,7 +28,7 @@ from typing import Dict, Set, Optional, List
 
 from django.conf import settings
 from django.db.models import QuerySet
-from django.forms import Form, modelformset_factory, inlineformset_factory
+from django.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import resolve_url, redirect, render
@@ -725,19 +725,38 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
         context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
 
-        # Get information about mail sent if any
-        token = None
-        if self.proposition.certificat_refus_sic:
-            token = get_remote_token(self.proposition.certificat_refus_sic[0])
-        elif self.proposition.certificat_approbation_sic:
-            token = get_remote_token(self.proposition.certificat_approbation_sic[0])
-        if token is not None:
-            metadata = get_remote_metadata(token)
-            context['sic_decision_sent_at'] = metadata['uploaded_at']
-            try:
-                context['sic_decision_sent_by'] = Person.objects.get(global_id=metadata['author'])
-            except Person.DoesNotExist:
-                context['sic_decision_sent_by'] = metadata['author']
+        # Get information about the decision sending by the SIC if any and only in the final statuses
+        sic_decision_status = self.admission.checklist.get('current', {}).get('decision_sic', {})
+
+        if sic_decision_status:
+            history_tags = None
+            if sic_decision_status.get('statut') == ChoixStatutChecklist.GEST_REUSSITE.name:
+                history_tags = [
+                    'proposition',
+                    'sic-decision',
+                    'approval',
+                    'message' if self.admission.type_demande == TypeDemande.ADMISSION.name else 'status-changed',
+                ]
+            elif (
+                sic_decision_status.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+                and sic_decision_status.get('extra', {}).get('blocage') == 'refusal'
+            ):
+                history_tags = ['proposition', 'sic-decision', 'refusal', 'message']
+
+            if history_tags:
+                history_entry: Optional[HistoryEntry] = (
+                    HistoryEntry.objects.filter(
+                        tags__contains=history_tags,
+                        object_uuid=self.admission_uuid,
+                    )
+                    .order_by('-created')
+                    .first()
+                )
+
+                if history_entry:
+                    context['sic_decision_sent_at'] = history_entry.created
+                    context['sic_decision_sent_by'] = history_entry.author
+                    context['sic_decision_sent_with_email'] = 'message' in history_entry.tags
 
         context['sic_decision_dispensation_form'] = SicDecisionDerogationForm(
             initial={

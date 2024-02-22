@@ -53,7 +53,7 @@
   <hr>
   <div>
     <div class="row flex-content no-space">
-      <div class="col-md-2">
+      <div class="col-md-4">
         {% bootstrap_field filter_form.liste_travail %}
       </div>
         <button id="toggle-checklist-filters" type="button" class="btn btn-link nopadding" value="off">
@@ -61,7 +61,7 @@
         </button>
     </div>
     <div id="checklist-filters-container">
-      <div class="btn-group mt-1" data-toggle="buttons">
+      <div class="btn-group mt-1" data-toggle="buttons" id="checklist-filters-mode">
         {% for choice in filter_form.mode_filtres_etats_checklist %}
           <label
             for="{{ choice.id_for_label  }}"
@@ -85,8 +85,16 @@
           initializePopover({ trigger: 'hover' })
           initializeLazyPopover()
 
+          {# Working lists #}
+          const stateInput = $('#id_etats');
+          const typeInput = $('#id_type');
+          const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
+          const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
+          const toggleChecklistFiltersButton = $('#toggle-checklist-filters');
+          let selectWorkListInProgress = false;
+
           {# Toggle the checklist filters #}
-          $('#toggle-checklist-filters').on('click', function () {
+          toggleChecklistFiltersButton.on('click', function () {
               if ($(this).val() === 'off') {
                   $('#checklist-filters-container').show();
                   $(this).val('on');
@@ -98,12 +106,7 @@
               }
           });
 
-          {# Working lists #}
-          const stateInput = $('#id_etats');
-          const typeInput = $('#id_type');
-          const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
-          const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
-          let selectWorkListInProgress = false;
+          toggleChecklistFiltersButton.val(checklistFiltersInputs.filter(':checked').length > 0 ? 'off' : 'on').trigger('click');
 
           $('#id_etats, #id_type, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"]').on('change', function () {
               {# Reset the selected working list if the values of the dependent inputs change except if this change was triggered from the working list #}
@@ -129,6 +132,25 @@
               });
               selectWorkListInProgress = false;
           });
+          
+          {# Simulate the behavior of sub options #}
+          ['AUTHENTIFICATION', 'BESOIN_DEROGATION'].forEach(
+              function (optionValuePrefix) {
+                  const currentInputs = checklistFiltersInputs.filter(`[value^="${optionValuePrefix}"]`);
+                  currentInputs.on('change', function () {
+                      if (selectWorkListInProgress) return;
+                      {# Unselect the sub options if the parent option is unselected #}
+                      if (this.value === optionValuePrefix) {
+                          if(this.checked === false) {
+                              currentInputs.prop('checked', false);
+                          }
+                      } else if (this.checked === true) {
+                          {# Select the parent option if one of the sub options is selected #}
+                          currentInputs.filter(`[value="${optionValuePrefix}"]`).prop('checked', true);
+                      }
+                  });
+              }
+          )
 
           const $reference = $('#id_numero');
           $reference.mask(getReferenceMask($reference.val()), {
@@ -153,8 +175,17 @@
       gap: 1em;
     }
 
+    #checklist-filters-container .multi-widget label.control-label {
+      text-decoration: underline;
+    }
+
     #checklist-filters-container .multi-widget ul {
       list-style-type: none;
+      padding-left: 0;
+    }
+
+    #checklist-filters-container .multi-widget label:not(.control-label) {
+      font-weight: normal;
     }
 
     #checklist-filters-container .multi-widget input[value*="."] {
@@ -163,6 +194,12 @@
 
     #checklist-filters-container {
       display: none;
+    }
+
+    #checklist-filters-mode label:not(.active) {
+      background-color: #ddd;
+      border-color: #ddd;
+      color: #337ab7;
     }
   </style>
 {% endblock %}

@@ -1246,6 +1246,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
 
+        # When filtering by the authentification criteria, the authentification status should have the specific
+        # value and the past experience checklist tab status should be the authentification status
         current_authentication = 'AUTHENTIFICATION.' + EtatAuthentificationParcours.VRAI.name
 
         response = self._do_request(
@@ -1257,9 +1259,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
         current_checklist['extra'] = {
-            'authentification': '1',
             'etat_authentification': EtatAuthentificationParcours.VRAI.name,
         }
         second_admission.save(update_fields=['checklist'])
@@ -1271,8 +1271,43 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        current_checklist['extra']['authentification'] = '1'
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_4=[current_authentication],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_4=[current_authentication, 'AUTHENTIFICATION'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_4=[
+                'AUTHENTIFICATION',
+                f'AUTHENTIFICATION.{EtatAuthentificationParcours.FAUX.name}',
+            ],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
 
     def test_list_filter_by_financeability_checklist_status(self):
         self.client.force_login(user=self.sic_management_user)
@@ -1918,6 +1953,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
 
+        # When filtering by the dispensation needed criteria, the dispensation needed field should have the specific
+        # value and the sic decision checklist tab status should be the dispensation needed status
         dispensation_needed = f'BESOIN_DEROGATION.{BesoinDeDerogation.ACCORD_DIRECTION.name}'
 
         response = self._do_request(
@@ -1939,8 +1976,45 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        current_checklist['extra'] = {'en_cours': 'derogation'}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_9=[dispensation_needed],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        # If a specific dispensation status is selected, the parent status (tab status) should be ignored to prevent
+        # to select every admission whose the sic decision checklist tab status is the dispensation needed status
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_9=[dispensation_needed, 'BESOIN_DEROGATION'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_9=[
+                'BESOIN_DEROGATION',
+                f'BESOIN_DEROGATION.{BesoinDeDerogation.REFUS_DIRECTION.name}',
+            ],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
 
     def test_list_filter_by_excluding_checklist_status(self):
         self.client.force_login(user=self.sic_management_user)
@@ -2061,9 +2135,12 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'filtres_etats_checklist_9': [f'BESOIN_DEROGATION.{BesoinDeDerogation.ACCORD_DIRECTION.name}'],
         }
 
-        # The admission has the specific status so we exclude it
+        # The admission has the specific dispensation needed state and the specific checklist tab status so we exclude
+        # it
         second_admission.dispensation_needed = BesoinDeDerogation.ACCORD_DIRECTION.name
-        second_admission.save(update_fields=['dispensation_needed'])
+        second_admission.checklist['current']['decision_sic']['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        second_admission.checklist['current']['decision_sic']['extra'] = {'en_cours': 'derogation'}
+        second_admission.save(update_fields=['dispensation_needed', 'checklist'])
 
         response = self._do_request(**default_cmd_params)
 
@@ -2085,9 +2162,20 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(third_admission.uuid, response.context['object_list'][0].uuid)
 
-        # The admission hasn't got the specific status so we don't exclude it
+        # The admission hasn't got the specific dispensation needed state so we don't exclude it
         second_admission.dispensation_needed = BesoinDeDerogation.NON_CONCERNE.name
         second_admission.save(update_fields=['dispensation_needed'])
+
+        response = self._do_request(**default_cmd_params)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        # The admission hasn't got the specific dispensation needed state so we don't exclude it
+        second_admission.dispensation_needed = BesoinDeDerogation.ACCORD_DIRECTION.name
+        second_admission.checklist['current']['decision_sic']['statut'] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
+        second_admission.save(update_fields=['dispensation_needed', 'checklist'])
 
         response = self._do_request(**default_cmd_params)
 
@@ -2106,13 +2194,13 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         default_cmd_params = {
             'mode_filtres_etats_checklist': ModeFiltrageChecklist.EXCLUSION.name,
             'numero': str(second_admission),
-            'filtres_etats_checklist_4': ['AUTHENTIFICATION'],
+            'filtres_etats_checklist_4': [f'AUTHENTIFICATION.{EtatAuthentificationParcours.VRAI.name}'],
         }
 
         second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = [
             {
                 'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
-                'extra': {'authentification': '1'},
+                'extra': {'authentification': '1', 'etat_authentification': EtatAuthentificationParcours.VRAI.name},
             }
         ]
         second_admission.save(update_fields=['checklist'])
@@ -2128,6 +2216,20 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             {
                 'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
                 'extra': {'authentification': '1'},
+            }
+        ]
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(**default_cmd_params)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+
+        # The admission hasn't got the specific authentification state for one experience so we don't exclude it
+        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = [
+            {
+                'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
+                'extra': {'authentification': '1', 'etat_authentification': EtatAuthentificationParcours.FAUX.name},
             }
         ]
         second_admission.save(update_fields=['checklist'])
