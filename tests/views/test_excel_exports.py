@@ -189,6 +189,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         cls.default_params = {
             'annee_academique': 2022,
             'taille_page': 10,
+            'demandeur': str(cls.sic_management_user.person.uuid),
         }
 
         # Targeted url
@@ -256,6 +257,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         filters = ast.literal_eval(export.filters)
         self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('demandeur'), self.default_params.get('demandeur'))
 
     def test_export_with_sic_management_user_with_filters_and_asc_ordering(self):
         self.client.force_login(user=self.sic_management_user)
@@ -273,6 +275,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         filters = ast.literal_eval(export.filters)
         self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('demandeur'), self.default_params.get('demandeur'))
         self.assertEqual(filters.get('tri_inverse'), False)
         self.assertEqual(filters.get('champ_tri'), 'numero_demande')
 
@@ -292,6 +295,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         filters = ast.literal_eval(export.filters)
         self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('demandeur'), self.default_params.get('demandeur'))
         self.assertEqual(filters.get('tri_inverse'), True)
         self.assertEqual(filters.get('champ_tri'), 'numero_demande')
 
@@ -344,6 +348,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
                 'bourse_internationale': str(international_scholarship.uuid),
                 'bourse_erasmus_mundus': str(erasmus_mundus_scholarship.uuid),
                 'bourse_double_diplomation': str(double_degree_scholarship.uuid),
+                'demandeur': str(self.sic_management_user.person.uuid),
             }
         )
 
