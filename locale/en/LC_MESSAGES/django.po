@@ -634,15 +634,15 @@ msgstr ""
 msgid "Analysis folder for a general education admission"
 msgstr ""
 
+msgid "Annex 1 visa form"
+msgstr ""
+
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr ""
 
 msgid ""
 "Annex 25 or 26 or the A/B card mentioning the refugee status or the decision "
 "confirming the protection of the parent"
-msgstr ""
-
-msgid "Annex 1 visa form"
 msgstr ""
 
 msgid "Annexe approval certificate from SIC"
