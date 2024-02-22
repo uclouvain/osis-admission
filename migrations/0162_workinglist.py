@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0158_auto_20240228_0919'),
+        ('admission', '0161_remove_generaleducationadmission_free_additional_approval_conditions'),
     ]
 
     operations = [

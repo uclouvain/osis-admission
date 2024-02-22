@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 from collections import defaultdict
+from contextlib import suppress
 from typing import List, Optional, Dict
 
 from django.conf import settings
@@ -202,6 +203,23 @@ class ListerToutesDemandes(IListerToutesDemandes):
             json_path_to_checks = defaultdict(set)
             all_checklist_filters = Q()
 
+            # Manage the case of the "AUTHENTIFICATION" and "BESOIN_DEROGATION" filters which are hierarchical
+            # If one sub item is selected, the parent must be unselected as the parent itself includes all sub items
+            for (tab_name, prefix_identifier,) in [
+                (
+                    OngletsChecklist.experiences_parcours_anterieur.name,
+                    'AUTHENTIFICATION',
+                ),
+                (
+                    OngletsChecklist.decision_sic.name,
+                    'BESOIN_DEROGATION',
+                ),
+            ]:
+                current_filters = filtres_etats_checklist.get(tab_name)
+                if any(f'{prefix_identifier}.' in current_filter for current_filter in current_filters):
+                    with suppress(ValueError):
+                        current_filters.remove(prefix_identifier)
+
             for tab_name, status_values in filtres_etats_checklist.items():
                 if not status_values:
                     continue
@@ -237,18 +255,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
                         json_path_to_checks['checklist__current'].add('parcours_anterieur')
                         json_path_to_checks['checklist'].add('current')
 
-                    elif (
-                        tab_name == OngletsChecklist.decision_sic.name
-                        and current_status_filter.statut is None
-                        and current_status_filter.extra.get('etat_besoin_derogation')
-                        and hasattr(BesoinDeDerogation, current_status_filter.extra['etat_besoin_derogation'])
-                    ):
-                        # > Filter on the dispensation needed status
-                        current_checklist_filters = Q(
-                            generaleducationadmission__dispensation_needed=current_status_filter.extra[
-                                'etat_besoin_derogation'
-                            ]
-                        )
                     else:
                         # Filter on the checklist tab status
                         current_checklist_filters = Q(
@@ -262,9 +268,20 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
                         # Filter on the checklist tab extra if necessary
                         if current_status_filter.extra:
+                            current_extra = {**current_status_filter.extra}
+
+                            if tab_name == OngletsChecklist.decision_sic.name:
+                                # Filter on the dispensation needed status if necessary
+                                dispensation_needed = current_extra.pop('etat_besoin_derogation', None)
+
+                                if dispensation_needed:
+                                    current_checklist_filters &= Q(
+                                        generaleducationadmission__dispensation_needed=dispensation_needed,
+                                    )
+
                             current_checklist_filters &= Q(
                                 **{
-                                    f'checklist__current__{tab_name}__extra__contains': current_status_filter.extra,
+                                    f'checklist__current__{tab_name}__extra__contains': current_extra,
                                 }
                             )
                             json_path_to_checks[f'checklist__current__{tab_name}'].add('extra')

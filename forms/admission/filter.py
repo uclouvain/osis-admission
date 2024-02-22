@@ -191,6 +191,7 @@ class AllAdmissionsFilterForm(forms.Form):
         choices=ModeFiltrageChecklist.choices(),
         label=_('Include or exclude the checklist filters'),
         required=False,
+        initial=ModeFiltrageChecklist.INCLUSION.name,
         widget=forms.RadioSelect(),
     )
 
