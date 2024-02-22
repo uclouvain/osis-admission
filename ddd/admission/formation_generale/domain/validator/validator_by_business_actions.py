@@ -60,7 +60,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutsChecklistGenerale,
+    StatutChecklist,
+)
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
@@ -467,6 +470,7 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionGenerale
+    statut_checklist_parcours_anterieur: StatutChecklist
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -475,6 +479,9 @@ class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionList
         return [
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
+            ),
+            ShouldParcoursAnterieurEtreSuffisant(
+                statut=self.statut_checklist_parcours_anterieur,
             ),
         ]
 

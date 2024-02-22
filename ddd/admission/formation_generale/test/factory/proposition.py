@@ -25,6 +25,7 @@
 # ##############################################################################
 import string
 import uuid
+from typing import Optional
 
 import factory
 from factory.fuzzy import FuzzyText
@@ -209,8 +210,8 @@ class PropositionFactory(factory.Factory):
     bourse_erasmus_mundus_id = factory.SubFactory(BourseIdentityFactory, uuid='e0e94dd5-3715-49a1-8953-8cc0f99372cb')
     est_reorientation_inscription_externe = False
     est_modification_inscription_externe = False
-    checklist_initiale = None
-    checklist_actuelle = None
+    checklist_initiale: Optional[StatutsChecklistGenerale] = None
+    checklist_actuelle: Optional[StatutsChecklistGenerale] = None
     poste_diplomatique = factory.SubFactory(
         PosteDiplomatiqueIdentityFactory,
         code=1,
