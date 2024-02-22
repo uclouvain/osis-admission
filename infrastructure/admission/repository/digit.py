@@ -135,6 +135,7 @@ def _request_person_ticket_creation(person: Person, noma: str):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return {"requestId": "1", "status": "CREATED"}
     else:
+        logger.info(f"DIGIT Response: {json.dumps(_get_ticket_data(person, noma))}")
         response = requests.post(
             headers={
                 'Content-Type': 'application/json',
