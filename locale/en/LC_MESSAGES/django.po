@@ -5375,12 +5375,6 @@ msgstr ""
 msgid "Role: ADRE secretary"
 msgstr ""
 
-msgid "Role: Admission reader"
-msgstr ""
-
-msgid "Role: Admission readers"
-msgstr ""
-
 msgid "Role: CDD configurator"
 msgstr ""
 
@@ -6211,6 +6205,11 @@ msgstr ""
 msgid ""
 "The global status of the application must be one of the following in order "
 "to submit the dossier to the faculty: %(statuses)s."
+msgstr ""
+
+#, python-format
+msgid ""
+"The inscription type admission was authorised the %(date)s by %(author)s."
 msgstr ""
 
 msgid "The jury is not in progress"

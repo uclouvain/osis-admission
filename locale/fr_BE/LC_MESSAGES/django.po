@@ -5949,12 +5949,6 @@ msgstr "Rôle: Secrétaires ADRE"
 msgid "Role: ADRE secretary"
 msgstr "Rôle: Secrétaire ADRE"
 
-msgid "Role: Admission reader"
-msgstr "Rôle: Lecteur des demandes d'inscription"
-
-msgid "Role: Admission readers"
-msgstr "Rôle: Lecteurs des demandes d'inscription"
-
 msgid "Role: CDD configurator"
 msgstr "Rôle: Configurateur CDD"
 
@@ -6874,6 +6868,12 @@ msgid ""
 msgstr ""
 "Le statut global de la demande doit être l'un des suivants pour pouvoir "
 "envoyer le dossier en faculté : %(statuses)s."
+
+#, python-format
+msgid ""
+"The inscription type admission was authorised the %(date)s by %(author)s."
+msgstr ""
+"La demande de type inscription a été autorisée le %(date)s par %(author)s."
 
 msgid "The jury is not in progress"
 msgstr "Le jury n'est pas en cours"
