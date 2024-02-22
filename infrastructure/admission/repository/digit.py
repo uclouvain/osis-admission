@@ -89,7 +89,10 @@ class DigitRepository(IDigitRepository):
     @classmethod
     def retrieve_list_pending_person_tickets(cls) -> List[StatutTicketPersonneDTO]:
         tickets = PersonTicketCreation.objects.filter(
-            status=PersonTicketCreationStatus.CREATED.value
+            status__in=[
+                PersonTicketCreationStatus.CREATED.value,
+                PersonTicketCreationStatus.IN_PROGRESS.value,
+            ]
         ).select_related('person').values(
             'request_id', 'person__last_name', 'person__first_name', 'person__global_id', 'status', 'errors'
         )
