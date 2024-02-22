@@ -24,7 +24,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if digit_ticket.statut == 'CREATED' %}
+{% if digit_ticket.statut == 'CREATED' or digit_ticket.statut == 'IN_PROGRESS' %}
     <div class="alert alert-info">
       <strong>En attente</strong> La demande de création de compte à DigIT est en cours de traitement
     </div>
