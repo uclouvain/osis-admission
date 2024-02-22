@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import json
+import logging
 from typing import Optional, List
 
 import requests
@@ -36,6 +37,7 @@ from base.models.person import Person
 from base.models.person_creation_ticket import PersonTicketCreation, PersonTicketCreationStatus
 from base.models.person_merge_proposal import PersonMergeProposal
 
+logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 class DigitRepository(IDigitRepository):
     @classmethod
@@ -48,6 +50,8 @@ class DigitRepository(IDigitRepository):
             person = proposition.get().proposal_merge_person
 
         ticket_response = _request_person_ticket_creation(person, noma)
+
+        logger.info(f"DIGIT Response: {ticket_response}")
 
         if ticket_response:
             PersonTicketCreation.objects.get_or_create(
