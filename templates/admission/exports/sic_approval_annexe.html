@@ -166,12 +166,15 @@
   </p>
 
   <ul class="list-unstyled ms-3">
-    {% if proposition.est_mobilite %}
+    {% if proposition.est_mobilite is True %}
     <li>☑ OUI</li>
     <li>☐ NON</li>
-    {% else %}
+    {% elif proposition.est_mobilite is False %}
     <li>☐ OUI</li>
     <li>☑ NON</li>
+    {% else %}
+    <li>☐ OUI</li>
+    <li>☐ NON</li>
     {% endif %}
   </ul>
 

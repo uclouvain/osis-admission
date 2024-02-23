@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0154_admissionviewer_remove_duplicates'),
+        ('admission', '0156_admissionviewer_remove_duplicates'),
     ]
 
     operations = [

@@ -13,7 +13,7 @@ def remove_duplicates(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0153_sic_approval_mail_document_link_remove_images'),
+        ('admission', '0155_sic_approval_mail_eu_remove_images'),
     ]
 
     operations = [
