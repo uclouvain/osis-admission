@@ -60,6 +60,10 @@ from admission.tests.factories.continuing_education import ContinuingEducationAd
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
 )
+from admission.tests.factories.faculty_decision import (
+    AdditionalApprovalConditionFactory,
+    FreeAdditionalApprovalConditionFactory,
+)
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
@@ -101,6 +105,12 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             candidate__country_of_citizenship__european_union=True,
             candidate__private_email='candidate2@test.be',
             bachelor_with_access_conditions_met=True,
+        )
+        FreeAdditionalApprovalConditionFactory(
+            admission=cls.admission_ok,
+        )
+        FreeAdditionalApprovalConditionFactory(
+            admission=cls.admission_ok,
         )
         cls.second_admission_ok = GeneralEducationAdmissionFactory(
             candidate__country_of_citizenship__european_union=True,
@@ -163,7 +173,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_general_proposition_verification_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        with self.assertNumQueriesLessThan(76):
+        with self.assertNumQueriesLessThan(79):
             response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ret = response.json()

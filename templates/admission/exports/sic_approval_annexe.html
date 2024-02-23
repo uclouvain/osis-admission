@@ -208,7 +208,7 @@
     <li>Si l’inscription définitive de l’étudiant·e est dépendante de conditions d’admission spécifiques,
       détaillez-les ci-après : <ul>
       {% for condition in proposition.conditions_complementaires %}
-        <li>{{ condition }}</li>
+        <li>{% if LANGUAGE_CODE == 'fr-be' %}{{ condition.nom_fr }}{% else %}{{ condition.nom_en }}{% endif %}</li>
       {% empty %}
         <li>Non-concerné·e</li>
       {% endfor %}

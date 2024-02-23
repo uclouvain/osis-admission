@@ -28,7 +28,8 @@ import factory
 from django.db.models import Max
 from factory.fuzzy import FuzzyText
 
-from admission.contrib.models.checklist import RefusalReason, RefusalReasonCategory, AdditionalApprovalCondition
+from admission.contrib.models.checklist import RefusalReason, RefusalReasonCategory, AdditionalApprovalCondition, \
+    FreeAdditionalApprovalCondition
 
 
 class RefusalReasonCategoryFactory(factory.django.DjangoModelFactory):
@@ -64,3 +65,12 @@ class AdditionalApprovalConditionFactory(factory.django.DjangoModelFactory):
             int: the first available ID to use for instances of this factory.
         """
         return (AdditionalApprovalCondition.objects.aggregate(Max('order'))['order__max'] or 0) + 1
+
+
+class FreeAdditionalApprovalConditionFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = FreeAdditionalApprovalCondition
+
+    name_fr = FuzzyText(length=10)
+    name_en = FuzzyText(length=10)
+
