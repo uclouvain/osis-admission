@@ -166,8 +166,13 @@
   </p>
 
   <ul class="list-unstyled ms-3">
-    <li>{% if proposition.est_mobilite %}☑{% else %}☐{% endif %} OUI</li>
+    {% if proposition.est_mobilite %}
+    <li>☑ OUI</li>
     <li>☐ NON</li>
+    {% else %}
+    <li>☐ OUI</li>
+    <li>☑ NON</li>
+    {% endif %}
   </ul>
 
   {% if proposition.est_mobilite %}<p>Si OUI : la durée de la mobilité est <em>a priori</em> de {{ proposition.nombre_de_mois_de_mobilite|enum_display:"MobiliteNombreDeMois" }} mois.</p>{% endif %}
