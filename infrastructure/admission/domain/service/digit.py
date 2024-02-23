@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 import json
+import logging
 from typing import Dict, List, Optional
 
 import requests
@@ -86,7 +87,7 @@ from osis_profile.models import (
 from osis_profile.models.education import LanguageKnowledge
 
 MOCK_DIGIT_SERVICE_CALL = settings.MOCK_DIGIT_SERVICE_CALL
-
+logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 class DigitService(IDigitService):
     @classmethod
@@ -104,6 +105,11 @@ class DigitService(IDigitService):
             )
 
             if created:
+                logger.info(
+                    f"DIGIT search existing person: "
+                    f'{json.dumps({"lastname": nom, "firstname": prenom, "birthDate": date_naissance})}'
+                )
+
                 response = requests.post(
                     headers={
                         'Content-Type': 'application/json',
@@ -119,12 +125,13 @@ class DigitService(IDigitService):
 
                 similarity_data = response.json()
 
+                logger.info(f"DIGIT Response: {similarity_data}")
+
                 PersonMergeProposal.objects.update_or_create(
                     original_person=original_person,
                     defaults={
-                        "status": PersonMergeStatus.MATCH_FOUND.name
-                        if similarity_data else PersonMergeStatus.NO_MATCH.name,
-                        "similarity_result": response.json(),
+                        "status": _get_status_from_digit_response(similarity_data),
+                        "similarity_result": similarity_data,
                         "last_similarity_result_update": datetime.datetime.now(),
                     }
                 )
@@ -132,6 +139,16 @@ class DigitService(IDigitService):
             similarity_data = person_merge_proposal.similarity_result
 
         return similarity_data
+
+
+def _get_status_from_digit_response(similarity_data):
+    if similarity_data:
+        if "status" in similarity_data.keys() and similarity_data["status"] == 500:
+            return PersonMergeStatus.ERROR.name
+        else:
+            return PersonMergeStatus.MATCH_FOUND.name
+    else:
+        return PersonMergeStatus.NO_MATCH.name
 
 
 def _mock_search_digit_account_return_response():
