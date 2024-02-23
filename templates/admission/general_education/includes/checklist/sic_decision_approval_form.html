@@ -213,7 +213,7 @@
 
         {% if sic_decision_approval_form.is_hue %}
             $('#id_sic-decision-approval-mobility_months_amount').dependsOn({
-                'input[name=sic-decision-approval-is_mobility]': {values: ['True']},
+                '#id_sic-decision-approval-is_mobility': {values: ['True']},
             }, {duration: 0, valueOnDisable: '',});
         {% endif %}
 
