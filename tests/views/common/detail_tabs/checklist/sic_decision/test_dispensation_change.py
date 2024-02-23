@@ -85,6 +85,7 @@ class SicDecisionChangeStatusViewTestCase(SicPatchMixin, TestCase):
         response = self.client.post(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get('HX-Refresh'))
 
         self.general_admission.refresh_from_db()
         self.assertEqual(
@@ -117,6 +118,7 @@ class SicDecisionChangeStatusViewTestCase(SicPatchMixin, TestCase):
         response = self.client.post(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.headers.get('HX-Refresh'), True)
 
         self.general_admission.refresh_from_db()
 

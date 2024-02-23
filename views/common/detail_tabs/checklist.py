@@ -945,6 +945,7 @@ class SicApprovalDecisionView(
                     doit_fournir_visa_etudes=form.cleaned_data.get('must_provide_student_visa_d', False),
                 )
             )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -979,6 +980,7 @@ class SicRefusalDecisionView(
                     autres_motifs=form.cleaned_data['other_reasons'],
                 )
             )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -1021,6 +1023,7 @@ class SicRefusalFinalDecisionView(
                         auteur=self.request.user.person.global_id,
                     )
                 )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -1063,6 +1066,7 @@ class SicApprovalFinalDecisionView(
                         auteur=self.request.user.person.global_id,
                     )
                 )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -1133,6 +1137,8 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             author=self.request.user.person,
         )
 
+        response = self.render_to_response(self.get_context_data())
+
         if admission_status_has_changed:
             add_history_entry(
                 admission.uuid,
@@ -1144,8 +1150,8 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
                 ),
                 tags=['proposition', 'sic-decision', 'status-changed'],
             )
-
-        return self.render_to_response(self.get_context_data())
+            response.headers['HX-Refresh'] = 'true'
+        return response
 
 
 class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
