@@ -943,6 +943,12 @@
                   currentModal.modal('show');
               }
           })
+
+          // jQuery events are NOT native events. We have to trigger our own.
+          // It would works with bootstrap 5 which does not use jQuery anymore.
+          $('.htmx-modal-reload').on('show.bs.modal', function() {
+              htmx.trigger('#' + this.id, 'modal-reload');
+          })
       })(jQuery);
   </script>
 {% endblock script %}

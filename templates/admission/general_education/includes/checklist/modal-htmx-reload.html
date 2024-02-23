@@ -1,3 +1,5 @@
+{% load i18n bootstrap3 %}
+
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -22,5 +24,19 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% url view.base_namespace|add:':sic-decision-approval' uuid=view.kwargs.uuid as url%}
-{% include "admission/general_education/includes/checklist/modal-htmx-reload.html" with modal_id="sic-decision-approval-modal" modal_classes="admission-modal-lg fac-decision-modal" modal_url=url %}
+
+<div class="modal fade htmx-modal-reload" id="{{ modal_id }}" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog {{ modal_classes }}" tabindex="-1" role="document" style="margin: auto;">
+        <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;"
+          hx-get="{{ modal_url }}"
+          hx-trigger="modal-reload from:#{{ modal_id }}"
+          hx-target="this"
+          hx-swap="innerHTML"
+        >
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          </div>
+          <div class="modal-body" style="overflow:auto;"></div>
+        </div>
+    </div>
+</div>
