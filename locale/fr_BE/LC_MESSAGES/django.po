@@ -716,6 +716,9 @@ msgstr "Dossier d'analyse"
 msgid "Analysis folder for a general education admission"
 msgstr "Dossier d'analyse pour une demande en formation générale"
 
+msgid "Annex 1 visa form"
+msgstr "Formulaire visa annexe 1"
+
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
 
@@ -725,9 +728,6 @@ msgid ""
 msgstr ""
 "Annexe 26 ou 26 ou la carte A/B mentionnant le statut de réfugié ou la "
 "décision confirmant la protection du parent"
-
-msgid "Annex 1 visa form"
-msgstr "Formulaire visa annexe 1"
 
 msgid "Annexe approval certificate from SIC"
 msgstr "Annexe au certificat d'approbation SIC"
