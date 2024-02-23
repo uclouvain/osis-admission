@@ -32,6 +32,11 @@
     style="overflow: auto;"
     id="sic-decision-approval-final-form"
 >
+  <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <h3 class="modal-title" id="myModalLabel">{% translate "SIC Approval" %}</h3>
+  </div>
+
   <div class="modal-body" style="overflow:auto;">
     {% if original_admission.checklist.current.donnees_personnelles.statut == 'GEST_BLOCAGE' and original_admission.checklist.current.donnees_personnelles.extra.fraud == '1' %}
     <div class="alert alert-danger">{% trans "<strong>Warning</strong> the candidate is reported as a <strong>fraudster</strong>" %}</div>
