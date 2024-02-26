@@ -885,8 +885,6 @@ class Proposition(interface.RootEntity):
         )
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE
         self.auteur_derniere_modification = auteur_modification
-        self.certificat_approbation_sic = []
-        self.certificat_approbation_sic_annexe = []
 
     def approuver_par_sic(self, auteur_modification: str, documents_dto: List[EmplacementDocumentDTO]):
         ApprouverParSicValidatorList(
@@ -907,4 +905,3 @@ class Proposition(interface.RootEntity):
         )
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE
         self.auteur_derniere_modification = auteur_modification
-        self.certificat_refus_sic = []
