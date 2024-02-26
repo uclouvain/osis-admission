@@ -287,6 +287,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.headers.get('HX-Refresh'), True)
 
         form = response.context['sic_decision_approval_form']
 
@@ -360,6 +361,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         # Check the response
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get('HX-Refresh'))
 
         form = response.context['sic_decision_approval_form']
 

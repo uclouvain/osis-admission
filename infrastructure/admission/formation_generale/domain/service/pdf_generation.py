@@ -354,6 +354,12 @@ class PDFGeneration(IPDFGeneration):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
             )
+
+            if not proposition_dto.candidat_a_nationalite_hors_ue_5 and not temporaire:
+                # The annex 1 must be generated only for H(UE+5) candidates
+                proposition.certificat_approbation_sic_annexe = []
+                return
+
             profil_candidat_identification = profil_candidat_translator.get_identification(
                 proposition.matricule_candidat
             )
