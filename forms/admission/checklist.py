@@ -790,7 +790,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             'particular_cost': forms.TextInput(),
             'rebilling_or_third_party_payer': forms.TextInput(),
             'first_year_inscription_and_status': forms.TextInput(),
-            'is_mobility': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'is_mobility': forms.Select(choices=[(None, '-'), (True, _('Yes')), (False, _('No'))]),
             'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
             'must_provide_student_visa_d': forms.CheckboxInput,
@@ -902,7 +902,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             del self.fields['is_mobility']
             del self.fields['mobility_months_amount']
         else:
-            self.fields['is_mobility'].required = True
+            self.fields['is_mobility'].required = False
             self.fields['mobility_months_amount'].required = False
 
         if not self.is_admission:
