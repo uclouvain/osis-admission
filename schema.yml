@@ -6748,6 +6748,9 @@ components:
               academic_year:
                 type: integer
                 nullable: true
+              uuid:
+                type: string
+                readOnly: true
               registered_credit_number:
                 type: number
                 nullable: true
