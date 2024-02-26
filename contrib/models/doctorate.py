@@ -33,6 +33,8 @@ from django.db import models
 from django.db.models import OuterRef
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
+from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -53,8 +55,6 @@ from base.models.enums.entity_type import SECTOR
 from base.models.person import Person
 from base.utils.cte import CTESubquery
 from osis_common.ddd.interface import BusinessException
-from osis_document.contrib import FileField
-from osis_signature.contrib.fields import SignatureProcessField
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 
 __all__ = [
