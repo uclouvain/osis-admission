@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -139,6 +139,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
     def get_formatted_filters_parameters_worksheet(self, filters: str) -> Dict:
         formatted_filters = super().get_formatted_filters_parameters_worksheet(filters)
 
+        formatted_filters.pop('demandeur', None)
         formatted_filters.pop('tri_inverse', None)
         formatted_filters.pop('champ_tri', None)
 
@@ -253,5 +254,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             if ordering_field:
                 filters['tri_inverse'] = ordering_field[0] == '-'
                 filters['champ_tri'] = ordering_field.lstrip('-')
+
+            filters['demandeur'] = str(self.request.user.person.uuid)
             return form.cleaned_data
         return {}
