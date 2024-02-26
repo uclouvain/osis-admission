@@ -357,8 +357,9 @@ class RemplirEmplacementDocumentParGestionnaireCommand(commands.RemplirEmplaceme
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(interface.QueryRequest):
+class RecupererResumeEtEmplacementsDocumentsPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+    avec_document_libres: bool = False
 
 
 # Paiement des frais de dossier

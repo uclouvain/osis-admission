@@ -28,9 +28,15 @@
     hx-post="{% url view.base_namespace|add:':sic-decision-approval-final' uuid=view.kwargs.uuid %}"
     hx-target="this"
     hx-swap="outerHTML"
+    {% if htmx_oob %}hx-swap-oob="true"{% endif %}
     style="overflow: auto;"
     id="sic-decision-approval-final-form"
 >
+  <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <h3 class="modal-title" id="myModalLabel">{% translate "SIC Approval" %}</h3>
+  </div>
+
   <div class="modal-body" style="overflow:auto;">
     {% if original_admission.checklist.current.donnees_personnelles.statut == 'GEST_BLOCAGE' and original_admission.checklist.current.donnees_personnelles.extra.fraud == '1' %}
     <div class="alert alert-danger">{% trans "<strong>Warning</strong> the candidate is reported as a <strong>fraudster</strong>" %}</div>
@@ -55,6 +61,8 @@
   </div>
 
   <div class="modal-footer">
+    {% translate 'The Previous experience must be in the "Sufficient" status in order to do this action.' as previous_experience_disabled_str %}
+    {% translate 'The authorization can not be done while there is one or more documents to be requested immediately.' as has_requested_documents_disabled_str %}
     {% if original_admission.type_demande == 'ADMISSION' %}
       <a
           class="btn btn-default"
@@ -64,18 +72,29 @@
         <i class="fa fa-magnifying-glass"></i>
         {% translate 'Visualize approval' %}
       </a>
-      <a
-          class="btn btn-default"
-          href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
-          target="_blank"
-      >
-        <i class="fa fa-magnifying-glass"></i>
-        {% translate 'Visualize annexe1' %}
-      </a>
+      {% if admission.candidat_a_nationalite_hors_ue_5 %}
+        <a
+            class="btn btn-default"
+            href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
+            target="_blank"
+        >
+          <i class="fa fa-magnifying-glass"></i>
+          {% translate 'Visualize annexe1' %}
+        </a>
+      {% endif %}
       <button
           class="btn btn-success"
           name="save"
-          {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
+          {% if original_admission.checklist.current.parcours_anterieur.statut != 'GEST_REUSSITE' or a_des_documents_requis_immediat %}
+            disabled
+            data-toggle="popover"
+            data-placement="auto top"
+            data-trigger="hover"
+            data-container="body"
+            data-content="{% if a_des_documents_requis_immediat %}{{ has_requested_documents_disabled_str|force_escape }}{% else %}{{ previous_experience_disabled_str|force_escape }}{% endif %}"
+          {% else %}
+            {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
+          {% endif %}
       >
         <i class="fa fa-envelope"></i>
         {% translate 'Send' context 'admission' %}
@@ -84,7 +103,16 @@
       <button
           class="btn btn-success"
           name="save"
-          {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
+          {% if original_admission.checklist.current.parcours_anterieur.statut != 'GEST_REUSSITE' or a_des_documents_requis_immediat %}
+            disabled
+            data-toggle="popover"
+            data-placement="auto top"
+            data-trigger="hover"
+            data-container="body"
+            data-content="{% if a_des_documents_requis_immediat %}{{ has_requested_documents_disabled_str|force_escape }}{% else %}{{ previous_experience_disabled_str|force_escape }}{% endif %}"
+          {% else %}
+            {% switch "admission_decision_sic_button" %}{% else %}disabled{% endswitch %}
+          {% endif %}
       >
         <i class="fa fa-thumbs-up"></i>
         {% translate 'Authorize' %}
@@ -123,17 +151,21 @@
   {% endif %}
 
   {% if request.htmx %}
-    {% if sic_decision_approval_final_form.is_valid %}
-      {# Update the content of the tab #}
-      {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
-    {% endif %}
     <script>
-        $(document).ready(function(){
-            {% if sic_decision_approval_final_form.is_valid %}
-                $('#sic-decision-approval-final-modal').modal('hide');
-                $('.modal-backdrop').hide();
-            {% endif %}
-        });
+      $(document).ready(function(){
+          {% if sic_decision_approval_final_form.is_valid %}
+            $('#sic-decision-approval-final-modal').modal('hide');
+            $('.modal-backdrop').hide();
+          {% endif %}
+          $('#sic-decision-approval-final-form *[data-toggle=popover]').popover();
+      });
     </script>
   {% endif %}
 </form>
+
+{% if request.htmx %}
+  {% if sic_decision_approval_final_form.is_valid %}
+    {# Update the content of the tab #}
+    {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
+  {% endif %}
+{% endif %}

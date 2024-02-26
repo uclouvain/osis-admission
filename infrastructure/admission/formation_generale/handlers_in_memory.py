@@ -377,8 +377,8 @@ COMMAND_HANDLERS = {
             emplacement_document_repository=_emplacement_document_repository,
         )
     ),
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery: (
-        lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_non_libres_proposition(
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery: (
+        lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_proposition(
             cmd,
             proposition_repository=_proposition_repository,
             profil_candidat_translator=_profil_candidat_translator,
@@ -576,6 +576,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: refuser_admission_par_sic(
             cmd,
             proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
             historique=_historique_formation_generale,
             notification=_notification,
             pdf_generation=_pdf_generation,
@@ -585,6 +586,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: refuser_inscription_par_sic(
             cmd,
             proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
             historique=_historique_formation_generale,
             notification=_notification,
             pdf_generation=_pdf_generation,
@@ -594,10 +596,16 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: approuver_admission_par_sic(
             cmd,
             proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
             historique=_historique_formation_generale,
             notification=_notification,
             pdf_generation=_pdf_generation,
             emplacement_document_repository=_emplacement_document_repository,
+            comptabilite_translator=_comptabilite_translator,
+            question_specifique_translator=_question_specific_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -605,12 +613,19 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            question_specifique_translator=_question_specific_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
         lambda msg_bus, cmd: recuperer_pdf_temporaire_decision_sic(
             cmd,
             proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
             pdf_generation=_pdf_generation,
         )
     ),

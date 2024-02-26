@@ -37,6 +37,7 @@ from admission.ddd.admission.domain.model.complement_formation import Complement
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
@@ -49,6 +50,7 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import Titr
 from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.domain.service.i_bourse import BourseIdentity
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
     ChoixAssimilation1,
@@ -865,7 +867,7 @@ class Proposition(interface.RootEntity):
         self.certificat_approbation_sic = []
         self.certificat_approbation_sic_annexe = []
 
-    def approuver_par_sic(self, auteur_modification: str):
+    def approuver_par_sic(self, auteur_modification: str, documents_dto: List[EmplacementDocumentDTO]):
         ApprouverParSicValidatorList(
             statut=self.statut,
             avec_conditions_complementaires=self.avec_conditions_complementaires,
@@ -874,6 +876,8 @@ class Proposition(interface.RootEntity):
             avec_complements_formation=self.avec_complements_formation,
             complements_formation=self.complements_formation,
             nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
+            checklist=self.checklist_actuelle,
+            documents_dto=documents_dto,
         ).validate()
 
         self.checklist_actuelle.decision_sic = StatutChecklist(

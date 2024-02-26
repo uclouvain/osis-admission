@@ -281,6 +281,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 else None,
                 sigle_entite_gestion=admission.training_management_faculty
                 or admission.sigle_entite_gestion,  # from annotation
+                credits=admission.training.credits,
             ),
             reference=admission.formatted_reference,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,

@@ -487,11 +487,11 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['education'].title, 'Études secondaires')
         self.assertEqual(
             call_args_by_tab['curriculum_academic_experience'].title,
-            'Curriculum > Computer science (2021-2022)',
+            'Curriculum > Computer science 2021-2022',
         )
         self.assertEqual(
             call_args_by_tab['curriculum_non_academic_experience'].title,
-            'Curriculum > Travail (01/2021 - 03/2021)',
+            'Curriculum > Travail 01/2021-03/2021',
         )
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
@@ -525,8 +525,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(tabs_titles), 7)
 
-        self.assertNotIn('Curriculum > Computer science (2021-2022)', tabs_titles)
-        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+        self.assertNotIn('Curriculum > Computer science 2021-2022', tabs_titles)
+        self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
 
         other_admission = ContinuingEducationAdmissionFactory()
 
@@ -547,8 +547,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(tabs_titles), 7)
 
-        self.assertNotIn('Curriculum > Computer science (2021-2022)', tabs_titles)
-        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+        self.assertNotIn('Curriculum > Computer science 2021-2022', tabs_titles)
+        self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
 
         AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=admission, educationalexperience=educational_experience
@@ -567,8 +567,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(tabs_titles), 9)
 
-        self.assertIn('Curriculum > Computer science (2021-2022)', tabs_titles)
-        self.assertIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+        self.assertIn('Curriculum > Computer science 2021-2022', tabs_titles)
+        self.assertIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
 
     def test_generation_with_general_education_not_submitted_proposition(self):
         candidate: Person = CompletePersonForBachelorFactory(
@@ -612,11 +612,11 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['education'].title, 'Études secondaires')
         self.assertEqual(
             call_args_by_tab['curriculum_academic_experience'].title,
-            'Curriculum > Computer science (2021-2022)',
+            'Curriculum > Computer science 2021-2022',
         )
         self.assertEqual(
             call_args_by_tab['curriculum_non_academic_experience'].title,
-            'Curriculum > Travail (01/2021 - 03/2021)',
+            'Curriculum > Travail 01/2021-03/2021',
         )
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
@@ -644,8 +644,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(tabs_titles), 8)
 
-        self.assertNotIn('Curriculum > Computer science (2021-2022)', tabs_titles)
-        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+        self.assertNotIn('Curriculum > Computer science 2021-2022', tabs_titles)
+        self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
 
         other_admission = GeneralEducationAdmissionFactory(candidate=candidate)
 
@@ -666,8 +666,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(tabs_titles), 8)
 
-        self.assertNotIn('Curriculum > Computer science (2021-2022)', tabs_titles)
-        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+        self.assertNotIn('Curriculum > Computer science 2021-2022', tabs_titles)
+        self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
 
         AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=admission, educationalexperience=educational_experience
@@ -686,8 +686,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(tabs_titles), 10)
 
-        self.assertIn('Curriculum > Computer science (2021-2022)', tabs_titles)
-        self.assertIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+        self.assertIn('Curriculum > Computer science 2021-2022', tabs_titles)
+        self.assertIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
 
     def test_generation_with_doctorate_education_not_submitted_proposition(self):
         candidate = CompletePersonFactory()
@@ -732,11 +732,11 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
         self.assertEqual(
             call_args_by_tab['curriculum_academic_experience'].title,
-            'Curriculum > Computer science (2021-2023)',
+            'Curriculum > Computer science 2021-2023',
         )
         self.assertEqual(
             call_args_by_tab['curriculum_non_academic_experience'].title,
-            'Curriculum > Travail (01/2021 - 03/2021)',
+            'Curriculum > Travail 01/2021-03/2021',
         )
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
         self.assertEqual(call_args_by_tab['project'].title, 'Projet de recherche doctoral')
@@ -762,8 +762,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(tabs_titles), 11)
 
-        self.assertNotIn('Curriculum > Computer science (2021-2023)', tabs_titles)
-        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+        self.assertNotIn('Curriculum > Computer science 2021-2023', tabs_titles)
+        self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
 
         other_admission = DoctorateAdmissionFactory(candidate=candidate)
 
@@ -785,8 +785,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(tabs_titles), 11)
 
-        self.assertNotIn('Curriculum > Computer science (2021-2023)', tabs_titles)
-        self.assertNotIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+        self.assertNotIn('Curriculum > Computer science 2021-2023', tabs_titles)
+        self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
 
         AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=admission,
@@ -806,8 +806,8 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(tabs_titles), 13)
 
-        self.assertIn('Curriculum > Computer science (2021-2023)', tabs_titles)
-        self.assertIn('Curriculum > Travail (01/2021 - 03/2021)', tabs_titles)
+        self.assertIn('Curriculum > Computer science 2021-2023', tabs_titles)
+        self.assertIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
 
     def test_async_generation_with_continuing_education(self):
         admission = ContinuingEducationAdmissionFactory()
@@ -1266,6 +1266,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 ),
                 sigle_entite_gestion='FFC',
                 code='FC1',
+                credits=180,
             ),
             reference='0123',
             annee_calculee=2023,
@@ -1335,6 +1336,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 ),
                 sigle_entite_gestion='FFG',
                 code='FG1',
+                credits=180,
             ),
             reference='0123',
             annee_calculee=2023,
@@ -2538,7 +2540,8 @@ class SectionsAttachmentsTestCase(TestCase):
 
             self.assertEqual(attachments[0].identifier, f'{experience_year.annee}.RELEVE_NOTES_ANNUEL')
             self.assertEqual(
-                attachments[0].label, f'{DocumentsCurriculum["RELEVE_NOTES_ANNUEL"]} - {experience_year.annee}'
+                attachments[0].label,
+                f'{DocumentsCurriculum["RELEVE_NOTES_ANNUEL"]} {experience_year.annee}-{experience_year.annee + 1}',
             )
             self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
             self.assertTrue(attachments[0].required)
@@ -2570,7 +2573,7 @@ class SectionsAttachmentsTestCase(TestCase):
             self.assertEqual(attachments[0].identifier, f'{experience_year.annee}.RELEVE_NOTES_ANNUEL')
             self.assertEqual(
                 attachments[0].label,
-                f'{DocumentsCurriculum["RELEVE_NOTES_ANNUEL"]} - {experience_year.annee}',
+                f'{DocumentsCurriculum["RELEVE_NOTES_ANNUEL"]} {experience_year.annee}-{experience_year.annee + 1}',
             )
             self.assertEqual(attachments[0].uuids, experience_year.releve_notes)
             self.assertTrue(attachments[0].required)
@@ -2578,7 +2581,8 @@ class SectionsAttachmentsTestCase(TestCase):
             self.assertEqual(attachments[1].identifier, f'{experience_year.annee}.TRADUCTION_RELEVE_NOTES_ANNUEL')
             self.assertEqual(
                 attachments[1].label,
-                f'{DocumentsCurriculum["TRADUCTION_RELEVE_NOTES_ANNUEL"]} - {experience_year.annee}',
+                f'{DocumentsCurriculum["TRADUCTION_RELEVE_NOTES_ANNUEL"]} '
+                f'{experience_year.annee}-{experience_year.annee + 1}',
             )
             self.assertEqual(attachments[1].uuids, experience_year.traduction_releve_notes)
             self.assertTrue(attachments[1].required)
@@ -3001,7 +3005,7 @@ class SectionsAttachmentsTestCase(TestCase):
         )
         self.assertEqual(
             attachments[0].label,
-            f'{DocumentsConnaissancesLangues["CERTIFICAT_CONNAISSANCE_LANGUE"]} - '
+            f'{DocumentsConnaissancesLangues["CERTIFICAT_CONNAISSANCE_LANGUE"]} '
             f'{self.doctorate_context.connaissances_langues[0].nom_langue}',
         )
         self.assertEqual(
@@ -3016,7 +3020,7 @@ class SectionsAttachmentsTestCase(TestCase):
         )
         self.assertEqual(
             attachments[1].label,
-            f'{DocumentsConnaissancesLangues["CERTIFICAT_CONNAISSANCE_LANGUE"]} - '
+            f'{DocumentsConnaissancesLangues["CERTIFICAT_CONNAISSANCE_LANGUE"]} '
             f'{self.doctorate_context.connaissances_langues[1].nom_langue}',
         )
         self.assertEqual(
@@ -3144,7 +3148,7 @@ class SectionsAttachmentsTestCase(TestCase):
         self.assertEqual(attachments[0].identifier, f'{signature_promoteur.promoteur.uuid}.APPROBATION_PDF')
         self.assertEqual(
             attachments[0].label,
-            f'{DocumentsSupervision["APPROBATION_PDF"]} - '
+            f'{DocumentsSupervision["APPROBATION_PDF"]} '
             f'{signature_promoteur.promoteur.prenom} {signature_promoteur.promoteur.nom}',
         )
         self.assertEqual(attachments[0].uuids, signature_promoteur.pdf)
@@ -3153,7 +3157,7 @@ class SectionsAttachmentsTestCase(TestCase):
         self.assertEqual(attachments[1].identifier, f'{signature_membre_ca.membre_CA.uuid}.APPROBATION_PDF')
         self.assertEqual(
             attachments[1].label,
-            f'{DocumentsSupervision["APPROBATION_PDF"]} - '
+            f'{DocumentsSupervision["APPROBATION_PDF"]} '
             f'{signature_membre_ca.membre_CA.prenom} {signature_membre_ca.membre_CA.nom}',
         )
         self.assertEqual(attachments[1].uuids, signature_membre_ca.pdf)

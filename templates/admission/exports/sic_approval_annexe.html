@@ -112,16 +112,16 @@
   </p>
 
   <p>
-    Je soussignée <strong>Virginie Odeurs, Directrice du Service des inscriptions</strong><br>
-    En ma qualité de représentante de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
+    Je soussignée <strong>{{ rector.first_name }} {{ rector.last_name }}, Recteur</strong><br>
+    En ma qualité de représentant de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
   </p>
 
   <p>
     Confirme que l'étudiant·e ci-dessous :<br>
-    Nom : <strong>{{ proposition.profil_soumis_candidat.nom }}</strong><br>
-    Prénom : <strong>{{ proposition.profil_soumis_candidat.prenom }}</strong><br>
-    Date de naissance : <strong>{{ proposition.profil_soumis_candidat.date_naissance|date:"d/m/Y" }}</strong><br>
-    Nationalité : <strong>{{ proposition.profil_soumis_candidat.nationalite }}</strong><br>
+    Nom : <strong>{{ profil_candidat_identification.nom }}</strong><br>
+    Prénom : <strong>{{ profil_candidat_identification.prenom }}</strong><br>
+    Date de naissance : <strong>{{ profil_candidat_identification.date_naissance|date:"d/m/Y" }}</strong><br>
+    Nationalité : <strong>{{ profil_candidat_identification.pays_nationalite|country_name_from_iso_code }}</strong><br>
   </p>
 
   <ul class="list-unstyled ms-3">
@@ -150,7 +150,7 @@
   </p>
 
   <p>
-    Le programme d’études susmentionné comprend un nombre total de 120 crédits ECTS,
+    Le programme d’études susmentionné comprend un nombre total de {{ proposition.formation.credits }} crédits ECTS,
     pour l'ensemble de la formation, sous réserve d'ajouts d'enseignements
     complémentaires qui pourront être imposés à l'étudiant·e, ou de dispense(s) qu'il·elle aurait
     obtenue(s) (avec un minimum de 54 crédits par année académique).
@@ -166,8 +166,16 @@
   </p>
 
   <ul class="list-unstyled ms-3">
-    <li>{% if proposition.est_mobilite %}☑{% else %}☐{% endif %} OUI</li>
+    {% if proposition.est_mobilite is True %}
+    <li>☑ OUI</li>
     <li>☐ NON</li>
+    {% elif proposition.est_mobilite is False %}
+    <li>☐ OUI</li>
+    <li>☑ NON</li>
+    {% else %}
+    <li>☐ OUI</li>
+    <li>☐ NON</li>
+    {% endif %}
   </ul>
 
   {% if proposition.est_mobilite %}<p>Si OUI : la durée de la mobilité est <em>a priori</em> de {{ proposition.nombre_de_mois_de_mobilite|enum_display:"MobiliteNombreDeMois" }} mois.</p>{% endif %}
@@ -212,10 +220,10 @@
   <div id="sigle-container">
     <img id="sigle" src="{% static "img/sedes.png" %}">
     <div class="pt-5">
-      {% if director.signature %}<img class="ms-3" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
+      {% if rector.signature %}<img class="ms-3" src="{% get_file_url rector.signature.0 %}" id="signature">{% endif %}
       <p>
-        {{ director.first_name }} {{ director.last_name }},<br>
-        {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
+        {{ rector.first_name }} {{ rector.last_name }},<br>
+        {% if rector.gender == 'F' %}{% trans "Rector" context "F" %}{% else %}{% trans "Rector" %}{% endif %}
       </p>
     </div>
   </div>

@@ -62,7 +62,6 @@ TYPE_DIPLOME_MAP = {
     EducationalType.QUALIFICATION_METHOD.name: 'TECHNIQUE_QUALIFICATION',
     EducationalType.ARTISTIC_QUALIFICATION.name: 'TECHNIQUE_QUALIFICATION',
     EducationalType.PROFESSIONAL_EDUCATION.name: 'PROFESSIONNEL',
-    EducationalType.PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM.name: 'PROFESSIONNEL',
     ForeignDiplomaTypes.NATIONAL_BACHELOR.name: 'BACCALAUREAT_EUROPEEN',
     ForeignDiplomaTypes.EUROPEAN_BACHELOR.name: 'BACCALAUREAT_INTERNATIONAL',
     ForeignDiplomaTypes.INTERNATIONAL_BACCALAUREATE.name: 'BACCALAUREAT_INTERNATIONAL'
@@ -194,6 +193,7 @@ class InjectionEPC:
             documents = cls._recuperer_documents(diplome)
             type_etude = diplome_belge.educational_type if diplome_belge else diplome_etranger.foreign_diploma_type
             return {
+                'osis_uuid': str(diplome.uuid),
                 'type_etude': TYPE_DIPLOME_MAP.get(type_etude),
                 'annee_fin': diplome.academic_graduation_year.year,
                 'code_ecole': diplome_belge.institute.code if diplome_belge and diplome_belge.institute else '',
@@ -243,6 +243,7 @@ class InjectionEPC:
         )
 
         donnees_annuelles = {
+            'osis_uuid': str(experience_educative_annualisee.uuid),
             'annee_debut': experience_educative_annualisee.academic_year.year,
             'annee_fin': experience_educative_annualisee.academic_year.year + 1,
             'communaute_linguistique': COMMUNAUTE_MAP.get(communaute, ''),
@@ -288,6 +289,7 @@ class InjectionEPC:
 
         return [
             {
+                'osis_uuid': str(experience_pro.uuid),
                 'type_occupation': experience_pro.type,
                 'debut': experience_pro.start_date.strftime("%d/%m/%Y"),
                 'fin': experience_pro.end_date.strftime("%d/%m/%Y"),

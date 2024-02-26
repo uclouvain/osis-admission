@@ -26,7 +26,10 @@
 
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT,
+)
 from osis_common.ddd.interface import BusinessException
 
 
@@ -117,11 +120,13 @@ class StatutPropositionInvalidePourPaiementInscriptionException(BusinessExceptio
 
     def __init__(self, current_status, **kwargs):
         message = _(
-            'The status of the request is currently "{current_status}". Only the status "{from_status}" allows you '
+            'The status of the request is currently "{current_status}". Only the statuses "{from_statuses}" allow you '
             'to move to the "{to_status}" status for the application fee.'
         ).format(
             current_status=current_status,
-            from_status=ChoixStatutPropositionGenerale.CONFIRMEE.value,
+            from_statuses=ChoixStatutPropositionGenerale.get_specific_values(
+                STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT
+            ),
             to_status=_("Must pay"),
         )
         super().__init__(message, **kwargs)
@@ -216,5 +221,23 @@ class TitreAccesEtreSelectionnePourEnvoyerASICException(BusinessException):
         message = _(
             'Please select in the previous experience, the diploma(s), or non-academic activity(ies) giving '
             'access to the chosen program.'
+        )
+        super().__init__(message, **kwargs)
+
+
+class ParcoursAnterieurNonSuffisantException(BusinessException):
+    status_code = "FORMATION-GENERALE-25"
+
+    def __init__(self, **kwargs):
+        message = _('The Previous experience must be in the "Sufficient" status in order to do this action.')
+        super().__init__(message, **kwargs)
+
+
+class DocumentAReclamerImmediatException(BusinessException):
+    status_code = "FORMATION-GENERALE-26"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "The authorization can not be done while there is one or more documents to be requested immediately."
         )
         super().__init__(message, **kwargs)

@@ -122,6 +122,10 @@ class ExperienceAcademiqueDTO(interface.DTO):
             nom_formation=self.nom_formation_equivalente_communaute_fr or self.nom_formation,
         )
 
+    @property
+    def titre_pdf_decision_sic(self):
+        return self.nom_formation
+
 
 @attr.dataclass(frozen=True, slots=True)
 class ExperienceNonAcademiqueDTO(interface.DTO):
@@ -137,18 +141,31 @@ class ExperienceNonAcademiqueDTO(interface.DTO):
     valorisee_par_admissions: Optional[List[str]] = None
 
     def __str__(self):
+        if self.type == ActivityType.OTHER.name:
+            return self.autre_activite
         return str(ActivityType.get_value(self.type))
 
     @property
+    def dates_formatees(self):
+        date_debut = self.date_debut.strftime('%m/%Y')
+        date_fin = self.date_fin.strftime('%m/%Y')
+        return f"{date_debut}-{date_fin}" if date_debut != date_fin else date_debut
+
+    @property
     def titre_formate(self):
-        if self.date_debut != self.date_fin:
-            return f"{self.date_debut.strftime('%m/%Y')}-{self.date_fin.strftime('%m/%Y')} : {self}"
-        else:
-            return f"{self.date_debut.strftime('%m/%Y')} : {self}"
+        return f"{self.dates_formatees} : {self}"
 
     @cached_property
     def derniere_annee(self):
         return self.date_fin.year if self.date_fin.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE else self.date_fin.year - 1
+
+    @property
+    def titre_pdf_decision_sic(self):
+        return (
+            f'{self.autre_activite} {self.dates_formatees}'
+            if self.type == ActivityType.OTHER.name
+            else self.dates_formatees
+        )
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -567,9 +567,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
             cleaned_data['free_additional_approval_conditions'] = []
 
         if cleaned_data.get('with_prerequisite_courses'):
-            if not cleaned_data.get('prerequisite_courses'):
-                self.add_error('prerequisite_courses', FIELD_REQUIRED_MESSAGE)
-            else:
+            if cleaned_data.get('prerequisite_courses'):
                 cleaned_data['prerequisite_courses'] = LearningUnitYear.objects.filter(
                     acronym__in=cleaned_data.get('prerequisite_courses', []),
                     academic_year__year=self.academic_year,
@@ -792,7 +790,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             'particular_cost': forms.TextInput(),
             'rebilling_or_third_party_payer': forms.TextInput(),
             'first_year_inscription_and_status': forms.TextInput(),
-            'is_mobility': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'is_mobility': forms.Select(choices=[(None, '-'), (True, _('Yes')), (False, _('No'))]),
             'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
             'must_provide_student_visa_d': forms.CheckboxInput,
@@ -904,16 +902,19 @@ class SicDecisionApprovalForm(forms.ModelForm):
             del self.fields['is_mobility']
             del self.fields['mobility_months_amount']
         else:
-            self.fields['is_mobility'].required = True
+            self.fields['is_mobility'].required = False
             self.fields['mobility_months_amount'].required = False
 
         if not self.is_admission:
             del self.fields['must_report_to_sic']
-            del self.fields['must_provide_student_visa_d']
         else:
             self.fields['must_report_to_sic'].required = True
-            self.initial['must_provide_student_visa_d'] = candidate_nationality_is_no_ue_5
             self.initial['must_report_to_sic'] = False
+
+        if self.is_admission and candidate_nationality_is_no_ue_5:
+            self.initial['must_provide_student_visa_d'] = True
+        else:
+            del self.fields['must_provide_student_visa_d']
 
         self.fields['communication_to_the_candidate'].required = False
 
@@ -1039,6 +1040,8 @@ class SicDecisionFinalApprovalForm(forms.Form):
                     **settings.CKEDITOR_CONFIGS['link_only'],
                     'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
                     'language': get_language(),
+                    'allowedContent': True,
+                    'autoParagraph': False,
                 }
             )
 

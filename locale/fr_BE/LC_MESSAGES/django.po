@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-29 16:31+0200\n"
+"POT-Creation-Date: 2024-02-12 17:06+0100\n"
 "PO-Revision-Date: 2023-12-08 17:10+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -716,6 +716,9 @@ msgstr "Dossier d'analyse"
 msgid "Analysis folder for a general education admission"
 msgstr "Dossier d'analyse pour une demande en formation générale"
 
+msgid "Annex 1 visa form"
+msgstr "Formulaire visa annexe 1"
+
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
 
@@ -790,13 +793,7 @@ msgstr "Approbation par pdf"
 msgid "Approval"
 msgstr "Accord"
 
-msgid "Approval certificate annexe of SIC"
-msgstr "Certificat d'approbation annexe SIC"
-
 msgid "Approval certificate from SIC"
-msgstr "Certificat d'approbation SIC"
-
-msgid "Approval certificate of SIC"
 msgstr "Certificat d'approbation SIC"
 
 msgid "Approval certificate of faculty"
@@ -1400,6 +1397,13 @@ msgstr "Attestation"
 msgid "Certificate for children of staff"
 msgstr "Attestation enfant du personnel"
 
+msgid ""
+"Certificate justifying your activity, mentioning this activity, for the "
+"period concerned"
+msgstr ""
+"Attestation justifiant votre activité, mentionnant cette activité, pour la "
+"période concernée"
+
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
@@ -1995,6 +1999,9 @@ msgstr "Cours"
 msgid "Courses taken"
 msgstr "Cours suivis"
 
+msgid "Create message"
+msgstr "Créer le message"
+
 msgid "Create new doctorate admission"
 msgstr "Créer une nouvelle admission en doctorat"
 
@@ -2266,6 +2273,9 @@ msgstr "Poste diplomatique"
 
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
+
+msgid "Director"
+msgstr "Directeur"
 
 msgid "Director of the inscription service"
 msgstr "Directeur du Service des inscriptions"
@@ -2549,6 +2559,13 @@ msgid ""
 msgstr ""
 "Mail réclamant les frais de dossier au candidat le %(date)s par %(author)s."
 
+msgid "Email sent to the EU+5 candidate when SIC approves an admission."
+msgstr "E-mail envoyé au candidat UE+5 lorsque SIC approuve une proposition."
+
+msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
+msgstr ""
+"E-mail envoyé au candidat H(UE+5) lorsque SIC approuve une proposition."
+
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
@@ -2562,9 +2579,6 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que la vérification de "
 "l'authentification de son parcours est en cours."
-
-msgid "Email sent to the candidate when SIC approves an admission."
-msgstr "E-mail envoyé au candidat lorsque SIC approuve une proposition."
 
 msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
@@ -2624,11 +2638,17 @@ msgstr "S'inscrire à un cours"
 msgid "Enrolled"
 msgstr "Inscrit"
 
+msgid "Enrollment authorization document link"
+msgstr "Lien du document d'autorisation d'inscription"
+
 msgid "Enrolment Office (SIC)"
 msgstr "Service des inscriptions (SIC)"
 
 msgid "Enrolment applications"
 msgstr "Demandes d'inscription"
+
+msgid "Enrolment authorisation"
+msgstr "Autorisation d'inscription"
 
 msgid "Enrolment campus"
 msgstr "Site d'inscription"
@@ -5307,9 +5327,6 @@ msgstr "Merci de spécifier votre numéro de registre national belge."
 msgid "Please specify your old NOMA (matriculation number)."
 msgstr "Merci de spécifier votre ancien NOMA (numéro de matricule)."
 
-msgid "Post-dated certificate justifying your activity mentioned above"
-msgstr "Attestation postdatée justifiant votre activité mentionnée ci-dessus"
-
 msgid "Post-enrolment status"
 msgstr "Statut après inscription"
 
@@ -5650,6 +5667,13 @@ msgstr "Destinataire"
 msgid "Recompute"
 msgstr "Recalculer"
 
+msgid "Rector"
+msgstr "Recteur"
+
+msgctxt "F"
+msgid "Rector"
+msgstr "Rectrice"
+
 msgid "Reduced tuition fee"
 msgstr "Réduction des droits d’inscription"
 
@@ -5686,6 +5710,9 @@ msgstr "Attestation de refus SIC"
 
 msgid "Refusal certificate of faculty"
 msgstr "Attestation de refus facultaire"
+
+msgid "Refusal document link"
+msgstr "Lien du document de refus"
 
 msgid "Refusal reason"
 msgstr "Motif de refus"
@@ -6555,6 +6582,13 @@ msgstr ""
 "L’attestation de réussite de l’épreuve de confirmation est en cours de "
 "génération, veuillez revenir plus tard pour y accéder."
 
+msgid ""
+"The Previous experience must be in the \"Sufficient\" status in order to do "
+"this action."
+msgstr ""
+"Le parcours antérieur doit être à l'état \"Suffisant\" pour pouvoir "
+"effectuer cette action."
+
 #, python-format
 msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
@@ -6570,6 +6604,13 @@ msgstr "L'acronyme de la bourse d'études"
 
 msgid "The activity title"
 msgstr "Le titre de l'activité"
+
+msgid ""
+"The authorization can not be done while there is one or more documents to be "
+"requested immediately."
+msgstr ""
+"L’autorisation ne peut avoir lieu tant qu’un ou plusieurs documents sont à "
+"réclamer immédiatement."
 
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
@@ -6936,13 +6977,13 @@ msgstr "Le statut a bien été modifié pour : %(status)s."
 
 #, python-brace-format
 msgid ""
-"The status of the request is currently \"{current_status}\". Only the status "
-"\"{from_status}\" allows you to move to the \"{to_status}\" status for the "
-"application fee."
+"The status of the request is currently \"{current_status}\". Only the "
+"statuses \"{from_statuses}\" allow you to move to the \"{to_status}\" status "
+"for the application fee."
 msgstr ""
-"Le statut de la demande est actuellement \"{current_status}\". Seul le "
-"statut \"{from_status}\" permet de passer à l'état \"{to_status}\" pour les "
-"frais de dossier."
+"Le statut de la demande est actuellement \"{current_status}\". Seuls les "
+"statuts \"{from_statuses}\" permettent de passer à l'état \"{to_status}\" "
+"pour les frais de dossier."
 
 msgid "The submitted information is not consistent with information requested."
 msgstr ""
@@ -7515,6 +7556,9 @@ msgstr "Vue par"
 msgid "Visa"
 msgstr "Visa"
 
+msgid "Visa application document link"
+msgstr "Lien du document de demande de visa"
+
 msgid "Visualize"
 msgstr "Visualiser"
 
@@ -7985,6 +8029,9 @@ msgstr ""
 msgid "You must set a lead supervisor."
 msgstr "Vous devez désigner un promoteur de référence."
 
+msgid "You need to create the message before sending it."
+msgstr "Il est nécessaire de créer le message avant de pouvoir envoyer."
+
 msgid "You need to set a member as president."
 msgstr "Vous devez désigner un membre comme président."
 
@@ -8007,6 +8054,9 @@ msgstr "Situation d’assimilation qui vous correspond"
 
 msgid "Your data have been saved."
 msgstr "Vos données ont été sauvegardées."
+
+msgid "Your dossier reference:"
+msgstr "Votre numéro de dossier :"
 
 msgid ""
 "Your export request has been planned, you will receive a notification as "

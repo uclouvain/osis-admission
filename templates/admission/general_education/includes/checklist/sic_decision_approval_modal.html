@@ -1,6 +1,3 @@
-{% extends "admission/modal/modal.html" %}
-{% load i18n bootstrap3 %}
-
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -25,13 +22,5 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-
-{% block modal_id %}sic-decision-approval-modal{% endblock %}
-
-{% block modal_title %}{% translate "Approval to validate" %}{% endblock %}
-
-{% block modal_class %}modal-lg fac-decision-modal{% endblock %}
-
-{% block modal_content %}
-  {% include 'admission/general_education/includes/checklist/sic_decision_approval_form.html' %}
-{% endblock %}
+{% url view.base_namespace|add:':sic-decision-approval' uuid=view.kwargs.uuid as url%}
+{% include "admission/general_education/includes/checklist/modal-htmx-reload.html" with modal_id="sic-decision-approval-modal" modal_classes="admission-modal-lg fac-decision-modal" modal_url=url %}

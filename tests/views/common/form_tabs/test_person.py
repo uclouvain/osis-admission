@@ -630,6 +630,15 @@ class PersonFormTestCase(TestCase):
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
+    def test_general_person_form_post_without_country_of_citizenship(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        data = self.form_data.copy()
+        data['country_of_citizenship'] = ''
+        response = self.client.post(self.general_url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('country_of_citizenship', response.context['form'].errors)
+
     def test_general_person_form_post_updates_submitted_profile_if_necessary(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -684,6 +693,7 @@ class PersonFormTestCase(TestCase):
             {
                 'coordinates': default_submitted_profile.get('coordinates'),
                 'identification': {
+                    'birth_date': '1990-01-01',
                     'first_name': 'John',
                     'last_name': 'Doe',
                     'gender': ChoixGenre.H.name,

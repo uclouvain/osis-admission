@@ -66,6 +66,7 @@ class IPDFGeneration(DomainService):
     def generer_sic_temporaire(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
@@ -77,6 +78,7 @@ class IPDFGeneration(DomainService):
     def generer_attestation_accord_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -88,6 +90,7 @@ class IPDFGeneration(DomainService):
     def generer_attestation_accord_annexe_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -99,6 +102,7 @@ class IPDFGeneration(DomainService):
     def generer_attestation_refus_sic(
         cls,
         proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -111,6 +115,7 @@ class IPDFGeneration(DomainService):
         cls,
         proposition_repository: IPropositionRepository,
         proposition: Proposition,
+        profil_candidat_translator: IProfilCandidatTranslator,
         gestionnaire: str,
         temporaire: bool = False,
     ) -> Optional[str]:

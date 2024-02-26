@@ -67,6 +67,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
@@ -74,7 +75,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
     ModifierChecklistChoixFormationCommand,
     SpecifierPaiementNecessaireCommand,
     EnvoyerRappelPaiementCommand,
@@ -151,6 +152,9 @@ from admission.mail_templates.checklist import (
     ADMISSION_EMAIL_SIC_APPROVAL,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE,
+    EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
+    EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
+    ADMISSION_EMAIL_SIC_APPROVAL_EU,
 )
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
@@ -158,6 +162,8 @@ from admission.utils import (
     get_backoffice_admission_url,
     get_portal_admission_url,
     get_access_titles_names,
+    get_salutation_prefix,
+    format_academic_year,
 )
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
@@ -212,6 +218,7 @@ __namespace__ = False
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
 ENTITY_SIC = 'SIC'
+EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 
 
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
@@ -687,6 +694,10 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             }
             for document in self.sic_decision_approval_form_requestable_documents
         }
+        context['a_des_documents_requis_immediat'] = any(
+            document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+            for document in self.sic_decision_approval_form_requestable_documents
+        )
 
         if self.request.htmx:
             comment = CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags=['decision_sic']).first()
@@ -802,6 +813,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             else "",
             "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
+            "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
         }
         if self.sic_director:
             tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
@@ -831,30 +843,39 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
     @cached_property
     def sic_decision_approval_final_form(self):
+        candidate = self.admission.candidate
+
+        training_title = {
+            settings.LANGUAGE_CODE_FR: self.proposition.formation.intitule_fr,
+            settings.LANGUAGE_CODE_EN: self.proposition.formation.intitule,
+        }[candidate.language]
+
         tokens = {
-            "admission_reference": self.proposition.reference,
-            "candidate": (
-                f"{self.proposition.profil_soumis_candidat.prenom} " f"{self.proposition.profil_soumis_candidat.nom}"
-            )
-            if self.proposition.profil_soumis_candidat
-            else "",
-            "academic_year": f"{self.proposition.formation.annee}-{self.proposition.formation.annee + 1}",
-            "academic_year_start_date": date_format(self.proposition.formation.date_debut),
-            "admission_email": self.proposition.formation.campus_inscription.email,
-            "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
+            'admission_reference': self.proposition.reference,
+            'candidate_first_name': self.proposition.prenom_candidat,
+            'candidate_last_name': self.proposition.nom_candidat,
+            'academic_year': format_academic_year(self.proposition.formation.annee),
+            'academic_year_start_date': date_format(self.proposition.formation.date_debut),
+            'admission_email': self.proposition.formation.campus_inscription.email,
+            'enrollment_authorization_document_link': EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
+            'visa_application_document_link': EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
+            'greetings': get_salutation_prefix(self.admission.candidate),
+            'training_title': training_title,
+            'admission_link_front': get_portal_admission_url('general-education', self.admission_uuid),
+            'admission_link_back': get_backoffice_admission_url('general-education', self.admission_uuid),
+            'training_campus': self.proposition.formation.campus.nom,
+            'training_acronym': self.proposition.formation.sigle,
         }
-        if get_language() == settings.LANGUAGE_CODE_FR:
-            if self.proposition.genre_candidat == "H":
-                tokens['greetings'] = "Cher"
-            elif self.proposition.genre_candidat == "F":
-                tokens['greetings'] = "Chère"
-            else:
-                tokens['greetings'] = "Cher·ère"
+
+        if self.admission.candidate.country_of_citizenship.european_union:
+            template_name = ADMISSION_EMAIL_SIC_APPROVAL_EU
+        else:
+            template_name = ADMISSION_EMAIL_SIC_APPROVAL
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
-                ADMISSION_EMAIL_SIC_APPROVAL,
-                settings.LANGUAGE_CODE_FR,
+                template_name,
+                self.admission.candidate.language,
             )
 
             subject = mail_template.render_subject(tokens=tokens)
@@ -924,10 +945,12 @@ class SicApprovalDecisionView(
                     doit_fournir_visa_etudes=form.cleaned_data.get('must_provide_student_visa_d', False),
                 )
             )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
-
+        # Reset cached proposition
+        del self.proposition
         return super().form_valid(form)
 
 
@@ -957,6 +980,7 @@ class SicRefusalDecisionView(
                     autres_motifs=form.cleaned_data['other_reasons'],
                 )
             )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -999,6 +1023,7 @@ class SicRefusalFinalDecisionView(
                         auteur=self.request.user.person.global_id,
                     )
                 )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -1041,6 +1066,7 @@ class SicApprovalFinalDecisionView(
                         auteur=self.request.user.person.global_id,
                     )
                 )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -1111,6 +1137,8 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             author=self.request.user.person,
         )
 
+        response = self.render_to_response(self.get_context_data())
+
         if admission_status_has_changed:
             add_history_entry(
                 admission.uuid,
@@ -1122,8 +1150,8 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
                 ),
                 tags=['proposition', 'sic-decision', 'status-changed'],
             )
-
-        return self.render_to_response(self.get_context_data())
+            response.headers['HX-Refresh'] = 'true'
+        return response
 
 
 class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
@@ -1235,7 +1263,7 @@ class ChecklistView(
         if not self.request.htmx:
             # Retrieve data related to the proposition
             command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(uuid_proposition=self.admission_uuid),
+                RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
             )
 
             context['resume_proposition'] = command_result.resume
@@ -1634,7 +1662,7 @@ class ApplicationFeesView(
 
 class PastExperiencesStatusView(
     AdmissionFormMixin,
-    CheckListDefaultContextMixin,
+    SicDecisionMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):
