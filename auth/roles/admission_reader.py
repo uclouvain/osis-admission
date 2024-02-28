@@ -68,6 +68,5 @@ class AdmissionReader(ParcoursViewer):
             # Management
             'admission.view_documents_management': is_part_of_education_group & is_submitted,
             'admission.view_checklist': is_part_of_education_group & is_submitted,
-            'admission.checklist_change_fac_comment': is_part_of_education_group,
         }
         return RuleSet(ruleset)
