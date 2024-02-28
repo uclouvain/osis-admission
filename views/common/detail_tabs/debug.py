@@ -75,23 +75,23 @@ class DebugView(LoadDossierViewMixin, TemplateView):
 
             logger.removeHandler(handler)
 
-        # logger = logging.getLogger('CalculFinancabilite')
-        # logger.setLevel(logging.INFO)
-        # with StringIO() as buffer, freezegun.freeze_time(self.request.GET.get("date-soumission")):
-        #     handler = logging.StreamHandler(buffer)
-        #     handler.setLevel(logging.INFO)
-        #     logger.addHandler(handler)
-        #     from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
-        #     financabilite = message_bus_instance.invoke(
-        #         DeterminerSiCandidatEstFinancableQuery(
-        #             matricule_fgs=self.proposition.matricule_candidat,
-        #             sigle_formation=self.proposition.formation.sigle,
-        #             annee=self.proposition.formation.annee,
-        #             est_en_reorientation=False,
-        #         )
-        #     )
-        #     data['financabilite'] = financabilite
-        #     data['financabilite_logs'] = buffer.getvalue()
-        #     logger.removeHandler(handler)
+        logger = logging.getLogger('CalculFinancabilite')
+        logger.setLevel(logging.INFO)
+        with StringIO() as buffer, freezegun.freeze_time(self.request.GET.get("date-soumission")):
+            handler = logging.StreamHandler(buffer)
+            handler.setLevel(logging.INFO)
+            logger.addHandler(handler)
+            from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
+            financabilite = message_bus_instance.invoke(
+                DeterminerSiCandidatEstFinancableQuery(
+                    matricule_fgs=self.proposition.matricule_candidat,
+                    sigle_formation=self.proposition.formation.sigle,
+                    annee=self.proposition.formation.annee,
+                    est_en_reorientation=False,
+                )
+            )
+            data['financabilite'] = financabilite
+            data['financabilite_logs'] = buffer.getvalue()
+            logger.removeHandler(handler)
 
         return data
