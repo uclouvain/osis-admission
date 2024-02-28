@@ -6,7 +6,6 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('parcours_interne', '0004_alter_parcoursviewer_unique_together'),
         ('admission', '0157_admissionviewer_admission_viewer_unique'),
     ]
 
