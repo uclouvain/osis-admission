@@ -35,7 +35,6 @@ from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.commands import DeterminerAnneeAcademiqueEtPotQuery as ContinuingCmd
 from admission.ddd.admission.formation_generale.commands import DeterminerAnneeAcademiqueEtPotQuery as GeneralCmd
 from admission.views.doctorate.mixins import LoadDossierViewMixin
-from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
 from osis_common.ddd.interface import BusinessException
 
 __all__ = ['DebugView']
@@ -82,6 +81,7 @@ class DebugView(LoadDossierViewMixin, TemplateView):
             handler = logging.StreamHandler(buffer)
             handler.setLevel(logging.INFO)
             logger.addHandler(handler)
+            from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
             financabilite = message_bus_instance.invoke(
                 DeterminerSiCandidatEstFinancableQuery(
                     matricule_fgs=self.proposition.matricule_candidat,
