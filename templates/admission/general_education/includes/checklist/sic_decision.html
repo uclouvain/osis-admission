@@ -180,12 +180,13 @@
           {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
           {% if admission.avec_conditions_complementaires %}
             {% if admission.conditions_complementaires %}
+              {% get_current_language as LANGUAGE_CODE %}
               <dl>
                 <dt>{% translate _('Additional conditions') %}</dt>
                 <dd>
                   <ul>
                     {% for condition in admission.conditions_complementaires %}
-                      <li>{{ condition }}</li>
+                      <li>{% if LANGUAGE_CODE == 'fr-be' %}{{ condition.nom_fr }}{% else %}{{ condition.nom_en }}{% endif %}</li>
                     {% endfor %}
                   </ul>
                 </dd>

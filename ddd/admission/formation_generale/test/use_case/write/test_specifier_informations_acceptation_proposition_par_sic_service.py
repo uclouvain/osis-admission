@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from unittest import TestCase
 
 import factory
@@ -56,6 +57,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
         cls.command = SpecifierInformationsAcceptationPropositionParSicCommand
+        cls.uuid_experience = str(uuid.uuid4())
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(
@@ -137,7 +139,16 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
                 uuid_proposition='uuid-MASTER-SCI-APPROVED',
                 avec_conditions_complementaires=True,
                 uuids_conditions_complementaires_existantes=['uuid-condition-complementaire-1'],
-                conditions_complementaires_libres=['Condition libre 1'],
+                conditions_complementaires_libres=[
+                    {
+                        'name_fr': 'Condition libre 1',
+                        'name_en': 'Free condition 1',
+                        'related_experience_id': self.uuid_experience,
+                    },
+                    {
+                        'name_fr': 'Condition libre 2',
+                    },
+                ],
                 avec_complements_formation=True,
                 uuids_complements_formation=['uuid-complement-formation-1'],
                 commentaire_complements_formation='Mon commentaire concernant les compléments de formation',
@@ -173,7 +184,13 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
                 )
             ],
         )
-        self.assertEqual(proposition.conditions_complementaires_libres, ['Condition libre 1'])
+        self.assertEqual(len(proposition.conditions_complementaires_libres), 2)
+        self.assertEqual(proposition.conditions_complementaires_libres[0].nom_fr, 'Condition libre 1')
+        self.assertEqual(proposition.conditions_complementaires_libres[0].nom_en, 'Free condition 1')
+        self.assertEqual(proposition.conditions_complementaires_libres[0].uuid_experience, self.uuid_experience)
+        self.assertEqual(proposition.conditions_complementaires_libres[1].nom_fr, 'Condition libre 2')
+        self.assertEqual(proposition.conditions_complementaires_libres[1].nom_en, '')
+        self.assertEqual(proposition.conditions_complementaires_libres[1].uuid_experience, '')
         self.assertEqual(proposition.avec_complements_formation, True)
         self.assertEqual(
             proposition.complements_formation,

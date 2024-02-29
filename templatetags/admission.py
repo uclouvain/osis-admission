@@ -39,6 +39,8 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
+
+from admission.contrib.models.checklist import FREE_ADDITIONAL_APPROVAL_CONDITION_FIELD_BY_LANGUAGE
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -590,7 +592,7 @@ def document_component(document_write_token, document_metadata, can_edit=True):
                 'template': 'osis_document/editor.html',
                 'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
-                'attrs': attrs
+                'attrs': attrs,
             }
         elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
             return {

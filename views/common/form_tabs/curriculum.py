@@ -30,8 +30,9 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Prefetch, F
+from django.db.models import Prefetch, F, ProtectedError
 from django.forms import forms
+from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -44,6 +45,7 @@ from admission.contrib.models.base import (
     BaseAdmission,
     AdmissionProfessionalValuatedExperiences,
 )
+from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.enums import Onglets
@@ -633,9 +635,29 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
     slug_field = 'uuid'
     slug_url_kwarg = 'experience_uuid'
 
+    @property
+    def experience_id(self):
+        return self.kwargs.get('experience_uuid', None)
+
     def delete(self, request, *args, **kwargs):
         # Delete the experience
-        delete = super().delete(request, *args, **kwargs)
+        try:
+            delete = super().delete(request, *args, **kwargs)
+        except ProtectedError as e:
+            free_approval_condition = next(
+                (obj for obj in e.protected_objects if isinstance(obj, FreeAdditionalApprovalCondition)),
+                None,
+            )
+            error_message = (
+                _(
+                    'Cannot delete the experience because it is used as additional condition for the '
+                    'proposition {admission}.'.format(admission=free_approval_condition.admission)
+                )
+                if free_approval_condition
+                else _('Cannot delete the experience because it is used in another context.')
+            )
+            messages.error(self.request, error_message)
+            return redirect(self.get_failure_url())
 
         # Delete the information of the experience from the checklist
         admission: BaseAdmission = self.admission
@@ -661,6 +683,9 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
     def get_success_url(self):
         return reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid}) + '#parcours_anterieur'
 
+    def get_failure_url(self):
+        raise NotImplemented
+
 
 class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView):
     urlpatterns = {'educational_delete': 'educational/<uuid:experience_uuid>/delete'}
@@ -668,9 +693,27 @@ class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView):
     def get_queryset(self):
         return EducationalExperience.objects.filter(person=self.admission.candidate)
 
+    def get_failure_url(self):
+        return reverse(
+            self.base_namespace + ':update:curriculum:educational',
+            kwargs={
+                'uuid': self.admission_uuid,
+                'experience_uuid': self.experience_id,
+            },
+        )
+
 
 class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView):
     urlpatterns = {'non_educational_delete': 'non_educational/<uuid:experience_uuid>/delete'}
 
     def get_queryset(self):
         return ProfessionalExperience.objects.filter(person=self.admission.candidate)
+
+    def get_failure_url(self):
+        return reverse(
+            self.base_namespace + ':update:curriculum:non_educational',
+            kwargs={
+                'uuid': self.admission_uuid,
+                'experience_uuid': self.experience_id,
+            },
+        )

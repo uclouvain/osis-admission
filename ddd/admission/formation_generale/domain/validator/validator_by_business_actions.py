@@ -34,8 +34,8 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
+    ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
@@ -329,7 +329,7 @@ class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidato
 
     avec_conditions_complementaires: Optional[bool]
     conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
-    conditions_complementaires_libres: List[str]
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
 
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[ComplementFormationIdentity]]
@@ -366,7 +366,7 @@ class ApprouverParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidato
 
     avec_conditions_complementaires: Optional[bool]
     conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
-    conditions_complementaires_libres: List[str]
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
 
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[ComplementFormationIdentity]]
