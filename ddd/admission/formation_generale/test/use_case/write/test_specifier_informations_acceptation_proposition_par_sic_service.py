@@ -39,6 +39,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
 )
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    SituationPropositionNonSICException,
+    ParcoursAnterieurNonSuffisantException,
+)
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
     _PropositionIdentityFactory,
@@ -48,6 +52,7 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
@@ -96,6 +101,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
 
     def test_should_etre_ok_avec_min_informations(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_REUSSITE
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -129,8 +135,27 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         self.assertIsNone(proposition.doit_se_presenter_en_sic)
         self.assertEqual(proposition.communication_au_candidat, '')
 
+    def test_should_lever_exception_si_statut_proposition_non_valide(self):
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_REUSSITE
+        self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+        self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonSICException)
+
+    def test_should_lever_exception_si_parcours_anterieur_non_suffisant(self):
+        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_EN_COURS
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+        self.assertIsInstance(context.exception.exceptions.pop(), ParcoursAnterieurNonSuffisantException)
+
     def test_should_etre_ok_si_completee_avec_max_informations(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_REUSSITE
         self.proposition.annee_calculee = 2020
 
         # Maximum d'informations données

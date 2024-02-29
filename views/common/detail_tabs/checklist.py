@@ -272,6 +272,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'admission.checklist_change_faculty_decision',
             self.admission,
         )
+        context['past_experiences_are_sufficient'] = (
+            self.admission.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut', '')
+            == ChoixStatutChecklist.GEST_REUSSITE.name
+        )
         context['bg_classes'] = {}
         return context
 
@@ -1777,7 +1781,7 @@ class ApplicationFeesView(
 
 class PastExperiencesStatusView(
     AdmissionFormMixin,
-    SicDecisionMixin,
+    CheckListDefaultContextMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):

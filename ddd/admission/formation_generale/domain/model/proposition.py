@@ -795,7 +795,10 @@ class Proposition(interface.RootEntity):
         communication_au_candidat: str,
         doit_fournir_visa_etudes: Optional[bool],
     ):
-        ApprouverParSicAValiderValidatorList(statut=self.statut).validate()
+        ApprouverParSicAValiderValidatorList(
+            statut=self.statut,
+            statut_checklist_parcours_anterieur=self.checklist_actuelle.parcours_anterieur,
+        ).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_EN_COURS,

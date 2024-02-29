@@ -89,6 +89,10 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             determined_academic_year=cls.academic_years[0],
         )
         cls.experience_uuid = str(cls.general_admission.candidate.educationalexperience_set.first().uuid)
+        cls.general_admission.checklist['current']['parcours_anterieur'][
+            'statut'
+        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        cls.general_admission.save()
         cls.url = resolve_url(
             'admission:general-education:sic-decision-approval',
             uuid=cls.general_admission.uuid,
