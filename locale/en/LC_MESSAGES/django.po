@@ -1419,6 +1419,9 @@ msgstr ""
 msgid "Civil status"
 msgstr ""
 
+msgid "Claim cancelled on"
+msgstr ""
+
 msgid "Cleaned"
 msgstr ""
 
@@ -5239,6 +5242,9 @@ msgstr ""
 msgid "Reporting categories"
 msgstr ""
 
+msgid "Request cancelled"
+msgstr ""
+
 msgid "Request of a new deadline for the confirmation paper"
 msgstr ""
 
@@ -5343,12 +5349,6 @@ msgid "Role: ADRE Secretaries"
 msgstr ""
 
 msgid "Role: ADRE secretary"
-msgstr ""
-
-msgid "Role: Admission reader"
-msgstr ""
-
-msgid "Role: Admission readers"
 msgstr ""
 
 msgid "Role: CDD configurator"
@@ -6408,9 +6408,7 @@ msgstr ""
 msgid "This account number has been verified"
 msgstr ""
 
-msgid ""
-"This action will cancel the document request. The applicant will still need "
-"to be informed."
+msgid "This action will cancel the document request."
 msgstr ""
 
 msgid "This activity and its potential subactivities will be discontinued"

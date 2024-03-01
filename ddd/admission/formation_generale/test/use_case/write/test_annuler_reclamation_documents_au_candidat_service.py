@@ -154,7 +154,7 @@ class AnnulerReclamationDocumentsAuCandidatTestCase(SimpleTestCase):
             self.assertEqual(emplacements_documents[identifiant].a_echeance_le, datetime.date(2023, 1, 15))
             self.assertEqual(emplacements_documents[identifiant].derniere_action_le, datetime.datetime(2023, 1, 5))
             self.assertEqual(emplacements_documents[identifiant].reclame_le, datetime.datetime(2023, 1, 3))
-            self.assertEqual(emplacements_documents[identifiant].statut, StatutEmplacementDocument.A_RECLAMER)
+            self.assertEqual(emplacements_documents[identifiant].statut, StatutEmplacementDocument.RECLAMATION_ANNULEE)
             self.assertEqual(emplacements_documents[identifiant].document_soumis_par, '')
             self.assertEqual(emplacements_documents[identifiant].uuids_documents, [])
 
@@ -218,7 +218,7 @@ class AnnulerReclamationDocumentsAuCandidatTestCase(SimpleTestCase):
             self.assertEqual(emplacements_documents[identifiant].a_echeance_le, datetime.date(2023, 1, 15))
             self.assertEqual(emplacements_documents[identifiant].derniere_action_le, datetime.datetime(2023, 1, 5))
             self.assertEqual(emplacements_documents[identifiant].reclame_le, datetime.datetime(2023, 1, 3))
-            self.assertEqual(emplacements_documents[identifiant].statut, StatutEmplacementDocument.A_RECLAMER)
+            self.assertEqual(emplacements_documents[identifiant].statut, StatutEmplacementDocument.RECLAMATION_ANNULEE)
             self.assertEqual(emplacements_documents[identifiant].document_soumis_par, '')
             self.assertEqual(emplacements_documents[identifiant].uuids_documents, [])
 

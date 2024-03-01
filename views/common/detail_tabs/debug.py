@@ -82,6 +82,7 @@ class DebugView(LoadDossierViewMixin, TemplateView):
             handler.setLevel(logging.INFO)
             logger.addHandler(handler)
             from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
+
             financabilite = message_bus_instance.invoke(
                 DeterminerSiCandidatEstFinancableQuery(
                     matricule_fgs=self.proposition.matricule_candidat,

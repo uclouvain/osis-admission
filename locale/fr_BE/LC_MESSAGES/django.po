@@ -1546,6 +1546,9 @@ msgstr "Ville"
 msgid "Civil status"
 msgstr "État civil"
 
+msgid "Claim cancelled on"
+msgstr "Réclamation annulée le"
+
 msgid "Cleaned"
 msgstr "Toiletté"
 
@@ -5807,6 +5810,9 @@ msgstr "Remplacer le document"
 msgid "Reporting categories"
 msgstr "Catégories de reporting"
 
+msgid "Request cancelled"
+msgstr "Réclamation annulée"
+
 msgid "Request of a new deadline for the confirmation paper"
 msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 
@@ -5918,12 +5924,6 @@ msgstr "Rôle: Secrétaires ADRE"
 
 msgid "Role: ADRE secretary"
 msgstr "Rôle: Secrétaire ADRE"
-
-msgid "Role: Admission reader"
-msgstr "Rôle: Lecteur des demandes d'inscription"
-
-msgid "Role: Admission readers"
-msgstr "Rôle: Lecteurs des demandes d'inscription"
 
 msgid "Role: CDD configurator"
 msgstr "Rôle: Configurateur CDD"
@@ -7096,12 +7096,8 @@ msgstr "Données relatives à la thèse"
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
 
-msgid ""
-"This action will cancel the document request. The applicant will still need "
-"to be informed."
-msgstr ""
-"Cette action va annuler la réclamation des documents en cours. Il restera à "
-"informer le/la candidat·e."
+msgid "This action will cancel the document request."
+msgstr "Cette action va annuler la réclamation des documents en cours."
 
 msgid "This activity and its potential subactivities will be discontinued"
 msgstr "Cette activité et ses potentielles sous-activités seront supprimées"
