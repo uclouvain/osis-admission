@@ -44,7 +44,7 @@
     </div>
     {% url request.resolver_match.namespace|add:':cancel-document-request' uuid=view.kwargs.uuid as cancel_request_url %}
     {% blocktranslate trimmed asvar cancel_request_message %}
-      This action will cancel the document request. The applicant will still need to be informed.
+      This action will cancel the document request.
     {% endblocktranslate %}
     {% include 'admission/modal/confirm_modal.html' with confirm_id='cancel-request-modal' confirm_message=cancel_request_message confirm_url=cancel_request_url htmx_request=True %}
   </div>
