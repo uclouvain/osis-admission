@@ -476,6 +476,16 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         reference = '{:08}'.format(self.reference)
         return f'{reference[:4]}.{reference[4:]}'
 
+    def get_admission_context(self):
+        from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
+
+        if hasattr(self, 'generaleducationadmission'):
+            return CONTEXT_GENERAL
+        if hasattr(self, 'doctorateadmission'):
+            return CONTEXT_DOCTORATE
+        if hasattr(self, 'continuingeducationadmission'):
+            return CONTEXT_CONTINUING
+
 
 class AdmissionEducationalValuatedExperiences(models.Model):
     baseadmission = models.ForeignKey(
