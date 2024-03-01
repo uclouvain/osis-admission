@@ -5409,6 +5409,16 @@ msgstr ""
 msgid "Retaking of the test"
 msgstr ""
 
+msgid "Retype"
+msgstr ""
+
+msgctxt "admission"
+msgid "Retype"
+msgstr ""
+
+msgid "Retype the document"
+msgstr ""
+
 msgctxt "activity"
 msgid "Role"
 msgstr ""
@@ -6989,6 +6999,9 @@ msgid "Weight"
 msgstr ""
 
 msgid "What diploma have you obtained (or will obtain)?"
+msgstr ""
+
+msgid "What is the new type of this document?"
 msgstr ""
 
 msgid "What was the most recent year you were enrolled at UCLouvain?"

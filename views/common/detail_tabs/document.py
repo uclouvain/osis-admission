@@ -36,6 +36,8 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
     EMPLACEMENTS_SIC,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+    EMPLACEMENTS_DOCUMENTS_INTERNES,
+    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
@@ -47,6 +49,7 @@ from admission.forms.admission.document import (
     UploadDocumentForm,
     RequestFreeDocumentWithDefaultFileForm,
     ChangeRequestDocumentForm,
+    RetypeDocumentForm,
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
@@ -68,6 +71,7 @@ __all__ = [
     'UploadFreeInternalDocumentView',
     'RequestStatusChangeDocumentView',
     'InProgressAnalysisFolderGenerationView',
+    'RetypeDocumentView',
 ]
 
 from osis_document.utils import get_file_url
@@ -140,6 +144,14 @@ def can_edit_document(document: AdmissionDocument, is_fac: bool, is_sic: bool) -
         return is_sic
 
     return False
+
+
+def can_retype_document(document: AdmissionDocument, document_identifier: str) -> bool:
+    if document.type in EMPLACEMENTS_DOCUMENTS_INTERNES:
+        return False
+    if document_identifier in DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION:
+        return False
+    return True
 
 
 class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
@@ -217,6 +229,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['requestable_document'] = document.requestable
         editable_document = can_edit_document(document, self.is_fac, self.is_sic)
         context['editable_document'] = editable_document
+        context['retypable_document'] = can_retype_document(document, document_identifier)
         context['document'] = document
 
         if document.uuids:
@@ -242,6 +255,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
             only_limited_request_choices=self.is_fac and document.type in EMPLACEMENTS_FAC,
         )
 
+        context['retype_form'] = RetypeDocumentForm(admission_uuid=self.admission_uuid, identifier=document_identifier)
         context['replace_form'] = ReplaceDocumentForm(mimetypes=document.mimetypes, identifier=document_identifier)
         context['upload_form'] = UploadDocumentForm(mimetypes=document.mimetypes, identifier=document_identifier)
 
@@ -516,3 +530,32 @@ class InProgressAnalysisFolderGenerationView(LoadDossierViewMixin, RedirectView)
         reading_token = admission_pdf_recap(self.admission, get_language(), with_annotated_documents=True)
         self.url = get_file_url(reading_token)
         return super().get(request, *args, **kwargs)
+
+
+class RetypeDocumentView(DocumentFormView):
+    form_class = RetypeDocumentForm
+    urlpatterns = {'retype': 'retype/<str:identifier>'}
+    template_name = 'admission/document/retype_form.html'
+    htmx_template_name = 'admission/document/retype_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['admission_uuid'] = self.admission_uuid
+        kwargs['identifier'] = self.document_identifier
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['retype_form'] = context['form']
+        return context
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(
+            general_education_commands.RetyperDocumentCommand(
+                uuid_proposition=self.admission_uuid,
+                identifiant_source=self.document_identifier,
+                identifiant_cible=form.cleaned_data['identifier'],
+                auteur=self.request.user.person.global_id,
+            )
+        )
+        return super().form_valid(form)
