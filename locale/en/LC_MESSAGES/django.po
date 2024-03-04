@@ -1260,6 +1260,15 @@ msgstr ""
 msgid "Candidate:"
 msgstr ""
 
+#, python-brace-format
+msgid ""
+"Cannot delete the experience because it is used as additional condition for "
+"the proposition {admission}."
+msgstr ""
+
+msgid "Cannot delete the experience because it is used in another context."
+msgstr ""
+
 msgid "Canvas"
 msgstr ""
 
@@ -2298,6 +2307,9 @@ msgstr ""
 msgid "EFT"
 msgstr ""
 
+msgid "EN"
+msgstr ""
+
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr ""
@@ -2568,6 +2580,9 @@ msgstr ""
 msgid "FNRS"
 msgstr ""
 
+msgid "FR"
+msgstr ""
+
 msgid "FREE_COURSE"
 msgstr "Open course"
 
@@ -2789,7 +2804,13 @@ msgstr ""
 msgid "Fraudster status from SIC"
 msgstr ""
 
+msgid "Free additional approval condition"
+msgstr ""
+
 msgid "Free additional approval conditions"
+msgstr ""
+
+msgid "Free additional conditions"
 msgstr ""
 
 msgid "Free and requestable by FAC"
@@ -5187,6 +5208,9 @@ msgid "Registration certificate"
 msgstr ""
 
 msgid "Registration fees"
+msgstr ""
+
+msgid "Related experience"
 msgstr ""
 
 msgid "Relationship"

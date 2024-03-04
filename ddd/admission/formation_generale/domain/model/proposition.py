@@ -36,6 +36,7 @@ from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
+    ConditionComplementaireLibreApprobation,
 )
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.enums.equivalence import (
@@ -173,7 +174,7 @@ class Proposition(interface.RootEntity):
     autre_formation_choisie_fac_id: Optional['FormationIdentity'] = None
     avec_conditions_complementaires: Optional[bool] = None
     conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity] = attr.Factory(list)
-    conditions_complementaires_libres: List[str] = attr.Factory(list)
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation] = attr.Factory(list)
     complements_formation: Optional[List[ComplementFormationIdentity]] = attr.Factory(list)
     avec_complements_formation: Optional[bool] = None
     commentaire_complements_formation: str = ''
@@ -335,7 +336,7 @@ class Proposition(interface.RootEntity):
         sigle_autre_formation: str,
         avec_conditions_complementaires: Optional[bool],
         uuids_conditions_complementaires_existantes: Optional[List[str]],
-        conditions_complementaires_libres: Optional[List[str]],
+        conditions_complementaires_libres: Optional[List[Dict]],
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
@@ -367,7 +368,15 @@ class Proposition(interface.RootEntity):
             if uuids_conditions_complementaires_existantes
             else []
         )
-        self.conditions_complementaires_libres = conditions_complementaires_libres
+
+        self.conditions_complementaires_libres = [
+            ConditionComplementaireLibreApprobation(
+                nom_fr=condition_libre.get('name_fr', ''),
+                nom_en=condition_libre.get('name_en', ''),
+                uuid_experience=condition_libre.get('related_experience_id', ''),
+            )
+            for condition_libre in conditions_complementaires_libres
+        ]
 
         self.avec_complements_formation = avec_complements_formation
         self.complements_formation = (
@@ -767,7 +776,7 @@ class Proposition(interface.RootEntity):
         auteur_modification: str,
         avec_conditions_complementaires: Optional[bool],
         uuids_conditions_complementaires_existantes: Optional[List[str]],
-        conditions_complementaires_libres: Optional[List[str]],
+        conditions_complementaires_libres: Optional[List[Dict]],
         avec_complements_formation: Optional[bool],
         uuids_complements_formation: Optional[List[str]],
         commentaire_complements_formation: str,
@@ -786,7 +795,10 @@ class Proposition(interface.RootEntity):
         communication_au_candidat: str,
         doit_fournir_visa_etudes: Optional[bool],
     ):
-        ApprouverParSicAValiderValidatorList(statut=self.statut).validate()
+        ApprouverParSicAValiderValidatorList(
+            statut=self.statut,
+            statut_checklist_parcours_anterieur=self.checklist_actuelle.parcours_anterieur,
+        ).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_EN_COURS,
@@ -804,7 +816,14 @@ class Proposition(interface.RootEntity):
             if uuids_conditions_complementaires_existantes
             else []
         )
-        self.conditions_complementaires_libres = conditions_complementaires_libres
+        self.conditions_complementaires_libres = [
+            ConditionComplementaireLibreApprobation(
+                nom_fr=condition_libre.get('name_fr', ''),
+                nom_en=condition_libre.get('name_en', ''),
+                uuid_experience=condition_libre.get('related_experience_id', ''),
+            )
+            for condition_libre in conditions_complementaires_libres
+        ]
 
         self.avec_complements_formation = avec_complements_formation
         self.complements_formation = (

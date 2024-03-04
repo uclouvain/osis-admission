@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,3 +31,10 @@ from osis_common.ddd import interface
 @attr.dataclass(frozen=True, slots=True)
 class ConditionComplementaireApprobationIdentity(interface.EntityIdentity):
     uuid: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ConditionComplementaireLibreApprobation(interface.Entity):
+    nom_fr: str
+    nom_en: str
+    uuid_experience: str = ''

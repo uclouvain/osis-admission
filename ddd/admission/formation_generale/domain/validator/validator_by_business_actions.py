@@ -34,8 +34,8 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
+    ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
@@ -60,7 +60,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutsChecklistGenerale,
+    StatutChecklist,
+)
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldCurriculumFichierEtreSpecifie,
     ShouldEquivalenceEtreSpecifiee,
@@ -329,7 +332,7 @@ class ApprouverParFacValidatorList(TwoStepsMultipleBusinessExceptionListValidato
 
     avec_conditions_complementaires: Optional[bool]
     conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
-    conditions_complementaires_libres: List[str]
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
 
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[ComplementFormationIdentity]]
@@ -366,7 +369,7 @@ class ApprouverParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidato
 
     avec_conditions_complementaires: Optional[bool]
     conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
-    conditions_complementaires_libres: List[str]
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
 
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[ComplementFormationIdentity]]
@@ -467,6 +470,7 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionGenerale
+    statut_checklist_parcours_anterieur: StatutChecklist
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -475,6 +479,9 @@ class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionList
         return [
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
+            ),
+            ShouldParcoursAnterieurEtreSuffisant(
+                statut=self.statut_checklist_parcours_anterieur,
             ),
         ]
 
