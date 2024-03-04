@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-12 17:06+0100\n"
+"POT-Creation-Date: 2024-03-04 15:18+0100\n"
 "PO-Revision-Date: 2023-12-08 17:10+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -723,6 +723,9 @@ msgstr "Dossier d'analyse"
 msgid "Analysis folder for a general education admission"
 msgstr "Dossier d'analyse pour une demande en formation générale"
 
+msgid "Annex 1 visa form"
+msgstr "Formulaire visa annexe 1"
+
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
 
@@ -732,9 +735,6 @@ msgid ""
 msgstr ""
 "Annexe 26 ou 26 ou la carte A/B mentionnant le statut de réfugié ou la "
 "décision confirmant la protection du parent"
-
-msgid "Annex 1 visa form"
-msgstr "Formulaire visa annexe 1"
 
 msgid "Annexe approval certificate from SIC"
 msgstr "Annexe au certificat d'approbation SIC"
@@ -3533,6 +3533,12 @@ msgstr "Invité"
 msgid "IN_PROGRESS"
 msgstr "En cours"
 
+msgid "Id card expiry date"
+msgstr "Date de fin de validité de la carte d'identité"
+
+msgid "Id card number"
+msgstr "Numéro de carte d'identité"
+
 msgid "Identification"
 msgstr "Identification"
 
@@ -4667,6 +4673,9 @@ msgstr "Intitulé du type d'enseignement"
 
 msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
+
+msgid "National number"
+msgstr "Numéro de registre national belge (NISS)"
 
 msgid "Nationality"
 msgstr "Nationalité"

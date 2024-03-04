@@ -79,5 +79,8 @@ class PersonMergeProposalForm(AdmissionPersonForm):
         force_translations = [
             _('Civil state'),
             _('Middle name'),
-            _('Country of citizenship name')
+            _('Country of citizenship name'),
+            _('National number'),
+            _('Id card number'),
+            _('Id card expiry date'),
         ]

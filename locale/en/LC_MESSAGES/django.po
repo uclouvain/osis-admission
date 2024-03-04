@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-12 17:06+0100\n"
+"POT-Creation-Date: 2024-03-04 15:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -639,15 +639,15 @@ msgstr ""
 msgid "Analysis folder for a general education admission"
 msgstr ""
 
+msgid "Annex 1 visa form"
+msgstr ""
+
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr ""
 
 msgid ""
 "Annex 25 or 26 or the A/B card mentioning the refugee status or the decision "
 "confirming the protection of the parent"
-msgstr ""
-
-msgid "Annex 1 visa form"
 msgstr ""
 
 msgid "Annexe approval certificate from SIC"
@@ -3203,6 +3203,12 @@ msgstr "Invited to sign"
 msgid "IN_PROGRESS"
 msgstr "In progress"
 
+msgid "Id card expiry date"
+msgstr ""
+
+msgid "Id card number"
+msgstr ""
+
 msgid "Identification"
 msgstr ""
 
@@ -4178,6 +4184,9 @@ msgid "Name of the education type"
 msgstr ""
 
 msgid "Name of the management entity"
+msgstr ""
+
+msgid "National number"
 msgstr ""
 
 msgid "Nationality"
