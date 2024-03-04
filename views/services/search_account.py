@@ -60,7 +60,7 @@ class SearchAccountView(HtmxMixin, FormView):
         return Person.objects.values(
             'first_name', 'middle_name', 'last_name', 'email', 'gender', 'birth_date', 'civil_state',
             'birth_place', 'country_of_citizenship__name', 'national_number', 'id_card_number',
-            'passport_number', 'last_registration_id', 'global_id',
+            'passport_number', 'id_card_expiry_date', 'global_id'
         ).get(baseadmissions__uuid=self.kwargs['uuid'])
 
     def get_context_data(self, **kwargs):

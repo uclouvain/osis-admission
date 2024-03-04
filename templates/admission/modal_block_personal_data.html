@@ -42,6 +42,7 @@
 
         <div class="panel-body original-data">
             {% for label, value in candidate.items %}
+                {% if label != 'global_id' %}
                 <div class="flex-merge-input">
                     <div class="input-field-data">
                         {% input_field_data label value False %}
@@ -52,6 +53,7 @@
                         </button>
                     </div>
                 </div>
+                {% endif %}
             {% endfor %}
         </div>
     </div>
@@ -80,7 +82,7 @@
                     </button>
                 </div>
                 <div class="panel-title form-group">
-                        <div class="bold-text">{% trans 'Available information' %}</div>
+                        <div class="bold-text text-nowrap">{% trans 'Available information' %}</div>
                         {% for match in matches %}
                           <div id="match-{{ forloop.counter0 }}" class="match-name" data-matricule="{{ match.person.matricule }}" {% if not forloop.first %} style="display: none;" {% endif %}">
                             {{ match.person.lastName }}, {{ match.person.firstName }} - <span class="badge panel-default-badge-success" data-toggle="tooltip" title="Similarity rate">{{ match.similarityRate }}</span>

@@ -57,9 +57,8 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'country_of_citizenship',
             'national_number',
             'id_card_number',
-            'id_card_expiry_date',
             'passport_number',
-            'last_registration_id',
+            'id_card_expiry_date',
             'identification_type',
         ]
         exclude = [
@@ -75,6 +74,7 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'has_national_number',
             'unknown_birth_date',
             'already_registered',
+            'last_registration_id',
         ]
         force_translations = [
             _('Civil state'),

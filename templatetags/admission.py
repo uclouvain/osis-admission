@@ -1107,7 +1107,7 @@ def map_fields_items(digit_fields):
         "national_number": "nationalRegister",
         "id_card_number": "",
         "passport_number": "",
-        "last_registration_id": "",
+        "id_card_expiry_date": "",
     }
 
     mapped_fields = {}
@@ -1133,6 +1133,8 @@ def input_field_data(label, value, editable=True, mask=None, select_key=None):
     if label == 'civil_state' and value is not None:
         select_key = value
         value = CivilState.get_value(select_key)
+    if 'country_of_citizenship' in label:
+        select_key = Country.objects.get(name=value).id
     return {
         'label': label,
         'value': str(value) if value else None,

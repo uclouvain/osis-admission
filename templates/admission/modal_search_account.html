@@ -116,9 +116,10 @@
         el.addEventListener('click', (e) => {
             const source = e.currentTarget.dataset.mergeSource;
             const label = e.currentTarget.dataset.mergeLabel;
+            const destinationLabel = label === 'country_of_citizenship__name' ? 'country_of_citizenship' : label;
 
             const valueToCopy = document.querySelector(`.${source}-data #${label}`).value;
-            const destinationInput = document.querySelector(`.fusion-data #id_${label}`);
+            const destinationInput = document.querySelector(`.fusion-data #id_${destinationLabel}`);
 
             if(destinationInput && valueToCopy){
 
@@ -130,7 +131,8 @@
                     $(destinationInput).val(selectKey);
                 }
                 else if(label === 'country_of_citizenship__name'){
-                    $(destinationInput).append(new Option(valueToCopy, valueToCopy, true, true)).trigger("change");
+                    const selectKey = document.querySelector(`.${source}-data #${label}`).dataset.selectKey;
+                    $(destinationInput).append(new Option(valueToCopy, selectKey, true, true)).trigger("change");
                 }
                 else $(destinationInput).val(valueToCopy);
                 $(destinationInput).trigger('input');
