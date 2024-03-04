@@ -352,3 +352,8 @@ select.select2-hidden-accessible + span {
   -webkit-animation: spin-loader 2s linear infinite;
   animation: spin-loader 2s linear infinite;
 }
+
+a.no-link {
+  text-decoration: none !important;
+  color: white;
+}

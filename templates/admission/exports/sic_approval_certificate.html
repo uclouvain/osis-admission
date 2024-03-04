@@ -244,7 +244,7 @@
     {% trans "We would like to draw your attention to the fact that this enrolment authorisation is conditional on :" %}
     <ul>
       {% for condition in proposition.conditions_complementaires %}
-      <li>{{ condition }}</li>
+        <li>{% if LANGUAGE_CODE == 'fr-be' %}{{ condition.nom_fr }}{% else %}{{ condition.nom_en }}{% endif %}</li>
       {% endfor %}
     </ul>
   </p>

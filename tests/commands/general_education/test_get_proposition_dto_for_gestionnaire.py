@@ -28,6 +28,7 @@ import uuid
 from unittest.mock import ANY, patch
 
 import freezegun
+from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils.translation import gettext, pgettext
 from osis_history.models import HistoryEntry
@@ -41,8 +42,13 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
 from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.tests.factories.faculty_decision import RefusalReasonFactory, AdditionalApprovalConditionFactory
+from admission.tests.factories.faculty_decision import (
+    RefusalReasonFactory,
+    AdditionalApprovalConditionFactory,
+    FreeAdditionalApprovalConditionFactory,
+)
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -295,9 +301,17 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                 AdditionalApprovalConditionFactory(),
             ]
         )
-        self.admission.free_additional_approval_conditions = [
-            'first free condition',
-            'second free condition',
+        free_conditions = [
+            FreeAdditionalApprovalConditionFactory(
+                admission=self.admission,
+                name_fr='Ma première condition',
+                name_en='My first condition',
+            ),
+            FreeAdditionalApprovalConditionFactory(
+                admission=self.admission,
+                name_fr='Ma deuxième condition',
+                name_en='My second condition',
+            ),
         ]
         self.admission.other_training_accepted_by_fac = GeneralEducationTrainingFactory(
             academic_year__current=True,
@@ -343,8 +357,26 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
 
         self.assertCountEqual(
             result.conditions_complementaires,
-            self.admission.free_additional_approval_conditions
-            + [condition.name_fr for condition in self.admission.additional_approval_conditions.all()],
+            [
+                ConditionComplementaireApprobationDTO(
+                    uuid=condition.uuid,
+                    libre=False,
+                    nom_fr=condition.name_fr,
+                    nom_en=condition.name_en,
+                    uuid_experience='',
+                )
+                for condition in self.admission.additional_approval_conditions.all()
+            ]
+            + [
+                ConditionComplementaireApprobationDTO(
+                    uuid=condition.uuid,
+                    libre=True,
+                    nom_fr=condition.name_fr,
+                    nom_en=condition.name_en,
+                    uuid_experience='',
+                )
+                for condition in free_conditions
+            ],
         )
 
         prerequisite_courses = self.admission.prerequisite_courses.all()

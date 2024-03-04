@@ -232,12 +232,6 @@ class GeneralEducationAdmission(BaseAdmission):
         to='admission.AdditionalApprovalCondition',
         verbose_name=_('Additional approval conditions'),
     )
-    free_additional_approval_conditions = ArrayField(
-        base_field=models.TextField(),
-        blank=True,
-        default=list,
-        verbose_name=_('Free additional approval conditions'),
-    )
     other_training_accepted_by_fac = models.ForeignKey(
         blank=True,
         null=True,

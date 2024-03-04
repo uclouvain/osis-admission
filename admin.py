@@ -42,7 +42,6 @@ from ordered_model.admin import OrderedModelAdmin
 from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
-from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
@@ -67,7 +66,12 @@ from admission.contrib.models import (
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
-from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
+from admission.contrib.models.checklist import (
+    RefusalReasonCategory,
+    RefusalReason,
+    AdditionalApprovalCondition,
+    FreeAdditionalApprovalCondition,
+)
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
@@ -500,7 +504,13 @@ class AccountingAdmin(ReadOnlyFilesMixin, admin.ModelAdmin):
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference']
-    list_display = ('reference', 'candidate', 'training', 'type_demande', 'created_at', )
+    list_display = (
+        'reference',
+        'candidate',
+        'training',
+        'type_demande',
+        'created_at',
+    )
     actions = [
         'injecter_dans_epc',
     ]
@@ -561,6 +571,29 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
     list_filter = ['status', 'method']
 
 
+class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):
+    related_experience = forms.ModelMultipleChoiceField(
+        queryset=EducationalExperience.objects.none(),
+        required=False,
+        widget=FilteredSelectMultiple(verbose_name=_('Educational experiences'), is_stacked=False),
+        to_field_name='uuid',
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['related_experience'].queryset = self.instance.admission.candidate.educationalexperience_set
+
+
+class FreeAdditionalApprovalConditionAdmin(admin.ModelAdmin):
+    form = FreeAdditionalApprovalConditionAdminForm
+    list_display = ['name_fr', 'name_en', 'admission']
+    search_fields = ['admission__reference']
+    autocomplete_fields = [
+        'related_experience',
+        'admission',
+    ]
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
@@ -577,6 +610,7 @@ admin.site.register(RefusalReason, RefusalReasonAdmin)
 admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
 admin.site.register(DiplomaticPost, DiplomaticPostAdmin)
 admin.site.register(OnlinePayment, OnlinePaymentAdmin)
+admin.site.register(FreeAdditionalApprovalCondition, FreeAdditionalApprovalConditionAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
@@ -790,7 +824,12 @@ class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
 
 
 class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
-    list_display = ('person', 'education_group_most_recent_acronym', 'cohort', 'changed',)
+    list_display = (
+        'person',
+        'education_group_most_recent_acronym',
+        'cohort',
+        'changed',
+    )
 
     def get_hijack_user(self, obj):
         return obj.person.user
@@ -811,7 +850,6 @@ admin.site.register(Candidate, FrontOfficeRoleModelAdmin)
 admin.site.register(CddConfigurator, CddConfiguratorAdmin)
 
 admin.site.register(CentralManager, CentralManagerAdmin)
-admin.site.register(AdmissionReader, AdmissionReaderAdmin)
 admin.site.register(ProgramManager, ProgramManagerAdmin)
 admin.site.register(SicManagement, HijackEntityRoleModelAdmin)
 admin.site.register(AdreSecretary, HijackRoleModelAdmin)

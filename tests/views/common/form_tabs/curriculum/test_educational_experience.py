@@ -47,6 +47,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from admission.tests.factories.faculty_decision import FreeAdditionalApprovalConditionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
@@ -1737,6 +1738,21 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             experience_uuid=self.experience.uuid,
         )
 
+        # Mock osis document api
+        patcher = mock.patch("osis_document.api.utils.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch(
+            'osis_document.api.utils.get_remote_metadata',
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patched = patcher.start()
+        patched.side_effect = lambda _, value, __: value
+        self.addCleanup(patcher.stop)
+
     def test_delete_experience_from_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
         response = self.client.delete(self.delete_url)
@@ -1761,6 +1777,29 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_experience_used_as_approval_condition_is_not_allowed(self):
+        self.client.force_login(self.sic_manager_user)
+
+        approval_condition = FreeAdditionalApprovalConditionFactory(
+            admission=self.general_admission,
+            related_experience=self.experience,
+            name_fr='Condition de test',
+            name_en='Test condition',
+        )
+
+        response = self.client.delete(self.delete_url, follow=True)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(
+            gettext(
+                'Cannot delete the experience because it is used as additional condition for the '
+                'proposition {admission}.'.format(admission=approval_condition.admission)
+            ),
+            messages,
+        )
 
     def test_delete_known_experience(self):
         self.client.force_login(self.sic_manager_user)

@@ -437,7 +437,7 @@ class SpecifierInformationsAcceptationPropositionParFaculteCommand(interface.Com
     sigle_autre_formation: str = ''
     uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
     avec_conditions_complementaires: Optional[bool] = None
-    conditions_complementaires_libres: List[str] = attr.Factory(list)
+    conditions_complementaires_libres: List[Dict] = attr.Factory(list)
     avec_complements_formation: Optional[bool] = None
     uuids_complements_formation: List[str] = attr.Factory(list)
     commentaire_complements_formation: str = ''
@@ -538,7 +538,7 @@ class SpecifierInformationsAcceptationPropositionParSicCommand(interface.Command
     gestionnaire: str
     avec_conditions_complementaires: Optional[bool] = None
     uuids_conditions_complementaires_existantes: List[str] = attr.Factory(list)
-    conditions_complementaires_libres: List[str] = attr.Factory(list)
+    conditions_complementaires_libres: List[Dict] = attr.Factory(list)
     avec_complements_formation: Optional[bool] = None
     uuids_complements_formation: List[str] = attr.Factory(list)
     commentaire_complements_formation: str = ''

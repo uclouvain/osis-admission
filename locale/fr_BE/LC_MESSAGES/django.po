@@ -1370,6 +1370,19 @@ msgstr "Pays de la nationalité du candidat"
 msgid "Candidate:"
 msgstr "Candidat :"
 
+#, python-brace-format
+msgid ""
+"Cannot delete the experience because it is used as additional condition for "
+"the proposition {admission}."
+msgstr ""
+"Impossible de supprimer l'expérience parce qu'elle est utilisée comme "
+"condition additionnelle pour la proposition {admission}."
+
+msgid "Cannot delete the experience because it is used in another context."
+msgstr ""
+"Impossible de supprimer l'expérience parce qu'elle est utilisée dans un "
+"autre contexte."
+
 msgid "Canvas"
 msgstr "Canvas"
 
@@ -2502,6 +2515,9 @@ msgstr "ECTS doit être positif"
 msgid "EFT"
 msgstr "EFT"
 
+msgid "EN"
+msgstr "EN"
+
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr "AUTORISATION D’INSCRIPTION<br>à l’année académique %(academic_year)s"
@@ -2787,6 +2803,9 @@ msgstr "Réorientation/modification externe"
 msgid "FNRS"
 msgstr "FNRS"
 
+msgid "FR"
+msgstr "FR"
+
 msgid "FREE_COURSE"
 msgstr "Cours libre"
 
@@ -3040,8 +3059,14 @@ msgstr "Statut fraudeur d'après l'ARES"
 msgid "Fraudster status from SIC"
 msgstr "Statut fraudeur d'après SIC"
 
+msgid "Free additional approval condition"
+msgstr "Condition complémentaire d'acceptation libre"
+
 msgid "Free additional approval conditions"
 msgstr "Conditions complémentaires d'acceptation libres"
+
+msgid "Free additional conditions"
+msgstr "Conditions complémentaires libres"
 
 msgid "Free and requestable by FAC"
 msgstr "Libre et réclamable par FAC"
@@ -5752,6 +5777,9 @@ msgstr "Attestation d’immatriculation"
 
 msgid "Registration fees"
 msgstr "Droits d'inscription"
+
+msgid "Related experience"
+msgstr "Expérience associée"
 
 msgid "Relationship"
 msgstr "Lien de parenté"

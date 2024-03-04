@@ -34,6 +34,8 @@
 {% endblock %}
 
 {% block decision_content %}
+  {% get_current_language as LANGUAGE_CODE %}
+  
   {% if proposition.autre_formation_choisie_fac %}
     {% display proposition.autre_formation_choisie_fac.sigle ' - ' proposition.autre_formation_choisie_fac.intitule as course_title %}
     {% field_data _('Other authorized program') course_title inline=True %}
@@ -56,13 +58,14 @@
     {% field_data _('Valuated diplomas or experiences:') '' inline=True %}
   {% endif %}
 
+  
   {% if proposition.avec_conditions_complementaires %}
     <dl>
       <dt>{% translate 'Additional conditions:' %}</dt>
       <dd>
         <ul>
           {% for condition in proposition.conditions_complementaires %}
-            <li>{{ condition }}</li>
+            <li>{% if LANGUAGE_CODE == 'fr-be' %}{{ condition.nom_fr }}{% else %}{{ condition.nom_en }}{% endif %}</li>
           {% endfor %}
         </ul>
       </dd>
