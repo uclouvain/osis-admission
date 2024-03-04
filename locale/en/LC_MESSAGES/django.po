@@ -5342,12 +5342,6 @@ msgstr ""
 msgid "Role: ADRE secretary"
 msgstr ""
 
-msgid "Role: Admission reader"
-msgstr ""
-
-msgid "Role: Admission readers"
-msgstr ""
-
 msgid "Role: CDD configurator"
 msgstr ""
 
@@ -7260,6 +7254,9 @@ msgid "Your Belgian student status"
 msgstr ""
 
 msgid "Your data have been saved."
+msgstr ""
+
+msgid "Your document is available here"
 msgstr ""
 
 msgid "Your dossier reference:"
