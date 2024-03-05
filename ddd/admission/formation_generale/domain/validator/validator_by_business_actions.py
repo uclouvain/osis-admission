@@ -471,6 +471,7 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
 class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionGenerale
     statut_checklist_parcours_anterieur: StatutChecklist
+    documents_dto: List[EmplacementDocumentDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -482,6 +483,9 @@ class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionList
             ),
             ShouldParcoursAnterieurEtreSuffisant(
                 statut=self.statut_checklist_parcours_anterieur,
+            ),
+            ShouldNePasAvoirDeDocumentReclameImmediat(
+                documents_dto=self.documents_dto,
             ),
         ]
 
