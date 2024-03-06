@@ -135,6 +135,14 @@
                 addOptionButton.value = '+';
                 addOptionButton.className = 'btn';
 
+                // When the user presses enter on the text input, add the option and prevent the event from propagating
+                addOptionTextInput.addEventListener('keydown', function(event) {
+                   if (event.key === 'Enter') {
+                       addOptionButton.click();
+                       event.preventDefault();
+                   }
+                });
+
                 addOptionButton.addEventListener('click', function(event) {
                     // Add a new option value in the original select
                     const inputText = document.getElementById(addOptionTextInput.id);
