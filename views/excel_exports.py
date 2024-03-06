@@ -27,11 +27,13 @@
 import ast
 from typing import Dict
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.defaultfilters import yesno
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.text import slugify
 from django.utils.translation import gettext as _, gettext_lazy, pgettext
 from django.views import View
@@ -110,6 +112,7 @@ class BaseAdmissionExcelExportView(
                 job_uuid=task.uuid,
                 file_name=slugify(self.export_name),
                 type=ExportTypes.EXCEL.name,
+                extra_data={'description': str(self.export_description)},
             )
 
         if export:
@@ -126,6 +129,19 @@ class BaseAdmissionExcelExportView(
             return response
 
         return HttpResponseRedirect(reverse(self.redirect_url_name))
+
+    def get_task_done_async_manager_extra_kwargs(self, file_name: str, file_url: str, export_extra_data: Dict) -> Dict:
+        download_message = format_html(
+            "{}: <a href='{}' target='_blank'>{}</a>",
+            _("Your document is available here"),
+            file_url,
+            file_name,
+        )
+        description = export_extra_data.get('description')
+        return {'description': f"{description}<br>{download_message}"}
+
+    def get_read_token_extra_kwargs(self) -> Dict:
+        return {'custom_ttl': settings.EXPORT_FILE_DEFAULT_TTL}
 
 
 class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
