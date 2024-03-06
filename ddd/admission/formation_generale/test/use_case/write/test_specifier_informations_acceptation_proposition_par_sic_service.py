@@ -23,10 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import uuid
 from unittest import TestCase
 
 import factory
+import freezegun
 
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
@@ -53,8 +55,11 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 
 
+@freezegun.freeze_time('2020-11-01')
 class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -63,6 +68,15 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         cls.message_bus = message_bus_in_memory_instance
         cls.command = SpecifierInformationsAcceptationPropositionParSicCommand
         cls.uuid_experience = str(uuid.uuid4())
+        academic_year_repository = AcademicYearInMemoryRepository()
+        for annee in range(2020, 2022):
+            academic_year_repository.save(
+                AcademicYear(
+                    entity_id=AcademicYearIdentity(year=annee),
+                    start_date=datetime.date(annee, 9, 15),
+                    end_date=datetime.date(annee + 1, 9, 30),
+                )
+            )
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(
