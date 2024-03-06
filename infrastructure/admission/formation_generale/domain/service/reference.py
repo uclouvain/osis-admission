@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.contrib.models.base import BaseAdmissionProxy
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_reference import IReferenceTranslator
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
@@ -34,9 +34,9 @@ class ReferenceTranslator(IReferenceTranslator):
     def get_reference(cls, entity_id: PropositionIdentity) -> str:
         try:
             return (
-                BaseAdmissionProxy.objects.with_training_management_and_reference()
+                BaseAdmission.objects.with_training_management_and_reference()
                 .get(uuid=entity_id.uuid)
                 .formatted_reference
             )
-        except BaseAdmissionProxy.DoesNotExist:
+        except BaseAdmission.DoesNotExist:
             raise PropositionNonTrouveeException

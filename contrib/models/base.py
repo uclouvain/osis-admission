@@ -457,6 +457,8 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         encoder=DjangoJSONEncoder,
     )
 
+    objects = BaseAdmissionManager()
+
     class Meta:
         constraints = [
             models.CheckConstraint(
@@ -540,15 +542,6 @@ def _invalidate_candidate_cache(sender, instance, **kwargs):
     ]
     if keys:
         cache.delete_many(keys)
-
-
-class BaseAdmissionProxy(BaseAdmission):
-    """Proxy model of base.BaseAdmission"""
-
-    objects = BaseAdmissionManager()
-
-    class Meta:
-        proxy = True
 
 
 class AdmissionViewer(models.Model):
