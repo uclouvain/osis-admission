@@ -949,7 +949,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'candidate_last_name': self.proposition.nom_candidat,
             'academic_year': format_academic_year(self.proposition.formation.annee),
             'academic_year_start_date': date_format(self.proposition.formation.date_debut),
-            'admission_email': self.proposition.formation.campus_inscription.email,
+            'admission_email': self.proposition.formation.campus_inscription.email_inscription_sic,
             'enrollment_authorization_document_link': EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
             'visa_application_document_link': EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
             'greetings': get_salutation_prefix(self.admission.candidate),

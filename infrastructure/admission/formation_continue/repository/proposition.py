@@ -310,7 +310,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     numero_rue=campus.street_number,
                     boite_postale=campus.postal_box,
                     localisation=campus.location,
-                    email=campus.email,
+                    email_inscription_sic=campus.sic_enrollment_email,
                 )
                 if campus is not None
                 else None,
@@ -331,7 +331,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     numero_rue=admission.training.enrollment_campus.street_number,
                     boite_postale=admission.training.enrollment_campus.postal_box,
                     localisation=admission.training.enrollment_campus.location,
-                    email=admission.training.enrollment_campus.email,
+                    email_inscription_sic=admission.training.enrollment_campus.sic_enrollment_email,
                 )
                 if admission.training.enrollment_campus is not None
                 else None,

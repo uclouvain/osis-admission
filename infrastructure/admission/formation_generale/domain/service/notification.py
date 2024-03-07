@@ -257,7 +257,9 @@ class Notification(INotification):
                 }[current_language],
             )
             common_tokens['training_acronym'] = admission.training.acronym
-            common_tokens['training_enrollment_campus_email'] = admission.training.enrollment_campus.email
+            common_tokens[
+                'training_enrollment_campus_email'
+            ] = admission.training.enrollment_campus.sic_enrollment_email
 
             email_message = generate_email(
                 ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
@@ -346,7 +348,8 @@ class Notification(INotification):
             'training_campus': proposition.formation.campus,
             'requested_submitted_documents': html_list_by_status[StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION],
             'requested_not_submitted_documents': html_list_by_status[StatutEmplacementDocument.A_RECLAMER],
-            'enrolment_service_email': admission.training.enrollment_campus.email or MAIL_INSCRIPTION_DEFAUT,
+            'enrolment_service_email': admission.training.enrollment_campus.sic_enrollment_email
+            or MAIL_INSCRIPTION_DEFAUT,
             'training_year': format_academic_year(proposition.annee_calculee),
             'admission_link_front': get_portal_admission_url('general-education', proposition.uuid),
             'admission_link_back': get_backoffice_admission_url('general-education', proposition.uuid),
