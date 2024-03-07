@@ -118,6 +118,8 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
 
         self.filters = self.form.cleaned_data
 
+        self.filters.pop('liste_travail', None)
+
         if self.query_params:
             # Add page number to kwargs to pass it to the paginator
             self.kwargs['page'] = self.query_params.get('page')

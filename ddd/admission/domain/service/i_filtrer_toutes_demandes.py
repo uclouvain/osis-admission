@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from abc import abstractmethod
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.views import PaginatedList
@@ -54,5 +54,7 @@ class IListerToutesDemandes(interface.DomainService):
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
         taille_page: Optional[int] = None,
+        mode_filtres_etats_checklist: Optional[str] = '',
+        filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
     ) -> PaginatedList[DemandeRechercheDTO]:
         raise NotImplementedError

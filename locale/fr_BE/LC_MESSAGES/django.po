@@ -605,6 +605,9 @@ msgstr "Condition d'accès"
 msgid "Admission requirement year"
 msgstr "Millésime de la condition d'accès"
 
+msgid "Admission statuses"
+msgstr "Les statuts de l'admission"
+
 msgid "Admission to regulated professions"
 msgstr "Accès aux professions réglementées"
 
@@ -1513,6 +1516,12 @@ msgstr "Modifier la publication de cette conférence"
 msgid "Checklist"
 msgstr "Checklist"
 
+msgid "Checklist filters"
+msgstr "Filtres de la checklist"
+
+msgid "Checklist filters mode"
+msgstr "Le mode des filtres de la checklist"
+
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr "Enfant d'un membre du personnel de l'UCLouvain ou de l'entité Martin V"
 
@@ -2192,6 +2201,9 @@ msgstr "Décision de la faculté"
 msgid "Declared assimilated"
 msgstr "Déclaré(e) assimilé(e)"
 
+msgid "Declared assimilated or not"
+msgstr "Déclaré(e) assimilé(e) ou non"
+
 msgid "Declared not assimilated"
 msgstr "Déclaré(e) non assimilé(e)"
 
@@ -2747,6 +2759,9 @@ msgstr "Export excel à partir d'admission"
 msgid "Excel export of admission applications"
 msgstr "Export excel des demandes d'admission"
 
+msgid "Exclude"
+msgstr "Exclure"
+
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
 
@@ -3237,6 +3252,9 @@ msgstr "Texte d'aide"
 msgid "Hide the checklist menu"
 msgstr "Cacher le menu de la checklist"
 
+msgid "Hide the states of the checklist"
+msgstr "Cacher les états de la checklist"
+
 msgctxt "tab"
 msgid "History"
 msgstr "Historique"
@@ -3726,6 +3744,12 @@ msgstr ""
 
 msgid "In person"
 msgstr "En présentiel"
+
+msgid "Include"
+msgstr "Inclure"
+
+msgid "Include or exclude the checklist filters"
+msgstr "Inclure ou exclure les filtres de la checklist"
 
 msgid "Incomplete field"
 msgstr "Non renseigné(e)"
@@ -4647,6 +4671,9 @@ msgstr "Intitulé du type d'enseignement"
 msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
 
+msgid "Name of the working list"
+msgstr "Nom de la liste de travail"
+
 msgid "Nationality"
 msgstr "Nationalité"
 
@@ -5149,6 +5176,9 @@ msgctxt "admission"
 msgid "Personal email"
 msgstr "E-mail privé"
 
+msgid "Personalized"
+msgstr "Personnalisée"
+
 msgid "PhD"
 msgstr "Doctorat"
 
@@ -5409,6 +5439,9 @@ msgstr "Epreuves de confirmation passées"
 
 msgid "Previous experience"
 msgstr "Parcours antérieur"
+
+msgid "Previous experiences"
+msgstr "Expériences du parcours"
 
 msgid "Previous notes"
 msgstr "Notes précédentes"
@@ -5916,12 +5949,6 @@ msgstr "Rôle: Secrétaires ADRE"
 msgid "Role: ADRE secretary"
 msgstr "Rôle: Secrétaire ADRE"
 
-msgid "Role: Admission reader"
-msgstr "Rôle: Lecteur des demandes d'inscription"
-
-msgid "Role: Admission readers"
-msgstr "Rôle: Lecteurs des demandes d'inscription"
-
 msgid "Role: CDD configurator"
 msgstr "Rôle: Configurateur CDD"
 
@@ -6241,6 +6268,9 @@ msgstr "Voir le détail"
 
 msgid "Show the checklist menu"
 msgstr "Afficher le menu de la checklist"
+
+msgid "Show the states of the checklist"
+msgstr "Afficher les états de la checklist"
 
 msgid "Signatures"
 msgstr "Signatures"
@@ -6838,6 +6868,12 @@ msgid ""
 msgstr ""
 "Le statut global de la demande doit être l'un des suivants pour pouvoir "
 "envoyer le dossier en faculté : %(statuses)s."
+
+#, python-format
+msgid ""
+"The inscription type admission was authorised the %(date)s by %(author)s."
+msgstr ""
+"La demande de type inscription a été autorisée le %(date)s par %(author)s."
 
 msgid "The jury is not in progress"
 msgstr "Le jury n'est pas en cours"
@@ -7686,6 +7722,12 @@ msgstr "Type de contrat de travail"
 
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
+
+msgid "Working list"
+msgstr "Liste de travail"
+
+msgid "Working lists"
+msgstr "Listes de travail"
 
 msgid ""
 "Would you like to become a <a href='https://uclouvain.be/fr/decouvrir/carte-"
