@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ from rules import predicate
 from waffle import switch_is_active
 
 from admission.contrib.models import DoctorateAdmission
-from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
+from admission.contrib.models.base import BaseAdmission
 from osis_role.cache import predicate_cache
 from osis_role.errors import predicate_failed_msg
 
@@ -43,7 +43,7 @@ def is_admission_request_author(self, user: User, obj: BaseAdmission):
 @predicate(bind=True)
 @predicate_failed_msg(message=_("Another admission has been submitted."))
 def does_not_have_a_submitted_admission(self, user: User, obj: DoctorateAdmission):
-    return not BaseAdmissionProxy.objects.candidate_has_submission(user.person)
+    return not BaseAdmission.objects.candidate_has_submission(user.person)
 
 
 @predicate
