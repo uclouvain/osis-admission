@@ -45,6 +45,7 @@ from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
 from ddd.logic.shared_kernel.academic_year.commands import SearchAcademicYearCommand
 from ddd.logic.shared_kernel.campus.commands import GetCampusQuery
+from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 
 
 class FormationContinueTranslator(IFormationContinueTranslator):
@@ -84,7 +85,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
                 numero_rue=campus.street_number,
                 boite_postale=campus.postal_box,
                 localisation=campus.location,
-                email=campus.email,
+                email_inscription_sic=campus.sic_enrollment_email,
             )
             if campus is not None
             else None,
@@ -100,7 +101,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
                 numero_rue=campus_inscription.street_number,
                 boite_postale=campus_inscription.postal_box,
                 localisation=campus_inscription.location,
-                email=campus_inscription.email,
+                email_inscription_sic=campus_inscription.sic_enrollment_email,
             )
             if campus_inscription is not None
             else None,
@@ -157,7 +158,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
                     rue=campus.street,
                     numero_rue=campus.street_number,
                     localisation=campus.location,
-                    email=campus.email,
+                    email_inscription_sic=campus.sic_enrollment_email,
                 )
                 if campus is not None
                 else None,

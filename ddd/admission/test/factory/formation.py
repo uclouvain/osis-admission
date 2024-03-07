@@ -71,7 +71,7 @@ class CampusFactory(factory.Factory):
     rue = 'rue'
     numero_rue = 'numero_rue'
     localisation = 'localisation'
-    email = 'email@example.com'
+    email_inscription_sic = 'email@example.com'
 
 
 class FormationFactory(factory.Factory):

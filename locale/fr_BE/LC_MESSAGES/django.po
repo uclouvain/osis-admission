@@ -5916,12 +5916,6 @@ msgstr "Rôle: Secrétaires ADRE"
 msgid "Role: ADRE secretary"
 msgstr "Rôle: Secrétaire ADRE"
 
-msgid "Role: Admission reader"
-msgstr "Rôle: Lecteur des demandes d'inscription"
-
-msgid "Role: Admission readers"
-msgstr "Rôle: Lecteurs des demandes d'inscription"
-
 msgid "Role: CDD configurator"
 msgstr "Rôle: Configurateur CDD"
 
