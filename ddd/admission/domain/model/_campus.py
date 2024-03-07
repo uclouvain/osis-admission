@@ -38,4 +38,4 @@ class Campus(interface.ValueObject):
     rue: str
     numero_rue: str
     localisation: str
-    email: str
+    email_inscription_sic: str
