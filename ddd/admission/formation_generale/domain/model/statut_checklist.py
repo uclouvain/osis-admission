@@ -367,6 +367,11 @@ onglet_specificites_formation = ConfigurationOngletChecklist(
             statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
         ),
         ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER_APRES_INSCRIPTION',
+            libelle=_('To be completed after application'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
+        ),
+        ConfigurationStatutChecklist(
             identifiant='INSUFFISANT',
             libelle=_('Insufficient'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
