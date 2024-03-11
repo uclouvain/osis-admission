@@ -150,7 +150,15 @@
       <span class="label label-danger">{% translate 'Not fundable' %}</span>
     {% endif %}
     {% if admission.candidat_a_plusieurs_demandes %}
-      <span class="label label-admission-primary">{% translate 'Several applications' %}</span>
+      <span
+        class="label label-admission-primary"
+        data-lazy-popover-url="{% url base_namespace|add:':other-admissions-list' uuid=view.kwargs.uuid %}"
+        data-title="{% translate 'Other application(s)' %}"
+        tabindex="0"
+        role="button"
+      >
+        {% translate 'Several applications' %}
+      </span>
     {% endif %}
   </div>
 {% endblock %}

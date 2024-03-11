@@ -75,6 +75,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     DocumentsEtudesSecondaires,
 )
+from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -118,6 +119,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     OngletsChecklist,
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -1411,23 +1413,13 @@ class ChecklistView(
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
-            etats = [
-                status
-                for status in ChoixStatutPropositionGenerale.get_names()
-                if status
-                not in {
-                    ChoixStatutPropositionGenerale.EN_BROUILLON,
-                    ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
-                    ChoixStatutPropositionGenerale.ANNULEE,
-                }
-            ]
             context['autres_demandes'] = [
                 demande
                 for demande in message_bus_instance.invoke(
                     ListerToutesDemandesQuery(
                         annee_academique=self.admission.determined_academic_year.year,
                         matricule_candidat=self.admission.candidate.global_id,
-                        etats=etats,
+                        etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
                     )
                 )
                 if demande.uuid != self.admission_uuid
