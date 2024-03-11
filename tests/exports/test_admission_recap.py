@@ -45,7 +45,6 @@ from admission.calendar.admission_calendar import (
 )
 from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.ddd import FR_ISO_CODE, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
@@ -101,7 +100,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
-    OngletsDemande,
     DocumentsSuiteAutorisation,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -1248,7 +1246,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 type=TrainingType.CERTIFICATE_OF_SUCCESS.name,
                 code_domaine='CDFC',
@@ -1262,7 +1260,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 sigle_entite_gestion='FFC',
                 code='FC1',
@@ -1318,7 +1316,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 type=TrainingType.BACHELOR.name,
                 code_domaine='CDFG',
@@ -1332,7 +1330,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 sigle_entite_gestion='FFG',
                 code='FG1',
