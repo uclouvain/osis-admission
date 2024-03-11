@@ -25,6 +25,8 @@
 ##############################################################################
 from typing import List, Optional
 
+import factory
+
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -32,6 +34,21 @@ from admission.ddd.admission.formation_continue.domain.service.i_formation impor
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.test.factory.formation import FormationFactory
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.state_iufc import StateIUFC
+from ddd.logic.formation_catalogue.formation_continue.domain.model.informations_specifiques import (
+    InformationsSpecifiques,
+    FormationContinueIdentite,
+)
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
+
+
+class InformationsSpecifiquesFactory(factory.Factory):
+    class Meta:
+        model = InformationsSpecifiques
+
+    aide_a_la_formation = True
+    inscription_au_role_obligatoire = False
+    etat = StateIUFC.OPEN
 
 
 class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
@@ -110,6 +127,61 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
         ),
     ]
 
+    iufc_specific_informations_trainings = []
+
+    @classmethod
+    def reset(cls):
+        cls.iufc_specific_informations_trainings = [
+            InformationsSpecifiquesFactory(
+                entity_id=FormationContinueIdentite(
+                    sigle_formation='USCC1',
+                    annee=2022,
+                ),
+            ),
+            InformationsSpecifiquesFactory(
+                entity_id=FormationContinueIdentite(
+                    sigle_formation='USCC1',
+                    annee=2020,
+                ),
+            ),
+            InformationsSpecifiquesFactory(
+                entity_id=FormationContinueIdentite(
+                    sigle_formation='USCC2',
+                    annee=2022,
+                ),
+            ),
+            InformationsSpecifiquesFactory(
+                entity_id=FormationContinueIdentite(
+                    sigle_formation='USCC3',
+                    annee=2022,
+                ),
+            ),
+            InformationsSpecifiquesFactory(
+                entity_id=FormationContinueIdentite(
+                    sigle_formation='USCC4',
+                    annee=2022,
+                ),
+            ),
+            InformationsSpecifiquesFactory(
+                entity_id=FormationContinueIdentite(
+                    sigle_formation='USCC5',
+                    annee=2022,
+                ),
+            ),
+            InformationsSpecifiquesFactory(
+                entity_id=FormationContinueIdentite(
+                    sigle_formation='ESP3DP-MASTER',
+                    annee=2022,
+                ),
+            ),
+            InformationsSpecifiquesFactory(
+                entity_id=FormationContinueIdentite(
+                    sigle_formation='USCC4',
+                    annee=2020,
+                ),
+            ),
+        ]
+
     @classmethod
     def _build_dto(cls, entity: FormationFactory) -> 'FormationDTO':
         return FormationDTO(
@@ -181,4 +253,23 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             if training.entity_id.sigle == sigle
             and training.entity_id.annee == annee
             and training.type_formation == TypeFormation.FORMATION_CONTINUE
+        )
+
+    @classmethod
+    def get_informations_specifiques_dto(cls, entity_id: FormationIdentity) -> Optional[InformationsSpecifiquesDTO]:
+        training: Optional[InformationsSpecifiques] = next(
+            (
+                training
+                for training in cls.iufc_specific_informations_trainings
+                if training.entity_id.sigle_formation == entity_id.sigle and training.entity_id.annee == entity_id.annee
+            ),
+            None,
+        )
+
+        return training and InformationsSpecifiquesDTO(
+            sigle_formation=training.entity_id.sigle_formation,
+            annee=training.entity_id.annee,
+            aide_a_la_formation=training.aide_a_la_formation,
+            inscription_au_role_obligatoire=training.inscription_au_role_obligatoire,
+            etat=training.etat,
         )
