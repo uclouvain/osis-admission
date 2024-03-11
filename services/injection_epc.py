@@ -29,7 +29,7 @@ from typing import Dict, List, Union
 import osis_document.contrib.fields
 import pika
 from django.conf import settings
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Case, When, Value
 from django.shortcuts import get_object_or_404
 
 from admission.contrib.models import Accounting
@@ -40,6 +40,7 @@ from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAs
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.person_address_type import PersonAddressType
+from base.models.enums.sap_client_creation_source import SAPClientCreationSource
 from base.models.organization import Organization
 from base.models.person import Person
 from base.models.person_address import PersonAddress
@@ -114,7 +115,7 @@ class InjectionEPC:
         return {
             'dossier_uuid': str(admission.uuid),
             'signaletique': cls._get_signaletique(candidat=candidat, adresse_domicile=adresse_domicile),
-            'comptabilite': cls._get_comptabilite(comptabilite=comptabilite),
+            'comptabilite': cls._get_comptabilite(candidat=candidat, comptabilite=comptabilite),
             'etudes_secondaires': cls._get_etudes_secondaires(candidat=candidat),
             'curriculum_academique': cls._get_curriculum_academique(candidat=candidat),
             'curriculum_autres': cls._get_curriculum_autres_activites(candidat=candidat),
@@ -130,6 +131,7 @@ class InjectionEPC:
     def _get_signaletique(cls, candidat: Person, adresse_domicile: PersonAddress) -> Dict:
         documents = cls._recuperer_documents(candidat)
         return {
+            'noma': candidat.student_set.first().registration_id,
             'nom': candidat.last_name,
             'prenom': candidat.first_name,
             'prenom_suivant': candidat.middle_name,
@@ -172,10 +174,16 @@ class InjectionEPC:
         return documents
 
     @classmethod
-    def _get_comptabilite(cls, comptabilite: Accounting) -> Dict:
+    def _get_comptabilite(cls, candidat: Person, comptabilite: Accounting) -> Dict:
         if comptabilite:
             documents = cls._recuperer_documents(comptabilite)
             return {
+                'client_sap': candidat.sapclient_set.annotate(
+                    priorite=Case(
+                        When(creation_source=SAPClientCreationSource.OSIS.name), then=Value(1),
+                        default=2
+                    )
+                ).order_by('priorite').first(),
                 'iban': comptabilite.iban_account_number,
                 'bic': comptabilite.bic_swift_code,
                 'nom_titulaire': comptabilite.account_holder_last_name,
@@ -207,7 +215,7 @@ class InjectionEPC:
         return {}
 
     @classmethod
-    def _get_curriculum_academique(cls, candidat: Person) -> List[List[Dict]]:
+    def _get_curriculum_academique(cls, candidat: Person) -> List[Dict]:
         experiences_educatives = candidat.educationalexperience_set.all().select_related(
             'institute',
             'country',
@@ -223,12 +231,10 @@ class InjectionEPC:
             ).order_by(
                 'academic_year'
             )  # type: QuerySet[EducationalExperienceYear]
-            experiences_annuelles = []
 
             for experience_educative_annualisee in experiences_educatives_annualisees:
                 data_annuelle = cls.__build_data_annuelle(experience_educative, experience_educative_annualisee)
-                experiences_annuelles.append(data_annuelle)
-            experiences.append(experiences_annuelles)
+                experiences.append(data_annuelle)
 
         return experiences
 
