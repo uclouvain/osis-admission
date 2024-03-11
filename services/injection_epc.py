@@ -37,6 +37,7 @@ from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
+from admission.ddd.admission.formation_generale.domain.model.enums import DROITS_INSCRIPTION_MONTANT_VALEURS
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.person_address_type import PersonAddressType
@@ -73,7 +74,7 @@ COMMUNAUTE_MAP = {
     CommunityEnum.FRENCH_SPEAKING.name: 'WALLONIE_BRUXELLES',
 }
 RESULTAT_MAP = {
-    Result.WAITING_RESULT.name: 'PAS_DE_RESULTAT',
+    Result.WAITING_RESULT.name: 'EN_ATTENTE_DE_RESULTAT',
     Result.SUCCESS.name: 'REUSSITE_COMPLETE',
     Result.SUCCESS_WITH_RESIDUAL_CREDITS.name: 'REUSSITE_PARTIELLE',
     Result.FAILURE.name: 'ECHEC'
@@ -383,7 +384,7 @@ class InjectionEPC:
                 if groupe_de_supervision
                 else ''
             ),
-            'condition_acces': 'WORK_IN_PROGRESS',  # pas encore dev
+            'condition_acces': getattr(admission, 'admission_requirement', ''),
             'double_diplome': double_diplome.short_name if double_diplome else '',
             'type_demande_bourse': type_demande_bourse.short_name if type_demande_bourse else '',
             'type_erasmus': type_erasmus.short_name if type_erasmus else '',
@@ -394,8 +395,11 @@ class InjectionEPC:
     def _get_donnees_comptables(admission: BaseAdmission) -> Dict:
         return {
             'annee_academique': admission.training.academic_year.year,
-            'droits_majores': 'WORK_IN_PROGRESS',  # pas encore dev
-            'montant_doits_majores': 'WORK_IN_PROGRESS'  # pas encore dev
+            'droits_majores': getattr(admission, 'tuition_fees_dispensation', ''),
+            'montant_doits_majores': (
+                str(getattr(admission, "tuition_fees_amount_other", "")) or
+                DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission, "tuition_fees_amount", ""))
+            )
         }
 
     @staticmethod
