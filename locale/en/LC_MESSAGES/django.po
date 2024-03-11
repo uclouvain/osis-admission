@@ -4441,6 +4441,9 @@ msgstr ""
 msgid "Other address"
 msgstr ""
 
+msgid "Other application(s)"
+msgstr ""
+
 msgid "Other authorized program"
 msgstr ""
 
@@ -6003,9 +6006,6 @@ msgid ""
 msgstr ""
 
 msgid "The candidate has a scholarship"
-msgstr ""
-
-msgid "The candidate has several enrolment applications in progress"
 msgstr ""
 
 msgid "The candidate is doing a mobility"
