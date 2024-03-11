@@ -26,7 +26,7 @@
 
 {% if perms.admission.view_enrolment_applications or perms.admission.view_doctorate_enrolment_applications or perms.admission.view_continuing_enrolment_applications %}
   <li class="nav-item dropdown">
-    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button"
+    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" data-bs-toggle="dropdown" role="button"
        aria-haspopup="true" aria-expanded="false"
        id="lnk_home_dropdown_admissions">
       <span class="hidden-md fa fa-address-card" aria-hidden="true"></span>
@@ -35,16 +35,16 @@
     </a>
     <ul class="dropdown-menu">
       {% if perms.admission.view_enrolment_applications %}
-        <li>
+        <li class="dropdown-item">
           <a href="{% url 'admission:all-list' %}">
             <span class="fa fa-chalkboard-user"></span>
             {% trans 'Enrolment applications' %}
           </a>
         </li>
       {% endif %}
-      <li role="separator" class="divider"></li>
+        <li role="separator" class="divider dropdown-divider"></li>
       {% if perms.admission.view_doctorate_enrolment_applications %}
-        <li>
+        <li class="dropdown-item">
           <a href="{% url 'admission:doctorate:cdd:list' %}">
             <span class="fa fa-graduation-cap"></span>
             {% trans 'Doctorate enrolment applications' %}
@@ -52,7 +52,7 @@
         </li>
       {% endif %}
       {% if perms.admission.change_cddmailtemplate %}
-        <li>
+        <li class="dropdown-item">
           <a href="{% url 'admission:config:cdd-mail-template:list' %}">
             <span class="fa fa-tools"></span>
             {% trans 'CDD Mail template' %}
@@ -60,16 +60,16 @@
         </li>
       {% endif %}
       {% if perms.admission.change_cddconfiguration %}
-        <li>
+        <li class="dropdown-item">
           <a href="{% url 'admission:config:cdd-config:list' %}">
             <span class="fa fa-tools"></span>
             {% trans 'CDD configuration' %}
           </a>
         </li>
       {% endif %}
-      <li role="separator" class="divider"></li>
+        <li role="separator" class="divider dropdown-divider"></li>
       {% if perms.admission.view_continuing_enrolment_applications %}
-        <li>
+        <li class="dropdown-item">
           <a href="{% url 'admission:continuing-education:list' %}">
             <span class="fa fa-chalkboard-user"></span>
             {% trans 'Continuing enrolment applications' %}
