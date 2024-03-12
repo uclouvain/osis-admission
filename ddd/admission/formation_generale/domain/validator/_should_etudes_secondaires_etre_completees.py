@@ -35,7 +35,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
-from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
@@ -43,7 +43,6 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
 )
 from osis_profile import REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
-from osis_profile.views.edit_etudes_secondaires import CHOIX_DIPLOME_OBTENU
 
 
 @attr.dataclass(frozen=True, slots=True)

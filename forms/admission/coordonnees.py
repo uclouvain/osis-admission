@@ -32,10 +32,9 @@ from admission.forms import (
     AdmissionModelCountryChoiceField,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     PhoneField,
-    autocomplete,
 )
 from admission.utils import force_title
-from base.forms.utils import get_example_text, FIELD_REQUIRED_MESSAGE
+from base.forms.utils import get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.models.person import Person
 from osis_profile import BE_ISO_CODE
 from reference.models.country import Country

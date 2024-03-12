@@ -31,14 +31,13 @@ from admission.api.serializers.fields import AnswerToSpecificQuestionField
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
-from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
 from base.models.organization import Organization
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
     ForeignHighSchoolDiploma,
     HighSchoolDiplomaAlternative,
 )
-from osis_profile.views.edit_etudes_secondaires import CHOIX_DIPLOME_OBTENU
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
 

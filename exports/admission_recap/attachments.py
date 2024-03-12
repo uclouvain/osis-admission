@@ -60,12 +60,11 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.got_diploma import CHOIX_DIPLOME_OBTENU
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from osis_profile import CURRICULUM_ACTIVITY_LABEL
-from osis_profile.models.enums.curriculum import TranscriptType
+from osis_profile.models.enums.curriculum import TranscriptType, CURRICULUM_ACTIVITY_LABEL
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
-from osis_profile.views.edit_etudes_secondaires import CHOIX_DIPLOME_OBTENU
 
 
 class Attachment:

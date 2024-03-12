@@ -30,9 +30,8 @@ from admission.ddd.parcours_doctoral.jury.domain.model.enums import GenreMembre,
 from admission.forms import (
     AdmissionModelCountryChoiceField,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
-    autocomplete,
 )
-from base.forms.utils import EMPTY_CHOICE
+from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.models.person import Person
 from base.models.utils.utils import ChoiceEnum
 from reference.models.country import Country

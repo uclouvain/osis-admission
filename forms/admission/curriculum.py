@@ -35,15 +35,14 @@ from django.utils.dates import MONTHS_ALT
 from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pgettext_lazy
 
 from admission.forms import (
-    autocomplete,
-    AdmissionFileUploadField as FileUploadField,
     AdmissionModelCountryChoiceField,
 )
 from admission.views.autocomplete.diploma_title import get_diploma_label_with_study_type
-from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE
+from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.fields import RadioBooleanField
+from base.forms.utils.file_field import MaxOneFileUploadField as FileUploadField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from base.utils.mark_safe_lazy import mark_safe_lazy

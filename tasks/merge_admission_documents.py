@@ -30,8 +30,8 @@ from typing import List
 
 from django.db import transaction
 from django.utils.text import slugify
+from osis_document.enums import PostProcessingType
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models import (
     AdmissionTask,
     ContinuingEducationAdmission,
@@ -52,8 +52,8 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.exceptions import DocumentPostProcessingException, InvalidMimeTypeException
 from admission.infrastructure.utils import get_document_from_identifier
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from infrastructure.messages_bus import message_bus_instance
-from osis_document.enums import PostProcessingType
 
 
 def _base_education_admission_document_merging_from_task(admission):

@@ -40,7 +40,8 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     ChoixTypeEpreuve,
     ContexteFormation,
 )
-from admission.forms import SelectOrOtherField, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS, autocomplete
+from admission.forms import SelectOrOtherField, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
+from base.forms.utils import autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.datefield import DatePickerInput
 from base.models.academic_year import AcademicYear

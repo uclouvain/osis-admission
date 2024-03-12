@@ -35,7 +35,6 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
@@ -52,6 +51,7 @@ from admission.tests.factories.general_education import GeneralEducationAdmissio
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum

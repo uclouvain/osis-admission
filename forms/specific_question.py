@@ -40,9 +40,9 @@ from admission.ddd.admission.enums import (
     TYPES_ITEMS_LECTURE_SEULE,
     Onglets,
 )
-from admission.forms import AdmissionFileUploadField
 from admission.utils import get_uuid_value
 from base.forms.utils import EMPTY_CHOICE
+from base.forms.utils.file_field import MaxOneFileUploadField
 
 DEFAULT_MAX_NB_DOCUMENTS = 1
 
@@ -170,7 +170,7 @@ def _get_field_from_configuration(configuration: QuestionSpecifiqueDTO, required
     elif form_item_type == TypeItemFormulaire.DOCUMENT.name:
         default_field_params = _get_default_field_params(configuration)
         default_field_params['required'] = required_documents_on_form_submit
-        field = AdmissionFileUploadField(
+        field = MaxOneFileUploadField(
             **default_field_params,
             # Note that the AdmissionFileUploadField overrides the max_files and mimetypes attributes
             max_files=configuration.configuration.get(

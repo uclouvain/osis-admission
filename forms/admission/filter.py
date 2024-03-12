@@ -33,10 +33,11 @@ from admission.contrib.models import Scholarship
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION, CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS, autocomplete
+from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.forms.utils import autocomplete
 from base.forms.widgets import Select2MultipleCheckboxesWidget
 from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes

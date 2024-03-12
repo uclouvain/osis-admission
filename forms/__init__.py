@@ -33,13 +33,10 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
-from osis_document.contrib import FileUploadField
 
-from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
-from admission.forms import autocomplete
-from base.forms.utils import EMPTY_CHOICE
+from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.models.academic_year import AcademicYear
 from education_group.templatetags.education_group_extra import format_to_academic_year
 from reference.models.country import Country
@@ -49,10 +46,6 @@ ALL_EMPTY_CHOICE = (('', _('All')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
 EMPTY_CHOICE_AS_LIST = [list(EMPTY_CHOICE[0])]
-
-# autocomplete,
-# AdmissionFileUploadField as FileUploadField,
-# # AdmissionModelCountryChoiceField,
 
 DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
     'data-minimum-input-length': 3,
@@ -191,17 +184,6 @@ def format_training(training: FormationDTO):
         campus=training.campus,
         sigle=training.sigle,
     )
-
-
-class AdmissionFileUploadField(FileUploadField):
-    """
-    A file upload field that supports only one file and by default only PDF file.
-    """
-
-    def __init__(self, forced_mimetypes=None, **kwargs):
-        kwargs['max_files'] = 1
-        kwargs['mimetypes'] = forced_mimetypes or [PDF_MIME_TYPE]
-        super().__init__(**kwargs)
 
 
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):

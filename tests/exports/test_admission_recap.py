@@ -43,7 +43,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
+from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -146,6 +146,7 @@ from admission.tests.factories.person import (
     CompletePersonFactory,
 )
 from admission.tests.factories.roles import ProgramManagerRoleFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
@@ -165,14 +166,14 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile import BE_ISO_CODE, CURRICULUM_ACTIVITY_LABEL
+from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     ActivitySector,
     ActivityType,
     EvaluationSystem,
     Grade,
     Result,
-    TranscriptType,
+    TranscriptType, CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,

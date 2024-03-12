@@ -30,16 +30,15 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from admission.forms import (
-    AdmissionFileUploadField as FileUploadField,
     AdmissionModelCountryChoiceField,
 )
-from admission.forms import autocomplete
 from admission.forms.specific_question import ConfigurableFormMixin
-from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
+from base.forms.utils.file_field import MaxOneFileUploadField as FileUploadField
 from base.models.academic_year import AcademicYear
 from base.models.enums.establishment_type import EstablishmentTypeEnum
-from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
 from base.models.organization import Organization
 from base.utils.utils import format_academic_year
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
@@ -50,7 +49,6 @@ from osis_profile.models.enums.education import (
     ForeignDiplomaTypes,
     EducationalType,
 )
-from osis_profile.views.edit_etudes_secondaires import CHOIX_DIPLOME_OBTENU
 from reference.models.country import Country
 from reference.models.language import Language
 

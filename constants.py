@@ -23,9 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from base.forms.utils.file_field import PDF_MIME_TYPE
 
 DEFAULT_PAGINATOR_SIZE = 500
-PDF_MIME_TYPE = 'application/pdf'
 JPEG_MIME_TYPE = 'image/jpeg'
 PNG_MIME_TYPE = 'image/png'
 IMAGE_MIME_TYPES = {JPEG_MIME_TYPE, PNG_MIME_TYPE}

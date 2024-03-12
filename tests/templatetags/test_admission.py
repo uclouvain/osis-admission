@@ -39,7 +39,7 @@ from django.utils import translation
 from django.utils.translation import gettext as _, pgettext
 from django.views import View
 
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
+from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -88,12 +88,13 @@ from admission.templatetags.admission import (
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
-from osis_profile import BE_ISO_CODE, CURRICULUM_ACTIVITY_LABEL
-from osis_profile.models.enums.curriculum import EvaluationSystem
+from osis_profile import BE_ISO_CODE
+from osis_profile.models.enums.curriculum import EvaluationSystem, CURRICULUM_ACTIVITY_LABEL
 from reference.tests.factories.country import CountryFactory
 
 

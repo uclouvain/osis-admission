@@ -31,7 +31,6 @@ from django.utils.translation import gettext_lazy as _
 from admission.constants import IMAGE_MIME_TYPES
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe, ChoixGenre
 from admission.forms import (
-    AdmissionFileUploadField as FileUploadField,
     AdmissionModelCountryChoiceField,
     AdmissionModelForm,
     get_year_choices,
@@ -41,6 +40,7 @@ from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESS
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.fields import RadioBooleanField
+from base.forms.utils.file_field import MaxOneFileUploadField as FileUploadField
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from base.models.utils.utils import ChoiceEnum

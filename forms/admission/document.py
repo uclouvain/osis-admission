@@ -39,16 +39,16 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
-from admission.forms import AdmissionFileUploadField
 from admission.templatetags.admission import formatted_language, document_request_status_css_class
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.forms.utils.datefield import CustomDateInput
+from base.forms.utils.file_field import MaxOneFileUploadField
 
 
 class UploadDocumentFormMixin(forms.Form):
     def __init__(self, mimetypes, identifier, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['file'] = AdmissionFileUploadField(
+        self.fields['file'] = MaxOneFileUploadField(
             label=_('File'),
             max_files=1,
             min_files=1,
@@ -69,7 +69,7 @@ class UploadFreeDocumentForm(forms.Form):
         label=pgettext_lazy('admission', 'Document name'),
     )
 
-    file = AdmissionFileUploadField(
+    file = MaxOneFileUploadField(
         label=_('File'),
         max_files=1,
         min_files=1,
