@@ -5932,6 +5932,16 @@ msgstr "Épreuve de confirmation à représenter"
 msgid "Retaking of the test"
 msgstr "Confirmation à représenter"
 
+msgid "Retype"
+msgstr "Retyper"
+
+msgctxt "admission"
+msgid "Retype"
+msgstr "Retyper"
+
+msgid "Retype the document"
+msgstr "Retyper le document"
+
 msgctxt "activity"
 msgid "Role"
 msgstr "Rôle"
@@ -7680,6 +7690,9 @@ msgstr "Poids"
 
 msgid "What diploma have you obtained (or will obtain)?"
 msgstr "Quel diplôme avez-vous obtenu (ou obtiendrez-vous) ?"
+
+msgid "What is the new type of this document?"
+msgstr "Quel est le nouveau type de ce document ?"
 
 msgid "What was the most recent year you were enrolled at UCLouvain?"
 msgstr "Quelle est votre dernière année d'inscription à l'UCLouvain ?"
