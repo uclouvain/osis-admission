@@ -41,7 +41,12 @@ from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.forms.admission.filter import AllAdmissionsFilterForm
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from base.models.campus import Campus
@@ -189,6 +194,22 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
                     scholarship_values[scholarship],
                 )
 
+        # Format the checklist filters mode
+        checklist_mode = formatted_filters.get('mode_filtres_etats_checklist')
+        if checklist_mode:
+            mapping_filter_key_value['mode_filtres_etats_checklist'] = ModeFiltrageChecklist.get_value(checklist_mode)
+
+        # Format the checklist filters
+        mapping_filter_key_value['filtres_etats_checklist'] = {}
+        for checklist_tab, checklist_statuses in formatted_filters.get('filtres_etats_checklist').items():
+            if not checklist_statuses:
+                continue
+
+            mapping_filter_key_value['filtres_etats_checklist'][OngletsChecklist.get_value(checklist_tab)] = [
+                ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[checklist_tab][status].libelle
+                for status in checklist_statuses
+            ]
+
         # Format enums
         statuses = formatted_filters.get('etats')
         if statuses:
@@ -249,6 +270,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             filters = form.cleaned_data
             filters.pop('taille_page', None)
             filters.pop('page', None)
+            filters.pop('liste_travail', None)
 
             ordering_field = self.request.GET.get('o')
             if ordering_field:

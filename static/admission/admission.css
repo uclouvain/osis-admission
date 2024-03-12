@@ -69,6 +69,11 @@ textarea {
   gap: 1em;
 }
 
+.flex-content.no-space {
+  justify-content: normal;
+  gap: normal;
+}
+
 .align-items-baseline {
   align-items: baseline;
 }

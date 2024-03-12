@@ -3901,3 +3901,71 @@ class DocumentViewTestCase(TestCase):
             expected_url='http://dummyurl/file/pdf-token',
             fetch_redirect_response=False,
         )
+
+    # The manager replaces the document
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_general_sic_manager_replaces_a_document(self, frozen_time):
+        self.init_documents(for_sic=True)
+
+        base_url = 'admission:general-education:document:retype'
+
+        self.client.force_login(user=self.sic_manager_user)
+
+        with self.subTest('Unknown document'):
+            response = self.client.get(
+                resolve_url(
+                    base_url,
+                    uuid=self.general_admission.uuid,
+                    identifier='unknown',
+                ),
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 404)
+
+        with self.subTest('Post a valid form'):
+            other_doc = self.sic_free_requestable_document.split('.')[-1]
+            self.general_admission.specific_question_answers[other_doc] = ['uuid-doc']
+            self.general_admission.save()
+
+            response = self.client.post(
+                resolve_url(
+                    base_url,
+                    uuid=self.general_admission.uuid,
+                    identifier=self.non_free_document_identifier,
+                ),
+                data={
+                    'identifier': self.sic_free_requestable_document,
+                },
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 200)
+
+            self.general_admission.refresh_from_db()
+
+            # Check last modification data
+            self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+            self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+        with self.subTest('Post a valid form to empty doc'):
+            other_doc = self.sic_free_requestable_document.split('.')[-1]
+            self.general_admission.specific_question_answers[other_doc] = []
+            self.general_admission.save()
+
+            response = self.client.post(
+                resolve_url(
+                    base_url,
+                    uuid=self.general_admission.uuid,
+                    identifier=self.non_free_document_identifier,
+                ),
+                data={
+                    'identifier': self.sic_free_requestable_document,
+                },
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 200)
+
+            self.general_admission.refresh_from_db()
+
+            # Check last modification data
+            self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+            self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
