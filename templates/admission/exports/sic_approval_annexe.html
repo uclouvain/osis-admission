@@ -112,12 +112,16 @@
   </p>
 
   <p>
-    {% if rector.gender == 'F' %}
+    {% if rector.gender == "F" %}
       Je soussignée <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" context "F" %}</strong><br>
+      En ma qualité de représentante de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
+    {% elif rector.gender == "H" %}
+      Je soussigné <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" context "H" %}</strong><br>
+      En ma qualité de représentant de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
     {% else %}
-      Je soussigné <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" %}</strong><br>
+      Je soussigné·e <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" %}</strong><br>
+      En ma qualité de représentant·e de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
     {% endif %}
-    En ma qualité de représentant de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
   </p>
 
   <p>
@@ -227,7 +231,13 @@
       {% if rector.signature %}<img class="ms-3" src="{% get_file_url rector.signature.0 %}" id="signature">{% endif %}
       <p>
         {{ rector.first_name }} {{ rector.last_name }},<br>
-        {% if rector.gender == 'F' %}{% trans "Rector" context "F" %}{% else %}{% trans "Rector" %}{% endif %}
+        {% if rector.gender == "F" %}
+          {% trans "Rector" context "F" %}
+        {% elif rector.gender == "H" %}
+          {% trans "Rector" context "H" %}
+        {% else %}
+          {% trans "Rector" %}
+        {% endif %}
       </p>
     </div>
   </div>
