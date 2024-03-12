@@ -183,7 +183,7 @@
           {% field_data _('Contact person for the design of the annual program') contact_person %}
 
           {% field_data _('Tuition fees amount') admission.droits_inscription_montant|enum_display:'DroitsInscriptionMontant' %}
-          {% if admission.droits_inscription_montant == 'OTHER' %}
+          {% if admission.droits_inscription_montant == 'AUTRE' %}
             {% field_data _('Amount (without EUR/)') admission.droits_inscription_montant_autre %}
           {% endif %}
           {% field_data _('Dispensation or increased fees') admission.dispense_ou_droits_majores|enum_display:'DispenseOuDroitsMajores' %}
