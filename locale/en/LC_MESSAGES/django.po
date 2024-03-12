@@ -2099,11 +2099,19 @@ msgstr ""
 msgid "Director"
 msgstr ""
 
+msgctxt "F"
 msgid "Director of the inscription service"
 msgstr ""
 
-msgctxt "F"
+msgctxt "H"
 msgid "Director of the inscription service"
+msgstr ""
+
+msgctxt "X"
+msgid "Director of the inscription service"
+msgstr ""
+
+msgid "Director title"
 msgstr ""
 
 msgid "Disabled"
