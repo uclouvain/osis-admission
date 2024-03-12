@@ -150,7 +150,7 @@
   </p>
 
   <p>
-    Le programme d’études susmentionné comprend un nombre total de {{ proposition.formation.credits }} crédits ECTS,
+    Le programme d’études susmentionné comprend un nombre total de {{ nombre_credits_formation|default_if_none:'...' }} crédits ECTS,
     pour l'ensemble de la formation, sous réserve d'ajouts d'enseignements
     complémentaires qui pourront être imposés à l'étudiant·e, ou de dispense(s) qu'il·elle aurait
     obtenue(s) (avec un minimum de 54 crédits par année académique).

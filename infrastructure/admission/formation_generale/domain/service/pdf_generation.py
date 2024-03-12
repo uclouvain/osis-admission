@@ -65,6 +65,7 @@ from admission.infrastructure.utils import (
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_profile.models.enums.curriculum import ActivityType
 
@@ -350,9 +351,18 @@ class PDFGeneration(IPDFGeneration):
         gestionnaire: str,
         temporaire: bool = False,
     ) -> Optional[str]:
+        from infrastructure.messages_bus import message_bus_instance
+
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
+            )
+
+            nombre_credits_formation = message_bus_instance.invoke(
+                GetCreditsDeLaFormationQuery(
+                    sigle=proposition_dto.formation.sigle,
+                    annee=proposition_dto.formation.annee,
+                )
             )
 
             if not proposition_dto.candidat_a_nationalite_hors_ue_5 and not temporaire:
@@ -371,6 +381,7 @@ class PDFGeneration(IPDFGeneration):
                     'proposition': proposition_dto,
                     'profil_candidat_identification': profil_candidat_identification,
                     'rector': cls._get_sic_rector(),
+                    'nombre_credits_formation': nombre_credits_formation,
                 },
                 author=gestionnaire,
             )
