@@ -32,16 +32,19 @@ from admission.ddd.admission.repository.i_emplacement_document import IEmplaceme
 def retyper_document(
     cmd: 'RetyperDocumentCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> None:
+) -> EmplacementDocumentIdentity:
+    document_from_identity = EmplacementDocumentIdentity(
+        identifiant=cmd.identifiant_source,
+        proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
+    )
+    document_to_identity = EmplacementDocumentIdentity(
+        identifiant=cmd.identifiant_cible,
+        proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
+    )
+
     emplacement_document_repository.echanger_emplacements(
-        entity_id_from=EmplacementDocumentIdentity(
-            identifiant=cmd.identifiant_source,
-            proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
-        ),
-        entity_id_to=EmplacementDocumentIdentity(
-            identifiant=cmd.identifiant_cible,
-            proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
-        ),
+        entity_id_from=document_from_identity,
+        entity_id_to=document_to_identity,
         auteur=cmd.auteur,
     )
-    return None
+    return document_from_identity
