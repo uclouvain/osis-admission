@@ -5692,9 +5692,6 @@ msgstr "Destinataire"
 msgid "Recompute"
 msgstr "Recalculer"
 
-msgid "Rector"
-msgstr "Recteur·trice"
-
 msgctxt "F"
 msgid "Rector"
 msgstr "Rectrice"
@@ -5702,6 +5699,10 @@ msgstr "Rectrice"
 msgctxt "H"
 msgid "Rector"
 msgstr "Recteur"
+
+msgctxt "X"
+msgid "Rector"
+msgstr "Recteur·trice"
 
 msgid "Reduced tuition fee"
 msgstr "Réduction des droits d’inscription"

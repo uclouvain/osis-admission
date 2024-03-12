@@ -119,7 +119,7 @@
       Je soussigné <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" context "H" %}</strong><br>
       En ma qualité de représentant de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
     {% else %}
-      Je soussigné·e <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" %}</strong><br>
+      Je soussigné·e <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" context "X" %}</strong><br>
       En ma qualité de représentant·e de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
     {% endif %}
   </p>
@@ -236,7 +236,7 @@
         {% elif rector.gender == "H" %}
           {% trans "Rector" context "H" %}
         {% else %}
-          {% trans "Rector" %}
+          {% trans "Rector" context "X" %}
         {% endif %}
       </p>
     </div>
