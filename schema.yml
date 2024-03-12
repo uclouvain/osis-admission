@@ -6691,7 +6691,6 @@ components:
       - QUALIFICATION_METHOD
       - ARTISTIC_QUALIFICATION
       - PROFESSIONAL_EDUCATION
-      - PROFESSIONAL_EDUCATION_AND_MATURITY_EXAM
       type: string
     ForeignDiplomaTypes:
       enum:
@@ -6749,6 +6748,9 @@ components:
               academic_year:
                 type: integer
                 nullable: true
+              uuid:
+                type: string
+                readOnly: true
               registered_credit_number:
                 type: number
                 nullable: true

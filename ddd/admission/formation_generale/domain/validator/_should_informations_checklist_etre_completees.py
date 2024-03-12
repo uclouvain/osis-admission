@@ -23,17 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import attr
 
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
+    ConditionComplementaireLibreApprobation,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
+)
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.emplacement_document import (
+    StatutReclamationEmplacementDocument,
+    StatutEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -44,7 +50,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     DecisionFacultaireEnum,
 )
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutsChecklistGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutsChecklistGenerale,
+    StatutChecklist,
+)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     MotifRefusFacultaireNonSpecifieException,
     InformationsAcceptationFacultaireNonSpecifieesException,
@@ -53,6 +62,8 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     TitreAccesEtreSelectionneException,
     ConditionAccesEtreSelectionneException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
+    ParcoursAnterieurNonSuffisantException,
+    DocumentAReclamerImmediatException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from epc.models.enums.condition_acces import ConditionAcces
@@ -72,7 +83,7 @@ class ShouldSpecifierMotifRefusFacultaire(BusinessValidator):
 class ShouldSpecifierInformationsAcceptationFacultaire(BusinessValidator):
     avec_conditions_complementaires: Optional[bool]
     conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
-    conditions_complementaires_libres: List[str]
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
 
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[ComplementFormationIdentity]]
@@ -184,3 +195,25 @@ class ShouldConditionAccesEtreSelectionne(BusinessValidator):
             self.condition_acces and self.millesime_condition_acces
         ):
             raise ConditionAccesEtreSelectionneException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldParcoursAnterieurEtreSuffisant(BusinessValidator):
+    statut: StatutChecklist
+
+    def validate(self, *args, **kwargs):
+        if self.statut.statut != ChoixStatutChecklist.GEST_REUSSITE:
+            raise ParcoursAnterieurNonSuffisantException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldNePasAvoirDeDocumentReclameImmediat(BusinessValidator):
+    documents_dto: List[EmplacementDocumentDTO]
+
+    def validate(self, *args, **kwargs):
+        if any(
+            document.statut == StatutEmplacementDocument.A_RECLAMER.name
+            and document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+            for document in self.documents_dto
+        ):
+            raise DocumentAReclamerImmediatException

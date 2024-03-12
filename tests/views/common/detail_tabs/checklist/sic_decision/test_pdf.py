@@ -31,6 +31,7 @@ from django.test import TestCase
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
+from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCurriculum,
     StatutReclamationEmplacementDocument,
@@ -62,6 +63,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile.models.enums.curriculum import TranscriptType, ActivityType
+from reference.tests.factories.language import LanguageFactory
 
 
 class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
@@ -75,6 +77,7 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
         cls.training = GeneralEducationTrainingFactory(
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
+            education_group_type__name=TypeFormation.MASTER.name,
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
@@ -112,6 +115,7 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
             person=cls.general_admission.candidate,
             transcript_type=TranscriptType.ONE_A_YEAR.name,
             obtained_diploma=True,
+            linguistic_regime=LanguageFactory(code='GK', name='Greek'),
         )
 
         new_educational_experience_year = EducationalExperienceYearFactory(
@@ -193,26 +197,26 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
 
         # For the curriculum experiences, we display the names of the experiences before the documents names
         self.assertIn(
-            f"{ActivityType.WORK.value} 01/2023-03/2023 > {CURRICULUM_ACTIVITY_LABEL[ActivityType.WORK.name]}",
-            documents_names,
-        )
-        self.assertIn(
-            f"My custom activity 01/2024 > {CURRICULUM_ACTIVITY_LABEL[ActivityType.OTHER.name]}",
+            f"{CURRICULUM_ACTIVITY_LABEL[ActivityType.WORK.name]} : 01/2023-03/2023",
             documents_names,
         )
 
         self.assertIn(
-            f"Computer science (Institute) 2023-2024 > {DocumentsCurriculum['RELEVE_NOTES_ANNUEL']} 2023-2024",
+            f"{CURRICULUM_ACTIVITY_LABEL[ActivityType.OTHER.name]} : My custom activity 01/2024",
             documents_names,
         )
 
         self.assertIn(
-            f"Computer science (Institute) 2023-2024 > {DocumentsCurriculum['TRADUCTION_RELEVE_NOTES_ANNUEL']} "
-            f"2023-2024",
+            f"{DocumentsCurriculum['RELEVE_NOTES_ANNUEL']} 2023-2024 : Computer science",
             documents_names,
         )
 
         self.assertIn(
-            f"Computer science (Institute) 2023-2024 > {DocumentsCurriculum['DIPLOME']}",
+            f"{DocumentsCurriculum['TRADUCTION_RELEVE_NOTES_ANNUEL']} 2023-2024 : Computer science",
+            documents_names,
+        )
+
+        self.assertIn(
+            f"{DocumentsCurriculum['DIPLOME']} : Computer science",
             documents_names,
         )

@@ -223,3 +223,21 @@ class TitreAccesEtreSelectionnePourEnvoyerASICException(BusinessException):
             'access to the chosen program.'
         )
         super().__init__(message, **kwargs)
+
+
+class ParcoursAnterieurNonSuffisantException(BusinessException):
+    status_code = "FORMATION-GENERALE-25"
+
+    def __init__(self, **kwargs):
+        message = _('The Previous experience must be in the "Sufficient" status in order to do this action.')
+        super().__init__(message, **kwargs)
+
+
+class DocumentAReclamerImmediatException(BusinessException):
+    status_code = "FORMATION-GENERALE-26"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "The authorization can not be done while there is one or more documents to be requested immediately."
+        )
+        super().__init__(message, **kwargs)

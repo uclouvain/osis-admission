@@ -26,10 +26,11 @@
 
 from contextlib import suppress
 from enum import Enum
-from typing import List, Optional, Union, Dict
+from typing import List, Optional, Union
 
 import attrs
 from django.conf import settings
+from django.db import transaction
 from django.db.models import OuterRef, Subquery, Prefetch
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
@@ -37,7 +38,7 @@ from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import Accounting, GeneralEducationAdmissionProxy, Scholarship
-from admission.contrib.models.checklist import RefusalReason
+from admission.contrib.models.checklist import RefusalReason, FreeAdditionalApprovalCondition
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
@@ -45,6 +46,7 @@ from admission.ddd.admission.domain.model.bourse import BourseIdentity
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
+    ConditionComplementaireLibreApprobation,
 )
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
@@ -74,6 +76,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
@@ -89,7 +92,7 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.models.student import Student
-from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO, PartimSearchDTO
+from ddd.logic.learning_unit.dtos import PartimSearchDTO
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import ApplicationService
@@ -127,6 +130,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             return cls._load(
                 GeneralEducationAdmissionProxy.objects.prefetch_related(
                     'additional_approval_conditions',
+                    'freeadditionalapprovalcondition_set',
                     'prerequisite_courses',
                     'refusal_reasons',
                 )
@@ -250,7 +254,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'other_refusal_reasons': entity.autres_motifs_refus,
                 'other_training_accepted_by_fac': other_training,
                 'with_additional_approval_conditions': entity.avec_conditions_complementaires,
-                'free_additional_approval_conditions': entity.conditions_complementaires_libres,
                 'with_prerequisite_courses': entity.avec_complements_formation,
                 'prerequisite_courses_fac_comment': entity.commentaire_complements_formation,
                 'program_planned_years_number': entity.nombre_annees_prevoir_programme,
@@ -296,6 +299,19 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         admission.additional_approval_conditions.set([c.uuid for c in entity.conditions_complementaires_existantes])
         admission.prerequisite_courses.set([training.uuid for training in entity.complements_formation])
         admission.refusal_reasons.set([motif.uuid for motif in entity.motifs_refus])
+        with transaction.atomic():
+            admission.freeadditionalapprovalcondition_set.all().delete()
+            FreeAdditionalApprovalCondition.objects.bulk_create(
+                [
+                    FreeAdditionalApprovalCondition(
+                        name_fr=condition.nom_fr,
+                        name_en=condition.nom_en,
+                        related_experience_id=condition.uuid_experience,
+                        admission=admission,
+                    )
+                    for condition in entity.conditions_complementaires_libres
+                ],
+            )
 
     @classmethod
     def _sauvegarder_comptabilite(cls, admission, entity):
@@ -456,7 +472,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ConditionComplementaireApprobationIdentity(uuid=condition.uuid)
                 for condition in admission.additional_approval_conditions.all()
             ],
-            conditions_complementaires_libres=admission.free_additional_approval_conditions,
+            conditions_complementaires_libres=[
+                ConditionComplementaireLibreApprobation(
+                    nom_fr=condition.name_fr,
+                    nom_en=condition.name_en,
+                    uuid_experience=str(condition.related_experience_id) if condition.related_experience_id else '',
+                )
+                for condition in admission.freeadditionalapprovalcondition_set.all()
+            ],
             avec_complements_formation=admission.with_prerequisite_courses,
             complements_formation=[
                 ComplementFormationIdentity(uuid=admission_training.uuid)
@@ -636,7 +659,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         is_french_language = get_language() == settings.LANGUAGE_CODE_FR
         proposition = cls._load_dto(admission)
         poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name
-        additional_condition_title_field = 'name_fr' if is_french_language else 'name_en'
 
         return PropositionGestionnaireDTO(
             **dto_to_dict(proposition),
@@ -702,10 +724,24 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else None,
             avec_conditions_complementaires=admission.with_additional_approval_conditions,
             conditions_complementaires=[
-                mark_safe(getattr(condition, additional_condition_title_field))
+                ConditionComplementaireApprobationDTO(
+                    uuid=condition.uuid,
+                    nom_fr=mark_safe(condition.name_fr),
+                    nom_en=mark_safe(condition.name_en),
+                    libre=False,
+                )
                 for condition in admission.additional_approval_conditions.all()
             ]
-            + admission.free_additional_approval_conditions,
+            + [
+                ConditionComplementaireApprobationDTO(
+                    uuid=condition.uuid,
+                    nom_fr=mark_safe(condition.name_fr),
+                    nom_en=mark_safe(condition.name_en),
+                    libre=True,
+                    uuid_experience=str(condition.related_experience_id) if condition.related_experience_id else '',
+                )
+                for condition in admission.freeadditionalapprovalcondition_set.all()
+            ],
             avec_complements_formation=admission.with_prerequisite_courses,
             complements_formation=prerequisite_courses,
             commentaire_complements_formation=admission.prerequisite_courses_fac_comment,
@@ -767,6 +803,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 .prefetch_related(
                     'prerequisite_courses__academic_year',
                     'additional_approval_conditions',
+                    'freeadditionalapprovalcondition_set',
                     Prefetch(
                         'refusal_reasons',
                         queryset=RefusalReason.objects.select_related('category').order_by('category__order', 'order'),

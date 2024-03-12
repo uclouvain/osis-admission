@@ -32,12 +32,13 @@ from osis_comment.models import CommentEntry
 
 from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.program_manager import ProgramManager
+from admission.auth.roles.program_manager import ProgramManager as ProgramManagerAdmission
 from admission.auth.roles.sic_management import SicManagement
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.formation_generale.commands import RecupererResumePropositionQuery
 from admission.views.doctorate.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
+from base.auth.roles.program_manager import ProgramManager
 from base.models.utils.utils import ChoiceEnum
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
@@ -122,7 +123,7 @@ class AdmissionCommentApiView(CommentEntryAPIMixin):
     }
     roles = {
         'sic-comments': {SicManagement, CentralManager},
-        'fac-comments': {ProgramManager, AdmissionReader},
+        'fac-comments': {ProgramManagerAdmission, AdmissionReader, ProgramManager},
     }
 
     def dispatch(self, request, *args, **kwargs):

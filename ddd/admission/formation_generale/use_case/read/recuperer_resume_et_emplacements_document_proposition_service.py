@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVR
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -49,8 +49,8 @@ from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAc
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
-def recuperer_resume_et_emplacements_documents_non_libres_proposition(
-    cmd: 'RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery',
+def recuperer_resume_et_emplacements_documents_proposition(
+    cmd: 'RecupererResumeEtEmplacementsDocumentsPropositionQuery',
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     comptabilite_translator: 'IComptabiliteTranslator',
@@ -90,7 +90,7 @@ def recuperer_resume_et_emplacements_documents_non_libres_proposition(
         personne_connue_translator=personne_connue_translator,
         resume_dto=resume_dto,
         questions_specifiques=questions_specifiques_dtos,
-        avec_documents_libres=False,
+        avec_documents_libres=cmd.avec_document_libres,
     )
 
     # THEN

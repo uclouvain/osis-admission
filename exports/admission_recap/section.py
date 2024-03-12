@@ -315,16 +315,10 @@ def get_educational_experience_section(
         educational_experience_year.annee for educational_experience_year in educational_experience.annees
     )
 
-    sub_identifier_label = (
-        f'{educational_experience.nom_formation} ({educational_experience.nom_institut})'
-        if educational_experience.nom_institut
-        else educational_experience.nom_formation
-    )
-
     return Section(
         identifier=OngletsDemande.CURRICULUM,
         sub_identifier=educational_experience.uuid,
-        sub_identifier_label=sub_identifier_label,
+        sub_identifier_label=educational_experience.nom_formation,
         sub_identifier_dates=f'{min_year}-{max_year}',
         content_template='admission/exports/recap/includes/curriculum_educational_experience.html',
         context=context,
@@ -351,13 +345,11 @@ def get_non_educational_experience_section(
     load_content: bool,
 ) -> Section:
     """Returns the non educational experience section."""
-    start_date = formats.date_format(non_educational_experience.date_debut, "m/Y")
-    end_date = formats.date_format(non_educational_experience.date_fin, "m/Y")
     return Section(
         identifier=OngletsDemande.CURRICULUM,
         sub_identifier=non_educational_experience.uuid,
         sub_identifier_label=non_educational_experience,
-        sub_identifier_dates=f'{start_date}-{end_date}' if start_date != end_date else start_date,
+        sub_identifier_dates=non_educational_experience.dates_formatees,
         content_template='admission/exports/recap/includes/curriculum_professional_experience.html',
         context=context,
         extra_context=get_non_educational_experience_context(non_educational_experience),

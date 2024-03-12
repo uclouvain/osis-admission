@@ -30,45 +30,7 @@
       hx-target="this"
       hx-swap-oob="true"
   >
-
-    <div class="form-group btn-group status-group" role="group">
-      {% if not resume_proposition.proposition|sic_can_edit %}
-        {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=True %}
-        {% checklist_state_button tab='decision_sic' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
-        {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
-        {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" class='warning' disabled=True %}
-        {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
-        {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' disabled=True %}
-      {% elif current|sic_in_final_statut %}
-        {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' open_modal='#sic-decision-confirm-modal-INITIAL_CANDIDAT' %}
-        {% checklist_state_button tab='decision_sic' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' disabled=True %}
-        {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' disabled=True %}
-        {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" class='warning' disabled=True %}
-        {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' disabled=True %}
-        {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' disabled=True %}
-      {% else %}
-        {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url %}
-        {% checklist_state_button tab='decision_sic' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' htmx_post=change_status_url %}
-        {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-to_be_completed' as change_status_url %}
-        {% checklist_state_button tab='decision_sic' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' blocage="to_be_completed" class='danger' htmx_post=change_status_url %}
-        {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS-derogation' as change_status_url %}
-        {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' htmx_post=change_status_url %}
-        {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" open_modal='#sic-decision-refusal-modal' class='warning' %}
-        {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" open_modal='#sic-decision-approval-modal' class='warning'  %}
-        {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-closed' as change_status_url %}
-        {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' htmx_post=change_status_url %}
-      {% endif %}
-      {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'refusal' %}
-        {% checklist_state_button tab='decision_sic' label=_("REFUSEE") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' open_modal='#sic-decision-refusal-final-modal' %}
-      {% else %}
-        {% checklist_state_button tab='decision_sic' label=_("REFUSEE") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' disabled=True %}
-      {% endif %}
-      {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'approval' %}
-        {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' open_modal='#sic-decision-approval-final-modal' %}
-      {% else %}
-        {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' disabled=True %}
-      {% endif %}
-    </div>
+    {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=resume_proposition.proposition current=current  %}
 
     {% if sic_decision_sent_at and sic_decision_sent_by %}
       <div class="alert alert-info">{% blocktrans with date=sic_decision_sent_at author=sic_decision_sent_by %}The SIC decision mail was sent to the candidate the {{ date }} by {{ author }}.{% endblocktrans %}</div>
@@ -160,14 +122,16 @@
               <i class="fa fa-magnifying-glass"></i>
               {% translate 'Visualize approval' %}
             </a>
-            <a
-                class="btn btn-default pull-right btn-heading-secondary"
-                href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
-                target="_blank"
-            >
-              <i class="fa fa-magnifying-glass"></i>
-              {% translate 'Visualize annexe1' %}
-            </a>
+            {% if admission.candidat_a_nationalite_hors_ue_5 %}
+              <a
+                  class="btn btn-default pull-right btn-heading-secondary"
+                  href="{% url view.base_namespace|add:':sic-decision-pdf-preview' uuid=view.kwargs.uuid pdf="accord_annexe" %}"
+                  target="_blank"
+              >
+                <i class="fa fa-magnifying-glass"></i>
+                {% translate 'Visualize annexe1' %}
+              </a>
+            {% endif %}
           {% endif %}
           <h4 class="panel-title">{% if current.statut == 'GEST_REUSSITE' %}{% trans "Authorization" %}{% else %}{% trans "Authorization to validate" %}{% endif %}</h4>
         </div>
@@ -178,12 +142,13 @@
           {% field_data _('Are there any additional conditions (subject to ...)?') admission.avec_conditions_complementaires %}
           {% if admission.avec_conditions_complementaires %}
             {% if admission.conditions_complementaires %}
+              {% get_current_language as LANGUAGE_CODE %}
               <dl>
                 <dt>{% translate _('Additional conditions') %}</dt>
                 <dd>
                   <ul>
                     {% for condition in admission.conditions_complementaires %}
-                      <li>{{ condition }}</li>
+                      <li>{% if LANGUAGE_CODE == 'fr-be' %}{{ condition.nom_fr }}{% else %}{{ condition.nom_en }}{% endif %}</li>
                     {% endfor %}
                   </ul>
                 </dd>
@@ -201,7 +166,7 @@
                 <dd>
                   <ul>
                     {% for formation in admission.complements_formation %}
-                      <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'fr-be' %}{{ formation.full_title }}{% else %}{{ formation.full_title_en }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
+                      <li>{{ formation.code }} - {% if LANGUAGE_CODE == 'en' and formation.full_title_en %}{{ formation.full_title_en }}{% else %}{{ formation.full_title }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
                     {% endfor %}
                   </ul>
                 </dd>

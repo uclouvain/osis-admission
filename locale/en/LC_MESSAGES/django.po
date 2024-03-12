@@ -634,6 +634,9 @@ msgstr ""
 msgid "Analysis folder for a general education admission"
 msgstr ""
 
+msgid "Annex 1 visa form"
+msgstr ""
+
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr ""
 
@@ -703,13 +706,7 @@ msgstr ""
 msgid "Approval"
 msgstr ""
 
-msgid "Approval certificate annexe of SIC"
-msgstr ""
-
 msgid "Approval certificate from SIC"
-msgstr ""
-
-msgid "Approval certificate of SIC"
 msgstr ""
 
 msgid "Approval certificate of faculty"
@@ -1261,6 +1258,15 @@ msgid "Candidate's country of nationality"
 msgstr ""
 
 msgid "Candidate:"
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"Cannot delete the experience because it is used as additional condition for "
+"the proposition {admission}."
+msgstr ""
+
+msgid "Cannot delete the experience because it is used in another context."
 msgstr ""
 
 msgid "Canvas"
@@ -2301,6 +2307,9 @@ msgstr ""
 msgid "EFT"
 msgstr ""
 
+msgid "EN"
+msgstr ""
+
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr ""
@@ -2356,6 +2365,12 @@ msgid ""
 "%(author)s."
 msgstr ""
 
+msgid "Email sent to the EU+5 candidate when SIC approves an admission."
+msgstr ""
+
+msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
+msgstr ""
+
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
@@ -2364,9 +2379,6 @@ msgstr ""
 msgid ""
 "Email sent to the candidate to inform him that the checking of the "
 "authentication of its background is in progress."
-msgstr ""
-
-msgid "Email sent to the candidate when SIC approves an admission."
 msgstr ""
 
 msgid "Email sent to the candidate when SIC refuses an admission."
@@ -2423,10 +2435,16 @@ msgstr ""
 msgid "Enrolled"
 msgstr ""
 
+msgid "Enrollment authorization document link"
+msgstr ""
+
 msgid "Enrolment Office (SIC)"
 msgstr ""
 
 msgid "Enrolment applications"
+msgstr ""
+
+msgid "Enrolment authorisation"
 msgstr ""
 
 msgid "Enrolment campus"
@@ -2560,6 +2578,9 @@ msgid "External reorientation/modification"
 msgstr ""
 
 msgid "FNRS"
+msgstr ""
+
+msgid "FR"
 msgstr ""
 
 msgid "FREE_COURSE"
@@ -2783,7 +2804,13 @@ msgstr ""
 msgid "Fraudster status from SIC"
 msgstr ""
 
+msgid "Free additional approval condition"
+msgstr ""
+
 msgid "Free additional approval conditions"
+msgstr ""
+
+msgid "Free additional conditions"
 msgstr ""
 
 msgid "Free and requestable by FAC"
@@ -5183,6 +5210,9 @@ msgstr ""
 msgid "Registration fees"
 msgstr ""
 
+msgid "Related experience"
+msgstr ""
+
 msgid "Relationship"
 msgstr ""
 
@@ -5966,6 +5996,11 @@ msgid "The acronym of the scholarship grant"
 msgstr ""
 
 msgid "The activity title"
+msgstr ""
+
+msgid ""
+"The authorization can not be done while there is one or more documents to be "
+"requested immediately."
 msgstr ""
 
 msgid "The candidate has a scholarship"
@@ -6813,6 +6848,9 @@ msgstr ""
 msgid "Visa"
 msgstr ""
 
+msgid "Visa application document link"
+msgstr ""
+
 msgid "Visualize"
 msgstr ""
 
@@ -7222,6 +7260,9 @@ msgid "Your Belgian student status"
 msgstr ""
 
 msgid "Your data have been saved."
+msgstr ""
+
+msgid "Your dossier reference:"
 msgstr ""
 
 msgid ""

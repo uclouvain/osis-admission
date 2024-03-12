@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission bootstrap3 enums osis_document %}
+{% load i18n static admission bootstrap3 enums osis_document statici18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -477,11 +477,18 @@
       </div>
     </div>
   </div>
+  
+  <table style="display:none;">
+    {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='fac-decision-additional-approval-conditions-form' form=fac_decision_free_approval_condition_formset.empty_form id='empty-fac-approval-form' %}
+    {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='sic-decision-additional-approval-conditions-form' form=sic_decision_free_approval_condition_formset.empty_form id='empty-sic-approval-form' %}
+  </table>
 
 {% endblock %}
 
 {% block script %}
   {{ block.super }}
+  <script src="{% statici18n LANGUAGE_CODE %}"></script>
+  <script src="{% static 'js/jquery.formset.js' %}"></script>
   {{ assimilation_form.media.js }}
   {{ fac_decision_refusal_form.media.js }}
   {{ fac_decision_refusal_form.media.js }}
@@ -495,6 +502,18 @@
       htmx.config.historyCacheSize = 0;
 
       (function ($) {
+          $('#tabs-content').on('click', '.formset-delete-confirm-button', function() {
+              const parentContainer = $(this).closest('.formset-delete-container');
+              $(this).addClass('hidden');
+              parentContainer.find('.formset-delete-actions').removeClass('hidden');
+          });
+
+          $('#tabs-content').on('click', '.formset-delete-cancel-button', function() {
+              const parentContainer = $(this).closest('.formset-delete-container');
+              parentContainer.find('.formset-delete-actions').addClass('hidden');
+              parentContainer.find('.formset-delete-confirm-button').removeClass('hidden');
+          });
+
           const defaultTab = window.location.hash || '#donnees_personnelles';
           const checklistMenu = $('#checklist-menu');
           const buttonClassByState = {
@@ -943,6 +962,12 @@
                   currentModal.modal('show');
               }
           })
+
+          // jQuery events are NOT native events. We have to trigger our own.
+          // It would works with bootstrap 5 which does not use jQuery anymore.
+          $('.htmx-modal-reload').on('show.bs.modal', function() {
+              htmx.trigger('#' + this.id, 'modal-reload');
+          })
       })(jQuery);
   </script>
 {% endblock script %}
@@ -1180,6 +1205,24 @@
 
     .refusal-reasons-list p {
       margin-bottom: initial;
+    }
+
+    .fac-decision-additional-approval-conditions-formset td {
+      padding: 1em;
+    }
+
+    .approval-conditions-fields {
+      flex: 1;
+    }
+
+    .approval-conditions-fields .form-group {
+      display: flex;
+      gap: 1em;
+      align-items: center;
+    }
+
+    .approval-conditions-fields .form-group {
+      margin-bottom: 0;
     }
 
     .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {

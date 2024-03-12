@@ -716,6 +716,9 @@ msgstr "Dossier d'analyse"
 msgid "Analysis folder for a general education admission"
 msgstr "Dossier d'analyse pour une demande en formation générale"
 
+msgid "Annex 1 visa form"
+msgstr "Formulaire visa annexe 1"
+
 msgid "Annex 25 or 26 for refugees and stateless persons"
 msgstr "Annexe 25 ou 26 pour les réfugiés et apatrides"
 
@@ -790,13 +793,7 @@ msgstr "Approbation par pdf"
 msgid "Approval"
 msgstr "Accord"
 
-msgid "Approval certificate annexe of SIC"
-msgstr "Certificat d'approbation annexe SIC"
-
 msgid "Approval certificate from SIC"
-msgstr "Certificat d'approbation SIC"
-
-msgid "Approval certificate of SIC"
 msgstr "Certificat d'approbation SIC"
 
 msgid "Approval certificate of faculty"
@@ -1372,6 +1369,19 @@ msgstr "Pays de la nationalité du candidat"
 
 msgid "Candidate:"
 msgstr "Candidat :"
+
+#, python-brace-format
+msgid ""
+"Cannot delete the experience because it is used as additional condition for "
+"the proposition {admission}."
+msgstr ""
+"Impossible de supprimer l'expérience parce qu'elle est utilisée comme "
+"condition additionnelle pour la proposition {admission}."
+
+msgid "Cannot delete the experience because it is used in another context."
+msgstr ""
+"Impossible de supprimer l'expérience parce qu'elle est utilisée dans un "
+"autre contexte."
 
 msgid "Canvas"
 msgstr "Canvas"
@@ -2505,6 +2515,9 @@ msgstr "ECTS doit être positif"
 msgid "EFT"
 msgstr "EFT"
 
+msgid "EN"
+msgstr "EN"
+
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr "AUTORISATION D’INSCRIPTION<br>à l’année académique %(academic_year)s"
@@ -2562,6 +2575,13 @@ msgid ""
 msgstr ""
 "Mail réclamant les frais de dossier au candidat le %(date)s par %(author)s."
 
+msgid "Email sent to the EU+5 candidate when SIC approves an admission."
+msgstr "E-mail envoyé au candidat UE+5 lorsque SIC approuve une proposition."
+
+msgid "Email sent to the NEU+5 candidate when SIC approves an admission."
+msgstr ""
+"E-mail envoyé au candidat H(UE+5) lorsque SIC approuve une proposition."
+
 msgid ""
 "Email sent to the candidate to inform him that he must pay the application "
 "fee to finalize an application for general education"
@@ -2575,9 +2595,6 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat pour l'informer que la vérification de "
 "l'authentification de son parcours est en cours."
-
-msgid "Email sent to the candidate when SIC approves an admission."
-msgstr "E-mail envoyé au candidat lorsque SIC approuve une proposition."
 
 msgid "Email sent to the candidate when SIC refuses an admission."
 msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
@@ -2637,11 +2654,17 @@ msgstr "S'inscrire à un cours"
 msgid "Enrolled"
 msgstr "Inscrit"
 
+msgid "Enrollment authorization document link"
+msgstr "Lien du document d'autorisation d'inscription"
+
 msgid "Enrolment Office (SIC)"
 msgstr "Service des inscriptions (SIC)"
 
 msgid "Enrolment applications"
 msgstr "Demandes d'inscription"
+
+msgid "Enrolment authorisation"
+msgstr "Autorisation d'inscription"
 
 msgid "Enrolment campus"
 msgstr "Site d'inscription"
@@ -2779,6 +2802,9 @@ msgstr "Réorientation/modification externe"
 
 msgid "FNRS"
 msgstr "FNRS"
+
+msgid "FR"
+msgstr "FR"
 
 msgid "FREE_COURSE"
 msgstr "Cours libre"
@@ -3033,8 +3059,14 @@ msgstr "Statut fraudeur d'après l'ARES"
 msgid "Fraudster status from SIC"
 msgstr "Statut fraudeur d'après SIC"
 
+msgid "Free additional approval condition"
+msgstr "Condition complémentaire d'acceptation libre"
+
 msgid "Free additional approval conditions"
 msgstr "Conditions complémentaires d'acceptation libres"
+
+msgid "Free additional conditions"
+msgstr "Conditions complémentaires libres"
 
 msgid "Free and requestable by FAC"
 msgstr "Libre et réclamable par FAC"
@@ -5746,6 +5778,9 @@ msgstr "Attestation d’immatriculation"
 msgid "Registration fees"
 msgstr "Droits d'inscription"
 
+msgid "Related experience"
+msgstr "Expérience associée"
+
 msgid "Relationship"
 msgstr "Lien de parenté"
 
@@ -6597,6 +6632,13 @@ msgstr "L'acronyme de la bourse d'études"
 
 msgid "The activity title"
 msgstr "Le titre de l'activité"
+
+msgid ""
+"The authorization can not be done while there is one or more documents to be "
+"requested immediately."
+msgstr ""
+"L’autorisation ne peut avoir lieu tant qu’un ou plusieurs documents sont à "
+"réclamer immédiatement."
 
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
@@ -7542,6 +7584,9 @@ msgstr "Vue par"
 msgid "Visa"
 msgstr "Visa"
 
+msgid "Visa application document link"
+msgstr "Lien du document de demande de visa"
+
 msgid "Visualize"
 msgstr "Visualiser"
 
@@ -8037,6 +8082,9 @@ msgstr "Situation d’assimilation qui vous correspond"
 
 msgid "Your data have been saved."
 msgstr "Vos données ont été sauvegardées."
+
+msgid "Your dossier reference:"
+msgstr "Votre numéro de dossier :"
 
 msgid ""
 "Your export request has been planned, you will receive a notification as "
