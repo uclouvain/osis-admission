@@ -5126,10 +5126,15 @@ msgstr ""
 msgid "Recompute"
 msgstr ""
 
+msgctxt "F"
 msgid "Rector"
 msgstr ""
 
-msgctxt "F"
+msgctxt "H"
+msgid "Rector"
+msgstr ""
+
+msgctxt "X"
 msgid "Rector"
 msgstr ""
 
