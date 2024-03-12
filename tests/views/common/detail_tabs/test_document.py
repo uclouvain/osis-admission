@@ -3113,7 +3113,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         context = response.context
-        self.assertEqual(context['document_uuid'], str(file_uuid))
+        self.assertEqual(context['document_uuid'], file_uuid)
         self.assertEqual(context['document_write_token'], 'foobar')
         self.assertEqual(context['document_metadata'], self.file_metadata)
 
