@@ -71,6 +71,8 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
 
         documents_by_category = {}
         for document in documents:
+            if self.q and self.q.lower() not in document.libelle.lower():
+                continue
             if (
                 document.type not in EMPLACEMENTS_DOCUMENTS_INTERNES
                 and document.identifiant not in DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION

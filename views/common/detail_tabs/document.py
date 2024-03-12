@@ -550,7 +550,7 @@ class RetypeDocumentView(DocumentFormView):
         return context
 
     def form_valid(self, form):
-        message_bus_instance.invoke(
+        document_id = message_bus_instance.invoke(
             general_education_commands.RetyperDocumentCommand(
                 uuid_proposition=self.admission_uuid,
                 identifiant_source=self.document_identifier,
@@ -558,4 +558,5 @@ class RetypeDocumentView(DocumentFormView):
                 auteur=self.request.user.person.global_id,
             )
         )
+        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
         return super().form_valid(form)
