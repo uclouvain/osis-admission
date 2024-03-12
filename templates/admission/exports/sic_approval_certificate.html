@@ -292,7 +292,13 @@
         {% if director.signature %}<img class="ms-3" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
         <p>
           {{ director.first_name }} {{ director.last_name }},<br>
-          {% if director.gender == 'F' %}{% trans "Director of the inscription service" context "F" %}{% else %}{% trans "Director of the inscription service" %}{% endif %}
+          {% if director.gender == 'F' %}
+            {% trans "Director of the inscription service" context "F" %}
+          {% elif director.gender == 'H' %}
+            {% trans "Director of the inscription service" context "H" %}
+          {% else %}
+            {% trans "Director of the inscription service" context "X" %}
+          {% endif %}
         </p>
       </div>
     </div>

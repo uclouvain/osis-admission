@@ -128,6 +128,11 @@ templates.register(
             example="Virginie Odeurs",
         ),
         Token(
+            name='director_title',
+            description=_("Director title"),
+            example="Directeur·e",
+        ),
+        Token(
             name='document_link',
             description=_("Refusal document link"),
             example="https://osis.uclouvain.be/...",

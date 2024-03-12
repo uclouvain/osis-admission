@@ -37,7 +37,7 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, gettext, get_language
+from django.utils.translation import gettext_lazy as _, gettext, get_language, pgettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
@@ -52,12 +52,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -871,7 +870,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         )
 
     @cached_property
-    def sic_director(self):
+    def sic_director(self) -> Optional[Person]:
         now = timezone.now()
         director = (
             Person.objects.filter(
@@ -901,6 +900,17 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         }
         if self.sic_director:
             tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
+            director_gender = self.sic_director.gender or ChoixGenre.X.name
+        else:
+            director_gender = ChoixGenre.X.name
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            if director_gender == ChoixGenre.F.name:
+                tokens["director_title"] = pgettext('F', 'Director of the inscription service')
+            elif director_gender == ChoixGenre.H.name:
+                tokens["director_title"] = pgettext('H', 'Director of the inscription service')
+            else:
+                tokens["director_title"] = pgettext('X', 'Director of the inscription service')
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
