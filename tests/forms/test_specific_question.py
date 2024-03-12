@@ -31,6 +31,7 @@ from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 from django.test.utils import override_settings
+from osis_document.contrib import FileUploadField
 
 from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -41,9 +42,8 @@ from admission.ddd.admission.enums import (
     TypeChampTexteFormulaire,
     TypeChampSelectionFormulaire,
 )
-from admission.forms import EMPTY_CHOICE
 from admission.forms.specific_question import ConfigurableFormMixin, PlainTextWidget
-from osis_document.contrib import FileUploadField
+from base.forms.utils import EMPTY_CHOICE
 
 
 class ConfigurableFormItemFieldTestCase(TestCase):

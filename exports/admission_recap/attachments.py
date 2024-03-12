@@ -57,15 +57,15 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    CHOIX_DIPLOME_OBTENU,
     ChoixStatutPropositionGenerale,
 )
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
-from admission.utils import format_academic_year
 from base.models.enums.education_group_types import TrainingType
+from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from osis_profile import CURRICULUM_ACTIVITY_LABEL
 from osis_profile.models.enums.curriculum import TranscriptType
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
+from osis_profile.views.edit_etudes_secondaires import CHOIX_DIPLOME_OBTENU
 
 
 class Attachment:

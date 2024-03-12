@@ -26,7 +26,7 @@
 from datetime import date
 from typing import List, Tuple
 
-from admission.ddd import PLUS_5_ISO_CODES
+from osis_profile import PLUS_5_ISO_CODES
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation

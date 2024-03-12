@@ -27,16 +27,16 @@ from dal.forward import Const
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import DiplomaticPost
 from admission.forms import (
     AdmissionFileUploadField,
     autocomplete,
-    RadioBooleanField,
     get_diplomatic_post_initial_choices,
 )
 from admission.forms.specific_question import ConfigurableFormMixin
-from admission.mark_safe_lazy import mark_safe_lazy
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.fields import RadioBooleanField
+from base.utils.mark_safe_lazy import mark_safe_lazy
 
 
 class CommonSpecificQuestionsForm(ConfigurableFormMixin, forms.Form):

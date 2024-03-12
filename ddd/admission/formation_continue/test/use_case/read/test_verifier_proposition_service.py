@@ -35,6 +35,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
 )
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
@@ -52,7 +53,6 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -94,7 +94,8 @@ class TestVerifierPropositionService(TestCase):
 
     def test_should_retourner_erreur_si_indication_a_diplome_etudes_secondaires_non_specifiee(self):
         with mock.patch.dict(
-            self.etudes_secondaires, {'0000000001': EtudesSecondairesDTO(annee_diplome_etudes_secondaires=2020)}
+            self.etudes_secondaires,
+            {'0000000001': EtudesSecondairesAdmissionDTO(annee_diplome_etudes_secondaires=2020)}
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.verifier_commande)
@@ -103,7 +104,7 @@ class TestVerifierPropositionService(TestCase):
     def test_should_retourner_erreur_si_annee_diplome_etudes_secondaires_non_specifiee(self):
         with mock.patch.dict(
             self.etudes_secondaires,
-            {'0000000001': EtudesSecondairesDTO(diplome_etudes_secondaires=GotDiploma.YES.name)},
+            {'0000000001': EtudesSecondairesAdmissionDTO(diplome_etudes_secondaires=GotDiploma.YES.name)},
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.verifier_commande)
@@ -111,7 +112,7 @@ class TestVerifierPropositionService(TestCase):
 
         with mock.patch.dict(
             self.etudes_secondaires,
-            {'0000000001': EtudesSecondairesDTO(diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name)},
+            {'0000000001': EtudesSecondairesAdmissionDTO(diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name)},
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.verifier_commande)
@@ -121,7 +122,7 @@ class TestVerifierPropositionService(TestCase):
         with mock.patch.dict(
             self.etudes_secondaires,
             {
-                '0000000001': EtudesSecondairesDTO(
+                '0000000001': EtudesSecondairesAdmissionDTO(
                     diplome_etudes_secondaires=GotDiploma.YES.name,
                     annee_diplome_etudes_secondaires=2020,
                 )
@@ -134,7 +135,7 @@ class TestVerifierPropositionService(TestCase):
         with mock.patch.dict(
             self.etudes_secondaires,
             {
-                '0000000001': EtudesSecondairesDTO(
+                '0000000001': EtudesSecondairesAdmissionDTO(
                     diplome_etudes_secondaires=GotDiploma.NO.name,
                 )
             },

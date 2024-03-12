@@ -36,14 +36,12 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCurriculum,
     StatutReclamationEmplacementDocument,
     DocumentsIdentification,
-    StatutEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     DroitsInscriptionMontant,
     DispenseOuDroitsMajores,
 )
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     ProfessionalExperienceFactory,
@@ -62,6 +60,7 @@ from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from osis_profile import CURRICULUM_ACTIVITY_LABEL
 from osis_profile.models.enums.curriculum import TranscriptType, ActivityType
 from reference.tests.factories.language import LanguageFactory
 

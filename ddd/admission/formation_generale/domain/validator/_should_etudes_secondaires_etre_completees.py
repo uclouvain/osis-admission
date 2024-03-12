@@ -27,9 +27,7 @@ from typing import Optional
 
 import attr
 
-from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.domain.model.formation import Formation
-from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
@@ -43,7 +41,9 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeEtrangerEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
 )
+from osis_profile import REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
+from osis_profile.views.edit_etudes_secondaires import CHOIX_DIPLOME_OBTENU
 
 
 @attr.dataclass(frozen=True, slots=True)

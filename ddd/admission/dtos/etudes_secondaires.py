@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,16 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from decimal import Decimal
 
-FR_ISO_CODE = "FR"
-EN_ISO_CODE = "EN"
-CODE_BACHELIER_VETERINAIRE = 'VETE1BA'
-PREFIXES_DOMAINES_FORMATIONS_DENT_MED = {'11', '13'}
-LANGUES_OBLIGATOIRES_DOCTORAT = ["EN", "FR"]
-NB_MOIS_MIN_VAE = 36
-MONTANT_FRAIS_DOSSIER = Decimal(200)
-DUREE_MINIMALE_PROGRAMME = 1
-DUREE_MAXIMALE_PROGRAMME = 5
-MAIL_INSCRIPTION_DEFAUT = 'inscription-lln@uclouvain.be'
-MAIL_VERIFICATEUR_CURSUS = 'verificationcursus@uclouvain.be'
+import attr
+
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
+
+
+@attr.dataclass(slots=True, frozen=True)
+class EtudesSecondairesAdmissionDTO(EtudesSecondairesDTO):
+    @property
+    def uuid(self):
+        return OngletsDemande.ETUDES_SECONDAIRES.name

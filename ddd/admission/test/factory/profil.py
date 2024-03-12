@@ -31,13 +31,14 @@ import factory
 from attr import dataclass
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from base.models.enums.civil_state import CivilState
 from base.tests.factories.person import generate_global_id
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO, CurriculumDTO,
+    ExperienceNonAcademiqueDTO,
 )
 
 
@@ -105,7 +106,7 @@ class CoordonneesDTOFactory(factory.Factory):
 
 class EtudesSecondairesDTOFactory(factory.Factory):
     class Meta:
-        model = EtudesSecondairesDTO
+        model = EtudesSecondairesAdmissionDTO
         abstract = False
 
 
@@ -182,7 +183,7 @@ class ExperienceNonAcademiqueDTOFactory(factory.Factory):
 
 class CurriculumDTOFactory(factory.Factory):
     class Meta:
-        model = CurriculumDTO
+        model = CurriculumAdmissionDTO
         abstract = False
 
     experiences_non_academiques: List[ExperienceNonAcademiqueDTOFactory] = []

@@ -45,7 +45,7 @@ from admission.calendar.admission_calendar import (
 )
 from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
-from admission.ddd import FR_ISO_CODE, BE_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
@@ -62,8 +62,10 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     PromoteurDTO,
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -91,7 +93,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
-    OngletsDemande,
     DocumentsSuiteAutorisation,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -109,7 +110,6 @@ from admission.ddd.admission.formation_generale.dtos import (
 from admission.exports.admission_recap.attachments import (
     Attachment,
 )
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.exports.admission_recap.section import (
     get_accounting_section,
     get_cotutelle_section,
@@ -159,13 +159,13 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
-    EtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO, CurriculumDTO,
+    ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile import BE_ISO_CODE, CURRICULUM_ACTIVITY_LABEL
 from osis_profile.models.enums.curriculum import (
     ActivitySector,
     ActivityType,
@@ -190,7 +190,7 @@ class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
 
 
 @attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesDTO):
+class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
     pass
 
 
@@ -210,12 +210,7 @@ class _AdressePersonnelleDTO(UnfrozenDTO, AdressePersonnelleDTO):
 
 
 @attr.dataclass
-class _CurriculumDTO(UnfrozenDTO, CurriculumDTO):
-    pass
-
-
-@attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesDTO):
+class _CurriculumDTO(UnfrozenDTO, CurriculumAdmissionDTO):
     pass
 
 

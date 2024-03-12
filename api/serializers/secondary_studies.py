@@ -28,7 +28,6 @@ from functools import partial
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
-from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
@@ -39,9 +38,9 @@ from osis_profile.models import (
     ForeignHighSchoolDiploma,
     HighSchoolDiplomaAlternative,
 )
+from osis_profile.views.edit_etudes_secondaires import CHOIX_DIPLOME_OBTENU
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
-
 
 RelatedHighSchoolField = partial(
     serializers.SlugRelatedField,
