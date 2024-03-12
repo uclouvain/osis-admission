@@ -5133,6 +5133,10 @@ msgctxt "F"
 msgid "Rector"
 msgstr ""
 
+msgctxt "H"
+msgid "Rector"
+msgstr ""
+
 msgid "Reduced tuition fee"
 msgstr ""
 
