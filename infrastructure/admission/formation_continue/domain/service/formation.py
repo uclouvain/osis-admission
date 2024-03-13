@@ -113,7 +113,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
     def get_dto(cls, sigle: str, annee: int) -> 'FormationDTO':  # pragma: no cover
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(SearchFormationsCommand(sigle=sigle, annee=annee))
+        dtos = message_bus_instance.invoke(SearchFormationsCommand(sigles_annees=[(sigle, annee)]))
 
         if dtos:
             return cls._build_dto(dtos[0])
@@ -126,8 +126,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
 
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
-                sigle=entity_id.sigle,
-                annee=entity_id.annee,
+                sigles_annees=[(entity_id.sigle, entity_id.annee)],
                 types=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
                     TypeFormation.FORMATION_CONTINUE.name
                 ),
@@ -207,8 +206,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
 
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
-                sigle=sigle,
-                annee=annee,
+                sigles_annees=[(sigle, annee)],
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,

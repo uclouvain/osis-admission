@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigle=sigle, annee=annee, type=TrainingType.PHD.name)
+            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.PHD.name)
         )
         if dtos:
             return cls._build_dto(dtos[0])
@@ -70,7 +70,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(
-            SearchFormationsCommand(sigle=sigle, annee=annee, type=TrainingType.PHD.name)
+            SearchFormationsCommand(sigles_annees=[(sigle, annee)], type=TrainingType.PHD.name)
         )
         if dtos:
             dto: TrainingDto = dtos[0]
@@ -122,8 +122,7 @@ class DoctoratTranslator(IDoctoratTranslator):
 
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
-                sigle=sigle,
-                annee=annee,
+                sigles_annees=[(sigle, annee)],
                 type=TrainingType.PHD.name,
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
