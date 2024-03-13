@@ -105,14 +105,16 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     def experience_id(self):
         return self._experience_id or self.kwargs.get('experience_uuid', None)
 
+    @property
+    def educational_experience_filter_uuid(self):
+        return {'uuid': self.experience_id}
+
     def post(self, request, *args, **kwargs):
         if self.experience_id:
             # On update
             return super().post(request, *args, **kwargs)
 
         context_data = self.get_context_data(**kwargs)
-
-        experience = context_data['educational_experience']
 
         base_form = context_data['base_form']
         year_formset = context_data['year_formset']
@@ -184,6 +186,12 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
                 'experience_uuid': self.experience_id,
             },
         )
+
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            'prevent_quitting_template': 'admission/includes/prevent_quitting_button.html',
+        }
 
 
 class CurriculumNonEducationalExperienceFormView(
@@ -270,6 +278,12 @@ class CurriculumNonEducationalExperienceFormView(
                 'experience_uuid': self.experience_id,
             },
         )
+
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            'prevent_quitting_template': 'admission/includes/prevent_quitting_button.html',
+        }
 
 
 class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):

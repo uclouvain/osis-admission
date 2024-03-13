@@ -34,7 +34,6 @@ from admission.calendar.admission_calendar import (
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import Onglets, CHOIX_AFFILIATION_SPORT_SELON_SITE
@@ -68,6 +67,7 @@ from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models.enums.curriculum import CURRICULUM_ACTIVITY_LABEL
+from osis_profile.views.edit_experience_academique import SYSTEMES_EVALUATION_AVEC_CREDITS
 
 
 class Section:
@@ -297,7 +297,7 @@ def get_educational_experience_context(context: ResumePropositionDTO, educationa
         'is_belgian_experience': educational_experience.pays == BE_ISO_CODE,
         'translation_required': translation_required,
         'evaluation_system_with_credits': educational_experience.systeme_evaluation
-        in VerifierCurriculum.SYSTEMES_EVALUATION_AVEC_CREDITS,
+        in SYSTEMES_EVALUATION_AVEC_CREDITS,
     }
 
 
