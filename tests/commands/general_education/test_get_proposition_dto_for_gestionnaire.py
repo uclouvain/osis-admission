@@ -28,9 +28,8 @@ import uuid
 from unittest.mock import ANY, patch
 
 import freezegun
-from django.conf import settings
 from django.test import TestCase, override_settings
-from django.utils.translation import gettext, pgettext
+from django.utils.translation import pgettext
 from osis_history.models import HistoryEntry
 
 from admission.contrib.models import GeneralEducationAdmission
@@ -59,7 +58,6 @@ from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from base.tests.factories.student import StudentFactory
-from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO
 from infrastructure.messages_bus import message_bus_instance
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
@@ -137,6 +135,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                     boite_postale='',
                     localisation='',
                     email='',
+                    uuid=self.admission.training.enrollment_campus.uuid,
                 ),
                 sigle_entite_gestion='SCH',
                 credits=180,

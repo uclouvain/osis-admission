@@ -24,6 +24,7 @@
 #
 ##############################################################################
 import unicodedata
+import uuid
 from typing import List, Optional
 
 from django.conf import settings
@@ -74,6 +75,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             intitule_fr=dto.title_fr,
             intitule_en=dto.title_en,
             campus=CampusDTO(
+                uuid=uuid.UUID(str(campus.uuid)),
                 nom=campus.name,
                 code_postal=campus.postal_code,
                 ville=campus.city,
@@ -90,6 +92,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             type=dto.type,
             code_domaine=dto.main_domain_code or '',
             campus_inscription=CampusDTO(
+                uuid=uuid.UUID(str(campus_inscription.uuid)),
                 nom=campus_inscription.name,
                 code_postal=campus_inscription.postal_code,
                 ville=campus_inscription.city,
