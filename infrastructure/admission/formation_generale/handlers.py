@@ -107,6 +107,7 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
 COMMAND_HANDLERS = {
@@ -531,6 +532,7 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
         )
     ),
     RefuserInscriptionParSicCommand: (
@@ -541,6 +543,7 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
         )
     ),
     ApprouverAdmissionParSicCommand: (
@@ -577,6 +580,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            campus_repository=UclouvainCampusRepository(),
             pdf_generation=PDFGeneration(),
         )
     ),

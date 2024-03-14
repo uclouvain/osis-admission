@@ -1,0 +1,53 @@
+{% load i18n %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<style>
+  #footer {
+      font-family: Arial, sans-serif;
+      font-size: 9pt;
+      margin: 0;
+      line-height: 105%;
+  }
+
+  #footer #campus {
+      font-weight: 500;
+      margin: 0;
+  }
+  #footer #campus strong {
+      font-weight: 700;
+  }
+</style>
+<div id="footer">
+  <span id="campus">
+    {% if campus.uuid == ORDERED_CAMPUSES_UUIDS.LOUVAIN_LA_NEUVE_UUID %}
+    <strong>LOUVAIN-LA-NEUVE</strong> | BRUXELLES | MONS | TOURNAI | CHARLEROI | NAMUR<br />
+    {% elif campus.uuid == ORDERED_CAMPUSES_UUIDS.BRUXELLES_SAINT_LOUIS_UUID %}
+    LOUVAIN-LA-NEUVE | <strong>BRUXELLES</strong> | MONS | TOURNAI | CHARLEROI | NAMUR<br />
+    {% endif %}
+  </span>
+  {{ campus.street }} {{ campus.street_number }}{% if campus.postal_box %} bte {{ campus.postal_box }}{% endif %},
+  {% if campus.location %}{{ campus.location }}, {% endif %}
+  {{ campus.postal_code }} {{ campus.city }},
+  {{ campus.country_name }}
+</div>
