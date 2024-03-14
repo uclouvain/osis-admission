@@ -64,6 +64,8 @@ from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
+from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
+from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 ENTITY_SIC = 'SIC'
@@ -72,6 +74,23 @@ ENTITY_UCL = 'UCL'
 
 
 class PDFGeneration(IPDFGeneration):
+    @classmethod
+    def _get_refusal_certificate_footer_campus(
+        cls,
+        proposition_dto: PropositionGestionnaireDTO,
+        campus_repository: IUclouvainCampusRepository,
+    ):
+        footer_campus_uuid = (
+            # For the trainings whose the enrollment is in Saint-Louis, the campus to display is the related one
+            ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID']
+            if proposition_dto.formation.campus_inscription
+            and proposition_dto.formation.campus_inscription.uuid
+            == ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID']
+            # For other trainings, the campus to display is the Louvain-La-Neuve campus (default)
+            else ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID']
+        )
+        return campus_repository.get_dto(UclouvainCampusIdentity(uuid=str(footer_campus_uuid)))
+
     @classmethod
     def _get_sic_director(cls, proposition_dto: PropositionGestionnaireDTO):
         now = timezone.now()
@@ -252,14 +271,24 @@ class PDFGeneration(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
     ) -> Optional[str]:
+        if pdf == 'refus':
+            return cls.generer_attestation_refus_sic(
+                proposition_repository=proposition_repository,
+                profil_candidat_translator=profil_candidat_translator,
+                campus_repository=campus_repository,
+                proposition=proposition,
+                gestionnaire=gestionnaire,
+                temporaire=True,
+            )
+
         PDF_GENERATION_METHOD = {
             'accord': cls.generer_attestation_accord_sic,
             'accord_annexe': cls.generer_attestation_accord_annexe_sic,
-            'refus': cls.generer_attestation_refus_sic,
         }
 
         pdf_generation_method = PDF_GENERATION_METHOD.get(pdf)
@@ -402,6 +431,7 @@ class PDFGeneration(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -423,6 +453,7 @@ class PDFGeneration(IPDFGeneration):
                     'profil_candidat_identification': profil_candidat_identification,
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(proposition_dto),
+                    'footer_campus': cls._get_refusal_certificate_footer_campus(proposition_dto, campus_repository),
                 },
                 author=gestionnaire,
             )
@@ -435,6 +466,7 @@ class PDFGeneration(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -456,6 +488,7 @@ class PDFGeneration(IPDFGeneration):
                     'profil_candidat_identification': profil_candidat_identification,
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(proposition_dto),
+                    'footer_campus': cls._get_refusal_certificate_footer_campus(proposition_dto, campus_repository),
                 },
                 author=gestionnaire,
             )

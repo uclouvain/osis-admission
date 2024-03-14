@@ -40,7 +40,7 @@ from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
 
-from admission.contrib.models.checklist import FREE_ADDITIONAL_APPROVAL_CONDITION_FIELD_BY_LANGUAGE
+from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -49,7 +49,7 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE
+from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -1274,6 +1274,14 @@ def footer_campus(proposition):
     return {
         'campus': CAMPUS.get(proposition.formation.campus_inscription.nom, 'LLN'),
         'proposition': proposition,
+    }
+
+
+@register.inclusion_tag('admission/exports/includes/refusal_footer_campus.html')
+def refusal_footer_campus(campus: UclouvainCampusDTO):
+    return {
+        'campus': campus,
+        'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
     }
 
 
