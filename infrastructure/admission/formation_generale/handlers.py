@@ -102,6 +102,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.questi
     QuestionSpecifiqueTranslator,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.reference import ReferenceTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.taches_techniques import TachesTechniques
 from admission.infrastructure.admission.formation_generale.repository.emplacement_document import (
     EmplacementDocumentRepository,
 )
@@ -355,6 +356,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         paiement_frais_dossier_service=PaiementFraisDossier(),
         historique=HistoriqueFormationGenerale(),
+        taches_techniques=TachesTechniques(),
     ),
     PayerFraisDossierPropositionSuiteSoumissionCommand: (
         lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_soumission(
