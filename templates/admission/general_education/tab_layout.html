@@ -103,7 +103,10 @@
     <br>
     <span class="bold-text">{{ admission.type|enum_display:'TypeDemande' }} - </span>
     <span class="copy-to-clipboard">
-      <span class="copy-to-clipboard-text bold-text">{{ admission.reference }}</span>
+      <span
+          class="copy-to-clipboard-text bold-text"
+          data-text="{{ request.scheme }}://{{ request.get_host }}{% url "admission:general-education" admission.uuid %}"
+      >{{ admission.reference }}</span>
       <button class="copy-button">
         <i class="far fa-copy"></i>
       </button>
