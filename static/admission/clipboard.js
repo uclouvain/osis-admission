@@ -46,8 +46,12 @@ function writeTextToClipboard(clipboardSelector, resetTitleAfter=3) {
 
         buttonComponent.on('click', () => {
             // Copy text content to clipboard
-            const textComponent = $(this).find('.copy-to-clipboard-text').get(0);
-            navigator.clipboard.writeText(textComponent.textContent).then(() => {
+            const $textComponent = $(this).find('.copy-to-clipboard-text');
+            let text = $textComponent.attr('data-text');
+            if (!text) {
+                text = $textComponent.text();
+            }
+            navigator.clipboard.writeText(text).then(() => {
                 buttonComponent.attr('data-original-title', tooltipTextOnSuccess).tooltip('show');
                 buttonComponent.attr('data-original-title', initialTooltipText);
             }, () => {
