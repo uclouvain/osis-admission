@@ -46,7 +46,7 @@ from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
 from admission.contrib.models import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
@@ -104,7 +104,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             prefetch_viewers_queryset = prefetch_viewers_queryset.exclude(person__uuid=demandeur)
 
         qs = (
-            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            BaseAdmission.objects.with_training_management_and_reference()
             .annotate_several_admissions_in_progress()
             .annotate(
                 status=Coalesce(
