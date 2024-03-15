@@ -71,6 +71,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     StatutReclamationEmplacementDocument,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
@@ -859,7 +860,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         return [
             document
             for document in documents
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name
+            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
             and document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
         ]
 

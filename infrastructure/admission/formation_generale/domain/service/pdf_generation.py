@@ -44,6 +44,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     OngletsDemande,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -340,7 +341,7 @@ class PDFGeneration(IPDFGeneration):
         # Get the list of documents
         for document in documents:
             if (
-                document.statut in {StatutEmplacementDocument.A_RECLAMER.name}
+                document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
                 and document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
             ):
                 document_identifier = document.identifiant.split('.')

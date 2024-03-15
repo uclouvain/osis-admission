@@ -80,6 +80,12 @@ class StatutEmplacementDocument(ChoiceEnum):
     RECLAMATION_ANNULEE = _('Request cancelled')
 
 
+STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER = {
+    StatutEmplacementDocument.A_RECLAMER.name,
+    StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
+}
+
+
 class StatutReclamationEmplacementDocument(ChoiceEnum):
     IMMEDIATEMENT = _('Immediately')
     ULTERIEUREMENT_BLOQUANT = _('Later > blocking')

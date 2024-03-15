@@ -41,6 +41,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     EMPLACEMENTS_FAC,
     EMPLACEMENTS_SIC,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -175,7 +176,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         return [
             document
             for document in self.documents
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name and document.type in requestable_types
+            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER and document.type in requestable_types
         ]
 
     def get_initial(self):
@@ -200,6 +201,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         context['documents'] = self.documents
         context['EMPLACEMENTS_DOCUMENTS_INTERNES'] = EMPLACEMENTS_DOCUMENTS_INTERNES
         context['EMPLACEMENTS_FAC'] = EMPLACEMENTS_FAC
+        context['STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER'] = STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
         context['next'] = self.request.GET.get('next')
 
         context['requested_documents'] = {

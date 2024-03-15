@@ -79,7 +79,9 @@ class EmplacementDocument(interface.Entity):
 
     def annuler_reclamation_au_candidat(self, auteur: str, annule_le: datetime):
         self.dernier_acteur = auteur
+        self.a_echeance_le = None
         self.derniere_action_le = annule_le
+        self.reclame_le = None
         self.statut = StatutEmplacementDocument.RECLAMATION_ANNULEE
 
     def remplir_par_gestionnaire(self, uuid_document: str, auteur: str):
@@ -90,7 +92,10 @@ class EmplacementDocument(interface.Entity):
         self.statut_reclamation = None
         self.document_soumis_par = auteur
 
-    def remplir_par_candidat(self, uuid_documents, auteur: str):
+    def remplir_par_candidat(self, uuid_documents, auteur: str, complete_le: datetime):
+        self.dernier_acteur = auteur
+        self.derniere_action_le = complete_le
+
         if uuid_documents:
             self.uuids_documents = uuid_documents
             self.statut = StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION
