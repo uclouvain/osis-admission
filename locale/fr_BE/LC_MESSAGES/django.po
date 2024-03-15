@@ -2302,12 +2302,20 @@ msgstr "Code poste diplomatique"
 msgid "Director"
 msgstr "Directeur"
 
-msgid "Director of the inscription service"
-msgstr "Directeur du Service des inscriptions"
-
 msgctxt "F"
 msgid "Director of the inscription service"
 msgstr "Directrice du Service des inscriptions"
+
+msgctxt "H"
+msgid "Director of the inscription service"
+msgstr "Directeur du Service des inscriptions"
+
+msgctxt "X"
+msgid "Director of the inscription service"
+msgstr "Directeur·trice du Service des inscriptions"
+
+msgid "Director title"
+msgstr "Titre du directeur"
 
 msgid "Disabled"
 msgstr "Désactivé"
