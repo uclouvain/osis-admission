@@ -336,6 +336,7 @@
             {% else %}
               {% checklist_state_button tab='specificites_formation' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='muted' %}
             {% endif %}
+            {% checklist_state_button tab='specificites_formation' label=_("To be completed after application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}
             {% checklist_state_button tab='specificites_formation' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
             {% checklist_state_button tab='specificites_formation' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' %}
           </div>
