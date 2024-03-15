@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0161_remove_generaleducationadmission_free_additional_approval_conditions'),
+        ('admission', '0164_default_workinglists'),
     ]
 
     operations = [
