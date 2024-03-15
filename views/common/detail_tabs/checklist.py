@@ -1360,6 +1360,8 @@ class ChecklistView(
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
                 'ATTESTATION_REFUS_SIC',
+                'ATTESTATION_ACCORD_FACULTAIRE',
+                'ATTESTATION_REFUS_FACULTAIRE',
             },
         }
 
