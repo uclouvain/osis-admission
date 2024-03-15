@@ -361,8 +361,6 @@ class DoctorateAdmission(BaseAdmission):
     def doctorate_id(self, value):
         self.training_id = value
 
-    objects = BaseAdmissionQuerySet.as_manager()
-
     class Meta:
         verbose_name = _("Doctorate admission")
         ordering = ('-created_at',)

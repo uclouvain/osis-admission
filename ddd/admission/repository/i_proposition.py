@@ -27,12 +27,25 @@ from abc import ABCMeta
 
 from osis_common.ddd import interface
 
+CAMPUS_LETTRE_DOSSIER = {
+    'Bruxelles Saint-Louis': 'B',
+    'Charleroi': 'C',
+    'Louvain-la-Neuve': 'L',
+    'Mons': 'M',
+    'Namur': 'N',
+    'Tournai': 'T',
+    'Bruxelles Woluwe': 'W',
+    'Bruxelles Saint-Gilles': 'G',
+    'Autre site': 'X',
+}
+
 
 def formater_reference(reference: int, nom_campus_inscription: str, sigle_entite_gestion: str, annee: int) -> str:
     """Formater la référence d'une admission"""
     reference_formatee = '{:08}'.format(reference)
     reference_formatee = f'{reference_formatee[:4]}.{reference_formatee[4:]}'
-    return f'{nom_campus_inscription[0]}-{sigle_entite_gestion}{annee % 100}-{reference_formatee}'
+    lettre_campus = CAMPUS_LETTRE_DOSSIER.get(nom_campus_inscription, 'X')
+    return f'{lettre_campus}-{sigle_entite_gestion}{annee % 100}-{reference_formatee}'
 
 
 class IGlobalPropositionRepository(interface.AbstractRepository, metaclass=ABCMeta):
