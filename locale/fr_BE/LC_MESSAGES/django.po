@@ -4973,6 +4973,9 @@ msgstr "Autre"
 msgid "Other address"
 msgstr "Une autre adresse"
 
+msgid "Other application(s)"
+msgstr "Autre(s) demande(s)"
+
 msgid "Other authorized program"
 msgstr "Autre formation autorisée"
 
@@ -6687,9 +6690,6 @@ msgstr ""
 
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
-
-msgid "The candidate has several enrolment applications in progress"
-msgstr "Le candidat a plusieurs demandes d'inscription en cours"
 
 msgid "The candidate is doing a mobility"
 msgstr "Le candidat effectue une mobilité"

@@ -53,7 +53,6 @@ from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurA
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
-    BesoinDeDerogation,
     OngletsChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
