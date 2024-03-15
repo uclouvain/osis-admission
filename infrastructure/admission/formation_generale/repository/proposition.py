@@ -566,6 +566,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 intitule_fr=admission.training.title,
                 intitule_en=admission.training.title_english,
                 campus=CampusDTO(
+                    uuid=campus.uuid,
                     nom=campus.name,
                     code_postal=campus.postal_code,
                     ville=campus.city,
@@ -582,6 +583,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
                 campus_inscription=CampusDTO(
+                    uuid=admission.training.enrollment_campus.uuid,
                     nom=admission.training.enrollment_campus.name,
                     code_postal=admission.training.enrollment_campus.postal_code,
                     ville=admission.training.enrollment_campus.city,
