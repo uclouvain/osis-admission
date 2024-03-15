@@ -69,10 +69,12 @@ class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABC
         reponses_documents_a_completer: Dict[str, List[str]],
         auteur: str,
     ):
+        heure = datetime.datetime.now()
         for document in documents_completes:
             document.remplir_par_candidat(
                 uuid_documents=reponses_documents_a_completer.get(document.entity_id.identifiant),
                 auteur=auteur,
+                complete_le=heure,
             )
 
     @classmethod

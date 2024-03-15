@@ -46,7 +46,7 @@
               </tr>
             {% endifchanged %}
             <tr
-              {% if document.statut == 'A_RECLAMER' %}
+              {% if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER %}
                 class="bg-danger"
               {% elif document.statut == 'RECLAME' %}
                 class="bg-info"
@@ -68,7 +68,11 @@
               <td class="min-width">
               <span class="flex-content-no-wrap align-items-baseline">
                 {% if document.dernier_acteur %}
-                  {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
+                  {% if document.dernier_acteur.matricule == admission.matricule_candidat %}
+                    {% translate 'Candidate' %}
+                  {% else %}
+                    {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
+                  {% endif %}
                   {% if document.statut == 'RECLAME' %}
                     <i class="fa-solid fa-envelope" title="{% translate 'Requested' context 'document' %}"></i>
                   {% endif %}
@@ -78,11 +82,11 @@
               </span>
               </td>
               <td class="min-width">
-                {% if document.statut == 'RECLAMATION_ANNULEE' %}
-                  {% translate 'Claim cancelled on' %} {{ document.derniere_action_le|date:'DATE_FORMAT' }}
-                {% elif document.reclame_le %}
+                {% if document.statut == 'RECLAME' %}
                   {% translate 'Requested on' %} {{ document.reclame_le|date:'DATE_FORMAT' }}<br>
                   {% translate 'Deadline on' %} {{ document.a_echeance_le|date:'DATE_FORMAT' }}
+                {% elif document.statut == 'RECLAMATION_ANNULEE' %}
+                  {% translate 'Claim cancelled on' %} {{ document.derniere_action_le|date:'DATE_FORMAT' }}
                 {% elif document.derniere_action_le %}
                   {{ document.derniere_action_le|date:'DATETIME_FORMAT' }}
                 {% endif %}
