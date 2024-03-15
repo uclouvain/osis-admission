@@ -49,7 +49,9 @@ from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
-from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    PoursuiteDeCycle,
+)
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from osis_profile.models import EducationalExperienceYear

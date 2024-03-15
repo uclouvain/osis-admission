@@ -58,6 +58,7 @@
   <script>
       $(document).ready(function () {
           initializePopover({ trigger: 'hover' })
+          initializeLazyPopover()
 
           const $reference = $('#id_numero');
           $reference.mask(getReferenceMask($reference.val()), {

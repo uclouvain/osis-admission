@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,9 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import itertools
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+    STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
+)
 
 CHOIX_STATUT_TOUTE_PROPOSITION = [(status.name, status.value) for status in ChoixStatutPropositionGenerale]
 CHOIX_STATUT_TOUTE_PROPOSITION.insert(
@@ -36,3 +47,18 @@ CHOIX_STATUT_TOUTE_PROPOSITION.insert(
     ),
 )
 CHOIX_STATUT_TOUTE_PROPOSITION_DICT = {statut[0]: statut[1] for statut in CHOIX_STATUT_TOUTE_PROPOSITION}
+
+STATUTS_TOUTE_PROPOSITION = set(
+    itertools.chain(
+        ChoixStatutPropositionGenerale.get_names(),
+        ChoixStatutPropositionDoctorale.get_names(),
+        ChoixStatutPropositionContinue.get_names(),
+    )
+)
+
+STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER = list(
+    STATUTS_TOUTE_PROPOSITION
+    - STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE
+    - STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
+    - STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
+)
