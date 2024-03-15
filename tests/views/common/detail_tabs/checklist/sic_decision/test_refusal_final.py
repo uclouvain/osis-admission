@@ -34,6 +34,7 @@ from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import GeneralEducationAdmission
+from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -42,6 +43,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     TypeDeRefus,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import ENTITY_SIC, ENTITY_SICB
+from admission.templatetags.admission import SAINT_LOUIS, MONS
 from admission.tests.factories.faculty_decision import RefusalReasonFactory
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
@@ -50,11 +52,15 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import SicPatchMixin
+from base.models.campus import Campus, LOUVAIN_LA_NEUVE_CAMPUS_NAME
 from base.models.enums.mandate_type import MandateTypes
+from base.models.enums.organization_type import MAIN
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.mandatary import MandataryFactory
+from reference.tests.factories.country import CountryFactory
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -66,15 +72,58 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
         EntityVersionFactory(entity=cls.first_doctoral_commission)
 
+        country = CountryFactory(iso_code=BE_ISO_CODE)
+
         cls.louvain_training = GeneralEducationTrainingFactory(
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
-            enrollment_campus__uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
+            enrollment_campus=CampusFactory(
+                name=LOUVAIN_LA_NEUVE_CAMPUS_NAME,
+                location="Place 1",
+                postal_code="1348",
+                city="Louvain-la-Neuve",
+                country=country,
+                street="University street",
+                postal_box="1",
+                street_number="2",
+                email="louvain@test.be",
+                uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
+                organization__type=MAIN,
+            ),
         )
         cls.saint_louis_training = GeneralEducationTrainingFactory(
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
-            enrollment_campus__uuid=ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID'],
+            enrollment_campus=CampusFactory(
+                name=SAINT_LOUIS,
+                location="Place 2",
+                postal_code="1000",
+                city="Bruxelles",
+                country=country,
+                street="University road",
+                postal_box="3",
+                street_number="4",
+                email="saint_louis@test.be",
+                uuid=ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID'],
+                organization__type=MAIN,
+            ),
+        )
+        cls.mons_training = GeneralEducationTrainingFactory(
+            management_entity=cls.first_doctoral_commission,
+            academic_year=cls.academic_years[0],
+            enrollment_campus=CampusFactory(
+                name=MONS,
+                location="Place 3",
+                postal_code="7000",
+                city="Mons",
+                country=country,
+                street="University place",
+                postal_box="5",
+                street_number="6",
+                email="mons@test.be",
+                uuid=ORDERED_CAMPUSES_UUIDS['MONS_UUID'],
+                organization__type=MAIN,
+            ),
         )
 
         cls.sic_entity = EntityWithVersionFactory(version__acronym=ENTITY_SIC)
@@ -201,6 +250,11 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         director = call_args[0][2]['director']
         self.assertEqual(director, self.sic_director_mandate.person)
 
+        footer_campus = call_args[0][2]['footer_campus']
+        training_campus: Campus = self.louvain_training.enrollment_campus
+
+        self.assertEqual(footer_campus.uuid, training_campus.uuid)
+
     def test_refusal_final_decision_form_submitting_for_a_saint_louis_training(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -228,6 +282,44 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         director = call_args[0][2]['director']
         self.assertEqual(director, self.sic_b_director_mandate.person)
+
+        footer_campus = call_args[0][2]['footer_campus']
+        training_campus: Campus = self.saint_louis_training.enrollment_campus
+
+        self.assertEqual(footer_campus.uuid, training_campus.uuid)
+
+    def test_refusal_final_decision_form_submitting_for_a_mons_training(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        self.general_admission.training = self.mons_training
+        self.general_admission.save(update_fields=['training'])
+
+        # Choose an existing reason
+        response = self.client.post(
+            self.url,
+            data={
+                'sic-decision-refusal-final-subject': 'subject',
+                'sic-decision-refusal-final-body': 'body',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the refusal certificate contains the right data
+        self.get_pdf_from_template_patcher.assert_called_once()
+
+        call_args = self.get_pdf_from_template_patcher.call_args_list[0]
+        self.assertIn('director', call_args[0][2])
+
+        director = call_args[0][2]['director']
+        self.assertEqual(director, self.sic_director_mandate.person)
+
+        footer_campus = call_args[0][2]['footer_campus']
+        training_campus: Campus = self.louvain_training.enrollment_campus
+
+        self.assertEqual(footer_campus.uuid, training_campus.uuid)
 
     def test_refusal_final_decision_form_submitting_inscription(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -275,6 +367,11 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         director = call_args[0][2]['director']
         self.assertEqual(director, self.sic_director_mandate.person)
 
+        footer_campus = call_args[0][2]['footer_campus']
+        training_campus: Campus = self.louvain_training.enrollment_campus
+
+        self.assertEqual(footer_campus.uuid, training_campus.uuid)
+
     def test_refusal_final_decision_form_submitting_inscription_for_a_saint_louis_training(self):
         self.client.force_login(user=self.sic_manager_user)
         self.general_admission.type_demande = TypeDemande.INSCRIPTION.name
@@ -302,3 +399,41 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         director = call_args[0][2]['director']
         self.assertEqual(director, self.sic_b_director_mandate.person)
+
+        footer_campus = call_args[0][2]['footer_campus']
+        training_campus: Campus = self.saint_louis_training.enrollment_campus
+
+        self.assertEqual(footer_campus.uuid, training_campus.uuid)
+
+    def test_refusal_final_decision_form_submitting_inscription_for_a_mons_training(self):
+        self.client.force_login(user=self.sic_manager_user)
+        self.general_admission.type_demande = TypeDemande.INSCRIPTION.name
+        self.general_admission.training = self.mons_training
+        self.general_admission.save()
+
+        # Choose an existing reason
+        response = self.client.post(
+            self.url,
+            data={
+                'sic-decision-refusal-final-subject': 'subject',
+                'sic-decision-refusal-final-body': 'body',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the refusal certificate contains the right data
+        self.get_pdf_from_template_patcher.assert_called_once()
+
+        call_args = self.get_pdf_from_template_patcher.call_args_list[0]
+        self.assertIn('director', call_args[0][2])
+
+        director = call_args[0][2]['director']
+        self.assertEqual(director, self.sic_director_mandate.person)
+
+        footer_campus = call_args[0][2]['footer_campus']
+        training_campus: Campus = self.louvain_training.enrollment_campus
+
+        self.assertEqual(footer_campus.uuid, training_campus.uuid)
