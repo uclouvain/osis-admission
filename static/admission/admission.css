@@ -74,6 +74,12 @@ textarea {
   gap: normal;
 }
 
+.flex-content-no-wrap-no-justify {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
 .align-items-baseline {
   align-items: baseline;
 }
