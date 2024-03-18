@@ -38,7 +38,6 @@ from admission.ddd.admission.domain.model.condition_complementaire_approbation i
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
@@ -774,6 +773,7 @@ class Proposition(interface.RootEntity):
     def specifier_informations_acceptation_par_sic(
         self,
         auteur_modification: str,
+        documents_dto: List[EmplacementDocumentDTO],
         avec_conditions_complementaires: Optional[bool],
         uuids_conditions_complementaires_existantes: Optional[List[str]],
         conditions_complementaires_libres: Optional[List[Dict]],
@@ -798,6 +798,7 @@ class Proposition(interface.RootEntity):
         ApprouverParSicAValiderValidatorList(
             statut=self.statut,
             statut_checklist_parcours_anterieur=self.checklist_actuelle.parcours_anterieur,
+            documents_dto=documents_dto,
         ).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
         self.checklist_actuelle.decision_sic = StatutChecklist(

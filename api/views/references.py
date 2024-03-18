@@ -23,14 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
-
 from django.http import Http404
 from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import AuthorizationAwareSchema
+from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import Scholarship, DiplomaticPost
 from base.models.campus import Campus
 from ddd.logic.shared_kernel.campus.commands import SearchUclouvainCampusesQuery, GetCampusQuery
@@ -74,19 +73,8 @@ class ListCampusView(ListAPIView):
     pagination_class = None
     serializer_class = serializers.CampusSerializer
     queryset = Campus.objects.none()
-    ordered_campuses = {
-        'LOUVAIN_LA_NEUVE_UUID': uuid.UUID('6f207107-bcf0-4b38-a622-9e78a3540c99'),
-        'BRUXELLES_WOLUWE_UUID': uuid.UUID('6da2b1d8-d60a-4cca-b3c3-333b43529d11'),
-        'BRUXELLES_SAINT_LOUIS_UUID': uuid.UUID('9e942dbe-45fc-4de7-9e17-ccd6e82345da'),
-        'MONS_UUID': uuid.UUID('f2b2ac6f-1bde-4389-bd5e-2257407c10f5'),
-        'BRUXELLES_SAINT_GILLES_UUID': uuid.UUID('f32a20cf-cfd6-47ab-b768-53c6c9df8b7c'),
-        'TOURNAI_UUID': uuid.UUID('cf34ff38-268e-4c10-aaa3-ec0c76df2398'),
-        'CHARLEROI_UUID': uuid.UUID('32bfcf4f-4b70-4532-9597-9722c61a27f5'),
-        'NAMUR_UUID': uuid.UUID('ccdfd820-52dc-4aef-a325-fbba3a1f0f52'),
-        'AUTRE_SITE_UUID': uuid.UUID('35b0431b-9609-4a31-a328-04c56571f4ba'),
-    }
     campus_order_by_uuid = {
-        campus_uuid: campus_index for campus_index, campus_uuid in enumerate(ordered_campuses.values())
+        campus_uuid: campus_index for campus_index, campus_uuid in enumerate(ORDERED_CAMPUSES_UUIDS.values())
     }
 
     def list(self, request, *args, **kwargs):

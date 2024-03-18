@@ -39,8 +39,6 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
-
-from admission.contrib.models.checklist import FREE_ADDITIONAL_APPROVAL_CONDITION_FIELD_BY_LANGUAGE
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -49,17 +47,16 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE
+from admission.constants import IMAGE_MIME_TYPES
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos import EtudesSecondairesDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos import CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -93,8 +90,11 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import format_academic_year, get_access_conditions_url
+from admission.utils import get_access_conditions_url
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
+from base.utils.utils import format_academic_year
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -875,6 +875,15 @@ def admission_url(admission_uuid: str, osis_education_type: str):
 
 
 @register.simple_tag
+def list_other_admissions_url(admission_uuid: str, osis_education_type: str):
+    """Get the URL of the list view displaying the other admissions of a candidate of a specific admission"""
+    admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+    if admission_context is None:
+        return None
+    return reverse(f'admission:{admission_context}:other-admissions-list', kwargs={'uuid': admission_uuid})
+
+
+@register.simple_tag
 def admission_status(status: str, osis_education_type: str):
     """Get the status of a specific admission"""
     admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
@@ -1120,7 +1129,7 @@ def authentication_css_class(authentication_status):
 def bg_class_by_checklist_experience(experience):
     return {
         ExperienceAcademiqueDTO: 'bg-info',
-        EtudesSecondairesDTO: 'bg-warning',
+        EtudesSecondairesAdmissionDTO: 'bg-warning',
     }.get(experience.__class__, '')
 
 
@@ -1173,7 +1182,7 @@ def experience_details_template(
         )
         context.update(get_non_educational_experience_context(experience))
 
-    elif experience.__class__ == EtudesSecondairesDTO:
+    elif experience.__class__ == EtudesSecondairesAdmissionDTO:
         context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
         context['etudes_secondaires'] = experience
         context['edit_link_button'] = (
@@ -1200,13 +1209,13 @@ def experience_details_template(
 )
 def checklist_experience_action_links(
     context,
-    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
     current_year,
 ):
     base_namespace = context['view'].base_namespace
     proposition_uuid = context['view'].kwargs['uuid']
     proposition_uuid_str = str(proposition_uuid)
-    if experience.__class__ == EtudesSecondairesDTO:
+    if experience.__class__ == EtudesSecondairesAdmissionDTO:
         return {
             'update_url': resolve_url(
                 f'{base_namespace}:update:education',

@@ -38,7 +38,6 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
@@ -61,7 +60,6 @@ from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.faculty_decision import (
-    AdditionalApprovalConditionFactory,
     FreeAdditionalApprovalConditionFactory,
 )
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
@@ -74,6 +72,7 @@ from admission.tests.factories.person import (
     IncompletePersonForIUFCFactory,
 )
 from admission.tests.factories.roles import ProgramManagerRoleFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma

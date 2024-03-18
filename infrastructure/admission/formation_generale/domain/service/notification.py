@@ -69,9 +69,9 @@ from admission.utils import (
     get_portal_admission_url,
     get_backoffice_admission_url,
     get_salutation_prefix,
-    format_academic_year,
 )
 from base.models.person import Person
+from base.utils.utils import format_academic_year
 from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 

@@ -2290,12 +2290,20 @@ msgstr "Code poste diplomatique"
 msgid "Director"
 msgstr "Directeur"
 
-msgid "Director of the inscription service"
-msgstr "Directeur du Service des inscriptions"
-
 msgctxt "F"
 msgid "Director of the inscription service"
 msgstr "Directrice du Service des inscriptions"
+
+msgctxt "H"
+msgid "Director of the inscription service"
+msgstr "Directeur du Service des inscriptions"
+
+msgctxt "X"
+msgid "Director of the inscription service"
+msgstr "Directeur·trice du Service des inscriptions"
+
+msgid "Director title"
+msgstr "Titre du directeur"
 
 msgid "Disabled"
 msgstr "Désactivé"
@@ -4946,6 +4954,9 @@ msgstr "Autre"
 msgid "Other address"
 msgstr "Une autre adresse"
 
+msgid "Other application(s)"
+msgstr "Autre(s) demande(s)"
+
 msgid "Other authorized program"
 msgstr "Autre formation autorisée"
 
@@ -6641,9 +6652,6 @@ msgstr ""
 
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
-
-msgid "The candidate has several enrolment applications in progress"
-msgstr "Le candidat a plusieurs demandes d'inscription en cours"
 
 msgid "The candidate is doing a mobility"
 msgstr "Le candidat effectue une mobilité"

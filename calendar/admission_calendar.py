@@ -35,19 +35,19 @@ from admission.ddd.admission.domain.service.i_annee_inscription_formation import
     Date,
     IAnneeInscriptionFormationTranslator,
 )
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ConditionAccess
-from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import IProfilCandidatTranslator
 from base.business.academic_calendar import AcademicEventSessionCalendarHelper
 from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from osis_profile import BE_ISO_CODE
 
 __all__ = [
     "AdmissionPoolExternalEnrollmentChangeCalendar",

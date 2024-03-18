@@ -28,7 +28,7 @@ from typing import Dict, Set, Optional, List
 
 from django.conf import settings
 from django.db.models import QuerySet
-from django.forms import Form, modelformset_factory, inlineformset_factory
+from django.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import resolve_url, redirect, render
@@ -37,10 +37,12 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, gettext, get_language
+from django.utils.translation import gettext_lazy as _, pgettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
@@ -51,13 +53,11 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
-from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE, MAIL_VERIFICATEUR_CURSUS
+from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -77,6 +77,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     DocumentsEtudesSecondaires,
 )
+from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -168,22 +169,22 @@ from admission.utils import (
     get_portal_admission_url,
     get_access_titles_names,
     get_salutation_prefix,
-    format_academic_year,
 )
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.api.utils import get_remote_metadata, get_remote_token
-from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
+from osis_profile.utils import curriculum as curriculum_utils
 from osis_role.templatetags.osis_role import has_perm
 
 __all__ = [
@@ -871,7 +872,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         )
 
     @cached_property
-    def sic_director(self):
+    def sic_director(self) -> Optional[Person]:
         now = timezone.now()
         director = (
             Person.objects.filter(
@@ -901,6 +902,17 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         }
         if self.sic_director:
             tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
+            director_gender = self.sic_director.gender or ChoixGenre.X.name
+        else:
+            director_gender = ChoixGenre.X.name
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            if director_gender == ChoixGenre.F.name:
+                tokens["director_title"] = pgettext('F', 'Director of the inscription service')
+            elif director_gender == ChoixGenre.H.name:
+                tokens["director_title"] = pgettext('H', 'Director of the inscription service')
+            else:
+                tokens["director_title"] = pgettext('X', 'Director of the inscription service')
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
@@ -1402,23 +1414,13 @@ class ChecklistView(
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
-            etats = [
-                status
-                for status in ChoixStatutPropositionGenerale.get_names()
-                if status
-                not in {
-                    ChoixStatutPropositionGenerale.EN_BROUILLON,
-                    ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
-                    ChoixStatutPropositionGenerale.ANNULEE,
-                }
-            ]
             context['autres_demandes'] = [
                 demande
                 for demande in message_bus_instance.invoke(
                     ListerToutesDemandesQuery(
                         annee_academique=self.admission.determined_academic_year.year,
                         matricule_candidat=self.admission.candidate.global_id,
-                        etats=etats,
+                        etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
                     )
                 )
                 if demande.uuid != self.admission_uuid
@@ -1676,47 +1678,13 @@ class ChecklistView(
 
         return context
 
-    def _get_experiences(self, resume: ResumePropositionDTO):
-        experiences = {}
-
-        for experience_academique in resume.curriculum.experiences_academiques:
-            for annee_academique in experience_academique.annees:
-                experiences.setdefault(annee_academique.annee, [])
-                if experience_academique.a_obtenu_diplome:
-                    experiences[annee_academique.annee].insert(0, experience_academique)
-                else:
-                    experiences[annee_academique.annee].append(experience_academique)
-
-        experiences_non_academiques = {}
-        for experience_non_academique in resume.curriculum.experiences_non_academiques:
-            date_courante = experience_non_academique.date_debut
-            while True:
-                annee = (
-                    date_courante.year if date_courante.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE else date_courante.year - 1
-                )
-                if experience_non_academique not in experiences_non_academiques.get(annee, []):
-                    experiences_non_academiques.setdefault(annee, []).append(experience_non_academique)
-                if date_courante == experience_non_academique.date_fin:
-                    break
-                date_courante = min(
-                    date_courante.replace(year=date_courante.year + 1), experience_non_academique.date_fin
-                )
-        for annee, experiences_annee in experiences_non_academiques.items():
-            experiences_annee.sort(key=lambda x: x.date_fin, reverse=True)
-            experiences.setdefault(annee, []).extend(experiences_annee)
-
-        etudes_secondaires = resume.etudes_secondaires
-        if etudes_secondaires:
-            if etudes_secondaires.annee_diplome_etudes_secondaires:
-                experiences.setdefault(etudes_secondaires.annee_diplome_etudes_secondaires, []).append(
-                    etudes_secondaires
-                )
-            elif etudes_secondaires.alternative_secondaires:
-                experiences.setdefault(0, []).append(etudes_secondaires)
-
-        experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
-
-        return experiences
+    @staticmethod
+    def _get_experiences(resume: ResumePropositionDTO):
+        return curriculum_utils.groupe_curriculum_par_annee_decroissante(
+            experiences_academiques=resume.curriculum.experiences_academiques,
+            experiences_professionnelles=resume.curriculum.experiences_non_academiques,
+            etudes_secondaires=resume.etudes_secondaires
+        )
 
     def _get_financabilite(self):
         # TODO

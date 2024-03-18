@@ -24,18 +24,15 @@
 #
 # ##############################################################################
 import itertools
-from builtins import iter
 from typing import Optional, List, Dict, Union
 
 from django.conf import settings
 from django.utils import translation, timezone
 from django.utils.translation import override
-
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
+from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -47,12 +44,12 @@ from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererDocumentsPropositionQuery,
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PdfSicInconnu
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
@@ -60,26 +57,36 @@ from admission.infrastructure.admission.domain.service.unites_enseignement_trans
 )
 from admission.infrastructure.utils import (
     CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM,
-    CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
 )
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from osis_profile.models.enums.curriculum import ActivityType
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
 
 ENTITY_SIC = 'SIC'
+ENTITY_SICB = 'SICB'
 ENTITY_UCL = 'UCL'
 
 
 class PDFGeneration(IPDFGeneration):
     @classmethod
-    def _get_sic_director(cls):
+    def _get_sic_director(cls, proposition_dto: PropositionGestionnaireDTO):
         now = timezone.now()
+
+        # For the trainings whose the enrollment is in Saint-Louis, the director is the Saint-Louis campus sic director
+        entity = (
+            ENTITY_SICB
+            if proposition_dto.formation.campus_inscription
+            and proposition_dto.formation.campus_inscription.uuid
+            == ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID']
+            else ENTITY_SIC
+        )
+
         director = (
             Person.objects.filter(
-                mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
+                mandatary__mandate__entity__entityversion__acronym=entity,
                 mandatary__mandate__function=MandateTypes.DIRECTOR.name,
             )
             .filter(
@@ -333,7 +340,7 @@ class PDFGeneration(IPDFGeneration):
                 'profil_candidat_identification': profil_candidat_identification,
                 'profil_candidat_coordonnees': profil_candidat_coordonnees,
                 'documents_names': documents_names,
-                'director': cls._get_sic_director(),
+                'director': cls._get_sic_director(proposition_dto),
             },
             author=gestionnaire,
             language=proposition_dto.langue_contact_candidat,
@@ -414,7 +421,7 @@ class PDFGeneration(IPDFGeneration):
                     'proposition': proposition_dto,
                     'profil_candidat_identification': profil_candidat_identification,
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
-                    'director': cls._get_sic_director(),
+                    'director': cls._get_sic_director(proposition_dto),
                 },
                 author=gestionnaire,
             )
@@ -447,7 +454,7 @@ class PDFGeneration(IPDFGeneration):
                     'proposition': proposition_dto,
                     'profil_candidat_identification': profil_candidat_identification,
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
-                    'director': cls._get_sic_director(),
+                    'director': cls._get_sic_director(proposition_dto),
                 },
                 author=gestionnaire,
             )

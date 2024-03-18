@@ -29,12 +29,11 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande, DocumentsIdentification
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
@@ -42,12 +41,14 @@ from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.person_address import PersonAddressFactory
+from osis_profile import BE_ISO_CODE
 from reference.models.country import Country
 from reference.tests.factories.country import CountryFactory
 

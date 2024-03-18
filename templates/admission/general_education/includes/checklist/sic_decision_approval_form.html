@@ -199,8 +199,15 @@
       {% translate 'Cancel' %}
     </button>
     <button
+        id="sic-decision-approval-submit-button"
         class="btn btn-primary"
         name="save"
+        disabled
+        data-toggle="popover"
+        data-placement="auto top"
+        data-trigger="hover"
+        data-container="body"
+        data-content="{% translate 'The authorization can not be done while there is one or more documents to be requested immediately.' %}"
     >
       {% translate 'Save' context 'admission' %}
     </button>
@@ -208,6 +215,8 @@
 
   <script>
     $(document).ready(function() {
+        $('#sic-decision-approval-form [data-toggle=popover]').popover();
+
         $('#id_sic-decision-approval-tuition_fees_amount_other').dependsOn({
             '#id_sic-decision-approval-tuition_fees_amount': {values: ['AUTRE']},
         }, {duration: 0, valueOnDisable: '',});
@@ -223,6 +232,15 @@
         const requestedDocumentsSelects = $('#sic-approval-requested-documents-selects select');
         const confirmElement = $('#sic-approval-delete-confirm-element');
         let confirmEvents = new Set();
+
+        const updateConfirmButtonDisabled = function () {
+          if ($('#sic-decision-approval-form option[value=IMMEDIATEMENT]:selected').length === 0) {
+            $('#sic-decision-approval-submit-button').prop('disabled', false).popover('destroy');
+          } else {
+            $('#sic-decision-approval-submit-button').prop('disabled', true).popover();
+          }
+        };
+        updateConfirmButtonDisabled();
 
         {# Manage the update of the request status #}
 
@@ -253,6 +271,8 @@
                 clonedConfirmElement[0].id += '-' + $(this).attr('name');
                 $(this).closest('.form-group').append(clonedConfirmElement);
                 clonedConfirmElement.children('button:first').focus();
+            } else {
+              updateConfirmButtonDisabled();
             }
         });
 
@@ -262,6 +282,7 @@
             const select = row.find('select');
             confirmEvents.add(select[0].id);
             select[0].dispatchEvent(new CustomEvent('confirmStatusChange'));
+            updateConfirmButtonDisabled();
         });
 
         {# Cancel the cancellation of the request of the document #}

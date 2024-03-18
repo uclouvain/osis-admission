@@ -43,37 +43,29 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
+from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import AdmissionTask
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
-from admission.ddd import FR_ISO_CODE, BE_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    AnneeExperienceAcademiqueDTO,
     ConnaissanceLangueDTO,
     CotutelleDTO,
-    CurriculumDTO,
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
     DoctoratDTO,
-    ExperienceAcademiqueDTO,
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    AlternativeSecondairesDTO,
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-)
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -101,7 +93,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
-    OngletsDemande,
     DocumentsSuiteAutorisation,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -119,7 +110,6 @@ from admission.ddd.admission.formation_generale.dtos import (
 from admission.exports.admission_recap.attachments import (
     Attachment,
 )
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.exports.admission_recap.section import (
     get_accounting_section,
     get_cotutelle_section,
@@ -156,6 +146,7 @@ from admission.tests.factories.person import (
     CompletePersonFactory,
 )
 from admission.tests.factories.roles import ProgramManagerRoleFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
@@ -165,14 +156,24 @@ from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     ActivitySector,
     ActivityType,
     EvaluationSystem,
     Grade,
     Result,
-    TranscriptType,
+    TranscriptType, CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
@@ -190,7 +191,7 @@ class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
 
 
 @attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesDTO):
+class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
     pass
 
 
@@ -210,12 +211,7 @@ class _AdressePersonnelleDTO(UnfrozenDTO, AdressePersonnelleDTO):
 
 
 @attr.dataclass
-class _CurriculumDTO(UnfrozenDTO, CurriculumDTO):
-    pass
-
-
-@attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesDTO):
+class _CurriculumDTO(UnfrozenDTO, CurriculumAdmissionDTO):
     pass
 
 
@@ -1239,6 +1235,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 intitule_fr='Formation continue 1',
                 intitule_en='Formation continue 1',
                 campus=CampusDTO(
+                    uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
                     nom='Louvain-la-Neuve',
                     code_postal='',
                     ville='',
@@ -1253,6 +1250,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 type=TrainingType.CERTIFICATE_OF_SUCCESS.name,
                 code_domaine='CDFC',
                 campus_inscription=CampusDTO(
+                    uuid=ORDERED_CAMPUSES_UUIDS['MONS_UUID'],
                     nom='Mons',
                     code_postal='',
                     ville='',
@@ -1309,6 +1307,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 intitule_fr='Bachelor 1',
                 intitule_en='Bachelor 1',
                 campus=CampusDTO(
+                    uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
                     nom='Louvain-la-Neuve',
                     code_postal='',
                     ville='',
@@ -1323,6 +1322,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 type=TrainingType.BACHELOR.name,
                 code_domaine='CDFG',
                 campus_inscription=CampusDTO(
+                    uuid=ORDERED_CAMPUSES_UUIDS['MONS_UUID'],
                     nom='Mons',
                     code_postal='',
                     ville='',
