@@ -537,6 +537,9 @@ msgstr ""
 msgid "Admission requirement year"
 msgstr ""
 
+msgid "Admission statuses"
+msgstr ""
+
 msgid "Admission to regulated professions"
 msgstr ""
 
@@ -1386,6 +1389,12 @@ msgstr ""
 msgid "Checklist"
 msgstr ""
 
+msgid "Checklist filters"
+msgstr ""
+
+msgid "Checklist filters mode"
+msgstr ""
+
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr ""
 
@@ -2001,6 +2010,9 @@ msgstr ""
 msgid "Declared assimilated"
 msgstr ""
 
+msgid "Declared assimilated or not"
+msgstr ""
+
 msgid "Declared not assimilated"
 msgstr ""
 
@@ -2532,6 +2544,9 @@ msgstr ""
 msgid "Excel export of admission applications"
 msgstr ""
 
+msgid "Exclude"
+msgstr ""
+
 msgid "Exit without saving"
 msgstr ""
 
@@ -2980,6 +2995,9 @@ msgstr ""
 msgid "Hide the checklist menu"
 msgstr ""
 
+msgid "Hide the states of the checklist"
+msgstr ""
+
 msgctxt "tab"
 msgid "History"
 msgstr ""
@@ -3350,6 +3368,12 @@ msgid ""
 msgstr ""
 
 msgid "In person"
+msgstr ""
+
+msgid "Include"
+msgstr ""
+
+msgid "Include or exclude the checklist filters"
 msgstr ""
 
 msgid "Incomplete field"
@@ -4165,6 +4189,9 @@ msgstr ""
 msgid "Name of the management entity"
 msgstr ""
 
+msgid "Name of the working list"
+msgstr ""
+
 msgid "Nationality"
 msgstr ""
 
@@ -4651,6 +4678,9 @@ msgctxt "admission"
 msgid "Personal email"
 msgstr ""
 
+msgid "Personalized"
+msgstr ""
+
 msgid "PhD"
 msgstr ""
 
@@ -4870,6 +4900,9 @@ msgid "Previous confirmation exams"
 msgstr ""
 
 msgid "Previous experience"
+msgstr ""
+
+msgid "Previous experiences"
 msgstr ""
 
 msgid "Previous notes"
@@ -5672,6 +5705,9 @@ msgstr ""
 msgid "Show the checklist menu"
 msgstr ""
 
+msgid "Show the states of the checklist"
+msgstr ""
+
 msgid "Signatures"
 msgstr ""
 
@@ -6182,6 +6218,11 @@ msgstr ""
 msgid ""
 "The global status of the application must be one of the following in order "
 "to submit the dossier to the faculty: %(statuses)s."
+msgstr ""
+
+#, python-format
+msgid ""
+"The inscription type admission was authorised the %(date)s by %(author)s."
 msgstr ""
 
 msgid "The jury is not in progress"
@@ -6943,6 +6984,12 @@ msgid "Work contract type"
 msgstr ""
 
 msgid "Working contract type"
+msgstr ""
+
+msgid "Working list"
+msgstr ""
+
+msgid "Working lists"
 msgstr ""
 
 msgid ""
