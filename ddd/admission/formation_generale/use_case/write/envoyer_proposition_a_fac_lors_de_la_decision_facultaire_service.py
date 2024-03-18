@@ -29,21 +29,32 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
+    IEmailDestinataireRepository
 
 
 def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
     cmd: EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
     proposition_repository: 'IPropositionRepository',
+    email_destinataire_repository: 'IEmailDestinataireRepository',
     notification: 'INotification',
     historique: 'IHistorique',
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
+    informations_email_destinataire = email_destinataire_repository.get_informations_destinataire_dto(
+        sigle_programme=proposition.formation_id.sigle,
+        annee=proposition.annee_calculee,
+        pour_premiere_annee=proposition.premiere_annee_de_bachelier,
+    )
 
     proposition.soumettre_a_fac_lors_de_la_decision_facultaire(auteur_modification=cmd.gestionnaire)
 
     proposition_repository.save(entity=proposition)
 
-    message = notification.confirmer_envoi_a_fac_lors_de_la_decision_facultaire(proposition=proposition)
+    message = notification.confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
+        proposition=proposition,
+        email=informations_email_destinataire.email,
+    )
 
     historique.historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
         proposition=proposition,

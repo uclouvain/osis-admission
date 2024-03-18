@@ -32,6 +32,7 @@ from admission.ddd.admission.domain.model.enums.authentification import EtatAuth
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.email_destinataire.dtos.destinataire import InformationsDestinataireDTO
 from osis_common.ddd import interface
 
 
@@ -53,7 +54,11 @@ class INotification(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> Optional[EmailMessage]:
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        program_email: InformationsDestinataireDTO,
+    ) -> Optional[EmailMessage]:
         raise NotImplementedError
 
     @classmethod

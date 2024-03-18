@@ -34,6 +34,7 @@ from admission.ddd.admission.shared_kernel.email_destinataire.dtos.destinataire 
 from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
     IEmailDestinataireRepository
 from epc.models.email_fonction_programme import EmailFonctionProgramme
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 
 
 class EmailDestinataireRepository(IEmailDestinataireRepository):
@@ -46,7 +47,10 @@ class EmailDestinataireRepository(IEmailDestinataireRepository):
     ) -> 'InformationsDestinataireDTO':
         try:
             email_fonction = (
-                EmailFonctionProgramme.objects.filter(premiere_annee=pour_premiere_annee)
+                EmailFonctionProgramme.objects.filter(
+                    type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+                    premiere_annee=pour_premiere_annee,
+                )
                 .annotate(
                     sigle_formation=F('programme__educationgroupyear__acronym'),
                     annee=F('programme__educationgroupyear__academic_year__year'),

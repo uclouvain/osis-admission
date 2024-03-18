@@ -51,6 +51,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.email_destinataire.dtos.destinataire import InformationsDestinataireDTO
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
@@ -217,20 +218,16 @@ class Notification(INotification):
         return email_message
 
     @classmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> Optional[EmailMessage]:
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        program_email: InformationsDestinataireDTO,
+    ) -> Optional[EmailMessage]:
         admission: BaseAdmission = (
             BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate__country_of_citizenship', 'training__enrollment_campus')
             .get(uuid=proposition.entity_id.uuid)
         )
-
-        program_email: EmailFonctionProgramme = EmailFonctionProgramme.objects.filter(
-            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
-            programme=admission.training.education_group,
-            premiere_annee=bool(
-                proposition.poursuite_de_cycle_a_specifier and proposition.poursuite_de_cycle != PoursuiteDeCycle.YES
-            ),
-        ).first()
 
         if not program_email:
             return

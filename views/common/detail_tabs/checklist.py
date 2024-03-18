@@ -412,7 +412,7 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
                         self.proposition.poursuite_de_cycle_a_specifier
                         and self.proposition.poursuite_de_cycle != PoursuiteDeCycle.YES.name,
                     ),
-                    annee=self.admission.training.academic_year.year
+                    annee=self.admission.determined_academic_year.year,
                 )
             )
         except InformationsDestinatairePasTrouvee:

@@ -206,6 +206,10 @@ class Proposition(interface.RootEntity):
     etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
+    @property
+    def premiere_annee_de_bachelier(self) -> bool:
+        return bool(self.poursuite_de_cycle_a_specifier and self.poursuite_de_cycle != PoursuiteDeCycle.YES)
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
