@@ -47,6 +47,7 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -136,6 +137,7 @@ from admission.infrastructure.admission.repository.in_memory.titre_acces_selecti
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
@@ -162,6 +164,7 @@ _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
 _poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
 _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
 _reference_translator = ReferenceInMemoryTranslator()
+_campus_repository = UclouvainCampusInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -555,6 +558,12 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             historique=_historique_formation_generale,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            question_specifique_translator=_question_specific_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
         )
     ),
     ModifierAuthentificationExperienceParcoursAnterieurCommand: (
@@ -580,6 +589,7 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
             notification=_notification,
             pdf_generation=_pdf_generation,
+            campus_repository=_campus_repository,
         )
     ),
     RefuserInscriptionParSicCommand: (
@@ -590,6 +600,7 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
             notification=_notification,
             pdf_generation=_pdf_generation,
+            campus_repository=_campus_repository,
         )
     ),
     ApprouverAdmissionParSicCommand: (
@@ -626,7 +637,14 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             profil_candidat_translator=_profil_candidat_translator,
+            campus_repository=_campus_repository,
             pdf_generation=_pdf_generation,
+        )
+    ),
+    RetyperDocumentCommand: (
+        lambda msg_bus, cmd: retyper_document(
+            cmd,
+            emplacement_document_repository=_emplacement_document_repository,
         )
     ),
 }

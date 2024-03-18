@@ -537,6 +537,9 @@ msgstr ""
 msgid "Admission requirement year"
 msgstr ""
 
+msgid "Admission statuses"
+msgstr ""
+
 msgid "Admission to regulated professions"
 msgstr ""
 
@@ -1386,6 +1389,12 @@ msgstr ""
 msgid "Checklist"
 msgstr ""
 
+msgid "Checklist filters"
+msgstr ""
+
+msgid "Checklist filters mode"
+msgstr ""
+
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr ""
 
@@ -2001,6 +2010,9 @@ msgstr ""
 msgid "Declared assimilated"
 msgstr ""
 
+msgid "Declared assimilated or not"
+msgstr ""
+
 msgid "Declared not assimilated"
 msgstr ""
 
@@ -2099,11 +2111,19 @@ msgstr ""
 msgid "Director"
 msgstr ""
 
+msgctxt "F"
 msgid "Director of the inscription service"
 msgstr ""
 
-msgctxt "F"
+msgctxt "H"
 msgid "Director of the inscription service"
+msgstr ""
+
+msgctxt "X"
+msgid "Director of the inscription service"
+msgstr ""
+
+msgid "Director title"
 msgstr ""
 
 msgid "Disabled"
@@ -2522,6 +2542,9 @@ msgid "Excel export of admission"
 msgstr ""
 
 msgid "Excel export of admission applications"
+msgstr ""
+
+msgid "Exclude"
 msgstr ""
 
 msgid "Exit without saving"
@@ -2972,6 +2995,9 @@ msgstr ""
 msgid "Hide the checklist menu"
 msgstr ""
 
+msgid "Hide the states of the checklist"
+msgstr ""
+
 msgctxt "tab"
 msgid "History"
 msgstr ""
@@ -3342,6 +3368,12 @@ msgid ""
 msgstr ""
 
 msgid "In person"
+msgstr ""
+
+msgid "Include"
+msgstr ""
+
+msgid "Include or exclude the checklist filters"
 msgstr ""
 
 msgid "Incomplete field"
@@ -4157,6 +4189,9 @@ msgstr ""
 msgid "Name of the management entity"
 msgstr ""
 
+msgid "Name of the working list"
+msgstr ""
+
 msgid "Nationality"
 msgstr ""
 
@@ -4441,6 +4476,9 @@ msgstr ""
 msgid "Other address"
 msgstr ""
 
+msgid "Other application(s)"
+msgstr ""
+
 msgid "Other authorized program"
 msgstr ""
 
@@ -4638,6 +4676,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Personal email"
+msgstr ""
+
+msgid "Personalized"
 msgstr ""
 
 msgid "PhD"
@@ -4859,6 +4900,9 @@ msgid "Previous confirmation exams"
 msgstr ""
 
 msgid "Previous experience"
+msgstr ""
+
+msgid "Previous experiences"
 msgstr ""
 
 msgid "Previous notes"
@@ -5330,6 +5374,16 @@ msgstr ""
 msgid "Retaking of the test"
 msgstr ""
 
+msgid "Retype"
+msgstr ""
+
+msgctxt "admission"
+msgid "Retype"
+msgstr ""
+
+msgid "Retype the document"
+msgstr ""
+
 msgctxt "activity"
 msgid "Role"
 msgstr ""
@@ -5659,6 +5713,9 @@ msgid "Show details"
 msgstr ""
 
 msgid "Show the checklist menu"
+msgstr ""
+
+msgid "Show the states of the checklist"
 msgstr ""
 
 msgid "Signatures"
@@ -6005,9 +6062,6 @@ msgstr ""
 msgid "The candidate has a scholarship"
 msgstr ""
 
-msgid "The candidate has several enrolment applications in progress"
-msgstr ""
-
 msgid "The candidate is doing a mobility"
 msgstr ""
 
@@ -6174,6 +6228,11 @@ msgstr ""
 msgid ""
 "The global status of the application must be one of the following in order "
 "to submit the dossier to the faculty: %(statuses)s."
+msgstr ""
+
+#, python-format
+msgid ""
+"The inscription type admission was authorised the %(date)s by %(author)s."
 msgstr ""
 
 msgid "The jury is not in progress"
@@ -6901,6 +6960,9 @@ msgstr ""
 msgid "What diploma have you obtained (or will obtain)?"
 msgstr ""
 
+msgid "What is the new type of this document?"
+msgstr ""
+
 msgid "What was the most recent year you were enrolled at UCLouvain?"
 msgstr ""
 
@@ -6935,6 +6997,12 @@ msgid "Work contract type"
 msgstr ""
 
 msgid "Working contract type"
+msgstr ""
+
+msgid "Working list"
+msgstr ""
+
+msgid "Working lists"
 msgstr ""
 
 msgid ""

@@ -43,7 +43,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
+from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import AdmissionTask
 from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
 from admission.ddd import FR_ISO_CODE, BE_ISO_CODE
@@ -822,7 +822,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(14):
+        with self.assertNumQueriesLessThan(16):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -847,7 +847,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(15):
+        with self.assertNumQueriesLessThan(17):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -1239,6 +1239,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 intitule_fr='Formation continue 1',
                 intitule_en='Formation continue 1',
                 campus=CampusDTO(
+                    uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
                     nom='Louvain-la-Neuve',
                     code_postal='',
                     ville='',
@@ -1253,6 +1254,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 type=TrainingType.CERTIFICATE_OF_SUCCESS.name,
                 code_domaine='CDFC',
                 campus_inscription=CampusDTO(
+                    uuid=ORDERED_CAMPUSES_UUIDS['MONS_UUID'],
                     nom='Mons',
                     code_postal='',
                     ville='',
@@ -1309,6 +1311,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 intitule_fr='Bachelor 1',
                 intitule_en='Bachelor 1',
                 campus=CampusDTO(
+                    uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
                     nom='Louvain-la-Neuve',
                     code_postal='',
                     ville='',
@@ -1323,6 +1326,7 @@ class SectionsAttachmentsTestCase(TestCase):
                 type=TrainingType.BACHELOR.name,
                 code_domaine='CDFG',
                 campus_inscription=CampusDTO(
+                    uuid=ORDERED_CAMPUSES_UUIDS['MONS_UUID'],
                     nom='Mons',
                     code_postal='',
                     ville='',

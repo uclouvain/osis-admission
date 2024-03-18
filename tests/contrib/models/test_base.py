@@ -27,7 +27,7 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from admission.contrib.models import AdmissionViewer
-from admission.contrib.models.base import admission_directory_path, BaseAdmissionProxy
+from admission.contrib.models.base import admission_directory_path, BaseAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
@@ -57,7 +57,7 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
 
     def test_annotate_several_admissions_in_progress_with_no_other_admission(self):
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().first()
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().first()
             self.assertFalse(admission.has_several_admissions_in_progress)
 
     def test_annotate_several_admissions_in_progress_with_other_admission_but_with_other_candidate(self):
@@ -66,7 +66,7 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
             status=self.base_admission.status,
         )
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().all()[0]
             self.assertFalse(admission.has_several_admissions_in_progress)
 
     def test_annotate_several_admissions_in_progress_with_other_admission_but_with_in_progress_status(self):
@@ -76,7 +76,7 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
             candidate=self.base_admission.candidate,
         )
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().all()[0]
             self.assertFalse(admission.has_several_admissions_in_progress)
 
     def test_annotate_several_admissions_in_progress_with_other_admission_but_with_cancelled_status(self):
@@ -86,7 +86,7 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
             candidate=self.base_admission.candidate,
         )
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().all()[0]
             self.assertFalse(admission.has_several_admissions_in_progress)
 
     def test_annotate_several_admissions_in_progress_with_other_admission(self):
@@ -96,7 +96,7 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
             candidate=self.base_admission.candidate,
         )
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().all()[0]
             self.assertTrue(admission.has_several_admissions_in_progress)
 
 

@@ -41,6 +41,7 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -107,6 +108,7 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 
 COMMAND_HANDLERS = {
@@ -499,7 +501,13 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
         )
     ),
     ModifierAuthentificationExperienceParcoursAnterieurCommand: (
@@ -525,6 +533,7 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
         )
     ),
     RefuserInscriptionParSicCommand: (
@@ -535,6 +544,7 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
         )
     ),
     ApprouverAdmissionParSicCommand: (
@@ -571,7 +581,14 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            campus_repository=UclouvainCampusRepository(),
             pdf_generation=PDFGeneration(),
+        )
+    ),
+    RetyperDocumentCommand: (
+        lambda msg_bus, cmd: retyper_document(
+            cmd,
+            emplacement_document_repository=EmplacementDocumentRepository(),
         )
     ),
 }

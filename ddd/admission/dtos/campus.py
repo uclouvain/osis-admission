@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+import uuid
+
 import attr
 
 from osis_common.ddd import interface
@@ -30,6 +32,7 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True)
 class CampusDTO(interface.DTO):
+    uuid: uuid.UUID
     nom: str
     code_postal: str
     ville: str

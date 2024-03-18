@@ -61,6 +61,10 @@ STATUTS_PROPOSITION_GENERALE_NON_SOUMISE = {
     ChoixStatutPropositionGenerale.ANNULEE.name,
 }
 
+STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE = STATUTS_PROPOSITION_GENERALE_NON_SOUMISE | {
+    ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name
+}
+
 # Le gestionnaire FAC a la main
 STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC = {
     ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name,
@@ -244,3 +248,16 @@ class TypeDeRefus(ChoiceEnum):
     REFUS_DOSSIER_TARDIF = _("REFUS_DOSSIER_TARDIF")
     REFUS_COMPLEMENT_TARDIF = _("REFUS_COMPLEMENT_TARDIF")
     REFUS_ARTICLE_96_HUE_NON_PROGRESSION = _("REFUS_ARTICLE_96_HUE_NON_PROGRESSION")
+
+
+class OngletsChecklist(ChoiceEnum):
+    assimilation = _('Belgian student status')
+    financabilite = _('Financeability')
+    frais_dossier = _('Application fee')
+    choix_formation = _('Course choice')
+    parcours_anterieur = _('Previous experience')
+    experiences_parcours_anterieur = _('Previous experiences')
+    donnees_personnelles = _('Personal data')
+    specificites_formation = _('Training specificities')
+    decision_facultaire = _('Decision of the faculty')
+    decision_sic = _('Decision of SIC')

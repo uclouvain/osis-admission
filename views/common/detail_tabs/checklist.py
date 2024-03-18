@@ -28,7 +28,7 @@ from typing import Dict, Set, Optional, List
 
 from django.conf import settings
 from django.db.models import QuerySet
-from django.forms import Form, modelformset_factory, inlineformset_factory
+from django.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import resolve_url, redirect, render
@@ -37,7 +37,7 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, gettext, get_language
+from django.utils.translation import gettext_lazy as _, gettext, get_language, pgettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
@@ -52,12 +52,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.constants import FIELD_REQUIRED_MESSAGE
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -77,6 +76,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     DocumentsEtudesSecondaires,
 )
+from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -119,6 +119,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
     PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
+    OngletsChecklist,
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
@@ -229,15 +231,8 @@ EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
     extra_context = {
         'checklist_tabs': {
-            'assimilation': _("Belgian student status"),
-            'financabilite': _("Financeability"),
-            'frais_dossier': _("Application fee"),
-            'choix_formation': _("Course choice"),
-            'parcours_anterieur': _("Previous experience"),
-            'donnees_personnelles': _("Personal data"),
-            'specificites_formation': _("Training specificities"),
-            'decision_facultaire': _("Decision of the faculty"),
-            'decision_sic': _("Decision of SIC"),
+            tab_name: OngletsChecklist[tab_name].value
+            for tab_name in OngletsChecklist.get_names_except(OngletsChecklist.experiences_parcours_anterieur)
         },
         'hide_files': True,
         'condition_acces_enum': ConditionAcces,
@@ -730,19 +725,38 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
         context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
 
-        # Get information about mail sent if any
-        token = None
-        if self.proposition.certificat_refus_sic:
-            token = get_remote_token(self.proposition.certificat_refus_sic[0])
-        elif self.proposition.certificat_approbation_sic:
-            token = get_remote_token(self.proposition.certificat_approbation_sic[0])
-        if token is not None:
-            metadata = get_remote_metadata(token)
-            context['sic_decision_sent_at'] = metadata['uploaded_at']
-            try:
-                context['sic_decision_sent_by'] = Person.objects.get(global_id=metadata['author'])
-            except Person.DoesNotExist:
-                context['sic_decision_sent_by'] = metadata['author']
+        # Get information about the decision sending by the SIC if any and only in the final statuses
+        sic_decision_status = self.admission.checklist.get('current', {}).get('decision_sic', {})
+
+        if sic_decision_status:
+            history_tags = None
+            if sic_decision_status.get('statut') == ChoixStatutChecklist.GEST_REUSSITE.name:
+                history_tags = [
+                    'proposition',
+                    'sic-decision',
+                    'approval',
+                    'message' if self.admission.type_demande == TypeDemande.ADMISSION.name else 'status-changed',
+                ]
+            elif (
+                sic_decision_status.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+                and sic_decision_status.get('extra', {}).get('blocage') == 'refusal'
+            ):
+                history_tags = ['proposition', 'sic-decision', 'refusal', 'message']
+
+            if history_tags:
+                history_entry: Optional[HistoryEntry] = (
+                    HistoryEntry.objects.filter(
+                        tags__contains=history_tags,
+                        object_uuid=self.admission_uuid,
+                    )
+                    .order_by('-created')
+                    .first()
+                )
+
+                if history_entry:
+                    context['sic_decision_sent_at'] = history_entry.created
+                    context['sic_decision_sent_by'] = history_entry.author
+                    context['sic_decision_sent_with_email'] = 'message' in history_entry.tags
 
         context['sic_decision_dispensation_form'] = SicDecisionDerogationForm(
             initial={
@@ -871,7 +885,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         )
 
     @cached_property
-    def sic_director(self):
+    def sic_director(self) -> Optional[Person]:
         now = timezone.now()
         director = (
             Person.objects.filter(
@@ -901,6 +915,17 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         }
         if self.sic_director:
             tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
+            director_gender = self.sic_director.gender or ChoixGenre.X.name
+        else:
+            director_gender = ChoixGenre.X.name
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            if director_gender == ChoixGenre.F.name:
+                tokens["director_title"] = pgettext('F', 'Director of the inscription service')
+            elif director_gender == ChoixGenre.H.name:
+                tokens["director_title"] = pgettext('H', 'Director of the inscription service')
+            else:
+                tokens["director_title"] = pgettext('X', 'Director of the inscription service')
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
@@ -1349,6 +1374,8 @@ class ChecklistView(
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
                 'ATTESTATION_REFUS_SIC',
+                'ATTESTATION_ACCORD_FACULTAIRE',
+                'ATTESTATION_REFUS_FACULTAIRE',
             },
         }
 
@@ -1400,23 +1427,13 @@ class ChecklistView(
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
-            etats = [
-                status
-                for status in ChoixStatutPropositionGenerale.get_names()
-                if status
-                not in {
-                    ChoixStatutPropositionGenerale.EN_BROUILLON,
-                    ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
-                    ChoixStatutPropositionGenerale.ANNULEE,
-                }
-            ]
             context['autres_demandes'] = [
                 demande
                 for demande in message_bus_instance.invoke(
                     ListerToutesDemandesQuery(
                         annee_academique=self.admission.determined_academic_year.year,
                         matricule_candidat=self.admission.candidate.global_id,
-                        etats=etats,
+                        etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
                     )
                 )
                 if demande.uuid != self.admission_uuid

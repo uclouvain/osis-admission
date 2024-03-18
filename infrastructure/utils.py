@@ -185,7 +185,10 @@ def get_document_from_identifier(
         obj = admission
         field = 'specific_question_answers'
         specific_question_uuid = document_identifier_parts[-1]
-        document_uuids = admission.specific_question_answers.get(specific_question_uuid, [])
+        document_uuids = [
+            uuid.UUID(document_uuid) if isinstance(document_uuid, str) else document_uuid
+            for document_uuid in admission.specific_question_answers.get(specific_question_uuid, [])
+        ]
         requestable_document = True
         document_status = requested_document.get('status', StatutEmplacementDocument.NON_ANALYSE.name)
 

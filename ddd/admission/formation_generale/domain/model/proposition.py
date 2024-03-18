@@ -402,7 +402,6 @@ class Proposition(interface.RootEntity):
 
         self.specifier_refus_par_fac()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
-        self.certificat_approbation_fac = []
         self.auteur_derniere_modification = auteur_modification
 
     def approuver_par_fac(self, auteur_modification: str, titres_selectionnes: List[TitreAccesSelectionnable]):
@@ -419,7 +418,6 @@ class Proposition(interface.RootEntity):
 
         self.specifier_acceptation_par_fac()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
-        self.certificat_refus_fac = []
         self.auteur_derniere_modification = auteur_modification
 
     def soumettre_a_fac_lors_de_la_decision_facultaire(self, auteur_modification: str):
@@ -774,6 +772,7 @@ class Proposition(interface.RootEntity):
     def specifier_informations_acceptation_par_sic(
         self,
         auteur_modification: str,
+        documents_dto: List[EmplacementDocumentDTO],
         avec_conditions_complementaires: Optional[bool],
         uuids_conditions_complementaires_existantes: Optional[List[str]],
         conditions_complementaires_libres: Optional[List[Dict]],
@@ -798,6 +797,7 @@ class Proposition(interface.RootEntity):
         ApprouverParSicAValiderValidatorList(
             statut=self.statut,
             statut_checklist_parcours_anterieur=self.checklist_actuelle.parcours_anterieur,
+            documents_dto=documents_dto,
         ).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
         self.checklist_actuelle.decision_sic = StatutChecklist(
@@ -883,8 +883,6 @@ class Proposition(interface.RootEntity):
         )
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE
         self.auteur_derniere_modification = auteur_modification
-        self.certificat_approbation_sic = []
-        self.certificat_approbation_sic_annexe = []
 
     def approuver_par_sic(self, auteur_modification: str, documents_dto: List[EmplacementDocumentDTO]):
         ApprouverParSicValidatorList(
@@ -905,4 +903,3 @@ class Proposition(interface.RootEntity):
         )
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE
         self.auteur_derniere_modification = auteur_modification
-        self.certificat_refus_sic = []

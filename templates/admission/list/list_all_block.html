@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,14 @@
       {% display admission.nom_candidat ',' admission.prenom_candidat ' ' '(' admission.noma_candidat ')' as candidate_complete_name %}
       {{ candidate_complete_name }}
       {% if admission.plusieurs_demandes %}
-        <span class="fa-solid fa-list-ol" title="{% translate "The candidate has several enrolment applications in progress" %}"></span>
+        {% list_other_admissions_url admission.uuid admission.type_formation as list_other_admissions_url %}
+        <span
+          class="fa-solid fa-list-ol"
+          data-lazy-popover-url="{{ list_other_admissions_url }}"
+          data-title="{% translate "Other application(s)" %}"
+          tabindex="0"
+          role="button"
+        ></span>
       {% endif %}
     </div>
   </td>
