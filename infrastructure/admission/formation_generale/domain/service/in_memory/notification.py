@@ -31,7 +31,8 @@ from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumen
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.dtos.destinataire import InformationsDestinataireDTO
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
+    IEmailDestinataireRepository
 
 
 class NotificationInMemory(INotification):
@@ -51,7 +52,7 @@ class NotificationInMemory(INotification):
     def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
         cls,
         proposition: Proposition,
-        program_email: InformationsDestinataireDTO,
+        email_destinataire_repository: IEmailDestinataireRepository,
     ) -> Optional[EmailMessage]:
         pass
 

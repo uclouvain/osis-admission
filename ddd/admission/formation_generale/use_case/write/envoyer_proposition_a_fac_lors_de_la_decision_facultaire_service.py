@@ -41,11 +41,6 @@ def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
     historique: 'IHistorique',
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
-    informations_email_destinataire = email_destinataire_repository.get_informations_destinataire_dto(
-        sigle_programme=proposition.formation_id.sigle,
-        annee=proposition.annee_calculee,
-        pour_premiere_annee=proposition.premiere_annee_de_bachelier,
-    )
 
     proposition.soumettre_a_fac_lors_de_la_decision_facultaire(auteur_modification=cmd.gestionnaire)
 
@@ -53,7 +48,7 @@ def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
 
     message = notification.confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
         proposition=proposition,
-        email=informations_email_destinataire.email,
+        email_destinataire_repository=email_destinataire_repository
     )
 
     historique.historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(

@@ -55,11 +55,11 @@ class EmailDestinataireRepository(IEmailDestinataireRepository):
                     sigle_formation=F('programme__educationgroupyear__acronym'),
                     annee=F('programme__educationgroupyear__academic_year__year'),
                 )
+                .values('en_tete', 'email', 'sigle_formation', 'annee', 'premiere_annee')
                 .get(
                     sigle_formation=sigle_programme.replace('-1', '') if pour_premiere_annee else sigle_programme,
                     annee=annee,
                 )
-                .values('en_tete', 'email', 'sigle_formation', 'annee', 'premiere_annee')
             )
         except EmailFonctionProgramme.DoesNotExist as e:
             raise InformationsDestinatairePasTrouvee from e
