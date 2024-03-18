@@ -34,9 +34,9 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext_lazy
+from osis_document.utils import generate_filename, is_uuid
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
-from admission.ddd import BE_ISO_CODE, FR_ISO_CODE, EN_ISO_CODE
+from admission.ddd import FR_ISO_CODE, EN_ISO_CODE
 from admission.ddd.admission.enums.question_specifique import (
     TypeItemFormulaire,
     CleConfigurationItemFormulaire,
@@ -50,8 +50,9 @@ from admission.ddd.admission.enums.question_specifique import (
     TypeChampSelectionFormulaire,
 )
 from admission.forms.translation_field import TranslatedValueField, IdentifiedTranslatedListsValueField
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.person import Person
-from osis_document.utils import generate_filename, is_uuid
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience
 
 TRANSLATION_LANGUAGES = [settings.LANGUAGE_CODE_EN, settings.LANGUAGE_CODE_FR]
