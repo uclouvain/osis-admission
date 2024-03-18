@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import rules
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -122,5 +122,6 @@ class CentralManager(EntityRoleModel):
             'admission.checklist_change_sic_comment': is_entity_manager,
             'admission.checklist_change_comment': is_entity_manager & in_sic_status,
             'admission.checklist_change_sic_decision': is_entity_manager & in_sic_status,
+            'profil.can_see_parcours_externe': rules.always_allow,
         }
         return RuleSet(ruleset)

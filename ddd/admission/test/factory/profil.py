@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 import datetime
 import uuid
 from typing import List
@@ -31,15 +30,16 @@ from typing import List
 import factory
 from attr import dataclass
 
-from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    ExperienceAcademiqueDTO,
-    AnneeExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from base.models.enums.civil_state import CivilState
 from base.tests.factories.person import generate_global_id
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 
 
 class IdentificationDTOFactory(factory.Factory):
@@ -106,7 +106,7 @@ class CoordonneesDTOFactory(factory.Factory):
 
 class EtudesSecondairesDTOFactory(factory.Factory):
     class Meta:
-        model = EtudesSecondairesDTO
+        model = EtudesSecondairesAdmissionDTO
         abstract = False
 
 
@@ -183,7 +183,7 @@ class ExperienceNonAcademiqueDTOFactory(factory.Factory):
 
 class CurriculumDTOFactory(factory.Factory):
     class Meta:
-        model = CurriculumDTO
+        model = CurriculumAdmissionDTO
         abstract = False
 
     experiences_non_academiques: List[ExperienceNonAcademiqueDTOFactory] = []

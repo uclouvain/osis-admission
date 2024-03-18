@@ -34,9 +34,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre, ChoixSexe
@@ -52,6 +51,7 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -59,6 +59,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
+from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import TranscriptType
 from reference.tests.factories.country import CountryFactory
 

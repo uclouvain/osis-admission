@@ -55,7 +55,6 @@ from admission.mail_templates import (
 )
 from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.utils import (
-    format_academic_year,
     get_portal_admission_list_url,
     get_backoffice_admission_url,
     get_portal_admission_url,
@@ -64,6 +63,7 @@ from admission.utils import (
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.entity_version import EntityVersion
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
