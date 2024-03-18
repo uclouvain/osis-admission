@@ -29,19 +29,18 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
+from osis_document.api.utils import get_remote_token
+from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_notification.contrib.handlers import EmailNotificationHandler
 
 from admission.auth.roles.program_manager import ProgramManager
 from admission.contrib.models import AdmissionTask, ContinuingEducationAdmission
-from admission.contrib.models.base import BaseAdmissionProxy
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
-
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING
 from admission.utils import get_salutation_prefix
-from osis_document.api.utils import get_remote_token
-from osis_document.utils import get_file_url
 
 
 class Notification(INotification):
@@ -75,7 +74,7 @@ class Notification(INotification):
         from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 
         admission = (
-            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate', 'training')
             .get(uuid=proposition.entity_id.uuid)
         )

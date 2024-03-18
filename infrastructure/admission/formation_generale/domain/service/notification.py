@@ -38,7 +38,7 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
 from admission.contrib.models import AdmissionTask, GeneralEducationAdmission
-from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
@@ -109,7 +109,7 @@ class Notification(INotification):
             return
 
         admission = (
-            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate')
             .get(uuid=proposition.entity_id.uuid)
         )
@@ -196,7 +196,7 @@ class Notification(INotification):
     @classmethod
     def demande_paiement_frais_dossier(cls, proposition: Proposition) -> EmailMessage:
         admission = (
-            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate')
             .get(uuid=proposition.entity_id.uuid)
         )
@@ -219,7 +219,7 @@ class Notification(INotification):
     @classmethod
     def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> Optional[EmailMessage]:
         admission: BaseAdmission = (
-            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate__country_of_citizenship', 'training__enrollment_campus')
             .get(uuid=proposition.entity_id.uuid)
         )
@@ -471,7 +471,7 @@ class Notification(INotification):
     @classmethod
     def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
         admission: BaseAdmission = (
-            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate__country_of_citizenship', 'training')
             .get(uuid=proposition.entity_id.uuid)
         )
@@ -511,7 +511,7 @@ class Notification(INotification):
     @classmethod
     def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
         admission: BaseAdmission = (
-            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate', 'training')
             .get(uuid=proposition.entity_id.uuid)
         )

@@ -29,7 +29,7 @@ from typing import Dict, List, Union
 import osis_document.contrib.fields
 import pika
 from django.conf import settings
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Case, When, Value
 from django.shortcuts import get_object_or_404
 
 from admission.contrib.models import Accounting
@@ -37,9 +37,11 @@ from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
+from admission.ddd.admission.formation_generale.domain.model.enums import DROITS_INSCRIPTION_MONTANT_VALEURS
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.person_address_type import PersonAddressType
+from base.models.enums.sap_client_creation_source import SAPClientCreationSource
 from base.models.organization import Organization
 from base.models.person import Person
 from base.models.person_address import PersonAddress
@@ -72,7 +74,7 @@ COMMUNAUTE_MAP = {
     CommunityEnum.FRENCH_SPEAKING.name: 'WALLONIE_BRUXELLES',
 }
 RESULTAT_MAP = {
-    Result.WAITING_RESULT.name: 'PAS_DE_RESULTAT',
+    Result.WAITING_RESULT.name: 'EN_ATTENTE_DE_RESULTAT',
     Result.SUCCESS.name: 'REUSSITE_COMPLETE',
     Result.SUCCESS_WITH_RESIDUAL_CREDITS.name: 'REUSSITE_PARTIELLE',
     Result.FAILURE.name: 'ECHEC'
@@ -114,7 +116,7 @@ class InjectionEPC:
         return {
             'dossier_uuid': str(admission.uuid),
             'signaletique': cls._get_signaletique(candidat=candidat, adresse_domicile=adresse_domicile),
-            'comptabilite': cls._get_comptabilite(comptabilite=comptabilite),
+            'comptabilite': cls._get_comptabilite(candidat=candidat, comptabilite=comptabilite),
             'etudes_secondaires': cls._get_etudes_secondaires(candidat=candidat),
             'curriculum_academique': cls._get_curriculum_academique(candidat=candidat),
             'curriculum_autres': cls._get_curriculum_autres_activites(candidat=candidat),
@@ -130,6 +132,7 @@ class InjectionEPC:
     def _get_signaletique(cls, candidat: Person, adresse_domicile: PersonAddress) -> Dict:
         documents = cls._recuperer_documents(candidat)
         return {
+            'noma': candidat.student_set.first().registration_id,
             'nom': candidat.last_name,
             'prenom': candidat.first_name,
             'prenom_suivant': candidat.middle_name,
@@ -172,10 +175,16 @@ class InjectionEPC:
         return documents
 
     @classmethod
-    def _get_comptabilite(cls, comptabilite: Accounting) -> Dict:
+    def _get_comptabilite(cls, candidat: Person, comptabilite: Accounting) -> Dict:
         if comptabilite:
             documents = cls._recuperer_documents(comptabilite)
             return {
+                'client_sap': candidat.sapclient_set.annotate(
+                    priorite=Case(
+                        When(creation_source=SAPClientCreationSource.OSIS.name), then=Value(1),
+                        default=2
+                    )
+                ).order_by('priorite').first(),
                 'iban': comptabilite.iban_account_number,
                 'bic': comptabilite.bic_swift_code,
                 'nom_titulaire': comptabilite.account_holder_last_name,
@@ -207,7 +216,7 @@ class InjectionEPC:
         return {}
 
     @classmethod
-    def _get_curriculum_academique(cls, candidat: Person) -> List[List[Dict]]:
+    def _get_curriculum_academique(cls, candidat: Person) -> List[Dict]:
         experiences_educatives = candidat.educationalexperience_set.all().select_related(
             'institute',
             'country',
@@ -223,12 +232,10 @@ class InjectionEPC:
             ).order_by(
                 'academic_year'
             )  # type: QuerySet[EducationalExperienceYear]
-            experiences_annuelles = []
 
             for experience_educative_annualisee in experiences_educatives_annualisees:
                 data_annuelle = cls.__build_data_annuelle(experience_educative, experience_educative_annualisee)
-                experiences_annuelles.append(data_annuelle)
-            experiences.append(experiences_annuelles)
+                experiences.append(data_annuelle)
 
         return experiences
 
@@ -377,7 +384,7 @@ class InjectionEPC:
                 if groupe_de_supervision
                 else ''
             ),
-            'condition_acces': 'WORK_IN_PROGRESS',  # pas encore dev
+            'condition_acces': getattr(admission, 'admission_requirement', ''),
             'double_diplome': double_diplome.short_name if double_diplome else '',
             'type_demande_bourse': type_demande_bourse.short_name if type_demande_bourse else '',
             'type_erasmus': type_erasmus.short_name if type_erasmus else '',
@@ -388,8 +395,11 @@ class InjectionEPC:
     def _get_donnees_comptables(admission: BaseAdmission) -> Dict:
         return {
             'annee_academique': admission.training.academic_year.year,
-            'droits_majores': 'WORK_IN_PROGRESS',  # pas encore dev
-            'montant_doits_majores': 'WORK_IN_PROGRESS'  # pas encore dev
+            'droits_majores': getattr(admission, 'tuition_fees_dispensation', ''),
+            'montant_doits_majores': (
+                str(getattr(admission, "tuition_fees_amount_other", "")) or
+                DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission, "tuition_fees_amount", ""))
+            )
         }
 
     @staticmethod

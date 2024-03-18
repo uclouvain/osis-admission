@@ -2099,11 +2099,19 @@ msgstr ""
 msgid "Director"
 msgstr ""
 
+msgctxt "F"
 msgid "Director of the inscription service"
 msgstr ""
 
-msgctxt "F"
+msgctxt "H"
 msgid "Director of the inscription service"
+msgstr ""
+
+msgctxt "X"
+msgid "Director of the inscription service"
+msgstr ""
+
+msgid "Director title"
 msgstr ""
 
 msgid "Disabled"
@@ -4441,6 +4449,9 @@ msgstr ""
 msgid "Other address"
 msgstr ""
 
+msgid "Other application(s)"
+msgstr ""
+
 msgid "Other authorized program"
 msgstr ""
 
@@ -5126,10 +5137,15 @@ msgstr ""
 msgid "Recompute"
 msgstr ""
 
+msgctxt "F"
 msgid "Rector"
 msgstr ""
 
-msgctxt "F"
+msgctxt "H"
+msgid "Rector"
+msgstr ""
+
+msgctxt "X"
 msgid "Rector"
 msgstr ""
 
@@ -5340,12 +5356,6 @@ msgid "Role: ADRE Secretaries"
 msgstr ""
 
 msgid "Role: ADRE secretary"
-msgstr ""
-
-msgid "Role: Admission reader"
-msgstr ""
-
-msgid "Role: Admission readers"
 msgstr ""
 
 msgid "Role: CDD configurator"
@@ -6004,9 +6014,6 @@ msgid ""
 msgstr ""
 
 msgid "The candidate has a scholarship"
-msgstr ""
-
-msgid "The candidate has several enrolment applications in progress"
 msgstr ""
 
 msgid "The candidate is doing a mobility"

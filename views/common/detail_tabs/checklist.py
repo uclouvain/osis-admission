@@ -37,7 +37,7 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
@@ -57,6 +57,7 @@ from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -76,6 +77,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     DocumentsEtudesSecondaires,
 )
+from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -870,7 +872,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         )
 
     @cached_property
-    def sic_director(self):
+    def sic_director(self) -> Optional[Person]:
         now = timezone.now()
         director = (
             Person.objects.filter(
@@ -900,6 +902,17 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         }
         if self.sic_director:
             tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
+            director_gender = self.sic_director.gender or ChoixGenre.X.name
+        else:
+            director_gender = ChoixGenre.X.name
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            if director_gender == ChoixGenre.F.name:
+                tokens["director_title"] = pgettext('F', 'Director of the inscription service')
+            elif director_gender == ChoixGenre.H.name:
+                tokens["director_title"] = pgettext('H', 'Director of the inscription service')
+            else:
+                tokens["director_title"] = pgettext('X', 'Director of the inscription service')
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
@@ -1348,6 +1361,8 @@ class ChecklistView(
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
                 'ATTESTATION_REFUS_SIC',
+                'ATTESTATION_ACCORD_FACULTAIRE',
+                'ATTESTATION_REFUS_FACULTAIRE',
             },
         }
 
@@ -1399,23 +1414,13 @@ class ChecklistView(
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
-            etats = [
-                status
-                for status in ChoixStatutPropositionGenerale.get_names()
-                if status
-                not in {
-                    ChoixStatutPropositionGenerale.EN_BROUILLON,
-                    ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
-                    ChoixStatutPropositionGenerale.ANNULEE,
-                }
-            ]
             context['autres_demandes'] = [
                 demande
                 for demande in message_bus_instance.invoke(
                     ListerToutesDemandesQuery(
                         annee_academique=self.admission.determined_academic_year.year,
                         matricule_candidat=self.admission.candidate.global_id,
-                        etats=etats,
+                        etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
                     )
                 )
                 if demande.uuid != self.admission_uuid

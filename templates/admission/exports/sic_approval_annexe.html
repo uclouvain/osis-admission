@@ -112,8 +112,16 @@
   </p>
 
   <p>
-    Je soussignée <strong>{{ rector.first_name }} {{ rector.last_name }}, Recteur</strong><br>
-    En ma qualité de représentant de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
+    {% if rector.gender == "F" %}
+      Je soussignée <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" context "F" %}</strong><br>
+      En ma qualité de représentante de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
+    {% elif rector.gender == "H" %}
+      Je soussigné <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" context "H" %}</strong><br>
+      En ma qualité de représentant de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
+    {% else %}
+      Je soussigné·e <strong>{{ rector.first_name }} {{ rector.last_name }}, {% trans "Rector" context "X" %}</strong><br>
+      En ma qualité de représentant·e de <strong>l'Université catholique de Louvain (UCLouvain)</strong>
+    {% endif %}
   </p>
 
   <p>
@@ -150,7 +158,7 @@
   </p>
 
   <p>
-    Le programme d’études susmentionné comprend un nombre total de {{ proposition.formation.credits }} crédits ECTS,
+    Le programme d’études susmentionné comprend un nombre total de {{ nombre_credits_formation|default_if_none:'...' }} crédits ECTS,
     pour l'ensemble de la formation, sous réserve d'ajouts d'enseignements
     complémentaires qui pourront être imposés à l'étudiant·e, ou de dispense(s) qu'il·elle aurait
     obtenue(s) (avec un minimum de 54 crédits par année académique).
@@ -223,7 +231,13 @@
       {% if rector.signature %}<img class="ms-3" src="{% get_file_url rector.signature.0 %}" id="signature">{% endif %}
       <p>
         {{ rector.first_name }} {{ rector.last_name }},<br>
-        {% if rector.gender == 'F' %}{% trans "Rector" context "F" %}{% else %}{% trans "Rector" %}{% endif %}
+        {% if rector.gender == "F" %}
+          {% trans "Rector" context "F" %}
+        {% elif rector.gender == "H" %}
+          {% trans "Rector" context "H" %}
+        {% else %}
+          {% trans "Rector" context "X" %}
+        {% endif %}
       </p>
     </div>
   </div>

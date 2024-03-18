@@ -875,6 +875,15 @@ def admission_url(admission_uuid: str, osis_education_type: str):
 
 
 @register.simple_tag
+def list_other_admissions_url(admission_uuid: str, osis_education_type: str):
+    """Get the URL of the list view displaying the other admissions of a candidate of a specific admission"""
+    admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+    if admission_context is None:
+        return None
+    return reverse(f'admission:{admission_context}:other-admissions-list', kwargs={'uuid': admission_uuid})
+
+
+@register.simple_tag
 def admission_status(status: str, osis_education_type: str):
     """Get the status of a specific admission"""
     admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)

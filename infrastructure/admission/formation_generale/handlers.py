@@ -41,14 +41,14 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
+    specifier_besoin_de_derogation,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
-)
-from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
-    specifier_besoin_de_derogation,
 )
 from admission.ddd.admission.formation_generale.use_case.write.specifier_informations_acceptation_proposition_par_sic_service import (
     specifier_informations_acceptation_proposition_par_sic,
@@ -499,7 +499,13 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
         )
     ),
     ModifierAuthentificationExperienceParcoursAnterieurCommand: (
