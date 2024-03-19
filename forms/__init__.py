@@ -43,6 +43,7 @@ from reference.models.country import Country
 
 NONE_CHOICE = ((None, ' - '),)
 ALL_EMPTY_CHOICE = (('', _('All')),)
+OTHER_EMPTY_CHOICE = (('', _('Other')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
 EMPTY_CHOICE_AS_LIST = [list(EMPTY_CHOICE[0])]
@@ -146,17 +147,28 @@ def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM
     return [(academic_year.year, format_to_academic_year(academic_year.year)) for academic_year in academic_years]
 
 
-def get_year_choices(min_year=1920, max_year=None):
-    """Return the choices of a year choice field. If no max year is specified, the current year is used."""
+def get_year_choices(min_year=1920, max_year=None, full_format=False, empty_label=' - '):
+    """
+    Return the choices for a year choice field.
+    :param min_year: The minimum year.
+    :param max_year: The maximum year. If not specified, the current year is used.
+    :param full_format: If True, the choices are in the format 'YYYY-YYYY', otherwise they are 'YYYY'.
+    :param empty_label: The label of the empty choice.
+    :return: The list of choices.
+    """
     if max_year is None:
         max_year = datetime.datetime.now().year
-    return [EMPTY_CHOICE[0]] + [
-        (
-            year,
-            year,
-        )
-        for year in range(max_year, min_year - 1, -1)
-    ]
+
+    year_range = range(max_year, min_year - 1, -1)
+
+    if full_format:
+        choices = [('', empty_label)]
+        for year in year_range:
+            current_year = f'{year}-{year + 1}'
+            choices.append((current_year, current_year))
+        return choices
+    else:
+        return [('', empty_label)] + [(year, year) for year in year_range]
 
 
 def get_scholarship_choices(scholarships, scholarship_type: TypeBourse):

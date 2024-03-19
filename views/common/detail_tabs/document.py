@@ -53,6 +53,7 @@ from admission.forms.admission.document import (
     RequestFreeDocumentWithDefaultFileForm,
     ChangeRequestDocumentForm,
     RetypeDocumentForm,
+    UploadManagerDocumentForm,
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
 from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
@@ -83,7 +84,7 @@ from osis_document.utils import get_file_url
 
 
 class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    form_class = UploadFreeDocumentForm
+    form_class = UploadManagerDocumentForm
     permission_required = 'admission.change_documents_management'
     template_name = 'admission/document/upload_free_document.html'
     htmx_template_name = 'admission/document/upload_free_document.html'
@@ -93,6 +94,7 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
     name = 'upload-free-document'
     urlpatterns = 'free-internal-upload'
     message_on_success = _('The document has been uploaded')
+    prefix = 'upload-free-internal-document-form'
 
     @property
     def document_type(self):
@@ -101,6 +103,11 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
             if self.is_fac
             else TypeEmplacementDocument.LIBRE_INTERNE_SIC.name
         )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['candidate_language'] = self.admission.candidate.language
+        return kwargs
 
     def form_valid(self, form) -> HttpResponse:
         document_id = message_bus_instance.invoke(
@@ -113,20 +120,31 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
-        return super().form_valid(self.form_class())
+        return super().form_valid(
+            self.form_class(
+                candidate_language=self.admission.candidate.language,
+                prefix=self.prefix,
+            )
+        )
 
 
 class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
     name = 'analysis-folder-generation'
     urlpatterns = 'analysis-folder-generation'
     message_on_success = _('A new version of the analysis folder has been generated.')
+    prefix = None  # No prefix for the form as it is not rendered in the template
 
     def get_form_kwargs(self):
         return {
             'data': {
                 'file_name': _('Analysis folder'),
-                'file_0': admission_pdf_recap(self.admission, get_language(), with_annotated_documents=True),
-            }
+                'file_0': admission_pdf_recap(
+                    self.admission,
+                    get_language(),
+                    with_annotated_documents=True,
+                ),
+            },
+            'candidate_language': self.admission.candidate.language,
         }
 
 
@@ -179,6 +197,7 @@ class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequire
                 raison=form.cleaned_data.get('reason', ''),
                 uuid_document=form.cleaned_data['file'][0] if form.cleaned_data.get('file') else '',
                 statut_reclamation=form.cleaned_data.get('request_status', ''),
+                onglet_checklist_associe=form.cleaned_data.get('checklist_tab') or '',
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
@@ -191,10 +210,12 @@ class RequestFreeCandidateDocumentView(BaseRequestFreeCandidateDocument):
     htmx_template_name = 'admission/document/request_free_document.html'
     urlpatterns = 'free-candidate-request'
     name = 'request-free-candidate-document'
+    prefix = 'free-document-request-form'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['only_limited_request_choices'] = self.is_fac
+        kwargs['candidate_language'] = self.admission.candidate.language
         return kwargs
 
 
@@ -204,6 +225,12 @@ class RequestFreeCandidateDocumentWithDefaultFileView(BaseRequestFreeCandidateDo
     htmx_template_name = 'admission/document/request_free_document_with_default_file.html'
     urlpatterns = 'free-candidate-request-with-default-file'
     name = 'request-free-candidate-document-with-default-file'
+    prefix = 'free-document-request-with-default-file-form'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['candidate_language'] = self.admission.candidate.language
+        return kwargs
 
 
 class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, TemplateView):
