@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "admission/tab_layout.html" %}
 {% load bootstrap3 i18n static admission enums %}
 
 {% comment "License" %}
@@ -25,14 +25,6 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% comment "Usage" %}
-  `tab_layout.html` gère le layout des formulaires et des détails, ceci implique
-  - si la variable `form` est présente, le {% block form %} est affiché
-  - si dans `form` il y a des `visible_fields`, la balise
-  <form> est ajoutée ainsi que les boutons de soumission et le lien
-  d'annulation dans les actions et en bas de page
-{% endcomment %}
-
 {% block breadcrumb %}
   <li>
     <a href="{% url 'admissions' %}" id="lnk_admissions">
@@ -53,211 +45,51 @@
   </li>
 {% endblock %}
 
-{% url base_namespace|add:request.resolver_match.url_name view.kwargs.pk as cancel_url %}
-{% url base_namespace|add:":update:"|add:request.resolver_match.url_name view.kwargs.pk as change_url %}
-
-{% block content %}
-  {% if form or force_form %}
-    {% include "admission/modal/prevent_quitting_modal.html" %}
-  {% endif %}
-
-  {% default_tab_context as tab_context %}
-  {% block page-header %}
-    <div class="page-header flex-content">
-      <h2>
-        {% if doctorate %}
-          {{ doctorate.intitule_formation }} ({{ doctorate.reference }})
-        {% else %}
-          {{ admission.doctorat.intitule }} ({{ admission.reference }})
-        {% endif %}
-      </h2>
-      <a
-          href="{% url 'admission:doctorate:cdd:list' %}"
-          class="text-primary"
-      >
-        <span class="fa fa-stream"></span>
-        {% trans "Back to the list" %}
-      </a>
-    </div>
-  {% endblock page-header %}
-
-  <div class="panel panel-default">
-    <div id="admission-panel-header-container" class="panel-heading flex-content">
-      <div id="admission-panel-header">
-        {% block panel-heading %}
-          <div>
-            {% if doctorate %}
-              {% trans "Doctoral student:" %} {{ doctorate.prenom_doctorant }} {{ doctorate.nom_doctorant }}
-            {% else %}
-              {% trans "Candidate:" %} {{ admission.prenom_candidat }} {{ admission.nom_candidat }}
-            {% endif %}
-          </div>
-          <div>
-            {% trans "Status:" %}
-            {% if doctorate %}
-              {{ doctorate.statut|enum_display:'ChoixStatutDoctorat' }}
-            {% else %}
-              {{ admission.statut|enum_display:'ChoixStatutPropositionDoctorale' }}
-              {% if dossier %}
-                | {% trans "CDD:" %}
-                {{ dossier.statut_cdd|enum_display:'ChoixStatutCDD' }}
-                | {% trans "SIC:" %}
-                {{ dossier.statut_sic|enum_display:'ChoixStatutSIC' }}
-              {% endif %}
-            {% endif %}
-          </div>
-          {% if object.submitted_at %}
-            <div>
-              {% trans "Submission date:" %}
-              {{ object.submitted_at|date:'d/m/Y H:i' }}
-            </div>
-          {% endif %}
-        {% endblock %}
-      </div>
-      <div>
-        {% block actions-group %}
-          <div class="btn-group hidden" id="actions-group-container">
-            <button
-                type="button"
-                class="btn btn-default"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-            >
-              {% trans "Actions" %}
-              <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu pull-right">
-              {% block actions %}
-                {% if form or force_form %}
-                  {# Form -> link to the details page #}
-                  {% can_read_tab tab_context.active_tab as can_read_tab %}
-                  {% detail_tab_path_from_update view.kwargs.uuid as read_url %}
-                  <li>
-                    <button class="btn btn-primary" type="submit" form="admission-form" style="width: 100%">
-                      {% translate 'Save' context 'admission' %}
-                    </button>
-                  </li>
-                  {% if next_url or can_read_tab and read_url %}
-                    <li>
-                      <a
-                          class="btn"
-                          href="{% if next_url %}{{ next_url }}{% else %}{{ read_url }}{% endif %}"
-                      >
-                        {% translate 'Cancel' %}
-                      </a>
-                    </li>
-                  {% endif %}
-                {% else %}
-                  {# Details -> link to the form page #}
-                  {% can_update_tab tab_context.active_tab as can_update_tab %}
-                  {% update_tab_path_from_detail view.kwargs.uuid as update_url %}
-                  {% if can_update_tab and update_url %}
-                    <li>
-                      <a href="{{ update_url }}">
-                        {% translate "Update" context 'verb' %}
-                      </a>
-                    </li>
-                  {% endif %}
-                {% endif %}
-              {% endblock %}
-            </ul>
-          </div>
-        {% endblock %}
-      </div>
-    </div>
-    <div class="panel-body">
-    {% if not without_menu %}
-      {% admission_tabs %}
-      {% current_subtabs as subtabs_context %}
-    {% endif %}
-      {% if subtabs_context.subtabs|length > 1 %}
-        <div class="row" style="display: flex">
-        <div class="col-md-2 visible-md visible-lg border-right">
-          {% doctorate_subtabs_bar %}
-        </div>
-        <div class="col-md-10">
+{% block page-header %}
+  <div class="page-header flex-content">
+    <h2>
+      {% if doctorate %}
+        {{ doctorate.intitule_formation }} ({{ doctorate.reference }})
+      {% else %}
+        {{ admission.doctorat.intitule }} ({{ admission.reference }})
       {% endif %}
-      {% block tab_content %}
-        {% if form.visible_fields or force_form %}
-          {# Display the form if needed #}
-          <form id="admission-form" class="osis-form" method="post" action="">
-            {% csrf_token %}
-            {% block form %}{% endblock %}
-          </form>
-          <div class="text-right">
-            {% can_read_tab tab_context.active_tab as can_read_tab %}
-            {% detail_tab_path_from_update view.kwargs.uuid as read_url %}
-            <a
-                href="{% if next_url %}{{ next_url }}{% else %}{{ read_url }}{% endif %}"
-                class="btn btn-default"
-                style="margin-left: 10px;"
-                role="button"
-            >
-              {% translate 'Cancel' %}
-            </a>
-            <button class="btn btn-primary" type="submit" form="admission-form">
-              <span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span>
-              {% translate 'Save' context 'admission' %}
-            </button>
-          </div>
-        {% else %}
-          <p>{% trans "This page is currently under construction." %}</p>
-        {% endif %}
-      {% endblock %}
-      {% if children|length > 1 %}
-        </div>
-        </div>
-      {% endif %}
-    </div>
+    </h2>
+    <a
+        href="{% url 'admission:doctorate:cdd:list' %}"
+        class="text-primary"
+    >
+      <span class="fa fa-stream"></span>
+      {% trans "Back to the list" %}
+    </a>
   </div>
-  {% block extra_content %}{% endblock %}
-{% endblock %}
+{% endblock page-header %}
 
-{% block script %}
-  {# Add either form scripts or osis-documents for detail #}
-  {{ block.super }}
-  <script src="{% static 'admission/popover.js' %}"></script>
-  <script>
-    $(function () {
-      initializePopover();
-      initializeLazyPopover()
-      const actionsGroupContainer = $('#actions-group-container');
-      if (actionsGroupContainer.find('li').length > 0) {
-        actionsGroupContainer.removeClass('hidden');
-      }
-    });
-  </script>
-  {% if form %}
-    {{ form.media.js }}
-    <script>
-      $(function () {
-          // Prevent to submit data from form inputs in disabled containers
-          $('form').on('submit', function() {
-              $(this).find('div[disabled] *').prop('disabled', true);
-          })
-      });
-    </script>
-  {% else %}
-    <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
+{% block panel-heading %}
+  <div>
+    {% if doctorate %}
+      {% trans "Doctoral student:" %} {{ doctorate.prenom_doctorant }} {{ doctorate.nom_doctorant }}
+    {% else %}
+      {% trans "Candidate:" %} {{ admission.prenom_candidat }} {{ admission.nom_candidat }}
+    {% endif %}
+  </div>
+  <div>
+    {% trans "Status:" %}
+    {% if doctorate %}
+      {{ doctorate.statut|enum_display:'ChoixStatutDoctorat' }}
+    {% else %}
+      {{ admission.statut|enum_display:'ChoixStatutPropositionDoctorale' }}
+      {% if dossier %}
+        | {% trans "CDD:" %}
+        {{ dossier.statut_cdd|enum_display:'ChoixStatutCDD' }}
+        | {% trans "SIC:" %}
+        {{ dossier.statut_sic|enum_display:'ChoixStatutSIC' }}
+      {% endif %}
+    {% endif %}
+  </div>
+  {% if object.submitted_at %}
+    <div>
+      {% trans "Submission date:" %}
+      {{ object.submitted_at|date:'d/m/Y H:i' }}
+    </div>
   {% endif %}
-{% endblock %}
-
-{% block style %}
-  <link href="{% static "admission/admission.css" %}" rel="stylesheet"/>
-  {# Add either form styles or osis-documents for detail #}
-  {% if form %}
-    {{ form.media.css }}
-  {% else %}
-    <link href="{% static "osis_document/osis-document.css" %}" rel="stylesheet" />
-  {% endif %}
-  <style>
-    p {
-      margin-bottom: 20px;
-    }
-
-    h3 {
-      margin: 1em 0;
-    }
-  </style>
 {% endblock %}

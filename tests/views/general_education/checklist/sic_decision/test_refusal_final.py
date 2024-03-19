@@ -50,7 +50,7 @@ from admission.tests.factories.general_education import (
 )
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import SicPatchMixin
+from admission.tests.views.general_education.checklist.sic_decision.base import SicPatchMixin
 from base.models.campus import Campus, LOUVAIN_LA_NEUVE_CAMPUS_NAME
 from base.models.enums.mandate_type import MandateTypes
 from base.models.enums.organization_type import MAIN

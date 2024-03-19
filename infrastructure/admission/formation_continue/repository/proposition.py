@@ -23,9 +23,10 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from enum import Enum
 from typing import List, Optional
 
+import attrs
 from django.conf import settings
 from django.utils.translation import get_language
 
@@ -47,6 +48,10 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    StatutChecklist,
+    StatutsChecklistContinue,
+)
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
@@ -96,6 +101,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             )
         except ContinuingEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
+
+    @classmethod
+    def _serialize(cls, inst, field, value):
+        if isinstance(value, StatutChecklist):
+            return attrs.asdict(value, value_serializer=cls._serialize)
+
+        if isinstance(value, Enum):
+            return value.name
+
+        return value
 
     @classmethod
     def save(cls, entity: 'Proposition') -> None:
@@ -157,6 +172,27 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'billing_address_type': entity.type_adresse_facturation.name if entity.type_adresse_facturation else '',
                 'motivations': entity.motivations,
                 'ways_to_find_out_about_the_course': [way.name for way in entity.moyens_decouverte_formation],
+                'checklist': {
+                    'initial': entity.checklist_initiale
+                    and attrs.asdict(entity.checklist_initiale, value_serializer=cls._serialize)
+                    or {},
+                    'current': entity.checklist_actuelle
+                    and attrs.asdict(entity.checklist_actuelle, value_serializer=cls._serialize)
+                    or {},
+                },
+                'interested_mark': entity.marque_d_interet,
+                'edition': entity.edition.name if entity.edition else '',
+                'in_payement_order': entity.en_ordre_de_paiement,
+                'reduced_rights': entity.droits_reduits,
+                'payed_by_training_cheque': entity.paye_par_cheque_formation,
+                'cep': entity.cep,
+                'payement_spread': entity.etalement_des_paiments,
+                'training_spread': entity.etalement_de_la_formation,
+                'experience_knowledge_valorisation': entity.valorisation_des_acquis_d_experience,
+                'assessment_test_presented': entity.a_presente_l_epreuve_d_evaluation,
+                'assessment_test_succeeded': entity.a_reussi_l_epreuve_d_evaluation,
+                'certificate_provided': entity.diplome_produit,
+                'tff_label': entity.intitule_du_tff,
                 **adresse_facturation,
             },
         )
@@ -169,6 +205,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def _load(cls, admission: 'ContinuingEducationAdmission') -> 'Proposition':
+        checklist_initiale = admission.checklist.get('initial')
+        checklist_actuelle = admission.checklist.get('current')
+
         return Proposition(
             entity_id=PropositionIdentityBuilder().build_from_uuid(admission.uuid),
             matricule_candidat=admission.candidate.global_id,
@@ -214,6 +253,21 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             moyens_decouverte_formation=[
                 ChoixMoyensDecouverteFormation[way] for way in admission.ways_to_find_out_about_the_course
             ],
+            marque_d_interet=admission.interested_mark,
+            edition=admission.edition,
+            checklist_initiale=checklist_initiale and StatutsChecklistContinue.from_dict(checklist_initiale),
+            checklist_actuelle=checklist_actuelle and StatutsChecklistContinue.from_dict(checklist_actuelle),
+            en_ordre_de_paiement=admission.in_payement_order,
+            droits_reduits=admission.reduced_rights,
+            paye_par_cheque_formation=admission.payed_by_training_cheque,
+            cep=admission.cep,
+            etalement_des_paiments=admission.payement_spread,
+            etalement_de_la_formation=admission.training_spread,
+            valorisation_des_acquis_d_experience=admission.experience_knowledge_valorisation,
+            a_presente_l_epreuve_d_evaluation=admission.assessment_test_presented,
+            a_reussi_l_epreuve_d_evaluation=admission.assessment_test_succeeded,
+            diplome_produit=admission.certificate_provided,
+            intitule_du_tff=admission.tff_label,
         )
 
     @classmethod
@@ -325,4 +379,18 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_additionnels=admission.additional_documents,
             motivations=admission.motivations,
             moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,
+            documents_demandes=admission.requested_documents,
+            marque_d_interet=admission.interested_mark,
+            edition=admission.edition,
+            en_ordre_de_paiement=admission.in_payement_order,
+            droits_reduits=admission.reduced_rights,
+            paye_par_cheque_formation=admission.payed_by_training_cheque,
+            cep=admission.cep,
+            etalement_des_paiments=admission.payement_spread,
+            etalement_de_la_formation=admission.training_spread,
+            valorisation_des_acquis_d_experience=admission.experience_knowledge_valorisation,
+            a_presente_l_epreuve_d_evaluation=admission.assessment_test_presented,
+            a_reussi_l_epreuve_d_evaluation=admission.assessment_test_succeeded,
+            diplome_produit=admission.certificate_provided,
+            intitule_du_tff=admission.tff_label,
         )

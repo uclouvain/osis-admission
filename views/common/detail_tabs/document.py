@@ -54,7 +54,7 @@ from admission.forms.admission.document import (
     UploadManagerDocumentForm,
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
-from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin

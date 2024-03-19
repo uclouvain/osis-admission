@@ -517,6 +517,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'type_demande',
         'created_at',
     )
+    readonly_fields = ['uuid']
     actions = [
         'injecter_dans_epc',
     ]
