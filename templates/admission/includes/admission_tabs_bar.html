@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 {% comment "Usage" %}
   You can use this template tag by displaying {% admission_tabs %}.
   It also display subtabs while on mobile displays, but you need to show
-  {% doctorate_subtabs_bar admission %} for other displays.
+  {% subtabs_bar admission %} for other displays.
 {% endcomment %}
 
 <div class="form-group">
@@ -63,7 +63,7 @@
             {% include 'admission/includes/tab_entry.html' with tab_name=children.0.name tab_label=parent.label is_active=True icon=parent.icon badge=parent.badge %}
             {% if children|length > 1 %}
               <div class="col-xs-offset-1">
-                {% doctorate_subtabs_bar %}
+                {% subtabs_bar %}
               </div>
             {% endif %}
           {% else %}
