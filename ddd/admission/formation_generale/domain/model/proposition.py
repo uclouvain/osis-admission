@@ -406,7 +406,6 @@ class Proposition(interface.RootEntity):
 
         self.specifier_refus_par_fac()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
-        self.certificat_approbation_fac = []
         self.auteur_derniere_modification = auteur_modification
 
     def approuver_par_fac(self, auteur_modification: str, titres_selectionnes: List[TitreAccesSelectionnable]):
@@ -423,7 +422,6 @@ class Proposition(interface.RootEntity):
 
         self.specifier_acceptation_par_fac()
         self.statut = ChoixStatutPropositionGenerale.RETOUR_DE_FAC
-        self.certificat_refus_fac = []
         self.auteur_derniere_modification = auteur_modification
 
     def soumettre_a_fac_lors_de_la_decision_facultaire(self, auteur_modification: str):
@@ -889,8 +887,6 @@ class Proposition(interface.RootEntity):
         )
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE
         self.auteur_derniere_modification = auteur_modification
-        self.certificat_approbation_sic = []
-        self.certificat_approbation_sic_annexe = []
 
     def approuver_par_sic(self, auteur_modification: str, documents_dto: List[EmplacementDocumentDTO]):
         ApprouverParSicValidatorList(
@@ -911,4 +907,3 @@ class Proposition(interface.RootEntity):
         )
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE
         self.auteur_derniere_modification = auteur_modification
-        self.certificat_refus_sic = []

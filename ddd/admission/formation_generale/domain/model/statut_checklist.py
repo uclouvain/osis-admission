@@ -27,8 +27,15 @@ from enum import Enum
 from typing import List, Optional, Dict
 
 import attr
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    BesoinDeDerogation,
+    DecisionFacultaireEnum,
+    OngletsChecklist,
+)
 from osis_common.ddd import interface
 
 
@@ -105,4 +112,391 @@ class StatutsChecklistGenerale:
 
 INDEX_ONGLETS_CHECKLIST = {
     onglet: index for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
+}
+
+
+@attr.dataclass
+class ConfigurationStatutChecklist(interface.ValueObject):
+    identifiant: str
+    libelle: str
+    statut: Optional[ChoixStatutChecklist] = None
+    extra: Dict[str, any] = attr.Factory(dict)
+
+
+@attr.dataclass
+class ConfigurationOngletChecklist(interface.ValueObject):
+    identifiant: OngletsChecklist
+    statuts: List[ConfigurationStatutChecklist]
+
+
+STATUTS_CHECKLIST_PAR_ONGLET: Dict[str, Dict[str, ConfigurationStatutChecklist]] = {}
+
+onglet_donnes_personnelles = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.donnees_personnelles,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER',
+            libelle=_('To be completed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'fraud': '0'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='FRAUDEUR',
+            libelle=_('Fraudster'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'fraud': '1'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='VALIDEES',
+            libelle=_('Validated'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+onglet_assimilation = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.assimilation,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='NON_CONCERNE',
+            libelle=_('Not concerned'),
+            statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='DECLARE_ASSIMILE_OU_PAS',
+            libelle=_('Declared assimilated or not'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER',
+            libelle=_('To be completed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='AVIS_EXPERT',
+            libelle=_('Expert opinion'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER_APRES_INSCRIPTION',
+            libelle=_('To be completed after application'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='VALIDEE',
+            libelle=pgettext_lazy('assimilation-checklist', 'Validated'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+onglet_frais_dossier = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.frais_dossier,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='NON_CONCERNE',
+            libelle=_('Not concerned'),
+            statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='DOIT_PAYER',
+            libelle=_('Must pay'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='DISPENSE',
+            libelle=_('Dispensed'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='PAYES',
+            libelle=_('Payed'),
+            statut=ChoixStatutChecklist.SYST_REUSSITE,
+        ),
+    ],
+)
+
+onglet_parcours_anterieur = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.parcours_anterieur,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='TOILETTE',
+            libelle=_('Cleaned'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER_APRES_INSCRIPTION',
+            libelle=_('To be completed after application'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='INSUFFISANT',
+            libelle=_('Insufficient'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='SUFFISANT',
+            libelle=_('Sufficient'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+onglets_parcours_anterieur_experiences = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.experiences_parcours_anterieur,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER',
+            libelle=_('To be completed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='AUTHENTIFICATION',
+            libelle=_('Authentication'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'authentification': '1'},
+        ),
+    ]
+    + [
+        ConfigurationStatutChecklist(
+            identifiant=f'AUTHENTIFICATION.{etat_authentification.name}',
+            libelle=etat_authentification.value,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={
+                'etat_authentification': etat_authentification.name,
+                'authentification': '1',
+            },
+        )
+        for etat_authentification in EtatAuthentificationParcours
+    ]
+    + [
+        ConfigurationStatutChecklist(
+            identifiant='AVIS_EXPERT',
+            libelle=_('Expert advice'),
+            extra={'authentification': '0'},
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER_APRES_INSCRIPTION',
+            libelle=_('To complete after enrolment'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='VALIDEE',
+            libelle=_('Validated'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+onglet_financabilite = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.financabilite,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='NON_CONCERNE',
+            libelle=_('Not concerned'),
+            statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='AVIS_EXPERT',
+            libelle=_('Expert opinion'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER',
+            libelle=_('To be completed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'to_be_completed': '1'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='NON_FINANCABLE',
+            libelle=_('Not financeable'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'to_be_completed': '0'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='FINANCABLE',
+            libelle=_('Financeable'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+onglet_choix_formation = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.choix_formation,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='VALIDE',
+            libelle=_('Validated'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+onglet_specificites_formation = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.specificites_formation,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='NON_CONCERNE',
+            libelle=_('Not concerned'),
+            statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='INSUFFISANT',
+            libelle=_('Insufficient'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='SUFFISANT',
+            libelle=_('Sufficient'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+onglet_decision_facultaire = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.decision_facultaire,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='PRIS_EN_CHARGE',
+            libelle=_('Taken in charge'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER_PAR_SIC',
+            libelle=_('To be completed by SIC'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'decision': DecisionFacultaireEnum.HORS_DECISION.value},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='REFUS',
+            libelle=_('Refusal'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'decision': DecisionFacultaireEnum.EN_DECISION.value},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='ACCORD',
+            libelle=_('Approval'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+onglet_decision_sic = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.decision_sic,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER',
+            libelle=_('To be completed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'blocage': 'to_be_completed'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='BESOIN_DEROGATION',
+            libelle=_('Dispensation needed'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'derogation'},
+        ),
+    ]
+    + [
+        ConfigurationStatutChecklist(
+            identifiant=f'BESOIN_DEROGATION.{etat_besoin_derogation.name}',
+            libelle=etat_besoin_derogation.value,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={
+                'etat_besoin_derogation': etat_besoin_derogation.name,
+                'en_cours': 'derogation',
+            },
+        )
+        for etat_besoin_derogation in BesoinDeDerogation
+    ]
+    + [
+        ConfigurationStatutChecklist(
+            identifiant='REFUS_A_VALIDER',
+            libelle=_('Refusal to validate'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'refusal'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='AUTORISATION_A_VALIDER',
+            libelle=_('Approval to validate'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'approval'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='CLOTURE',
+            libelle=_('Closed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'blocage': 'closed'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='REFUSE',
+            libelle=_('REFUSEE'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'blocage': 'refusal'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='AUTORISE',
+            libelle=_('Approved'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
+ORGANISATION_ONGLETS_CHECKLIST: List[ConfigurationOngletChecklist] = [
+    onglet_donnes_personnelles,
+    onglet_assimilation,
+    onglet_frais_dossier,
+    onglet_parcours_anterieur,
+    onglets_parcours_anterieur_experiences,
+    onglet_financabilite,
+    onglet_choix_formation,
+    onglet_specificites_formation,
+    onglet_decision_facultaire,
+    onglet_decision_sic,
+]
+
+ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT = {
+    onglet.identifiant.name: {statut.identifiant: statut for statut in onglet.statuts}
+    for onglet in ORGANISATION_ONGLETS_CHECKLIST
 }

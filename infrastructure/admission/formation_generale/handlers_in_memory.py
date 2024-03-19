@@ -138,6 +138,7 @@ from admission.infrastructure.admission.repository.in_memory.titre_acces_selecti
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import\
     EmailDestinataireInMemoryRepository
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
@@ -165,6 +166,7 @@ _poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
 _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
 _reference_translator = ReferenceInMemoryTranslator()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
+_campus_repository = UclouvainCampusInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -590,6 +592,7 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
             notification=_notification,
             pdf_generation=_pdf_generation,
+            campus_repository=_campus_repository,
         )
     ),
     RefuserInscriptionParSicCommand: (
@@ -600,6 +603,7 @@ COMMAND_HANDLERS = {
             historique=_historique_formation_generale,
             notification=_notification,
             pdf_generation=_pdf_generation,
+            campus_repository=_campus_repository,
         )
     ),
     ApprouverAdmissionParSicCommand: (
@@ -636,6 +640,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             profil_candidat_translator=_profil_candidat_translator,
+            campus_repository=_campus_repository,
             pdf_generation=_pdf_generation,
         )
     ),
