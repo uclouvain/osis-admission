@@ -123,6 +123,7 @@ class AdmissionDocument:
     document_submitted_by: str
     max_documents_number: Optional[int]
     request_status: str
+    related_checklist_tab: str
 
 
 def get_document_from_identifier(
@@ -393,6 +394,7 @@ def get_document_from_identifier(
             document_submitted_by=document_submitted_by,
             max_documents_number=max_documents_number,
             request_status=requested_document.get('request_status') or '',
+            related_checklist_tab=requested_document.get('related_checklist_tab') or '',
         )
 
 
