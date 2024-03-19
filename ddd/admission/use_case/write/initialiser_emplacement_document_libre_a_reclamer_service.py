@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ def initialiser_emplacement_document_libre_a_reclamer(
         libelle=cmd.libelle,
         raison=cmd.raison,
         statut_reclamation=cmd.statut_reclamation,
+        onglet_checklist_associe=cmd.onglet_checklist_associe,
     )
 
     emplacement_document.remplir_par_gestionnaire(uuid_document=cmd.uuid_document, auteur=cmd.auteur)

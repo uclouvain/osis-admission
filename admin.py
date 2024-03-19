@@ -64,6 +64,7 @@ from admission.contrib.models import (
     DiplomaticPost,
 )
 from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.checklist import (
     RefusalReasonCategory,
@@ -897,6 +898,15 @@ class WorkingListAdmin(OrderedModelAdmin):
         }
 
 
+class CategorizedFreeDocumentAdmin(admin.ModelAdmin):
+    model = CategorizedFreeDocument
+    search_fields = [
+        'short_label_en',
+        'short_label_fr',
+    ]
+
+
+admin.site.register(CategorizedFreeDocument, CategorizedFreeDocumentAdmin)
 admin.site.register(WorkingList, WorkingListAdmin)
 admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
 admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
