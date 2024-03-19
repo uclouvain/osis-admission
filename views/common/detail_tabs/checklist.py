@@ -37,10 +37,12 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, gettext, get_language, pgettext
+from django.utils.translation import gettext_lazy as _, pgettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
@@ -124,6 +126,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
+    InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
@@ -178,13 +183,9 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.condition_acces import ConditionAcces
-from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.api.utils import get_remote_metadata, get_remote_token
-from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_role.templatetags.osis_role import has_perm
 
@@ -398,14 +399,19 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
 
     @cached_property
     def program_faculty_email(self):
-        return EmailFonctionProgramme.objects.filter(
-            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
-            programme=self.admission.training.education_group,
-            premiere_annee=bool(
-                self.proposition.poursuite_de_cycle_a_specifier
-                and self.proposition.poursuite_de_cycle != PoursuiteDeCycle.YES.name,
-            ),
-        ).first()
+        try:
+            return message_bus_instance.invoke(
+                RecupererInformationsDestinataireQuery(
+                    sigle_formation=self.admission.training.acronym,
+                    est_premiere_annee=bool(
+                        self.proposition.poursuite_de_cycle_a_specifier
+                        and self.proposition.poursuite_de_cycle != PoursuiteDeCycle.YES.name,
+                    ),
+                    annee=self.admission.determined_academic_year.year,
+                )
+            )
+        except InformationsDestinatairePasTrouvee:
+            return None
 
     @cached_property
     def fac_decision_refusal_form(self):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-12 17:06+0100\n"
+"POT-Creation-Date: 2024-03-19 09:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -5354,6 +5354,11 @@ msgstr ""
 
 msgid "Resident (as defined by government decree)"
 msgstr ""
+
+#, fuzzy
+#| msgid "Experience not found."
+msgid "Ressource not found."
+msgstr "Expérience non trouvée."
 
 msgid "Restore activity to submitted"
 msgstr ""
