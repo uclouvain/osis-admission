@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from django.views.generic import RedirectView
 
 from admission.ddd.admission.doctorat.preparation.commands import GetGroupeDeSupervisionCommand
 from admission.exports.admission_confirmation_canvas import admission_pdf_confirmation_canvas
-from admission.views.doctorate.forms.confirmation import DoctorateAdmissionLastConfirmationMixin
+from admission.views.doctorate.mixins import DoctorateAdmissionLastConfirmationMixin
 from infrastructure.messages_bus import message_bus_instance
 
 __all__ = [
