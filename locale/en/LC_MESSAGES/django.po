@@ -7329,6 +7329,9 @@ msgstr ""
 msgid "Your data have been saved."
 msgstr ""
 
+msgid "Your document is available here"
+msgstr ""
+
 msgid "Your dossier reference:"
 msgstr ""
 
