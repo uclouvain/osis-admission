@@ -243,8 +243,7 @@ class RequestAllDocumentsForm(forms.Form):
 
         self.fields['message_content'].widget.attrs['data-config'] = json.dumps(
             {
-                **settings.CKEDITOR_CONFIGS['link_only'],
-                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                 'language': get_language(),
             }
         )
