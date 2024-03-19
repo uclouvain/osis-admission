@@ -31,6 +31,7 @@ from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCand
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd.interface import DomainService
 
@@ -67,6 +68,7 @@ class IPDFGeneration(DomainService):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
@@ -103,6 +105,7 @@ class IPDFGeneration(DomainService):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -116,6 +119,7 @@ class IPDFGeneration(DomainService):
         proposition_repository: IPropositionRepository,
         proposition: Proposition,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         gestionnaire: str,
         temporaire: bool = False,
     ) -> Optional[str]:

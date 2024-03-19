@@ -41,7 +41,6 @@ from django.utils.translation import gettext_lazy as _, pgettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
-from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
@@ -120,9 +119,13 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
     PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
+    OngletsChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
+    InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
@@ -178,9 +181,7 @@ from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year
-from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.condition_acces import ConditionAcces
-from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_profile.models import EducationalExperience
@@ -230,15 +231,8 @@ EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
     extra_context = {
         'checklist_tabs': {
-            'assimilation': _("Belgian student status"),
-            'financabilite': _("Financeability"),
-            'frais_dossier': _("Application fee"),
-            'choix_formation': _("Course choice"),
-            'parcours_anterieur': _("Previous experience"),
-            'donnees_personnelles': _("Personal data"),
-            'specificites_formation': _("Training specificities"),
-            'decision_facultaire': _("Decision of the faculty"),
-            'decision_sic': _("Decision of SIC"),
+            tab_name: OngletsChecklist[tab_name].value
+            for tab_name in OngletsChecklist.get_names_except(OngletsChecklist.experiences_parcours_anterieur)
         },
         'hide_files': True,
         'condition_acces_enum': ConditionAcces,
@@ -404,14 +398,19 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
 
     @cached_property
     def program_faculty_email(self):
-        return EmailFonctionProgramme.objects.filter(
-            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
-            programme=self.admission.training.education_group,
-            premiere_annee=bool(
-                self.proposition.poursuite_de_cycle_a_specifier
-                and self.proposition.poursuite_de_cycle != PoursuiteDeCycle.YES.name,
-            ),
-        ).first()
+        try:
+            return message_bus_instance.invoke(
+                RecupererInformationsDestinataireQuery(
+                    sigle_formation=self.admission.training.acronym,
+                    est_premiere_annee=bool(
+                        self.proposition.poursuite_de_cycle_a_specifier
+                        and self.proposition.poursuite_de_cycle != PoursuiteDeCycle.YES.name,
+                    ),
+                    annee=self.admission.determined_academic_year.year,
+                )
+            )
+        except InformationsDestinatairePasTrouvee:
+            return None
 
     @cached_property
     def fac_decision_refusal_form(self):
@@ -731,19 +730,38 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
         context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
 
-        # Get information about mail sent if any
-        token = None
-        if self.proposition.certificat_refus_sic:
-            token = get_remote_token(self.proposition.certificat_refus_sic[0])
-        elif self.proposition.certificat_approbation_sic:
-            token = get_remote_token(self.proposition.certificat_approbation_sic[0])
-        if token is not None:
-            metadata = get_remote_metadata(token)
-            context['sic_decision_sent_at'] = metadata['uploaded_at']
-            try:
-                context['sic_decision_sent_by'] = Person.objects.get(global_id=metadata['author'])
-            except Person.DoesNotExist:
-                context['sic_decision_sent_by'] = metadata['author']
+        # Get information about the decision sending by the SIC if any and only in the final statuses
+        sic_decision_status = self.admission.checklist.get('current', {}).get('decision_sic', {})
+
+        if sic_decision_status:
+            history_tags = None
+            if sic_decision_status.get('statut') == ChoixStatutChecklist.GEST_REUSSITE.name:
+                history_tags = [
+                    'proposition',
+                    'sic-decision',
+                    'approval',
+                    'message' if self.admission.type_demande == TypeDemande.ADMISSION.name else 'status-changed',
+                ]
+            elif (
+                sic_decision_status.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+                and sic_decision_status.get('extra', {}).get('blocage') == 'refusal'
+            ):
+                history_tags = ['proposition', 'sic-decision', 'refusal', 'message']
+
+            if history_tags:
+                history_entry: Optional[HistoryEntry] = (
+                    HistoryEntry.objects.filter(
+                        tags__contains=history_tags,
+                        object_uuid=self.admission_uuid,
+                    )
+                    .order_by('-created')
+                    .first()
+                )
+
+                if history_entry:
+                    context['sic_decision_sent_at'] = history_entry.created
+                    context['sic_decision_sent_by'] = history_entry.author
+                    context['sic_decision_sent_with_email'] = 'message' in history_entry.tags
 
         context['sic_decision_dispensation_form'] = SicDecisionDerogationForm(
             initial={

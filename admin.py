@@ -35,11 +35,10 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext
 from django_json_widget.widgets import JSONEditorWidget
+from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
-from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
 from admission.auth.roles.adre import AdreSecretary
@@ -75,8 +74,12 @@ from admission.contrib.models.checklist import (
 from admission.contrib.models.doctoral_training import Activity
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
+from admission.contrib.models.working_list import WorkingList
 from admission.ddd.admission.enums import CritereItemFormulaireFormation
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
+from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc import InjectionEPC
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
@@ -86,6 +89,7 @@ from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
+from osis_document.contrib import FileField
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
@@ -843,6 +847,42 @@ class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
         return obj.person.user
 
 
+class WorkingListForm(forms.ModelForm):
+    checklist_filters = ChecklistStateFilterField(
+        configurations=ORGANISATION_ONGLETS_CHECKLIST,
+        label=_('Checklist filters'),
+        required=False,
+    )
+
+    admission_statuses = forms.TypedMultipleChoiceField(
+        label=_('Admission statuses'),
+        required=False,
+        choices=CHOIX_STATUT_TOUTE_PROPOSITION,
+    )
+
+    class Meta:
+        model = WorkingList
+        fields = '__all__'
+
+
+class WorkingListAdmin(OrderedModelAdmin):
+    list_display = ['translated_name', 'move_up_down_links', 'order']
+    search_fields = ['name']
+    form = WorkingListForm
+
+    @admin.display(description=_('Name'))
+    def translated_name(self, obj):
+        return obj.name.get(get_language())
+
+    class Media:
+        css = {
+            'all': [
+                'admission/working_list_admin.css',
+            ],
+        }
+
+
+admin.site.register(WorkingList, WorkingListAdmin)
 admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
 admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
 admin.site.register(Candidate, FrontOfficeRoleModelAdmin)

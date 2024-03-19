@@ -199,7 +199,7 @@ class GeneralAccountingDetailViewTestCase(TestCase):
         self.assertEqual(response.context['admission'].uuid, self.general_admission.uuid)
 
         accounting = response.context['accounting']
-        self.assertEqual(
+        self.assertCountEqual(
             accounting['derniers_etablissements_superieurs_communaute_fr_frequentes']['names'],
             [
                 'First institute',

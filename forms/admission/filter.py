@@ -26,14 +26,18 @@
 import re
 
 from django import forms
-from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy
+from django.utils.translation import gettext_lazy as _, ngettext, pgettext_lazy, get_language
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.contrib.models import Scholarship
+from admission.contrib.models.working_list import WorkingList
 from admission.ddd.admission.enums import TypeBourse
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION, CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
 from admission.forms import ALL_EMPTY_CHOICE, get_academic_year_choices, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
+from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -47,6 +51,11 @@ from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from education_group.forms.fields import MainCampusChoiceField
 
 REGEX_REFERENCE = r'\d{4}\.\d{4}$'
+
+
+class WorkingListField(forms.ModelChoiceField):
+    def label_from_instance(self, obj: WorkingList):
+        return obj.name.get(get_language())
 
 
 class AllAdmissionsFilterForm(forms.Form):
@@ -165,6 +174,34 @@ class AllAdmissionsFilterForm(forms.Form):
         required=False,
     )
 
+    liste_travail = WorkingListField(
+        label=_('Working list'),
+        queryset=WorkingList.objects.all(),
+        required=False,
+        empty_label=_('Personalized'),
+        widget=autocomplete.ListSelect2(
+            url="admission:autocomplete:working-lists",
+            attrs={
+                'data-placeholder': _('Personalized'),
+                'data-allow-clear': 'true',
+            },
+        ),
+    )
+
+    mode_filtres_etats_checklist = forms.ChoiceField(
+        choices=ModeFiltrageChecklist.choices(),
+        label=_('Include or exclude the checklist filters'),
+        required=False,
+        initial=ModeFiltrageChecklist.INCLUSION.name,
+        widget=forms.RadioSelect(),
+    )
+
+    filtres_etats_checklist = ChecklistStateFilterField(
+        configurations=ORGANISATION_ONGLETS_CHECKLIST,
+        label=_('Checklist filters'),
+        required=False,
+    )
+
     taille_page = forms.TypedChoiceField(
         label=_("Page size"),
         choices=((size, size) for size in PAGINATOR_SIZE_LIST),
@@ -218,6 +255,14 @@ class AllAdmissionsFilterForm(forms.Form):
                 if person:
                     self.fields['matricule_candidat'].widget.choices = (
                         (candidate, '{}, {}'.format(person['last_name'], person['first_name'])),
+                    )
+
+            working_list_id = self.data.get(self.add_prefix('liste_travail'))
+            if working_list_id:
+                working_list = WorkingList.objects.filter(id=working_list_id).first()
+                if working_list:
+                    self.fields['liste_travail'].widget.choices = (
+                        (str(working_list.id), working_list.name.get(get_language())),
                     )
 
     def clean_numero(self):

@@ -33,7 +33,13 @@
     {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=resume_proposition.proposition current=current  %}
 
     {% if sic_decision_sent_at and sic_decision_sent_by %}
-      <div class="alert alert-info">{% blocktrans with date=sic_decision_sent_at author=sic_decision_sent_by %}The SIC decision mail was sent to the candidate the {{ date }} by {{ author }}.{% endblocktrans %}</div>
+      <div class="alert alert-info">
+        {% if sic_decision_sent_with_email %}
+          {% blocktrans with date=sic_decision_sent_at author=sic_decision_sent_by %}The SIC decision mail was sent to the candidate the {{ date }} by {{ author }}.{% endblocktrans %}
+        {% else %}
+          {% blocktrans with date=sic_decision_sent_at author=sic_decision_sent_by %}The inscription type admission was authorised the {{ date }} by {{ author }}.{% endblocktrans %}
+        {% endif %}
+      </div>
     {% endif %}
 
     {% bootstrap_form comment_forms.decision_sic %}
