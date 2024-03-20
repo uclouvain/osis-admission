@@ -35,8 +35,7 @@ class Migration(migrations.Migration):
 
                 <p>Veuillez agréer, Madame, Monsieur, l'expression de nos salutations distinguées.</p>
 
-                <p>{director}<br>
-                {director_title}</p>
+                <p>Le Service des inscriptions</p>
                 ''',
             },
         ),

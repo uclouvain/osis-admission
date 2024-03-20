@@ -913,19 +913,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
             "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
         }
-        if self.sic_director:
-            tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
-            director_gender = self.sic_director.gender or ChoixGenre.X.name
-        else:
-            director_gender = ChoixGenre.X.name
-
-        with translation.override(settings.LANGUAGE_CODE_FR):
-            if director_gender == ChoixGenre.F.name:
-                tokens["director_title"] = pgettext('F', 'Director of the inscription service')
-            elif director_gender == ChoixGenre.H.name:
-                tokens["director_title"] = pgettext('H', 'Director of the inscription service')
-            else:
-                tokens["director_title"] = pgettext('X', 'Director of the inscription service')
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(

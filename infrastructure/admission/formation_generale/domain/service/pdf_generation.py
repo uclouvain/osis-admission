@@ -371,6 +371,7 @@ class PDFGeneration(IPDFGeneration):
                 'profil_candidat_coordonnees': profil_candidat_coordonnees,
                 'documents_names': documents_names,
                 'director': cls._get_sic_director(proposition_dto),
+                'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
             },
             author=gestionnaire,
             language=proposition_dto.langue_contact_candidat,
@@ -454,6 +455,7 @@ class PDFGeneration(IPDFGeneration):
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(proposition_dto),
                     'footer_campus': cls._get_refusal_certificate_footer_campus(proposition_dto, campus_repository),
+                    'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
                 },
                 author=gestionnaire,
             )
@@ -489,6 +491,7 @@ class PDFGeneration(IPDFGeneration):
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(proposition_dto),
                     'footer_campus': cls._get_refusal_certificate_footer_campus(proposition_dto, campus_repository),
+                    'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
                 },
                 author=gestionnaire,
             )
