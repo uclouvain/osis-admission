@@ -6973,7 +6973,7 @@ msgstr ""
 msgid "The number of credits registered must be greater than 0."
 msgstr "Le nombre de crédits inscrits doit être supérieur à 0."
 
-msgid "The official French-language enrolment authorisation signed by you."
+msgid "The official enrolment authorisation signed by you."
 msgstr "La présente autorisation signée pour accord dans le cadre ci-dessous."
 
 msgid "The opinion about the extension request is not completed."
