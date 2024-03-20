@@ -308,7 +308,7 @@ DocumentsSuiteAutorisation = {
         'Copy of your student visa D (permission to stay longer than 90 days in Belgium) issued by the Belgian '
         'Embassy or Consulate.'
     ),
-    'AUTORISATION_PDF_SIGNEE': _('The official French-language enrolment authorisation signed by you.'),
+    'AUTORISATION_PDF_SIGNEE': _('The official enrolment authorisation signed by you.'),
 }
 
 
