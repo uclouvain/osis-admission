@@ -23,7 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
+
 from django import forms
+from django.conf import settings
+from django.utils.translation import (
+    gettext_lazy as _,
+    get_language,
+)
 
 from admission.contrib.models import ContinuingEducationAdmission
 
@@ -60,3 +67,32 @@ class StudentReportForm(forms.ModelForm):
             'certificate_provided': forms.CheckboxInput(),
             'tff_label': forms.TextInput(),
         }
+
+
+class DecisionFacApprovalForm(forms.Form):
+    accepter_la_demande = forms.BooleanField(
+        label=_('Accept application'),
+    )
+    condition_acceptation = forms.CharField(
+        label=_('Acceptation condition'),
+        required=False,
+        widget=forms.Textarea(),
+    )
+
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['body'].widget.attrs['data-config'] = json.dumps(
+            {
+                **settings.CKEDITOR_CONFIGS['link_only'],
+                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                'language': get_language(),
+            }
+        )

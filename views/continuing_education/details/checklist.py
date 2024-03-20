@@ -45,7 +45,7 @@ from admission.exports.admission_recap.section import get_dynamic_questions_by_t
 from admission.forms.admission.checklist import (
     CommentForm,
 )
-from admission.forms.admission.continuing_education.checklist import StudentReportForm
+from admission.forms.admission.continuing_education.checklist import StudentReportForm, DecisionFacApprovalForm
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
@@ -72,6 +72,14 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     def can_update_checklist_tab(self):
         return has_perm('admission.change_checklist', user=self.request.user, obj=self.admission)
 
+    @cached_property
+    def decision_fac_approval_form(self):
+        return DecisionFacApprovalForm(
+            # instance=self.admission if self.request.method != 'POST' else None,
+            data=self.request.POST if self.request.method == 'POST' else None,
+            prefix='fac-decision-approval',
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         checklist_additional_icons = {}
@@ -97,6 +105,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             self.admission,
         )
         context['student_report_form'] = StudentReportForm(instance=self.admission)
+        context['decision_fac_approval_form'] = self.decision_fac_approval_form
         return context
 
 
@@ -118,20 +127,6 @@ class ChecklistView(
                 'DOSSIER_ANALYSE',
             }
         }
-
-        # # Add documents from the specific questions
-        # checklist_target_tab_by_specific_question_tab = {
-        # }
-        #
-        # for specific_question in specific_questions:
-        #     if (
-        #         specific_question.type == TypeItemFormulaire.DOCUMENT.name
-        #         and specific_question.onglet in checklist_target_tab_by_specific_question_tab
-        #     ):
-        #         documents_by_tab[checklist_target_tab_by_specific_question_tab[specific_question.onglet]].add(
-        #             specific_question.uuid
-        #         )
-
         return documents_by_tab
 
     def get_template_names(self):
@@ -165,7 +160,16 @@ class ChecklistView(
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
             # Initialize forms
-            tab_names = list(self.extra_context['checklist_tabs'].keys())
+            tab_names = [
+                'fiche_etudiant',
+                'decision__IUFC_for_FAC',
+                'decision__FAC_for_IUFC',
+            ]
+
+            labels = {
+                'decision__IUFC_for_FAC': _('IUFC comment for the Faculty'),
+                'decision__FAC_for_IUFC': _('Faculty comment for IUFC'),
+            }
 
             comments = {
                 ('__'.join(c.tags)): c
@@ -177,6 +181,7 @@ class ChecklistView(
                     comment=comments.get(tab_name, None),
                     form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
                     prefix=tab_name,
+                    label=labels.get(tab_name),
                 )
                 for tab_name in tab_names
             }

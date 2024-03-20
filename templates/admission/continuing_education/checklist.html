@@ -69,26 +69,8 @@
           </div>
         </div>
 
-      {% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision next_url=next_base_url|add:'decision' %}
-        <div role="tabpanel" class="tab-pane in active" id="decision">
-          <div class="form-group btn-group status-group" role="group">
-{#            {% translate initial.libelle as initial_state_label %}#}
-{#            {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' %}#}
-{#            {% checklist_state_button tab='decision' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}#}
-{#            {% checklist_state_button tab='decision' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}#}
-{#            {% checklist_state_button tab='decision' label=_("To be completed after application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}#}
-{#            {% translate "Validated" context "decision-checklist" as validated_label %}#}
-{#            {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' %}#}
-          </div>
+        {% include "admission/continuing_education/includes/checklist/decision.html" %}
 
-          <p><em>En attente de developpement</em></p>
-
-{#          {% bootstrap_form comment_forms.decision %}#}
-
-          <div class="info-part">
-          </div>
-        </div>
-      {% endwith %}
     </div>
 
     <div id="info-viewer-tab" class="viewer-tab">
