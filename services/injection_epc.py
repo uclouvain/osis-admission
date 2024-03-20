@@ -29,11 +29,15 @@ from typing import Dict, List, Union
 import osis_document.contrib.fields
 import pika
 from django.conf import settings
-from django.db.models import QuerySet, Case, When, Value
+from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
 from django.shortcuts import get_object_or_404
 
 from admission.contrib.models import Accounting
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.base import (
+    BaseAdmission,
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.contrib.models.enums.actor_type import ActorType
 from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
@@ -97,7 +101,7 @@ SPORT_TOUT_CAMPUS = [
 
 class InjectionEPC:
     def injecter(self, admission: BaseAdmission):
-        logger.info(f"[INJECTION EPC] Recuperation des donnees de l'admission avec reference {str(admission)}")
+        logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
         donnees = self.recuperer_donnees(admission=admission)
         logger.info(f"[INJECTION EPC] Donnees recuperees : {donnees} - Envoi dans la queue")
         self.envoyer_admission_dans_queue(
@@ -117,9 +121,9 @@ class InjectionEPC:
             'dossier_uuid': str(admission.uuid),
             'signaletique': cls._get_signaletique(candidat=candidat, adresse_domicile=adresse_domicile),
             'comptabilite': cls._get_comptabilite(candidat=candidat, comptabilite=comptabilite),
-            'etudes_secondaires': cls._get_etudes_secondaires(candidat=candidat),
-            'curriculum_academique': cls._get_curriculum_academique(candidat=candidat),
-            'curriculum_autres': cls._get_curriculum_autres_activites(candidat=candidat),
+            'etudes_secondaires': cls._get_etudes_secondaires(candidat=candidat, admission=admission),
+            'curriculum_academique': cls._get_curriculum_academique(candidat=candidat, admission=admission),
+            'curriculum_autres': cls._get_curriculum_autres_activites(candidat=candidat, admission=admission),
             'inscription_annee_academique': cls._get_inscription_annee_academique(admission=admission),
             'inscription_offre': cls._get_inscription_offre(admission=admission),
             'donnees_comptables': cls._get_donnees_comptables(admission=admission),
@@ -131,8 +135,9 @@ class InjectionEPC:
     @classmethod
     def _get_signaletique(cls, candidat: Person, adresse_domicile: PersonAddress) -> Dict:
         documents = cls._recuperer_documents(candidat)
+        etudiant = candidat.student_set.first()
         return {
-            'noma': candidat.student_set.first().registration_id,
+            'noma': etudiant.registration_id if etudiant else '',
             'nom': candidat.last_name,
             'prenom': candidat.first_name,
             'prenom_suivant': candidat.middle_name,
@@ -194,10 +199,11 @@ class InjectionEPC:
         return {}
 
     @classmethod
-    def _get_etudes_secondaires(cls, candidat: Person) -> Dict:
+    def _get_etudes_secondaires(cls, candidat: Person, admission: BaseAdmission) -> Dict:
         diplome_belge = getattr(candidat, 'belgianhighschooldiploma', None)  # type: BelgianHighSchoolDiploma
         diplome_etranger = getattr(candidat, 'foreignhighschooldiploma', None)  # type: ForeignHighSchoolDiploma
-        if diplome_belge or diplome_etranger:
+        diplome_pertinent = admission.valuated_secondary_studies_person
+        if diplome_pertinent and (diplome_belge or diplome_etranger):
             diplome = diplome_belge or diplome_etranger
             documents = cls._recuperer_documents(diplome)
             type_etude = diplome_belge.educational_type if diplome_belge else diplome_etranger.foreign_diploma_type
@@ -216,8 +222,17 @@ class InjectionEPC:
         return {}
 
     @classmethod
-    def _get_curriculum_academique(cls, candidat: Person) -> List[Dict]:
-        experiences_educatives = candidat.educationalexperience_set.all().select_related(
+    def _get_curriculum_academique(cls, candidat: Person, admission: BaseAdmission) -> List[Dict]:
+        experiences_educatives = candidat.educationalexperience_set.annotate(
+            valorisee_par_dossier=Exists(
+                AdmissionEducationalValuatedExperiences.objects.filter(
+                    baseadmission_id=admission.uuid,
+                    educationalexperience_id=OuterRef('uuid')
+                )
+            )
+        ).filter(
+            valorisee_par_dossier=True
+        ).select_related(
             'institute',
             'country',
             'program'
@@ -290,8 +305,16 @@ class InjectionEPC:
         }
 
     @classmethod
-    def _get_curriculum_autres_activites(cls, candidat: Person) -> List[Dict]:
-        experiences_professionnelles = candidat.professionalexperience_set.all(
+    def _get_curriculum_autres_activites(cls, candidat: Person, admission: BaseAdmission) -> List[Dict]:
+        experiences_professionnelles = candidat.professionalexperience_set.annotate(
+            valorisee_par_dossier=Exists(
+                AdmissionProfessionalValuatedExperiences.objects.filter(
+                    baseadmission_id=admission.uuid,
+                    professionalexperience_id=OuterRef('uuid')
+                )
+            )
+        ).filter(
+            valorisee_par_dossier=True
         ).order_by('start_date')  # type: QuerySet[ProfessionalExperience]
 
         return [
@@ -449,7 +472,7 @@ class InjectionEPC:
             pika.exceptions.AMQPError
         ) as e:
             logger.exception(
-                f"[INJECTION EPC] Une erreur est survenue lors de l'injection vers EPC de l'admission avec uuid "
+                f"[INJECTION EPC] Une erreur est survenue lors de l injection vers EPC de l admission avec uuid "
                 f"{admission_uuid} et reference {admission_reference}"
             )
             raise InjectionVersEPCException(reference=admission_reference) from e
@@ -459,15 +482,15 @@ def admission_response_from_epc_callback(donnees):
     donnees = json.loads(donnees.decode("utf-8").replace("\'", "\""))
     dossier_uuid = donnees['dossier_uuid']
     logger.info(
-        f"[INJECTION EPC - RETOUR] Reception d'une reponse d'EPC pour l'admission avec uuid "
+        f"[INJECTION EPC - RETOUR] Reception d une reponse d EPC pour l admission avec uuid "
         f"{dossier_uuid} - Donnees recues : {donnees}"
     )
     admission = get_object_or_404(BaseAdmission, uuid=dossier_uuid)
     if donnees['success']:
-        logger.info("[INJECTION EPC - RETOUR] L'injection est terminee")
+        logger.info("[INJECTION EPC - RETOUR] L injection est terminee")
         # manage success
     else:
-        logger.error(f"[INJECTION EPC - RETOUR] L'injection a echouee")
+        logger.error(f"[INJECTION EPC - RETOUR] L injection a echouee")
         # manage errors
     # history ?
     # notification ?
@@ -475,5 +498,5 @@ def admission_response_from_epc_callback(donnees):
 
 class InjectionVersEPCException(Exception):
     def __init__(self, reference: str, **kwargs):
-        self.message = f"[INJECTION EPC] Impossible d'injecter l'admission avec reference: {reference} vers EPC"
+        self.message = f"[INJECTION EPC] Impossible d injecter l admission avec reference: {reference} vers EPC"
         super().__init__(**kwargs)
