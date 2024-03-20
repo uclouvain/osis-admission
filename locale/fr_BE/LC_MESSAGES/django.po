@@ -2316,23 +2316,29 @@ msgstr "Poste diplomatique"
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
 
-msgid "Director"
-msgstr "Directeur"
-
 msgctxt "F"
-msgid "Director of the inscription service"
+msgid "Director of the Enrolment Office"
 msgstr "Directrice du Service des inscriptions"
 
 msgctxt "H"
-msgid "Director of the inscription service"
+msgid "Director of the Enrolment Office"
 msgstr "Directeur du Service des inscriptions"
 
 msgctxt "X"
-msgid "Director of the inscription service"
+msgid "Director of the Enrolment Office"
 msgstr "Directeur·trice du Service des inscriptions"
 
-msgid "Director title"
-msgstr "Titre du directeur"
+msgctxt "F"
+msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
+msgstr "Directrice du Service des inscriptions Saint-Louis Bruxelles"
+
+msgctxt "H"
+msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
+msgstr "Directeur du Service des inscriptions Saint-Louis Bruxelles"
+
+msgctxt "X"
+msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
+msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
 
 msgid "Disabled"
 msgstr "Désactivé"
@@ -2700,8 +2706,8 @@ msgstr "Inscrit"
 msgid "Enrollment authorization document link"
 msgstr "Lien du document d'autorisation d'inscription"
 
-msgid "Enrolment Office (SIC)"
-msgstr "Service des inscriptions (SIC)"
+msgid "Enrolment Office"
+msgstr "Service des inscriptions"
 
 msgid "Enrolment applications"
 msgstr "Demandes d'inscription"
@@ -6123,6 +6129,9 @@ msgstr "Sur 3 ans, 1/2 crédits inscrits même cycle car allègement"
 
 msgid "SYST_REUSSITE"
 msgstr "Système réussite"
+
+msgid "Saint-Louis Bruxelles Enrolment Office"
+msgstr "Service des inscriptions Saint-Louis Bruxelles"
 
 msgid "Salary slips"
 msgstr "Fiches de rémunération"

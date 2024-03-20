@@ -116,14 +116,20 @@
 
   <div class="row">
     <div class="col-6">
-      <strong>{% trans "Enrolment Office (SIC)" %}</strong>
+      <strong>
+        {% if proposition.formation.campus_inscription.uuid == ORDERED_CAMPUSES_UUIDS.BRUXELLES_SAINT_LOUIS_UUID %}
+          {% trans "Saint-Louis Bruxelles Enrolment Office" %}
+        {% else %}
+          {% trans "Enrolment Office" %}
+        {% endif %}
+      </strong>
     </div>
     <div class="col-6">
       {% include "admission/exports/includes/profil_adresse.html" %}
     </div>
   </div>
 
-  <div class="text-end">Louvain-la-Neuve, {% if LANGUAGE_CODE == 'fr-be' %}Le {% endif %}{% now "d/m/Y" %}</div>
+  <div class="text-end">{% if LANGUAGE_CODE == 'fr-be' %}Le {% endif %}{% now "d/m/Y" %}</div>
 
   <div id="guillemet-droite"></div>
 
@@ -144,21 +150,7 @@
 
   <img class="float-end" id="sigle" src="{% static "img/sedes-filigrane.jpg" %}">
 
-  <div>
-    {% if director.signature %}<img class="ms-3" src="{% get_file_url director.signature.0 %}" id="signature">{% endif %}
-    <p>
-      {{ director.first_name }} {{ director.last_name }},<br>
-      <em>
-        {% if director.gender == "F" %}
-          {% trans "Director of the inscription service" context "F" %}
-        {% elif director.gender == "H" %}
-          {% trans "Director of the inscription service" context "H" %}
-        {% else %}
-          {% trans "Director of the inscription service" context "X" %}
-        {% endif %}
-      </em>
-    </p>
-  </div>
+  {% include 'admission/exports/includes/sic_certificate_signature.html' with director=director proposition=proposition %}
 
   <div id="guillemet-gauche"></div>
 </body>
