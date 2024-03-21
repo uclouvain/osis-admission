@@ -6280,7 +6280,7 @@ msgstr ""
 msgid "The number of credits registered must be greater than 0."
 msgstr ""
 
-msgid "The official French-language enrolment authorisation signed by you."
+msgid "The official enrolment authorisation signed by you."
 msgstr ""
 
 msgid "The opinion about the extension request is not completed."
