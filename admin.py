@@ -35,10 +35,11 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django_json_widget.widgets import JSONEditorWidget
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
+from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
+from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
 from admission.auth.roles.adre import AdreSecretary
@@ -72,6 +73,7 @@ from admission.contrib.models.checklist import (
     FreeAdditionalApprovalCondition,
 )
 from admission.contrib.models.doctoral_training import Activity
+from admission.contrib.models.epc_injection import EPCInjection
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
 from admission.contrib.models.working_list import WorkingList
@@ -89,7 +91,6 @@ from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
-from osis_document.contrib import FileField
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
@@ -575,6 +576,15 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
     list_filter = ['status', 'method']
 
 
+class EPCInjectionAdmin(admin.ModelAdmin):
+    search_fields = ['admission']
+    list_display = ['admission', 'status', 'epc_responses']
+    list_filter = ['status']
+    formfield_overrides = {
+        models.JSONField: {'widget': JSONEditorWidget},
+    }
+
+
 class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):
     related_experience = forms.ModelMultipleChoiceField(
         queryset=EducationalExperience.objects.none(),
@@ -896,3 +906,4 @@ admin.site.register(AdreSecretary, HijackRoleModelAdmin)
 admin.site.register(JurySecretary, HijackRoleModelAdmin)
 admin.site.register(Sceb, HijackRoleModelAdmin)
 admin.site.register(DoctorateReader, HijackRoleModelAdmin)
+admin.site.register(EPCInjection, EPCInjectionAdmin)
