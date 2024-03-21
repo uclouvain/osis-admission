@@ -188,13 +188,14 @@ class InjectionEPC:
     def _get_comptabilite(cls, candidat: Person, comptabilite: Accounting) -> Dict:
         if comptabilite:
             documents = cls._recuperer_documents(comptabilite)
+            client_sap = candidat.sapclient_set.annotate(
+                priorite=Case(
+                    When(creation_source=SAPClientCreationSource.OSIS.name), then=Value(1),
+                    default=2
+                )
+            ).order_by('priorite').first()
             return {
-                'client_sap': candidat.sapclient_set.annotate(
-                    priorite=Case(
-                        When(creation_source=SAPClientCreationSource.OSIS.name), then=Value(1),
-                        default=2
-                    )
-                ).order_by('priorite').first(),
+                'client_sap': client_sap.client_number if client_sap else '',
                 'iban': comptabilite.iban_account_number,
                 'bic': comptabilite.bic_swift_code,
                 'nom_titulaire': comptabilite.account_holder_last_name,
