@@ -2108,22 +2108,28 @@ msgstr ""
 msgid "Diplomatic post code"
 msgstr ""
 
-msgid "Director"
-msgstr ""
-
 msgctxt "F"
-msgid "Director of the inscription service"
+msgid "Director of the Enrolment Office"
 msgstr ""
 
 msgctxt "H"
-msgid "Director of the inscription service"
+msgid "Director of the Enrolment Office"
 msgstr ""
 
 msgctxt "X"
-msgid "Director of the inscription service"
+msgid "Director of the Enrolment Office"
 msgstr ""
 
-msgid "Director title"
+msgctxt "F"
+msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
+msgstr ""
+
+msgctxt "H"
+msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
+msgstr ""
+
+msgctxt "X"
+msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
 msgstr ""
 
 msgid "Disabled"
@@ -2458,7 +2464,7 @@ msgstr ""
 msgid "Enrollment authorization document link"
 msgstr ""
 
-msgid "Enrolment Office (SIC)"
+msgid "Enrolment Office"
 msgstr ""
 
 msgid "Enrolment applications"
@@ -5528,6 +5534,9 @@ msgstr ""
 
 msgid "SYST_REUSSITE"
 msgstr "System success"
+
+msgid "Saint-Louis Bruxelles Enrolment Office"
+msgstr ""
 
 msgid "Salary slips"
 msgstr ""
