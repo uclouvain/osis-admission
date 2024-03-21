@@ -30,15 +30,15 @@ import osis_document.contrib.fields
 import pika
 from django.conf import settings
 from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
-from django.shortcuts import get_object_or_404
 
-from admission.contrib.models import Accounting
+from admission.contrib.models import Accounting, EPCInjection
 from admission.contrib.models.base import (
     BaseAdmission,
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
 from admission.contrib.models.enums.actor_type import ActorType
+from admission.contrib.models.epc_injection import EPCInjectionStatus
 from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
 from admission.ddd.admission.formation_generale.domain.model.enums import DROITS_INSCRIPTION_MONTANT_VALEURS
@@ -103,7 +103,12 @@ class InjectionEPC:
     def injecter(self, admission: BaseAdmission):
         logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
         donnees = self.recuperer_donnees(admission=admission)
-        logger.info(f"[INJECTION EPC] Donnees recuperees : {donnees} - Envoi dans la queue")
+        EPCInjection.objects.get_or_create(
+            admission=admission,
+            defaults={'payload': donnees}
+        )
+        logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
+        logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
         self.envoyer_admission_dans_queue(
             donnees=donnees,
             admission_uuid=admission.uuid,
@@ -478,25 +483,29 @@ class InjectionEPC:
             raise InjectionVersEPCException(reference=admission_reference) from e
 
 
-def admission_response_from_epc_callback(donnees):
-    donnees = json.loads(donnees.decode("utf-8").replace("\'", "\""))
-    dossier_uuid = donnees['dossier_uuid']
-    logger.info(
-        f"[INJECTION EPC - RETOUR] Reception d une reponse d EPC pour l admission avec uuid "
-        f"{dossier_uuid} - Donnees recues : {donnees}"
-    )
-    admission = get_object_or_404(BaseAdmission, uuid=dossier_uuid)
-    if donnees['success']:
-        logger.info("[INJECTION EPC - RETOUR] L injection est terminee")
-        # manage success
-    else:
-        logger.error(f"[INJECTION EPC - RETOUR] L injection a echouee")
-        # manage errors
-    # history ?
-    # notification ?
-
-
 class InjectionVersEPCException(Exception):
     def __init__(self, reference: str, **kwargs):
         self.message = f"[INJECTION EPC] Impossible d injecter l admission avec reference: {reference} vers EPC"
         super().__init__(**kwargs)
+
+
+def admission_response_from_epc_callback(donnees):
+    donnees = json.loads(donnees.decode("utf-8").replace("\'", "\""))
+    dossier_uuid, statut = donnees['dossier_uuid'], donnees['status']
+    logger.info(
+        f"[INJECTION EPC - RETOUR] Reception d une reponse d EPC pour l admission avec uuid "
+        f"{dossier_uuid} \nDonnees recues : {json.dumps(donnees, indent=4)}"
+    )
+
+    epc_injection = EPCInjection.objects.get(admission__uuid=dossier_uuid)
+    epc_injection.status = statut
+    epc_injection.epc_responses.append(donnees)
+    epc_injection.save()
+
+    if statut == EPCInjectionStatus.OK.name:
+        logger.info("[INJECTION EPC - RETOUR] L injection a ete effectuee avec succes")
+    else:
+        erreurs = [f"\t- {erreur['message']}" for erreur in donnees['errors']]
+        logger.error(f"[INJECTION EPC - RETOUR] L injection a echouee pour ce/ces raison(s) : \n" + "\n".join(erreurs))
+    # history ?
+    # notification ?
