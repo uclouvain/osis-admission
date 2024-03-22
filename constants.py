@@ -23,12 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import re
 import uuid
-from django.utils.translation import gettext_lazy as _
 
-
-FIELD_REQUIRED_MESSAGE = _("This field is required.")
 DEFAULT_PAGINATOR_SIZE = 500
 PDF_MIME_TYPE = 'application/pdf'
 JPEG_MIME_TYPE = 'image/jpeg'

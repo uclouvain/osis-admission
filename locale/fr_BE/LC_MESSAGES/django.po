@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-19 09:54+0100\n"
+"POT-Creation-Date: 2024-03-22 18:08+0100\n"
 "PO-Revision-Date: 2023-12-08 17:10+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -7244,9 +7244,6 @@ msgstr "Ce champ est obligatoire si le prénom est manquant."
 msgid "This field is required if the surname is missing."
 msgstr "Ce champ est obligatoire si le nom est manquant."
 
-msgid "This field is required."
-msgstr "Ce champ est obligatoire."
-
 #, python-format
 msgid ""
 "This field must contain a translation for each of the following languages: "
@@ -8214,10 +8211,6 @@ msgstr "Carte de crédit"
 
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
-
-#, python-format
-msgid "e.g.: %(example)s"
-msgstr "ex: %(example)s"
 
 msgid "e.g.: 5th out of 30"
 msgstr "ex: 5ème sur 30"

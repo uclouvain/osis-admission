@@ -37,10 +37,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDSS,
     ChoixSousDomaineSciences,
 )
-from admission.forms import EMPTY_CHOICE
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import CentralManagerRoleFactory
+from base.forms.utils import EMPTY_CHOICE
 from base.models.enums.entity_type import EntityType
 from base.templatetags.pagination import PAGINATOR_SIZE_LIST
 from base.tests.factories.academic_year import AcademicYearFactory
