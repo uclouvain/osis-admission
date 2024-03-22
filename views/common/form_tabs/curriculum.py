@@ -687,13 +687,7 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
         return delete
 
     def get_success_url(self):
-        success_url = reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
-
-        redirect_to = self.request.POST.get('redirect_to')
-        if redirect_to:
-            success_url += redirect_to
-
-        return success_url
+        return reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid}) + '#parcours_anterieur'
 
     def get_failure_url(self):
         raise NotImplemented
@@ -843,13 +837,7 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
         return super().form_valid(form)
 
     def get_success_url(self):
-        success_url = reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
-
-        redirect_to = self.request.POST.get('redirect_to')
-        if redirect_to:
-            success_url += redirect_to
-
-        return success_url
+        return reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid}) + '#parcours_anterieur'
 
 
 class CurriculumNonEducationalExperienceDuplicateView(CurriculumBaseExperienceDuplicateView):
