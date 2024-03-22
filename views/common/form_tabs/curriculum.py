@@ -45,8 +45,7 @@ from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from base.models.academic_year import AcademicYear
-from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
+from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView
 from osis_profile.views.edit_experience_non_academique import EditExperienceNonAcademiqueView
 
@@ -96,11 +95,6 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     update_requested_documents = True
     update_admission_author = True
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.existing_experience = False
-        self._experience_id = None
-
     @property
     def experience_id(self):
         return self._experience_id or self.kwargs.get('experience_uuid', None)
@@ -110,59 +104,22 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         return {'uuid': self.experience_id}
 
     def post(self, request, *args, **kwargs):
+        context_data = self.get_context_data(**kwargs)
+
+        base_form = context_data['base_form']
+
         if self.experience_id:
             # On update
             return super().post(request, *args, **kwargs)
 
-        context_data = self.get_context_data(**kwargs)
-
-        base_form = context_data['base_form']
-        year_formset = context_data['year_formset']
-
-        # Check the forms
-        if not self.check_forms(base_form, year_formset):
-            messages.error(self.request, _("Please correct the errors below"))
-            return self.render_to_response(context_data)
-
-        enrolled_years = [
-            year_form.cleaned_data['academic_year']
-            for year_form in year_formset
-            if year_form.cleaned_data['is_enrolled']
-        ]
-
-        academic_years = {year.year: year for year in AcademicYear.objects.filter(year__in=enrolled_years)}
-
-        # Clean not model fields
-        for field in [
-            'other_institute',
-            'other_program',
-            'start',
-            'end',
-        ]:
-            base_form.cleaned_data.pop(field)
-
         # On creation
         # Save the base data
         with transaction.atomic():
-            instance = EducationalExperience.objects.create(
-                person=self.admission.candidate,
-                **base_form.cleaned_data,
-            )
-
-            # Save the enrolled years data
-            for year_form in year_formset:
-                cleaned_data = year_form.cleaned_data
-                cleaned_data['educational_experience'] = instance
-                cleaned_data['academic_year'] = academic_years[cleaned_data['academic_year']]
-                if cleaned_data.pop('is_enrolled'):
-                    EducationalExperienceYear.objects.create(**cleaned_data)
-
-            self._experience_id = instance.uuid
 
             # Consider the experience as valuated
             AdmissionEducationalValuatedExperiences.objects.create(
                 baseadmission_id=self.admission.uuid,
-                educationalexperience_id=instance.uuid,
+                educationalexperience_id=self._experience_id,
             )
 
             # Add the experience to the checklist
@@ -210,11 +167,6 @@ class CurriculumNonEducationalExperienceFormView(
     }
     update_requested_documents = True
     update_admission_author = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.existing_experience = False
-        self._experience_id = None
 
     @property
     def experience_id(self):
