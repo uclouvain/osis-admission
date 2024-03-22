@@ -578,11 +578,16 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
 
 class EPCInjectionAdmin(admin.ModelAdmin):
     search_fields = ['admission']
-    list_display = ['admission', 'status', 'epc_responses']
+    list_display = ['admission', 'status', 'last_epc_response']
     list_filter = ['status']
     formfield_overrides = {
         models.JSONField: {'widget': JSONEditorWidget},
     }
+
+    @admin.display()
+    def last_epc_response(self, obj):
+        if obj.epc_responses:
+            return obj.epc_responses[-1]
 
 
 class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):
