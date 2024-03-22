@@ -39,9 +39,10 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
-from admission.forms import AdmissionFileUploadField, CustomDateInput
+from admission.forms import AdmissionFileUploadField
 from admission.templatetags.admission import formatted_language, document_request_status_css_class
 from base.forms.utils.choice_field import BLANK_CHOICE
+from base.forms.utils.datefield import CustomDateInput
 
 
 class UploadDocumentFormMixin(forms.Form):

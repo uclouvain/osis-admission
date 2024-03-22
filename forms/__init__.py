@@ -40,7 +40,6 @@ from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
 from base.forms.utils import EMPTY_CHOICE, autocomplete
-from base.forms.utils.datefield import DATE_FORMAT
 from base.models.academic_year import AcademicYear
 from education_group.templatetags.education_group_extra import format_to_academic_year
 from reference.models.country import Country
@@ -128,20 +127,6 @@ class SelectOrOtherField(forms.MultiValueField):
         if hasattr(self, 'choices') and radio not in self.choices and other is None:
             value = ['other', radio]
         return super().clean(value)
-
-
-class CustomDateInput(forms.DateInput):
-    def __init__(self, attrs=None, format=DATE_FORMAT):
-        if attrs is None:
-            attrs = {
-                'placeholder': _("dd/mm/yyyy"),
-                'data-mask': '00/00/0000',
-                'autocomplete': 'off',
-            }
-        super().__init__(attrs, format)
-
-    class Media:
-        js = ('js/jquery.mask.min.js',)
 
 
 class PhoneField(forms.CharField):

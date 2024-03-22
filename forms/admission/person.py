@@ -32,7 +32,6 @@ from admission.constants import IMAGE_MIME_TYPES
 from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe, ChoixGenre
 from admission.forms import (
-    CustomDateInput,
     AdmissionFileUploadField as FileUploadField,
     RadioBooleanField,
     AdmissionModelCountryChoiceField,
@@ -42,6 +41,7 @@ from admission.forms import (
 from admission.utils import force_title
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
+from base.forms.utils.datefield import CustomDateInput
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from base.models.utils.utils import ChoiceEnum

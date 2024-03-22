@@ -76,7 +76,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     FilterFieldWidget,
-    CustomDateInput,
     EMPTY_CHOICE_AS_LIST,
     get_initial_choices_for_additional_approval_conditions,
 )
@@ -87,6 +86,7 @@ from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.choice_field import BLANK_CHOICE
+from base.forms.utils.datefield import CustomDateInput
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
