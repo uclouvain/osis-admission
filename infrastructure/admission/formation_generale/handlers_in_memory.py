@@ -126,6 +126,9 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.reference import (
     ReferenceInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.taches_techniques import (
+    TachesTechniquesInMemory,
+)
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -167,6 +170,7 @@ _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryReposit
 _reference_translator = ReferenceInMemoryTranslator()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
 _campus_repository = UclouvainCampusInMemoryRepository()
+_taches_techniques = TachesTechniquesInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -413,6 +417,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         paiement_frais_dossier_service=_paiement_frais_dossier,
         historique=_historique_formation_generale,
+        taches_techniques=_taches_techniques,
     ),
     PayerFraisDossierPropositionSuiteSoumissionCommand: (
         lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_soumission(

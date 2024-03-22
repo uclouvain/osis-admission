@@ -25,7 +25,9 @@
 # ##############################################################################
 import datetime
 import json
+import uuid
 from typing import List
+from unittest import mock
 
 import freezegun
 from django.conf import settings
@@ -40,6 +42,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
 )
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
@@ -52,6 +55,20 @@ from base.tests.factories.entity_version import EntityVersionFactory
 
 
 class ApplicationFeesViewTestCase(TestCase):
+    def setUp(self):
+        self.file_uuid = uuid.uuid4()
+        patcher = mock.patch('admission.tasks.merge_admission_documents.base_education_admission_document_merging')
+
+        self.merge_documents_patcher = patcher.start()
+        self.addCleanup(self.merge_documents_patcher.stop)
+
+        patcher = mock.patch(
+            'admission.exports.admission_recap.admission_recap.admission_pdf_recap',
+            return_value=self.file_uuid,
+        )
+        self.generate_pdf_recap_method_patcher = patcher.start()
+        self.addCleanup(self.generate_pdf_recap_method_patcher.stop)
+
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -367,6 +384,62 @@ class ApplicationFeesViewTestCase(TestCase):
             history_items[1].tags,
             ['proposition', 'application-fees-payment', 'request', 'status-changed'],
         )
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_cancel_the_initial_request_of_the_payment_of_the_application(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=self.training,
+            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        application_fee_checklist = StatutChecklist(
+            libelle='Must pay',
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={
+                'initial': '1',
+            },
+        ).to_dict()
+
+        # Simulate an initial application fees request
+        general_admission.checklist['current']['frais_dossier'] = application_fee_checklist
+        general_admission.pdf_recap = []
+        general_admission.save(update_fields=['checklist', 'pdf_recap'])
+
+        # Cancel
+        url = resolve_url(
+            'admission:general-education:application-fees',
+            uuid=general_admission.uuid,
+            status=ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
+        )
+        response = self.client.post(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.merge_documents_patcher.assert_called_once()
+        self.generate_pdf_recap_method_patcher.assert_called_once()
+
+        self.merge_documents_patcher.reset_mock()
+        self.generate_pdf_recap_method_patcher.reset_mock()
+
+        # Simulate a second application fees request
+        general_admission.checklist['current']['frais_dossier'] = application_fee_checklist
+        general_admission.save(update_fields=['checklist'])
+
+        # Cancel
+        url = resolve_url(
+            'admission:general-education:application-fees',
+            uuid=general_admission.uuid,
+            status=ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
+        )
+        response = self.client.post(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.merge_documents_patcher.assert_called_once()
+        self.generate_pdf_recap_method_patcher.assert_not_called()
 
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_change_checklist_status_from_not_concerned_to_dispensed(self, frozen_time):
