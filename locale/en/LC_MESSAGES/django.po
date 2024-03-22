@@ -1248,6 +1248,9 @@ msgstr ""
 msgid "Cancel the application fee request"
 msgstr ""
 
+msgid "Cancel the request"
+msgstr ""
+
 msgid "Cancelled application"
 msgstr ""
 
@@ -1429,6 +1432,9 @@ msgid "City"
 msgstr ""
 
 msgid "Civil status"
+msgstr ""
+
+msgid "Claim cancelled on"
 msgstr ""
 
 msgid "Cleaned"
@@ -5306,6 +5312,9 @@ msgstr ""
 msgid "Reporting categories"
 msgstr ""
 
+msgid "Request cancelled"
+msgstr ""
+
 msgid "Request of a new deadline for the confirmation paper"
 msgstr ""
 
@@ -6186,6 +6195,9 @@ msgstr ""
 msgid "The documents have been requested to the candidate"
 msgstr ""
 
+msgid "The documents request have been cancelled"
+msgstr ""
+
 msgid "The dossier has been confirmed as:"
 msgstr ""
 
@@ -6482,6 +6494,9 @@ msgid "Thesis-related data"
 msgstr ""
 
 msgid "This account number has been verified"
+msgstr ""
+
+msgid "This action will cancel the document request."
 msgstr ""
 
 msgid "This activity and its potential subactivities will be discontinued"

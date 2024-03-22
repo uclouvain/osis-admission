@@ -27,6 +27,7 @@
 import datetime
 import uuid
 from email import message_from_string
+from typing import Optional
 from unittest import mock
 from unittest.mock import patch
 
@@ -2787,6 +2788,58 @@ class DocumentViewTestCase(TestCase):
             ).exists()
         )
 
+        frozen_time.move_to('2022-01-05')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
+        HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).delete()
+
+        # Cancel the documents request
+        cancel_url = resolve_url(
+            'admission:general-education:cancel-document-request',
+            uuid=self.general_admission.uuid,
+        )
+
+        response = self.client.post(cancel_url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.general_admission.refresh_from_db()
+
+        # Check that the requested documents have been updated
+        self.assertEqual(
+            self.general_admission.requested_documents[self.sic_free_requestable_document],
+            {
+                'last_actor': self.second_sic_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                'last_action_at': '2022-01-05T00:00:00',
+                'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
+                'requested_at': '',
+                'deadline_at': '',
+                'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+        )
+
+        # Check that the proposition status has been changed
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.second_sic_manager_user.person)
+
+        # Check history
+        entry: Optional[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).first()
+
+        self.assertIsNotNone(entry)
+        self.assertCountEqual(entry.tags, ['proposition', 'status-changed'])
+        self.assertEqual(entry.message_fr, 'La réclamation des documents complémentaires a été annulée par SIC.')
+        self.assertEqual(entry.message_en, 'The request for additional information has been cancelled by SIC.')
+        self.assertEqual(
+            entry.author,
+            f'{self.second_sic_manager_user.person.first_name} {self.second_sic_manager_user.person.last_name}',
+        )
+
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_general_document_detail_fac_manager(self, frozen_time):
         self.init_documents(for_fac=True)
@@ -2961,6 +3014,58 @@ class DocumentViewTestCase(TestCase):
                 object_uuid=self.general_admission.uuid,
                 tags=['proposition', 'status-changed'],
             ).exists()
+        )
+
+        frozen_time.move_to('2022-01-05')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
+        HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).delete()
+
+        # Cancel the documents request
+        cancel_url = resolve_url(
+            'admission:general-education:cancel-document-request',
+            uuid=self.general_admission.uuid,
+        )
+
+        response = self.client.post(cancel_url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.general_admission.refresh_from_db()
+
+        # Check that the requested documents have been updated
+        self.assertEqual(
+            self.general_admission.requested_documents[self.fac_free_requestable_document],
+            {
+                'last_actor': self.second_fac_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+                'last_action_at': '2022-01-05T00:00:00',
+                'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
+                'requested_at': '',
+                'deadline_at': '',
+                'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+        )
+
+        # Check that the proposition status has been changed
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.second_fac_manager_user.person)
+
+        # Check history
+        entry: Optional[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).first()
+
+        self.assertIsNotNone(entry)
+        self.assertCountEqual(entry.tags, ['proposition', 'status-changed'])
+        self.assertEqual(entry.message_fr, 'La réclamation des documents complémentaires a été annulée par FAC.')
+        self.assertEqual(entry.message_en, 'The request for additional information has been cancelled by FAC.')
+        self.assertEqual(
+            entry.author,
+            f'{self.second_fac_manager_user.person.first_name} {self.second_fac_manager_user.person.last_name}',
         )
 
     def test_document_detail_view(self):
