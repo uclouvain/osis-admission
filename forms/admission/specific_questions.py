@@ -27,7 +27,6 @@ from dal.forward import Const
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import DiplomaticPost
 from admission.forms import (
     AdmissionFileUploadField,
@@ -37,6 +36,7 @@ from admission.forms import (
 )
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.mark_safe_lazy import mark_safe_lazy
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 
 
 class CommonSpecificQuestionsForm(ConfigurableFormMixin, forms.Form):

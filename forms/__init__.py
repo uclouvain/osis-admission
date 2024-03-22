@@ -34,18 +34,18 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
+from osis_document.contrib import FileUploadField
 
 from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
 from admission.forms import autocomplete
+from base.forms.utils import EMPTY_CHOICE
 from base.forms.utils.datefield import DATE_FORMAT
 from base.models.academic_year import AcademicYear
 from education_group.templatetags.education_group_extra import format_to_academic_year
-from osis_document.contrib import FileUploadField
 from reference.models.country import Country
 
-EMPTY_CHOICE = (('', ' - '),)
 NONE_CHOICE = ((None, ' - '),)
 ALL_EMPTY_CHOICE = (('', _('All')),)
 MINIMUM_SELECTABLE_YEAR = 2004
@@ -180,10 +180,6 @@ def get_year_choices(min_year=1920, max_year=None):
         )
         for year in range(max_year, min_year - 1, -1)
     ]
-
-
-def get_example_text(example: str):
-    return _("e.g.: %(example)s") % {'example': example}
 
 
 def get_scholarship_choices(scholarships, scholarship_type: TypeBourse):

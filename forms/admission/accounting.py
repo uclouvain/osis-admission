@@ -23,14 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Set, List
+from typing import List
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _, ngettext
 from localflavor.generic.forms import BICFormField, IBAN_MIN_LENGTH
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd.admission.domain.validator._should_comptabilite_etre_completee import DEPENDANCES_CHAMPS_ASSIMILATION
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
@@ -44,9 +43,10 @@ from admission.ddd.admission.enums import (
     ChoixTypeCompteBancaire,
     ChoixAffiliationSport,
 )
-from admission.forms import AdmissionFileUploadField as FileUploadField, RadioBooleanField, get_example_text
-from admission.templatetags.admission import get_academic_year
+from admission.forms import AdmissionFileUploadField as FileUploadField, RadioBooleanField
 from admission.mark_safe_lazy import mark_safe_lazy
+from admission.templatetags.admission import get_academic_year
+from base.forms.utils import get_example_text, FIELD_REQUIRED_MESSAGE
 from reference.services.iban_validator import (
     IBANValidatorService,
     IBANValidatorException,

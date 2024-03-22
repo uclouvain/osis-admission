@@ -38,17 +38,16 @@ from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.forms import (
     autocomplete,
-    EMPTY_CHOICE,
     AdmissionFileUploadField as FileUploadField,
     RadioBooleanField,
     CustomDateInput,
-    get_example_text,
     FORM_SET_PREFIX,
     AdmissionModelCountryChoiceField,
 )
 from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.mark_safe_lazy import mark_safe_lazy
 from admission.views.autocomplete.diploma_title import get_diploma_label_with_study_type
+from base.forms.utils import EMPTY_CHOICE, get_example_text
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from osis_profile.models import EducationalExperience, ProfessionalExperience

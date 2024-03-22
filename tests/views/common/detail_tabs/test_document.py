@@ -36,16 +36,12 @@ from django.contrib.auth.models import User
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.utils.translation import gettext
+from osis_document.contrib.forms import FileUploadField
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 from rest_framework import status
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.tests.factories.person import CompletePersonFactory
-from base.forms.utils.choice_field import BLANK_CHOICE
-from osis_document.contrib.forms import FileUploadField
-
-from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE, IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
+from admission.constants import PDF_MIME_TYPE, IMAGE_MIME_TYPES
 from admission.contrib.models import GeneralEducationAdmission, AdmissionFormItemInstantiation, AdmissionFormItem
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
@@ -59,13 +55,17 @@ from admission.ddd.admission.enums.emplacement_document import (
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
     StatutReclamationEmplacementDocument,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms import AdmissionFileUploadField
 from admission.infrastructure.utils import MODEL_FIELD_BY_FREE_MANAGER_DOCUMENT_TYPE
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
+from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.choice_field import BLANK_CHOICE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory

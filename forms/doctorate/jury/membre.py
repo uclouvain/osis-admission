@@ -29,10 +29,10 @@ from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import GenreMembre, TitreMembre
 from admission.forms import (
     AdmissionModelCountryChoiceField,
-    EMPTY_CHOICE,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     autocomplete,
 )
+from base.forms.utils import EMPTY_CHOICE
 from base.models.person import Person
 from base.models.utils.utils import ChoiceEnum
 from reference.models.country import Country

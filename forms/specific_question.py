@@ -40,9 +40,9 @@ from admission.ddd.admission.enums import (
     TYPES_ITEMS_LECTURE_SEULE,
     Onglets,
 )
-from admission.forms import AdmissionFileUploadField, EMPTY_CHOICE, EMPTY_CHOICE_AS_LIST
+from admission.forms import AdmissionFileUploadField
 from admission.utils import get_uuid_value
-
+from base.forms.utils import EMPTY_CHOICE
 
 DEFAULT_MAX_NB_DOCUMENTS = 1
 
