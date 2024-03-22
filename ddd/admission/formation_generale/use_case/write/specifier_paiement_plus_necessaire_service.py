@@ -23,13 +23,15 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.formation_generale.commands import SpecifierPaiementPlusNecessaireCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
+from admission.ddd.admission.formation_generale.domain.service.i_taches_techniques import ITachesTechniques
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
@@ -38,11 +40,15 @@ def specifier_paiement_plus_necessaire(
     proposition_repository: 'IPropositionRepository',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
     historique: 'IHistorique',
+    taches_techniques: 'ITachesTechniques',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
     statut_initial = proposition.statut
+    statut_checklist_frais_dossier_avant_modification = StatutChecklist.from_dict(
+        proposition.checklist_actuelle.frais_dossier.to_dict(),
+    )
 
     # WHEN
     paiement_frais_dossier_service.verifier_paiement_non_realise(
@@ -57,5 +63,10 @@ def specifier_paiement_plus_necessaire(
     proposition_repository.save(proposition)
 
     historique.historiser_annulation_demande_paiement_par_gestionnaire(proposition, cmd.gestionnaire, statut_initial)
+
+    taches_techniques.annuler_paiement_initial_frais_dossier(
+        proposition=proposition,
+        statut_checklist_frais_dossier_avant_modification=statut_checklist_frais_dossier_avant_modification,
+    )
 
     return proposition_id
