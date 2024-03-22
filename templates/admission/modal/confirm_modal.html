@@ -48,6 +48,6 @@
   >
     {% csrf_token %}
     <button type="button" class="btn btn-default" data-dismiss="modal">{% translate 'Cancel' %}</button>
-    <button type="submit" class="btn btn-danger">{% translate 'Confirm' %}</button>
+    <button type="submit" class="btn {{ confirm_button_class|default:'btn-danger' }}">{% translate 'Confirm' %}</button>
   </form>
 {% endblock %}
