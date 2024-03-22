@@ -39,9 +39,9 @@ from admission.forms import (
     AdmissionModelForm,
     get_year_choices,
 )
-from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.utils import force_title
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE
+from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from base.models.utils.utils import ChoiceEnum
@@ -227,7 +227,7 @@ class AdmissionPersonForm(AdmissionModelForm):
     )
 
     # Already registered
-    last_registration_year = AcademicYearField(
+    last_registration_year = AcademicYearModelChoiceField(
         required=False,
         label=_('What was the most recent year you were enrolled at UCLouvain?'),
         past_only=True,

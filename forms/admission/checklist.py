@@ -84,10 +84,10 @@ from admission.forms import (
 from admission.forms import get_academic_year_choices
 from admission.forms.admission.document import ChangeRequestDocumentForm
 from admission.forms.autocomplete import Select2MultipleWithTagWhenNoResultWidget
-from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE
+from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
@@ -644,7 +644,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
 
 
 class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
-    admission_requirement_year = AcademicYearField(
+    admission_requirement_year = AcademicYearModelChoiceField(
         past_only=True,
         required=False,
         label=_('Admission requirement year'),

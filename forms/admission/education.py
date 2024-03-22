@@ -29,17 +29,16 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
 from admission.forms import (
     AdmissionFileUploadField as FileUploadField,
     AdmissionModelCountryChoiceField,
 )
 from admission.forms import autocomplete
-from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import format_academic_year
-from base.forms.utils import EMPTY_CHOICE
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
+from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.models.academic_year import AcademicYear
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
@@ -81,7 +80,7 @@ class BaseAdmissionEducationForm(ConfigurableFormMixin):
             ),
         ),
     )
-    graduated_from_high_school_year = AcademicYearField(
+    graduated_from_high_school_year = AcademicYearModelChoiceField(
         label=_('Please indicate the academic year in which you obtained your degree'),
         widget=autocomplete.Select2,
         required=False,

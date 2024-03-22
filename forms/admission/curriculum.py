@@ -44,10 +44,10 @@ from admission.forms import (
     FORM_SET_PREFIX,
     AdmissionModelCountryChoiceField,
 )
-from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.mark_safe_lazy import mark_safe_lazy
 from admission.views.autocomplete.diploma_title import get_diploma_label_with_study_type
 from base.forms.utils import EMPTY_CHOICE, get_example_text
+from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -277,14 +277,14 @@ class ProgramModelField(forms.ModelChoiceField):
 
 
 class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, forms.ModelForm):
-    start = AcademicYearField(
+    start = AcademicYearModelChoiceField(
         label=_('Start'),
         widget=autocomplete.Select2(),
         past_only=True,
         to_field_name='year',
     )
 
-    end = AcademicYearField(
+    end = AcademicYearModelChoiceField(
         label=pgettext_lazy('admission', 'End'),
         widget=autocomplete.Select2(),
         past_only=True,

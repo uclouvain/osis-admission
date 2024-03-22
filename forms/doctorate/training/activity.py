@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from datetime import date
 from functools import partial
 from typing import List, Tuple
 
@@ -42,13 +41,13 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     ContexteFormation,
 )
 from admission.forms import SelectOrOtherField, DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS, autocomplete
+from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.datefield import DatePickerInput
 from base.models.academic_year import AcademicYear
 from base.models.learning_unit_year import LearningUnitYear
 
 __all__ = [
     "ConfigurableActivityTypeField",
-    "AcademicYearField",
     "ConferenceForm",
     "ConferenceCommunicationForm",
     "ConferencePublicationForm",
@@ -107,29 +106,6 @@ class BooleanRadioSelect(forms.RadioSelect):
             context['widget']['optgroups'][0][1][0]['selected'] = True
             context['widget']['optgroups'][0][1][0]['attrs']['checked'] = True
         return context
-
-
-class AcademicYearField(forms.ModelChoiceField):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('label', _("Academic year"))
-        kwargs.setdefault('queryset', AcademicYear.objects.order_by('-year'))
-        if kwargs.pop('future_only', False):
-            kwargs.setdefault('limit_choices_to', self.limit_to_future_years_choices)
-        if kwargs.pop('past_only', False):
-            kwargs.setdefault('limit_choices_to', self.limit_to_past_years_choices)
-
-        super().__init__(*args, **kwargs)
-
-    @staticmethod
-    def limit_to_future_years_choices():
-        return {'year__gte': date.today().year}
-
-    @staticmethod
-    def limit_to_past_years_choices():
-        return {'start_date__lte': date.today()}
-
-    def label_from_instance(self, obj: AcademicYear) -> str:
-        return f"{obj.year}-{obj.year + 1}"
 
 
 CustomDatePickerInput = partial(
@@ -573,7 +549,7 @@ class CourseForm(ActivityFormMixin, forms.ModelForm):
         required=False,
     )
     organizing_institution = SelectOrOtherField(choices=[INSTITUTION_UCL], label=_("Institution"))
-    academic_year = AcademicYearField(widget=autocomplete.ListSelect2(), required=False)
+    academic_year = AcademicYearModelChoiceField(widget=autocomplete.ListSelect2(), required=False)
     is_online = forms.BooleanField(
         label=_("Course unit with evaluation"),  # Yes, its another meaning, but we spare a db field
         initial=False,
@@ -660,7 +636,7 @@ class PaperForm(ActivityFormMixin, forms.ModelForm):
 
 class UclCourseForm(ActivityFormMixin, forms.ModelForm):
     template_name = "admission/doctorate/forms/training/ucl_course.html"
-    academic_year = AcademicYearField(to_field_name='year', widget=autocomplete.ListSelect2(), future_only=True)
+    academic_year = AcademicYearModelChoiceField(to_field_name='year', widget=autocomplete.ListSelect2(), future_only=True)
     learning_unit_year = forms.CharField(
         label=pgettext_lazy("admission", "Learning unit"),
         widget=autocomplete.ListSelect2(
