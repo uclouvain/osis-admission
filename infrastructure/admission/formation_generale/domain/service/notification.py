@@ -72,9 +72,9 @@ from admission.utils import (
     get_portal_admission_url,
     get_backoffice_admission_url,
     get_salutation_prefix,
-    format_academic_year,
 )
 from base.models.person import Person
+from base.utils.utils import format_academic_year
 
 ONE_YEAR_SECONDS = 366 * 24 * 60 * 60
 EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'

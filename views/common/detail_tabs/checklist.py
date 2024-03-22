@@ -172,7 +172,6 @@ from admission.utils import (
     get_portal_admission_url,
     get_access_titles_names,
     get_salutation_prefix,
-    format_academic_year,
 )
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
@@ -181,6 +180,7 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException

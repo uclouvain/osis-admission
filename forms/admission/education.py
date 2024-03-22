@@ -34,7 +34,6 @@ from admission.forms import (
     AdmissionModelCountryChoiceField,
 )
 from admission.forms.specific_question import ConfigurableFormMixin
-from admission.utils import format_academic_year
 from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.file_field import MaxOneFileUploadField
@@ -42,6 +41,7 @@ from base.models.academic_year import AcademicYear
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.organization import Organization
+from base.utils.utils import format_academic_year
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,

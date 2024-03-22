@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-19 09:54+0100\n"
+"POT-Creation-Date: 2024-03-22 18:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -6538,9 +6538,6 @@ msgstr ""
 msgid "This field is required if the surname is missing."
 msgstr ""
 
-msgid "This field is required."
-msgstr ""
-
 #, python-format
 msgid ""
 "This field must contain a translation for each of the following languages: "
@@ -7391,10 +7388,6 @@ msgid "creditcard"
 msgstr "Credit card"
 
 msgid "dd/mm/yyyy"
-msgstr ""
-
-#, python-format
-msgid "e.g.: %(example)s"
 msgstr ""
 
 msgid "e.g.: 5th out of 30"

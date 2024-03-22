@@ -39,7 +39,6 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, DeleteView
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models.base import (
     AdmissionEducationalValuatedExperiences,
     BaseAdmission,
@@ -65,6 +64,7 @@ from admission.forms.admission.curriculum import (
 )
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
 from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
