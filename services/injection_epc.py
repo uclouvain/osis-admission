@@ -467,7 +467,6 @@ class InjectionEPC:
             channel = connect.channel()
             queue_name = settings.QUEUES.get('QUEUES_NAME').get('ADMISSION_TO_EPC')
             send_message(queue_name, donnees, connect, channel)
-            logger.info()
             # change something in admission object ? epc_injection_status ? = sended
             # history ?
             # notification ?
