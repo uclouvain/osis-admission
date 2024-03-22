@@ -8141,6 +8141,9 @@ msgstr "Situation d’assimilation qui vous correspond"
 msgid "Your data have been saved."
 msgstr "Vos données ont été sauvegardées."
 
+msgid "Your document is available here"
+msgstr "Votre document est disponible ici"
+
 msgid "Your dossier reference:"
 msgstr "Votre numéro de dossier :"
 
