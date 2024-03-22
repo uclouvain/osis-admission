@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -150,6 +150,7 @@
     </a>
 
     {# Create the confirmation modals #}
+    <div class="parcours-modals">
     {% for year, year_experiences in experiences.items %}
       {% for experience in year_experiences %}
         {% checklist_experience_action_links_context experience=experience current_year=year prefix=prefix as experience_urls %}
@@ -167,9 +168,10 @@
           {% endblocktranslate %}
           {% concat 'duplicate-experience-modal-' prefix '-' experience_urls.experience_uuid as duplicate_modal_id %}
           {% translate 'Duplication of an experience' as confirm_title %}
-          {% include 'admission/modal/confirm_modal.html' with confirm_title=confirm_title confirm_url=experience_urls.duplicate_url confirm_message=confirm_message confirm_id=duplicate_modal_id %}
+          {% include 'admission/modal/confirm_modal.html' with confirm_title=confirm_title confirm_url=experience_urls.duplicate_url confirm_message=confirm_message confirm_id=duplicate_modal_id confirm_button_class="bg-primary" %}
         {% endif %}
       {% endfor %}
     {% endfor %}
+    </div>
   {% endif %}
 </div>
