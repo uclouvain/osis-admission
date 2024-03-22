@@ -24,11 +24,7 @@
 #
 # ##############################################################################
 
-import calendar
-import datetime
-
 from django.contrib import messages
-from django.db import transaction
 from django.db.models import ProtectedError
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -96,40 +92,21 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     update_admission_author = True
 
     @property
-    def experience_id(self):
-        return self._experience_id or self.kwargs.get('experience_uuid', None)
-
-    @property
     def educational_experience_filter_uuid(self):
         return {'uuid': self.experience_id}
 
-    def post(self, request, *args, **kwargs):
-        context_data = self.get_context_data(**kwargs)
-
-        base_form = context_data['base_form']
-
-        if self.experience_id:
-            # On update
-            return super().post(request, *args, **kwargs)
-
-        # On creation
-        # Save the base data
-        with transaction.atomic():
-
-            # Consider the experience as valuated
-            AdmissionEducationalValuatedExperiences.objects.create(
-                baseadmission_id=self.admission.uuid,
-                educationalexperience_id=self._experience_id,
-            )
-
-            # Add the experience to the checklist
-            if 'current' in self.admission.checklist:
-                admission = self.admission
-                experience_checklist = Checklist.initialiser_checklist_experience(instance.uuid).to_dict()
-                admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
-                admission.save(update_fields=['checklist'])
-
-        return self.form_valid(base_form)
+    def traitement_specifique_de_creation(self):
+        # Consider the experience as valuated
+        AdmissionEducationalValuatedExperiences.objects.create(
+            baseadmission_id=self.admission.uuid,
+            educationalexperience_id=self._experience_id,
+        )
+        # Add the experience to the checklist
+        if 'current' in self.admission.checklist:
+            admission = self.admission
+            experience_checklist = Checklist.initialiser_checklist_experience(self._experience_id).to_dict()
+            admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
+            admission.save(update_fields=['checklist'])
 
     @property
     def person(self):
@@ -169,58 +146,21 @@ class CurriculumNonEducationalExperienceFormView(
     update_admission_author = True
 
     @property
-    def experience_id(self):
-        return self._experience_id or self.kwargs.get('experience_uuid', None)
-
-    @property
     def person(self):
         return self.admission.candidate
 
-    def form_valid(self, form):
-        if self.existing_experience:
-            # On update
-            return super().form_valid(form)
-
-        cleaned_data = form.cleaned_data
-
-        # The start date is the first day of the specified month
-        cleaned_data['start_date'] = datetime.date(
-            int(cleaned_data.pop('start_date_year')),
-            int(cleaned_data.pop('start_date_month')),
-            1,
+    def traitement_specifique_de_creation(self):
+        # Consider the experience as valuated
+        AdmissionProfessionalValuatedExperiences.objects.create(
+            baseadmission_id=self.admission.uuid,
+            professionalexperience_id=self._experience_id,
         )
-        # The end date is the last day of the specified month
-        end_date_year = int(cleaned_data.pop('end_date_year'))
-        end_date_month = int(cleaned_data.pop('end_date_month'))
-        cleaned_data['end_date'] = datetime.date(
-            end_date_year,
-            end_date_month,
-            calendar.monthrange(end_date_year, end_date_month)[1],
-        )
-
-        # On create
-        with transaction.atomic():
-            instance = ProfessionalExperience.objects.create(
-                person=self.admission.candidate,
-                **cleaned_data,
-            )
-
-            self._experience_id = instance.uuid
-
-            # Consider the experience as valuated
-            AdmissionProfessionalValuatedExperiences.objects.create(
-                baseadmission_id=self.admission.uuid,
-                professionalexperience_id=instance.uuid,
-            )
-
-            # Add the experience to the checklist
-            if 'current' in self.admission.checklist:
-                admission = self.admission
-                experience_checklist = Checklist.initialiser_checklist_experience(instance.uuid).to_dict()
-                admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
-                admission.save(update_fields=['checklist'])
-
-        return super().form_valid(form)
+        # Add the experience to the checklist
+        if 'current' in self.admission.checklist:
+            admission = self.admission
+            experience_checklist = Checklist.initialiser_checklist_experience(self._experience_id).to_dict()
+            admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
+            admission.save(update_fields=['checklist'])
 
     def get_success_url(self):
         return reverse(

@@ -172,7 +172,7 @@ def _get_field_from_configuration(configuration: QuestionSpecifiqueDTO, required
         default_field_params['required'] = required_documents_on_form_submit
         field = MaxOneFileUploadField(
             **default_field_params,
-            # Note that the AdmissionFileUploadField overrides the max_files and mimetypes attributes
+            # Note that the MaxOneFileUploadField overrides the max_files and mimetypes attributes
             max_files=configuration.configuration.get(
                 CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name,
                 DEFAULT_MAX_NB_DOCUMENTS,

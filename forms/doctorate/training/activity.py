@@ -640,7 +640,7 @@ class UclCourseForm(ActivityFormMixin, forms.ModelForm):
     academic_year = AcademicYearModelChoiceField(
         to_field_name='year',
         widget=autocomplete.ListSelect2(),
-        future_only=True
+        future_only=True,
     )
     learning_unit_year = forms.CharField(
         label=pgettext_lazy("admission", "Learning unit"),
