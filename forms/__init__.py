@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 import datetime
-from functools import partial
 from typing import List, Optional, Dict
 
 import phonenumbers
@@ -202,15 +201,6 @@ class AdmissionFileUploadField(FileUploadField):
         kwargs['max_files'] = 1
         kwargs['mimetypes'] = forced_mimetypes or [PDF_MIME_TYPE]
         super().__init__(**kwargs)
-
-
-RadioBooleanField = partial(
-    forms.TypedChoiceField,
-    coerce=lambda value: value == 'True',
-    choices=((True, _('Yes')), (False, _('No'))),
-    widget=forms.RadioSelect,
-    empty_value=None,
-)
 
 
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):

@@ -43,10 +43,11 @@ from admission.ddd.admission.enums import (
     ChoixTypeCompteBancaire,
     ChoixAffiliationSport,
 )
-from admission.forms import AdmissionFileUploadField as FileUploadField, RadioBooleanField
+from admission.forms import AdmissionFileUploadField as FileUploadField
 from admission.mark_safe_lazy import mark_safe_lazy
 from admission.templatetags.admission import get_academic_year
 from base.forms.utils import get_example_text, FIELD_REQUIRED_MESSAGE
+from base.forms.utils.fields import RadioBooleanField
 from reference.services.iban_validator import (
     IBANValidatorService,
     IBANValidatorException,
