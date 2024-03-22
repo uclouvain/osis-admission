@@ -56,7 +56,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.forms import AdmissionFileUploadField
 from admission.infrastructure.utils import MODEL_FIELD_BY_FREE_MANAGER_DOCUMENT_TYPE
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
@@ -66,6 +65,7 @@ from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
+from base.forms.utils.file_field import MaxOneFileUploadField
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -274,7 +274,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
         self.assertIn(
-            AdmissionFileUploadField.default_error_messages['min_files'],
+            MaxOneFileUploadField.default_error_messages['min_files'],
             response.context['form'].errors.get('file', []),
         )
 
@@ -290,7 +290,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            AdmissionFileUploadField.default_error_messages['max_files'],
+            MaxOneFileUploadField.default_error_messages['max_files'],
             response.context['form'].errors.get('file', []),
         )
 
@@ -354,7 +354,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
         self.assertIn(
-            AdmissionFileUploadField.default_error_messages['min_files'],
+            MaxOneFileUploadField.default_error_messages['min_files'],
             response.context['form'].errors.get('file', []),
         )
 
@@ -370,7 +370,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            AdmissionFileUploadField.default_error_messages['max_files'],
+            MaxOneFileUploadField.default_error_messages['max_files'],
             response.context['form'].errors.get('file', []),
         )
 

@@ -36,7 +36,6 @@ from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pge
 
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.forms import (
-    AdmissionFileUploadField as FileUploadField,
     FORM_SET_PREFIX,
     AdmissionModelCountryChoiceField,
 )
@@ -46,6 +45,7 @@ from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESS
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.fields import RadioBooleanField
+from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -116,7 +116,7 @@ class AdmissionCurriculumProfessionalExperienceForm(forms.ModelForm):
         label=_('Employer'),
         required=False,
     )
-    certificate = FileUploadField(
+    certificate = MaxOneFileUploadField(
         label=_('Certificate'),
         required=False,
     )
@@ -407,19 +407,19 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
         label=pgettext_lazy('admission', 'Grade'),
         required=False,
     )
-    graduate_degree = FileUploadField(
+    graduate_degree = MaxOneFileUploadField(
         label=_('Diploma'),
         required=False,
     )
-    graduate_degree_translation = FileUploadField(
+    graduate_degree_translation = MaxOneFileUploadField(
         label=_('Diploma translation'),
         required=False,
     )
-    transcript = FileUploadField(
+    transcript = MaxOneFileUploadField(
         label=_('Transcript'),
         required=False,
     )
-    transcript_translation = FileUploadField(
+    transcript_translation = MaxOneFileUploadField(
         label=_('Transcript translation'),
         required=False,
     )
@@ -456,7 +456,7 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
             },
         ),
     )
-    dissertation_summary = FileUploadField(
+    dissertation_summary = MaxOneFileUploadField(
         label=_('Dissertation summary'),
         required=False,
     )
@@ -675,12 +675,12 @@ class AdmissionCurriculumEducationalExperienceYearForm(ByContextAdmissionFormMix
         required=False,
         localize=True,
     )
-    transcript = FileUploadField(
+    transcript = MaxOneFileUploadField(
         label=_('Transcript'),
         max_files=1,
         required=False,
     )
-    transcript_translation = FileUploadField(
+    transcript_translation = MaxOneFileUploadField(
         label=_('Transcript translation'),
         max_files=1,
         required=False,

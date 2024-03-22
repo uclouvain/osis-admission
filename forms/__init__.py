@@ -33,9 +33,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
-from osis_document.contrib import FileUploadField
 
-from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
 from base.forms.utils import EMPTY_CHOICE, autocomplete
@@ -190,17 +188,6 @@ def format_training(training: FormationDTO):
         campus=training.campus,
         sigle=training.sigle,
     )
-
-
-class AdmissionFileUploadField(FileUploadField):
-    """
-    A file upload field that supports only one file and by default only PDF file.
-    """
-
-    def __init__(self, forced_mimetypes=None, **kwargs):
-        kwargs['max_files'] = 1
-        kwargs['mimetypes'] = forced_mimetypes or [PDF_MIME_TYPE]
-        super().__init__(**kwargs)
 
 
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
