@@ -54,9 +54,8 @@ from admission.forms import (
     CustomDateInput,
     get_academic_year_choices,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
-    autocomplete,
 )
-from base.forms.utils import EMPTY_CHOICE
+from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType

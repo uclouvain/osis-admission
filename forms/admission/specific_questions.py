@@ -30,13 +30,12 @@ from django.utils.translation import gettext_lazy as _
 from admission.contrib.models import DiplomaticPost
 from admission.forms import (
     AdmissionFileUploadField,
-    autocomplete,
     RadioBooleanField,
     get_diplomatic_post_initial_choices,
 )
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.mark_safe_lazy import mark_safe_lazy
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils import FIELD_REQUIRED_MESSAGE, autocomplete
 
 
 class CommonSpecificQuestionsForm(ConfigurableFormMixin, forms.Form):

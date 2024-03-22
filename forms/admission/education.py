@@ -34,10 +34,9 @@ from admission.forms import (
     AdmissionFileUploadField as FileUploadField,
     AdmissionModelCountryChoiceField,
 )
-from admission.forms import autocomplete
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import format_academic_year
-from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.models.academic_year import AcademicYear
 from base.models.enums.establishment_type import EstablishmentTypeEnum

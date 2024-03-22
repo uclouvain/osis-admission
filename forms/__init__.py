@@ -39,8 +39,7 @@ from osis_document.contrib import FileUploadField
 from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
-from admission.forms import autocomplete
-from base.forms.utils import EMPTY_CHOICE
+from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.forms.utils.datefield import DATE_FORMAT
 from base.models.academic_year import AcademicYear
 from education_group.templatetags.education_group_extra import format_to_academic_year
