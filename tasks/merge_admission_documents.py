@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from infrastructure.messages_bus import message_bus_instance
 
 
-def _base_education_admission_document_merging_from_task(admission):
+def base_education_admission_document_merging(admission):
     """Merging of each document field of the proposition into one PDF."""
     from osis_document.api.utils import launch_post_processing
 
@@ -159,16 +159,16 @@ def _base_education_admission_document_merging_from_task(admission):
 def general_education_admission_document_merging_from_task(task_uuid: str):
     """Merging of each document field of a general education proposition into one PDF."""
     task = AdmissionTask.objects.select_related(f'admission__generaleducationadmission').get(task__uuid=task_uuid)
-    _base_education_admission_document_merging_from_task(admission=task.admission.generaleducationadmission)
+    base_education_admission_document_merging(admission=task.admission.generaleducationadmission)
 
 
 def continuing_education_admission_document_merging_from_task(task_uuid: str):
     """Merging of each document field of a continuing education proposition into one PDF."""
     task = AdmissionTask.objects.select_related(f'admission__continuingeducationadmission').get(task__uuid=task_uuid)
-    _base_education_admission_document_merging_from_task(admission=task.admission.continuingeducationadmission)
+    base_education_admission_document_merging(admission=task.admission.continuingeducationadmission)
 
 
 def doctorate_education_admission_document_merging_from_task(task_uuid: str):
     """Merging of each document field of a doctorate education proposition into one PDF."""
     task = AdmissionTask.objects.select_related(f'admission__doctorateadmission').get(task__uuid=task_uuid)
-    _base_education_admission_document_merging_from_task(admission=task.admission.doctorateadmission)
+    base_education_admission_document_merging(admission=task.admission.doctorateadmission)
