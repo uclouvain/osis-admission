@@ -41,6 +41,7 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -601,6 +602,12 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=ProfilCandidatTranslator(),
             campus_repository=UclouvainCampusRepository(),
             pdf_generation=PDFGeneration(),
+        )
+    ),
+    RetyperDocumentCommand: (
+        lambda msg_bus, cmd: retyper_document(
+            cmd,
+            emplacement_document_repository=EmplacementDocumentRepository(),
         )
     ),
 }
