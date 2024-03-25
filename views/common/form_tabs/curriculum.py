@@ -26,13 +26,15 @@
 
 import calendar
 import datetime
+import uuid
 from decimal import Decimal
+from typing import Union
 
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Prefetch, F, ProtectedError
+from django.db.models import Prefetch, F, ProtectedError, QuerySet
 from django.forms import forms
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.template import loader
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -63,6 +65,7 @@ from admission.forms.admission.curriculum import (
     AdmissionCurriculumProfessionalExperienceForm,
 )
 from admission.forms.specific_question import ConfigurableFormMixin
+from admission.utils import copy_documents
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.academic_year import AcademicYear
@@ -74,9 +77,11 @@ from reference.models.enums.cycle import Cycle
 __all__ = [
     'CurriculumEducationalExperienceFormView',
     'CurriculumEducationalExperienceDeleteView',
+    'CurriculumEducationalExperienceDuplicateView',
     'CurriculumGlobalFormView',
     'CurriculumNonEducationalExperienceFormView',
     'CurriculumNonEducationalExperienceDeleteView',
+    'CurriculumNonEducationalExperienceDuplicateView',
 ]
 
 
@@ -634,6 +639,7 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
     permission_required = 'admission.change_admission_curriculum'
     slug_field = 'uuid'
     slug_url_kwarg = 'experience_uuid'
+    template_name = 'admission/empty_template.html'
 
     @property
     def experience_id(self):
@@ -681,7 +687,13 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
         return delete
 
     def get_success_url(self):
-        return reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid}) + '#parcours_anterieur'
+        success_url = reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
+
+        redirect_to = self.request.POST.get('redirect_to')
+        if redirect_to:
+            success_url += redirect_to
+
+        return success_url
 
     def get_failure_url(self):
         raise NotImplemented
@@ -717,3 +729,163 @@ class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView):
                 'experience_uuid': self.experience_id,
             },
         )
+
+
+class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
+    """
+    View to duplicate a curriculum experience.
+    """
+
+    permission_required = 'admission.change_admission_curriculum'
+    slug_field = 'uuid'
+    slug_url_kwarg = 'experience_uuid'
+    template_name = 'admission/empty_template.html'
+    form_class = forms.Form
+    update_admission_author = True
+    update_requested_documents = True
+
+    experience_model = None  # Name of the model of the experience to duplicate
+    valuated_experience_model = None  # Name of the model of the valuated experience
+    valuated_experience_field_id_name = None  # Name of the field of the experience in the valuated experience model
+
+    @property
+    def experience_id(self):
+        return self.kwargs.get('experience_uuid', None)
+
+    def additional_duplications(self, duplicated_experience):
+        """
+        Create additional objects that must be duplicated in addition to the duplicated experience.
+        :param duplicated_experience: The duplicated experience.
+        :return: The list of additional objects.
+        """
+        return []
+
+    def additional_duplications_save(self, duplicated_objects):
+        """
+        Save additional objects that must be duplicated in addition to the duplicated experience.
+        :param duplicated_objects: The list of additional objects returned by the 'additional_duplications' method.
+        """
+        pass
+
+    def form_valid(self, form):
+        # Retrieve the experience to duplicate
+        duplicated_experience = get_object_or_404(
+            self.experience_model.objects.select_related('person'),
+            uuid=self.experience_id,
+        )
+
+        # Retrieve the valuations of the experience to duplicate
+        valuated_admissions: QuerySet[
+            Union[AdmissionProfessionalValuatedExperiences, AdmissionEducationalValuatedExperiences]
+        ] = self.valuated_experience_model.objects.filter(
+            **{self.valuated_experience_field_id_name: self.experience_id}
+        ).select_related(
+            'baseadmission'
+        )
+
+        # Initialize the new experience
+        duplicated_experience.pk = None
+        duplicated_experience.external_id = None
+        duplicated_experience.uuid = uuid.uuid4()
+        duplicated_experience._state_adding = True
+
+        # Initialize the sub models if necessary
+        additional_duplications = self.additional_duplications(duplicated_experience=duplicated_experience)
+
+        all_duplications = [duplicated_experience]
+
+        if additional_duplications:
+            all_duplications += additional_duplications
+
+        # Make a copy of all documents and affect them to the new experience and to the sub models, if any
+        copy_documents(all_duplications)
+
+        # Save the new experience
+        duplicated_experience.save()
+
+        # Save the sub models, if any
+        self.additional_duplications_save(additional_duplications)
+
+        initial_checklist = Checklist.initialiser_checklist_experience(duplicated_experience.uuid).to_dict()
+
+        new_valuations = []
+        admissions_to_update = []
+
+        # Loop over the valuated admissions by the experience
+        for current_valuation in valuated_admissions:
+
+            # Initialize the valuation of the admission by the new experience
+            new_valuations.append(
+                self.valuated_experience_model(
+                    **{
+                        'baseadmission_id': current_valuation.baseadmission_id,
+                        self.valuated_experience_field_id_name: duplicated_experience.uuid,
+                    },
+                )
+            )
+
+            # Initialize the checklist of the duplicated experience
+            admission_experience_checklists = (
+                current_valuation.baseadmission.checklist.get('current', {})
+                .get('parcours_anterieur', {})
+                .get('enfants')
+            )
+            if admission_experience_checklists is not None:
+                admission_experience_checklists.append(initial_checklist)
+                admissions_to_update.append(current_valuation.baseadmission)
+
+        if new_valuations:
+            self.valuated_experience_model.objects.bulk_create(new_valuations)
+
+        if admissions_to_update:
+            BaseAdmission.objects.bulk_update(admissions_to_update, ['checklist'])
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        success_url = reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
+
+        redirect_to = self.request.POST.get('redirect_to')
+        if redirect_to:
+            success_url += redirect_to
+
+        return success_url
+
+
+class CurriculumNonEducationalExperienceDuplicateView(CurriculumBaseExperienceDuplicateView):
+    """
+    View to duplicate a professional experience.
+    """
+
+    urlpatterns = {'non_educational_duplicate': 'non_educational/<uuid:experience_uuid>/duplicate'}
+    experience_model = ProfessionalExperience
+    valuated_experience_model = AdmissionProfessionalValuatedExperiences
+    valuated_experience_field_id_name = 'professionalexperience_id'
+
+
+class CurriculumEducationalExperienceDuplicateView(CurriculumBaseExperienceDuplicateView):
+    """
+    View to duplicate an educational experience.
+    """
+
+    urlpatterns = {'educational_duplicate': 'educational/<uuid:experience_uuid>/duplicate'}
+    experience_model = EducationalExperience
+    valuated_experience_model = AdmissionEducationalValuatedExperiences
+    valuated_experience_field_id_name = 'educationalexperience_id'
+
+    def additional_duplications(self, duplicated_experience):
+        experience_years = EducationalExperienceYear.objects.filter(
+            educational_experience__uuid=self.experience_id
+        ).select_related('educational_experience__person')
+
+        for duplicated_experience_year in experience_years:
+            duplicated_experience_year.pk = None
+            duplicated_experience_year.external_id = None
+            duplicated_experience_year._state_adding = True
+            duplicated_experience_year.uuid = uuid.uuid4()
+            duplicated_experience_year.educational_experience = duplicated_experience
+
+        return experience_years
+
+    def additional_duplications_save(self, duplicated_objects):
+        EducationalExperienceYear.objects.bulk_create(duplicated_objects)

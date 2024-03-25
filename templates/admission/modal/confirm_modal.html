@@ -25,7 +25,7 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block modal_id %}confirmation-modal{% endblock %}
+{% block modal_id %}{{ confirm_id|default:'confirmation-modal' }}{% endblock %}
 
 {% block modal_title %}
   {{ confirm_title|default:_('Confirm') }}
@@ -47,7 +47,7 @@
     {% endif %}
   >
     {% csrf_token %}
+    <button type="button" class="btn btn-default" data-dismiss="modal">{% translate 'Cancel' %}</button>
+    <button type="submit" class="btn {{ confirm_button_class|default:'btn-danger' }}">{% translate 'Confirm' %}</button>
   </form>
-  <button type="button" class="btn btn-default" data-dismiss="modal">{% translate 'Cancel' %}</button>
-  <button type="submit" class="btn btn-danger" form="confirm-form">{% translate 'Confirm' %}</button>
 {% endblock %}

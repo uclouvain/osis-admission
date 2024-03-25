@@ -422,9 +422,6 @@ msgstr "Sigle de l'entité de gestion"
 msgid "Acronym of the training"
 msgstr "Sigle de la formation"
 
-msgid "Action"
-msgstr "Action"
-
 msgid "Actions"
 msgstr "Actions"
 
@@ -854,6 +851,17 @@ msgstr ""
 msgctxt "admission"
 msgid "Are you sure you want to delete \"%(object)s\"?"
 msgstr "Êtes-vous sûr de vouloir supprimer \"%(object)s\" ?"
+
+#, python-format
+msgid "Are you sure you want to delete this experience (%(experience_name)s)?"
+msgstr ""
+"Êtes-vous sûr de vouloir supprimer cette expérience (%(experience_name)s) ?"
+
+#, python-format
+msgid ""
+"Are you sure you want to duplicate this experience (%(experience_name)s)?"
+msgstr ""
+"Êtes-vous sûr de vouloir dupliquer cette expérience (%(experience_name)s) ?"
 
 #, python-format
 msgid "Are you sure you want to refuse \"%(object)s\"?"
@@ -2253,6 +2261,9 @@ msgctxt "admission"
 msgid "Delete"
 msgstr "Supprimer"
 
+msgid "Delete experience"
+msgstr "Supprimer l'expérience"
+
 msgid "Delete the document"
 msgstr "Supprimer le document"
 
@@ -2499,6 +2510,12 @@ msgstr ""
 
 msgid "Dual or triple degree"
 msgstr "Double ou triple diplomation"
+
+msgid "Duplicate experience"
+msgstr "Dupliquer l'expérience"
+
+msgid "Duplication of an experience"
+msgstr "Duplication d'une expérience"
 
 msgid "Dynamic questions about \"Specific aspects\" sub-tab"
 msgstr "Questions dynamiques du sous-onglet \"Spécificités\""
