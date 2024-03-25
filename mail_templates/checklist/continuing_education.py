@@ -77,62 +77,65 @@ templates.register(
     tokens=CHECKLIST_TOKENS
     + [
         Token(
-            name='condition',
+            name='conditions',
             description=_("Condition for approval"),
             example="Condition for approval",
         ),
     ],
 )
 
-ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION = 'osis-admission-continuing-education-checklist-decision-fac-approval-with-condition'
+ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITHOUT_CONDITION = 'osis-admission-continuing-education-checklist-decision-fac-approval-without-condition'
 templates.register(
-    ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION,
+    ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITHOUT_CONDITION,
     description=_(
         'Email sent to the candidate when the faculty approve the application with condition.',
+    ),
+    tag=CONTINUING_ADMISSION_TAG,
+    tokens=CHECKLIST_TOKENS,
+)
+
+ADMISSION_EMAIL_DECISION_DENY = 'osis-admission-continuing-education-checklist-decision-deny'
+templates.register(
+    ADMISSION_EMAIL_DECISION_DENY,
+    description=_(
+        'Email sent to the candidate when IUFC or the faculty deny the application.',
     ),
     tag=CONTINUING_ADMISSION_TAG,
     tokens=CHECKLIST_TOKENS
     + [
         Token(
-            name='condition',
-            description=_("Condition for approval"),
-            example="Condition for approval",
+            name='reasons',
+            description=_("Reasons for not accepting"),
+            example="Reasons for not accepting",
         ),
     ],
 )
 
-ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION = 'osis-admission-continuing-education-checklist-decision-fac-approval-with-condition'
+ADMISSION_EMAIL_DECISION_ON_HOLD = 'osis-admission-continuing-education-checklist-decision-on-hold'
 templates.register(
-    ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION,
+    ADMISSION_EMAIL_DECISION_ON_HOLD,
     description=_(
-        'Email sent to the candidate when the faculty approve the application with condition.',
+        'Email sent to the candidate when IUFC or the faculty put the application on hold.',
     ),
     tag=CONTINUING_ADMISSION_TAG,
     tokens=CHECKLIST_TOKENS
     + [
-        Token(
-            name='condition',
-            description=_("Condition for approval"),
-            example="Condition for approval",
-        ),
+           Token(
+               name='reasons',
+               description=_("Reasons for putting on hold"),
+               example="The programme is already full",
+           ),
     ],
 )
 
-ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION = 'osis-admission-continuing-education-checklist-decision-fac-approval-with-condition'
+ADMISSION_EMAIL_DECISION_CANCEL = 'osis-admission-continuing-education-checklist-decision-cancel'
 templates.register(
-    ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION,
+    ADMISSION_EMAIL_DECISION_CANCEL,
     description=_(
-        'Email sent to the candidate when the faculty approve the application with condition.',
+        'Email sent to the candidate when IUFC or the faculty cancel the application.',
     ),
     tag=CONTINUING_ADMISSION_TAG,
-    tokens=CHECKLIST_TOKENS
-    + [
-        Token(
-            name='condition',
-            description=_("Condition for approval"),
-            example="Condition for approval",
-        ),
-    ],
+    tokens=CHECKLIST_TOKENS,
 )
 
 ADMISSION_EMAIL_DECISION_APPROVAL = 'osis-admission-continuing-education-checklist-decision-approval'
