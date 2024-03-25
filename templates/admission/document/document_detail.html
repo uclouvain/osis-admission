@@ -56,6 +56,17 @@
         >
           <i class="fas fa-download"></i>
         </a>
+        {% if retypable_document %}
+          <button
+              class="btn btn-default"
+              data-toggle="modal"
+              data-target="#retype-document-modal"
+              title="{% translate 'Retype the document' %}"
+          >
+            <i class="fas fa-dice"></i>
+          </button>
+        {% endif %}
+        {% include 'admission/document/retype_modal.html' %}
         {% if editable_document %}
           <button
               class="btn btn-danger"

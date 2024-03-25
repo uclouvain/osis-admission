@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ from typing import List, Optional, Dict
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from osis_common.ddd import interface
 
@@ -109,3 +110,22 @@ class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABC
         entities: List[EmplacementDocument],
     ) -> None:
         raise NotImplementedError
+
+    @classmethod
+    def echanger_emplacements(
+        cls,
+        entity_id_from: EmplacementDocumentIdentity,
+        entity_id_to: EmplacementDocumentIdentity,
+        auteur: str,
+    ) -> None:
+        entity_to = cls.get(entity_id_to)
+        entity_to_type = entity_to.type
+        entity_from = cls.get(entity_id_from)
+
+        entity_to.entity_id = entity_id_from
+        entity_to.type = entity_from.type
+
+        entity_from.entity_id = entity_id_to
+        entity_from.type = entity_to_type
+
+        cls.save_multiple(entities=[entity_to, entity_from], auteur=auteur)
