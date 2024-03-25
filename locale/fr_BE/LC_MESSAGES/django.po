@@ -1352,6 +1352,9 @@ msgstr "Annuler"
 msgid "Cancel the application fee request"
 msgstr "Annuler la demande des frais de dossier"
 
+msgid "Cancel the request"
+msgstr "Annuler la réclamation"
+
 msgid "Cancelled application"
 msgstr "Demande annulée"
 
@@ -1551,6 +1554,9 @@ msgstr "Ville"
 
 msgid "Civil status"
 msgstr "État civil"
+
+msgid "Claim cancelled on"
+msgstr "Réclamation annulée le"
 
 msgid "Cleaned"
 msgstr "Toiletté"
@@ -5853,6 +5859,9 @@ msgstr "Remplacer le document"
 msgid "Reporting categories"
 msgstr "Catégories de reporting"
 
+msgid "Request cancelled"
+msgstr "Réclamation annulée"
+
 msgid "Request of a new deadline for the confirmation paper"
 msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
 
@@ -6810,6 +6819,9 @@ msgstr "Le document n'est plus désigné comme étant à réclamer"
 msgid "The documents have been requested to the candidate"
 msgstr "Les documents ont été réclamés au candidat"
 
+msgid "The documents request have been cancelled"
+msgstr "La réclamation des documents a été annulée"
+
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
 
@@ -7141,6 +7153,9 @@ msgstr "Données relatives à la thèse"
 
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
+
+msgid "This action will cancel the document request."
+msgstr "Cette action va annuler la réclamation des documents en cours."
 
 msgid "This activity and its potential subactivities will be discontinued"
 msgstr "Cette activité et ses potentielles sous-activités seront supprimées"

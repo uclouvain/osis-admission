@@ -50,16 +50,31 @@ class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABC
             )
 
     @classmethod
+    def annuler_reclamation_documents_au_candidat(
+        cls,
+        documents_reclames: List[EmplacementDocument],
+        auteur: str,
+    ):
+        heure = datetime.datetime.now()
+        for document in documents_reclames:
+            document.annuler_reclamation_au_candidat(
+                auteur=auteur,
+                annule_le=heure,
+            )
+
+    @classmethod
     def completer_documents_par_candidat(
         cls,
         documents_completes: List[EmplacementDocument],
         reponses_documents_a_completer: Dict[str, List[str]],
         auteur: str,
     ):
+        heure = datetime.datetime.now()
         for document in documents_completes:
             document.remplir_par_candidat(
                 uuid_documents=reponses_documents_a_completer.get(document.entity_id.identifiant),
                 auteur=auteur,
+                complete_le=heure,
             )
 
     @classmethod

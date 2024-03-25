@@ -38,6 +38,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.templatetags.admission import formatted_language, document_request_status_css_class
 from base.forms.utils.choice_field import BLANK_CHOICE
@@ -252,7 +253,7 @@ class RequestAllDocumentsForm(forms.Form):
         self.documents = {}
 
         for document in documents:
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name and document.statut_reclamation:
+            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER and document.statut_reclamation:
                 if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:
