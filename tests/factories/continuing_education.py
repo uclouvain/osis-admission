@@ -26,7 +26,11 @@
 import factory
 
 from admission.contrib.models import ContinuingEducationAdmission
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixInscriptionATitre
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixInscriptionATitre,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionContinue,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -71,13 +75,45 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
     )
     reference = factory.LazyAttribute(generate_proposition_reference)
     registration_as = ChoixInscriptionATitre.PRIVE.name
-
-    @factory.post_generation
-    def create_candidate_role(self, create, extracted, **kwargs):
-        CandidateFactory(person=self.candidate)
+    checklist = factory.Dict({'default': True})  # This default value is overriden in a post generation method
 
     class Params:
         with_access_conditions_met = factory.Trait(
             training__education_group_type__name=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
             candidate=factory.SubFactory(CompletePersonForIUFCFactory),
         )
+
+    @factory.post_generation
+    def create_candidate_role(self, create, extracted, **kwargs):
+        CandidateFactory(person=self.candidate)
+
+    @factory.post_generation
+    def initialize_checklist(self, create, extracted, **kwargs):
+        if self.checklist != {'default': True}:
+            return
+
+        self.checklist = (
+            {}
+            if self.status
+            in {
+                ChoixStatutPropositionContinue.EN_BROUILLON.name,
+                ChoixStatutPropositionContinue.ANNULEE.name,
+            }
+            else {
+                'initial': get_checklist(),
+                'current': get_checklist(),
+            }
+        )
+
+
+def get_checklist():
+    default_content = {
+        'libelle': '',
+        'enfants': [],
+        'extra': {},
+        'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+    }
+    return {
+        'fiche_etudiant': default_content,
+        'decision': default_content,
+    }

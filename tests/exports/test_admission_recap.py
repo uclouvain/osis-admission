@@ -109,6 +109,7 @@ from admission.ddd.admission.formation_continue.commands import RecupererQuestio
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixStatutPropositionContinue,
+    ChoixEdition,
 )
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionFormationContinueDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -1302,6 +1303,20 @@ class SectionsAttachmentsTestCase(TestCase):
             documents_additionnels=[],
             motivations='My motivation',
             moyens_decouverte_formation=[],
+            documents_demandes={},
+            marque_d_interet=False,
+            edition=ChoixEdition.UN.name,
+            en_ordre_de_paiement=False,
+            droits_reduits=False,
+            paye_par_cheque_formation=False,
+            cep=False,
+            etalement_des_paiments=False,
+            etalement_de_la_formation=False,
+            valorisation_des_acquis_d_experience=False,
+            a_presente_l_epreuve_d_evaluation=False,
+            a_reussi_l_epreuve_d_evaluation=False,
+            diplome_produit=False,
+            intitule_du_tff="",
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',

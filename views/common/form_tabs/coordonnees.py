@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from django.views.generic import FormView
 
 from admission.ddd import BE_ISO_CODE
 from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
-from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
 from reference.models.country import Country

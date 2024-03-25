@@ -23,15 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from django.conf import settings
-from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
-from osis_history.models import HistoryEntry
 
-from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.checklist import AdditionalApprovalCondition
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -41,15 +35,14 @@ from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
 )
-from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import SicPatchMixin
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 
 
-class SicDecisionChangeStatusViewTestCase(SicPatchMixin, TestCase):
+class ChangeExtraViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -63,66 +56,106 @@ class SicDecisionChangeStatusViewTestCase(SicPatchMixin, TestCase):
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
+        cls.second_sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+        cls.second_fac_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.training.education_group
+        ).person.user
+
         cls.default_headers = {'HTTP_HX-Request': 'true'}
 
-        AdditionalApprovalCondition.objects.all().delete()
-        cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
-            training=cls.training,
-            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
-            status=ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
-            determined_academic_year=cls.academic_years[0],
-        )
-        cls.url = resolve_url(
-            'admission:general-education:sic-decision-change-status',
-            uuid=cls.general_admission.uuid,
-            status='GEST_EN_COURS-approval',
+    def setUp(self) -> None:
+        super().setUp()
+        self.general_admission = GeneralEducationAdmissionFactory(
+            training=self.training,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
-    def test_post_as_sic_user(self):
+    def test_change_extra_of_assimilation_with_a_bad_request(self):
         self.client.force_login(user=self.sic_manager_user)
+        url = resolve_url(
+            'admission:general-education:change-checklist-extra',
+            uuid=self.general_admission.uuid,
+            tab='assimilation',
+        )
 
-        response = self.client.post(self.url, **self.default_headers)
+        # Check the response
+        response = self.client.post(url, data={}, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.headers.get('HX-Refresh'))
+        form = response.context['form']
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors.get('date_debut', []),
+            [FIELD_REQUIRED_MESSAGE],
+        )
 
+        # Check that the admission has not been updated
         self.general_admission.refresh_from_db()
         self.assertEqual(
-            self.general_admission.checklist['current']['decision_sic']['statut'],
-            ChoixStatutChecklist.GEST_EN_COURS.name,
-        )
-        self.assertEqual(
-            self.general_admission.checklist['current']['decision_sic']['extra'],
-            {'en_cours': 'approval'},
-        )
-        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
-
-        # Check that an history entry is created
-        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
-            object_uuid=self.general_admission.uuid,
+            self.general_admission.checklist['current']['assimilation'],
+            {
+                'enfants': [],
+                'libelle': '',
+                'extra': {},
+                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+            },
         )
 
-        self.assertEqual(len(entries), 1)
-
-        self.assertCountEqual(
-            ['proposition', 'sic-decision', 'status-changed'],
-            entries[0].tags,
+    def test_change_extra_of_assimilation_with_a_valid_request(self):
+        self.client.force_login(user=self.sic_manager_user)
+        url = resolve_url(
+            'admission:general-education:change-checklist-extra',
+            uuid=self.general_admission.uuid,
+            tab='assimilation',
         )
 
-        self.assertEqual(
-            entries[0].author,
-            f'{self.sic_manager_user.person.first_name} {self.sic_manager_user.person.last_name}',
+        # Check the response
+        response = self.client.post(
+            url,
+            data={
+                'date_debut': '2021-12-31',
+            },
+            **self.default_headers,
         )
-
-        response = self.client.post(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.headers.get('HX-Refresh'), True)
+        form = response.context['form']
+        self.assertTrue(form.is_valid())
 
+        # Check that the admission has been updated
         self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['assimilation'],
+            {
+                'enfants': [],
+                'libelle': '',
+                'extra': {
+                    'date_debut': '2021-12-31',
+                },
+                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+            },
+        )
 
-        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+        # Empty checklist
+        self.general_admission.checklist.pop('current', None)
+        self.general_admission.save()
 
-        # Check that no additional history entry is created
-        self.assertEqual(len(HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)), 1)
+        response = self.client.post(
+            url,
+            data={
+                'date_debut': '2021-12-31',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['assimilation'].get('extra'),
+            {
+                'date_debut': '2021-12-31',
+            },
+        )

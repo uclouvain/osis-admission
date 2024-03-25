@@ -68,7 +68,7 @@ from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
 )
-from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import SicPatchMixin
+from admission.tests.views.general_education.checklist.sic_decision.base import SicPatchMixin
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.models.enums.community import CommunityEnum
