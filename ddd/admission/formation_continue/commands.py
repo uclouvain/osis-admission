@@ -162,3 +162,8 @@ class RecupererQuestionsSpecifiquesQuery(commands.RecupererQuestionsSpecifiquesQ
 @attr.dataclass(frozen=True, slots=True)
 class RecupererDocumentsPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(interface.QueryRequest):
+    uuid_proposition: str

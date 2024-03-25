@@ -28,7 +28,7 @@ from django.views.generic import UpdateView
 
 from admission.ddd import BE_ISO_CODE
 from admission.forms.admission.person import AdmissionPersonForm
-from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from reference.models.country import Country
 
 __all__ = ['AdmissionPersonFormView']
