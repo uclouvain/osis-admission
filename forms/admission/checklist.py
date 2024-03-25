@@ -63,7 +63,11 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument, TypeEmplacementDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    StatutEmplacementDocument,
+    TypeEmplacementDocument,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
@@ -752,7 +756,7 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
         self.documents = {}
 
         for document in documents:
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
+            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER:
                 if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:
@@ -1086,8 +1090,7 @@ class SicDecisionFinalRefusalForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['body'].widget.attrs['data-config'] = json.dumps(
             {
-                **settings.CKEDITOR_CONFIGS['link_only'],
-                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                 'language': get_language(),
             }
         )
@@ -1111,11 +1114,8 @@ class SicDecisionFinalApprovalForm(forms.Form):
         else:
             self.fields['body'].widget.attrs['data-config'] = json.dumps(
                 {
-                    **settings.CKEDITOR_CONFIGS['link_only'],
-                    'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                    **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                     'language': get_language(),
-                    'allowedContent': True,
-                    'autoParagraph': False,
                 }
             )
 

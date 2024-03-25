@@ -26,6 +26,7 @@
 import uuid
 
 from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 DEFAULT_PAGINATOR_SIZE = 500
 JPEG_MIME_TYPE = 'image/jpeg'
@@ -44,4 +45,19 @@ ORDERED_CAMPUSES_UUIDS = {
     'CHARLEROI_UUID': uuid.UUID('32bfcf4f-4b70-4532-9597-9722c61a27f5'),
     'NAMUR_UUID': uuid.UUID('ccdfd820-52dc-4aef-a325-fbba3a1f0f52'),
     'AUTRE_SITE_UUID': uuid.UUID('35b0431b-9609-4a31-a328-04c56571f4ba'),
+}
+ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES = {
+    AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT,
+    AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT,
+    AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT,
+    AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE,
+    AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION,
+    AcademicCalendarTypes.ADMISSION_POOL_VIP,
+    AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE,
+    AcademicCalendarTypes.ADMISSION_POOL_INSTITUT_CHANGE,
+    AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN,
+    AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN,
+    AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY,
+    AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY,
+    AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA,
 }

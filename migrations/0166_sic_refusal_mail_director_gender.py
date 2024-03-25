@@ -9,7 +9,7 @@ from admission.mail_templates.checklist import ADMISSION_EMAIL_SIC_REFUSAL
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0162_delete_baseadmissionproxy'),
+        ('admission', '0165_delete_baseadmissionproxy'),
     ]
 
     operations = [
@@ -35,8 +35,7 @@ class Migration(migrations.Migration):
 
                 <p>Veuillez agréer, Madame, Monsieur, l'expression de nos salutations distinguées.</p>
 
-                <p>{director}<br>
-                {director_title}</p>
+                <p>Le Service des inscriptions</p>
                 ''',
             },
         ),

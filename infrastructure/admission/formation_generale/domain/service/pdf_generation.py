@@ -42,6 +42,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     OngletsDemande,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -339,7 +340,7 @@ class PDFGeneration(IPDFGeneration):
         # Get the list of documents
         for document in documents:
             if (
-                document.statut in {StatutEmplacementDocument.A_RECLAMER.name}
+                document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
                 and document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
             ):
                 document_identifier = document.identifiant.split('.')
@@ -370,6 +371,7 @@ class PDFGeneration(IPDFGeneration):
                 'profil_candidat_coordonnees': profil_candidat_coordonnees,
                 'documents_names': documents_names,
                 'director': cls._get_sic_director(proposition_dto),
+                'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
             },
             author=gestionnaire,
             language=proposition_dto.langue_contact_candidat,
@@ -453,6 +455,7 @@ class PDFGeneration(IPDFGeneration):
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(proposition_dto),
                     'footer_campus': cls._get_refusal_certificate_footer_campus(proposition_dto, campus_repository),
+                    'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
                 },
                 author=gestionnaire,
             )
@@ -488,6 +491,7 @@ class PDFGeneration(IPDFGeneration):
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
                     'director': cls._get_sic_director(proposition_dto),
                     'footer_campus': cls._get_refusal_certificate_footer_campus(proposition_dto, campus_repository),
+                    'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
                 },
                 author=gestionnaire,
             )

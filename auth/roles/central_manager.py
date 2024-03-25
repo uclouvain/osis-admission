@@ -42,6 +42,7 @@ from admission.auth.predicates.general import (
     not_cancelled,
     in_progress,
     can_send_to_fac_faculty_decision,
+    in_sic_document_request_status,
 )
 from education_group.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
@@ -110,6 +111,7 @@ class CentralManager(EntityRoleModel):
             'admission.view_documents_management': is_entity_manager & not_cancelled,
             'admission.edit_documents': is_entity_manager & not_cancelled,
             'admission.change_documents_management': is_entity_manager & in_sic_status,
+            'admission.cancel_document_request': is_entity_manager & in_sic_document_request_status,
             'admission.generate_in_progress_analysis_folder': is_entity_manager & in_progress,
             'admission.view_checklist': is_entity_manager & is_submitted,
             'admission.change_checklist': is_entity_manager & in_sic_status,

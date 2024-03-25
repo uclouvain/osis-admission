@@ -256,6 +256,20 @@ COMMAND_HANDLERS = {
         notification=Notification(),
         historique=HistoriqueGlobal(),
     ),
+    AnnulerReclamationDocumentsAuCandidatCommand: (
+        lambda msg_bus, cmd: annuler_reclamation_documents_au_candidat(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            emplacement_document_repository=EmplacementDocumentRepository(),
+            historique=HistoriqueGlobal(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        )
+    ),
     ReclamerDocumentsAuCandidatParFACCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_fac(
         cmd,
         proposition_repository=PropositionRepository(),

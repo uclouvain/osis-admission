@@ -653,6 +653,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 **self.manuel_required_params,
                 'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
                 'request_status': '',
+                'last_action_at': '2020-01-02T00:00:00',
+                'last_actor': self.admission.candidate.global_id,
             },
         )
 
@@ -664,6 +666,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 **self.manuel_required_params,
                 'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
                 'request_status': '',
+                'last_action_at': '2020-01-02T00:00:00',
+                'last_actor': self.admission.candidate.global_id,
             },
         )
 
@@ -674,6 +678,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
                 'request_status': '',
+                'last_action_at': '2020-01-02T00:00:00',
+                'last_actor': self.admission.candidate.global_id,
             },
         )
 
@@ -774,6 +780,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 **self.manuel_required_params,
                 'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
                 'request_status': '',
+                'last_action_at': '2020-01-02T00:00:00',
+                'last_actor': self.admission.candidate.global_id,
             },
         )
 
@@ -785,6 +793,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 **self.manuel_required_params,
                 'status': StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name,
                 'request_status': '',
+                'last_action_at': '2020-01-02T00:00:00',
+                'last_actor': self.admission.candidate.global_id,
             },
         )
 
@@ -795,6 +805,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
                 'status': StatutEmplacementDocument.A_RECLAMER.name,
                 'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+                'last_action_at': '2020-01-02T00:00:00',
+                'last_actor': self.admission.candidate.global_id,
             },
         )
 

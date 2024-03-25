@@ -70,36 +70,63 @@
     </table>
   </div>
 
+  {% has_perm 'admission.change_documents_management' as can_change_documents %}
+  {% has_perm 'admission.cancel_document_request' as can_cancel_document_request %}
+
   <div class="flex-content mt-1" style="gap: 5px">
     <button
         class="btn btn-primary"
+        {% if can_change_documents %}
         data-toggle="collapse"
         data-target="#upload-internal-document-form"
         hx-get="{% url request.resolver_match.namespace|add:':document:free-internal-upload' uuid=view.kwargs.uuid %}"
         hx-target="#upload-internal-document-form"
         hx-trigger="click once"
+        {% else %}
+        disabled
+        {% endif %}
     >
       <i class="fa-solid fa-upload"></i>
       {% translate 'Upload a document' %}
       <i class="fa-solid fa-paperclip"></i>
     </button>
 
-    <button
+    <div>
+      <button
         class="btn btn-primary"
+        {% if can_change_documents %}
         data-toggle="modal"
         data-target="#request-all-form-modal"
         data-backdrop="static"
         data-keyboard="false"
-    >
-      <i class="fa-solid fa-envelope"></i>
-      {% translate 'Request the documents from the candidate' %}
-    </button>
+        {% else %}
+        disabled
+        {% endif %}
+      >
+        <i class="fa-solid fa-envelope"></i>
+        {% translate 'Request the documents from the candidate' %}
+      </button>
+      {% if can_cancel_document_request %}
+        <button
+          class="btn btn-danger"
+          data-toggle="modal"
+          data-target="#cancel-request-modal"
+        >
+          <i class="fa-solid fa-rectangle-xmark"></i>
+          {% translate 'Cancel the request' %}
+        </button>
+      {% endif %}
+    </div>
 
     <button
         class="btn btn-default htmx-button"
+        {% if can_change_documents %}
         hx-post="{% url request.resolver_match.namespace|add:':document:analysis-folder-generation' uuid=view.kwargs.uuid %}"
         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
         hx-swap="none"
+        {% else %}
+        disabled
+        {% endif %}
     >
       <i class="fa-solid fa-arrows-rotate"></i>
       {% translate 'Generate an analysis folder' %}

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -121,5 +121,19 @@ class Historique(IHistorique):
             "Les documents ont été complétés par le candidat.",
             "The documents have been completed by the candidate.",
             f"{candidat.prenom} {candidat.nom}",
+            tags=["proposition", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_annulation_reclamation_documents(cls, proposition: PropositionAdmission, acteur: str, par_fac: bool):
+        gestionnaire = PersonneConnueUclTranslator().get(acteur)
+
+        actor = 'FAC' if par_fac else 'SIC'
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            f"La réclamation des documents complémentaires a été annulée par {actor}.",
+            f"The request for additional information has been cancelled by {actor}.",
+            f"{gestionnaire.prenom} {gestionnaire.nom}",
             tags=["proposition", "status-changed"],
         )

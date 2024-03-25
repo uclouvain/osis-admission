@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0165_merge_20240318_1140'),
+        ('admission', '0164_default_workinglists'),
     ]
 
     operations = [
