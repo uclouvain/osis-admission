@@ -1089,8 +1089,7 @@ class SicDecisionFinalRefusalForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['body'].widget.attrs['data-config'] = json.dumps(
             {
-                **settings.CKEDITOR_CONFIGS['link_only'],
-                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                 'language': get_language(),
             }
         )
@@ -1114,11 +1113,8 @@ class SicDecisionFinalApprovalForm(forms.Form):
         else:
             self.fields['body'].widget.attrs['data-config'] = json.dumps(
                 {
-                    **settings.CKEDITOR_CONFIGS['link_only'],
-                    'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                    **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                     'language': get_language(),
-                    'allowedContent': True,
-                    'autoParagraph': False,
                 }
             )
 
