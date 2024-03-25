@@ -28,6 +28,7 @@ from django.utils.functional import cached_property
 
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.enums import Onglets
+from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
 
@@ -62,6 +63,7 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
         return {
             **super().high_school_diploma,
             'specific_question_answers': self.admission.specific_question_answers,
+            'is_vae_potential': ProfilCandidatTranslator.est_potentiel_vae(self.person.global_id),
         }
 
     def get_template_names(self):

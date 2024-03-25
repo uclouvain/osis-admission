@@ -29,21 +29,23 @@ from django.db.models import ProtectedError
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DeleteView, FormView
+from django.views.generic import FormView
 
 from admission.contrib.models.base import (
     AdmissionEducationalValuatedExperiences,
-    BaseAdmission,
     AdmissionProfessionalValuatedExperiences,
 )
+from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from osis_profile.models import EducationalExperience, ProfessionalExperience
+from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
+from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView
 from osis_profile.views.edit_experience_non_academique import EditExperienceNonAcademiqueView
+from osis_profile.views.parcours_externe_mixins import DeleteEducationalExperienceMixin
 
 __all__ = [
     'CurriculumEducationalExperienceFormView',
@@ -178,14 +180,12 @@ class CurriculumNonEducationalExperienceFormView(
         }
 
 
-class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
+class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperienceMixin):
     permission_required = 'admission.change_admission_curriculum'
-    slug_field = 'uuid'
-    slug_url_kwarg = 'experience_uuid'
 
     @property
-    def experience_id(self):
-        return self.kwargs.get('experience_uuid', None)
+    def person(self):
+        return self.admission.candidate
 
     def delete(self, request, *args, **kwargs):
         # Delete the experience
@@ -231,15 +231,9 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteView):
     def get_success_url(self):
         return reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid}) + '#parcours_anterieur'
 
-    def get_failure_url(self):
-        raise NotImplemented
 
-
-class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView):
+class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceAcademiqueView):
     urlpatterns = {'educational_delete': 'educational/<uuid:experience_uuid>/delete'}
-
-    def get_queryset(self):
-        return EducationalExperience.objects.filter(person=self.admission.candidate)
 
     def get_failure_url(self):
         return reverse(
@@ -251,11 +245,8 @@ class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView):
         )
 
 
-class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView):
+class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceNonAcademiqueView):
     urlpatterns = {'non_educational_delete': 'non_educational/<uuid:experience_uuid>/delete'}
-
-    def get_queryset(self):
-        return ProfessionalExperience.objects.filter(person=self.admission.candidate)
 
     def get_failure_url(self):
         return reverse(

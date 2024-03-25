@@ -48,5 +48,3 @@ class ByContextAdmissionFormMixin:
         if field and self.fields[field].disabled:
             return
         super().add_error(field, error)
-
-

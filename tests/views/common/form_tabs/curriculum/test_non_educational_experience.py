@@ -61,6 +61,7 @@ from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
 from reference.tests.factories.country import CountryFactory
 
 
+#TODO: Remove duplicate tests with osis_profile
 @freezegun.freeze_time('2023-01-01')
 class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
     @classmethod
