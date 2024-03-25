@@ -6,7 +6,6 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0166_epcinjection'),
         ('admission', '0167_sic_refusal_mail_signature_change'),
     ]
 
