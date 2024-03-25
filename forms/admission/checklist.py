@@ -68,6 +68,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
+
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,

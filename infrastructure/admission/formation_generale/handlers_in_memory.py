@@ -47,6 +47,7 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
@@ -322,6 +323,20 @@ COMMAND_HANDLERS = {
         emplacement_document_repository=_emplacement_document_repository,
         notification=_notification,
         historique=_historique_global,
+    ),
+    AnnulerReclamationDocumentsAuCandidatCommand: (
+        lambda msg_bus, cmd: annuler_reclamation_documents_au_candidat(
+            cmd,
+            proposition_repository=_proposition_repository,
+            emplacement_document_repository=_emplacement_document_repository,
+            historique=_historique_global,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            question_specifique_translator=_question_specific_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        )
     ),
     AnnulerReclamationDocumentsAuCandidatCommand: (
         lambda msg_bus, cmd: annuler_reclamation_documents_au_candidat(
@@ -661,6 +676,12 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=_profil_candidat_translator,
             campus_repository=_campus_repository,
             pdf_generation=_pdf_generation,
+        )
+    ),
+    RetyperDocumentCommand: (
+        lambda msg_bus, cmd: retyper_document(
+            cmd,
+            emplacement_document_repository=_emplacement_document_repository,
         )
     ),
 }

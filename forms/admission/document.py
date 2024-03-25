@@ -26,6 +26,7 @@
 import json
 from typing import List
 
+from dal import autocomplete, forward
 from django import forms
 from django.conf import settings
 from django.shortcuts import resolve_url
@@ -297,3 +298,20 @@ class RequestAllDocumentsForm(forms.Form):
         cleaned_data['requested_documents'] = requested_documents
 
         return cleaned_data
+
+
+class RetypeDocumentForm(forms.Form):
+    identifier = forms.CharField(
+        label=_('What is the new type of this document?'),
+        widget=autocomplete.Select2(
+            url="admission:autocomplete:document-types-swap",
+            attrs={'data-html': True},
+        ),
+    )
+
+    def __init__(self, admission_uuid, identifier, **kwargs):
+        super().__init__(**kwargs)
+        self.fields['identifier'].widget.forward = [
+            forward.Const(str(admission_uuid), 'admission_uuid'),
+            forward.Const(identifier, 'document_identifier'),
+        ]
