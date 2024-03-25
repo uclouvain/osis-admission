@@ -31,6 +31,7 @@ from admission.ddd.admission.domain.service.i_unites_enseignement_translator imp
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 
@@ -63,6 +64,7 @@ class PDFGenerationInMemory(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
@@ -76,6 +78,7 @@ class PDFGenerationInMemory(IPDFGeneration):
         profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
+        temporaire: bool = False,
     ) -> Optional[str]:
         pass
 
@@ -86,6 +89,7 @@ class PDFGenerationInMemory(IPDFGeneration):
         profil_candidat_translator: IProfilCandidatTranslator,
         proposition: Proposition,
         gestionnaire: str,
+        temporaire: bool = False,
     ) -> Optional[str]:
         pass
 
@@ -94,8 +98,10 @@ class PDFGenerationInMemory(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
+        temporaire: bool = False,
     ) -> Optional[str]:
         pass
 
@@ -104,7 +110,9 @@ class PDFGenerationInMemory(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
+        temporaire: bool = False,
     ) -> Optional[str]:
         pass

@@ -40,6 +40,8 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
+
+from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -53,7 +55,9 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
 )
+from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -73,18 +77,6 @@ from program_management.models.education_group_version import EducationGroupVers
 from reference.models.country import Country
 
 REFERENCE_SEQ_NAME = 'admission_baseadmission_reference_seq'
-
-CAMPUS_LETTRE_DOSSIER = {
-    'Bruxelles Saint-Louis': 'B',
-    'Charleroi': 'C',
-    'Louvain-la-Neuve': 'L',
-    'Mons': 'M',
-    'Namur': 'N',
-    'Tournai': 'T',
-    'Bruxelles Woluwe': 'W',
-    'Bruxelles Saint-Gilles': 'G',
-    'Autre site': 'X',
-}
 
 
 def admission_directory_path(admission: 'BaseAdmission', filename: str):
@@ -204,7 +196,11 @@ class BaseAdmissionQuerySet(models.QuerySet):
                     determined_academic_year_id=OuterRef("determined_academic_year_id"),
                 )
                 .exclude(
-                    Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE)
+                    Q(
+                        generaleducationadmission__status__in=(
+                            STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE
+                        )
+                    )
                     | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
                     | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE),
                 )
@@ -359,7 +355,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
     )
     determined_pool = models.CharField(
-        choices=AcademicCalendarTypes.choices(),
+        choices=tuple((x.name, x.value) for x in AcademicCalendarTypes if x in ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES),
         max_length=70,
         null=True,
         blank=True,
@@ -457,6 +453,8 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         encoder=DjangoJSONEncoder,
     )
 
+    objects = BaseAdmissionManager()
+
     class Meta:
         constraints = [
             models.CheckConstraint(
@@ -540,15 +538,6 @@ def _invalidate_candidate_cache(sender, instance, **kwargs):
     ]
     if keys:
         cache.delete_many(keys)
-
-
-class BaseAdmissionProxy(BaseAdmission):
-    """Proxy model of base.BaseAdmission"""
-
-    objects = BaseAdmissionManager()
-
-    class Meta:
-        proxy = True
 
 
 class AdmissionViewer(models.Model):

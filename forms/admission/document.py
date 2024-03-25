@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,16 +38,18 @@ from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
-from admission.forms import AdmissionFileUploadField, CustomDateInput
 from admission.templatetags.admission import formatted_language, document_request_status_css_class
 from base.forms.utils.choice_field import BLANK_CHOICE
+from base.forms.utils.datefield import CustomDateInput
+from base.forms.utils.file_field import MaxOneFileUploadField
 
 
 class UploadDocumentFormMixin(forms.Form):
     def __init__(self, mimetypes, identifier, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['file'] = AdmissionFileUploadField(
+        self.fields['file'] = MaxOneFileUploadField(
             label=_('File'),
             max_files=1,
             min_files=1,
@@ -68,7 +70,7 @@ class UploadFreeDocumentForm(forms.Form):
         label=pgettext_lazy('admission', 'Document name'),
     )
 
-    file = AdmissionFileUploadField(
+    file = MaxOneFileUploadField(
         label=_('File'),
         max_files=1,
         min_files=1,
@@ -242,8 +244,7 @@ class RequestAllDocumentsForm(forms.Form):
 
         self.fields['message_content'].widget.attrs['data-config'] = json.dumps(
             {
-                **settings.CKEDITOR_CONFIGS['link_only'],
-                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                 'language': get_language(),
             }
         )
@@ -251,7 +252,7 @@ class RequestAllDocumentsForm(forms.Form):
         self.documents = {}
 
         for document in documents:
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name and document.statut_reclamation:
+            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER and document.statut_reclamation:
                 if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:

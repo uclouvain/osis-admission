@@ -24,7 +24,9 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional
+from collections import defaultdict
+from contextlib import suppress
+from typing import List, Optional, Dict
 
 from django.conf import settings
 from django.db.models import (
@@ -44,12 +46,21 @@ from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
 from admission.contrib.models import AdmissionViewer
-from admission.contrib.models.base import BaseAdmission, BaseAdmissionProxy
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
-from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    PoursuiteDeCycle,
+    BesoinDeDerogation,
+    OngletsChecklist,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+    ConfigurationStatutChecklist,
+)
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from osis_profile.models import EducationalExperienceYear
@@ -78,6 +89,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
         taille_page: Optional[int] = None,
+        mode_filtres_etats_checklist: Optional[str] = '',
+        filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -91,7 +104,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             prefetch_viewers_queryset = prefetch_viewers_queryset.exclude(person__uuid=demandeur)
 
         qs = (
-            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            BaseAdmission.objects.with_training_management_and_reference()
             .annotate_several_admissions_in_progress()
             .annotate(
                 status=Coalesce(
@@ -186,6 +199,106 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if bourse_double_diplomation:
             qs = qs.filter(generaleducationadmission__double_degree_scholarship_id=bourse_double_diplomation)
 
+        if mode_filtres_etats_checklist and filtres_etats_checklist:
+            json_path_to_checks = defaultdict(set)
+            all_checklist_filters = Q()
+
+            # Manage the case of the "AUTHENTIFICATION" and "BESOIN_DEROGATION" filters which are hierarchical
+            # If one sub item is selected, the parent must be unselected as the parent itself includes all sub items
+            for (tab_name, prefix_identifier,) in [
+                (
+                    OngletsChecklist.experiences_parcours_anterieur.name,
+                    'AUTHENTIFICATION',
+                ),
+                (
+                    OngletsChecklist.decision_sic.name,
+                    'BESOIN_DEROGATION',
+                ),
+            ]:
+                current_filters = filtres_etats_checklist.get(tab_name)
+                if any(f'{prefix_identifier}.' in current_filter for current_filter in current_filters):
+                    with suppress(ValueError):
+                        current_filters.remove(prefix_identifier)
+
+            for tab_name, status_values in filtres_etats_checklist.items():
+                if not status_values:
+                    continue
+
+                current_tab: Optional[
+                    Dict[str, Dict[str, ConfigurationStatutChecklist]]
+                ] = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+
+                if not current_tab:
+                    continue
+
+                for status_value in status_values:
+                    current_status_filter: Optional[ConfigurationStatutChecklist] = current_tab.get(status_value)
+
+                    if not current_status_filter:
+                        continue
+
+                    # Specific cases
+                    if tab_name == OngletsChecklist.experiences_parcours_anterieur.name:
+                        # > For the past experiences, we search if one of them match the criteria
+                        fields_to_filter = {}
+
+                        if current_status_filter.statut:
+                            fields_to_filter['statut'] = current_status_filter.statut.name
+                        if current_status_filter.extra:
+                            fields_to_filter['extra'] = current_status_filter.extra
+
+                        current_checklist_filters = Q(
+                            checklist__current__parcours_anterieur__enfants__contains=[fields_to_filter],
+                        )
+
+                        json_path_to_checks['checklist__current__parcours_anterieur'].add('enfants')
+                        json_path_to_checks['checklist__current'].add('parcours_anterieur')
+                        json_path_to_checks['checklist'].add('current')
+
+                    else:
+                        # Filter on the checklist tab status
+                        current_checklist_filters = Q(
+                            **{
+                                f'checklist__current__{tab_name}__statut': current_status_filter.statut.name,
+                            }
+                        )
+                        json_path_to_checks[f'checklist__current__{tab_name}'].add('statut')
+                        json_path_to_checks['checklist__current'].add(tab_name)
+                        json_path_to_checks['checklist'].add('current')
+
+                        # Filter on the checklist tab extra if necessary
+                        if current_status_filter.extra:
+                            current_extra = {**current_status_filter.extra}
+
+                            if tab_name == OngletsChecklist.decision_sic.name:
+                                # Filter on the dispensation needed status if necessary
+                                dispensation_needed = current_extra.pop('etat_besoin_derogation', None)
+
+                                if dispensation_needed:
+                                    current_checklist_filters &= Q(
+                                        generaleducationadmission__dispensation_needed=dispensation_needed,
+                                    )
+
+                            current_checklist_filters &= Q(
+                                **{
+                                    f'checklist__current__{tab_name}__extra__contains': current_extra,
+                                }
+                            )
+                            json_path_to_checks[f'checklist__current__{tab_name}'].add('extra')
+
+                    all_checklist_filters |= current_checklist_filters
+
+            if mode_filtres_etats_checklist == ModeFiltrageChecklist.EXCLUSION.name:
+                # We exclude the admissions whose the specific keys have the specified values
+                all_checklist_filters = ~all_checklist_filters
+
+                # We exclude the admissions whose the specific keys are missing (for unconfirmed admission,
+                # other admission contexts etc.)
+                for base_key, missing_keys in json_path_to_checks.items():
+                    all_checklist_filters |= ~Q(**{f'{base_key}__has_keys': missing_keys})
+
+            qs = qs.filter(all_checklist_filters)
+
         field_order = []
         if champ_tri:
             if champ_tri == 'type_demande':
@@ -243,7 +356,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, 'title' if language_is_french else 'title_english'),
             type_formation=admission.training.education_group_type.name,
-            lieu_formation=admission.teaching_campus,
+            lieu_formation=admission.teaching_campus,  # From annotation
             nationalite_candidat=getattr(
                 admission.candidate.country_of_citizenship,
                 'name' if language_is_french else 'name_en',

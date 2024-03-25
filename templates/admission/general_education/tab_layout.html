@@ -103,7 +103,10 @@
     <br>
     <span class="bold-text">{{ admission.type|enum_display:'TypeDemande' }} - </span>
     <span class="copy-to-clipboard">
-      <span class="copy-to-clipboard-text bold-text">{{ admission.reference }}</span>
+      <span
+          class="copy-to-clipboard-text bold-text"
+          data-text="{{ request.scheme }}://{{ request.get_host }}{% url "admission:general-education" admission.uuid %}"
+      >{{ admission.reference }}</span>
       <button class="copy-button">
         <i class="far fa-copy"></i>
       </button>
@@ -150,7 +153,15 @@
       <span class="label label-danger">{% translate 'Not fundable' %}</span>
     {% endif %}
     {% if admission.candidat_a_plusieurs_demandes %}
-      <span class="label label-admission-primary">{% translate 'Several applications' %}</span>
+      <span
+        class="label label-admission-primary"
+        data-lazy-popover-url="{% url base_namespace|add:':other-admissions-list' uuid=view.kwargs.uuid %}"
+        data-title="{% translate 'Other application(s)' %}"
+        tabindex="0"
+        role="button"
+      >
+        {% translate 'Several applications' %}
+      </span>
     {% endif %}
   </div>
 {% endblock %}

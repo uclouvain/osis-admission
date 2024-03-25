@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,11 +23,10 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import re
+import uuid
 
-from django.utils.translation import gettext_lazy as _
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
-FIELD_REQUIRED_MESSAGE = _("This field is required.")
 DEFAULT_PAGINATOR_SIZE = 500
 PDF_MIME_TYPE = 'application/pdf'
 JPEG_MIME_TYPE = 'image/jpeg'
@@ -36,3 +35,29 @@ IMAGE_MIME_TYPES = {JPEG_MIME_TYPE, PNG_MIME_TYPE}
 SUPPORTED_MIME_TYPES = {PDF_MIME_TYPE} | IMAGE_MIME_TYPES
 DEFAULT_MIME_TYPES = [PDF_MIME_TYPE]
 UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+ORDERED_CAMPUSES_UUIDS = {
+    'LOUVAIN_LA_NEUVE_UUID': uuid.UUID('6f207107-bcf0-4b38-a622-9e78a3540c99'),
+    'BRUXELLES_WOLUWE_UUID': uuid.UUID('6da2b1d8-d60a-4cca-b3c3-333b43529d11'),
+    'BRUXELLES_SAINT_LOUIS_UUID': uuid.UUID('9e942dbe-45fc-4de7-9e17-ccd6e82345da'),
+    'MONS_UUID': uuid.UUID('f2b2ac6f-1bde-4389-bd5e-2257407c10f5'),
+    'BRUXELLES_SAINT_GILLES_UUID': uuid.UUID('f32a20cf-cfd6-47ab-b768-53c6c9df8b7c'),
+    'TOURNAI_UUID': uuid.UUID('cf34ff38-268e-4c10-aaa3-ec0c76df2398'),
+    'CHARLEROI_UUID': uuid.UUID('32bfcf4f-4b70-4532-9597-9722c61a27f5'),
+    'NAMUR_UUID': uuid.UUID('ccdfd820-52dc-4aef-a325-fbba3a1f0f52'),
+    'AUTRE_SITE_UUID': uuid.UUID('35b0431b-9609-4a31-a328-04c56571f4ba'),
+}
+ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES = {
+    AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT,
+    AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT,
+    AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT,
+    AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE,
+    AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION,
+    AcademicCalendarTypes.ADMISSION_POOL_VIP,
+    AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE,
+    AcademicCalendarTypes.ADMISSION_POOL_INSTITUT_CHANGE,
+    AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN,
+    AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN,
+    AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY,
+    AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY,
+    AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA,
+}

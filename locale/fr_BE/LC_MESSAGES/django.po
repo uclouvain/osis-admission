@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-12 17:06+0100\n"
+"POT-Creation-Date: 2024-03-22 18:08+0100\n"
 "PO-Revision-Date: 2023-12-08 17:10+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -422,9 +422,6 @@ msgstr "Sigle de l'entité de gestion"
 msgid "Acronym of the training"
 msgstr "Sigle de la formation"
 
-msgid "Action"
-msgstr "Action"
-
 msgid "Actions"
 msgstr "Actions"
 
@@ -604,6 +601,9 @@ msgstr "Condition d'accès"
 
 msgid "Admission requirement year"
 msgstr "Millésime de la condition d'accès"
+
+msgid "Admission statuses"
+msgstr "Les statuts de l'admission"
 
 msgid "Admission to regulated professions"
 msgstr "Accès aux professions réglementées"
@@ -851,6 +851,17 @@ msgstr ""
 msgctxt "admission"
 msgid "Are you sure you want to delete \"%(object)s\"?"
 msgstr "Êtes-vous sûr de vouloir supprimer \"%(object)s\" ?"
+
+#, python-format
+msgid "Are you sure you want to delete this experience (%(experience_name)s)?"
+msgstr ""
+"Êtes-vous sûr de vouloir supprimer cette expérience (%(experience_name)s) ?"
+
+#, python-format
+msgid ""
+"Are you sure you want to duplicate this experience (%(experience_name)s)?"
+msgstr ""
+"Êtes-vous sûr de vouloir dupliquer cette expérience (%(experience_name)s) ?"
 
 #, python-format
 msgid "Are you sure you want to refuse \"%(object)s\"?"
@@ -1349,6 +1360,9 @@ msgstr "Annuler"
 msgid "Cancel the application fee request"
 msgstr "Annuler la demande des frais de dossier"
 
+msgid "Cancel the request"
+msgstr "Annuler la réclamation"
+
 msgid "Cancelled application"
 msgstr "Demande annulée"
 
@@ -1369,6 +1383,19 @@ msgstr "Pays de la nationalité du candidat"
 
 msgid "Candidate:"
 msgstr "Candidat :"
+
+#, python-brace-format
+msgid ""
+"Cannot delete the experience because it is used as additional condition for "
+"the proposition {admission}."
+msgstr ""
+"Impossible de supprimer l'expérience parce qu'elle est utilisée comme "
+"condition additionnelle pour la proposition {admission}."
+
+msgid "Cannot delete the experience because it is used in another context."
+msgstr ""
+"Impossible de supprimer l'expérience parce qu'elle est utilisée dans un "
+"autre contexte."
 
 msgid "Canvas"
 msgstr "Canvas"
@@ -1500,6 +1527,12 @@ msgstr "Modifier la publication de cette conférence"
 msgid "Checklist"
 msgstr "Checklist"
 
+msgid "Checklist filters"
+msgstr "Filtres de la checklist"
+
+msgid "Checklist filters mode"
+msgstr "Le mode des filtres de la checklist"
+
 msgid "Child of a member of the staff of the UCLouvain or the Martin V entity"
 msgstr "Enfant d'un membre du personnel de l'UCLouvain ou de l'entité Martin V"
 
@@ -1529,6 +1562,9 @@ msgstr "Ville"
 
 msgid "Civil status"
 msgstr "État civil"
+
+msgid "Claim cancelled on"
+msgstr "Réclamation annulée le"
 
 msgid "Cleaned"
 msgstr "Toiletté"
@@ -2179,6 +2215,9 @@ msgstr "Décision de la faculté"
 msgid "Declared assimilated"
 msgstr "Déclaré(e) assimilé(e)"
 
+msgid "Declared assimilated or not"
+msgstr "Déclaré(e) assimilé(e) ou non"
+
 msgid "Declared not assimilated"
 msgstr "Déclaré(e) non assimilé(e)"
 
@@ -2221,6 +2260,9 @@ msgstr "Date de l'admission définitive :"
 msgctxt "admission"
 msgid "Delete"
 msgstr "Supprimer"
+
+msgid "Delete experience"
+msgstr "Supprimer l'expérience"
 
 msgid "Delete the document"
 msgstr "Supprimer le document"
@@ -2274,15 +2316,29 @@ msgstr "Poste diplomatique"
 msgid "Diplomatic post code"
 msgstr "Code poste diplomatique"
 
-msgid "Director"
-msgstr "Directeur"
+msgctxt "F"
+msgid "Director of the Enrolment Office"
+msgstr "Directrice du Service des inscriptions"
 
-msgid "Director of the inscription service"
+msgctxt "H"
+msgid "Director of the Enrolment Office"
 msgstr "Directeur du Service des inscriptions"
 
+msgctxt "X"
+msgid "Director of the Enrolment Office"
+msgstr "Directeur·trice du Service des inscriptions"
+
 msgctxt "F"
-msgid "Director of the inscription service"
-msgstr "Directrice du Service des inscriptions"
+msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
+msgstr "Directrice du Service des inscriptions Saint-Louis Bruxelles"
+
+msgctxt "H"
+msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
+msgstr "Directeur du Service des inscriptions Saint-Louis Bruxelles"
+
+msgctxt "X"
+msgid "Director of the Saint-Louis Bruxelles Enrolment Office"
+msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
 
 msgid "Disabled"
 msgstr "Désactivé"
@@ -2461,6 +2517,12 @@ msgstr ""
 msgid "Dual or triple degree"
 msgstr "Double ou triple diplomation"
 
+msgid "Duplicate experience"
+msgstr "Dupliquer l'expérience"
+
+msgid "Duplication of an experience"
+msgstr "Duplication d'une expérience"
+
 msgid "Dynamic questions about \"Specific aspects\" sub-tab"
 msgstr "Questions dynamiques du sous-onglet \"Spécificités\""
 
@@ -2501,6 +2563,9 @@ msgstr "ECTS doit être positif"
 
 msgid "EFT"
 msgstr "EFT"
+
+msgid "EN"
+msgstr "EN"
 
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
@@ -2641,8 +2706,8 @@ msgstr "Inscrit"
 msgid "Enrollment authorization document link"
 msgstr "Lien du document d'autorisation d'inscription"
 
-msgid "Enrolment Office (SIC)"
-msgstr "Service des inscriptions (SIC)"
+msgid "Enrolment Office"
+msgstr "Service des inscriptions"
 
 msgid "Enrolment applications"
 msgstr "Demandes d'inscription"
@@ -2731,6 +2796,9 @@ msgstr "Export excel à partir d'admission"
 msgid "Excel export of admission applications"
 msgstr "Export excel des demandes d'admission"
 
+msgid "Exclude"
+msgstr "Exclure"
+
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
 
@@ -2786,6 +2854,9 @@ msgstr "Réorientation/modification externe"
 
 msgid "FNRS"
 msgstr "FNRS"
+
+msgid "FR"
+msgstr "FR"
 
 msgid "FREE_COURSE"
 msgstr "Cours libre"
@@ -3040,8 +3111,14 @@ msgstr "Statut fraudeur d'après l'ARES"
 msgid "Fraudster status from SIC"
 msgstr "Statut fraudeur d'après SIC"
 
+msgid "Free additional approval condition"
+msgstr "Condition complémentaire d'acceptation libre"
+
 msgid "Free additional approval conditions"
 msgstr "Conditions complémentaires d'acceptation libres"
+
+msgid "Free additional conditions"
+msgstr "Conditions complémentaires libres"
 
 msgid "Free and requestable by FAC"
 msgstr "Libre et réclamable par FAC"
@@ -3211,6 +3288,9 @@ msgstr "Texte d'aide"
 
 msgid "Hide the checklist menu"
 msgstr "Cacher le menu de la checklist"
+
+msgid "Hide the states of the checklist"
+msgstr "Cacher les états de la checklist"
 
 msgctxt "tab"
 msgid "History"
@@ -3701,6 +3781,12 @@ msgstr ""
 
 msgid "In person"
 msgstr "En présentiel"
+
+msgid "Include"
+msgstr "Inclure"
+
+msgid "Include or exclude the checklist filters"
+msgstr "Inclure ou exclure les filtres de la checklist"
 
 msgid "Incomplete field"
 msgstr "Non renseigné(e)"
@@ -4622,6 +4708,9 @@ msgstr "Intitulé du type d'enseignement"
 msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
 
+msgid "Name of the working list"
+msgstr "Nom de la liste de travail"
+
 msgid "Nationality"
 msgstr "Nationalité"
 
@@ -4921,6 +5010,9 @@ msgstr "Autre"
 msgid "Other address"
 msgstr "Une autre adresse"
 
+msgid "Other application(s)"
+msgstr "Autre(s) demande(s)"
+
 msgid "Other authorized program"
 msgstr "Autre formation autorisée"
 
@@ -5123,6 +5215,9 @@ msgstr "Données personnelles"
 msgctxt "admission"
 msgid "Personal email"
 msgstr "E-mail privé"
+
+msgid "Personalized"
+msgstr "Personnalisée"
 
 msgid "PhD"
 msgstr "Doctorat"
@@ -5384,6 +5479,9 @@ msgstr "Epreuves de confirmation passées"
 
 msgid "Previous experience"
 msgstr "Parcours antérieur"
+
+msgid "Previous experiences"
+msgstr "Expériences du parcours"
 
 msgid "Previous notes"
 msgstr "Notes précédentes"
@@ -5667,12 +5765,17 @@ msgstr "Destinataire"
 msgid "Recompute"
 msgstr "Recalculer"
 
-msgid "Rector"
-msgstr "Recteur"
-
 msgctxt "F"
 msgid "Rector"
 msgstr "Rectrice"
+
+msgctxt "H"
+msgid "Rector"
+msgstr "Recteur"
+
+msgctxt "X"
+msgid "Rector"
+msgstr "Recteur·trice"
 
 msgid "Reduced tuition fee"
 msgstr "Réduction des droits d’inscription"
@@ -5753,6 +5856,9 @@ msgstr "Attestation d’immatriculation"
 msgid "Registration fees"
 msgstr "Droits d'inscription"
 
+msgid "Related experience"
+msgstr "Expérience associée"
+
 msgid "Relationship"
 msgstr "Lien de parenté"
 
@@ -5775,6 +5881,9 @@ msgstr "Remplacer le document"
 
 msgid "Reporting categories"
 msgstr "Catégories de reporting"
+
+msgid "Request cancelled"
+msgstr "Réclamation annulée"
 
 msgid "Request of a new deadline for the confirmation paper"
 msgstr "Demande d'une nouvelle échéance pour l'épreuve de confirmation"
@@ -5852,6 +5961,9 @@ msgstr ""
 msgid "Resident (as defined by government decree)"
 msgstr "Résident (au sens du Décret)"
 
+msgid "Ressource not found."
+msgstr "Ressource introuvable."
+
 msgid "Restore activity to submitted"
 msgstr "Remettre cette activité au statut soumise"
 
@@ -5887,12 +5999,6 @@ msgstr "Rôle: Secrétaires ADRE"
 
 msgid "Role: ADRE secretary"
 msgstr "Rôle: Secrétaire ADRE"
-
-msgid "Role: Admission reader"
-msgstr "Rôle: Lecteur des demandes d'inscription"
-
-msgid "Role: Admission readers"
-msgstr "Rôle: Lecteurs des demandes d'inscription"
 
 msgid "Role: CDD configurator"
 msgstr "Rôle: Configurateur CDD"
@@ -6023,6 +6129,9 @@ msgstr "Sur 3 ans, 1/2 crédits inscrits même cycle car allègement"
 
 msgid "SYST_REUSSITE"
 msgstr "Système réussite"
+
+msgid "Saint-Louis Bruxelles Enrolment Office"
+msgstr "Service des inscriptions Saint-Louis Bruxelles"
 
 msgid "Salary slips"
 msgstr "Fiches de rémunération"
@@ -6213,6 +6322,9 @@ msgstr "Voir le détail"
 
 msgid "Show the checklist menu"
 msgstr "Afficher le menu de la checklist"
+
+msgid "Show the states of the checklist"
+msgstr "Afficher les états de la checklist"
 
 msgid "Signatures"
 msgstr "Signatures"
@@ -6615,9 +6727,6 @@ msgstr ""
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
 
-msgid "The candidate has several enrolment applications in progress"
-msgstr "Le candidat a plusieurs demandes d'inscription en cours"
-
 msgid "The candidate is doing a mobility"
 msgstr "Le candidat effectue une mobilité"
 
@@ -6736,6 +6845,9 @@ msgstr "Le document n'est plus désigné comme étant à réclamer"
 msgid "The documents have been requested to the candidate"
 msgstr "Les documents ont été réclamés au candidat"
 
+msgid "The documents request have been cancelled"
+msgstr "La réclamation des documents a été annulée"
+
 msgid "The dossier has been confirmed as:"
 msgstr "La demande a été confirmée sous le nom :"
 
@@ -6811,6 +6923,12 @@ msgstr ""
 "Le statut global de la demande doit être l'un des suivants pour pouvoir "
 "envoyer le dossier en faculté : %(statuses)s."
 
+#, python-format
+msgid ""
+"The inscription type admission was authorised the %(date)s by %(author)s."
+msgstr ""
+"La demande de type inscription a été autorisée le %(date)s par %(author)s."
+
 msgid "The jury is not in progress"
 msgstr "Le jury n'est pas en cours"
 
@@ -6869,7 +6987,7 @@ msgstr ""
 msgid "The number of credits registered must be greater than 0."
 msgstr "Le nombre de crédits inscrits doit être supérieur à 0."
 
-msgid "The official French-language enrolment authorisation signed by you."
+msgid "The official enrolment authorisation signed by you."
 msgstr "La présente autorisation signée pour accord dans le cadre ci-dessous."
 
 msgid "The opinion about the extension request is not completed."
@@ -7062,6 +7180,9 @@ msgstr "Données relatives à la thèse"
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
 
+msgid "This action will cancel the document request."
+msgstr "Cette action va annuler la réclamation des documents en cours."
+
 msgid "This activity and its potential subactivities will be discontinued"
 msgstr "Cette activité et ses potentielles sous-activités seront supprimées"
 
@@ -7163,9 +7284,6 @@ msgstr "Ce champ est obligatoire si le prénom est manquant."
 
 msgid "This field is required if the surname is missing."
 msgstr "Ce champ est obligatoire si le nom est manquant."
-
-msgid "This field is required."
-msgstr "Ce champ est obligatoire."
 
 #, python-format
 msgid ""
@@ -7659,6 +7777,12 @@ msgstr "Type de contrat de travail"
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
 
+msgid "Working list"
+msgstr "Liste de travail"
+
+msgid "Working lists"
+msgstr "Listes de travail"
+
 msgid ""
 "Would you like to become a <a href='https://uclouvain.be/fr/decouvrir/carte-"
 "solidaire.html' target='_blank'>Solidarity Student</a>, that is, a member of "
@@ -8055,6 +8179,9 @@ msgstr "Situation d’assimilation qui vous correspond"
 msgid "Your data have been saved."
 msgstr "Vos données ont été sauvegardées."
 
+msgid "Your document is available here"
+msgstr "Votre document est disponible ici"
+
 msgid "Your dossier reference:"
 msgstr "Votre numéro de dossier :"
 
@@ -8125,10 +8252,6 @@ msgstr "Carte de crédit"
 
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
-
-#, python-format
-msgid "e.g.: %(example)s"
-msgstr "ex: %(example)s"
 
 msgid "e.g.: 5th out of 30"
 msgstr "ex: 5ème sur 30"

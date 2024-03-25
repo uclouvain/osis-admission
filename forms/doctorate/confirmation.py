@@ -29,8 +29,8 @@ from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileUploadField
 
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.forms import CustomDateInput
 from admission.forms.doctorate.cdd.generic_send_mail import BaseEmailTemplateForm
+from base.forms.utils.datefield import CustomDateInput
 
 
 class ConfirmationOpinionForm(forms.Form):

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,24 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.utils.translation import gettext_lazy as _
 
-from io import StringIO
-
-from django.core.management import call_command
-from django.test import TestCase
-
-SUCCESS_EXIT_CODE = 0
+from osis_common.ddd.interface import BusinessException
 
 
-class TestMigrations(TestCase):
-    def test_should_not_create_new_migrations_files_when_makemigrations_is_called(self):
-        out = StringIO()
-        try:
-            call_command("makemigrations", "admission", dry_run=True, check=True, stdout=out, skip_checks=True)
-        except SystemExit as e:
-            error_msg = (
-                "Some models changes has no migrations file.\n"
-                "Migrations file that would be created:\n"
-                "{}".format(out.getvalue())
-            )
-            self.assertEqual(e.code, SUCCESS_EXIT_CODE, error_msg)
+class InformationsDestinatairePasTrouvee(BusinessException):
+    def __init__(self, **kwargs):
+        message = _("Ressource not found.")
+        super().__init__(message, **kwargs)

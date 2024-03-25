@@ -23,9 +23,12 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+import uuid
 from unittest import TestCase
 
 import factory
+import freezegun
 
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
@@ -38,6 +41,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
 )
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    SituationPropositionNonSICException,
+    ParcoursAnterieurNonSuffisantException,
+)
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
     _PropositionIdentityFactory,
@@ -47,8 +54,12 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 
 
+@freezegun.freeze_time('2020-11-01')
 class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -56,6 +67,16 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
         cls.command = SpecifierInformationsAcceptationPropositionParSicCommand
+        cls.uuid_experience = str(uuid.uuid4())
+        academic_year_repository = AcademicYearInMemoryRepository()
+        for annee in range(2020, 2022):
+            academic_year_repository.save(
+                AcademicYear(
+                    entity_id=AcademicYearIdentity(year=annee),
+                    start_date=datetime.date(annee, 9, 15),
+                    end_date=datetime.date(annee + 1, 9, 30),
+                )
+            )
 
     def setUp(self) -> None:
         self.proposition = PropositionFactory(
@@ -94,6 +115,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
 
     def test_should_etre_ok_avec_min_informations(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_REUSSITE
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -127,8 +149,27 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
         self.assertIsNone(proposition.doit_se_presenter_en_sic)
         self.assertEqual(proposition.communication_au_candidat, '')
 
+    def test_should_lever_exception_si_statut_proposition_non_valide(self):
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_REUSSITE
+        self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+        self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonSICException)
+
+    def test_should_lever_exception_si_parcours_anterieur_non_suffisant(self):
+        self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_EN_COURS
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+        self.assertIsInstance(context.exception.exceptions.pop(), ParcoursAnterieurNonSuffisantException)
+
     def test_should_etre_ok_si_completee_avec_max_informations(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_REUSSITE
         self.proposition.annee_calculee = 2020
 
         # Maximum d'informations données
@@ -137,7 +178,16 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
                 uuid_proposition='uuid-MASTER-SCI-APPROVED',
                 avec_conditions_complementaires=True,
                 uuids_conditions_complementaires_existantes=['uuid-condition-complementaire-1'],
-                conditions_complementaires_libres=['Condition libre 1'],
+                conditions_complementaires_libres=[
+                    {
+                        'name_fr': 'Condition libre 1',
+                        'name_en': 'Free condition 1',
+                        'related_experience_id': self.uuid_experience,
+                    },
+                    {
+                        'name_fr': 'Condition libre 2',
+                    },
+                ],
                 avec_complements_formation=True,
                 uuids_complements_formation=['uuid-complement-formation-1'],
                 commentaire_complements_formation='Mon commentaire concernant les compléments de formation',
@@ -173,7 +223,13 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
                 )
             ],
         )
-        self.assertEqual(proposition.conditions_complementaires_libres, ['Condition libre 1'])
+        self.assertEqual(len(proposition.conditions_complementaires_libres), 2)
+        self.assertEqual(proposition.conditions_complementaires_libres[0].nom_fr, 'Condition libre 1')
+        self.assertEqual(proposition.conditions_complementaires_libres[0].nom_en, 'Free condition 1')
+        self.assertEqual(proposition.conditions_complementaires_libres[0].uuid_experience, self.uuid_experience)
+        self.assertEqual(proposition.conditions_complementaires_libres[1].nom_fr, 'Condition libre 2')
+        self.assertEqual(proposition.conditions_complementaires_libres[1].nom_en, '')
+        self.assertEqual(proposition.conditions_complementaires_libres[1].uuid_experience, '')
         self.assertEqual(proposition.avec_complements_formation, True)
         self.assertEqual(
             proposition.complements_formation,

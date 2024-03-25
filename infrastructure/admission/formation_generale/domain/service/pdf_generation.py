@@ -24,16 +24,15 @@
 #
 # ##############################################################################
 import itertools
-from builtins import iter
 from typing import Optional, List, Dict, Union
 
 from django.conf import settings
 from django.utils import translation, timezone
 from django.utils.translation import override
-
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
+from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
@@ -45,14 +44,15 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     OngletsDemande,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererDocumentsPropositionQuery,
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PdfSicInconnu
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
@@ -60,25 +60,54 @@ from admission.infrastructure.admission.domain.service.unites_enseignement_trans
 )
 from admission.infrastructure.utils import (
     CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM,
-    CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
 )
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
+from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
+from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from osis_profile.models.enums.curriculum import ActivityType
 
 ENTITY_SIC = 'SIC'
+ENTITY_SICB = 'SICB'
 ENTITY_UCL = 'UCL'
 
 
 class PDFGeneration(IPDFGeneration):
     @classmethod
-    def _get_sic_director(cls):
+    def _get_refusal_certificate_footer_campus(
+        cls,
+        proposition_dto: PropositionGestionnaireDTO,
+        campus_repository: IUclouvainCampusRepository,
+    ):
+        footer_campus_uuid = (
+            # For the trainings whose the enrollment is in Saint-Louis, the campus to display is the related one
+            ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID']
+            if proposition_dto.formation.campus_inscription
+            and proposition_dto.formation.campus_inscription.uuid
+            == ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID']
+            # For other trainings, the campus to display is the Louvain-La-Neuve campus (default)
+            else ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID']
+        )
+        return campus_repository.get_dto(UclouvainCampusIdentity(uuid=str(footer_campus_uuid)))
+
+    @classmethod
+    def _get_sic_director(cls, proposition_dto: PropositionGestionnaireDTO):
         now = timezone.now()
+
+        # For the trainings whose the enrollment is in Saint-Louis, the director is the Saint-Louis campus sic director
+        entity = (
+            ENTITY_SICB
+            if proposition_dto.formation.campus_inscription
+            and proposition_dto.formation.campus_inscription.uuid
+            == ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID']
+            else ENTITY_SIC
+        )
+
         director = (
             Person.objects.filter(
-                mandatary__mandate__entity__entityversion__acronym=ENTITY_SIC,
+                mandatary__mandate__entity__entityversion__acronym=entity,
                 mandatary__mandate__function=MandateTypes.DIRECTOR.name,
             )
             .filter(
@@ -243,14 +272,24 @@ class PDFGeneration(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
     ) -> Optional[str]:
+        if pdf == 'refus':
+            return cls.generer_attestation_refus_sic(
+                proposition_repository=proposition_repository,
+                profil_candidat_translator=profil_candidat_translator,
+                campus_repository=campus_repository,
+                proposition=proposition,
+                gestionnaire=gestionnaire,
+                temporaire=True,
+            )
+
         PDF_GENERATION_METHOD = {
             'accord': cls.generer_attestation_accord_sic,
             'accord_annexe': cls.generer_attestation_accord_annexe_sic,
-            'refus': cls.generer_attestation_refus_sic,
         }
 
         pdf_generation_method = PDF_GENERATION_METHOD.get(pdf)
@@ -302,7 +341,7 @@ class PDFGeneration(IPDFGeneration):
         # Get the list of documents
         for document in documents:
             if (
-                document.statut in {StatutEmplacementDocument.A_RECLAMER.name}
+                document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
                 and document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
             ):
                 document_identifier = document.identifiant.split('.')
@@ -332,7 +371,8 @@ class PDFGeneration(IPDFGeneration):
                 'profil_candidat_identification': profil_candidat_identification,
                 'profil_candidat_coordonnees': profil_candidat_coordonnees,
                 'documents_names': documents_names,
-                'director': cls._get_sic_director(),
+                'director': cls._get_sic_director(proposition_dto),
+                'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
             },
             author=gestionnaire,
             language=proposition_dto.langue_contact_candidat,
@@ -350,9 +390,18 @@ class PDFGeneration(IPDFGeneration):
         gestionnaire: str,
         temporaire: bool = False,
     ) -> Optional[str]:
+        from infrastructure.messages_bus import message_bus_instance
+
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator
+            )
+
+            nombre_credits_formation = message_bus_instance.invoke(
+                GetCreditsDeLaFormationQuery(
+                    sigle=proposition_dto.formation.sigle,
+                    annee=proposition_dto.formation.annee,
+                )
             )
 
             if not proposition_dto.candidat_a_nationalite_hors_ue_5 and not temporaire:
@@ -371,6 +420,7 @@ class PDFGeneration(IPDFGeneration):
                     'proposition': proposition_dto,
                     'profil_candidat_identification': profil_candidat_identification,
                     'rector': cls._get_sic_rector(),
+                    'nombre_credits_formation': nombre_credits_formation,
                 },
                 author=gestionnaire,
             )
@@ -383,6 +433,7 @@ class PDFGeneration(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -403,7 +454,9 @@ class PDFGeneration(IPDFGeneration):
                     'proposition': proposition_dto,
                     'profil_candidat_identification': profil_candidat_identification,
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
-                    'director': cls._get_sic_director(),
+                    'director': cls._get_sic_director(proposition_dto),
+                    'footer_campus': cls._get_refusal_certificate_footer_campus(proposition_dto, campus_repository),
+                    'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
                 },
                 author=gestionnaire,
             )
@@ -416,6 +469,7 @@ class PDFGeneration(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        campus_repository: IUclouvainCampusRepository,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -436,7 +490,9 @@ class PDFGeneration(IPDFGeneration):
                     'proposition': proposition_dto,
                     'profil_candidat_identification': profil_candidat_identification,
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
-                    'director': cls._get_sic_director(),
+                    'director': cls._get_sic_director(proposition_dto),
+                    'footer_campus': cls._get_refusal_certificate_footer_campus(proposition_dto, campus_repository),
+                    'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
                 },
                 author=gestionnaire,
             )

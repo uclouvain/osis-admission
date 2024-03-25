@@ -23,13 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import attr
 
 from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
+    ConditionComplementaireLibreApprobation,
 )
 from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
@@ -39,6 +40,7 @@ from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumen
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
     StatutEmplacementDocument,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -82,7 +84,7 @@ class ShouldSpecifierMotifRefusFacultaire(BusinessValidator):
 class ShouldSpecifierInformationsAcceptationFacultaire(BusinessValidator):
     avec_conditions_complementaires: Optional[bool]
     conditions_complementaires_existantes: List[ConditionComplementaireApprobationIdentity]
-    conditions_complementaires_libres: List[str]
+    conditions_complementaires_libres: List[ConditionComplementaireLibreApprobation]
 
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[ComplementFormationIdentity]]
@@ -211,7 +213,7 @@ class ShouldNePasAvoirDeDocumentReclameImmediat(BusinessValidator):
 
     def validate(self, *args, **kwargs):
         if any(
-            document.statut == StatutEmplacementDocument.A_RECLAMER.name
+            document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
             and document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
             for document in self.documents_dto
         ):

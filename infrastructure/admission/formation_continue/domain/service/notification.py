@@ -34,7 +34,7 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 
 from admission.auth.roles.program_manager import ProgramManager
 from admission.contrib.models import AdmissionTask, ContinuingEducationAdmission
-from admission.contrib.models.base import BaseAdmissionProxy
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
 
@@ -75,7 +75,7 @@ class Notification(INotification):
         from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 
         admission = (
-            BaseAdmissionProxy.objects.with_training_management_and_reference()
+            BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate', 'training')
             .get(uuid=proposition.entity_id.uuid)
         )

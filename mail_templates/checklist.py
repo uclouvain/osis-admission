@@ -123,11 +123,6 @@ templates.register(
             example="AGRO3DP / Doctorat en sciences agronomiques et ingénierie biologique",
         ),
         Token(
-            name='director',
-            description=_("Director"),
-            example="Virginie Odeurs",
-        ),
-        Token(
             name='document_link',
             description=_("Refusal document link"),
             example="https://osis.uclouvain.be/...",

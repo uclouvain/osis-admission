@@ -35,14 +35,13 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext
+from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
 from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
-from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.adre import AdreSecretary
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
@@ -67,12 +66,22 @@ from admission.contrib.models import (
 )
 from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.cdd_config import CddConfiguration
-from admission.contrib.models.checklist import RefusalReasonCategory, RefusalReason, AdditionalApprovalCondition
+from admission.contrib.models.checklist import (
+    RefusalReasonCategory,
+    RefusalReason,
+    AdditionalApprovalCondition,
+    FreeAdditionalApprovalCondition,
+)
 from admission.contrib.models.doctoral_training import Activity
+from admission.contrib.models.epc_injection import EPCInjection
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
+from admission.contrib.models.working_list import WorkingList
 from admission.ddd.admission.enums import CritereItemFormulaireFormation
+from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
+from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.services.injection_epc import InjectionEPC
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
@@ -500,7 +509,13 @@ class AccountingAdmin(ReadOnlyFilesMixin, admin.ModelAdmin):
 class BaseAdmissionAdmin(admin.ModelAdmin):
     # Only used to search admissions through autocomplete fields
     search_fields = ['reference']
-    list_display = ('reference', 'candidate', 'training', 'type_demande', 'created_at', )
+    list_display = (
+        'reference',
+        'candidate',
+        'training',
+        'type_demande',
+        'created_at',
+    )
     actions = [
         'injecter_dans_epc',
     ]
@@ -561,6 +576,43 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
     list_filter = ['status', 'method']
 
 
+class EPCInjectionAdmin(admin.ModelAdmin):
+    search_fields = ['admission']
+    list_display = ['admission', 'status', 'last_epc_response']
+    list_filter = ['status']
+    formfield_overrides = {
+        models.JSONField: {'widget': JSONEditorWidget},
+    }
+
+    @admin.display()
+    def last_epc_response(self, obj):
+        if obj.epc_responses:
+            return obj.epc_responses[-1]
+
+
+class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):
+    related_experience = forms.ModelMultipleChoiceField(
+        queryset=EducationalExperience.objects.none(),
+        required=False,
+        widget=FilteredSelectMultiple(verbose_name=_('Educational experiences'), is_stacked=False),
+        to_field_name='uuid',
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['related_experience'].queryset = self.instance.admission.candidate.educationalexperience_set
+
+
+class FreeAdditionalApprovalConditionAdmin(admin.ModelAdmin):
+    form = FreeAdditionalApprovalConditionAdminForm
+    list_display = ['name_fr', 'name_en', 'admission']
+    search_fields = ['admission__reference']
+    autocomplete_fields = [
+        'related_experience',
+        'admission',
+    ]
+
+
 admin.site.register(DoctorateAdmission, DoctorateAdmissionAdmin)
 admin.site.register(CddMailTemplate, CddMailTemplateAdmin)
 admin.site.register(CddConfiguration)
@@ -577,6 +629,7 @@ admin.site.register(RefusalReason, RefusalReasonAdmin)
 admin.site.register(AdditionalApprovalCondition, AdditionalApprovalConditionAdmin)
 admin.site.register(DiplomaticPost, DiplomaticPostAdmin)
 admin.site.register(OnlinePayment, OnlinePaymentAdmin)
+admin.site.register(FreeAdditionalApprovalCondition, FreeAdditionalApprovalConditionAdmin)
 
 
 class ActivityAdmin(admin.ModelAdmin):
@@ -790,7 +843,12 @@ class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
 
 
 class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
-    list_display = ('person', 'education_group_most_recent_acronym', 'cohort', 'changed',)
+    list_display = (
+        'person',
+        'education_group_most_recent_acronym',
+        'cohort',
+        'changed',
+    )
 
     def get_hijack_user(self, obj):
         return obj.person.user
@@ -804,6 +862,42 @@ class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
         return obj.person.user
 
 
+class WorkingListForm(forms.ModelForm):
+    checklist_filters = ChecklistStateFilterField(
+        configurations=ORGANISATION_ONGLETS_CHECKLIST,
+        label=_('Checklist filters'),
+        required=False,
+    )
+
+    admission_statuses = forms.TypedMultipleChoiceField(
+        label=_('Admission statuses'),
+        required=False,
+        choices=CHOIX_STATUT_TOUTE_PROPOSITION,
+    )
+
+    class Meta:
+        model = WorkingList
+        fields = '__all__'
+
+
+class WorkingListAdmin(OrderedModelAdmin):
+    list_display = ['translated_name', 'move_up_down_links', 'order']
+    search_fields = ['name']
+    form = WorkingListForm
+
+    @admin.display(description=_('Name'))
+    def translated_name(self, obj):
+        return obj.name.get(get_language())
+
+    class Media:
+        css = {
+            'all': [
+                'admission/working_list_admin.css',
+            ],
+        }
+
+
+admin.site.register(WorkingList, WorkingListAdmin)
 admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
 admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
 admin.site.register(Candidate, FrontOfficeRoleModelAdmin)
@@ -811,10 +905,10 @@ admin.site.register(Candidate, FrontOfficeRoleModelAdmin)
 admin.site.register(CddConfigurator, CddConfiguratorAdmin)
 
 admin.site.register(CentralManager, CentralManagerAdmin)
-admin.site.register(AdmissionReader, AdmissionReaderAdmin)
 admin.site.register(ProgramManager, ProgramManagerAdmin)
 admin.site.register(SicManagement, HijackEntityRoleModelAdmin)
 admin.site.register(AdreSecretary, HijackRoleModelAdmin)
 admin.site.register(JurySecretary, HijackRoleModelAdmin)
 admin.site.register(Sceb, HijackRoleModelAdmin)
 admin.site.register(DoctorateReader, HijackRoleModelAdmin)
+admin.site.register(EPCInjection, EPCInjectionAdmin)

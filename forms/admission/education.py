@@ -24,25 +24,24 @@
 #
 # ##############################################################################
 import datetime
+
 from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
 from admission.forms import (
-    EMPTY_CHOICE,
-    AdmissionFileUploadField as FileUploadField,
     AdmissionModelCountryChoiceField,
 )
-from admission.forms import autocomplete
-from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.forms.specific_question import ConfigurableFormMixin
-from admission.utils import format_academic_year
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete
+from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
+from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.academic_year import AcademicYear
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.organization import Organization
+from base.utils.utils import format_academic_year
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
@@ -80,7 +79,7 @@ class BaseAdmissionEducationForm(ConfigurableFormMixin):
             ),
         ),
     )
-    graduated_from_high_school_year = AcademicYearField(
+    graduated_from_high_school_year = AcademicYearModelChoiceField(
         label=_('Please indicate the academic year in which you obtained your degree'),
         widget=autocomplete.Select2,
         required=False,
@@ -122,13 +121,13 @@ class BachelorAdmissionEducationForm(BaseAdmissionEducationForm):
         widget=forms.RadioSelect,
         required=False,
     )
-    high_school_diploma = FileUploadField(
+    high_school_diploma = MaxOneFileUploadField(
         label=_('Secondary school diploma'),
         max_files=1,
         required=False,
         help_text=_('Secondary school diploma or, if not available, a certificate of enrolment or school attendance.'),
     )
-    first_cycle_admission_exam = FileUploadField(
+    first_cycle_admission_exam = MaxOneFileUploadField(
         label=_('Certificate of passing the bachelor\'s course entrance exam'),
         max_files=1,
         required=False,
@@ -297,12 +296,12 @@ class BachelorAdmissionEducationForeignDiplomaForm(forms.ModelForm):
         queryset=Country.objects.all(),
         to_field_name='iso_code',
     )
-    high_school_transcript = FileUploadField(
+    high_school_transcript = MaxOneFileUploadField(
         label=_('A transcript for your last year of secondary school'),
         max_files=1,
         required=False,
     )
-    high_school_transcript_translation = FileUploadField(
+    high_school_transcript_translation = MaxOneFileUploadField(
         label=_(
             'A translation of your official transcript of marks for your final year of secondary school '
             'by a sworn translator'
@@ -310,12 +309,12 @@ class BachelorAdmissionEducationForeignDiplomaForm(forms.ModelForm):
         max_files=1,
         required=False,
     )
-    high_school_diploma_translation = FileUploadField(
+    high_school_diploma_translation = MaxOneFileUploadField(
         label=_('A translation of your secondary school diploma by a sworn translator'),
         max_files=1,
         required=False,
     )
-    final_equivalence_decision_not_ue = FileUploadField(
+    final_equivalence_decision_not_ue = MaxOneFileUploadField(
         label=_(
             'Copy of both sides of the definitive equivalency decision by the Ministry of the French-speaking '
             'Community of Belgium (possibly accompanied by the DAES or the undergraduate studies exam, if your '
@@ -329,7 +328,7 @@ class BachelorAdmissionEducationForeignDiplomaForm(forms.ModelForm):
         max_files=2,
         required=False,
     )
-    final_equivalence_decision_ue = FileUploadField(
+    final_equivalence_decision_ue = MaxOneFileUploadField(
         label=_(
             'Copy of both sides of the definitive equivalency decision (accompanied, where applicable, by the DAES '
             'or undergraduate exam, in the case of restrictive equivalency)'
@@ -342,7 +341,7 @@ class BachelorAdmissionEducationForeignDiplomaForm(forms.ModelForm):
         max_files=2,
         required=False,
     )
-    equivalence_decision_proof = FileUploadField(
+    equivalence_decision_proof = MaxOneFileUploadField(
         label=_('Proof of equivalency request'),
         help_text=_(
             'If you do not yet have a final equivalency decision from the <a href="http://www.equivalences.cfwb.be/" '

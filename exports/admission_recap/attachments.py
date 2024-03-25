@@ -28,6 +28,7 @@ from typing import List, Optional, Dict
 
 import img2pdf
 from django.utils.translation import override
+from osis_document.api.utils import get_raw_content_remotely
 
 from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -62,11 +63,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
-from admission.utils import format_academic_year
 from base.models.enums.education_group_types import TrainingType
-from base.models.enums.got_diploma import GotDiploma
-from osis_document.api.utils import get_raw_content_remotely
-from osis_profile.models.enums.curriculum import TranscriptType, ActivityType
+from base.utils.utils import format_academic_year
+from osis_profile.models.enums.curriculum import TranscriptType
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 
