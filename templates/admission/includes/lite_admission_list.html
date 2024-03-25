@@ -27,7 +27,7 @@
 <table>
   {% for autre_demande in autres_demandes %}
     <tr>
-      <td>
+      <td style="white-space: nowrap; vertical-align: baseline;">
         {% admission_url autre_demande.uuid autre_demande.type_formation as autre_demande_url %}
         {% if autre_demande_url %}
           <a target="_blank" href="{{ autre_demande_url }}">{{ autre_demande.numero_demande }}</a>
