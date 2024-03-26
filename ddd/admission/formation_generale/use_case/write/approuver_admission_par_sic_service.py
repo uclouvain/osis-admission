@@ -23,12 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
@@ -38,8 +38,11 @@ from admission.ddd.admission.formation_generale.domain.service.emplacement_docum
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
+from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
 
 def approuver_admission_par_sic(
@@ -55,6 +58,8 @@ def approuver_admission_par_sic(
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
+    digit: 'IDigitRepository',
+    compteur_noma: 'ICompteurAnnuelPourNomaRepository',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -110,6 +115,16 @@ def approuver_admission_par_sic(
         proposition=proposition,
         emplacement_document_repository=emplacement_document_repository,
         auteur=cmd.auteur,
+    )
+
+    noma = NomaGenerateurService.generer_noma(
+        compteur=compteur_noma.get_compteur(annee=proposition.formation_id.annee).compteur,
+        annee=proposition.formation_id.annee
+    )
+
+    digit.submit_person_ticket(
+        global_id=proposition.matricule_candidat,
+        noma=noma
     )
 
     message = notification.accepter_proposition_par_sic(

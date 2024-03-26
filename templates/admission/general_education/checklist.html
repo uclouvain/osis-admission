@@ -99,6 +99,7 @@
         id="tabs-content"
         class="tab-content"
     >
+
       {% with initial=original_admission.checklist.initial.assimilation current=original_admission.checklist.current.assimilation next_url=next_base_url|add:'assimilation' %}
         <div role="tabpanel" class="tab-pane in active" id="assimilation">
           <div class="form-group btn-group status-group" role="group">
@@ -128,6 +129,20 @@
 
       {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
+
+        {% search_account_digit_result_msg original_admission %}
+
+        {% if digit_ticket %}
+            {% digit_ticket_status_msg digit_ticket %}
+        {% endif %}
+
+        <form id="create-digit-person-form" method="POST" action="{% url 'admission:services:digit:request-digit-person-creation' uuid=uuid %}">
+            {% csrf_token %}
+            <button id="create-person-form-btn" type="submit" class="btn btn-primary pull-right hidden" disabled>
+                Créer personne dans DigIT
+            </button>
+        </form>
+
           <div class="form-group btn-group status-group" role="group">
             {% translate initial.libelle as initial_state_label %}
             {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' %}
@@ -322,10 +337,10 @@
             {% endwith %}
           </div>
         {% endfor %}
-        
+
         {% include 'admission/general_education/includes/checklist/previous_experience_send_email_to_checkers_modal.html' %}
         {% include 'admission/general_education/includes/checklist/previous_experience_send_email_to_candidate_modal.html' %}
-        
+
       {% endwith %}
       {% with initial=original_admission.checklist.initial.specificites_formation current=original_admission.checklist.current.specificites_formation next_url=next_base_url|add:'specificites_formation' %}
         <div role="tabpanel" class="tab-pane" id="specificites_formation">
@@ -469,7 +484,7 @@
       </div>
     </div>
   </div>
-  
+
   <table style="display:none;">
     {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='fac-decision-additional-approval-conditions-form' form=fac_decision_free_approval_condition_formset.empty_form id='empty-fac-approval-form' %}
     {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='sic-decision-additional-approval-conditions-form' form=sic_decision_free_approval_condition_formset.empty_form id='empty-sic-approval-form' %}
@@ -508,7 +523,7 @@
 
           let currentTab = window.location.hash;
           let currentTabSplit = currentTab.split('-');
-          
+
           {# Manage the hash parameter #}
           if (currentTabSplit.length > 1) {
               {# Split the hash to get the checklist tab from it #}
@@ -979,7 +994,18 @@
               formData.set('redirect_to', activeTab.length > 0 ? `#${activeTab.attr('id')}` : window.location.hash);
           });
 
-      })(jQuery);
+      })(jQuery)
+
+        $('#merge-experience-form').on('submit', (e) => {
+            e.preventDefault();
+            htmx.ajax('GET', e.target.action, {
+                source: '#merge-experience-btn',
+                target: '#form-ajax-modal',
+                indicator: '#htmx-overlay',
+                swap: 'innerHTML',
+            }).then(() => $('#form-ajax-modal').modal('show'));
+        })
+    </script>
   </script>
 {% endblock script %}
 

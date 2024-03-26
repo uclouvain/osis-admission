@@ -53,6 +53,7 @@ class AdmissionCoordonneesDetailView(LoadDossierViewMixin, TemplateView):
             'private_email': self.admission.candidate.private_email,
             'phone_mobile': self.admission.candidate.phone_mobile,
             'emergency_contact_phone': self.admission.candidate.emergency_contact_phone,
+            'account': self.get_digit_data(),
         }
 
         if self.is_doctorate and 'dossier' in context:
@@ -61,3 +62,6 @@ class AdmissionCoordonneesDetailView(LoadDossierViewMixin, TemplateView):
             context['profil_candidat'] = context['admission'].profil_soumis_candidat
 
         return context
+
+    def get_digit_data(self):
+        return {'available': False, 'email': None}

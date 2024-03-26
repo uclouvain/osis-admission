@@ -85,6 +85,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
             elements_confirmation=ElementsConfirmationInMemory.get_elements_for_tests(),
         )
 
+    @mock.patch('admission.infrastructure.admission.domain.service.digit.MOCK_DIGIT_SERVICE_CALL', True)
     def test_should_soumettre_proposition_etre_ok_si_admission_complete(self):
         proposition = PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory()
 

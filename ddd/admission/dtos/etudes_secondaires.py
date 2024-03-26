@@ -80,6 +80,7 @@ class AlternativeSecondairesDTO(interface.DTO):
 
 @attr.dataclass(slots=True, frozen=True)
 class EtudesSecondairesDTO(interface.DTO):
+    uuid: str = ''
     diplome_belge: Optional[DiplomeBelgeEtudesSecondairesDTO] = None
     diplome_etranger: Optional[DiplomeEtrangerEtudesSecondairesDTO] = None
     alternative_secondaires: Optional[AlternativeSecondairesDTO] = None

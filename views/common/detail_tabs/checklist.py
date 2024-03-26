@@ -24,6 +24,8 @@
 #
 # ##############################################################################
 import datetime
+from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE, MAIL_VERIFICATEUR_CURSUS
+from admission.ddd import MONTANT_FRAIS_DOSSIER
 from typing import Dict, Set, Optional, List
 
 from django.conf import settings
@@ -41,6 +43,8 @@ from django.utils.translation import gettext_lazy as _, pgettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
+from osis_document.api.utils import get_remote_metadata, get_remote_token
+from osis_document.utils import get_file_url
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
@@ -55,6 +59,9 @@ from rest_framework.views import APIView
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
+from admission.ddd.admission.commands import ListerToutesDemandesQuery, GetStatutTicketPersonneQuery
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
@@ -1681,6 +1688,11 @@ class ChecklistView(
             )
             context['can_choose_access_title'] = can_change_access_title
 
+        matr = self.proposition_fusion.matricule if self.proposition_fusion else self.proposition.matricule_candidat
+        context['digit_ticket'] = message_bus_instance.invoke(
+            GetStatutTicketPersonneQuery(global_id=matr)
+        )
+
         return context
 
     def _get_experiences(self, resume: ResumePropositionDTO):
@@ -1723,7 +1735,31 @@ class ChecklistView(
 
         experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
 
+        if self.proposition_fusion:
+            curex_a_fusionner = (self.proposition_fusion.educational_curex_uuids +
+                                 self.proposition_fusion.professional_curex_uuids)
+            if curex_a_fusionner:
+                curex_existant = message_bus_instance.invoke(
+                    RechercherParcoursAnterieurQuery(
+                        global_id=self.proposition_fusion.matricule,
+                        uuid_proposition=self.admission_uuid,
+                    )
+                )
+                experiences = {
+                    annee: [exp for exp in exp_list if str(exp.uuid) in curex_a_fusionner]
+                    for annee, exp_list in experiences.items()
+                }
+                if curex_existant:
+                    # add existing curex by years
+                    for exp in (curex_existant.experiences_academiques + curex_existant.experiences_non_academiques):
+                        years_range = [anExp.annee for anExp in exp.annees] \
+                            if type(exp) == ExperienceAcademiqueDTO else range(exp.date_debut.year, exp.date_fin.year)
+                        for annee in years_range:
+                            experiences.setdefault(annee, []).append(exp)
+                    experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
+
         return experiences
+
 
     def _get_financabilite(self):
         # TODO
@@ -2149,7 +2185,7 @@ class ChoixFormationFormView(LoadDossierViewMixin, FormView):
     def dispatch(self, request, *args, **kwargs):
         if not request.htmx:
             return redirect(
-                reverse('admission:general-education:checklist', kwargs={'uuid': self.admission_uuid})
+                reverse('admission:general-education:checklist', kwargs={'uuid': str(self.admission_uuid)})
                 + '#choix_formation'
             )
         return super().dispatch(request, *args, **kwargs)
