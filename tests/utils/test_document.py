@@ -38,6 +38,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     OngletsDemande,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.infrastructure.utils import get_document_from_identifier, CORRESPONDANCE_CHAMPS_COMPTABILITE
 from admission.tests import TestCase
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -121,6 +122,7 @@ class TestGetDocumentFromIdentifier(TestCase):
             'requested_at': '2020-01-01T00:00:00',
             'deadline_at': '2020-01-15',
             'automatically_required': False,
+            'related_checklist_tab': OngletsChecklist.parcours_anterieur.name,
         }
 
         self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
@@ -154,6 +156,7 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.mimetypes, list(SUPPORTED_MIME_TYPES))
         self.assertEqual(document.label, 'Champ document')
         self.assertEqual(document.document_submitted_by, '0123456')
+        self.assertEqual(document.related_checklist_tab, OngletsChecklist.parcours_anterieur.name)
 
     def test_get_non_free_requestable_document_in_a_specific_question(self):
         base_identifier = Onglets.CURRICULUM.name

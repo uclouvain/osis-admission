@@ -25,7 +25,7 @@
 # ##############################################################################
 import uuid
 from datetime import datetime, date
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import attr
 
@@ -35,6 +35,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from osis_common.ddd import interface
 
 
@@ -62,6 +63,7 @@ class EmplacementDocument(interface.Entity):
     derniere_action_le: Optional[datetime] = None
     dernier_acteur: str = ''
     document_soumis_par: str = ''
+    onglet_checklist_associe: Optional[OngletsChecklist] = None
 
     def specifier_reclamation(self, raison: str, acteur: str, statut: str):
         self.justification_gestionnaire = raison
