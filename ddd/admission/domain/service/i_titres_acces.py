@@ -124,6 +124,13 @@ class ITitresAcces(interface.DomainService):
         ): [],
     }
 
+    formations_sans_conditions_acces = {
+        type_formation
+        for types_formation, titres in condition_matrix.items()
+        if titres == []
+        for type_formation in types_formation
+    }
+
     @classmethod
     def conditions_remplies(cls, matricule_candidat: str, equivalence_diplome: List[str]) -> AdmissionConditionsDTO:
         raise NotImplementedError
