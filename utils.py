@@ -69,10 +69,10 @@ from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.academic_calendar import AcademicCalendar
-from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
+from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
@@ -148,20 +148,6 @@ def takewhile_return_attribute_values(predicate, iterable, attribute):
             yield x[attribute]
         else:
             break
-
-
-def format_academic_year(year: Union[int, str, float], short: bool = False) -> str:
-    """Return the academic year related to a specific year."""
-    if not year:
-        return ''
-    if isinstance(year, (str, float)):
-        year = int(year)
-    elif isinstance(year, AcademicYear):
-        year = year.year
-    end_year = year + 1
-    if short:
-        end_year = end_year % 100
-    return f'{year}-{end_year}'
 
 
 def get_uuid_value(value: str) -> Union[uuid.UUID, str]:

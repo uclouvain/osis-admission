@@ -78,16 +78,6 @@ class SicPatchMixin(TestCase):
         self.change_remote_metadata_patcher.return_value = 'a-token'
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('admission.views.common.detail_tabs.checklist.get_remote_token')
-        patched = patcher.start()
-        patched.return_value = 'foobar'
-        self.addCleanup(patcher.stop)
-
-        patcher = mock.patch('admission.views.common.detail_tabs.checklist.get_remote_metadata')
-        patched = patcher.start()
-        patched.return_value = {"name": "test.pdf", 'uploaded_at': '2024-01-01T12:00:00Z', "author": "foo"}
-        self.addCleanup(patcher.stop)
-
         patcher = mock.patch(
             'admission.infrastructure.admission.formation_generale.domain.service.notification.get_remote_token'
         )

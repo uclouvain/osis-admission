@@ -206,6 +206,10 @@ class Proposition(interface.RootEntity):
     etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
+    @property
+    def premiere_annee_de_bachelier(self) -> bool:
+        return bool(self.poursuite_de_cycle_a_specifier and self.poursuite_de_cycle != PoursuiteDeCycle.YES)
+
     def modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
@@ -903,7 +907,12 @@ class Proposition(interface.RootEntity):
         )
         self.statut = ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE
         self.auteur_derniere_modification = auteur_modification
-        self.certificat_refus_sic = []
+
+    def annuler_reclamation_documents(self, auteur_modification: str, par_fac: bool):
+        self.statut = (
+            ChoixStatutPropositionGenerale.TRAITEMENT_FAC if par_fac else ChoixStatutPropositionGenerale.CONFIRMEE
+        )
+        self.auteur_derniere_modification = auteur_modification
 
     def annuler_reclamation_documents(self, auteur_modification: str, par_fac: bool):
         self.statut = (
