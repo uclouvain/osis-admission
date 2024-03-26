@@ -46,6 +46,7 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
 )
@@ -118,6 +119,7 @@ from admission.infrastructure.admission.formation_generale.domain.service.questi
     QuestionSpecifiqueTranslator,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.reference import ReferenceTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.taches_techniques import TachesTechniques
 from admission.infrastructure.admission.formation_generale.repository.emplacement_document import (
     EmplacementDocumentRepository,
 )
@@ -126,7 +128,10 @@ from admission.infrastructure.admission.repository.digit import DigitRepository
 from admission.infrastructure.admission.repository.proposition_fusion_personne import \
     PropositionPersonneFusionRepository
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import \
+    EmailDestinataireRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.shared_kernel.signaletique_etudiant.repository.compteur_noma import CompteurAnnuelPourNomaRepository
 
@@ -273,6 +278,20 @@ COMMAND_HANDLERS = {
         notification=Notification(),
         historique=HistoriqueGlobal(),
     ),
+    AnnulerReclamationDocumentsAuCandidatCommand: (
+        lambda msg_bus, cmd: annuler_reclamation_documents_au_candidat(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            emplacement_document_repository=EmplacementDocumentRepository(),
+            historique=HistoriqueGlobal(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        )
+    ),
     ReclamerDocumentsAuCandidatParFACCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_fac(
         cmd,
         proposition_repository=PropositionRepository(),
@@ -374,6 +393,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         paiement_frais_dossier_service=PaiementFraisDossier(),
         historique=HistoriqueFormationGenerale(),
+        taches_techniques=TachesTechniques(),
     ),
     PayerFraisDossierPropositionSuiteSoumissionCommand: (
         lambda msg_bus, cmd: payer_frais_dossier_proposition_suite_soumission(
@@ -400,6 +420,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
             cmd,
             proposition_repository=PropositionRepository(),
+            email_destinataire_repository=EmailDestinataireRepository(),
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),
         )
@@ -536,7 +557,13 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
             cmd,
             proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
             historique=HistoriqueFormationGenerale(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
         )
     ),
     ModifierAuthentificationExperienceParcoursAnterieurCommand: (
@@ -562,6 +589,7 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
         )
     ),
     RefuserInscriptionParSicCommand: (
@@ -572,6 +600,7 @@ COMMAND_HANDLERS = {
             historique=HistoriqueFormationGenerale(),
             notification=Notification(),
             pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
         )
     ),
     ApprouverAdmissionParSicCommand: (
@@ -612,7 +641,14 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            campus_repository=UclouvainCampusRepository(),
             pdf_generation=PDFGeneration(),
+        )
+    ),
+    RetyperDocumentCommand: (
+        lambda msg_bus, cmd: retyper_document(
+            cmd,
+            emplacement_document_repository=EmplacementDocumentRepository(),
         )
     ),
     RechercherParcoursAnterieurQuery: lambda msg_bus, cmd: rechercher_parcours_anterieur(

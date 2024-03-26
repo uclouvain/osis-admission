@@ -118,6 +118,7 @@ class AnneeExperienceAcademiqueDTOFactory(factory.Factory):
         model = AnneeExperienceAcademiqueDTO
         abstract = False
 
+    uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
     annee = 2020
     resultat = ''
     releve_notes = []

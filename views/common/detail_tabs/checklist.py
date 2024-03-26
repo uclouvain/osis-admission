@@ -31,6 +31,7 @@ from typing import Dict, Set, Optional, List
 from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
+from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import resolve_url, redirect, render
 from django.template.defaultfilters import truncatechars
@@ -38,11 +39,12 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, gettext, get_language
+from django.utils.translation import gettext_lazy as _, pgettext
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
+from osis_document.utils import get_file_url
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
@@ -60,6 +62,8 @@ from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery, GetStatutTicketPersonneQuery
 from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
+from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -74,11 +78,13 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     StatutReclamationEmplacementDocument,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     DocumentsEtudesSecondaires,
 )
+from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -121,9 +127,13 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
     PoursuiteDeCycle,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
+    OngletsChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
+    InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
@@ -131,6 +141,7 @@ from admission.forms.admission.checklist import (
     SicDecisionDerogationForm,
     FinancabiliteApprovalForm,
     SicDecisionApprovalDocumentsForm,
+    FreeAdditionalApprovalConditionForm,
 )
 from admission.forms.admission.checklist import (
     CommentForm,
@@ -169,17 +180,16 @@ from admission.utils import (
     get_portal_admission_url,
     get_access_titles_names,
     get_salutation_prefix,
-    format_academic_year,
 )
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from epc.models.email_fonction_programme import EmailFonctionProgramme
+from base.utils.utils import format_academic_year
 from epc.models.enums.condition_acces import ConditionAcces
-from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_profile.models import EducationalExperience
@@ -228,15 +238,8 @@ EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
     extra_context = {
         'checklist_tabs': {
-            'assimilation': _("Belgian student status"),
-            'financabilite': _("Financeability"),
-            'frais_dossier': _("Application fee"),
-            'choix_formation': _("Course choice"),
-            'parcours_anterieur': _("Previous experience"),
-            'donnees_personnelles': _("Personal data"),
-            'specificites_formation': _("Training specificities"),
-            'decision_facultaire': _("Decision of the faculty"),
-            'decision_sic': _("Decision of SIC"),
+            tab_name: OngletsChecklist[tab_name].value
+            for tab_name in OngletsChecklist.get_names_except(OngletsChecklist.experiences_parcours_anterieur)
         },
         'hide_files': True,
         'condition_acces_enum': ConditionAcces,
@@ -270,6 +273,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         context['can_change_faculty_decision'] = self.request.user.has_perm(
             'admission.checklist_change_faculty_decision',
             self.admission,
+        )
+        context['past_experiences_are_sufficient'] = (
+            self.admission.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut', '')
+            == ChoixStatutChecklist.GEST_REUSSITE.name
         )
         context['bg_classes'] = {}
         return context
@@ -391,20 +398,26 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
         )
         context['fac_decision_refusal_form'] = self.fac_decision_refusal_form
         context['fac_decision_approval_form'] = self.fac_decision_approval_form
+        context['fac_decision_free_approval_condition_formset'] = self.fac_decision_free_approval_condition_formset
         context['program_faculty_email'] = self.program_faculty_email.email if self.program_faculty_email else None
 
         return context
 
     @cached_property
     def program_faculty_email(self):
-        return EmailFonctionProgramme.objects.filter(
-            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
-            programme=self.admission.training.education_group,
-            premiere_annee=bool(
-                self.proposition.poursuite_de_cycle_a_specifier
-                and self.proposition.poursuite_de_cycle != PoursuiteDeCycle.YES.name,
-            ),
-        ).first()
+        try:
+            return message_bus_instance.invoke(
+                RecupererInformationsDestinataireQuery(
+                    sigle_formation=self.admission.training.acronym,
+                    est_premiere_annee=bool(
+                        self.proposition.poursuite_de_cycle_a_specifier
+                        and self.proposition.poursuite_de_cycle != PoursuiteDeCycle.YES.name,
+                    ),
+                    annee=self.admission.determined_academic_year.year,
+                )
+            )
+        except InformationsDestinatairePasTrouvee:
+            return None
 
     @cached_property
     def fac_decision_refusal_form(self):
@@ -422,17 +435,14 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
         return FacDecisionRefusalForm(**form_kwargs)
 
     @property
-    def additional_approval_conditions_for_diploma(self):
+    def candidate_cv_program_names_by_experience_uuid(self):
         experiences: QuerySet[EducationalExperience] = EducationalExperience.objects.select_related('program').filter(
             person=self.admission.candidate
         )
-        with translation.override(self.admission.candidate.language):
-            return [
-                gettext('Graduation of {program_name}').format(
-                    program_name=experience.program.title if experience.program else experience.education_name
-                )
-                for experience in experiences
-            ]
+        return {
+            str(experience.uuid): experience.program.title if experience.program else experience.education_name
+            for experience in experiences
+        }
 
     @cached_property
     def fac_decision_approval_form(self):
@@ -441,9 +451,31 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
             instance=self.admission if self.request.method != 'POST' else None,
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='fac-decision-approval',
-            additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
+            educational_experience_program_name_by_uuid=self.candidate_cv_program_names_by_experience_uuid,
             current_training_uuid=str(self.admission.training.uuid),
         )
+
+    @cached_property
+    def fac_decision_free_approval_condition_formset(self):
+        FreeApprovalConditionFormSet = formset_factory(
+            form=FreeAdditionalApprovalConditionForm,
+            extra=0,
+        )
+
+        formset = FreeApprovalConditionFormSet(
+            prefix='fac-decision',
+            initial=self.admission.freeadditionalapprovalcondition_set.filter(
+                related_experience__isnull=True,
+            ).values('name_fr', 'name_en')
+            if self.request.method != 'POST'
+            else None,
+            data=self.request.POST if self.request.method == 'POST' else None,
+            form_kwargs={
+                'candidate_language': self.admission.candidate.language,
+            },
+        )
+
+        return formset
 
 
 class FacultyDecisionView(
@@ -622,6 +654,30 @@ class FacultyApprovalDecisionView(
             ),
         )
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        formset = self.fac_decision_free_approval_condition_formset
+
+        # Cross validation
+        if form.is_valid() and formset.is_valid():
+            with_additional_conditions = form.cleaned_data['with_additional_approval_conditions']
+
+            if with_additional_conditions and (
+                not form.cleaned_data['additional_approval_conditions']
+                and not form.cleaned_data['cv_experiences_additional_approval_conditions']
+                and not any(subform.is_valid() for subform in formset)
+            ):
+                form.add_error('all_additional_approval_conditions', FIELD_REQUIRED_MESSAGE)
+
+        form.all_required_forms_are_valid = form.is_valid() and (
+            not form.cleaned_data['with_additional_approval_conditions'] or formset.is_valid()
+        )
+
+        if form.all_required_forms_are_valid:
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
     def get_form(self, form_class=None):
         return self.fac_decision_approval_form
 
@@ -632,8 +688,19 @@ class FacultyApprovalDecisionView(
             if form.cleaned_data['other_training_accepted_by_fac']
             else '',
             'avec_conditions_complementaires': form.cleaned_data['with_additional_approval_conditions'],
-            'uuids_conditions_complementaires_existantes': form.cleaned_data['additional_approval_conditions'],
-            'conditions_complementaires_libres': form.cleaned_data['free_additional_approval_conditions'],
+            'uuids_conditions_complementaires_existantes': [
+                condition for condition in form.cleaned_data['additional_approval_conditions']
+            ],
+            'conditions_complementaires_libres': (
+                [
+                    sub_form.cleaned_data
+                    for sub_form in self.fac_decision_free_approval_condition_formset.forms
+                    if sub_form.is_valid()
+                ]
+                if form.cleaned_data['with_additional_approval_conditions']
+                else []
+            )
+            + form.cleaned_data['cv_experiences_additional_approval_conditions'],
             'avec_complements_formation': form.cleaned_data['with_prerequisite_courses'],
             'uuids_complements_formation': form.cleaned_data['prerequisite_courses'],
             'commentaire_complements_formation': form.cleaned_data['prerequisite_courses_fac_comment'],
@@ -666,22 +733,42 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         context['sic_decision_refusal_form'] = self.sic_decision_refusal_form
         context['sic_decision_approval_documents_form'] = self.sic_decision_approval_documents_form
         context['sic_decision_approval_form'] = self.sic_decision_approval_form
+        context['sic_decision_free_approval_condition_formset'] = self.sic_decision_free_approval_condition_formset
         context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
         context['sic_decision_approval_final_form'] = self.sic_decision_approval_final_form
 
-        # Get information about mail sent if any
-        token = None
-        if self.proposition.certificat_refus_sic:
-            token = get_remote_token(self.proposition.certificat_refus_sic[0])
-        elif self.proposition.certificat_approbation_sic:
-            token = get_remote_token(self.proposition.certificat_approbation_sic[0])
-        if token is not None:
-            metadata = get_remote_metadata(token)
-            context['sic_decision_sent_at'] = metadata['uploaded_at']
-            try:
-                context['sic_decision_sent_by'] = Person.objects.get(global_id=metadata['author'])
-            except Person.DoesNotExist:
-                context['sic_decision_sent_by'] = metadata['author']
+        # Get information about the decision sending by the SIC if any and only in the final statuses
+        sic_decision_status = self.admission.checklist.get('current', {}).get('decision_sic', {})
+
+        if sic_decision_status:
+            history_tags = None
+            if sic_decision_status.get('statut') == ChoixStatutChecklist.GEST_REUSSITE.name:
+                history_tags = [
+                    'proposition',
+                    'sic-decision',
+                    'approval',
+                    'message' if self.admission.type_demande == TypeDemande.ADMISSION.name else 'status-changed',
+                ]
+            elif (
+                sic_decision_status.get('statut') == ChoixStatutChecklist.GEST_BLOCAGE.name
+                and sic_decision_status.get('extra', {}).get('blocage') == 'refusal'
+            ):
+                history_tags = ['proposition', 'sic-decision', 'refusal', 'message']
+
+            if history_tags:
+                history_entry: Optional[HistoryEntry] = (
+                    HistoryEntry.objects.filter(
+                        tags__contains=history_tags,
+                        object_uuid=self.admission_uuid,
+                    )
+                    .order_by('-created')
+                    .first()
+                )
+
+                if history_entry:
+                    context['sic_decision_sent_at'] = history_entry.created
+                    context['sic_decision_sent_by'] = history_entry.author
+                    context['sic_decision_sent_with_email'] = 'message' in history_entry.tags
 
         context['sic_decision_dispensation_form'] = SicDecisionDerogationForm(
             initial={
@@ -714,7 +801,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='decision_sic'
                     ),
-                    prefix='decision_sic__derogation',
+                    prefix='decision_sic',
                 ),
                 'decision_sic__derogation': CommentForm(
                     comment=comment_derogation,
@@ -742,18 +829,37 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
 
         return SicDecisionRefusalForm(**form_kwargs)
 
+    @cached_property
+    def sic_decision_free_approval_condition_formset(self):
+        FreeApprovalConditionFormSet = formset_factory(
+            form=FreeAdditionalApprovalConditionForm,
+            extra=0,
+        )
+
+        formset = FreeApprovalConditionFormSet(
+            prefix='sic-decision',
+            initial=self.admission.freeadditionalapprovalcondition_set.filter(
+                related_experience__isnull=True,
+            ).values('name_fr', 'name_en')
+            if self.request.method != 'POST'
+            else None,
+            data=self.request.POST if self.request.method == 'POST' else None,
+            form_kwargs={
+                'candidate_language': self.admission.candidate.language,
+            },
+        )
+
+        return formset
+
     @property
-    def additional_approval_conditions_for_diploma(self):
+    def candidate_cv_program_names_by_experience_uuid(self):
         experiences: QuerySet[EducationalExperience] = EducationalExperience.objects.select_related('program').filter(
             person=self.admission.candidate
         )
-        with translation.override(self.admission.candidate.language):
-            return [
-                gettext('Graduation of {program_name}').format(
-                    program_name=experience.program.title if experience.program else experience.education_name
-                )
-                for experience in experiences
-            ]
+        return {
+            str(experience.uuid): experience.program.title if experience.program else experience.education_name
+            for experience in experiences
+        }
 
     @cached_property
     def sic_decision_approval_form_requestable_documents(self):
@@ -765,7 +871,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         return [
             document
             for document in documents
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name
+            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
             and document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
         ]
 
@@ -786,12 +892,12 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             and 'sic-decision-approval-with_additional_approval_conditions' in self.request.POST
             else None,
             prefix='sic-decision-approval',
-            additional_approval_conditions_for_diploma=self.additional_approval_conditions_for_diploma,
+            educational_experience_program_name_by_uuid=self.candidate_cv_program_names_by_experience_uuid,
             candidate_nationality_is_no_ue_5=self.proposition.candidat_a_nationalite_hors_ue_5,
         )
 
     @cached_property
-    def sic_director(self):
+    def sic_director(self) -> Optional[Person]:
         now = timezone.now()
         director = (
             Person.objects.filter(
@@ -819,8 +925,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             "admission_training": f"{self.proposition.formation.sigle} / {self.proposition.formation.intitule}",
             "document_link": EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
         }
-        if self.sic_director:
-            tokens["director"] = f"{self.sic_director.first_name} {self.sic_director.last_name}"
 
         try:
             mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
@@ -916,6 +1020,30 @@ class SicApprovalDecisionView(
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_approval_form.html'
     permission_required = 'admission.checklist_change_sic_decision'
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        formset = self.sic_decision_free_approval_condition_formset
+
+        # Cross validation
+        if form.is_valid() and formset.is_valid():
+            with_additional_conditions = form.cleaned_data['with_additional_approval_conditions']
+
+            if with_additional_conditions and (
+                not form.cleaned_data['additional_approval_conditions']
+                and not form.cleaned_data['cv_experiences_additional_approval_conditions']
+                and not any(subform.is_valid() for subform in formset)
+            ):
+                form.add_error('all_additional_approval_conditions', FIELD_REQUIRED_MESSAGE)
+
+        form.all_required_forms_are_valid = form.is_valid() and (
+            not form.cleaned_data['with_additional_approval_conditions'] or formset.is_valid()
+        )
+
+        if form.all_required_forms_are_valid:
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
     def get_form(self, form_class=None):
         return self.sic_decision_approval_form
 
@@ -926,8 +1054,19 @@ class SicApprovalDecisionView(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                     avec_conditions_complementaires=form.cleaned_data['with_additional_approval_conditions'],
-                    uuids_conditions_complementaires_existantes=form.cleaned_data['additional_approval_conditions'],
-                    conditions_complementaires_libres=form.cleaned_data['free_additional_approval_conditions'],
+                    uuids_conditions_complementaires_existantes=[
+                        condition for condition in form.cleaned_data['additional_approval_conditions']
+                    ],
+                    conditions_complementaires_libres=(
+                        [
+                            sub_form.cleaned_data
+                            for sub_form in self.sic_decision_free_approval_condition_formset.forms
+                            if sub_form.is_valid()
+                        ]
+                        if form.cleaned_data['with_additional_approval_conditions']
+                        else []
+                    )
+                    + form.cleaned_data['cv_experiences_additional_approval_conditions'],
                     avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
                     uuids_complements_formation=form.cleaned_data['prerequisite_courses'],
                     commentaire_complements_formation=form.cleaned_data['prerequisite_courses_fac_comment'],
@@ -949,6 +1088,7 @@ class SicApprovalDecisionView(
                     doit_fournir_visa_etudes=form.cleaned_data.get('must_provide_student_visa_d', False),
                 )
             )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -983,6 +1123,7 @@ class SicRefusalDecisionView(
                     autres_motifs=form.cleaned_data['other_reasons'],
                 )
             )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -1025,6 +1166,7 @@ class SicRefusalFinalDecisionView(
                         auteur=self.request.user.person.global_id,
                     )
                 )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -1067,6 +1209,7 @@ class SicApprovalFinalDecisionView(
                         auteur=self.request.user.person.global_id,
                     )
                 )
+            self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -1137,6 +1280,8 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
             author=self.request.user.person,
         )
 
+        response = self.render_to_response(self.get_context_data())
+
         if admission_status_has_changed:
             add_history_entry(
                 admission.uuid,
@@ -1148,8 +1293,8 @@ class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin,
                 ),
                 tags=['proposition', 'sic-decision', 'status-changed'],
             )
-
-        return self.render_to_response(self.get_context_data())
+            response.headers['HX-Refresh'] = 'true'
+        return response
 
 
 class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
@@ -1228,6 +1373,8 @@ class ChecklistView(
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
                 'ATTESTATION_REFUS_SIC',
+                'ATTESTATION_ACCORD_FACULTAIRE',
+                'ATTESTATION_REFUS_FACULTAIRE',
             },
         }
 
@@ -1279,23 +1426,13 @@ class ChecklistView(
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
-            etats = [
-                status
-                for status in ChoixStatutPropositionGenerale.get_names()
-                if status
-                not in {
-                    ChoixStatutPropositionGenerale.EN_BROUILLON,
-                    ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
-                    ChoixStatutPropositionGenerale.ANNULEE,
-                }
-            ]
             context['autres_demandes'] = [
                 demande
                 for demande in message_bus_instance.invoke(
                     ListerToutesDemandesQuery(
                         annee_academique=self.admission.determined_academic_year.year,
                         matricule_candidat=self.admission.candidate.global_id,
-                        etats=etats,
+                        etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
                     )
                 )
                 if demande.uuid != self.admission_uuid
@@ -1689,7 +1826,7 @@ class ApplicationFeesView(
 
 class PastExperiencesStatusView(
     AdmissionFormMixin,
-    SicDecisionMixin,
+    CheckListDefaultContextMixin,
     HtmxPermissionRequiredMixin,
     FormView,
 ):

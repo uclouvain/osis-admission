@@ -491,7 +491,7 @@ class DisplayTagTestCase(TestCase):
                 'template': 'osis_document/editor.html',
                 'value': 'token',
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
-                'attrs': {}
+                'attrs': {},
             },
         )
 
@@ -501,7 +501,7 @@ class DisplayTagTestCase(TestCase):
             {
                 'mimetype': PDF_MIME_TYPE,
             },
-            can_edit=False
+            can_edit=False,
         )
         self.assertEqual(
             component,

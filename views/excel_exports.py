@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,11 +27,13 @@
 import ast
 from typing import Dict
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.defaultfilters import yesno
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.text import slugify
 from django.utils.translation import gettext as _, gettext_lazy, pgettext
 from django.views import View
@@ -41,7 +43,12 @@ from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.forms.admission.filter import AllAdmissionsFilterForm
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from base.models.campus import Campus
@@ -110,6 +117,7 @@ class BaseAdmissionExcelExportView(
                 job_uuid=task.uuid,
                 file_name=slugify(self.export_name),
                 type=ExportTypes.EXCEL.name,
+                extra_data={'description': str(self.export_description)},
             )
 
         if export:
@@ -127,6 +135,19 @@ class BaseAdmissionExcelExportView(
 
         return HttpResponseRedirect(reverse(self.redirect_url_name))
 
+    def get_task_done_async_manager_extra_kwargs(self, file_name: str, file_url: str, export_extra_data: Dict) -> Dict:
+        download_message = format_html(
+            "{}: <a href='{}' target='_blank'>{}</a>",
+            _("Your document is available here"),
+            file_url,
+            file_name,
+        )
+        description = export_extra_data.get('description')
+        return {'description': f"{description}<br>{download_message}"}
+
+    def get_read_token_extra_kwargs(self) -> Dict:
+        return {'custom_ttl': settings.EXPORT_FILE_DEFAULT_TTL}
+
 
 class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
     command = ListerToutesDemandesQuery
@@ -139,6 +160,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
     def get_formatted_filters_parameters_worksheet(self, filters: str) -> Dict:
         formatted_filters = super().get_formatted_filters_parameters_worksheet(filters)
 
+        formatted_filters.pop('demandeur', None)
         formatted_filters.pop('tri_inverse', None)
         formatted_filters.pop('champ_tri', None)
 
@@ -187,6 +209,22 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
                     scholarship_values[scholarship],
                     scholarship_values[scholarship],
                 )
+
+        # Format the checklist filters mode
+        checklist_mode = formatted_filters.get('mode_filtres_etats_checklist')
+        if checklist_mode:
+            mapping_filter_key_value['mode_filtres_etats_checklist'] = ModeFiltrageChecklist.get_value(checklist_mode)
+
+        # Format the checklist filters
+        mapping_filter_key_value['filtres_etats_checklist'] = {}
+        for checklist_tab, checklist_statuses in formatted_filters.get('filtres_etats_checklist').items():
+            if not checklist_statuses:
+                continue
+
+            mapping_filter_key_value['filtres_etats_checklist'][OngletsChecklist.get_value(checklist_tab)] = [
+                ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[checklist_tab][status].libelle
+                for status in checklist_statuses
+            ]
 
         # Format enums
         statuses = formatted_filters.get('etats')
@@ -248,10 +286,13 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             filters = form.cleaned_data
             filters.pop('taille_page', None)
             filters.pop('page', None)
+            filters.pop('liste_travail', None)
 
             ordering_field = self.request.GET.get('o')
             if ordering_field:
                 filters['tri_inverse'] = ordering_field[0] == '-'
                 filters['champ_tri'] = ordering_field.lstrip('-')
+
+            filters['demandeur'] = str(self.request.user.person.uuid)
             return form.cleaned_data
         return {}

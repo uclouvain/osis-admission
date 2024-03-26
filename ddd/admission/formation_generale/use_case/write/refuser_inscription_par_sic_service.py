@@ -31,6 +31,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 
 
 def refuser_inscription_par_sic(
@@ -40,6 +41,7 @@ def refuser_inscription_par_sic(
     historique: 'IHistorique',
     notification: 'INotification',
     pdf_generation: 'IPDFGeneration',
+    campus_repository: IUclouvainCampusRepository,
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
@@ -49,6 +51,7 @@ def refuser_inscription_par_sic(
     pdf_generation.generer_attestation_refus_inscription_sic(
         proposition_repository=proposition_repository,
         profil_candidat_translator=profil_candidat_translator,
+        campus_repository=campus_repository,
         proposition=proposition,
         gestionnaire=cmd.auteur,
     )

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ class EmplacementDocumentIdentity(interface.EntityIdentity):
 @attr.dataclass(slots=True)
 class EmplacementDocument(interface.Entity):
     entity_id: EmplacementDocumentIdentity
-    uuids_documents: List[Union[str, uuid.UUID]]
+    uuids_documents: List[uuid.UUID]
     type: TypeEmplacementDocument
     statut: StatutEmplacementDocument
     justification_gestionnaire: str
@@ -77,6 +77,13 @@ class EmplacementDocument(interface.Entity):
         self.reclame_le = reclame_le
         self.statut = StatutEmplacementDocument.RECLAME
 
+    def annuler_reclamation_au_candidat(self, auteur: str, annule_le: datetime):
+        self.dernier_acteur = auteur
+        self.a_echeance_le = None
+        self.derniere_action_le = annule_le
+        self.reclame_le = None
+        self.statut = StatutEmplacementDocument.RECLAMATION_ANNULEE
+
     def remplir_par_gestionnaire(self, uuid_document: str, auteur: str):
         if not uuid_document:
             return
@@ -85,7 +92,10 @@ class EmplacementDocument(interface.Entity):
         self.statut_reclamation = None
         self.document_soumis_par = auteur
 
-    def remplir_par_candidat(self, uuid_documents, auteur: str):
+    def remplir_par_candidat(self, uuid_documents, auteur: str, complete_le: datetime):
+        self.dernier_acteur = auteur
+        self.derniere_action_le = complete_le
+
         if uuid_documents:
             self.uuids_documents = uuid_documents
             self.statut = StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION

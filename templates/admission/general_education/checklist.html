@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission bootstrap3 enums osis_document %}
+{% load i18n static admission bootstrap3 enums osis_document statici18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -351,6 +351,7 @@
             {% else %}
               {% checklist_state_button tab='specificites_formation' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='muted' %}
             {% endif %}
+            {% checklist_state_button tab='specificites_formation' label=_("To be completed after application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}
             {% checklist_state_button tab='specificites_formation' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
             {% checklist_state_button tab='specificites_formation' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' %}
           </div>
@@ -424,16 +425,7 @@
             {% if autres_demandes %}
               <dt>{% trans "Other demand(s) by the candidate." %}</dt>
               <dd>
-                {% for autre_demande in autres_demandes %}
-                  {% admission_url autre_demande.uuid autre_demande.type_formation as autre_demande_url %}
-                  {% if autre_demande_url %}<a href="autre_demande_url">{{ autre_demande.numero_demande }}</a>{% else %}{{ autre_demande.numero_demande }}{% endif %}
-                  {% if admission.poursuite_de_cycle == 'TO_BE_DETERMINED' or admission.poursuite_de_cycle == 'NO' %}
-                    {{ autre_demande.sigle_formation }}-1 - {% trans "First year of" %} {{ autre_demande.intitule_formation|lower }} ({{ autre_demande.lieu_formation }})
-                  {% else %}
-                    {{ autre_demande.sigle_formation }} - {{ autre_demande.intitule_formation }} ({{ autre_demande.lieu_formation }})
-                  {% endif %}
-                  {% if not forloop.last %}<br>{% endif %}
-                {% endfor %}
+                {% include 'admission/includes/lite_admission_list.html' with with_title=True %}
               </dd>
             {% endif %}
           </dl>
@@ -493,10 +485,17 @@
     </div>
   </div>
 
+  <table style="display:none;">
+    {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='fac-decision-additional-approval-conditions-form' form=fac_decision_free_approval_condition_formset.empty_form id='empty-fac-approval-form' %}
+    {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='sic-decision-additional-approval-conditions-form' form=sic_decision_free_approval_condition_formset.empty_form id='empty-sic-approval-form' %}
+  </table>
+
 {% endblock %}
 
 {% block script %}
   {{ block.super }}
+  <script src="{% statici18n LANGUAGE_CODE %}"></script>
+  <script src="{% static 'js/jquery.formset.js' %}"></script>
   {{ assimilation_form.media.js }}
   {{ fac_decision_refusal_form.media.js }}
   {{ fac_decision_refusal_form.media.js }}
@@ -510,7 +509,30 @@
       htmx.config.historyCacheSize = 0;
 
       (function ($) {
-          const defaultTab = window.location.hash || '#donnees_personnelles';
+          $('#tabs-content').on('click', '.formset-delete-confirm-button', function() {
+              const parentContainer = $(this).closest('.formset-delete-container');
+              $(this).addClass('hidden');
+              parentContainer.find('.formset-delete-actions').removeClass('hidden');
+          });
+
+          $('#tabs-content').on('click', '.formset-delete-cancel-button', function() {
+              const parentContainer = $(this).closest('.formset-delete-container');
+              parentContainer.find('.formset-delete-actions').addClass('hidden');
+              parentContainer.find('.formset-delete-confirm-button').removeClass('hidden');
+          });
+
+          let currentTab = window.location.hash;
+          let currentTabSplit = currentTab.split('-');
+
+          {# Manage the hash parameter #}
+          if (currentTabSplit.length > 1) {
+              {# Split the hash to get the checklist tab from it #}
+              currentTab = currentTabSplit[0]; {# Checklist tab #}
+              {# Select the right parcours tab #}
+              $('a[href="' + window.location.hash + '"]').click(); {# Parcours tab #}
+          }
+
+          const defaultTab = currentTab || '#donnees_personnelles';
           const checklistMenu = $('#checklist-menu');
           const buttonClassByState = {
               INITIAL_NON_CONCERNE: 'fas fa-xmark text-muted',
@@ -958,6 +980,20 @@
                   currentModal.modal('show');
               }
           })
+
+          // jQuery events are NOT native events. We have to trigger our own.
+          // It would works with bootstrap 5 which does not use jQuery anymore.
+          $('.htmx-modal-reload').on('show.bs.modal', function() {
+              htmx.trigger('#' + this.id, 'modal-reload');
+          });
+
+          {# Add the current parcours tabs id to the form data to allow a future redirection #}
+          $('.parcours-modals form').on('formdata', function(event) {
+              const formData = event.originalEvent.formData;
+              const activeTab = $(this).closest('.parcours-modals').siblings('.tab-pane.active');
+              formData.set('redirect_to', activeTab.length > 0 ? `#${activeTab.attr('id')}` : window.location.hash);
+          });
+
       })(jQuery)
 
         $('#merge-experience-form').on('submit', (e) => {
@@ -1206,6 +1242,24 @@
 
     .refusal-reasons-list p {
       margin-bottom: initial;
+    }
+
+    .fac-decision-additional-approval-conditions-formset td {
+      padding: 1em;
+    }
+
+    .approval-conditions-fields {
+      flex: 1;
+    }
+
+    .approval-conditions-fields .form-group {
+      display: flex;
+      gap: 1em;
+      align-items: center;
+    }
+
+    .approval-conditions-fields .form-group {
+      margin-bottom: 0;
     }
 
     .fac-decision-modal .select2-selection--multiple .select2-selection__rendered {

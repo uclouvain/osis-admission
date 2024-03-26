@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import unicodedata
 from io import BytesIO
 from typing import Union, Optional
 
@@ -62,6 +62,13 @@ def admission_pdf_recap(
         GeneralEducationAdmission: general_education_commands,
         DoctorateAdmission: doctorate_education_commands,
     }[admission_class or type(admission)]
+
+    # Get admission with proper annotation if needed
+    if not hasattr(admission, 'formatted_reference'):
+        if admission_class:
+            admission = admission_class.objects.with_training_management_and_reference().get(pk=admission.pk)
+        else:
+            admission = BaseAdmission.objects.with_training_management_and_reference().get(pk=admission.pk)
 
     with override(language=language):
         context: ResumePropositionDTO = message_bus_instance.invoke(
@@ -147,8 +154,20 @@ def admission_pdf_recap(
         final_pdf = BytesIO()
         pdf.save(final_pdf, min_version=version)
 
+        # Generate the filename
+        def format_value_for_filename(value):
+            value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+            value = value.replace(' ', '_')
+            value = value[:30]
+            return value
+
+        first_name = format_value_for_filename(admission.candidate.first_name)
+        last_name = format_value_for_filename(admission.candidate.last_name)
+        reference = admission.formatted_reference
+        filename = f'{last_name} - {first_name} - {reference}.pdf'
+
         # Save the pdf
-        token = save_raw_content_remotely(final_pdf.getvalue(), 'admission_archive.pdf', 'application/pdf')
+        token = save_raw_content_remotely(final_pdf.getvalue(), filename, 'application/pdf')
 
         # Return the token
         return token

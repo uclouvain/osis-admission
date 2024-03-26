@@ -24,6 +24,7 @@
 #
 ##############################################################################
 import unicodedata
+import uuid
 from typing import List, Optional
 
 from django.conf import settings
@@ -74,6 +75,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             intitule_fr=dto.title_fr,
             intitule_en=dto.title_en,
             campus=CampusDTO(
+                uuid=uuid.UUID(str(campus.uuid)),
                 nom=campus.name,
                 code_postal=campus.postal_code,
                 ville=campus.city,
@@ -90,6 +92,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             type=dto.type,
             code_domaine=dto.main_domain_code or '',
             campus_inscription=CampusDTO(
+                uuid=uuid.UUID(str(campus_inscription.uuid)),
                 nom=campus_inscription.name,
                 code_postal=campus_inscription.postal_code,
                 ville=campus_inscription.city,
@@ -112,7 +115,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
     def get_dto(cls, sigle: str, annee: int) -> 'FormationDTO':  # pragma: no cover
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(SearchFormationsCommand(sigle=sigle, annee=annee))
+        dtos = message_bus_instance.invoke(SearchFormationsCommand(sigles_annees=[(sigle, annee)]))
 
         if dtos:
             return cls._build_dto(dtos[0])
@@ -125,8 +128,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
 
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
-                sigle=entity_id.sigle,
-                annee=entity_id.annee,
+                sigles_annees=[(entity_id.sigle, entity_id.annee)],
                 types=list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
             )
         )
@@ -211,8 +213,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
 
         dtos = message_bus_instance.invoke(
             SearchFormationsCommand(
-                sigle=sigle,
-                annee=annee,
+                sigles_annees=[(sigle, annee)],
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,

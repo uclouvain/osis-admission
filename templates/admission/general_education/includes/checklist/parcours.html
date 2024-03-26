@@ -1,4 +1,4 @@
-{% load admission_parcours i18n %}
+{% load admission_parcours i18n admission %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,9 @@
     <table class="table">
       <thead>
         <tr>
+          {% if show_actions %}
+            <th>{% trans "Actions" %}</th>
+          {% endif %}
           <th>{% trans "Years" %}</th>
           <th>{# Diplomant #}</th>
           <th>{% trans "Experiences" %}</th>
@@ -53,9 +56,6 @@
           <th>{% trans "Reduction" %}</th>
           <th>{% trans "Course change" %}</th>
           <th>{% trans "Institute" context "admission" %}</th>
-          {% if show_actions %}
-            <th>{% trans "Action" %}</th>
-          {% endif %}
         </tr>
       </thead>
       <tbody>
@@ -73,6 +73,9 @@
     <table class="table">
       <thead>
         <tr>
+          {% if show_actions %}
+            <th>{% trans "Actions" %}</th>
+          {% endif %}
           <th>{% trans "Years" %}</th>
           <th>{# Diplomant #}</th>
           <th>{% trans "Experiences" %}</th>
@@ -82,9 +85,6 @@
           <th>{% trans "Reduction" %}</th>
           <th>{% trans "Course change" %}</th>
           <th>{% trans "Institute" context "admission" %}</th>
-          {% if show_actions %}
-            <th>{% trans "Action" %}</th>
-          {% endif %}
         </tr>
       </thead>
       <tbody>
@@ -110,6 +110,9 @@
     <table class="table">
       <thead>
         <tr>
+          {% if show_actions %}
+            <th>{% trans "Actions" %}</th>
+          {% endif %}
           <th>{% trans "Years" %}</th>
           <th>{# Diplomant #}</th>
           <th>{% trans "Experiences" %}</th>
@@ -119,9 +122,6 @@
           <th>{% trans "Reduction" %}</th>
           <th>{% trans "Course change" %}</th>
           <th>{% trans "Institute" context "admission" %}</th>
-          {% if show_actions %}
-            <th>{% trans "Action" %}</th>
-          {% endif %}
         </tr>
       </thead>
       <tbody>
@@ -151,5 +151,30 @@
       <i class="fa-solid fa-plus"></i>
       {% translate 'Non-academic experience' %}
     </a>
+
+    {# Create the confirmation modals #}
+    <div class="parcours-modals">
+    {% for year, year_experiences in experiences.items %}
+      {% for experience in year_experiences %}
+        {% checklist_experience_action_links_context experience=experience current_year=year prefix=prefix as experience_urls %}
+        {% if experience_urls.delete_url %}
+          {% blocktranslate with experience_name=experience.titre_formate|safe asvar confirm_message trimmed %}
+            Are you sure you want to delete this experience ({{ experience_name }})?
+          {% endblocktranslate %}
+          {% concat 'delete-experience-modal-' prefix '-' experience_urls.experience_uuid as delete_modal_id %}
+          {% translate 'Deletion of an experience' as confirm_title %}
+          {% include 'admission/modal/confirm_modal.html' with confirm_title=confirm_title confirm_url=experience_urls.delete_url confirm_message=confirm_message confirm_id=delete_modal_id %}
+        {% endif %}
+        {% if experience_urls.duplicate_url %}
+          {% blocktranslate with experience_name=experience.titre_formate|safe asvar confirm_message trimmed %}
+            Are you sure you want to duplicate this experience ({{ experience_name }})?
+          {% endblocktranslate %}
+          {% concat 'duplicate-experience-modal-' prefix '-' experience_urls.experience_uuid as duplicate_modal_id %}
+          {% translate 'Duplication of an experience' as confirm_title %}
+          {% include 'admission/modal/confirm_modal.html' with confirm_title=confirm_title confirm_url=experience_urls.duplicate_url confirm_message=confirm_message confirm_id=duplicate_modal_id confirm_button_class="bg-primary" %}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+    </div>
   {% endif %}
 </div>

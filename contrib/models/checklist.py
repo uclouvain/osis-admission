@@ -33,6 +33,9 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from ordered_model.models import OrderedModel
 
+from admission.contrib.models import GeneralEducationAdmission
+from osis_profile.models import EducationalExperience
+
 
 class RefusalReasonCategory(OrderedModel):
     uuid = models.UUIDField(
@@ -117,3 +120,55 @@ class AdditionalApprovalCondition(models.Model):
         verbose_name = _('Additional approval condition')
         verbose_name_plural = _('Additional approval conditions')
         ordering = ['order']
+
+
+FREE_ADDITIONAL_APPROVAL_CONDITION_FIELD_BY_LANGUAGE = {
+    settings.LANGUAGE_CODE_FR: 'name_fr',
+    settings.LANGUAGE_CODE_EN: 'name_en',
+}
+
+
+class FreeAdditionalApprovalCondition(models.Model):
+    uuid = models.UUIDField(
+        db_index=True,
+        default=uuid.uuid4,
+        editable=False,
+        primary_key=True,
+    )
+
+    admission = models.ForeignKey(
+        on_delete=models.CASCADE,
+        to=GeneralEducationAdmission,
+        verbose_name=_('Admission'),
+    )
+
+    name_fr = models.TextField(
+        verbose_name=_('French name'),
+        blank=True,
+        default='',
+    )
+
+    name_en = models.TextField(
+        verbose_name=_('English name'),
+        blank=True,
+        default='',
+    )
+
+    related_experience = models.ForeignKey(
+        on_delete=models.PROTECT,
+        to=EducationalExperience,
+        verbose_name=_('Related experience'),
+        blank=True,
+        null=True,
+        to_field='uuid',
+    )
+
+    def __str__(self):
+        return {
+            settings.LANGUAGE_CODE_FR: self.name_fr,
+            settings.LANGUAGE_CODE_EN: self.name_en,
+        }[settings.LANGUAGE_CODE]
+
+    class Meta:
+        verbose_name = _('Free additional approval condition')
+        verbose_name_plural = _('Free additional approval conditions')

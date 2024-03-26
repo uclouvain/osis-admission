@@ -34,11 +34,11 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy
 from rest_framework import status
 
-from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE
+from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -48,6 +48,7 @@ from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
 )
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
 from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum

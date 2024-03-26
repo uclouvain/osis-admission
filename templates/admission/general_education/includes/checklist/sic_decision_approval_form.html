@@ -30,7 +30,11 @@
     id="sic-decision-approval-form"
     style="overflow: auto;"
 >
-  <div class="modal-body">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h3 class="modal-title" id="myModalLabel">{% translate "Approval to validate" %}</h3>
+  </div>
+  <div class="modal-body" style="overflow:auto;">
 
     {% has_perm 'admission.checklist_change_sic_decision' as can_change_sic_decision %}
 
@@ -98,19 +102,20 @@
     {% bootstrap_field sic_decision_approval_form.with_additional_approval_conditions %}
     <div
         id="sic-decision-additional-approval-conditions-container"
-        class="required_field hidden"
+        class="hidden"
     >
-      <div class="form-group{% if sic_decision_approval_form.all_additional_approval_conditions.errors %} has-error{% endif %}">
-        <label class="control-label">
-          {{ sic_decision_approval_form.all_additional_approval_conditions.field.label }}
-          <strong>({% translate 'contact language'%} </strong>
-          <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>)
-        </label>
-       {{ sic_decision_approval_form.all_additional_approval_conditions }}
-        {% for error in sic_decision_approval_form.all_additional_approval_conditions.errors %}
-          <div class="help-block">{{ error }}</div>
-        {% endfor %}
-      </div>
+      {% candidate_language admission.langue_contact_candidat as candidate_language_tag %}
+      {% bootstrap_field sic_decision_approval_form.all_additional_approval_conditions label=sic_decision_approval_form.all_additional_approval_conditions.label|add:candidate_language_tag|safe form_group_class="form-group required_field" %}
+
+        <strong>{% translate 'Free additional conditions' %}</strong>
+        <table id="sic-decision-additional-approval-conditions-formset" class="table table-bordered">
+          {{ sic_decision_free_approval_condition_formset.management_form }}
+          {% for form in sic_decision_free_approval_condition_formset.forms %}
+            {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='sic-decision-additional-approval-conditions-form' form=form %}
+          {% empty %}
+            <tr class="sic-decision-additional-approval-conditions-form"></tr>
+          {% endfor %}
+        </table>
     </div>
 
     {% bootstrap_field sic_decision_approval_form.with_prerequisite_courses %}
@@ -194,8 +199,15 @@
       {% translate 'Cancel' %}
     </button>
     <button
+        id="sic-decision-approval-submit-button"
         class="btn btn-primary"
         name="save"
+        disabled
+        data-toggle="popover"
+        data-placement="auto top"
+        data-trigger="hover"
+        data-container="body"
+        data-content="{% translate 'The authorization can not be done while there is one or more documents to be requested immediately.' %}"
     >
       {% translate 'Save' context 'admission' %}
     </button>
@@ -203,13 +215,15 @@
 
   <script>
     $(document).ready(function() {
+        $('#sic-decision-approval-form [data-toggle=popover]').popover();
+
         $('#id_sic-decision-approval-tuition_fees_amount_other').dependsOn({
             '#id_sic-decision-approval-tuition_fees_amount': {values: ['AUTRE']},
         }, {duration: 0, valueOnDisable: '',});
 
         {% if sic_decision_approval_form.is_hue %}
             $('#id_sic-decision-approval-mobility_months_amount').dependsOn({
-                'input[name=sic-decision-approval-is_mobility]': {values: ['True']},
+                '#id_sic-decision-approval-is_mobility': {values: ['True']},
             }, {duration: 0, valueOnDisable: '',});
         {% endif %}
 
@@ -218,6 +232,15 @@
         const requestedDocumentsSelects = $('#sic-approval-requested-documents-selects select');
         const confirmElement = $('#sic-approval-delete-confirm-element');
         let confirmEvents = new Set();
+
+        const updateConfirmButtonDisabled = function () {
+          if ($('#sic-decision-approval-form option[value=IMMEDIATEMENT]:selected').length === 0) {
+            $('#sic-decision-approval-submit-button').prop('disabled', false).popover('destroy');
+          } else {
+            $('#sic-decision-approval-submit-button').prop('disabled', true).popover();
+          }
+        };
+        updateConfirmButtonDisabled();
 
         {# Manage the update of the request status #}
 
@@ -248,6 +271,8 @@
                 clonedConfirmElement[0].id += '-' + $(this).attr('name');
                 $(this).closest('.form-group').append(clonedConfirmElement);
                 clonedConfirmElement.children('button:first').focus();
+            } else {
+              updateConfirmButtonDisabled();
             }
         });
 
@@ -257,6 +282,7 @@
             const select = row.find('select');
             confirmEvents.add(select[0].id);
             select[0].dispatchEvent(new CustomEvent('confirmStatusChange'));
+            updateConfirmButtonDisabled();
         });
 
         {# Cancel the cancellation of the request of the document #}
@@ -301,7 +327,7 @@
   </script>
 
   {% if request.htmx %}
-    {% if sic_decision_approval_form.is_valid %}
+    {% if sic_decision_approval_form.all_required_forms_are_valid %}
       {# Update the content of the tab #}
       {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
     {% endif %}
@@ -318,12 +344,38 @@
             initializeCKEditor('id_sic-decision-approval-prerequisite_courses_fac_comment');
             initializeCKEditor('id_sic-decision-approval-communication_to_the_candidate');
 
-            {% if sic_decision_approval_form.is_valid %}
+            {% if sic_decision_approval_form.all_required_forms_are_valid %}
                 $('#sic-decision-approval-modal').modal('hide');
             {% endif %}
         });
     </script>
+
   {% endif %}
+
+  <script>
+      $(document).ready(function(){
+          function formsetInitialization() {
+              $('#sic-decision-additional-approval-conditions-formset .sic-decision-additional-approval-conditions-form').formset({
+                  addText: '<i class="fa fa-plus"></i> {% translate "Add" %}',
+                  addCssClass: 'btn btn-primary',
+                  deleteText: '{% translate "Confirm" %}',
+                  deleteCssClass: 'no-link',
+                  deleteContainerClass: 'formset-delete-button',
+                  prefix: '{{ sic_decision_free_approval_condition_formset.prefix }}',
+                  formCssClass: '{{ sic_decision_free_approval_condition_formset.prefix }}-formset',
+                  formTemplate: $('#empty-sic-approval-form').clone(),
+              });
+          }
+
+          {% if request.htmx %}
+              formsetInitialization();
+          {% else %}
+              $('#sic-decision-approval-modal').one('shown.bs.modal', function() {
+                  formsetInitialization()
+              });
+          {% endif %}
+      })
+  </script>
 
   <style>
     #sic-approval-requested-documents-selects tbody tr.tab-name {

@@ -76,9 +76,19 @@
     {% bootstrap_field fac_decision_approval_form.with_additional_approval_conditions label=fac_decision_approval_form.with_additional_approval_conditions.label|label_with_user_icon %}
     <div
         id="fac-decision-additional-approval-conditions-container"
-        class="required_field hidden"
-    >
-      {% bootstrap_field fac_decision_approval_form.all_additional_approval_conditions label=fac_decision_approval_form.all_additional_approval_conditions.label|add:candidate_language_tag|label_with_user_icon %}
+        class="hidden"
+      >
+        {% bootstrap_field fac_decision_approval_form.all_additional_approval_conditions label=fac_decision_approval_form.all_additional_approval_conditions.label|add:candidate_language_tag|label_with_user_icon form_group_class='required_field form-group' %}
+
+        <strong>{% translate 'Free additional conditions' %}</strong>
+        <table id="fac-decision-additional-approval-conditions-formset" class="table table-bordered">
+          {{ fac_decision_free_approval_condition_formset.management_form }}
+          {% for form in fac_decision_free_approval_condition_formset.forms %}
+            {% include 'admission/general_education/includes/checklist/free_approval_form.html' with class='fac-decision-additional-approval-conditions-form' form=form %}
+          {% empty %}
+            <tr class="fac-decision-additional-approval-conditions-form"></tr>
+          {% endfor %}
+        </table>
     </div>
 
     {% bootstrap_field fac_decision_approval_form.with_prerequisite_courses label=fac_decision_approval_form.with_prerequisite_courses.label|label_with_user_icon %}
@@ -149,7 +159,7 @@
   </div>
 
   {% if request.htmx %}
-    {% if fac_decision_approval_form.is_valid %}
+    {% if fac_decision_approval_form.all_required_forms_are_valid %}
       {# Update the content of the tab #}
       {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
     {% endif %}
@@ -164,11 +174,36 @@
             {# Initialize the custom select2 component #}
             window.__dal__initialize($('select[data-autocomplete-light-function=select2_tag]'))
 
-            {% if fac_decision_approval_form.is_valid %}
+            {% if fac_decision_approval_form.all_required_forms_are_valid %}
                 $('#fac-decision-approval-modal').modal('hide');
             {% endif %}
         });
     </script>
   {% endif %}
+
+  <script>
+      $(document).ready(function(){
+          function formsetInitialization() {
+              $('#fac-decision-additional-approval-conditions-formset .fac-decision-additional-approval-conditions-form').formset({
+                  addText: '<i class="fa fa-plus"></i> {% translate "Add" %}',
+                  addCssClass: 'btn btn-primary',
+                  deleteText: '{% translate "Confirm" %}',
+                  deleteCssClass: 'no-link',
+                  deleteContainerClass: 'formset-delete-button',
+                  prefix: '{{ fac_decision_free_approval_condition_formset.prefix }}',
+                  formCssClass: '{{ fac_decision_free_approval_condition_formset.prefix }}-formset',
+                  formTemplate: $('#empty-fac-approval-form').clone(),
+              });
+          }
+
+          {% if request.htmx %}
+              formsetInitialization();
+          {% else %}
+            $('#fac-decision-approval-modal').one('shown.bs.modal', function() {
+                formsetInitialization()
+            });
+          {% endif %}
+      })
+  </script>
 
 </form>

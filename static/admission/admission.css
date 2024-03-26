@@ -69,6 +69,17 @@ textarea {
   gap: 1em;
 }
 
+.flex-content.no-space {
+  justify-content: normal;
+  gap: normal;
+}
+
+.flex-content-no-wrap-no-justify {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
 .align-items-baseline {
   align-items: baseline;
 }
@@ -451,4 +462,9 @@ select.select2-hidden-accessible + span {
   -moz-animation: spin-loader 2s linear infinite;
   -webkit-animation: spin-loader 2s linear infinite;
   animation: spin-loader 2s linear infinite;
+}
+
+a.no-link {
+  text-decoration: none !important;
+  color: white;
 }

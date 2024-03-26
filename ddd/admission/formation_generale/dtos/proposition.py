@@ -35,9 +35,13 @@ from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.poste_diplomatique import PosteDiplomatiqueDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
+    DroitsInscriptionMontant,
+)
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
-from ddd.logic.learning_unit.dtos import LearningUnitPartimDTO, LearningUnitSearchDTO, PartimSearchDTO
+from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
 from osis_common.ddd import interface
 
 
@@ -154,7 +158,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
 
     autre_formation_choisie_fac: Optional['BaseFormationDTO']
     avec_conditions_complementaires: Optional[bool]
-    conditions_complementaires: List[str]
+    conditions_complementaires: List[ConditionComplementaireApprobationDTO]
     avec_complements_formation: Optional[bool]
     complements_formation: Optional[List[Union['PartimSearchDTO', 'LearningUnitSearchDTO']]]
     commentaire_complements_formation: str
@@ -191,3 +195,11 @@ class PropositionGestionnaireDTO(PropositionDTO):
     @property
     def candidat_a_nationalite_hors_ue_5(self):
         return self.nationalite_ue_candidat is False and self.nationalite_candidat_code_iso not in PLUS_5_ISO_CODES
+
+    @property
+    def droits_inscription_montant_valeur_calculee(self):
+        return (
+            self.droits_inscription_montant_autre
+            if self.droits_inscription_montant == DroitsInscriptionMontant.AUTRE.name
+            else self.droits_inscription_montant_valeur
+        )

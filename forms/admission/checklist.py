@@ -25,7 +25,6 @@
 # ##############################################################################
 
 import datetime
-import itertools
 import json
 from collections import defaultdict
 from typing import Optional, List
@@ -37,12 +36,23 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import F
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, get_language, ngettext_lazy, pgettext_lazy, pgettext
+from django.utils.translation import (
+    gettext_lazy as _,
+    get_language,
+    ngettext_lazy,
+    pgettext_lazy,
+    pgettext,
+    gettext,
+    override,
+)
+from osis_document.utils import is_uuid
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
-from admission.contrib.models.checklist import RefusalReason, AdditionalApprovalCondition
+from admission.contrib.models.checklist import (
+    RefusalReason,
+    AdditionalApprovalCondition,
+)
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.domain.model.enums.condition_acces import recuperer_conditions_acces_par_formation
@@ -53,8 +63,11 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument, TypeEmplacementDocument
-
+from admission.ddd.admission.enums.emplacement_document import (
+    StatutEmplacementDocument,
+    TypeEmplacementDocument,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
@@ -67,27 +80,23 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     FilterFieldWidget,
-    get_initial_choices_for_additionnal_approval_conditions,
-    autocomplete,
-    get_example_text,
-    CustomDateInput,
     EMPTY_CHOICE_AS_LIST,
-    EMPTY_CHOICE,
+    get_initial_choices_for_additional_approval_conditions,
 )
 from admission.forms import get_academic_year_choices
 from admission.forms.admission.document import ChangeRequestDocumentForm
-from admission.forms.autocomplete import Select2MultipleWithTagWhenNoResultWidget
-from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
+from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
+from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.choice_field import BLANK_CHOICE
+from base.forms.utils.datefield import CustomDateInput
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.learning_unit_year import LearningUnitYear
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
-from osis_document.utils import is_uuid
 
 
 class CommentForm(forms.Form):
@@ -361,6 +370,41 @@ class MultipleChoiceFieldWithBetterError(forms.MultipleChoiceField):
             )
 
 
+class FreeAdditionalApprovalConditionForm(forms.Form):
+    name_fr = forms.CharField(
+        label=_('FR'),
+        widget=forms.Textarea(attrs={'rows': 1}),
+        required=False,
+    )
+
+    name_en = forms.CharField(
+        label=_('EN'),
+        widget=forms.Textarea(attrs={'rows': 1}),
+        required=False,
+    )
+
+    def __init__(self, candidate_language, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.empty_permitted = False
+        self.with_en_translation = candidate_language != settings.LANGUAGE_CODE_FR
+
+        if not self.with_en_translation:
+            self.fields['name_en'].widget.attrs['readonly'] = True
+
+    def clean_name_fr(self):
+        name = self.cleaned_data.get('name_fr')
+        if not name:
+            self.add_error('name_fr', FIELD_REQUIRED_MESSAGE)
+        return name
+
+    def clean_name_en(self):
+        name = self.cleaned_data.get('name_en')
+        if not name and self.with_en_translation:
+            self.add_error('name_en', FIELD_REQUIRED_MESSAGE)
+        return name
+
+
 class FacDecisionApprovalForm(forms.ModelForm):
     SEPARATOR = ';'
 
@@ -383,7 +427,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
-        widget=Select2MultipleWithTagWhenNoResultWidget(
+        widget=autocomplete.Select2MultipleWithTagWhenNoResultWidget(
             url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-token-separators': '[{}]'.format(SEPARATOR),
@@ -406,7 +450,6 @@ class FacDecisionApprovalForm(forms.ModelForm):
         widget=autocomplete.Select2Multiple(
             attrs={
                 'data-allow-clear': 'false',
-                'data-tags': 'true',
             },
         ),
     )
@@ -442,7 +485,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
     def __init__(
         self,
         academic_year,
-        additional_approval_conditions_for_diploma,
+        educational_experience_program_name_by_uuid,
         current_training_uuid,
         *args,
         **kwargs,
@@ -458,37 +501,35 @@ class FacDecisionApprovalForm(forms.ModelForm):
 
         # Initialize conditions field
         self.academic_year = academic_year
+        self.educational_experience_program_name_by_uuid = educational_experience_program_name_by_uuid
         self.data_existing_conditions = set()
-        self.data_free_conditions = set()
+        self.data_cv_experiences_conditions = set()
         self.predefined_approval_conditions = []
-        free_approval_conditions = []
+        self.predefined_approval_conditions = AdditionalApprovalCondition.objects.all()
 
         # Initialize additional approval conditions field
         if data:
             for condition in data.getlist(self.add_prefix('all_additional_approval_conditions'), []):
-                if is_uuid(condition):
-                    self.data_existing_conditions.add(condition)
+                if condition in educational_experience_program_name_by_uuid:
+                    # UUID of the experience
+                    self.data_cv_experiences_conditions.add(condition)
                 else:
-                    self.data_free_conditions.add(condition)
-
-            free_approval_conditions = self.data_free_conditions
+                    # UUID of the approval condition
+                    self.data_existing_conditions.add(condition)
 
         elif instance:
             # Additional conditions
             existing_approval_conditions = instance.additional_approval_conditions.all()
-            free_approval_conditions = instance.free_additional_approval_conditions
-            self.initial['all_additional_approval_conditions'] = [
-                c.uuid for c in existing_approval_conditions
-            ] + free_approval_conditions
+            cv_experiences_conditions = instance.freeadditionalapprovalcondition_set.filter(
+                related_experience__isnull=False
+            )
+            self.initial['all_additional_approval_conditions'] = [c.uuid for c in existing_approval_conditions] + [
+                c.related_experience_id for c in cv_experiences_conditions
+            ]
 
-        self.predefined_approval_conditions = AdditionalApprovalCondition.objects.all()
-
-        all_additional_approval_conditions_choices = get_initial_choices_for_additionnal_approval_conditions(
+        all_additional_approval_conditions_choices = get_initial_choices_for_additional_approval_conditions(
             predefined_approval_conditions=self.predefined_approval_conditions,
-            free_approval_conditions=itertools.chain(
-                additional_approval_conditions_for_diploma,
-                free_approval_conditions,
-            ),
+            cv_experiences_conditions=educational_experience_program_name_by_uuid,
         )
         self.fields['all_additional_approval_conditions'].choices = all_additional_approval_conditions_choices
         self.fields['all_additional_approval_conditions'].widget.choices = all_additional_approval_conditions_choices
@@ -545,7 +586,31 @@ class FacDecisionApprovalForm(forms.ModelForm):
         cleaned_data = self.cleaned_data.get('all_additional_approval_conditions', [])
 
         self.cleaned_data['additional_approval_conditions'] = list(self.data_existing_conditions)
-        self.cleaned_data['free_additional_approval_conditions'] = list(self.data_free_conditions)
+
+        cv_experiences_conditions = []
+
+        base_translation_by_language = {}
+
+        for language in [settings.LANGUAGE_CODE_FR, settings.LANGUAGE_CODE_EN]:
+            with override(language):
+                base_translation_by_language[language] = gettext('Graduation of {program_name}')
+
+        for experience_uuid in self.data_cv_experiences_conditions:
+            xp_name = self.educational_experience_program_name_by_uuid.get(experience_uuid, '')
+
+            cv_experiences_conditions.append(
+                {
+                    'related_experience_id': experience_uuid,
+                    'name_fr': str(base_translation_by_language[settings.LANGUAGE_CODE_FR]).format(
+                        program_name=xp_name
+                    ),
+                    'name_en': str(base_translation_by_language[settings.LANGUAGE_CODE_EN]).format(
+                        program_name=xp_name
+                    ),
+                }
+            )
+
+        self.cleaned_data['cv_experiences_additional_approval_conditions'] = cv_experiences_conditions
 
         return cleaned_data
 
@@ -558,13 +623,10 @@ class FacDecisionApprovalForm(forms.ModelForm):
         else:
             cleaned_data['other_training_accepted_by_fac'] = None
 
-        if cleaned_data.get('with_additional_approval_conditions'):
-            if not cleaned_data.get('all_additional_approval_conditions'):
-                self.add_error('all_additional_approval_conditions', FIELD_REQUIRED_MESSAGE)
-        else:
+        if not cleaned_data.get('with_additional_approval_conditions'):
             cleaned_data['all_additional_approval_conditions'] = []
             cleaned_data['additional_approval_conditions'] = []
-            cleaned_data['free_additional_approval_conditions'] = []
+            cleaned_data['cv_experiences_additional_approval_conditions'] = []
 
         if cleaned_data.get('with_prerequisite_courses'):
             if cleaned_data.get('prerequisite_courses'):
@@ -584,7 +646,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
 
 
 class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
-    admission_requirement_year = AcademicYearField(
+    admission_requirement_year = AcademicYearModelChoiceField(
         past_only=True,
         required=False,
         label=_('Admission requirement year'),
@@ -693,7 +755,7 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
         self.documents = {}
 
         for document in documents:
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
+            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER:
                 if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:
@@ -722,7 +784,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
-        widget=Select2MultipleWithTagWhenNoResultWidget(
+        widget=autocomplete.Select2MultipleWithTagWhenNoResultWidget(
             url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-token-separators': '[{}]'.format(SEPARATOR),
@@ -745,7 +807,6 @@ class SicDecisionApprovalForm(forms.ModelForm):
         widget=autocomplete.Select2Multiple(
             attrs={
                 'data-allow-clear': 'false',
-                'data-tags': 'true',
             },
         ),
     )
@@ -790,7 +851,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             'particular_cost': forms.TextInput(),
             'rebilling_or_third_party_payer': forms.TextInput(),
             'first_year_inscription_and_status': forms.TextInput(),
-            'is_mobility': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'is_mobility': forms.Select(choices=[(None, '-'), (True, _('Yes')), (False, _('No'))]),
             'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
             'must_provide_student_visa_d': forms.CheckboxInput,
@@ -799,7 +860,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
     def __init__(
         self,
         academic_year,
-        additional_approval_conditions_for_diploma,
+        educational_experience_program_name_by_uuid,
         candidate_nationality_is_no_ue_5: bool,
         *args,
         **kwargs,
@@ -822,41 +883,41 @@ class SicDecisionApprovalForm(forms.ModelForm):
             and self.instance.accounting.assimilation_situation != TypeSituationAssimilation.AUCUNE_ASSIMILATION.name
         )
         self.academic_year = academic_year
+        self.educational_experience_program_name_by_uuid = educational_experience_program_name_by_uuid
         self.data_existing_conditions = set()
-        self.data_free_conditions = set()
+        self.data_cv_experiences_conditions = set()
         self.predefined_approval_conditions = []
-        free_approval_conditions = []
+        self.predefined_approval_conditions = AdditionalApprovalCondition.objects.all()
 
         # Initialize additional approval conditions field
-        self.fields['with_additional_approval_conditions'].required = True
         if data:
             for condition in data.getlist(self.add_prefix('all_additional_approval_conditions'), []):
-                if is_uuid(condition):
-                    self.data_existing_conditions.add(condition)
+                if condition in educational_experience_program_name_by_uuid:
+                    # UUID of the experience
+                    self.data_cv_experiences_conditions.add(condition)
                 else:
-                    self.data_free_conditions.add(condition)
-
-            free_approval_conditions = self.data_free_conditions
+                    # UUID of the approval condition
+                    self.data_existing_conditions.add(condition)
 
         elif instance:
             # Additional conditions
             existing_approval_conditions = instance.additional_approval_conditions.all()
-            free_approval_conditions = instance.free_additional_approval_conditions
-            self.initial['all_additional_approval_conditions'] = [
-                c.uuid for c in existing_approval_conditions
-            ] + free_approval_conditions
+            cv_experiences_conditions = instance.freeadditionalapprovalcondition_set.filter(
+                related_experience__isnull=False
+            )
+            self.initial['all_additional_approval_conditions'] = [c.uuid for c in existing_approval_conditions] + [
+                c.related_experience_id for c in cv_experiences_conditions
+            ]
 
-        self.predefined_approval_conditions = AdditionalApprovalCondition.objects.all()
-
-        all_additional_approval_conditions_choices = get_initial_choices_for_additionnal_approval_conditions(
+        all_additional_approval_conditions_choices = get_initial_choices_for_additional_approval_conditions(
             predefined_approval_conditions=self.predefined_approval_conditions,
-            free_approval_conditions=itertools.chain(
-                additional_approval_conditions_for_diploma,
-                free_approval_conditions,
-            ),
+            cv_experiences_conditions=educational_experience_program_name_by_uuid,
         )
         self.fields['all_additional_approval_conditions'].choices = all_additional_approval_conditions_choices
         self.fields['all_additional_approval_conditions'].widget.choices = all_additional_approval_conditions_choices
+
+        # Initialize additional approval conditions field
+        self.fields['with_additional_approval_conditions'].required = True
 
         self.fields['with_prerequisite_courses'].required = True
         self.fields['prerequisite_courses'].widget.forward = [forward.Const(academic_year, 'year')]
@@ -902,7 +963,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
             del self.fields['is_mobility']
             del self.fields['mobility_months_amount']
         else:
-            self.fields['is_mobility'].required = True
+            self.fields['is_mobility'].required = False
             self.fields['mobility_months_amount'].required = False
 
         if not self.is_admission:
@@ -923,7 +984,31 @@ class SicDecisionApprovalForm(forms.ModelForm):
         cleaned_data = self.cleaned_data.get('all_additional_approval_conditions', [])
 
         self.cleaned_data['additional_approval_conditions'] = list(self.data_existing_conditions)
-        self.cleaned_data['free_additional_approval_conditions'] = list(self.data_free_conditions)
+
+        cv_experiences_conditions = []
+
+        base_translation_by_language = {}
+
+        for language in [settings.LANGUAGE_CODE_FR, settings.LANGUAGE_CODE_EN]:
+            with override(language):
+                base_translation_by_language[language] = gettext('Graduation of {program_name}')
+
+        for experience_uuid in self.data_cv_experiences_conditions:
+            xp_name = self.educational_experience_program_name_by_uuid.get(experience_uuid, '')
+
+            cv_experiences_conditions.append(
+                {
+                    'related_experience_id': experience_uuid,
+                    'name_fr': str(base_translation_by_language[settings.LANGUAGE_CODE_FR]).format(
+                        program_name=xp_name
+                    ),
+                    'name_en': str(base_translation_by_language[settings.LANGUAGE_CODE_EN]).format(
+                        program_name=xp_name
+                    ),
+                }
+            )
+
+        self.cleaned_data['cv_experiences_additional_approval_conditions'] = cv_experiences_conditions
 
         return cleaned_data
 
@@ -933,15 +1018,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
         if not cleaned_data.get('with_additional_approval_conditions'):
             cleaned_data['all_additional_approval_conditions'] = []
             cleaned_data['additional_approval_conditions'] = []
-            cleaned_data['free_additional_approval_conditions'] = []
-        elif not cleaned_data['all_additional_approval_conditions']:
-            self.add_error(
-                'all_additional_approval_conditions',
-                ValidationError(
-                    self.fields['all_additional_approval_conditions'].error_messages['required'],
-                    code='required',
-                ),
-            )
+            cleaned_data['cv_experiences_additional_approval_conditions'] = []
 
         if cleaned_data.get('with_prerequisite_courses'):
             if cleaned_data.get('prerequisite_courses'):
@@ -1012,8 +1089,7 @@ class SicDecisionFinalRefusalForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['body'].widget.attrs['data-config'] = json.dumps(
             {
-                **settings.CKEDITOR_CONFIGS['link_only'],
-                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                 'language': get_language(),
             }
         )
@@ -1037,11 +1113,8 @@ class SicDecisionFinalApprovalForm(forms.Form):
         else:
             self.fields['body'].widget.attrs['data-config'] = json.dumps(
                 {
-                    **settings.CKEDITOR_CONFIGS['link_only'],
-                    'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                    **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                     'language': get_language(),
-                    'allowedContent': True,
-                    'autoParagraph': False,
                 }
             )
 

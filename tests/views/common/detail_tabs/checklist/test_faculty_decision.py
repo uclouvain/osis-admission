@@ -35,6 +35,7 @@ from unittest.mock import patch
 
 import freezegun
 from django.conf import settings
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.test import override_settings
@@ -42,9 +43,12 @@ from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
-from admission.contrib.models.checklist import AdditionalApprovalCondition, RefusalReasonCategory
+from admission.contrib.models.checklist import (
+    AdditionalApprovalCondition,
+    RefusalReasonCategory,
+    FreeAdditionalApprovalCondition,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -52,7 +56,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DecisionFacultaireEnum,
     PoursuiteDeCycle,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.notification import NotificationException
 from admission.tests.factories.comment import CommentEntryFactory
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
@@ -61,6 +64,7 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.faculty_decision import (
     RefusalReasonFactory,
     AdditionalApprovalConditionFactory,
+    FreeAdditionalApprovalConditionFactory,
 )
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
@@ -73,6 +77,7 @@ from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
 )
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -225,6 +230,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             cycle_pursuit=PoursuiteDeCycle.NO.name,
+            determined_academic_year=self.academic_years[0]
         )
         self.default_checklist = copy.deepcopy(self.general_admission.checklist)
         self.url = resolve_url(
@@ -1453,7 +1459,10 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
-        cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+        cls.fac_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.training.education_group,
+            person__language=settings.LANGUAGE_CODE_FR,
+        ).person.user
         cls.default_headers = {'HTTP_HX-Request': 'true'}
 
         AdditionalApprovalCondition.objects.all().delete()
@@ -1469,6 +1478,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
             determined_academic_year=self.academic_years[0],
         )
+        self.experience_uuid = str(self.general_admission.candidate.educationalexperience_set.first().uuid)
         self.default_checklist = copy.deepcopy(self.general_admission.checklist)
         self.url = resolve_url(
             'admission:general-education:fac-decision-approval',
@@ -1543,7 +1553,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         # No approval data
         self.general_admission.with_additional_approval_conditions = None
         self.general_admission.additional_approval_conditions.set([])
-        self.general_admission.free_additional_approval_conditions = []
+        self.general_admission.freeadditionalapprovalcondition_set.all().delete()
         self.general_admission.other_training_accepted_by_fac = None
         self.general_admission.with_prerequisite_courses = None
         self.general_admission.prerequisite_courses.set([])
@@ -1572,6 +1582,9 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(form.initial.get('with_additional_approval_conditions'), None)
         self.assertEqual(form.initial.get('all_additional_approval_conditions'), [])
 
+        formset = response.context['fac_decision_free_approval_condition_formset']
+        self.assertEqual(len(formset.forms), 0)
+
         # Another training
         self.general_admission.other_training_accepted_by_fac = self.training
 
@@ -1590,9 +1603,19 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         ]
         self.general_admission.additional_approval_conditions.set(approval_conditions)
         self.general_admission.with_additional_approval_conditions = True
-        self.general_admission.free_additional_approval_conditions = [
-            'My first free condition',
-            'My second free condition',
+
+        free_approval_conditions = [
+            FreeAdditionalApprovalConditionFactory(
+                name_fr='Première condition libre',
+                name_en='First free condition',
+                admission=self.general_admission,
+            ),
+            FreeAdditionalApprovalConditionFactory(
+                name_fr='Deuxième condition libre',
+                name_en='Second free condition',
+                admission=self.general_admission,
+                related_experience=self.general_admission.candidate.educationalexperience_set.first(),
+            ),
         ]
 
         self.general_admission.save()
@@ -1644,24 +1667,15 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             [
                 approval_conditions[0].uuid,
                 approval_conditions[1].uuid,
-                self.general_admission.free_additional_approval_conditions[0],
-                self.general_admission.free_additional_approval_conditions[1],
+                free_approval_conditions[1].related_experience_id,
             ],
         )
         self.assertCountEqual(
             form.fields['all_additional_approval_conditions'].choices,
             [
                 (
+                    str(free_approval_conditions[1].related_experience_id),
                     gettext('Graduation of {program_name}').format(program_name='Computer science'),
-                    gettext('Graduation of {program_name}').format(program_name='Computer science'),
-                ),
-                (
-                    self.general_admission.free_additional_approval_conditions[0],
-                    self.general_admission.free_additional_approval_conditions[0],
-                ),
-                (
-                    self.general_admission.free_additional_approval_conditions[1],
-                    self.general_admission.free_additional_approval_conditions[1],
                 ),
                 (
                     approval_conditions[0].uuid,
@@ -1672,6 +1686,16 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
                     approval_conditions[1].name_fr,
                 ),
             ],
+        )
+
+        formset = response.context['fac_decision_free_approval_condition_formset']
+        self.assertEqual(len(formset.forms), 1)
+        self.assertEqual(
+            formset.forms[0].initial,
+            {
+                'name_fr': free_approval_conditions[0].name_fr,
+                'name_en': free_approval_conditions[0].name_en,
+            },
         )
 
     def test_approval_decision_form_submitting_with_invalid_data(self):
@@ -1707,7 +1731,6 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_training_accepted_by_fac', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('program_planned_years_number', []))
         self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('all_additional_approval_conditions', []))
 
         response = self.client.post(
             self.url,
@@ -1729,7 +1752,6 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('other_training_accepted_by_fac', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('program_planned_years_number', []))
         self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('prerequisite_courses', []))
-        self.assertNotIn(FIELD_REQUIRED_MESSAGE, form.errors.get('all_additional_approval_conditions', []))
 
         response = self.client.post(
             self.url,
@@ -1772,13 +1794,102 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             form.fields['all_additional_approval_conditions'].choices,
             [
                 (approval_conditions[0].uuid, approval_conditions[0].name_fr),
-                ('Free condition', 'Free condition'),
                 (
-                    gettext('Graduation of {program_name}').format(program_name='Computer science'),
+                    self.experience_uuid,
                     gettext('Graduation of {program_name}').format(program_name='Computer science'),
                 ),
             ],
         )
+
+        # Invalid free condition
+        response = self.client.post(
+            self.url,
+            data={
+                'fac-decision-approval-another_training': False,
+                'fac-decision-approval-with_prerequisite_courses': 'False',
+                'fac-decision-approval-with_additional_approval_conditions': 'True',
+                'fac-decision-approval-program_planned_years_number': 1,
+                'fac-decision-TOTAL_FORMS': '2',
+                'fac-decision-INITIAL_FORMS': '0',
+                'fac-decision-MIN_NUM_FORMS': '0',
+                'fac-decision-MAX_NUM_FORMS': '1000',
+                'fac-decision-0-name_fr': '',
+                'fac-decision-0-name_en': '',
+                'fac-decision-1-name_fr': 'Ma condition en français 2',
+                'fac-decision-1-name_en': '',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['fac_decision_approval_form']
+        formset = response.context['fac_decision_free_approval_condition_formset']
+
+        self.assertEqual(form.is_valid(), True)
+        self.assertEqual(formset.is_valid(), False)
+        self.assertEqual(formset.forms[0].is_valid(), False)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, formset.forms[0].errors.get('name_fr', []))
+        self.assertEqual(formset.forms[1].is_valid(), True)
+
+        self.general_admission.candidate.language = settings.LANGUAGE_CODE_EN
+        self.general_admission.candidate.save(update_fields=['language'])
+
+        response = self.client.post(
+            self.url,
+            data={
+                'fac-decision-approval-another_training': False,
+                'fac-decision-approval-with_prerequisite_courses': 'False',
+                'fac-decision-approval-with_additional_approval_conditions': 'True',
+                'fac-decision-approval-program_planned_years_number': 1,
+                'fac-decision-TOTAL_FORMS': '2',
+                'fac-decision-INITIAL_FORMS': '0',
+                'fac-decision-MIN_NUM_FORMS': '0',
+                'fac-decision-MAX_NUM_FORMS': '1000',
+                'fac-decision-0-name_fr': '',
+                'fac-decision-0-name_en': '',
+                'fac-decision-1-name_fr': 'Ma condition en français 2',
+                'fac-decision-1-name_en': '',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['fac_decision_approval_form']
+        formset = response.context['fac_decision_free_approval_condition_formset']
+
+        self.assertEqual(form.is_valid(), True)
+        self.assertEqual(formset.is_valid(), False)
+        self.assertEqual(formset.forms[0].is_valid(), False)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, formset.forms[0].errors.get('name_fr', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, formset.forms[0].errors.get('name_en', []))
+        self.assertEqual(formset.forms[1].is_valid(), False)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, formset.forms[1].errors.get('name_en', []))
+
+        response = self.client.post(
+            self.url,
+            data={
+                'fac-decision-approval-another_training': False,
+                'fac-decision-approval-with_prerequisite_courses': 'False',
+                'fac-decision-approval-with_additional_approval_conditions': 'True',
+                'fac-decision-approval-program_planned_years_number': 1,
+                'fac-decision-TOTAL_FORMS': '0',
+                'fac-decision-INITIAL_FORMS': '0',
+                'fac-decision-MIN_NUM_FORMS': '0',
+                'fac-decision-MAX_NUM_FORMS': '1000',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['fac_decision_approval_form']
+        formset = response.context['fac_decision_free_approval_condition_formset']
+
+        self.assertEqual(form.is_valid(), False)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('all_additional_approval_conditions', []))
+        self.assertEqual(formset.is_valid(), True)
 
     @freezegun.freeze_time('2022-01-01')
     def test_approval_decision_form_submitting_with_valid_data(self):
@@ -1804,13 +1915,21 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
                 'fac-decision-approval-with_additional_approval_conditions': 'True',
                 'fac-decision-approval-all_additional_approval_conditions': [
                     approval_conditions[0].uuid,
-                    'Free condition',
+                    self.experience_uuid,
                 ],
                 'fac-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
                 'fac-decision-approval-program_planned_years_number': 5,
                 'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
                 'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
                 'fac-decision-approval-join_program_fac_comment': 'Comment about the join program',
+                'fac-decision-TOTAL_FORMS': '2',
+                'fac-decision-INITIAL_FORMS': '0',
+                'fac-decision-MIN_NUM_FORMS': '0',
+                'fac-decision-MAX_NUM_FORMS': '1000',
+                'fac-decision-0-name_fr': 'Ma première condition',
+                'fac-decision-0-name_en': '',
+                'fac-decision-1-name_fr': 'Ma seconde condition',
+                'fac-decision-1-name_en': 'My second condition',
             },
             **self.default_headers,
         )
@@ -1819,8 +1938,10 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         form = response.context['fac_decision_approval_form']
+        formset = response.context['fac_decision_free_approval_condition_formset']
 
         self.assertTrue(form.is_valid())
+        self.assertTrue(formset.is_valid())
 
         # Check that the admission has been updated
         self.general_admission.refresh_from_db()
@@ -1837,7 +1958,6 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         approval_conditions = self.general_admission.additional_approval_conditions.all()
         self.assertEqual(len(approval_conditions), 1)
         self.assertEqual(approval_conditions[0], approval_conditions[0])
-        self.assertEqual(self.general_admission.free_additional_approval_conditions, ['Free condition'])
         self.assertEqual(self.general_admission.other_training_accepted_by_fac, self.general_admission.training)
         self.assertEqual(self.general_admission.with_prerequisite_courses, True)
         prerequisite_courses = self.general_admission.prerequisite_courses.all()
@@ -1851,6 +1971,53 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.general_admission.join_program_fac_comment, 'Comment about the join program')
+
+        # Check the creation of the free additional conditions
+        conditions: QuerySet[FreeAdditionalApprovalCondition] = FreeAdditionalApprovalCondition.objects.filter(
+            admission=self.general_admission
+        ).order_by('name_fr')
+        self.assertEqual(len(conditions), 3)
+        self.assertEqual(conditions[0].name_fr, 'L\'obtention de votre diplôme de Computer science')
+        self.assertEqual(conditions[0].name_en, 'Graduation of Computer science')
+        self.assertEqual(str(conditions[0].related_experience_id), self.experience_uuid)
+        self.assertEqual(conditions[1].name_fr, 'Ma première condition')
+        self.assertEqual(conditions[1].name_en, '')
+        self.assertIsNone(conditions[1].related_experience)
+        self.assertEqual(conditions[2].name_fr, 'Ma seconde condition')
+        self.assertEqual(conditions[2].name_en, 'My second condition')
+        self.assertIsNone(conditions[2].related_experience)
+
+        # Without additional condition
+        response = self.client.post(
+            self.url,
+            data={
+                'fac-decision-approval-another_training': False,
+                'fac-decision-approval-with_prerequisite_courses': 'False',
+                'fac-decision-approval-with_additional_approval_conditions': 'False',
+                'fac-decision-approval-all_additional_approval_conditions': [
+                    approval_conditions[0].uuid,
+                    self.experience_uuid,
+                ],
+                'fac-decision-approval-program_planned_years_number': 5,
+                'fac-decision-TOTAL_FORMS': '1',
+                'fac-decision-INITIAL_FORMS': '0',
+                'fac-decision-MIN_NUM_FORMS': '0',
+                'fac-decision-MAX_NUM_FORMS': '1000',
+                'fac-decision-0-name_fr': '',
+                'fac-decision-0-name_en': '',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.with_additional_approval_conditions, False)
+        self.assertFalse(self.general_admission.additional_approval_conditions.exists())
+        self.assertFalse(self.general_admission.freeadditionalapprovalcondition_set.exists())
 
     @freezegun.freeze_time('2022-01-01')
     def test_approval_decision_form_submitting_with_transfer_to_sic(self):
@@ -1874,8 +2041,14 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             'fac-decision-approval-with_additional_approval_conditions': 'True',
             'fac-decision-approval-all_additional_approval_conditions': [
                 approval_conditions[0].uuid,
-                'Free condition',
+                self.experience_uuid,
             ],
+            'fac-decision-TOTAL_FORMS': '1',
+            'fac-decision-INITIAL_FORMS': '0',
+            'fac-decision-MIN_NUM_FORMS': '0',
+            'fac-decision-MAX_NUM_FORMS': '1000',
+            'fac-decision-0-name_fr': 'Ma première condition',
+            'fac-decision-0-name_en': 'My first condition',
             'fac-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
             'fac-decision-approval-program_planned_years_number': 5,
             'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
@@ -1934,7 +2107,6 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         approval_conditions = self.general_admission.additional_approval_conditions.all()
         self.assertEqual(len(approval_conditions), 1)
         self.assertEqual(approval_conditions[0], approval_conditions[0])
-        self.assertEqual(self.general_admission.free_additional_approval_conditions, ['Free condition'])
         self.assertEqual(self.general_admission.other_training_accepted_by_fac, self.general_admission.training)
         self.assertEqual(self.general_admission.with_prerequisite_courses, True)
         prerequisite_courses = self.general_admission.prerequisite_courses.all()
@@ -1948,6 +2120,18 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.general_admission.join_program_fac_comment, 'Comment about the join program')
+
+        # Check the creation of the free additional conditions
+        conditions: QuerySet[FreeAdditionalApprovalCondition] = FreeAdditionalApprovalCondition.objects.filter(
+            admission=self.general_admission
+        ).order_by('name_fr')
+        self.assertEqual(len(conditions), 2)
+        self.assertEqual(conditions[0].name_fr, 'L\'obtention de votre diplôme de Computer science')
+        self.assertEqual(conditions[0].name_en, 'Graduation of Computer science')
+        self.assertEqual(str(conditions[0].related_experience_id), self.experience_uuid)
+        self.assertEqual(conditions[1].name_fr, 'Ma première condition')
+        self.assertEqual(conditions[1].name_en, 'My first condition')
+        self.assertIsNone(conditions[1].related_experience)
 
         # Check that an entry in the history has been created
         history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)

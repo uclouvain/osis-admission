@@ -28,16 +28,17 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import Scholarship
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import TypeBourse
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.forms import RadioBooleanField, get_scholarship_choices, format_training
+from admission.forms import get_scholarship_choices, format_training
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.fields import RadioBooleanField
 
 
 class TrainingChoiceForm(ConfigurableFormMixin):

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django.db import IntegrityError
 from django.test import TestCase
 
-from admission.contrib.models.base import admission_directory_path, BaseAdmissionProxy
+from admission.contrib.models import AdmissionViewer
+from admission.contrib.models.base import admission_directory_path, BaseAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 
@@ -55,7 +57,7 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
 
     def test_annotate_several_admissions_in_progress_with_no_other_admission(self):
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().first()
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().first()
             self.assertFalse(admission.has_several_admissions_in_progress)
 
     def test_annotate_several_admissions_in_progress_with_other_admission_but_with_other_candidate(self):
@@ -64,7 +66,7 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
             status=self.base_admission.status,
         )
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().all()[0]
             self.assertFalse(admission.has_several_admissions_in_progress)
 
     def test_annotate_several_admissions_in_progress_with_other_admission_but_with_in_progress_status(self):
@@ -74,7 +76,7 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
             candidate=self.base_admission.candidate,
         )
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().all()[0]
             self.assertFalse(admission.has_several_admissions_in_progress)
 
     def test_annotate_several_admissions_in_progress_with_other_admission_but_with_cancelled_status(self):
@@ -84,7 +86,7 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
             candidate=self.base_admission.candidate,
         )
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().all()[0]
             self.assertFalse(admission.has_several_admissions_in_progress)
 
     def test_annotate_several_admissions_in_progress_with_other_admission(self):
@@ -94,5 +96,21 @@ class BaseAnnotateSeveralAdmissionInProgress(TestCase):
             candidate=self.base_admission.candidate,
         )
         with self.assertNumQueries(1):
-            admission = BaseAdmissionProxy.objects.annotate_several_admissions_in_progress().all()[0]
+            admission = BaseAdmission.objects.annotate_several_admissions_in_progress().all()[0]
             self.assertTrue(admission.has_several_admissions_in_progress)
+
+
+class AdmissionViewerTestCase(TestCase):
+    def test_admission_viewers_duplicates(self):
+        admission = GeneralEducationAdmissionFactory()
+
+        AdmissionViewer.objects.all().delete()
+
+        AdmissionViewer.add_viewer(admission.candidate, admission)
+        AdmissionViewer.add_viewer(admission.candidate, admission)
+
+        self.assertEqual(AdmissionViewer.objects.all().count(), 1)
+
+        with self.assertRaises(IntegrityError):
+            AdmissionViewerFactory(admission=admission, person=admission.candidate)
+            AdmissionViewerFactory(admission=admission, person=admission.candidate)

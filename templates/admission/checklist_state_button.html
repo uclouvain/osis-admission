@@ -24,7 +24,15 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<div class="btn-group" role="group">
+<div
+  class="btn-group"
+  role="group"
+  {% if tooltip %}
+  title="{{ tooltip }}"
+  data-toggle="tooltip"
+  data-placement="bottom"
+  {% endif %}
+>
   {% is_current_checklist_status current state extra as is_current_status %}
   <button
       id="{{ tab }}-{{ state }}{% if sub_id %}-{{ sub_id }}{% endif %}"
@@ -35,13 +43,6 @@
       data-icon="{{ icon }}"
       {% if disabled or is_current_status %}disabled="disabled"{% endif %}
       {% if submitted_extra %}hx-vals="{{ submitted_extra|to_json }}"{% endif %}
-      {% if tooltip %}
-        data-toggle="popover"
-        data-placement="auto top"
-        data-trigger="hover"
-        data-container="body"
-        data-content="{{ tooltip }}"
-      {% endif %}
       {% if extra %}hx-vals="{{ extra|to_json }}"{% endif %}
       {% if open_modal %}
       data-toggle="modal"

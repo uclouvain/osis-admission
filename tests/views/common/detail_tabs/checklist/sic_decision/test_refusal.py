@@ -32,7 +32,6 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from osis_history.models import HistoryEntry
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -47,6 +46,7 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import SicPatchMixin
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -149,6 +149,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.headers.get('HX-Refresh'), True)
 
         form = response.context['sic_decision_refusal_form']
 
@@ -169,6 +170,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         # Check the response
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get('HX-Refresh'))
 
         form = response.context['sic_decision_refusal_form']
         self.assertTrue(form.is_valid())
@@ -233,6 +235,7 @@ class SicRefusalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         # Check the response
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers.get('HX-Refresh'))
 
         form = response.context['sic_decision_refusal_form']
         self.assertTrue(form.is_valid())

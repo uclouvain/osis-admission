@@ -77,6 +77,13 @@ class StatutEmplacementDocument(ChoiceEnum):
     NON_ANALYSE = _('Not analyzed')
     VALIDE = _('Validated')
     COMPLETE_APRES_RECLAMATION = _('Completed after the request')
+    RECLAMATION_ANNULEE = _('Request cancelled')
+
+
+STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER = {
+    StatutEmplacementDocument.A_RECLAMER.name,
+    StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
+}
 
 
 class StatutReclamationEmplacementDocument(ChoiceEnum):
@@ -308,7 +315,7 @@ DocumentsSuiteAutorisation = {
         'Copy of your student visa D (permission to stay longer than 90 days in Belgium) issued by the Belgian '
         'Embassy or Consulate.'
     ),
-    'AUTORISATION_PDF_SIGNEE': _('The official French-language enrolment authorisation signed by you.'),
+    'AUTORISATION_PDF_SIGNEE': _('The official enrolment authorisation signed by you.'),
 }
 
 

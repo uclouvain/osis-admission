@@ -306,6 +306,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def _get_academic_experience_year_dto(cls, educational_experience_year: EducationalExperienceYear):
         return AnneeExperienceAcademiqueDTO(
+            uuid=educational_experience_year.uuid,
             resultat=educational_experience_year.result,
             annee=educational_experience_year.academic_year.year,
             releve_notes=educational_experience_year.transcript,

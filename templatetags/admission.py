@@ -47,7 +47,7 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE
+from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -92,9 +92,11 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import format_academic_year, get_access_conditions_url
+from admission.utils import get_access_conditions_url
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
+from base.utils.utils import format_academic_year
+from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -592,7 +594,7 @@ def document_component(document_write_token, document_metadata, can_edit=True):
                 'template': 'osis_document/editor.html',
                 'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
-                'attrs': attrs
+                'attrs': attrs,
             }
         elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
             return {
@@ -876,9 +878,22 @@ def admission_url(admission_uuid: str, osis_education_type: str):
 
 
 @register.simple_tag
+def list_other_admissions_url(admission_uuid: str, osis_education_type: str):
+    """Get the URL of the list view displaying the other admissions of a candidate of a specific admission"""
+    admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+    if admission_context is None:
+        return None
+    return reverse(f'admission:{admission_context}:other-admissions-list', kwargs={'uuid': admission_uuid})
+
+
+@register.simple_tag
 def admission_status(status: str, osis_education_type: str):
     """Get the status of a specific admission"""
     admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(osis_education_type)
+
+    if admission_context is None:
+        return status
+
     return (
         {
             'general-education': ChoixStatutPropositionGenerale,
@@ -1273,6 +1288,69 @@ def experience_details_template(
     return context
 
 
+@register.simple_tag(takes_context=True)
+def checklist_experience_action_links_context(
+    context,
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
+    current_year,
+    prefix,
+):
+    base_namespace = context['view'].base_namespace
+    proposition_uuid = context['view'].kwargs['uuid']
+    proposition_uuid_str = str(proposition_uuid)
+    if experience.__class__ == EtudesSecondairesDTO:
+        return {
+            'prefix': prefix,
+            'update_url': resolve_url(
+                f'{base_namespace}:update:education',
+                uuid=proposition_uuid_str,
+            ),
+            'experience_uuid': str(experience.uuid),
+        }
+    elif (experience.valorisee_par_admissions and
+          proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year):
+        if experience.__class__ == ExperienceAcademiqueDTO:
+            return {
+                'prefix': prefix,
+                'update_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:educational',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'delete_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:educational_delete',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'duplicate_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:educational_duplicate',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'experience_uuid': str(experience.uuid),
+            }
+        elif experience.__class__ == ExperienceNonAcademiqueDTO:
+            return {
+                'prefix': prefix,
+                'update_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:non_educational',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'delete_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:non_educational_delete',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'duplicate_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:non_educational_duplicate',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'experience_uuid': str(experience.uuid),
+            }
+
+
 @register.inclusion_tag(
     'admission/general_education/includes/checklist/parcours_row_actions_links.html',
     takes_context=True,
@@ -1281,35 +1359,9 @@ def checklist_experience_action_links(
     context,
     experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
     current_year,
+    prefix,
 ):
-    base_namespace = context['view'].base_namespace
-    proposition_uuid = context['view'].kwargs['uuid']
-    proposition_uuid_str = str(proposition_uuid)
-    if experience.__class__ == EtudesSecondairesDTO:
-        return {
-            'update_url': resolve_url(
-                f'{base_namespace}:update:education',
-                uuid=proposition_uuid_str,
-            ),
-        }
-    elif (experience.valorisee_par_admissions and
-          proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year):
-        if experience.__class__ == ExperienceAcademiqueDTO:
-            return {
-                'update_url': resolve_url(
-                    f'{base_namespace}:update:curriculum:educational',
-                    uuid=proposition_uuid_str,
-                    experience_uuid=experience.uuid,
-                ),
-            }
-        elif experience.__class__ == ExperienceNonAcademiqueDTO:
-            return {
-                'update_url': resolve_url(
-                    f'{base_namespace}:update:curriculum:non_educational',
-                    uuid=proposition_uuid_str,
-                    experience_uuid=experience.uuid,
-                ),
-            }
+    return checklist_experience_action_links_context(context, experience, current_year, prefix)
 
 
 @register.filter
@@ -1347,6 +1399,14 @@ def footer_campus(proposition):
     return {
         'campus': CAMPUS.get(proposition.formation.campus_inscription.nom, 'LLN'),
         'proposition': proposition,
+    }
+
+
+@register.inclusion_tag('admission/exports/includes/refusal_footer_campus.html')
+def refusal_footer_campus(campus: UclouvainCampusDTO):
+    return {
+        'campus': campus,
+        'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
     }
 
 
