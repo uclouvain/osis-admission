@@ -33,6 +33,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsSystemeFAC,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     DocumentsSystemeSIC,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
@@ -75,3 +76,7 @@ class EmplacementDocumentDTO(interface.Entity):
     @property
     def est_reclamable(self):
         return self.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
+
+    @property
+    def est_a_reclamer(self):
+        return self.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER and bool(self.statut_reclamation)
