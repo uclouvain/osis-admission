@@ -65,7 +65,6 @@ from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumen
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
-    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -754,7 +753,7 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
         self.documents = {}
 
         for document in documents:
-            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER:
+            if document.est_a_reclamer:
                 if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:
