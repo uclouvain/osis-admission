@@ -28,6 +28,7 @@ from django.utils.functional import cached_property
 
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.enums import Onglets
+from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
@@ -49,6 +50,7 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
     update_requested_documents = True
     update_admission_author = True
     permission_required = 'admission.change_admission_secondary_studies'
+    foreign_form_class = AdmissionBachelorEducationForeignDiplomaForm
 
     @cached_property
     def is_bachelor(self):
@@ -85,3 +87,9 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
 
     def update_current_admission_on_form_valid(self, form, admission):
         admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        if self.is_bachelor:
+            context_data['is_vae_potential'] = self.high_school_diploma['is_vae_potential']
+        return context_data
