@@ -17,10 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Selectable items"
-msgstr ""
-
-msgid "Selected items"
+msgid "Add a personalized item in the list of the selected items"
 msgstr ""
 
 msgid "Search"
@@ -29,14 +26,8 @@ msgstr ""
 msgid "Search an element in the list of the selectable items"
 msgstr ""
 
-msgid "Add a personalized item in the list of the selected items"
+msgid "Selectable items"
 msgstr ""
 
-msgid "Copy to clipboard"
-msgstr ""
-
-msgid "Copied!"
-msgstr ""
-
-msgid "Impossible to copy"
+msgid "Selected items"
 msgstr ""
