@@ -47,6 +47,7 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
 )
@@ -661,6 +662,12 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=_profil_candidat_translator,
             campus_repository=_campus_repository,
             pdf_generation=_pdf_generation,
+        )
+    ),
+    RetyperDocumentCommand: (
+        lambda msg_bus, cmd: retyper_document(
+            cmd,
+            emplacement_document_repository=_emplacement_document_repository,
         )
     ),
 }

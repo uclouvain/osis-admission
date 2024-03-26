@@ -24,20 +24,13 @@
 #
 # ##############################################################################
 
-import calendar
-import datetime
 import uuid
-from decimal import Decimal
 from typing import Union
 
 from django.contrib import messages
-from django.db.models import ProtectedError
-from django.shortcuts import redirect
-from django.db import transaction
-from django.db.models import Prefetch, F, ProtectedError, QuerySet
+from django.db.models import ProtectedError, QuerySet
 from django.forms import forms
 from django.shortcuts import redirect, get_object_or_404
-from django.template import loader
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
@@ -53,6 +46,7 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import copy_documents
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
 from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
 from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView

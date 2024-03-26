@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -110,6 +110,8 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         }
 
         with transaction.atomic():
+            # In case we have several fields on the same object, we need to update them on a single instance.
+            model_objects_cache = {}
             for entity in entities:
                 if entity.type.name not in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
                     raise NotImplementedError
@@ -145,6 +147,10 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                     raise EmplacementDocumentNonTrouveException
 
                 model_object = emplacement_document.obj
+                if model_object in model_objects_cache:
+                    model_object = model_objects_cache[model_object]
+                else:
+                    model_objects_cache[model_object] = model_object
                 model_field = emplacement_document.field
                 specific_question_uuid = emplacement_document.specific_question_uuid
                 document_uuids = emplacement_document.uuids
@@ -163,14 +169,22 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                         setattr(model_object, model_field, entity.uuids_documents)
 
                     # Save the author of the file
-                    change_remote_metadata(
-                        token=entity.uuids_documents[0],
-                        metadata={
-                            'author': entity.document_soumis_par,
-                        },
-                    )
+                    if entity.uuids_documents:
+                        change_remote_metadata(
+                            token=entity.uuids_documents[0],
+                            metadata={
+                                'author': entity.document_soumis_par,
+                            },
+                        )
 
             for model_object, fields in updated_fields_by_object.items():
+                # Ensure the files are not deleted by osis_document.contrib.fields.FileField.pre_save
+                model_object._files_to_keep = [
+                    uuid_document
+                    for entity in entities
+                    for uuid_document in entity.uuids_documents
+                    if isinstance(uuid_document, uuid.UUID)
+                ]
                 model_object.save(update_fields=fields)
 
     @classmethod

@@ -40,10 +40,9 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
-
-from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from osis_document.contrib import FileField
 
+from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
 from admission.contrib.models.functions import ToChar
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -473,6 +472,16 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     def __str__(self):
         reference = '{:08}'.format(self.reference)
         return f'{reference[:4]}.{reference[4:]}'
+
+    def get_admission_context(self):
+        from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
+
+        if hasattr(self, 'generaleducationadmission'):
+            return CONTEXT_GENERAL
+        if hasattr(self, 'doctorateadmission'):
+            return CONTEXT_DOCTORATE
+        if hasattr(self, 'continuingeducationadmission'):
+            return CONTEXT_CONTINUING
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):
