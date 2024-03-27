@@ -178,6 +178,7 @@ class ExperienceAcademique:
     type_institut: str
     cycle_formation: str
     nom_formation_equivalente_communaute_fr: str
+    identifiant_externe: Optional[str] = None
 
 
 @dataclass
@@ -192,6 +193,7 @@ class ExperienceNonAcademique:
     fonction: str
     secteur: str
     autre_activite: str
+    identifiant_externe: Optional[str] = None
 
 
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
