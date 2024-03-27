@@ -41,10 +41,8 @@ from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCand
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     OngletsDemande,
-    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -340,10 +338,7 @@ class PDFGeneration(IPDFGeneration):
 
         # Get the list of documents
         for document in documents:
-            if (
-                document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
-                and document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES
-            ):
+            if document.est_a_reclamer:
                 document_identifier = document.identifiant.split('.')
 
                 if (

@@ -2846,6 +2846,14 @@ class DocumentViewTestCase(TestCase):
 
         self.client.force_login(user=self.second_fac_manager_user)
 
+        fac_free_requestable_document_without_status = self._create_a_free_document(
+            self.fac_manager_user,
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+        )
+        self.general_admission.refresh_from_db()
+        self.general_admission.requested_documents[fac_free_requestable_document_without_status]['request_status'] = ''
+        self.general_admission.save(update_fields=['requested_documents'])
+
         url = resolve_url('admission:general-education:documents', uuid=self.general_admission.uuid)
 
         # Get the list and the request form
@@ -2881,6 +2889,10 @@ class DocumentViewTestCase(TestCase):
             'My file name',
         )
         self.assertEqual(second_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
+
+        # The third field should be missing as there is no request status
+        third_field = form.fields.get(fac_free_requestable_document_without_status)
+        self.assertIsNone(third_field)
 
         # Simulate that the field is not missing but still requested
         self.general_admission.refresh_from_db()

@@ -82,7 +82,7 @@
 
   <script>
       $(document).ready(function () {
-          initializePopover({ trigger: 'hover' })
+          initializePopover({ trigger: 'hover' });
           initializeLazyPopover()
 
           {# Working lists #}
@@ -132,7 +132,7 @@
               });
               selectWorkListInProgress = false;
           });
-          
+
           {# Simulate the behavior of sub options #}
           ['AUTHENTIFICATION', 'BESOIN_DEROGATION'].forEach(
               function (optionValuePrefix) {
