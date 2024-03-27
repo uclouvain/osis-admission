@@ -30,7 +30,6 @@ from typing import List, Optional
 
 import attr
 from dateutil import relativedelta
-from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
 
 from admission.ddd import NB_MOIS_MIN_VAE, MOIS_DEBUT_ANNEE_ACADEMIQUE
@@ -89,6 +88,7 @@ class ExperienceAcademiqueDTO(interface.DTO):
     cycle_formation: str
     type_enseignement: str
     valorisee_par_admissions: Optional[List[str]] = None
+    identifiant_externe: Optional[str] = None
 
     def __str__(self):
         return self.nom_formation
@@ -127,6 +127,10 @@ class ExperienceAcademiqueDTO(interface.DTO):
     def titre_pdf_decision_sic(self):
         return self.nom_formation
 
+    @property
+    def epc_experience(self):
+        return bool(self.identifiant_externe)
+
 
 @attr.dataclass(frozen=True, slots=True)
 class ExperienceNonAcademiqueDTO(interface.DTO):
@@ -140,6 +144,7 @@ class ExperienceNonAcademiqueDTO(interface.DTO):
     secteur: str
     autre_activite: str
     valorisee_par_admissions: Optional[List[str]] = None
+    identifiant_externe: Optional[str] = None
 
     def __str__(self):
         if self.type == ActivityType.OTHER.name:
@@ -167,6 +172,10 @@ class ExperienceNonAcademiqueDTO(interface.DTO):
             if self.type == ActivityType.OTHER.name
             else self.dates_formatees
         )
+
+    @property
+    def epc_experience(self):
+        return bool(self.identifiant_externe)
 
 
 @attr.dataclass(frozen=True, slots=True)

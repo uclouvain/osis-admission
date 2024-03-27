@@ -298,6 +298,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 autre_activite=experience.activity,
                 uuid=experience.uuid,
                 valorisee_par_admissions=getattr(experience, 'valuated_from_admissions', None),
+                identifiant_externe=experience.external_id,
             )
             for experience in experiences_non_academiques
         ]
@@ -446,6 +447,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     systeme_evaluation=experience_year.educational_experience.evaluation_type,
                     type_enseignement=experience_year.educational_experience.study_system,
                     valorisee_par_admissions=getattr(experience_year, 'valuated_from_admissions', None),
+                    identifiant_externe=experience_year.educational_experience.external_id,
                     **institute,
                     **linguistic_regime,
                     **program_info,
