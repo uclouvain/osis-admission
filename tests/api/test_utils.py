@@ -26,6 +26,8 @@
 from django.test import TestCase
 
 from admission.utils import takewhile_return_attribute_values
+from base.tests.factories.academic_year import AcademicYearFactory
+from base.utils.utils import format_academic_year
 
 
 class UtilsTestCase(TestCase):
@@ -50,3 +52,21 @@ class UtilsTestCase(TestCase):
             list(takewhile_return_attribute_values(lambda obj: obj['a'] == 5, self.array, 'b')),
             [],
         )
+
+    def test_format_academic_year_with_empty_year(self):
+        self.assertEqual(format_academic_year(''), '')
+
+    def test_format_academic_year_with_year_as_int(self):
+        self.assertEqual(format_academic_year(2020), '2020-2021')
+
+    def test_format_academic_year_with_year_as_str(self):
+        self.assertEqual(format_academic_year('2020'), '2020-2021')
+
+    def test_format_academic_year_with_year_as_float(self):
+        self.assertEqual(format_academic_year(2020.0), '2020-2021')
+
+    def test_format_academic_year_with_year_as_academic_year_object(self):
+        self.assertEqual(format_academic_year(AcademicYearFactory(year=2020)), '2020-2021')
+
+    def test_format_academic_year_in_short_version(self):
+        self.assertEqual(format_academic_year(2020, short=True), '2020-21')

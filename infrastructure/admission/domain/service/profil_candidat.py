@@ -52,22 +52,12 @@ from admission.contrib.models.base import BaseAdmission
 from admission.contrib.models.functions import ArrayLength
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from admission.ddd import NB_MOIS_MIN_VAE
-from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    AnneeExperienceAcademiqueDTO,
-    ExperienceAcademiqueDTO,
-    CurriculumAExperiencesDTO,
-    ExperienceNonAcademiqueDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
-)
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
@@ -81,6 +71,16 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+    AlternativeSecondairesDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO, CurriculumAExperiencesDTO,
+)
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     EducationalExperienceYear,
     ProfessionalExperience,
@@ -226,7 +226,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         foreign_high_school_diploma = getattr(candidate, 'foreignhighschooldiploma', None)
         high_school_diploma_alternative = getattr(candidate, 'highschooldiplomaalternative', None)
 
-        return EtudesSecondairesDTO(
+        return EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=candidate.graduated_from_high_school,
             valorisees=valuated_secondary_studies,
             annee_diplome_etudes_secondaires=candidate.graduated_from_high_school_year.year
@@ -509,7 +509,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
         valuated_secondary_studies = cls.etudes_secondaires_valorisees(matricule)
 
         candidate: Person = Person.objects.select_related(
@@ -527,7 +527,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumDTO':
+    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumAdmissionDTO':
         minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
 
         academic_experiences_dtos = cls._get_academic_experiences_dtos(
@@ -542,7 +542,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
         non_academic_experiences_dtos = cls._get_non_academic_experiences_dtos(non_academic_experiences)
 
-        return CurriculumDTO(
+        return CurriculumAdmissionDTO(
             experiences_academiques=academic_experiences_dtos,
             annee_diplome_etudes_secondaires=minimal_years.get('highschool_diploma_year'),
             annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
@@ -780,7 +780,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     professional_valuated_experiences__baseadmission_id=uuid.UUID(str(uuid_proposition))
                 )
 
-        curriculum_dto = CurriculumDTO(
+        curriculum_dto = CurriculumAdmissionDTO(
             annee_derniere_inscription_ucl=last_registration_year,
             annee_diplome_etudes_secondaires=graduated_from_high_school_year,
             experiences_academiques=cls._get_academic_experiences_dtos(
