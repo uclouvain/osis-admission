@@ -35,7 +35,6 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
@@ -54,6 +53,7 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -62,6 +62,7 @@ from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
 from reference.tests.factories.country import CountryFactory
 
 
+#TODO: Remove duplicate tests with osis_profile
 @freezegun.freeze_time('2023-01-01')
 class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
     @classmethod

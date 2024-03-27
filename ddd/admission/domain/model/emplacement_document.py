@@ -25,7 +25,7 @@
 # ##############################################################################
 import uuid
 from datetime import datetime, date
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import attr
 

@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
 from dal_select2.views import Select2ListView
 from django.contrib.auth.mixins import LoginRequiredMixin

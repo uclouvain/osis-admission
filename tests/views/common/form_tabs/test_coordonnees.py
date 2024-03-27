@@ -30,7 +30,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
@@ -48,6 +48,7 @@ from base.models.person_address import PersonAddress
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.person_address import PersonAddressFactory
+from osis_profile import BE_ISO_CODE
 from reference.models.country import Country
 from reference.tests.factories.country import CountryFactory
 
