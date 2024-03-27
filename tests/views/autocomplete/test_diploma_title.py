@@ -29,7 +29,7 @@ from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
-from admission.views.autocomplete.diploma_title import mapping_study_cycle
+from reference.models.diploma_title import mapping_study_cycle
 from reference.models.enums.study_type import StudyType
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 

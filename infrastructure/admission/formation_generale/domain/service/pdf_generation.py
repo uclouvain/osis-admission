@@ -33,15 +33,12 @@ from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     OngletsDemande,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
@@ -68,6 +65,7 @@ from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
 from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
 from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
 
 ENTITY_SIC = 'SIC'
 ENTITY_SICB = 'SICB'

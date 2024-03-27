@@ -28,7 +28,6 @@ from typing import Dict, List, Optional, Union
 import attr
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd import PLUS_5_ISO_CODES, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator

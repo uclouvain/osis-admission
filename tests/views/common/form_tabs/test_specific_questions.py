@@ -36,7 +36,6 @@ from django.utils.translation import gettext
 from rest_framework import status
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
@@ -55,6 +54,7 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
 )
 from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.person_address_type import PersonAddressType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory, EducationGroupYearBachelorFactory

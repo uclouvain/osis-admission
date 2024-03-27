@@ -36,6 +36,7 @@ __all__ = [
 ]
 
 
+# TODO: To move into reference or base
 class CountriesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
     """
     Return a list of countries based on the search term and the active flag. The returned ids are the model pks.

@@ -25,27 +25,14 @@
 # ##############################################################################
 from dal import autocomplete
 
-from reference.models.diploma_title import DiplomaTitle
-from reference.models.enums.study_type import StudyType
+from reference.models.diploma_title import DiplomaTitle, get_diploma_label_with_study_type
 
 __all__ = [
     'DiplomaTitleAutocomplete',
 ]
 
 
-mapping_study_cycle = {
-    StudyType.NON_UNIVERSITY.name: 'SNU',
-    StudyType.UNIVERSITY.name: 'UNIV',
-}
-
-
 def get_diploma_label(diploma_title: DiplomaTitle) -> str:
-    return diploma_title.title
-
-
-def get_diploma_label_with_study_type(diploma_title: DiplomaTitle) -> str:
-    if diploma_title.study_type:
-        return f'{mapping_study_cycle.get(diploma_title.study_type)} - {diploma_title.title}'
     return diploma_title.title
 
 

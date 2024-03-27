@@ -24,15 +24,15 @@
 #
 # ##############################################################################
 from datetime import date, timedelta
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 
-from admission.ddd import PLUS_5_ISO_CODES
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import get_current_year
+from osis_profile import PLUS_5_ISO_CODES
 
 
 class CalendrierInscriptionInMemory(ICalendrierInscription):

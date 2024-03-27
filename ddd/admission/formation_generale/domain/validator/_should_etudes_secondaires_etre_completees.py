@@ -24,16 +24,10 @@
 #
 # ##############################################################################
 from typing import Optional
+
 import attr
 
-from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.domain.model.formation import Formation
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
@@ -41,7 +35,13 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
-from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+    AlternativeSecondairesDTO,
+)
+from osis_profile import REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 
 

@@ -34,7 +34,6 @@ from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import GeneralEducationAdmission
-from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -60,6 +59,7 @@ from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.mandatary import MandataryFactory
+from osis_profile import BE_ISO_CODE
 from reference.tests.factories.country import CountryFactory
 
 

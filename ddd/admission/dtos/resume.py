@@ -29,9 +29,10 @@ import attr
 from django.utils.functional import cached_property
 
 from admission.ddd.admission.doctorat.preparation import dtos as dtos_doctorat
-from admission.ddd.admission.doctorat.preparation.dtos import CurriculumDTO
-from admission.ddd.admission.dtos import IdentificationDTO, CoordonneesDTO, EtudesSecondairesDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.dtos import IdentificationDTO, CoordonneesDTO
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.formation_continue import dtos as dtos_formation_continue
 from admission.ddd.admission.formation_generale import dtos as dtos_formation_generale
 from osis_common.ddd import interface
@@ -56,8 +57,8 @@ class ResumeCandidatDTO(interface.DTO):
 
     identification: IdentificationDTO
     coordonnees: CoordonneesDTO
-    curriculum: CurriculumDTO
-    etudes_secondaires: Optional[EtudesSecondairesDTO]
+    curriculum: CurriculumAdmissionDTO
+    etudes_secondaires: Optional[EtudesSecondairesAdmissionDTO]
     connaissances_langues: Optional[List[dtos_doctorat.ConnaissanceLangueDTO]]
 
 

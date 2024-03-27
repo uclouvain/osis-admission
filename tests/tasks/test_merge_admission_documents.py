@@ -30,9 +30,10 @@ from unittest.mock import patch
 from django.conf import settings
 from django.test import override_settings
 from osis_async.models import AsyncTask
+from osis_document.enums import PostProcessingType
 from rest_framework.test import APITestCase
 
-from admission.constants import PDF_MIME_TYPE, PNG_MIME_TYPE
+from admission.constants import PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.enums import (
     CleConfigurationItemFormulaire,
@@ -53,9 +54,9 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.form_item import DocumentAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
-from osis_document.enums import PostProcessingType
 from osis_profile.models.enums.curriculum import TranscriptType
 
 

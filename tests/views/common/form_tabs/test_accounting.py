@@ -34,7 +34,6 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models import Accounting
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
@@ -56,6 +55,7 @@ from admission.tests.factories.curriculum import EducationalExperienceYearFactor
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory, CandidateFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year

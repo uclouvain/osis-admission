@@ -29,24 +29,23 @@ import freezegun
 from django.shortcuts import resolve_url
 from osis_history.models import HistoryEntry
 from rest_framework import status
+from rest_framework.test import APITestCase
 
 from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission
-from admission.ddd import BE_ISO_CODE
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests import CheckActionLinksMixin
-from rest_framework.test import APITestCase
-
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
+from osis_profile import BE_ISO_CODE
 from reference.tests.factories.country import CountryFactory
 
 

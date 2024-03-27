@@ -28,12 +28,12 @@ import uuid
 from typing import List
 
 from django.utils.text import slugify
+from osis_document.enums import PostProcessingType
 from rest_framework import generics
 from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.schema import ResponseSpecificSchema
-from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
@@ -42,8 +42,8 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.exceptions import DocumentPostProcessingException
 from admission.utils import get_cached_general_education_admission_perm_obj
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from infrastructure.messages_bus import message_bus_instance
-from osis_document.enums import PostProcessingType
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 

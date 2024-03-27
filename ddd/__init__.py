@@ -25,25 +25,14 @@
 # ##############################################################################
 from decimal import Decimal
 
-
-BE_ISO_CODE = "BE"
 FR_ISO_CODE = "FR"
 EN_ISO_CODE = "EN"
 CODE_BACHELIER_VETERINAIRE = 'VETE1BA'
 PREFIXES_DOMAINES_FORMATIONS_DENT_MED = {'11', '13'}
-REGIMES_LINGUISTIQUES_SANS_TRADUCTION = {'FR', 'NL', 'DE', 'EN', 'IT', 'ES', 'PT'}
 LANGUES_OBLIGATOIRES_DOCTORAT = ["EN", "FR"]
 NB_MOIS_MIN_VAE = 36
 MONTANT_FRAIS_DOSSIER = Decimal(200)
 DUREE_MINIMALE_PROGRAMME = 1
 DUREE_MAXIMALE_PROGRAMME = 5
-PLUS_5_ISO_CODES = {
-    'CH',  # Suisse
-    "IS",  # Islande
-    "NO",  # Norvège
-    "LI",  # Liechtenstein
-    "MC",  # Monaco
-}
 MAIL_INSCRIPTION_DEFAUT = 'inscription-lln@uclouvain.be'
 MAIL_VERIFICATEUR_CURSUS = 'verificationcursus@uclouvain.be'
-MOIS_DEBUT_ANNEE_ACADEMIQUE = 9

@@ -24,24 +24,25 @@
 #
 # ##############################################################################
 import datetime
-import uuid
 from abc import abstractmethod
 from typing import Dict, List, Optional
 
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConditionsComptabiliteDTO,
-    CurriculumDTO,
-    ExperienceAcademiqueDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAExperiencesDTO
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
-from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.dtos import CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.community import CommunityEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO, CurriculumAExperiencesDTO,
+)
 from osis_common.ddd import interface
 
 
@@ -68,12 +69,12 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumDTO':
+    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumAdmissionDTO':
         raise NotImplementedError
 
     @classmethod

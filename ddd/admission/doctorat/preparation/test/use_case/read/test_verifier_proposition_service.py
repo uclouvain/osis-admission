@@ -30,23 +30,14 @@ from unittest import TestCase
 import freezegun
 import mock
 
-from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionQuery
-from admission.ddd.admission.enums import (
-    ChoixTypeCompteBancaire,
-    TypeSituationAssimilation,
-    ChoixAssimilation6,
-    ChoixAssimilation5,
-    LienParente,
-    ChoixAssimilation3,
-    ChoixAssimilation2,
-    ChoixAssimilation1,
-)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixStatutSignatureGroupeDeSupervision,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AbsenceDeDetteNonCompleteeException,
     AdresseCorrespondanceNonCompleteeException,
@@ -83,7 +74,16 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     NombrePropositionsSoumisesDepasseException,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.enums import (
+    ChoixTypeCompteBancaire,
+    TypeSituationAssimilation,
+    ChoixAssimilation6,
+    ChoixAssimilation5,
+    LienParente,
+    ChoixAssimilation3,
+    ChoixAssimilation2,
+    ChoixAssimilation1,
+)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -101,6 +101,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,

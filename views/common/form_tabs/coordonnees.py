@@ -26,11 +26,11 @@
 from django.urls import reverse
 from django.views.generic import FormView
 
-from admission.ddd import BE_ISO_CODE
 from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
 from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
+from osis_profile import BE_ISO_CODE
 from reference.models.country import Country
 
 __all__ = ['AdmissionCoordonneesFormView']

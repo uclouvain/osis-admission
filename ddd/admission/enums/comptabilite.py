@@ -26,8 +26,8 @@
 
 from django.utils.translation import gettext_lazy as _
 
-from admission.mark_safe_lazy import mark_safe_lazy
 from base.models.utils.utils import ChoiceEnum
+from base.utils.mark_safe_lazy import mark_safe_lazy
 
 
 class TypeSituationAssimilation(ChoiceEnum):

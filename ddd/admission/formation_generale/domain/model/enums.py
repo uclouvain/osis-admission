@@ -28,7 +28,6 @@ from typing import Iterable
 from django.utils.translation import gettext_lazy as _
 
 from admission.enum_utils import build_enum_from_choices
-from base.models.enums.got_diploma import GotDiploma
 from base.models.utils.utils import ChoiceEnum
 
 
@@ -53,8 +52,6 @@ class ChoixStatutPropositionGenerale(ChoiceEnum):
     def get_specific_values(cls, keys: Iterable[str]):
         return ', '.join([str(getattr(cls, key).value) for key in keys])
 
-
-CHOIX_DIPLOME_OBTENU = {GotDiploma.YES.name, GotDiploma.THIS_YEAR.name}
 
 STATUTS_PROPOSITION_GENERALE_NON_SOUMISE = {
     ChoixStatutPropositionGenerale.EN_BROUILLON.name,

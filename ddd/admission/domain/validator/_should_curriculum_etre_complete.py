@@ -29,16 +29,13 @@ from typing import List, Optional, Set, Dict
 import attr
 from dateutil.rrule import rrule, MONTHLY, rruleset
 
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
 )
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.ddd.utils.business_validator import BusinessValidator, MultipleBusinessExceptions
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 
 
 @attr.dataclass(frozen=True, slots=True)

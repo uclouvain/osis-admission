@@ -38,10 +38,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixDoctoratDejaRealise, ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator import *
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldAbsenceDeDetteEtreCompletee,
@@ -52,6 +48,7 @@ from admission.ddd.admission.domain.validator import (
     ShouldAssimilationEtreCompletee,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 
 
 @attr.dataclass(frozen=True, slots=True)

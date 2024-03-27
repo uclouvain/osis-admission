@@ -29,7 +29,6 @@ from typing import Dict, List, Optional, Union
 
 import attr
 
-from admission.ddd import PLUS_5_ISO_CODES
 from admission.ddd.admission.dtos.bourse import BourseDTO
 from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -43,6 +42,7 @@ from admission.ddd.admission.formation_generale.dtos.condition_approbation impor
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
 from osis_common.ddd import interface
+from osis_profile import PLUS_5_ISO_CODES
 
 
 @attr.dataclass(frozen=True, slots=True)

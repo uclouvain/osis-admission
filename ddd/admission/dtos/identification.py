@@ -28,8 +28,8 @@ from typing import List, Optional
 
 import attr
 
-from admission.ddd import PLUS_5_ISO_CODES, BE_ISO_CODE
 from osis_common.ddd import interface
+from osis_profile import PLUS_5_ISO_CODES, BE_ISO_CODE
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -27,13 +27,14 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd import BE_ISO_CODE, EN_ISO_CODE
+from admission.ddd import EN_ISO_CODE
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person_address import PersonAddress
+from osis_profile import BE_ISO_CODE
 from reference.tests.factories.country import CountryFactory
 
 

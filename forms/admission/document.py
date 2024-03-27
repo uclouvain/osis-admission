@@ -35,7 +35,6 @@ from django.utils.translation import gettext_lazy as _, get_language, pgettext_l
 
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutEmplacementDocument,
     TypeEmplacementDocument,
     StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,

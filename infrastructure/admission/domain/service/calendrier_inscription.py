@@ -26,7 +26,6 @@
 from datetime import date
 from typing import List, Tuple
 
-from admission.ddd import PLUS_5_ISO_CODES
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.dtos import IdentificationDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
@@ -35,6 +34,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.education_group_types import TrainingType
+from osis_profile import PLUS_5_ISO_CODES
 
 
 class CalendrierInscription(ICalendrierInscription):

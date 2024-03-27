@@ -27,12 +27,12 @@ from typing import Optional
 
 import attr
 
-from admission.ddd import PLUS_5_ISO_CODES, BE_ISO_CODE
 from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     InformationsVisaNonCompleteesException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
+from osis_profile import PLUS_5_ISO_CODES, BE_ISO_CODE
 
 
 @attr.dataclass(frozen=True, slots=True)

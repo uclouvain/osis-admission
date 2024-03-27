@@ -30,9 +30,6 @@ import freezegun
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.formation_generale.commands import RetyperDocumentCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
-)
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
