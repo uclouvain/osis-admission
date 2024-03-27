@@ -33,6 +33,7 @@ from django.utils.translation import (
 )
 
 from admission.contrib.models import ContinuingEducationAdmission
+from osis_common.utils.enumerations import ChoiceEnum
 
 
 class StudentReportForm(forms.ModelForm):
@@ -69,10 +70,18 @@ class StudentReportForm(forms.ModelForm):
         }
 
 
+class DecisionFacApprovalChoices(ChoiceEnum):
+    AVEC_CONDITION = _('With condition')
+    SANS_CONDITION = _('Without condition')
+
+
 class DecisionFacApprovalForm(forms.Form):
-    accepter_la_demande = forms.BooleanField(
-        label=_('Accept application'),
+    accepter_la_demande = forms.ChoiceField(
+        choices=DecisionFacApprovalChoices.choices(),
+        required=True,
+        widget=forms.RadioSelect(),
     )
+
     condition_acceptation = forms.CharField(
         label=_('Acceptation condition'),
         required=False,
@@ -86,6 +95,11 @@ class DecisionFacApprovalForm(forms.Form):
         label=_('Message for the candidate'),
         widget=forms.Textarea(),
     )
+
+    class Media:
+        js = [
+            'js/dependsOn.min.js',
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

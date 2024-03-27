@@ -26,11 +26,14 @@
 
 from typing import Dict, Set, List
 
+from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView, FormView
 from osis_comment.models import CommentEntry
+from osis_mail_template.exceptions import EmptyMailTemplateContent
+from osis_mail_template.models import MailTemplate
 
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -46,6 +49,8 @@ from admission.forms.admission.checklist import (
     CommentForm,
 )
 from admission.forms.admission.continuing_education.checklist import StudentReportForm, DecisionFacApprovalForm
+from admission.mail_templates import ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION
+from admission.utils import get_salutation_prefix, get_portal_admission_url
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
@@ -56,6 +61,7 @@ __namespace__ = False
 __all__ = [
     'ChecklistView',
     'FicheEtudiantFormView',
+    'FacApprovalFormView',
 ]
 
 
@@ -73,11 +79,49 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         return has_perm('admission.change_checklist', user=self.request.user, obj=self.admission)
 
     @cached_property
+    def mail_tokens(self):
+        candidate = self.admission.candidate
+
+        training_title = {
+            settings.LANGUAGE_CODE_FR: self.proposition.formation.intitule_fr,
+            settings.LANGUAGE_CODE_EN: self.proposition.formation.intitule,
+        }[candidate.language]
+
+        return {
+            'candidate_first_name': self.proposition.prenom_candidat,
+            'candidate_last_name': self.proposition.nom_candidat,
+            'greetings': get_salutation_prefix(self.admission.candidate),
+            'application_reference': self.proposition.reference,
+            'training_acronym': self.proposition.formation.sigle,
+            'training_title': training_title,
+            'application_link': get_portal_admission_url('general-education', self.admission_uuid),
+            'managers_emails': 'TODO',
+            'sender_name': 'TODO',
+        }
+
+    @cached_property
     def decision_fac_approval_form(self):
+        tokens = self.mail_tokens
+
+        try:
+            mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
+                ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION,
+                self.admission.candidate.language,
+            )
+
+            subject = mail_template.render_subject(tokens=tokens)
+            body = mail_template.body_as_html(tokens=tokens)
+        except EmptyMailTemplateContent:
+            subject = ''
+            body = ''
+
         return DecisionFacApprovalForm(
-            # instance=self.admission if self.request.method != 'POST' else None,
             data=self.request.POST if self.request.method == 'POST' else None,
-            prefix='fac-decision-approval',
+            prefix='decision-fac-approval',
+            initial={
+                'subject': subject,
+                'body': body,
+            },
         )
 
     def get_context_data(self, **kwargs):
@@ -221,4 +265,20 @@ class FicheEtudiantFormView(CheckListDefaultContextMixin, AdmissionFormMixin, Ht
 
     def form_valid(self, form):
         form.save()
+        return super().form_valid(form)
+
+
+class FacApprovalFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPermissionRequiredMixin, FormView):
+    name = 'decision-fac-approval'
+    urlpatterns = 'decision-fac-approval'
+    template_name = 'admission/continuing_education/includes/checklist/decision_fac_approval_form.html'
+    htmx_template_name = 'admission/continuing_education/includes/checklist/decision_fac_approval_form.html'
+    permission_required = 'admission.view_checklist'
+    form_class = StudentReportForm
+
+    def get_form(self, form_class=None):
+        return self.decision_fac_approval_form
+
+    def form_valid(self, form):
+        # TODO
         return super().form_valid(form)
