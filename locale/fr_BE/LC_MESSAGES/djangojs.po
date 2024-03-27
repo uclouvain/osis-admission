@@ -17,11 +17,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "Selectable items"
-msgstr "Éléments sélectionnables"
+msgid "Add a personalized item in the list of the selected items"
+msgstr ""
+"Ajouter un élément personnalisé dans la liste des éléments sélectionnés"
 
-msgid "Selected items"
-msgstr "Éléments sélectionnés"
+msgid "Copied!"
+msgstr "Copié !"
+
+msgid "Copy to clipboard"
+msgstr "Copier dans le presse-papiers"
+
+msgid "Impossible to copy"
+msgstr "Impossible de copier"
+
+msgid "Impossible to select"
+msgstr "Impossible de sélectionner"
 
 msgid "Search"
 msgstr "Rechercher"
@@ -29,14 +39,14 @@ msgstr "Rechercher"
 msgid "Search an element in the list of the selectable items"
 msgstr "Rechercher un élément dans la liste des éléments sélectionnables"
 
-msgid "Add a personalized item in the list of the selected items"
-msgstr "Ajouter un élément personnalisé dans la liste des éléments sélectionnés"
+msgid "Select the element"
+msgstr "Sélectionner l'élément"
 
-msgid "Copy to clipboard"
-msgstr "Copier dans le presse-papiers"
+msgid "Selectable items"
+msgstr "Éléments sélectionnables"
 
-msgid "Copied!"
-msgstr "Copié !"
+msgid "Selected items"
+msgstr "Éléments sélectionnés"
 
-msgid "Impossible to copy"
-msgstr "Impossible de copier"
+msgid "Selected!"
+msgstr "Sélectionné !"
