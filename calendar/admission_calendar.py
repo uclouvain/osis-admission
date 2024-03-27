@@ -36,7 +36,7 @@ from admission.ddd.admission.domain.service.i_annee_inscription_formation import
     IAnneeInscriptionFormationTranslator,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_titres_acces import ConditionAccess
+from admission.ddd.admission.domain.service.i_titres_acces import ConditionAccess, ITitresAcces
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -395,17 +395,25 @@ class AdmissionPoolUe5BelgianCalendar(PoolCalendar):
         cls,
         ue_plus_5: bool,
         access_diplomas: List[str],
+        training_type: TrainingType,
         sigle: str,
         proposition: 'PropositionGenerale',
         **kwargs,
     ) -> bool:
-        """Candidat ayant la nationalité dans UE ou 5 pays (Suisse, Islande, Norvège, Liechtenstein, Monaco)
-        et un diplôme d'accès Belge"""
+        """Candidat ayant la nationalité dans UE ou 5 pays (Suisse, Islande, Norvège, Liechtenstein, Monaco) et :
+        - un diplôme d'accès Belge.
+        - ou une inscription à une formation ne demandant pas de condition d'accès.
+        """
         return (
             isinstance(proposition, PropositionGenerale)
             and ue_plus_5
-            and any(belgian_diploma in access_diplomas for belgian_diploma in DIPLOMES_ACCES_BELGE)
-            and not est_formation_contingentee_et_non_resident(sigle, proposition)
+            and (
+                (
+                    any(belgian_diploma in access_diplomas for belgian_diploma in DIPLOMES_ACCES_BELGE)
+                    and not est_formation_contingentee_et_non_resident(sigle, proposition)
+                )
+                or training_type in ITitresAcces.formations_sans_conditions_acces
+            )
         )
 
 
