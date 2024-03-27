@@ -73,6 +73,9 @@
 
     </div>
 
+    {% include 'admission/document/message_content_reset_confirm_modal.html' %}
+    {% include 'admission/document/message_object_reset_confirm_modal.html' %}
+
     <div id="info-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
       <div class="info-content"></div>
@@ -742,6 +745,11 @@
       position: sticky;
       bottom: 0;
       background: white;
+    }
+
+    .reset-button {
+      float: right;
+      margin-top: -7px;
     }
     
     /* Allow to scroll the content above the header menu */

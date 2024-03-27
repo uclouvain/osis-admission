@@ -49,7 +49,8 @@ from admission.forms.admission.checklist import (
     CommentForm,
 )
 from admission.forms.admission.continuing_education.checklist import StudentReportForm, DecisionFacApprovalForm
-from admission.mail_templates import ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION
+from admission.mail_templates import ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION, \
+    ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITHOUT_CONDITION
 from admission.utils import get_salutation_prefix, get_portal_admission_url
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
@@ -110,19 +111,41 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             )
 
             subject = mail_template.render_subject(tokens=tokens)
-            body = mail_template.body_as_html(tokens=tokens)
         except EmptyMailTemplateContent:
             subject = ''
-            body = ''
 
         return DecisionFacApprovalForm(
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='decision-fac-approval',
             initial={
                 'subject': subject,
-                'body': body,
             },
         )
+
+    def get_decision_fac_approval_mail_bodies(self):
+        bodies = {}
+        tokens = self.mail_tokens
+        tokens['conditions'] = '__CONDITION__'
+
+        try:
+            mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
+                ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION,
+                self.admission.candidate.language,
+            )
+            bodies['decision_fac_approval_mail_body_with_condition'] = mail_template.body_as_html(tokens=tokens)
+        except EmptyMailTemplateContent:
+            bodies['decision_fac_approval_mail_body_with_condition'] = ''
+
+        try:
+            mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
+                ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITHOUT_CONDITION,
+                self.admission.candidate.language,
+            )
+            bodies['decision_fac_approval_mail_body_without_condition'] = mail_template.body_as_html(tokens=tokens)
+        except EmptyMailTemplateContent:
+            bodies['decision_fac_approval_mail_body_without_condition'] = ''
+
+        return bodies
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -150,6 +173,8 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         )
         context['student_report_form'] = StudentReportForm(instance=self.admission)
         context['decision_fac_approval_form'] = self.decision_fac_approval_form
+        context.update(self.get_decision_fac_approval_mail_bodies())
+
         return context
 
 

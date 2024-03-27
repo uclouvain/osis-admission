@@ -33,7 +33,7 @@ from django.utils.translation import (
 )
 
 from admission.contrib.models import ContinuingEducationAdmission
-from osis_common.utils.enumerations import ChoiceEnum
+from base.models.utils.utils import ChoiceEnum
 
 
 class StudentReportForm(forms.ModelForm):
@@ -110,3 +110,12 @@ class DecisionFacApprovalForm(forms.Form):
                 'language': get_language(),
             }
         )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data['accepter_la_demande'] == DecisionFacApprovalChoices.AVEC_CONDITION.name and not cleaned_data.get('condition_acceptation'):
+            self.add_error('condition_acceptation', forms.ValidationError(
+                self.fields['condition_acceptation'].error_messages['required'],
+                code='required',
+            ))
+        return cleaned_data

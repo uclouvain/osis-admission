@@ -44,17 +44,26 @@
 
       {% bootstrap_field decision_fac_approval_form.condition_acceptation %}
 
-      <a href="#" id="decision-fac-approval-reset-subject" class="btn btn-sm btn-primary reset-button"><i class="fa fa-rotate-right"></i> {% trans "Reset" %}</a>
-      {% bootstrap_field decision_fac_approval_form.subject %}
+      <div id="decision-fac-approval-mail-container">
+        <a href="#" id="decision-fac-approval-reset-subject" class="btn btn-sm btn-primary reset-button"><i class="fa fa-rotate-right"></i> {% translate "Reset" %}</a>
+        {% bootstrap_field decision_fac_approval_form.subject %}
 
-      <a href="#" id="decision-fac-approval-reset-body" class="btn btn-sm btn-primary reset-button"><i class="fa fa-rotate-right"></i> {% trans "Reset" %}</a>
-      {% bootstrap_field decision_fac_approval_form.body %}
+        <a href="#" id="decision-fac-approval-reset-body" class="btn btn-sm btn-primary reset-button"><i class="fa fa-rotate-right"></i> {% translate 'Create message' %}</a>
+        {% bootstrap_field decision_fac_approval_form.body %}
+      </div>
   </div>
 
   <div class="modal-footer">
     <button
-        class="btn btn-success"
-        name="save"
+      id="decision-fac-approval-send-btn"
+      class="btn btn-success"
+      name="save"
+      disabled
+      data-toggle="popover"
+      data-placement="auto top"
+      data-trigger="hover"
+      data-container="body"
+      data-content="{% translate "You need to create the message before sending it." %}"
     >
       <i class="fa fa-envelope"></i>
       {% translate 'Send' context 'admission' %}
@@ -68,35 +77,91 @@
   </div>
 
   {{ decision_fac_approval_form.initial.subject|json_script:"decision_fac_approval_form_subject" }}
-  {{ decision_fac_approval_form.initial.body|json_script:"decision_fac_approval_form_body" }}
+  {{ decision_fac_approval_mail_body_with_condition|json_script:"decision_fac_approval_form_body_with_condition" }}
+  {{ decision_fac_approval_mail_body_without_condition|json_script:"decision_fac_approval_form_body_without_condition" }}
   {{ decision_fac_approval_form.media }}
 
   <script>
-    $(document).ready(function () {
+      $(document).ready(() => {
+        {# Reset / Set mail templates values #}
+        const defaultMessageWithCondition = JSON.parse(document.getElementById('decision_fac_approval_form_body_with_condition').textContent);
+        const defaultMessageWithoutCondition = JSON.parse(document.getElementById('decision_fac_approval_form_body_without_condition').textContent);
+        const defaultObject = JSON.parse(document.getElementById('decision_fac_approval_form_subject').textContent);
+        const $messageObjectInput = $('#id_decision-fac-approval-subject');
+        const $messageContentResetModal = $('#message-content-reset-confirm-modal');
+        const $messageObjectResetModal = $('#message-object-reset-confirm-modal');
+
+        $('#content-reset-confirm-button').click(function(event) {
+            if ($('#cke_id_decision-fac-approval-body').is(':hidden')) {
+                return;
+            }
+            event.preventDefault();
+
+            let value;
+            const conditionAcceptation = $('#id_decision-fac-approval-condition_acceptation').val();
+            if (!!conditionAcceptation) {
+              value = defaultMessageWithCondition.replace('__CONDITION__', conditionAcceptation);
+            } else {
+              value = defaultMessageWithoutCondition;
+            }
+
+            CKEDITOR.instances['id_decision-fac-approval-body'].setData(value);
+            $('#id_decision-fac-approval-body').val(value);
+            $messageContentResetModal.modal('hide');
+        });
+
+        $('#object-reset-confirm-button').click(function(event) {
+            if ($messageObjectInput.is(':hidden')) {
+                return;
+            }
+            event.preventDefault();
+            $('#id_decision-fac-approval-subject').val(defaultObject);
+            $messageObjectResetModal.modal('hide');
+        });
+
+        $('#decision-fac-approval-reset-body').click(function(event){
+            event.preventDefault();
+            const $messageContentContainer = $('#cke_id_decision-fac-approval-body');
+
+            if ($messageContentContainer.is(':hidden')) {
+              $messageContentContainer.show();
+              $('#content-reset-confirm-button').click();
+              $('#decision-fac-approval-reset-body').html($('#decision-fac-approval-reset-subject').html());
+              $('#decision-fac-approval-send-btn').prop('disabled', false).popover('destroy');
+            } else {
+              $messageContentResetModal.modal('show');
+            }
+        });
+
+        $('#decision-fac-approval-reset-subject').click(function(event){
+            event.preventDefault();
+            $messageObjectResetModal.modal('show');
+        });
+
+        CKEDITOR.on('instanceReady', function(){
+            {% if not decision_fac_approval_form.is_bound %}
+              $('#cke_id_decision-fac-approval-body').hide();
+            {% endif %}
+        });
+
+        $('#decision-fac-approval-send-btn[data-toggle="popover"]').popover();
+        {# / #}
+
+        initializeCKEditor('id_decision-fac-approval-body');
+
         $('#id_decision-fac-approval-condition_acceptation').dependsOn({
             'input[name=decision-fac-approval-accepter_la_demande]': {
                 values: [
                     'AVEC_CONDITION',
-                ]
+                ],
             },
         }, {duration: 0, valueOnDisable: '',});
-    });
 
-      $('#decision-fac-approval-reset-subject').click((event) => {
-          event.preventDefault();
-          const value = JSON.parse(document.getElementById('decision_fac_approval_form_subject').textContent);
-          $('#id_decision-fac-approval-subject').val(value);
-      });
-
-      $('#decision-fac-approval-reset-body').click((event) => {
-          event.preventDefault();
-          const value = JSON.parse(document.getElementById('decision_fac_approval_form_body').textContent);
-          $('#id_decision-fac-approval-body').val(value);
-          CKEDITOR.instances['id_fac-body'].setData(value);
-      });
-
-      $(document).ready(() => {
-          initializeCKEditor('id_decision-fac-approval-body');
+        $('#decision-fac-approval-mail-container').dependsOn({
+            'input[value=decision-fac-approval-accepter_la_demande]': {
+                checked: true,
+            },
+        }, {duration: 0,});
       });
   </script>
 
