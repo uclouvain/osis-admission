@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from osis_common.ddd import interface
 from osis_common.ddd.interface import CommandRequest
 
@@ -57,6 +58,7 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
         libelle: str,
         raison: str = '',
         statut_reclamation: str = '',
+        onglet_checklist_associe: str = '',
     ) -> 'EmplacementDocument':
         heure_initialisation = datetime.datetime.now()
         return EmplacementDocument(
@@ -72,6 +74,7 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
             justification_gestionnaire=raison,
             derniere_action_le=heure_initialisation,
             statut_reclamation=StatutReclamationEmplacementDocument[statut_reclamation] if statut_reclamation else None,
+            onglet_checklist_associe=OngletsChecklist[onglet_checklist_associe] if onglet_checklist_associe else None,
         )
 
     @classmethod

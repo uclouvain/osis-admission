@@ -37,7 +37,7 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, pgettext
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
@@ -56,7 +56,6 @@ from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -68,7 +67,6 @@ from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSe
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
-    StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     StatutReclamationEmplacementDocument,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
@@ -124,8 +122,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
-    InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
+    InformationsDestinatairePasTrouvee,
+)
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms

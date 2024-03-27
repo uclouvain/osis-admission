@@ -364,6 +364,10 @@ msgstr "Expérience académique"
 msgid "Academic year"
 msgstr "Année académique"
 
+msgctxt "admission"
+msgid "Academic year"
+msgstr "Année académique"
+
 msgid "Academic year of the admission"
 msgstr "Année académique de l'admission'"
 
@@ -1527,6 +1531,10 @@ msgstr "Modifier la publication de cette conférence"
 msgid "Checklist"
 msgstr "Checklist"
 
+msgctxt "admission"
+msgid "Checklist"
+msgstr "Checklist"
+
 msgid "Checklist filters"
 msgstr "Filtres de la checklist"
 
@@ -2442,6 +2450,10 @@ msgstr "Document non trouvé."
 
 msgid "Document to be requested"
 msgstr "Document à réclamer"
+
+msgctxt "admission"
+msgid "Document type"
+msgstr "Type de document"
 
 msgid "Documents"
 msgstr "Documents"
@@ -4133,6 +4145,12 @@ msgstr "Compréhension à l'audition"
 
 msgid "Long"
 msgstr "Long"
+
+msgid "Long label in english"
+msgstr "Libellé long en anglais"
+
+msgid "Long label in french"
+msgstr "Libellé long en français"
 
 msgid "Long name"
 msgstr "Nom long"
@@ -6324,6 +6342,12 @@ msgstr "Sexe"
 msgid "Short"
 msgstr "Court"
 
+msgid "Short label in english"
+msgstr "Libellé court en anglais"
+
+msgid "Short label in french"
+msgstr "Libellé court en français"
+
 msgid "Short name"
 msgstr "Nom court"
 
@@ -6852,6 +6876,9 @@ msgstr "Le document a été téléversé"
 msgid "The document is no longer designated as to be requested"
 msgstr "Le document n'est plus désigné comme étant à réclamer"
 
+msgid "The document must be related to the specified checklist tab"
+msgstr "Le document doit être associé à l'onglet de checklist spécifié"
+
 msgid "The documents have been requested to the candidate"
 msgstr "Les documents ont été réclamés au candidat"
 
@@ -7369,6 +7396,9 @@ msgstr "A compléter pour Fac"
 msgid "To be completed for the Enrolment Office (SIC)"
 msgstr "A compléter pour SIC"
 
+msgid "To be determined"
+msgstr "À déterminer"
+
 msgid "To be processed"
 msgstr "À traiter"
 
@@ -7599,10 +7629,13 @@ msgstr "Modifier le membre"
 
 msgctxt "admission"
 msgid "Upload"
-msgstr "Téléverser"
+msgstr "Uploader"
+
+msgid "Upload a UCLouvain document"
+msgstr "Uploader un document UCLouvain"
 
 msgid "Upload a document"
-msgstr "Téléverser un document"
+msgstr "Uploader un document"
 
 msgid "Upload a received document"
 msgstr "Uploader un document reçu"
@@ -7772,6 +7805,9 @@ msgstr ""
 
 msgid "Whole view"
 msgstr "Vue complète"
+
+msgid "With academic year"
+msgstr "Avec une année académique"
 
 msgid "Without free documents"
 msgstr "Sans les documents libres"

@@ -1,0 +1,82 @@
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<script>
+    $(document).ready(function () {
+        const document_type_input = $('#{{form.document_type.id_for_label}}');
+        const academic_year_input = $('#{{form.academic_year.id_for_label}}');
+        const file_name_input = $('#{{form.file_name.id_for_label}}');
+        const document_type_container = $('#{{form.document_type.id_for_label}}-container');
+        const academic_year_container = $('#{{form.academic_year.id_for_label}}-container');
+
+        const data = document_type_input.select2('data');
+
+        academic_year_container.toggle(data.length > 0 && data[0].with_academic_year);
+
+        {% if not without_checklist_tab_input %}
+            const checklist_tab_input = $('#{{form.checklist_tab.id_for_label}}');
+            document_type_container.toggle(!!checklist_tab_input.val());
+
+            {# On checklist tab change, show or not the document type field and reset it #}
+            checklist_tab_input.on('change', function(){
+                document_type_container.toggle(!!$(this).val());
+                document_type_input.val(null).change();
+
+                academic_year_container.hide();
+                academic_year_input.val('');
+
+                file_name_input.val('');
+            });
+
+        {% endif %}
+
+        {# On document type change, update the file name if the academic year is not used, else show the academic year field #}
+        document_type_input.on('select2:select', function () {
+            const data = $(this).select2('data');
+
+            academic_year_container.toggle(data.length > 0 && data[0].with_academic_year);
+            academic_year_input.val('');
+
+            file_name_input.val(data.length > 0 && !data[0].with_academic_year ? data[0].full_text : '');
+        });
+
+        document_type_input.on('select2:clear', function () {
+            academic_year_container.hide();
+            academic_year_input.val('');
+
+            file_name_input.val('');
+        });
+
+        {# On academic year change, update the file name #}
+        academic_year_input.on('change', function(){
+            const data = document_type_input.select2('data');
+            const currentYear = $(this).val();
+
+            file_name_input.val(
+                currentYear && data.length > 0 && data[0].with_academic_year ?
+                    data[0].full_text.replaceAll('{{ form.tokens.academic_year }}', currentYear) :
+                    '',
+            );
+        });
+    });
+</script>

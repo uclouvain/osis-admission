@@ -59,6 +59,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
     StatutReclamationEmplacementDocument,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
 from base.models.person import Person
@@ -200,6 +201,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             'deadline_at': entity.a_echeance_le or '',
             'automatically_required': entity.requis_automatiquement,
             'request_status': entity.statut_reclamation.name if entity.statut_reclamation else '',
+            'related_checklist_tab': entity.onglet_checklist_associe.name if entity.onglet_checklist_associe else '',
         }
 
     @classmethod
@@ -295,6 +297,9 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             document_soumis_par=emplacement_document.document_submitted_by,
             statut_reclamation=StatutReclamationEmplacementDocument[emplacement_document.request_status]
             if emplacement_document.request_status
+            else None,
+            onglet_checklist_associe=OngletsChecklist[emplacement_document.related_checklist_tab]
+            if emplacement_document.related_checklist_tab
             else None,
         )
 

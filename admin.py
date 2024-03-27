@@ -35,11 +35,10 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
 from django_json_widget.widgets import JSONEditorWidget
+from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
-from osis_document.contrib import FileField
 from osis_mail_template.admin import MailTemplateAdmin
 
 from admission.auth.roles.adre import AdreSecretary
@@ -65,6 +64,7 @@ from admission.contrib.models import (
     DiplomaticPost,
 )
 from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.checklist import (
     RefusalReasonCategory,
@@ -91,6 +91,7 @@ from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from education_group.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
+from osis_document.contrib import FileField
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
@@ -897,6 +898,23 @@ class WorkingListAdmin(OrderedModelAdmin):
         }
 
 
+class CategorizedFreeDocumentAdmin(admin.ModelAdmin):
+    model = CategorizedFreeDocument
+    list_display = [
+        'short_label_fr',
+        'checklist_tab',
+    ]
+    list_filter = [
+        ("checklist_tab", admin.EmptyFieldListFilter),
+        "checklist_tab",
+    ]
+    search_fields = [
+        'short_label_en',
+        'short_label_fr',
+    ]
+
+
+admin.site.register(CategorizedFreeDocument, CategorizedFreeDocumentAdmin)
 admin.site.register(WorkingList, WorkingListAdmin)
 admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
 admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)
