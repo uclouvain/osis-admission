@@ -122,8 +122,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
-    InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
+    InformationsDestinatairePasTrouvee,
+)
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms

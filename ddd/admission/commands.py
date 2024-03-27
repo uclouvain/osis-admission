@@ -77,6 +77,7 @@ class InitialiserEmplacementDocumentLibreAReclamerCommand(interface.CommandReque
     raison: str
     auteur: str
     uuid_document: str = ''
+    onglet_checklist_associe: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

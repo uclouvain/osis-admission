@@ -61,6 +61,7 @@ class EmplacementDocumentDTO(interface.Entity):
     types_documents: Dict[str, str]
     noms_documents_televerses: Dict[str, str]
     statut_reclamation: str
+    onglet_checklist_associe: str = ''
 
     def est_emplacement_systeme_fac(self):
         return (
