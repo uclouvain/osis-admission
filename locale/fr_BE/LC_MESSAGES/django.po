@@ -7354,6 +7354,16 @@ msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 "Cette expérience ne peut être mise à jour car elle a déjà été valorisée."
 
+#, python-format
+msgid ""
+"This experience has been added by the applicant in another application, to "
+"proceed to a modification, click on his/her <a href=\"%(admission_url)s\" "
+"target=\"_blank\">other application %(admission_reference)s</a>."
+msgstr ""
+"Cette expérience a été ajoutée par le·la candidat·e dans une autre demande, "
+"pour procéder à une modification, cliquez sur son <a "
+"href=\"%(admission_url)s\" target=\"_blank\">autre demande %(admission_reference)s</a>."
+
 msgid "This field is required if the first name is missing."
 msgstr "Ce champ est obligatoire si le prénom est manquant."
 

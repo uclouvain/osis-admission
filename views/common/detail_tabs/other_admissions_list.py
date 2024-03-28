@@ -48,7 +48,7 @@ class OtherAdmissionsListView(AdmissionViewMixin, TemplateView):
                     if self.admission.determined_academic_year
                     else self.admission.training.academic_year.year,
                     matricule_candidat=self.admission.candidate.global_id,
-                    etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
+                    etats=list(STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER),
                 )
             )
             if demande.uuid != self.admission_uuid

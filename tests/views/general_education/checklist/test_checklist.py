@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import itertools
+
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
@@ -33,7 +35,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import E
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    PoursuiteDeCycle,
+    PoursuiteDeCycle, OngletsChecklist,
 )
 from admission.tests.factories.curriculum import (
     EducationalExperienceYearFactory,
@@ -164,14 +166,18 @@ class ChecklistViewTestCase(TestCase):
         self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, past_experiences)
         self.assertNotIn(educational_experience_uuid_str, past_experiences)
         self.assertNotIn(non_educational_experience_uuid_str, past_experiences)
+        self.assertEqual(response.context['last_valuated_admission_by_experience_uuid'], {})
 
         # Documents
         self.assertIn(secondary_studies_child_identifier, documents)
         self.assertNotIn(educational_experience_child_identifier, documents)
         self.assertNotIn(non_educational_experience_child_identifier, documents)
 
-        # Two valuated experiences but by another admission -> we retrieve the experiences but no their documents
-        other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
+        # Two valuated experiences but by another admission -> we retrieve the experiences and their documents
+        other_admission = GeneralEducationAdmissionFactory(
+            candidate=self.general_admission.candidate,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
 
         educational_valuation = AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=other_admission,
@@ -201,10 +207,36 @@ class ChecklistViewTestCase(TestCase):
         self.assertIn(educational_experience_uuid_str, past_experiences)
         self.assertIn(non_educational_experience_uuid_str, past_experiences)
 
+        mapping_valuated_admission_experience = response.context['last_valuated_admission_by_experience_uuid']
+        self.assertIsNotNone(mapping_valuated_admission_experience.get(educational_experience_uuid_str))
+        self.assertEqual(
+            mapping_valuated_admission_experience[educational_experience_uuid_str].uuid,
+            other_admission.uuid,
+        )
+        self.assertIsNotNone(mapping_valuated_admission_experience.get(non_educational_experience_uuid_str))
+        self.assertEqual(
+            mapping_valuated_admission_experience[non_educational_experience_uuid_str].uuid,
+            other_admission.uuid,
+        )
+
         # Documents
         self.assertIn(secondary_studies_child_identifier, documents)
-        self.assertNotIn(educational_experience_child_identifier, documents)
-        self.assertNotIn(non_educational_experience_child_identifier, documents)
+        self.assertIn(educational_experience_child_identifier, documents)
+        self.assertIn(non_educational_experience_child_identifier, documents)
+        cv_experiences_documents_identifiers = {
+            doc.identifiant
+            for doc in itertools.chain(
+                documents[educational_experience_child_identifier],
+                documents[non_educational_experience_child_identifier],
+            )
+        }
+        self.assertCountEqual(response.context['read_only_documents'], cv_experiences_documents_identifiers)
+
+        past_experiences_documents = set(doc.identifiant for doc in documents[OngletsChecklist.parcours_anterieur.name])
+        financeability_documents = set(doc.identifiant for doc in documents[OngletsChecklist.financabilite.name])
+
+        self.assertTrue(cv_experiences_documents_identifiers <= past_experiences_documents)
+        self.assertTrue(cv_experiences_documents_identifiers <= financeability_documents)
 
         # Two valuated experiences by the current admission -> we retrieve the experiences and their documents
         educational_valuation.baseadmission = self.general_admission
@@ -230,11 +262,26 @@ class ChecklistViewTestCase(TestCase):
         self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, past_experiences)
         self.assertIn(educational_experience_uuid_str, past_experiences)
         self.assertIn(non_educational_experience_uuid_str, past_experiences)
+        self.assertEqual(response.context['last_valuated_admission_by_experience_uuid'], {})
 
         # Documents
         self.assertIn(secondary_studies_child_identifier, documents)
         self.assertIn(educational_experience_child_identifier, documents)
         self.assertIn(non_educational_experience_child_identifier, documents)
+        cv_experiences_documents_identifiers = {
+            doc.identifiant
+            for doc in itertools.chain(
+                documents[educational_experience_child_identifier],
+                documents[non_educational_experience_child_identifier],
+            )
+        }
+        self.assertEqual(response.context['read_only_documents'], [])
+
+        past_experiences_documents = set(doc.identifiant for doc in documents[OngletsChecklist.parcours_anterieur.name])
+        financeability_documents = set(doc.identifiant for doc in documents[OngletsChecklist.financabilite.name])
+
+        self.assertTrue(cv_experiences_documents_identifiers <= past_experiences_documents)
+        self.assertTrue(cv_experiences_documents_identifiers <= financeability_documents)
 
     def test_poursuite_de_cycle_no(self):
         self.training.education_group_type = EducationGroupTypeFactory(name=TrainingType.BACHELOR.name)
