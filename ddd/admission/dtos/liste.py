@@ -63,3 +63,9 @@ class DemandeRechercheDTO(interface.DTO):
     date_confirmation: Optional[datetime.datetime]
     est_premiere_annee: Optional[bool]
     poursuite_de_cycle: str
+    annee_formation: int
+    annee_calculee: Optional[int]
+
+    @property
+    def annee_demande(self):
+        return self.annee_calculee or self.annee_formation

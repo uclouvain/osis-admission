@@ -29,13 +29,17 @@
   <div id="document-spinner">
     <span class="fa fa-spinner"></span>
   </div>
+  {# Viewer for received or internal documents or default content if there is no document #}
   {% if not document_identifier %}
     <p id="empty-document-details">
       {% translate 'To visualize and edit a document, please select it in the list opposite.' %}
       <i id="empty-document-icon" class="fa-solid fa-file-import"></i>
     </p>
+  {% elif read_only_document %}
+    <div id="document-editor-container">
+      {% document_component document_write_token document_metadata False %}
+    </div>
   {% else %}
-    {# Viewer for received or internal documents or default content if there is no document #}
     <div id="document-editor-container">
       {% has_perm 'admission.edit_documents' as can_edit_documents %}
       {% document_component document_write_token document_metadata can_edit_documents %}
