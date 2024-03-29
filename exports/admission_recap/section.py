@@ -25,14 +25,12 @@
 # ##############################################################################
 from typing import Optional, List, Dict
 
-from django.utils import formats
 from django.utils.translation import gettext as _, override
 
 from admission.calendar.admission_calendar import (
     AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
 )
-from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
@@ -70,7 +68,7 @@ from admission.exports.admission_recap.constants import (
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.education_group_types import TrainingType
-from osis_profile.models.enums.curriculum import ActivityType
+from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 
 
 class Section:

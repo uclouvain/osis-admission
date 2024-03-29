@@ -61,7 +61,6 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     ExperienceNonAcademiqueDTO,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -81,6 +80,7 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     EducationalExperienceYear,
     ProfessionalExperience,

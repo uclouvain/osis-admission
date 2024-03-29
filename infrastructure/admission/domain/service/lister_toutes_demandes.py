@@ -47,7 +47,6 @@ from django.utils.translation import get_language
 
 from admission.contrib.models import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
-from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -62,6 +61,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperienceYear
 from osis_profile.models.enums.curriculum import Result
 

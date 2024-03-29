@@ -56,7 +56,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
-from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE, MAIL_VERIFICATEUR_CURSUS
+from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
@@ -190,6 +190,7 @@ from base.utils.utils import format_academic_year
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_profile import MOIS_DEBUT_ANNEE_ACADEMIQUE
 from osis_profile.models import EducationalExperience
 from osis_role.templatetags.osis_role import has_perm
 
