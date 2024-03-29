@@ -66,7 +66,7 @@ from admission.forms.admission.curriculum import (
 )
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import copy_documents
-from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
