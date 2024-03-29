@@ -79,6 +79,7 @@ class UploadDocumentForm(UploadDocumentFormMixin):
 class UploadFreeDocumentForm(forms.Form):
     file_name = forms.CharField(
         label=pgettext_lazy('admission', 'Document name'),
+        widget=forms.Textarea(attrs={'rows': 2}),
     )
 
     file = MaxOneFileUploadField(
@@ -201,10 +202,10 @@ class UploadManagerDocumentForm(FreeDocumentHelperFormMixin, UploadFreeDocumentF
 class RequestFreeDocumentForm(FreeDocumentHelperFormMixin, forms.Form):
     file_name = forms.CharField(
         label=pgettext_lazy('admission', 'Document name'),
+        widget=forms.Textarea(attrs={'rows': 2}),
     )
 
     reason = forms.CharField(
-        label=pgettext_lazy('admission', 'Reason'),
         widget=forms.Textarea,
         required=False,
     )
@@ -218,6 +219,13 @@ class RequestFreeDocumentForm(FreeDocumentHelperFormMixin, forms.Form):
         super().__init__(*args, **kwargs)
 
         self.fields['request_status'].choices = get_request_status_choices(only_limited_request_choices)
+
+        self.fields['reason'].label = mark_safe(
+            _(
+                'Communication to the candidate (refusal reason), in '
+                '<span class="label label-admission-primary">{language_code}]</span>'
+            ).format(language_code=formatted_language(self.candidate_language))
+        )
 
         if len(self.fields['request_status'].choices) == 2:
             # If there is only one not empty choice, hide the field and select the related value
