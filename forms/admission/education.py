@@ -41,7 +41,7 @@ from base.models.academic_year import AcademicYear
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.organization import Organization
-from base.utils.utils import format_academic_year
+from osis_profile.forms.etudes_secondaires import got_diploma_dynamic_choices
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
@@ -52,15 +52,6 @@ from osis_profile.models.enums.education import (
 )
 from reference.models.country import Country
 from reference.models.language import Language
-
-
-def got_diploma_dynamic_choices(current_year):
-    """Return the choices with a dynamic value for the choice THIS_YEAR."""
-    specific_values = {
-        GotDiploma.THIS_YEAR.name: _('I will be graduating from secondary school during the %s academic year')
-        % format_academic_year(current_year)
-    }
-    return tuple((x.name, specific_values.get(x.name, x.value)) for x in GotDiploma)
 
 
 class BaseAdmissionEducationForm(ConfigurableFormMixin):

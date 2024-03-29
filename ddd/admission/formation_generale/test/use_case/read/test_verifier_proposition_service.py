@@ -30,7 +30,7 @@ from unittest import TestCase, mock
 
 import freezegun
 
-from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ReductionDesDroitsInscriptionNonCompleteeException,
     AbsenceDeDetteNonCompleteeException,
@@ -95,6 +95,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,

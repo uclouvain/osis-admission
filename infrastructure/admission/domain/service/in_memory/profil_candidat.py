@@ -30,7 +30,6 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import (
     AnneeExperienceAcademiqueDTO,
@@ -42,16 +41,17 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.teaching_type import TeachingTypeEnum
+from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,

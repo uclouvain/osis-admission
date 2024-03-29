@@ -24,9 +24,9 @@
 #
 # ##############################################################################
 from typing import Optional
+
 import attr
 
-from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.domain.model.formation import Formation
 from admission.ddd.admission.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -42,6 +42,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.got_diploma import GotDiploma
+from osis_profile import REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 
 

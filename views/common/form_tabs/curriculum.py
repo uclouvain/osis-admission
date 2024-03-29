@@ -47,17 +47,10 @@ from admission.contrib.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
 from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
-from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
-from admission.forms import (
-    FOLLOWING_FORM_SET_PREFIX,
-    OSIS_DOCUMENT_UPLOADER_CLASS,
-    OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX,
-    FORM_SET_PREFIX,
-)
 from admission.forms.admission.curriculum import (
     AdmissionCurriculumAcademicExperienceForm,
     MINIMUM_CREDIT_NUMBER,
@@ -70,6 +63,11 @@ from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierView
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
+from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+from osis_profile.forms import (
+    FORM_SET_PREFIX, FOLLOWING_FORM_SET_PREFIX, OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX,
+    OSIS_DOCUMENT_UPLOADER_CLASS,
+)
 from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
 from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result
 from reference.models.enums.cycle import Cycle

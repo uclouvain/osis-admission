@@ -35,7 +35,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.contrib.models import ContinuingEducationAdmission, GeneralEducationAdmission
-from admission.ddd import BE_ISO_CODE, EN_ISO_CODE, FR_ISO_CODE
+from admission.ddd import EN_ISO_CODE, FR_ISO_CODE
 from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
 from admission.ddd.admission.enums import CritereItemFormulaireNationaliteDiplome
 from admission.ddd.admission.enums.question_specifique import (
@@ -72,6 +72,7 @@ from base.tests.factories.education_group import EducationGroupFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience
 from osis_profile.tests.factories.curriculum import EducationalExperienceFactory
 from reference.tests.factories.country import CountryFactory

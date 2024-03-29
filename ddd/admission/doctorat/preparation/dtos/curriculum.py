@@ -30,12 +30,12 @@ from typing import List, Optional
 
 import attr
 from dateutil import relativedelta
-from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
 
-from admission.ddd import NB_MOIS_MIN_VAE, MOIS_DEBUT_ANNEE_ACADEMIQUE
+from admission.ddd import NB_MOIS_MIN_VAE
 from base.models.enums.community import CommunityEnum
 from osis_common.ddd import interface
+from osis_profile import MOIS_DEBUT_ANNEE_ACADEMIQUE
 from osis_profile.models.enums.curriculum import ActivityType
 from reference.models.enums.cycle import Cycle
 
