@@ -5746,10 +5746,6 @@ msgstr "Boutons radios"
 msgid "Rank in diploma"
 msgstr "Rang dans le diplôme"
 
-msgctxt "admission"
-msgid "Reason"
-msgstr "Raison"
-
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"
 
