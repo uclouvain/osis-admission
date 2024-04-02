@@ -258,7 +258,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
             if year_form.cleaned_data['is_enrolled']
         ]
 
-        academic_years = {year.year: year for year in AcademicYear.objects.filter(year__in=enrolled_years)}
+        enrolled_academic_years = {year.year: year for year in AcademicYear.objects.filter(year__in=enrolled_years)}
 
         # Clean not model fields
         for field in [
@@ -287,7 +287,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
                     if cleaned_data.pop('is_enrolled'):
                         EducationalExperienceYear.objects.update_or_create(
                             educational_experience=educational_experience,
-                            academic_year=academic_years[cleaned_data.pop('academic_year')],
+                            academic_year=enrolled_academic_years[cleaned_data.pop('academic_year')],
                             defaults=cleaned_data,
                         )
 
@@ -309,9 +309,9 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
                 # Save the enrolled years data
                 for year_form in year_formset:
                     cleaned_data = year_form.cleaned_data
-                    cleaned_data['educational_experience'] = instance
-                    cleaned_data['academic_year'] = academic_years[cleaned_data['academic_year']]
                     if cleaned_data.pop('is_enrolled'):
+                        cleaned_data['educational_experience'] = instance
+                        cleaned_data['academic_year'] = enrolled_academic_years[cleaned_data['academic_year']]
                         EducationalExperienceYear.objects.create(**cleaned_data)
 
                 self._experience_id = instance.uuid
