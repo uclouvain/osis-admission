@@ -94,6 +94,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -613,12 +614,14 @@ class Proposition(interface.RootEntity):
         statut_checklist_cible: str,
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
         auteur_modification: str,
+        type_formation: TrainingType,
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
             statut=ChoixStatutChecklist[statut_checklist_cible],
             titres_acces_selectionnes=titres_acces_selectionnes,
             condition_acces=self.condition_acces,
             millesime_condition_acces=self.millesime_condition_acces,
+            type_formation=type_formation,
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
