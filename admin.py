@@ -34,6 +34,7 @@ from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.shortcuts import resolve_url
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext, pgettext_lazy, ngettext, get_language
 from django_json_widget.widgets import JSONEditorWidget
@@ -804,7 +805,7 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
 
 
 class FrontOfficeRoleModelAdmin(RoleModelAdmin):
-    list_display = ('person', 'global_id', 'view_on_portal')
+    list_display = ('person', 'global_id', 'view_on_portal', 'retrieve_from_digit')
 
     @admin.display(description=_('Identifier'))
     def global_id(self, obj):
@@ -814,6 +815,21 @@ class FrontOfficeRoleModelAdmin(RoleModelAdmin):
     def view_on_portal(self, obj):
         url = f"{settings.OSIS_PORTAL_URL}admin/auth/user/?q={obj.person.global_id}"
         return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Search on portal")}</a>')
+
+    @admin.display(description=_('Retrieve from DigIT'))
+    def retrieve_from_digit(self, obj):
+        admission = BaseAdmission.objects.filter(candidate=obj.person).first()
+        if admission:
+            url = reverse(viewname='admission:services:digit:search-account', kwargs={'uuid': admission.uuid})
+            return mark_safe(
+                f'<a class="button" '
+                f'onclick="fetch(\'{url}\', {{ method: \'POST\' }}).then('
+                f'response => {{alert(\'Successfully retrieved data from digit for '
+                f'{obj.person.last_name.upper()}, {obj.person.first_name.capitalize()}:'
+                f' saved in Person merge proposals\')}})"'
+                f'>{_("Retrieve from DigIT")}</a>')
+        else:
+            return mark_safe(f'<button class="button" disabled>{_("Retrieve from DigIT")}</button>')
 
 
 class TypeField(forms.CheckboxSelectMultiple):

@@ -24,11 +24,7 @@
 #
 # ##############################################################################
 
-import json
-
-import requests
-from django.conf import settings
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -39,9 +35,12 @@ __all__ = [
     "DiscardMergeAccountView",
 ]
 
+from django.utils.decorators import method_decorator
+
+from django.views.decorators.csrf import csrf_exempt
+
 from django.views.generic import FormView
 
-from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import RechercherCompteExistantQuery, DefairePropositionFusionCommand, \
     SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
 from base.models.person import Person
@@ -65,7 +64,10 @@ class RequestDigitAccountCreationView(FormView):
         return message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=global_id))
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class SearchDigitAccountView(FormView):
+
+    name = "search-account"
 
     urlpatterns = {'search-account': 'search-account/<uuid:uuid>'}
 
