@@ -40,6 +40,7 @@ from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumen
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
     StatutEmplacementDocument,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -212,7 +213,7 @@ class ShouldNePasAvoirDeDocumentReclameImmediat(BusinessValidator):
 
     def validate(self, *args, **kwargs):
         if any(
-            document.statut == StatutEmplacementDocument.A_RECLAMER.name
+            document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
             and document.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
             for document in self.documents_dto
         ):

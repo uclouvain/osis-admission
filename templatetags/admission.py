@@ -39,8 +39,6 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, pgettext, gettext
 from osis_comment.models import CommentEntry
-
-from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -93,8 +91,10 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.utils import format_academic_year, get_access_conditions_url
+from admission.utils import get_access_conditions_url
 from base.models.person import Person
+from base.utils.utils import format_academic_year
+from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -1207,6 +1207,68 @@ def experience_details_template(
     return context
 
 
+@register.simple_tag(takes_context=True)
+def checklist_experience_action_links_context(
+    context,
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
+    current_year,
+    prefix,
+):
+    base_namespace = context['view'].base_namespace
+    proposition_uuid = context['view'].kwargs['uuid']
+    proposition_uuid_str = str(proposition_uuid)
+    if experience.__class__ == EtudesSecondairesDTO:
+        return {
+            'prefix': prefix,
+            'update_url': resolve_url(
+                f'{base_namespace}:update:education',
+                uuid=proposition_uuid_str,
+            ),
+            'experience_uuid': str(experience.uuid),
+        }
+    elif proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year:
+        if experience.__class__ == ExperienceAcademiqueDTO:
+            return {
+                'prefix': prefix,
+                'update_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:educational',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'delete_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:educational_delete',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'duplicate_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:educational_duplicate',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'experience_uuid': str(experience.uuid),
+            }
+        elif experience.__class__ == ExperienceNonAcademiqueDTO:
+            return {
+                'prefix': prefix,
+                'update_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:non_educational',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'delete_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:non_educational_delete',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'duplicate_url': resolve_url(
+                    f'{base_namespace}:update:curriculum:non_educational_duplicate',
+                    uuid=proposition_uuid_str,
+                    experience_uuid=experience.uuid,
+                ),
+                'experience_uuid': str(experience.uuid),
+            }
+
+
 @register.inclusion_tag(
     'admission/general_education/includes/checklist/parcours_row_actions_links.html',
     takes_context=True,
@@ -1215,34 +1277,9 @@ def checklist_experience_action_links(
     context,
     experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
     current_year,
+    prefix,
 ):
-    base_namespace = context['view'].base_namespace
-    proposition_uuid = context['view'].kwargs['uuid']
-    proposition_uuid_str = str(proposition_uuid)
-    if experience.__class__ == EtudesSecondairesDTO:
-        return {
-            'update_url': resolve_url(
-                f'{base_namespace}:update:education',
-                uuid=proposition_uuid_str,
-            ),
-        }
-    elif proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year:
-        if experience.__class__ == ExperienceAcademiqueDTO:
-            return {
-                'update_url': resolve_url(
-                    f'{base_namespace}:update:curriculum:educational',
-                    uuid=proposition_uuid_str,
-                    experience_uuid=experience.uuid,
-                ),
-            }
-        elif experience.__class__ == ExperienceNonAcademiqueDTO:
-            return {
-                'update_url': resolve_url(
-                    f'{base_namespace}:update:curriculum:non_educational',
-                    uuid=proposition_uuid_str,
-                    experience_uuid=experience.uuid,
-                ),
-            }
+    return checklist_experience_action_links_context(context, experience, current_year, prefix)
 
 
 @register.filter

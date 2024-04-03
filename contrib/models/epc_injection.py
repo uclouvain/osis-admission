@@ -23,54 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from dal import autocomplete
+from django.db import models
+
+from admission.contrib.models.base import BaseAdmission
+from base.models.utils.utils import ChoiceEnum
 
 
-__all__ = [
-    'ListSelect2',
-    'Select2',
-    'Select2Multiple',
-    'TagSelect2',
-]
+class EPCInjectionStatus(ChoiceEnum):
+    OK = "OK"
+    ERROR = "ERROR"
 
 
-# The media of the select2 widget are loaded in the base layout.html so we don't need to do it twice
-class Select2WithoutMediaMixin:
-    class Media:
-        extend = False
-
-
-class ListSelect2(Select2WithoutMediaMixin, autocomplete.ListSelect2):
-    pass
-
-
-class Select2(Select2WithoutMediaMixin, autocomplete.Select2):
-    pass
-
-
-class Select2Multiple(Select2WithoutMediaMixin, autocomplete.Select2Multiple):
-    pass
-
-
-class TagSelect2(Select2WithoutMediaMixin, autocomplete.TagSelect2):
-    pass
-
-
-class ModelSelect2(Select2WithoutMediaMixin, autocomplete.ModelSelect2):
-    pass
-
-
-class Select2MultipleWithTagWhenNoResultWidget(autocomplete.Select2Multiple):
-    """
-    We override the default widget:
-     - to prevent the overriding of the option value with the option label when the tags are used
-     - to insert the tag option only if there is no other result
-
-     Note that to simplify the code, the part related to the creation of objects in Django has been removed.
-    """
-
-    autocomplete_function = "select2_tag"
-
-    class Media:
-        extend = False
-        js = ['admission/select2_tag.js']
+class EPCInjection(models.Model):
+    admission = models.ForeignKey(
+        BaseAdmission,
+        on_delete=models.CASCADE,
+        related_name='epc_injection',
+    )
+    status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=5)
+    payload = models.JSONField(default=dict, blank=True)
+    epc_responses = models.JSONField(default=list, blank=True)

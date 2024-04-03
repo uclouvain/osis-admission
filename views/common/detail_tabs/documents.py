@@ -27,6 +27,8 @@ import datetime
 from typing import List
 
 from django.conf import settings
+from django.forms import forms
+from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
 from django.views.generic import FormView
@@ -39,6 +41,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     EMPLACEMENTS_FAC,
     EMPLACEMENTS_SIC,
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -55,7 +58,6 @@ from admission.mail_templates import (
 )
 from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
 from admission.utils import (
-    format_academic_year,
     get_portal_admission_list_url,
     get_backoffice_admission_url,
     get_portal_admission_url,
@@ -64,12 +66,49 @@ from admission.utils import (
 from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.entity_version import EntityVersion
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin
 
 __all__ = [
+    'CancelDocumentRequestView',
     'DocumentView',
 ]
+
+__namespace__ = False
+
+
+class CancelDocumentRequestView(
+    LoadDossierViewMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    HtmxMixin,
+    FormView,
+):
+    form_class = forms.Form
+    permission_required = 'admission.cancel_document_request'
+    urlpatterns = 'cancel-document-request'
+    name = 'cancel-document-request'
+    template_name = 'admission/no_document.html'
+    htmx_template_name = 'admission/no_document.html'
+    default_htmx_trigger_form_extra = {
+        'refresh_details': 'reset',
+        'refresh_list': True,
+    }
+    message_on_success = _('The documents request have been cancelled')
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(
+            general_education_commands.AnnulerReclamationDocumentsAuCandidatCommand(
+                uuid_proposition=self.admission_uuid,
+                auteur=self.request.user.person.global_id,
+                par_fac=self.is_fac,
+            )
+        )
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return resolve_url(f'{self.base_namespace}:documents', uuid=self.admission_uuid)
 
 
 class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
@@ -137,7 +176,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         return [
             document
             for document in self.documents
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name and document.type in requestable_types
+            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER and document.type in requestable_types
         ]
 
     def get_initial(self):
@@ -162,6 +201,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         context['documents'] = self.documents
         context['EMPLACEMENTS_DOCUMENTS_INTERNES'] = EMPLACEMENTS_DOCUMENTS_INTERNES
         context['EMPLACEMENTS_FAC'] = EMPLACEMENTS_FAC
+        context['STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER'] = STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
         context['next'] = self.request.GET.get('next')
 
         context['requested_documents'] = {

@@ -129,6 +129,22 @@ def in_sic_status(self, user: User, obj: GeneralEducationAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(
+    not_in_general_statuses_predicate_message({ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name})
+)
+def in_sic_document_request_status(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status == ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_general_statuses_predicate_message({ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name})
+)
+def in_fac_document_request_status(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status == ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
+
+
+@predicate(bind=True)
 @predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS))
 def in_sic_status_extended(self, user: User, obj: GeneralEducationAdmission):
     return obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS

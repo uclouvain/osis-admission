@@ -25,12 +25,21 @@
 ##############################################################################
 
 from admission.ddd.admission.commands import *
+from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
+from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read.recuperer_informations_destinataire_service\
+    import recuperer_informations_destinataire
 from admission.ddd.admission.use_case.read import *
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import \
+    EmailDestinataireRepository
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
         cmd,
         lister_toutes_demandes_service=ListerToutesDemandes(),
+    ),
+    RecupererInformationsDestinataireQuery: lambda msg_bus, query: recuperer_informations_destinataire(
+        query,
+        email_destinataire_repository=EmailDestinataireRepository()
     ),
 }

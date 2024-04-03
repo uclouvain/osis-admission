@@ -35,7 +35,6 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import (
     AdmissionEducationalValuatedExperiences,
@@ -70,6 +69,7 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import SicPatchMixin
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
