@@ -139,6 +139,8 @@ from admission.infrastructure.admission.repository.in_memory.emplacement_documen
 from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import\
+    EmailDestinataireInMemoryRepository
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
@@ -167,6 +169,7 @@ _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
 _poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
 _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
 _reference_translator = ReferenceInMemoryTranslator()
+_email_destinataire_repository = EmailDestinataireInMemoryRepository()
 _campus_repository = UclouvainCampusInMemoryRepository()
 _taches_techniques = TachesTechniquesInMemory()
 
@@ -321,6 +324,20 @@ COMMAND_HANDLERS = {
         notification=_notification,
         historique=_historique_global,
     ),
+    AnnulerReclamationDocumentsAuCandidatCommand: (
+        lambda msg_bus, cmd: annuler_reclamation_documents_au_candidat(
+            cmd,
+            proposition_repository=_proposition_repository,
+            emplacement_document_repository=_emplacement_document_repository,
+            historique=_historique_global,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            question_specifique_translator=_question_specific_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        )
+    ),
     RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
         cmd,
         proposition_repository=_proposition_repository,
@@ -442,6 +459,7 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
             cmd,
             proposition_repository=_proposition_repository,
+            email_destinataire_repository=_email_destinataire_repository,
             notification=_notification,
             historique=_historique_formation_generale,
         )

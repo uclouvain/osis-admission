@@ -29,7 +29,6 @@ from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase, Client
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.enums import (
     CritereItemFormulaireNationaliteCandidat,
@@ -41,7 +40,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.management.commands.initialize_specific_questions import SpecificQuestionToInit
-from base.models.education_group_year import EducationGroupYear
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory

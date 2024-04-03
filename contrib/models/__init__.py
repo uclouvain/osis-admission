@@ -39,6 +39,7 @@ try:
     from .base import AdmissionViewer
     from .jury import JuryMember
     from .visa import DiplomaticPost
+    from .epc_injection import EPCInjection
 
     __all__ = [
         "DoctorateAdmission",

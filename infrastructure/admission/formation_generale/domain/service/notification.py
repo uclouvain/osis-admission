@@ -46,11 +46,14 @@ from admission.ddd.admission.enums.emplacement_document import StatutEmplacement
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
-    PoursuiteDeCycle,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
+    InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
+    IEmailDestinataireRepository
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
@@ -69,11 +72,9 @@ from admission.utils import (
     get_portal_admission_url,
     get_backoffice_admission_url,
     get_salutation_prefix,
-    format_academic_year,
 )
 from base.models.person import Person
-from epc.models.email_fonction_programme import EmailFonctionProgramme
-from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from base.utils.utils import format_academic_year
 
 ONE_YEAR_SECONDS = 366 * 24 * 60 * 60
 EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
@@ -217,22 +218,24 @@ class Notification(INotification):
         return email_message
 
     @classmethod
-    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(cls, proposition: Proposition) -> Optional[EmailMessage]:
+    def confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
+        cls,
+        proposition: Proposition,
+        email_destinataire_repository: IEmailDestinataireRepository,
+    ) -> Optional[EmailMessage]:
         admission: BaseAdmission = (
             BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate__country_of_citizenship', 'training__enrollment_campus')
             .get(uuid=proposition.entity_id.uuid)
         )
 
-        program_email: EmailFonctionProgramme = EmailFonctionProgramme.objects.filter(
-            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
-            programme=admission.training.education_group,
-            premiere_annee=bool(
-                proposition.poursuite_de_cycle_a_specifier and proposition.poursuite_de_cycle != PoursuiteDeCycle.YES
-            ),
-        ).first()
-
-        if not program_email:
+        try:
+            program_email = email_destinataire_repository.get_informations_destinataire_dto(
+                sigle_programme=proposition.formation_id.sigle,
+                annee=proposition.annee_calculee,
+                pour_premiere_annee=proposition.premiere_annee_de_bachelier,
+            )
+        except InformationsDestinatairePasTrouvee:
             return
 
         current_language = settings.LANGUAGE_CODE
