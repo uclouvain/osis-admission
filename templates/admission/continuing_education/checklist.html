@@ -1,0 +1,752 @@
+{% extends base_template %}
+{% load i18n static admission bootstrap3 enums osis_document %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block actions %}{% endblock %}
+
+{% block tab_content %}
+  <div
+      id="three-pane-checklist"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      hx-push-url="false"
+  >
+    <div id="shortcuts" class="btn-group" data-toggle="buttons">
+      <button
+        id="toggle-menu-button"
+        title="{% translate 'Hide the checklist menu' %}"
+        class="btn btn-default active"
+        type="button"
+      >
+        <i class="fa fa-list-check"></i>
+      </button>
+      <label class="btn btn-default active">
+        <input id="documents-shortcut" type="radio" name="shortcut" autocomplete="off" checked>
+        <i class="fa fa-folder-open"></i>
+      </label>
+      <label class="btn btn-default">
+        <input id="infos-shortcut" type="radio" name="shortcut" autocomplete="off">
+        <i class="fa fa-circle-info"></i>
+      </label>
+    </div>
+
+    {% include "admission/continuing_education/checklist_menu.html" %}
+    {% url base_namespace|add:":checklist" view.kwargs.uuid as checklist_url %}
+    {% concat '?next=' checklist_url '&next_hash_url=' as next_base_url %}
+
+    <div
+        id="tabs-content"
+        class="tab-content"
+    >
+        <div role="tabpanel" class="tab-pane in active" id="fiche_etudiant">
+
+          {% include "admission/continuing_education/includes/checklist/fiche_etudiant_form.html" %}
+          {% bootstrap_form comment_forms.fiche_etudiant %}
+
+          <div class="info-part">
+          </div>
+        </div>
+
+      {% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision next_url=next_base_url|add:'decision' %}
+        <div role="tabpanel" class="tab-pane in active" id="decision">
+          <div class="form-group btn-group status-group" role="group">
+{#            {% translate initial.libelle as initial_state_label %}#}
+{#            {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' %}#}
+{#            {% checklist_state_button tab='decision' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}#}
+{#            {% checklist_state_button tab='decision' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}#}
+{#            {% checklist_state_button tab='decision' label=_("To be completed after application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}#}
+{#            {% translate "Validated" context "decision-checklist" as validated_label %}#}
+{#            {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' %}#}
+          </div>
+
+          <p><em>En attente de developpement</em></p>
+
+{#          {% bootstrap_form comment_forms.decision %}#}
+
+          <div class="info-part">
+          </div>
+        </div>
+      {% endwith %}
+    </div>
+
+    <div id="info-viewer-tab" class="viewer-tab">
+      <div class="split-tab-slider"></div>
+      <div class="info-content"></div>
+    </div>
+
+
+    <div id="document-viewer-tab" class="viewer-tab">
+      <div class="split-tab-slider"></div>
+      <div id="document-content">
+        {% for tab, documents in documents.items %}
+          <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
+            <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
+            <div class="flex-content" style="gap: 5px">
+              <button type="button" disabled="disabled" class="btn btn-default previous-option-button">
+                <i class="fa-solid fa-angle-left"></i>
+              </button>
+              <select
+                  id="{{ tab }}-documents-select"
+                  class="form-control"
+                  hx-target="#document-details"
+                  hx-swap="outerHTML"
+                  style="flex: 1;"
+                  {# Normally, the identifier must be pass through an url param but trigger a request from an option #}
+                  {# doesn't work with Chrome so we trigger a request from the select and pass the identifier through a query param. #}
+                  hx-trigger="change"
+                  hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}"
+                  name="identifier"
+              >
+                <option disabled selected value>{% translate 'Select a document' %}</option>
+                {% for document in documents %}
+                  <option
+                      value="{{ document.identifiant }}"
+                  >
+                    {{ document.libelle }}
+                  </option>
+                {% endfor %}
+              </select>
+              <button type="button" class="btn btn-default next-option-button">
+                <i class="fa-solid fa-angle-right"></i>
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+        {% include 'admission/document/document_detail.html' %}
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
+  <script src="{% static 'admission/ckeditor.js' %}"></script>
+  <script>
+      // Prevent to save the DOM in cache when using htmx requests
+      htmx.config.refreshOnHistoryMiss = true;
+      htmx.config.historyCacheSize = 0;
+
+      (function ($) {
+          const defaultTab = window.location.hash || '#donnees_personnelles';
+          const checklistMenu = $('#checklist-menu');
+          const buttonClassByState = {
+              INITIAL_NON_CONCERNE: 'fas fa-xmark text-muted',
+              GEST_EN_COURS: 'fas fa-pencil text-warning',
+              GEST_BLOCAGE: 'fas fa-circle-stop text-danger',
+              GEST_BLOCAGE_ULTERIEUR: 'fas fa-circle-arrow-right text-info',
+              GEST_REUSSITE: 'fas fa-check text-success',
+              SYST_REUSSITE: 'fas fa-check text-success',
+          };
+          const documentContent = $('#document-content');
+
+          $('#toggle-menu-button').on('click', function(){
+              checklistMenu.toggle();
+              if (checklistMenu.is(':visible')) {
+                $(this).addClass('active');
+                $(this).prop('title', "{{ _('Hide the checklist menu') }}");
+              } else {
+                $(this).removeClass('active');
+                $(this).prop('title', "{{ _('Show the checklist menu') }}");
+              }
+          });
+
+          function refreshDocumentsSelectButtons(jQuerySelect) {
+              /*
+              * Enable/disable the previous and next buttons depending on the number of options in the select.
+              */
+              const prevOptionButton = jQuerySelect.siblings('.previous-option-button');
+              const nextOptionButton = jQuerySelect.siblings('.next-option-button');
+              const documentSelectElement = jQuerySelect[0];
+
+              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 1);
+              nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
+          }
+
+
+          function refreshDocuments() {
+              const selectedTab = window.location.hash || defaultTab;
+              const currentSelect = $(`${selectedTab}-documents-select`);
+              $('.documents-tab').addClass('hidden').filter(`${selectedTab}-documents`).removeClass('hidden');
+              currentSelect.prop("selectedIndex", currentSelect.find('option').length > 1 ? 1 : 0);
+              htmx.ajax(
+                  'GET',
+                  '{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}',
+                  {
+                      target: '#document-details',
+                      swap: 'outerHTML',
+                      values: {
+                          'identifier': currentSelect.val(),
+                      }
+                  },
+              ).finally(() => {
+                  if (currentSelect.length) {
+                      refreshDocumentsSelectButtons(currentSelect);
+                  }
+              });
+          }
+
+          {# Change the selected document by using the left and right buttons #}
+          $('.previous-option-button').on('click', function(){
+              const documentSelect = $(this).siblings('select');
+              const newSelectedOption = documentSelect.find('option:selected').prev('option:not(:disabled)');
+
+              if (newSelectedOption.length) {
+                newSelectedOption.prop('selected', 'selected');
+                documentSelect[0].dispatchEvent(new Event('change'));
+              }
+          });
+
+          $('.next-option-button').on('click', function(){
+              const documentSelect = $(this).siblings('select');
+              const newSelectedOption = documentSelect.find('option:selected').next('option:not(:disabled)');
+
+              if (newSelectedOption.length) {
+                newSelectedOption.prop('selected', 'selected');
+                documentSelect[0].dispatchEvent(new Event('change'));
+              }
+          });
+
+          $('select[name="identifier"]').on('change', function(){
+              refreshDocumentsSelectButtons($(this));
+          });
+
+          $('.documents-tab').each(function(){
+              const optionsNumber = $(this).find('option:not(:disabled)').length;
+              $(this).find('.next-option-button').prop('disabled', optionsNumber <=1);
+          });
+
+          function autogrow () {
+              if (this.scrollHeight > this.clientHeight) {
+                  this.style.height = `${this.scrollHeight}px`;
+              }
+          }
+
+          $('#tabs-content').on('input', 'textarea[name$="-comment"]', function () {
+              autogrow.call(this);
+          });
+
+          const menuItems = $('#checklist-menu *[data-toggle="tab"]');
+
+          menuItems.on('show.bs.tab', function (e) {
+              {# Don't indicate the previous tab as selected #}
+              $('#checklist-menu .active').removeClass('active');
+              {# Hide all sub-items except the selected one #}
+              const parentOfSelectedElement = $(this).parent()[0];
+              $('#checklist-menu .sub-items').each(function(event){
+                  if ($(this)[0] !== parentOfSelectedElement) {
+                      $(this).hide();
+                  }
+              })
+          });
+
+          menuItems.on('shown.bs.tab', function (e) {
+              $(this).parents('.list-group-item').find('.sub-items').show();
+
+              const tabPaneId = $(this).attr('href');
+              window.location.hash = tabPaneId;
+
+              // refresh comment height
+              autogrow.call($(tabPaneId).find('textarea[name$="-comment"]')[0]);
+
+              refreshDocuments();
+
+              // refresh info viewer (e.target = active && e.relatedTarget = previous)
+              if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+                  const $info = $('#info-viewer-tab .info-content');
+                  // move old info from info viewer to old tab
+                  const oldTabPanel = $($(e.relatedTarget).parent().attr('href')).find('.info-part');
+                  $info.children().detach().appendTo(oldTabPanel);
+                  // move new info from current tab to info viewer
+                  const currentTabPanel = $(tabPaneId).find('.info-part');
+                  currentTabPanel.children().detach().appendTo($info);
+              }
+          });
+
+          // Activate a specific tab from link click inside the checklist
+          $('a[data-toggle="checklist-tab"]').on('click', function () {
+              $(`#checklist-menu li[href="${$(this).attr('href')}"] a`).click();
+          });
+
+          $('#checklist-menu div[data-toggle="tab"]').on('click', function (event) {
+              // When selecting a tab that have children,
+              const parent = $(this).parent();
+              parent.removeClass('active');
+              parent.find('.sub-item').show('active');
+          });
+
+          // TODO find a way to genericly save extra and status
+
+          let configurationCache = null;
+
+          const sidebars = $('#document-viewer-tab, #info-viewer-tab');
+
+
+          $(document).ready(function () {
+              configurationCache = new BaseCache('admission_checklist_configuration');
+              sidebars.css('min-width', configurationCache.getItem('split_size', '20%'));
+
+              // Activate tab from hash on first load
+              $(`#checklist-menu *[data-toggle="tab"][href="${defaultTab}"]`).click();
+
+              if (configurationCache.getItem('side-tab', 'documents') === 'info') {
+                  $('#infos-shortcut').click();
+              } else {
+                  $('#info-viewer-tab').hide();
+              }
+
+              $('textarea[name="comment"]:visible').each(autogrow);
+          });
+
+          let bound = false;
+          $('.split-tab-slider').mousedown(function (e) {
+              bound = true;
+              e.preventDefault();
+              const initialWidth = sidebars.outerWidth();
+              const initialX = e.pageX;
+              $(document).mousemove(function (e) {
+                  e.preventDefault();
+                  sidebars.css('min-width', initialWidth + (initialX - e.pageX));
+              });
+          });
+
+          {# The document viewer is resizable so we apply the previous custom height if there is one #}
+          $(document).on('htmx:afterSettle', '#document-details', function(){
+              const documentEditorContainer = $('#document-editor-container');
+              documentEditorContainer.css(
+                  'height',
+                  documentEditorContainer.find('#no-document-container').length === 0 ?
+                    configurationCache.getItem('document_size', '100%')
+                    : 'fit-content',
+              );
+          });
+
+          $(document).mouseup(function (event) {
+              if (bound) {
+                  bound = false;
+                  $(document).off('mousemove');
+                  configurationCache.setItem('split_size', sidebars.css('min-width'));
+                  $('.osis-document-editor .editor-container').each(function () {
+                      this.dispatchEvent(new CustomEvent('setScale', { detail: 'auto' }));
+                  });
+              } else if (event.target.id === 'document-editor-container') {
+                  {# The document viewer is resizable so we keep its height for future document reloads #}
+                  configurationCache.setItem('document_size', $('#document-editor-container').css('height'));
+              }
+          });
+
+          // Shortcuts
+
+          const $info = $('#info-viewer-tab .info-content');
+          $('#infos-shortcut').change(function () {
+              // move the current tab's info-part to the side
+              configurationCache.setItem('side-tab', 'info');
+              const $tabInfo = $('#tabs-content .tab-pane.active .info-part');
+              $tabInfo.children().detach().appendTo($info);
+              $('#info-viewer-tab').show();
+              $('#document-viewer-tab').hide();
+          });
+          $('#documents-shortcut').change(function () {
+              // move back the current tab's info-part
+              configurationCache.setItem('side-tab', 'documents');
+              $info.children().detach().appendTo($('#tabs-content .tab-pane.active .info-part'));
+              $('#info-viewer-tab').hide();
+              $('#document-viewer-tab').show();
+              $('.osis-document-editor .editor-container').each(function () {
+                  this.dispatchEvent(new CustomEvent('setScale', { detail: 'auto' }));
+              });
+          });
+
+          {# Manage HTMX requests #}
+          let previousSelectedButton;
+
+          $('#tabs-content').on('htmx:beforeRequest', function(event) {
+              let elt = event.originalEvent.detail.elt;
+
+              if (elt.dataset.checklistButton) {
+                  elt = document.querySelector(elt.dataset.checklistButton);
+              }
+
+              const formGroup = elt.closest('.form-group');
+
+              if (formGroup === null) {
+                  elt.classList.add("saving");
+                  return ;
+              }
+              formGroup.style.pointerEvents = 'none';
+
+              if (elt.classList.contains('checklist-state-button')) {
+                  {# Click on checklist state button #}
+                  previousSelectedButton = formGroup.querySelector('button.active');
+                  previousSelectedButton.disabled = false;
+                  previousSelectedButton.classList.remove(
+                      'active',
+                      'btn-muted',
+                      'btn-info',
+                      'btn-warning',
+                      'btn-danger',
+                      'btn-success',
+                  )
+                  previousSelectedButton.classList.add('btn-default');
+                  elt.querySelector('i').className = 'fas fa-spinner fa-spin-pulse';
+              } else {
+                  formGroup.classList.add("saving");
+                  elt.readOnly = true;
+              }
+          });
+
+          $('#tabs-content').on('htmx:afterSettle', function(event){
+              $('textarea[name$="-comment"]:visible').each(autogrow);
+          });
+
+          $('#tabs-content').on('htmx:afterRequest', function(event) {
+              // Do not remove spinner if we are going to refresh the page
+              if (event.originalEvent.detail.xhr.getResponseHeader('hx-refresh') === 'true') {
+                  return ;
+              }
+              let elt = event.originalEvent.detail.elt;
+
+              if (elt.dataset.checklistButton) {
+                  elt = document.querySelector(elt.dataset.checklistButton);
+              }
+
+              const formGroup = elt.closest('.form-group');
+              if (formGroup === null) {
+                  elt.classList.remove("saving");
+                  return ;
+              }
+              formGroup.style.pointerEvents = 'initial';
+
+              if (elt.classList.contains('checklist-state-button')) {
+                  {# Click on checklist state button #}
+                  const buttonToSelect = event.originalEvent.detail.successful ? elt : previousSelectedButton;
+                  buttonToSelect.disabled = true;
+                  buttonToSelect.classList.remove('btn-default');
+                  buttonToSelect.classList.add(buttonToSelect.dataset.class, 'active');
+
+                  elt.querySelector('i').className = 'fas fa-' + elt.dataset.icon;
+
+                  {# Change the state icon in the list of the tabs #}
+                  const currentTabHref = $('#checklist-menu').find('.active').attr('href');
+                  const currentItem = $('#checklist-menu').find('div[href="' + currentTabHref + '"] i');
+                  currentItem[0].className = buttonClassByState[buttonToSelect.dataset.status];
+              } else {
+                  if (formGroup) formGroup.classList.remove("saving");
+                  elt.readOnly = false;
+              }
+          });
+
+          {# When a form is submitted #}
+          const base_details_url = "{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='custom_identifier' %}";
+          documentContent.on('formValidation', function(event) {
+
+              if (event.originalEvent.detail.is_valid) {
+                  $('#document-content .modal').modal('hide');
+                  $('#document-content .collapse').collapse('hide');
+
+                  {# Refresh the details of a document if the form has an impact on it #}
+                  if (event.originalEvent.detail.refresh_details) {
+                      htmx.ajax(
+                          'GET',
+                          base_details_url.replace('custom_identifier', event.originalEvent.detail.refresh_details),
+                          {
+                              target: '#document-details',
+                              swap: 'outerHTML',
+                          }
+                      )
+                  }
+              }
+          })
+
+          const htmxErrorsMessages = document.getElementById('pnl_error_messages');
+          const errorsByStatus = {
+              404: "{% translate 'The element has not been found.' %}",
+          };
+
+          {# When an error is encountered #}
+          documentContent.on('htmx:responseError', function(event) {
+              $('#document-content .modal').modal('hide');
+              $('#document-content .collapse').collapse('hide');
+
+              htmxErrorsMessages.textContent = errorsByStatus[event.originalEvent.detail.xhr.status] || "{% translate 'Some errors have been encountered.' %}";
+              computeToastsDuration()
+
+              htmxErrorsMessages.classList.remove('show', 'hidden');
+              void htmxErrorsMessages.offsetWidth; {# To trigger CSS transition #}
+              htmxErrorsMessages.classList.add('show');
+          });
+
+      })(jQuery);
+  </script>
+{% endblock script %}
+
+
+{% block style %}
+  {{ block.super }}
+  <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
+  <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
+  <link href="{% static 'css/toggle-switch.css' %}" rel="stylesheet" />
+  <style>
+    #three-pane-checklist {
+      display: flex;
+      position: relative;
+    }
+
+    #tabs-content, #info-viewer-tab, #document-viewer-tab {
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+
+    #shortcuts {
+      position: absolute;
+      top: -60px;
+      right: 0;
+    }
+
+    #checklist-menu {
+      min-width: 200px;
+      margin-right: 1em;
+    }
+
+    #checklist-menu li {
+      cursor: pointer;
+    }
+    #checklist-menu li a {
+      color: inherit;
+    }
+    #checklist-menu li a:hover {
+      text-decoration: none;
+    }
+
+    #checklist-menu li.active {
+      cursor: pointer;
+      background: inherit;
+      color: inherit;
+    }
+
+    #checklist-menu li.active > div > a, #checklist-menu li.active > a {
+      font-weight: bold;
+    }
+
+    .viewer-tab {
+      position: relative;
+      padding: 0 15px;
+      flex: 0;
+      min-width: 50%;
+    }
+
+    .split-tab-slider {
+      border: solid 1px #ddd;
+      border-top: none;
+      border-bottom: none;
+      width: 3px;
+      left: -1px;
+      height: 100%;
+      cursor: col-resize;
+      position: absolute;
+    }
+
+    dl dt a.btn, .panel-heading .btn, .tab-edit-button {
+      padding: 2px 5px 2px 7px;
+      vertical-align: bottom;
+    }
+
+    dl dt a.btn, .tab-edit-button {
+      margin-left: 0.5em;
+    }
+
+    .panel-heading .btn {
+      margin-right: -0.5em;
+      margin-top: -0.5em;
+    }
+
+    #toggle-menu-button {
+      margin-right: 5px;
+    }
+
+    #tabs-content {
+      padding: 0;
+      flex: 1;
+      overflow: auto;
+      margin-right: 1em;
+    }
+
+    #tabs-content textarea {
+      overflow: hidden;
+    }
+
+    #tabs-content .saving {
+      position: relative;
+    }
+
+    #tabs-content .saving::after {
+      display: block;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(238, 238, 238, .5);
+      content: "";
+      top: 0;
+    }
+
+    #tabs-content .saving::before {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      font-size: 2em;
+      margin-top: -1em;
+      content: "\f110";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      -webkit-animation-name: fa-spin;
+      animation-name: fa-spin;
+      -webkit-animation-direction: normal;
+      animation-direction: normal;
+      -webkit-animation-duration: 1s;
+      animation-duration: 1s;
+      -webkit-animation-iteration-count: infinite;
+      animation-iteration-count: infinite;
+      -webkit-animation-timing-function: steps(8);
+      animation-timing-function: steps(8);
+    }
+
+    #tabs-content a.saving::before {
+      left: -1.5em;
+      top: 0;
+      margin-top: 0;
+      font-size: 1.5em;
+    }
+
+    #tabs-content a.saving::after {
+      left: 0;
+    }
+
+    {# Document details #}
+    #document-viewer-tab {
+      display: flex;
+    }
+
+    #document-content {
+      display: flex;
+      flex-direction: column;
+      min-height: max(60vh, 250px);
+      width: 100%;
+    }
+
+    #document-details {
+      margin-top: 1em;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    #document-details #empty-document-details {
+      text-align: center;
+      margin: auto;
+    }
+
+    #empty-document-details #empty-document-icon {
+      display: block;
+      margin-top: 1em;
+      font-size: 3em;
+    }
+
+    #document-details .osis-document-editor {
+      height: 100%;
+    }
+
+    #document-editor-container {
+      overflow-y: scroll;
+      resize: vertical;
+      height: 100%;
+    }
+
+    #document-details img {
+      max-width: min(100%, min-content);
+      height: auto;
+    }
+
+    #document-details .osis-document-editor .editor-container {
+      height: 100%;
+      width: 100%;
+    }
+
+    #no-document-container {
+      border: 1px solid #ddd;
+      padding: 1em;
+      text-align: center;
+      color: #888;
+    }
+
+    .modal .media-right a:first-child {
+      display: none;
+    }
+
+    .checklist-state-button {
+      transition-duration: 0.5s;
+    }
+
+    input:invalid {
+      color: #a94442 !important;
+    }
+
+    #checklist-menu i {
+      width: 1em;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    #checklist-menu i:nth-child(2) {
+      margin: 0 0 0 5px
+    }
+
+    #checklist-menu .sub-items {
+      margin-top: 1em;
+      margin-bottom: 0;
+      max-width: 300px;
+    }
+
+    #checklist-menu .sub-item.bg-info {
+      background-color: #d9edf7;
+    }
+
+    #checklist-menu .sub-item.bg-warning {
+      background-color: #fcf8e3;
+    }
+    
+    /* Allow to scroll the content above the header menu */
+    html {
+      overflow: auto;
+      scroll-padding-top: 60px; /* height of sticky header */
+    }
+
+    #tabs-content #fiche_etudiant {
+      overflow-x: hidden;
+    }
+
+  </style>
+{% endblock style %}

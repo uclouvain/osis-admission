@@ -27,7 +27,7 @@ from django.views.generic import TemplateView
 
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
-from admission.views.doctorate.mixins import AdmissionViewMixin
+from admission.views.common.mixins import AdmissionViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
 __all__ = ['OtherAdmissionsListView']

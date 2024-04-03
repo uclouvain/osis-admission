@@ -37,7 +37,9 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
     ChoixMoyensDecouverteFormation,
+    ChoixEdition,
 )
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import StatutsChecklistContinue
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_action import (
     InformationsComplementairesValidatorList,
 )
@@ -83,6 +85,23 @@ class Proposition(interface.RootEntity):
 
     motivations: Optional[str] = ''
     moyens_decouverte_formation: List[ChoixMoyensDecouverteFormation] = attr.Factory(list)
+
+    checklist_initiale: Optional[StatutsChecklistContinue] = None
+    checklist_actuelle: Optional[StatutsChecklistContinue] = None
+
+    marque_d_interet: Optional[bool] = None
+    edition: Optional[ChoixEdition] = None
+    en_ordre_de_paiement: Optional[bool] = None
+    droits_reduits: Optional[bool] = None
+    paye_par_cheque_formation: Optional[bool] = None
+    cep: Optional[bool] = None
+    etalement_des_paiments: Optional[bool] = None
+    etalement_de_la_formation: Optional[bool] = None
+    valorisation_des_acquis_d_experience: Optional[bool] = None
+    a_presente_l_epreuve_d_evaluation: Optional[bool] = None
+    a_reussi_l_epreuve_d_evaluation: Optional[bool] = None
+    diplome_produit: Optional[bool] = None
+    intitule_du_tff: Optional[str] = ''
 
     def modifier_choix_formation(
         self,

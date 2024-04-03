@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,10 +26,10 @@
 
 from django.conf import settings
 from django.views.generic import RedirectView
+from osis_document.utils import get_file_url
 
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
-from admission.views.doctorate.mixins import LoadDossierViewMixin
-from osis_document.utils import get_file_url
+from admission.views.common.mixins import LoadDossierViewMixin
 
 __all__ = [
     "AdmissionPDFRecapExportView",

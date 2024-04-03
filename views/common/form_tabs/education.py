@@ -40,7 +40,7 @@ from admission.forms.admission.education import (
     BaseAdmissionEducationForm,
 )
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from osis_profile import PLUS_5_ISO_CODES, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
