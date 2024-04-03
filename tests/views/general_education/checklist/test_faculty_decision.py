@@ -217,7 +217,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
             management_entity=cls.first_doctoral_commission,
             education_group_type__name=TrainingType.BACHELOR.name,
             academic_year=cls.academic_years[0],
-            enrollment_campus__email='mons@campus.be',
+            enrollment_campus__sic_enrollment_email='mons@campus.be',
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
