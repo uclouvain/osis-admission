@@ -204,8 +204,8 @@ class ContinuingEducationAdmission(BaseAdmission):
         null=True,
     )
 
-    payed_by_training_cheque = models.BooleanField(
-        verbose_name=_("Payed by training cheque"),
+    pay_by_training_cheque = models.BooleanField(
+        verbose_name=_("Pay by training cheque"),
         null=True,
     )
 
