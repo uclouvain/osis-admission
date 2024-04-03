@@ -47,7 +47,6 @@ from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from osis_profile import BE_ISO_CODE
 
 __all__ = [
     "AdmissionPoolExternalEnrollmentChangeCalendar",
@@ -68,6 +67,8 @@ __all__ = [
     "est_formation_contingentee_et_non_resident",
     "PoolCalendar",
 ]
+
+from osis_profile import BE_ISO_CODE
 
 DIPLOMES_ACCES_BELGE = [
     ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_BELGE,

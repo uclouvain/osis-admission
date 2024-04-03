@@ -31,7 +31,9 @@ import attr
 
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.formation_continue.domain.model.enums import STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
+)
 from osis_common.ddd import interface
 
 
@@ -74,6 +76,22 @@ class PropositionDTO(interface.DTO):
 
     motivations: str
     moyens_decouverte_formation: List[str]
+
+    documents_demandes: Dict
+
+    marque_d_interet: Optional[bool]
+    edition: Optional[str]
+    en_ordre_de_paiement: Optional[bool]
+    droits_reduits: Optional[bool]
+    paye_par_cheque_formation: Optional[bool]
+    cep: Optional[bool]
+    etalement_des_paiments: Optional[bool]
+    etalement_de_la_formation: Optional[bool]
+    valorisation_des_acquis_d_experience: Optional[bool]
+    a_presente_l_epreuve_d_evaluation: Optional[bool]
+    a_reussi_l_epreuve_d_evaluation: Optional[bool]
+    diplome_produit: Optional[bool]
+    intitule_du_tff: Optional[str]
 
     @property
     def est_non_soumise(self):

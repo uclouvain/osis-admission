@@ -30,7 +30,7 @@ from admission.ddd.admission.domain.model.formation import est_formation_medecin
 from admission.ddd.admission.enums import Onglets
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
 
 __all__ = [

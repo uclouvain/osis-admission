@@ -56,7 +56,7 @@ from admission.tests.factories.general_education import (
 )
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import SicPatchMixin
+from admission.tests.views.general_education.checklist.sic_decision.base import SicPatchMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory

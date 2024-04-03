@@ -45,7 +45,7 @@ from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import copy_documents
-from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
 from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
 from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView

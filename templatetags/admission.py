@@ -65,6 +65,9 @@ from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSe
 from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_CONTINUE,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
@@ -73,7 +76,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_GENERALE,
+)
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO, PropositionDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
@@ -373,6 +378,9 @@ TAB_TREES = {
         ],
     },
     CONTEXT_CONTINUING: {
+        Tab('checklist', _('Checklist'), 'list-check'): [
+            Tab('checklist', _('Checklist'), 'list-check'),
+        ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
@@ -484,8 +492,8 @@ def get_current_context(admission: Union[DoctorateAdmission, GeneralEducationAdm
         return CONTEXT_CONTINUING
 
 
-@register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
-def doctorate_subtabs_bar(context):
+@register.inclusion_tag('admission/includes/subtabs_bar.html', takes_context=True)
+def subtabs_bar(context):
     return current_subtabs(context)
 
 
@@ -926,9 +934,15 @@ def country_name_from_iso_code(iso_code: str):
 
 
 @register.filter
-def get_ordered_checklist_items(checklist_items: dict):
+def get_ordered_checklist_items_general_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])
+    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]])
+
+
+@register.filter
+def get_ordered_checklist_items_continuing_education(checklist_items: dict):
+    """Return the ordered checklist items."""
+    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]])
 
 
 @register.filter

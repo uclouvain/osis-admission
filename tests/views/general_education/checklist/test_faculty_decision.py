@@ -230,7 +230,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             cycle_pursuit=PoursuiteDeCycle.NO.name,
-            determined_academic_year=self.academic_years[0]
+            determined_academic_year=self.academic_years[0],
         )
         self.default_checklist = copy.deepcopy(self.general_admission.checklist)
         self.url = resolve_url(
