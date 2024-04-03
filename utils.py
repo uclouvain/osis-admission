@@ -69,10 +69,10 @@ from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.academic_calendar import AcademicCalendar
-from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
+from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
@@ -148,20 +148,6 @@ def takewhile_return_attribute_values(predicate, iterable, attribute):
             yield x[attribute]
         else:
             break
-
-
-def format_academic_year(year: Union[int, str, float], short: bool = False) -> str:
-    """Return the academic year related to a specific year."""
-    if not year:
-        return ''
-    if isinstance(year, (str, float)):
-        year = int(year)
-    elif isinstance(year, AcademicYear):
-        year = year.year
-    end_year = year + 1
-    if short:
-        end_year = end_year % 100
-    return f'{year}-{end_year}'
 
 
 def get_uuid_value(value: str) -> Union[uuid.UUID, str]:
@@ -399,3 +385,71 @@ def get_access_titles_names(
         access_titles_names.append(experience_name)
 
     return access_titles_names
+
+
+def copy_documents(objs):
+    """
+    Create copies of the files of the specified objects and affect them to the specified objects.
+    :param objs: The list of objects.
+    """
+    from osis_document.api.utils import get_several_remote_metadata, get_remote_tokens, documents_remote_duplicate
+    from osis_document.contrib import FileField
+    from osis_document.utils import generate_filename
+
+    all_document_uuids = []
+    all_document_upload_paths = {}
+    document_fields_by_obj_uuid = {}
+
+    # Get all the document fields and the uuids of the documents to duplicate
+    for obj in objs:
+        document_fields_by_obj_uuid[obj.uuid] = {}
+
+        for field in obj._meta.get_fields():
+            if isinstance(field, FileField):
+                document_uuids = getattr(obj, field.name)
+
+                if document_uuids:
+                    document_fields_by_obj_uuid[obj.uuid][field.name] = field
+                    all_document_uuids += [document_uuid for document_uuid in document_uuids if document_uuid]
+
+    all_tokens = get_remote_tokens(all_document_uuids)
+    metadata_by_token = get_several_remote_metadata(tokens=list(all_tokens.values()))
+
+    # Get the upload paths of the documents to duplicate
+    for obj in objs:
+        for field_name, field in document_fields_by_obj_uuid[obj.uuid].items():
+            document_uuids = getattr(obj, field_name)
+
+            for document_uuid in document_uuids:
+                if not document_uuid:
+                    continue
+
+                document_uuid_str = str(document_uuid)
+                file_name = 'file'
+
+                if document_uuid_str in all_tokens and all_tokens[document_uuid_str] in metadata_by_token:
+                    metadata = metadata_by_token[all_tokens[document_uuid_str]]
+                    if metadata.get('name'):
+                        file_name = metadata['name']
+
+                all_document_upload_paths[document_uuid_str] = generate_filename(obj, file_name, field.upload_to)
+
+    # Make a copy of the documents and return the uuids of the copied documents
+    duplicates_documents_uuids = documents_remote_duplicate(
+        uuids=all_document_uuids,
+        with_modified_upload=True,
+        upload_path_by_uuid=all_document_upload_paths,
+    )
+
+    # Update the uuids of the documents with the uuids of the copied documents
+    for obj in objs:
+        for field_name in document_fields_by_obj_uuid[obj.uuid]:
+            setattr(
+                obj,
+                field_name,
+                [
+                    uuid.UUID(duplicates_documents_uuids[str(document_uuid)])
+                    for document_uuid in getattr(obj, field_name)
+                    if duplicates_documents_uuids.get(str(document_uuid))
+                ],
+            )

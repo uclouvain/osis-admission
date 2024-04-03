@@ -506,7 +506,18 @@
               parentContainer.find('.formset-delete-confirm-button').removeClass('hidden');
           });
 
-          const defaultTab = window.location.hash || '#donnees_personnelles';
+          let currentTab = window.location.hash;
+          let currentTabSplit = currentTab.split('-');
+          
+          {# Manage the hash parameter #}
+          if (currentTabSplit.length > 1) {
+              {# Split the hash to get the checklist tab from it #}
+              currentTab = currentTabSplit[0]; {# Checklist tab #}
+              {# Select the right parcours tab #}
+              $('a[href="' + window.location.hash + '"]').click(); {# Parcours tab #}
+          }
+
+          const defaultTab = currentTab || '#donnees_personnelles';
           const checklistMenu = $('#checklist-menu');
           const buttonClassByState = {
               INITIAL_NON_CONCERNE: 'fas fa-xmark text-muted',
@@ -959,7 +970,15 @@
           // It would works with bootstrap 5 which does not use jQuery anymore.
           $('.htmx-modal-reload').on('show.bs.modal', function() {
               htmx.trigger('#' + this.id, 'modal-reload');
-          })
+          });
+
+          {# Add the current parcours tabs id to the form data to allow a future redirection #}
+          $('.parcours-modals form').on('formdata', function(event) {
+              const formData = event.originalEvent.formData;
+              const activeTab = $(this).closest('.parcours-modals').siblings('.tab-pane.active');
+              formData.set('redirect_to', activeTab.length > 0 ? `#${activeTab.attr('id')}` : window.location.hash);
+          });
+
       })(jQuery);
   </script>
 {% endblock script %}

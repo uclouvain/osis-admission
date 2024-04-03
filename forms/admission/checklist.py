@@ -45,14 +45,12 @@ from django.utils.translation import (
     gettext,
     override,
 )
-from django.utils.translation.trans_real import translation
+from osis_document.utils import is_uuid
 
-from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.contrib.models.base import training_campus_subquery
 from admission.contrib.models.checklist import (
     RefusalReason,
-    FreeAdditionalApprovalCondition,
     AdditionalApprovalCondition,
 )
 from admission.ddd import DUREE_MINIMALE_PROGRAMME, DUREE_MAXIMALE_PROGRAMME
@@ -65,8 +63,9 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument, TypeEmplacementDocument
-
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
@@ -79,27 +78,23 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     FilterFieldWidget,
-    autocomplete,
-    get_example_text,
-    CustomDateInput,
     EMPTY_CHOICE_AS_LIST,
-    EMPTY_CHOICE,
     get_initial_choices_for_additional_approval_conditions,
 )
 from admission.forms import get_academic_year_choices
 from admission.forms.admission.document import ChangeRequestDocumentForm
-from admission.forms.autocomplete import Select2MultipleWithTagWhenNoResultWidget
-from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
+from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
+from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.choice_field import BLANK_CHOICE
+from base.forms.utils.datefield import CustomDateInput
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.learning_unit_year import LearningUnitYear
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
-from osis_document.utils import is_uuid
 
 
 class CommentForm(forms.Form):
@@ -430,7 +425,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
-        widget=Select2MultipleWithTagWhenNoResultWidget(
+        widget=autocomplete.Select2MultipleWithTagWhenNoResultWidget(
             url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-token-separators': '[{}]'.format(SEPARATOR),
@@ -649,7 +644,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
 
 
 class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
-    admission_requirement_year = AcademicYearField(
+    admission_requirement_year = AcademicYearModelChoiceField(
         past_only=True,
         required=False,
         label=_('Admission requirement year'),
@@ -758,7 +753,7 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
         self.documents = {}
 
         for document in documents:
-            if document.statut == StatutEmplacementDocument.A_RECLAMER.name:
+            if document.est_a_reclamer:
                 if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:
@@ -787,7 +782,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
-        widget=Select2MultipleWithTagWhenNoResultWidget(
+        widget=autocomplete.Select2MultipleWithTagWhenNoResultWidget(
             url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-token-separators': '[{}]'.format(SEPARATOR),
@@ -1092,8 +1087,7 @@ class SicDecisionFinalRefusalForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['body'].widget.attrs['data-config'] = json.dumps(
             {
-                **settings.CKEDITOR_CONFIGS['link_only'],
-                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                 'language': get_language(),
             }
         )
@@ -1117,11 +1111,8 @@ class SicDecisionFinalApprovalForm(forms.Form):
         else:
             self.fields['body'].widget.attrs['data-config'] = json.dumps(
                 {
-                    **settings.CKEDITOR_CONFIGS['link_only'],
-                    'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
+                    **settings.CKEDITOR_CONFIGS['osis_mail_template'],
                     'language': get_language(),
-                    'allowedContent': True,
-                    'autoParagraph': False,
                 }
             )
 

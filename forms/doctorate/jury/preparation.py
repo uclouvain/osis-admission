@@ -28,7 +28,7 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixLangueRedactionThese
 from admission.ddd.parcours_doctoral.jury.domain.model.enums import FormuleDefense
-from admission.forms import CustomDateInput
+from base.forms.utils.datefield import CustomDateInput
 
 
 class JuryPreparationForm(forms.Form):

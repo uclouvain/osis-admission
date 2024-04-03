@@ -30,8 +30,8 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from admission.contrib.models import CddMailTemplate, DoctorateAdmission
-from admission.forms import EMPTY_CHOICE
 from admission.utils import get_mail_templates_from_admission
+from base.forms.utils import EMPTY_CHOICE
 
 
 class CddDoctorateSendMailForm(forms.Form):

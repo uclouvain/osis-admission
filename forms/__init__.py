@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 import datetime
-from functools import partial
 from typing import List, Optional, Dict
 
 import phonenumbers
@@ -35,17 +34,13 @@ from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language
 
-from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.enums import TypeBourse
-from admission.forms import autocomplete
-from base.forms.utils.datefield import DATE_FORMAT
+from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.models.academic_year import AcademicYear
 from education_group.templatetags.education_group_extra import format_to_academic_year
-from osis_document.contrib import FileUploadField
 from reference.models.country import Country
 
-EMPTY_CHOICE = (('', ' - '),)
 NONE_CHOICE = ((None, ' - '),)
 ALL_EMPTY_CHOICE = (('', _('All')),)
 MINIMUM_SELECTABLE_YEAR = 2004
@@ -131,20 +126,6 @@ class SelectOrOtherField(forms.MultiValueField):
         return super().clean(value)
 
 
-class CustomDateInput(forms.DateInput):
-    def __init__(self, attrs=None, format=DATE_FORMAT):
-        if attrs is None:
-            attrs = {
-                'placeholder': _("dd/mm/yyyy"),
-                'data-mask': '00/00/0000',
-                'autocomplete': 'off',
-            }
-        super().__init__(attrs, format)
-
-    class Media:
-        js = ('js/jquery.mask.min.js',)
-
-
 class PhoneField(forms.CharField):
     def clean(self, value):
         value = super().clean(value)
@@ -182,10 +163,6 @@ def get_year_choices(min_year=1920, max_year=None):
     ]
 
 
-def get_example_text(example: str):
-    return _("e.g.: %(example)s") % {'example': example}
-
-
 def get_scholarship_choices(scholarships, scholarship_type: TypeBourse):
     """
     Return the list of choices of a scholarship choice field.
@@ -211,26 +188,6 @@ def format_training(training: FormationDTO):
         campus=training.campus,
         sigle=training.sigle,
     )
-
-
-class AdmissionFileUploadField(FileUploadField):
-    """
-    A file upload field that supports only one file and by default only PDF file.
-    """
-
-    def __init__(self, forced_mimetypes=None, **kwargs):
-        kwargs['max_files'] = 1
-        kwargs['mimetypes'] = forced_mimetypes or [PDF_MIME_TYPE]
-        super().__init__(**kwargs)
-
-
-RadioBooleanField = partial(
-    forms.TypedChoiceField,
-    coerce=lambda value: value == 'True',
-    choices=((True, _('Yes')), (False, _('No'))),
-    widget=forms.RadioSelect,
-    empty_value=None,
-)
 
 
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):

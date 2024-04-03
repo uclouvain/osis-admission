@@ -40,6 +40,8 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
+
+from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from osis_document.contrib import FileField
 
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -353,7 +355,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
     )
     determined_pool = models.CharField(
-        choices=AcademicCalendarTypes.choices(),
+        choices=tuple((x.name, x.value) for x in AcademicCalendarTypes if x in ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES),
         max_length=70,
         null=True,
         blank=True,

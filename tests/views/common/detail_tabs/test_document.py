@@ -27,6 +27,7 @@
 import datetime
 import uuid
 from email import message_from_string
+from typing import Optional
 from unittest import mock
 from unittest.mock import patch
 
@@ -36,16 +37,12 @@ from django.contrib.auth.models import User
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.utils.translation import gettext
+from osis_document.contrib.forms import FileUploadField
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 from rest_framework import status
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.tests.factories.person import CompletePersonFactory
-from base.forms.utils.choice_field import BLANK_CHOICE
-from osis_document.contrib.forms import FileUploadField
-
-from admission.constants import PDF_MIME_TYPE, FIELD_REQUIRED_MESSAGE, IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
+from admission.constants import PDF_MIME_TYPE, IMAGE_MIME_TYPES
 from admission.contrib.models import GeneralEducationAdmission, AdmissionFormItemInstantiation, AdmissionFormItem
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
@@ -59,13 +56,17 @@ from admission.ddd.admission.enums.emplacement_document import (
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
     StatutReclamationEmplacementDocument,
 )
-from admission.forms import AdmissionFileUploadField
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.infrastructure.utils import MODEL_FIELD_BY_FREE_MANAGER_DOCUMENT_TYPE
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
+from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.choice_field import BLANK_CHOICE
+from base.forms.utils.file_field import MaxOneFileUploadField
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -274,7 +275,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
         self.assertIn(
-            AdmissionFileUploadField.default_error_messages['min_files'],
+            MaxOneFileUploadField.default_error_messages['min_files'],
             response.context['form'].errors.get('file', []),
         )
 
@@ -290,7 +291,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            AdmissionFileUploadField.default_error_messages['max_files'],
+            MaxOneFileUploadField.default_error_messages['max_files'],
             response.context['form'].errors.get('file', []),
         )
 
@@ -354,7 +355,7 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
         self.assertIn(
-            AdmissionFileUploadField.default_error_messages['min_files'],
+            MaxOneFileUploadField.default_error_messages['min_files'],
             response.context['form'].errors.get('file', []),
         )
 
@@ -370,7 +371,7 @@ class DocumentViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(
-            AdmissionFileUploadField.default_error_messages['max_files'],
+            MaxOneFileUploadField.default_error_messages['max_files'],
             response.context['form'].errors.get('file', []),
         )
 
@@ -2787,11 +2788,71 @@ class DocumentViewTestCase(TestCase):
             ).exists()
         )
 
+        frozen_time.move_to('2022-01-05')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
+        HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).delete()
+
+        # Cancel the documents request
+        cancel_url = resolve_url(
+            'admission:general-education:cancel-document-request',
+            uuid=self.general_admission.uuid,
+        )
+
+        response = self.client.post(cancel_url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.general_admission.refresh_from_db()
+
+        # Check that the requested documents have been updated
+        self.assertEqual(
+            self.general_admission.requested_documents[self.sic_free_requestable_document],
+            {
+                'last_actor': self.second_sic_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                'last_action_at': '2022-01-05T00:00:00',
+                'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
+                'requested_at': '',
+                'deadline_at': '',
+                'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+        )
+
+        # Check that the proposition status has been changed
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.second_sic_manager_user.person)
+
+        # Check history
+        entry: Optional[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).first()
+
+        self.assertIsNotNone(entry)
+        self.assertCountEqual(entry.tags, ['proposition', 'status-changed'])
+        self.assertEqual(entry.message_fr, 'La réclamation des documents complémentaires a été annulée par SIC.')
+        self.assertEqual(entry.message_en, 'The request for additional information has been cancelled by SIC.')
+        self.assertEqual(
+            entry.author,
+            f'{self.second_sic_manager_user.person.first_name} {self.second_sic_manager_user.person.last_name}',
+        )
+
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_general_document_detail_fac_manager(self, frozen_time):
         self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.second_fac_manager_user)
+
+        fac_free_requestable_document_without_status = self._create_a_free_document(
+            self.fac_manager_user,
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+        )
+        self.general_admission.refresh_from_db()
+        self.general_admission.requested_documents[fac_free_requestable_document_without_status]['request_status'] = ''
+        self.general_admission.save(update_fields=['requested_documents'])
 
         url = resolve_url('admission:general-education:documents', uuid=self.general_admission.uuid)
 
@@ -2828,6 +2889,10 @@ class DocumentViewTestCase(TestCase):
             'My file name',
         )
         self.assertEqual(second_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
+
+        # The third field should be missing as there is no request status
+        third_field = form.fields.get(fac_free_requestable_document_without_status)
+        self.assertIsNone(third_field)
 
         # Simulate that the field is not missing but still requested
         self.general_admission.refresh_from_db()
@@ -2961,6 +3026,58 @@ class DocumentViewTestCase(TestCase):
                 object_uuid=self.general_admission.uuid,
                 tags=['proposition', 'status-changed'],
             ).exists()
+        )
+
+        frozen_time.move_to('2022-01-05')
+        self.general_admission.last_update_author = None
+        self.general_admission.save(update_fields=['last_update_author'])
+        HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).delete()
+
+        # Cancel the documents request
+        cancel_url = resolve_url(
+            'admission:general-education:cancel-document-request',
+            uuid=self.general_admission.uuid,
+        )
+
+        response = self.client.post(cancel_url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.general_admission.refresh_from_db()
+
+        # Check that the requested documents have been updated
+        self.assertEqual(
+            self.general_admission.requested_documents[self.fac_free_requestable_document],
+            {
+                'last_actor': self.second_fac_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+                'last_action_at': '2022-01-05T00:00:00',
+                'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
+                'requested_at': '',
+                'deadline_at': '',
+                'automatically_required': False,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            },
+        )
+
+        # Check that the proposition status has been changed
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+
+        # Check last modification data
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.general_admission.last_update_author, self.second_fac_manager_user.person)
+
+        # Check history
+        entry: Optional[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).first()
+
+        self.assertIsNotNone(entry)
+        self.assertCountEqual(entry.tags, ['proposition', 'status-changed'])
+        self.assertEqual(entry.message_fr, 'La réclamation des documents complémentaires a été annulée par FAC.')
+        self.assertEqual(entry.message_en, 'The request for additional information has been cancelled by FAC.')
+        self.assertEqual(
+            entry.author,
+            f'{self.second_fac_manager_user.person.first_name} {self.second_fac_manager_user.person.last_name}',
         )
 
     def test_document_detail_view(self):
