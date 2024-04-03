@@ -4728,10 +4728,10 @@ msgstr ""
 msgid "Past experiences authentication"
 msgstr ""
 
-msgid "Payed"
+msgid "Pay by training cheque"
 msgstr ""
 
-msgid "Payed by training cheque"
+msgid "Payed"
 msgstr ""
 
 msgid "Payement spread"

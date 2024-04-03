@@ -85,3 +85,8 @@ class ChoixEdition(ChoiceEnum):
     QUATRE = "4"
     CINQ = "5"
     SIX = "6"
+
+
+class OngletsChecklist(ChoiceEnum):
+    fiche_etudiant = _("Student report")
+    decision = _("Decision")
