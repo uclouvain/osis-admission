@@ -36,7 +36,6 @@ from admission.auth.predicates.common import (
 from admission.auth.predicates.general import (
     in_fac_status,
     is_submitted,
-    in_fac_document_request_status,
 )
 from base.models.education_group import EducationGroup
 from base.models.enums.education_group_types import TrainingType
@@ -103,7 +102,6 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_documents_management': is_part_of_education_group & is_submitted,
             'admission.edit_documents': is_part_of_education_group & is_submitted,
             'admission.change_documents_management': is_part_of_education_group & in_fac_status,
-            'admission.cancel_document_request': is_part_of_education_group & in_fac_document_request_status,
             'admission.view_checklist': is_part_of_education_group & is_submitted,
             'admission.checklist_change_faculty_decision': is_part_of_education_group & in_fac_status,
             'admission.checklist_faculty_decision_transfer_to_sic_with_decision': is_part_of_education_group

@@ -29,14 +29,11 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
-    IEmailDestinataireRepository
 
 
 def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
     cmd: EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
     proposition_repository: 'IPropositionRepository',
-    email_destinataire_repository: 'IEmailDestinataireRepository',
     notification: 'INotification',
     historique: 'IHistorique',
 ) -> PropositionIdentity:
@@ -46,10 +43,7 @@ def envoyer_proposition_a_fac_lors_de_la_decision_facultaire(
 
     proposition_repository.save(entity=proposition)
 
-    message = notification.confirmer_envoi_a_fac_lors_de_la_decision_facultaire(
-        proposition=proposition,
-        email_destinataire_repository=email_destinataire_repository
-    )
+    message = notification.confirmer_envoi_a_fac_lors_de_la_decision_facultaire(proposition=proposition)
 
     historique.historiser_envoi_fac_par_sic_lors_de_la_decision_facultaire(
         proposition=proposition,

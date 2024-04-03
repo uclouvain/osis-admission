@@ -69,4 +69,3 @@ from .modifier_statut_checklist_experience_parcours_anterieur_service import (
 from .modifier_authentification_experience_parcours_anterieur_service import (
     modifier_authentification_experience_parcours_anterieur,
 )
-from .annuler_reclamation_documents_au_candidat_service import annuler_reclamation_documents_au_candidat

@@ -24,9 +24,6 @@
 #
 ##############################################################################
 from admission.ddd.admission.commands import *
-from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
-from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read.recuperer_informations_destinataire_service\
-    import recuperer_informations_destinataire
 from admission.ddd.admission.use_case.read import *
 from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_demandes import (
     ListerToutesDemandesInMemory,
@@ -35,8 +32,6 @@ from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_d
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import\
-    EmailDestinataireInMemoryRepository
 
 _emplacement_document_repository = emplacement_document_in_memory_repository
 
@@ -45,9 +40,5 @@ COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
         cmd,
         lister_toutes_demandes_service=ListerToutesDemandesInMemory(),
-    ),
-    RecupererInformationsDestinataireQuery: lambda msg_bus, query: recuperer_informations_destinataire(
-        query,
-        email_destinataire_repository=EmailDestinataireInMemoryRepository()
     ),
 }

@@ -23,13 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+from typing import Set, List
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _, ngettext
 from localflavor.generic.forms import BICFormField, IBAN_MIN_LENGTH
 
+from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd.admission.domain.validator._should_comptabilite_etre_completee import DEPENDANCES_CHAMPS_ASSIMILATION
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
@@ -43,11 +44,9 @@ from admission.ddd.admission.enums import (
     ChoixTypeCompteBancaire,
     ChoixAffiliationSport,
 )
-from admission.mark_safe_lazy import mark_safe_lazy
+from admission.forms import AdmissionFileUploadField as FileUploadField, RadioBooleanField, get_example_text
 from admission.templatetags.admission import get_academic_year
-from base.forms.utils import get_example_text, FIELD_REQUIRED_MESSAGE
-from base.forms.utils.fields import RadioBooleanField
-from base.forms.utils.file_field import MaxOneFileUploadField
+from admission.mark_safe_lazy import mark_safe_lazy
 from reference.services.iban_validator import (
     IBANValidatorService,
     IBANValidatorException,
@@ -57,7 +56,7 @@ from reference.services.iban_validator import (
 
 class AccountingForm(forms.Form):
     # Absence of debt
-    attestation_absence_dette_etablissement = MaxOneFileUploadField(
+    attestation_absence_dette_etablissement = FileUploadField(
         label=_('Certificate stating no debts to the institution attended during the academic year'),
         required=False,
     )
@@ -77,7 +76,7 @@ class AccountingForm(forms.Form):
         help_text=_("Martin V comprises both the Martin V Ecole Fondamentale and the Martin V Lycee."),
         required=False,
     )
-    attestation_enfant_personnel = MaxOneFileUploadField(
+    attestation_enfant_personnel = FileUploadField(
         label=_('Certificate for children of staff'),
         required=False,
     )
@@ -97,22 +96,22 @@ class AccountingForm(forms.Form):
         required=False,
         widget=forms.RadioSelect,
     )
-    carte_resident_longue_duree = MaxOneFileUploadField(
+    carte_resident_longue_duree = FileUploadField(
         label=_('Copy of both sides of EC long-term resident card (D or L Card)'),
         required=False,
     )
-    carte_cire_sejour_illimite_etranger = MaxOneFileUploadField(
+    carte_cire_sejour_illimite_etranger = FileUploadField(
         label=_(
             "Copy of both sides of Certificate of Registration in the Foreigners Registry (CIRE), unlimited stay "
             "(B Card), or of Foreign National's Card, unlimited stay (C or K Card)"
         ),
         required=False,
     )
-    carte_sejour_membre_ue = MaxOneFileUploadField(
+    carte_sejour_membre_ue = FileUploadField(
         label=_('Copy of both sides of residence permit for a family member of a European Union citizen (F Card)'),
         required=False,
     )
-    carte_sejour_permanent_membre_ue = MaxOneFileUploadField(
+    carte_sejour_permanent_membre_ue = FileUploadField(
         label=_(
             'Copy of both sides of permanent residence card of a family member of a European Union citizen (F+ Card)'
         ),
@@ -126,40 +125,40 @@ class AccountingForm(forms.Form):
         required=False,
         widget=forms.RadioSelect,
     )
-    carte_a_b_refugie = MaxOneFileUploadField(
+    carte_a_b_refugie = FileUploadField(
         label=_('Copy of both sides of A or B Card (with "refugee" on card back)'),
         required=False,
     )
-    annexe_25_26_refugies_apatrides = MaxOneFileUploadField(
+    annexe_25_26_refugies_apatrides = FileUploadField(
         label=_(
             'Copy of Annex 25 or 26 completed by the Office of the Commissioner General for Refugees and '
             'Stateless Persons'
         ),
         required=False,
     )
-    attestation_immatriculation = MaxOneFileUploadField(
+    attestation_immatriculation = FileUploadField(
         label=_('Copy of "orange card" enrolment certificate'),
         required=False,
     )
-    preuve_statut_apatride = MaxOneFileUploadField(
+    preuve_statut_apatride = FileUploadField(
         label=_(
             'Copy of official document from the local authority or Foreign Nationals Office proving stateless status'
         ),
         required=False,
     )
-    carte_a_b = MaxOneFileUploadField(
+    carte_a_b = FileUploadField(
         label=_('Copy of both sides of A or B Card'),
         required=False,
     )
-    decision_protection_subsidiaire = MaxOneFileUploadField(
+    decision_protection_subsidiaire = FileUploadField(
         label=_('Copy of Foreign Nationals Office decision granting subsidiary protection'),
         required=False,
     )
-    decision_protection_temporaire = MaxOneFileUploadField(
+    decision_protection_temporaire = FileUploadField(
         label=_('Copy of Foreign Nationals Office decision granting temporary protection'),
         required=False,
     )
-    carte_a = MaxOneFileUploadField(
+    carte_a = FileUploadField(
         label=_('Copy of both sides of A Card'),
         required=False,
     )
@@ -172,11 +171,11 @@ class AccountingForm(forms.Form):
         widget=forms.RadioSelect,
     )
 
-    titre_sejour_3_mois_professionel = MaxOneFileUploadField(
+    titre_sejour_3_mois_professionel = FileUploadField(
         label=_('Copy of both sides of residence permit valid for more than 3 months'),
         required=False,
     )
-    fiches_remuneration = MaxOneFileUploadField(
+    fiches_remuneration = FileUploadField(
         label=_('Copy of 6 payslips issued in the 12 months preceding application'),
         required=False,
         help_text=_(
@@ -184,17 +183,17 @@ class AccountingForm(forms.Form):
             'average monthly salary set by the National Labour Council. This corresponded to E903 in 2023.'
         ),
     )
-    titre_sejour_3_mois_remplacement = MaxOneFileUploadField(
+    titre_sejour_3_mois_remplacement = FileUploadField(
         label=_('Copy of both sides of residence permit valid for more than 3 months'),
         required=False,
     )
-    preuve_allocations_chomage_pension_indemnite = MaxOneFileUploadField(
+    preuve_allocations_chomage_pension_indemnite = FileUploadField(
         label=_('Proof of receipt of unemployment benefit, pension or compensation from the mutual insurance company'),
         required=False,
     )
 
     # Assimilation 4
-    attestation_cpas = MaxOneFileUploadField(
+    attestation_cpas = FileUploadField(
         label=_('Recent CPAS certificate of coverage'),
         required=False,
     )
@@ -212,30 +211,30 @@ class AccountingForm(forms.Form):
         required=False,
         widget=forms.RadioSelect,
     )
-    composition_menage_acte_naissance = MaxOneFileUploadField(
+    composition_menage_acte_naissance = FileUploadField(
         label=_('Household composition, or copy of your birth certificate'),
         required=False,
     )
-    acte_tutelle = MaxOneFileUploadField(
+    acte_tutelle = FileUploadField(
         label=_('Copy of guardianship appointment legalised by Belgian authorities'),
         required=False,
     )
-    composition_menage_acte_mariage = MaxOneFileUploadField(
+    composition_menage_acte_mariage = FileUploadField(
         label=_('Household composition or marriage certificate authenticated by the Belgian authorities'),
         required=False,
     )
-    attestation_cohabitation_legale = MaxOneFileUploadField(
+    attestation_cohabitation_legale = FileUploadField(
         label=_('Certificate of legal cohabitation'),
         required=False,
     )
-    carte_identite_parent = MaxOneFileUploadField(
+    carte_identite_parent = FileUploadField(
         label=mark_safe_lazy(
             _('Copy of both sides of identity card of %(person_concerned)s'),
             person_concerned=dynamic_person_concerned,
         ),
         required=False,
     )
-    titre_sejour_longue_duree_parent = MaxOneFileUploadField(
+    titre_sejour_longue_duree_parent = FileUploadField(
         label=mark_safe_lazy(
             _(
                 'Copy of both sides of long-term residence permit in Belgium of %(person_concerned)s (B, C, D, F, F+, '
@@ -245,7 +244,7 @@ class AccountingForm(forms.Form):
         ),
         required=False,
     )
-    annexe_25_26_refugies_apatrides_decision_protection_parent = MaxOneFileUploadField(
+    annexe_25_26_refugies_apatrides_decision_protection_parent = FileUploadField(
         label=mark_safe_lazy(
             _(
                 "Copy of Annex 25 or 26 or A/B Card indicating refugee status or copy of Foreign Nationals Office "
@@ -256,14 +255,14 @@ class AccountingForm(forms.Form):
         ),
         required=False,
     )
-    titre_sejour_3_mois_parent = MaxOneFileUploadField(
+    titre_sejour_3_mois_parent = FileUploadField(
         label=mark_safe_lazy(
             _('Copy of both sides of residence permit valid for more than 3 months of %(person_concerned)s'),
             person_concerned=dynamic_person_concerned,
         ),
         required=False,
     )
-    fiches_remuneration_parent = MaxOneFileUploadField(
+    fiches_remuneration_parent = FileUploadField(
         label=mark_safe_lazy(
             _(
                 'Copy of 6 payslips issued in the 12 months preceding application or proof of receipt of '
@@ -277,7 +276,7 @@ class AccountingForm(forms.Form):
             'average monthly salary set by the National Labour Council. This corresponded to E903 in 2023.'
         ),
     )
-    attestation_cpas_parent = MaxOneFileUploadField(
+    attestation_cpas_parent = FileUploadField(
         label=mark_safe_lazy(
             _('Recent CPAS certificate of coverage for %(person_concerned)s'),
             person_concerned=dynamic_person_concerned,
@@ -292,11 +291,11 @@ class AccountingForm(forms.Form):
         required=False,
         widget=forms.RadioSelect,
     )
-    decision_bourse_cfwb = MaxOneFileUploadField(
+    decision_bourse_cfwb = FileUploadField(
         label=_('Copy of decision to grant CFWB scholarship'),
         required=False,
     )
-    attestation_boursier = MaxOneFileUploadField(
+    attestation_boursier = FileUploadField(
         label=_(
             "Copy of holder's certificate of scholarship issued by the General Administration for Development "
             "Cooperation"
@@ -305,11 +304,11 @@ class AccountingForm(forms.Form):
     )
 
     # Assimilation 7
-    titre_identite_sejour_longue_duree_ue = MaxOneFileUploadField(
+    titre_identite_sejour_longue_duree_ue = FileUploadField(
         label=_('Copy of both sides of identity document proving long-term residence in a European Union member state'),
         required=False,
     )
-    titre_sejour_belgique = MaxOneFileUploadField(
+    titre_sejour_belgique = FileUploadField(
         label=_('Copy of both sides of residence permit in Belgium'),
         required=False,
     )

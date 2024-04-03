@@ -72,7 +72,6 @@ from admission.contrib.models.checklist import (
     FreeAdditionalApprovalCondition,
 )
 from admission.contrib.models.doctoral_training import Activity
-from admission.contrib.models.epc_injection import EPCInjection
 from admission.contrib.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.contrib.models.online_payment import OnlinePayment
 from admission.contrib.models.working_list import WorkingList
@@ -576,20 +575,6 @@ class OnlinePaymentAdmin(admin.ModelAdmin):
     list_filter = ['status', 'method']
 
 
-class EPCInjectionAdmin(admin.ModelAdmin):
-    search_fields = ['admission']
-    list_display = ['admission', 'status', 'last_epc_response']
-    list_filter = ['status']
-    formfield_overrides = {
-        models.JSONField: {'widget': JSONEditorWidget},
-    }
-
-    @admin.display()
-    def last_epc_response(self, obj):
-        if obj.epc_responses:
-            return obj.epc_responses[-1]
-
-
 class FreeAdditionalApprovalConditionAdminForm(forms.ModelForm):
     related_experience = forms.ModelMultipleChoiceField(
         queryset=EducationalExperience.objects.none(),
@@ -911,4 +896,3 @@ admin.site.register(AdreSecretary, HijackRoleModelAdmin)
 admin.site.register(JurySecretary, HijackRoleModelAdmin)
 admin.site.register(Sceb, HijackRoleModelAdmin)
 admin.site.register(DoctorateReader, HijackRoleModelAdmin)
-admin.site.register(EPCInjection, EPCInjectionAdmin)

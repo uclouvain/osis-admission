@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-22 18:08+0100\n"
+"POT-Creation-Date: 2024-02-12 17:06+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -358,6 +358,9 @@ msgid "Acronym of the management entity"
 msgstr ""
 
 msgid "Acronym of the training"
+msgstr ""
+
+msgid "Action"
 msgstr ""
 
 msgid "Actions"
@@ -762,15 +765,6 @@ msgstr ""
 #, python-format
 msgctxt "admission"
 msgid "Are you sure you want to delete \"%(object)s\"?"
-msgstr ""
-
-#, python-format
-msgid "Are you sure you want to delete this experience (%(experience_name)s)?"
-msgstr ""
-
-#, python-format
-msgid ""
-"Are you sure you want to duplicate this experience (%(experience_name)s)?"
 msgstr ""
 
 #, python-format
@@ -1248,9 +1242,6 @@ msgstr ""
 msgid "Cancel the application fee request"
 msgstr ""
 
-msgid "Cancel the request"
-msgstr ""
-
 msgid "Cancelled application"
 msgstr ""
 
@@ -1432,9 +1423,6 @@ msgid "City"
 msgstr ""
 
 msgid "Civil status"
-msgstr ""
-
-msgid "Claim cancelled on"
 msgstr ""
 
 msgid "Cleaned"
@@ -2068,9 +2056,6 @@ msgctxt "admission"
 msgid "Delete"
 msgstr ""
 
-msgid "Delete experience"
-msgstr ""
-
 msgid "Delete the document"
 msgstr ""
 
@@ -2311,12 +2296,6 @@ msgid ""
 msgstr ""
 
 msgid "Dual or triple degree"
-msgstr ""
-
-msgid "Duplicate experience"
-msgstr ""
-
-msgid "Duplication of an experience"
 msgstr ""
 
 msgid "Dynamic questions about \"Specific aspects\" sub-tab"
@@ -5312,9 +5291,6 @@ msgstr ""
 msgid "Reporting categories"
 msgstr ""
 
-msgid "Request cancelled"
-msgstr ""
-
 msgid "Request of a new deadline for the confirmation paper"
 msgstr ""
 
@@ -5384,11 +5360,6 @@ msgstr ""
 
 msgid "Resident (as defined by government decree)"
 msgstr ""
-
-#, fuzzy
-#| msgid "Experience not found."
-msgid "Ressource not found."
-msgstr "Expérience non trouvée."
 
 msgid "Restore activity to submitted"
 msgstr ""
@@ -6200,9 +6171,6 @@ msgstr ""
 msgid "The documents have been requested to the candidate"
 msgstr ""
 
-msgid "The documents request have been cancelled"
-msgstr ""
-
 msgid "The dossier has been confirmed as:"
 msgstr ""
 
@@ -6501,9 +6469,6 @@ msgstr ""
 msgid "This account number has been verified"
 msgstr ""
 
-msgid "This action will cancel the document request."
-msgstr ""
-
 msgid "This activity and its potential subactivities will be discontinued"
 msgstr ""
 
@@ -6585,6 +6550,9 @@ msgid "This field is required if the first name is missing."
 msgstr ""
 
 msgid "This field is required if the surname is missing."
+msgstr ""
+
+msgid "This field is required."
 msgstr ""
 
 #, python-format
@@ -7370,9 +7338,6 @@ msgstr ""
 msgid "Your data have been saved."
 msgstr ""
 
-msgid "Your document is available here"
-msgstr ""
-
 msgid "Your dossier reference:"
 msgstr ""
 
@@ -7440,6 +7405,10 @@ msgid "creditcard"
 msgstr "Credit card"
 
 msgid "dd/mm/yyyy"
+msgstr ""
+
+#, python-format
+msgid "e.g.: %(example)s"
 msgstr ""
 
 msgid "e.g.: 5th out of 30"

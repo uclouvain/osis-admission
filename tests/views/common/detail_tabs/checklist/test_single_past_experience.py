@@ -38,6 +38,7 @@ from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 from rest_framework import status
 
+from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
@@ -51,7 +52,6 @@ from admission.tests.factories.general_education import (
 )
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory

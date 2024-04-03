@@ -129,7 +129,6 @@ class DiplomeEtudeSecondaire:
 
 @dataclass
 class AnneeExperienceAcademique:
-    uuid: str
     annee: int
     resultat: str
     releve_notes: List[str]
@@ -476,7 +475,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays='FR',
                 annees=[
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2016,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve1.pdf'],
@@ -485,7 +483,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                         credits_inscrits=10,
                     ),
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2017,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve2.pdf'],
@@ -494,7 +491,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                         credits_inscrits=10,
                     ),
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2019,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve3.pdf'],
@@ -536,7 +532,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays=BE_ISO_CODE,
                 annees=[
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2020,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve1.pdf'],
@@ -578,7 +573,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays='FR',
                 annees=[
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2016,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve1.pdf'],
@@ -587,7 +581,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                         credits_inscrits=10,
                     ),
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2017,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve2.pdf'],
@@ -596,7 +589,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                         credits_inscrits=10,
                     ),
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2019,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve3.pdf'],
@@ -638,7 +630,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays=BE_ISO_CODE,
                 annees=[
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2020,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve1.pdf'],
@@ -680,7 +671,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 pays='FR',
                 annees=[
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2016,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve1.pdf'],
@@ -689,7 +679,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                         credits_inscrits=10,
                     ),
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2017,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve2.pdf'],
@@ -698,7 +687,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                         credits_inscrits=10,
                     ),
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2018,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve3.pdf'],
@@ -707,7 +695,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                         credits_inscrits=10,
                     ),
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2019,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve4.pdf'],
@@ -716,7 +703,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                         credits_inscrits=10,
                     ),
                     AnneeExperienceAcademique(
-                        uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                         annee=2020,
                         resultat=Result.SUCCESS.name,
                         releve_notes=['releve5.pdf'],
@@ -957,7 +943,6 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             pays=experience.pays,
                             annees=[
                                 AnneeExperienceAcademiqueDTO(
-                                    uuid=annee.uuid,
                                     annee=annee.annee,
                                     resultat=annee.resultat,
                                     releve_notes=annee.releve_notes,

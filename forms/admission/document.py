@@ -35,20 +35,20 @@ from django.utils.translation import gettext_lazy as _, get_language, pgettext_l
 
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
+    StatutEmplacementDocument,
     TypeEmplacementDocument,
     StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
+from admission.forms import AdmissionFileUploadField, CustomDateInput
 from admission.templatetags.admission import formatted_language, document_request_status_css_class
 from base.forms.utils.choice_field import BLANK_CHOICE
-from base.forms.utils.datefield import CustomDateInput
-from base.forms.utils.file_field import MaxOneFileUploadField
 
 
 class UploadDocumentFormMixin(forms.Form):
     def __init__(self, mimetypes, identifier, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['file'] = MaxOneFileUploadField(
+        self.fields['file'] = AdmissionFileUploadField(
             label=_('File'),
             max_files=1,
             min_files=1,
@@ -69,7 +69,7 @@ class UploadFreeDocumentForm(forms.Form):
         label=pgettext_lazy('admission', 'Document name'),
     )
 
-    file = MaxOneFileUploadField(
+    file = AdmissionFileUploadField(
         label=_('File'),
         max_files=1,
         min_files=1,
@@ -243,7 +243,8 @@ class RequestAllDocumentsForm(forms.Form):
 
         self.fields['message_content'].widget.attrs['data-config'] = json.dumps(
             {
-                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                **settings.CKEDITOR_CONFIGS['link_only'],
+                'extraAllowedContent': 'span(*)[*]{*};ul(*)[*]{*}',
                 'language': get_language(),
             }
         )
@@ -251,7 +252,7 @@ class RequestAllDocumentsForm(forms.Form):
         self.documents = {}
 
         for document in documents:
-            if document.est_a_reclamer:
+            if document.statut == StatutEmplacementDocument.A_RECLAMER.name and document.statut_reclamation:
                 if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:

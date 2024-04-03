@@ -481,25 +481,6 @@ class CalendrierInscriptionTestCase(TestCase):
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN)
 
-    @freezegun.freeze_time('01/03/2022')
-    def test_ue5_belge_pour_certificat(self):
-        proposition = PropositionFactory()
-        profil = ProfilCandidatFactory(
-            matricule=proposition.matricule_candidat,
-            identification__pays_nationalite="FR",
-        )
-        self.profil_candidat_translator.profil_candidats.append(profil.identification)
-        self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
-            formation_id=FormationFactory(type=TrainingType.CERTIFICATE).entity_id,
-            proposition=proposition,
-            matricule_candidat=proposition.matricule_candidat,
-            titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.CERTIFICATE,
-            profil_candidat_translator=self.profil_candidat_translator,
-        )
-        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN)
-
     @freezegun.freeze_time('22/10/2022')
     def test_ue5_non_belge(self):
         proposition = PropositionFactory()

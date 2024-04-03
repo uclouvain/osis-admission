@@ -941,7 +941,6 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
             pays=BE_ISO_CODE,
             annees=[
                 AnneeExperienceAcademique(
-                    uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                     annee=2016,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
@@ -950,7 +949,6 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     credits_inscrits=10,
                 ),
                 AnneeExperienceAcademique(
-                    uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                     annee=2017,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
@@ -959,7 +957,6 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     credits_inscrits=10,
                 ),
                 AnneeExperienceAcademique(
-                    uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                     annee=2018,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
@@ -968,7 +965,6 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     credits_inscrits=10,
                 ),
                 AnneeExperienceAcademique(
-                    uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                     annee=2019,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],
@@ -977,7 +973,6 @@ class TestVerifierPropositionServiceCurriculumYears(TestVerifierPropositionServi
                     credits_inscrits=10,
                 ),
                 AnneeExperienceAcademique(
-                    uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                     annee=2020,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['releve_notes.pdf'],

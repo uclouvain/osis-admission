@@ -31,6 +31,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
+from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.domain.enums import TypeFormation
@@ -50,7 +51,6 @@ from admission.tests.factories.scholarship import (
     InternationalScholarshipFactory,
     ErasmusMundusScholarshipFactory,
 )
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.campus import Campus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory

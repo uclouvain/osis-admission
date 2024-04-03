@@ -309,13 +309,6 @@ class ReclamerDocumentsAuCandidatParFACCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class AnnulerReclamationDocumentsAuCandidatCommand(interface.CommandRequest):
-    uuid_proposition: str
-    auteur: str
-    par_fac: bool
-
-
-@attr.dataclass(frozen=True, slots=True)
 class CompleterEmplacementsDocumentsParCandidatCommand(interface.CommandRequest):
     uuid_proposition: str
     reponses_documents_a_completer: Dict[str, List[str]]

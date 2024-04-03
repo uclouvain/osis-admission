@@ -42,7 +42,6 @@ from reference.models.enums.cycle import Cycle
 
 @attr.dataclass(frozen=True, slots=True)
 class AnneeExperienceAcademiqueDTO(interface.DTO):
-    uuid: str
     annee: int
     resultat: str
     releve_notes: List[str]

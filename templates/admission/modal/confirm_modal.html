@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block modal_id %}{{ confirm_id|default:'confirmation-modal' }}{% endblock %}
+{% block modal_id %}confirmation-modal{% endblock %}
 
 {% block modal_title %}
   {{ confirm_title|default:_('Confirm') }}
@@ -36,18 +36,9 @@
 {% endblock %}
 
 {% block modal_footer %}
-  <form
-    id="confirm-form"
-    {% if htmx_request %}
-    hx-post="{{ confirm_url }}"
-    hx-swap="none"
-    {% else %}
-    method="post"
-    action="{{ confirm_url }}"
-    {% endif %}
-  >
+  <form id="confirm-form" method="post" action="{{ confirm_url }}" >
     {% csrf_token %}
-    <button type="button" class="btn btn-default" data-dismiss="modal">{% translate 'Cancel' %}</button>
-    <button type="submit" class="btn {{ confirm_button_class|default:'btn-danger' }}">{% translate 'Confirm' %}</button>
   </form>
+  <button type="button" class="btn btn-default" data-dismiss="modal">{% translate 'Cancel' %}</button>
+  <button type="submit" class="btn btn-danger" form="confirm-form">{% translate 'Confirm' %}</button>
 {% endblock %}
