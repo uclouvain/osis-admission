@@ -27,10 +27,10 @@ from django.utils.functional import cached_property
 from django.views.generic import RedirectView
 
 from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
-from admission.views.general_education.details.checklist import ChecklistView
 from admission.views.common.detail_tabs.documents import DocumentView
 from admission.views.common.detail_tabs.person import AdmissionPersonDetailView
 from admission.views.common.mixins import AdmissionViewMixin
+from admission.views.general_education.details.checklist import ChecklistView
 
 __all__ = ['AdmissionRedirectView']
 __namespace__ = False

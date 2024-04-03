@@ -34,6 +34,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )

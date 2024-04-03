@@ -45,8 +45,7 @@ from admission.calendar.admission_calendar import (
 )
 from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import AdmissionTask
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
-from admission.ddd import FR_ISO_CODE, BE_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
@@ -101,7 +100,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
-    OngletsDemande,
     DocumentsSuiteAutorisation,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -167,6 +165,7 @@ from base.models.person import Person
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     ActivitySector,
     ActivityType,

@@ -32,7 +32,6 @@ from admission.forms.admission.training_choice import TrainingChoiceForm
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
-
 __all__ = ['AdmissionTrainingChoiceFormView']
 
 

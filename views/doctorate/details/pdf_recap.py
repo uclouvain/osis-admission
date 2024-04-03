@@ -26,10 +26,10 @@
 
 from django.conf import settings
 from django.views.generic import RedirectView
+from osis_document.utils import get_file_url
 
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.views.common.mixins import LoadDossierViewMixin
-from osis_document.utils import get_file_url
 
 __all__ = [
     "AdmissionPDFRecapExportView",

@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 import datetime
-import uuid
 from abc import abstractmethod
 from typing import Dict, List, Optional
 
@@ -37,9 +36,9 @@ from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAExperiencesDTO
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.dtos import CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.community import CommunityEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from osis_common.ddd import interface
@@ -47,7 +46,6 @@ from osis_common.ddd import interface
 
 class IProfilCandidatTranslator(interface.DomainService):
     NB_MAX_ANNEES_CV_REQUISES = 5
-    MOIS_DEBUT_ANNEE_ACADEMIQUE = 9
     MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER = 9
     MOIS_FIN_ANNEE_ACADEMIQUE_A_VALORISER = 2
 

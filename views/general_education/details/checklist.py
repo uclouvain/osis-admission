@@ -37,7 +37,7 @@ from django.urls import reverse
 from django.utils import translation, timezone
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, pgettext
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
@@ -48,10 +48,9 @@ from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
-from admission.ddd import MOIS_DEBUT_ANNEE_ACADEMIQUE, MAIL_VERIFICATEUR_CURSUS
+from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -63,7 +62,6 @@ from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSe
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
-    StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     StatutReclamationEmplacementDocument, STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
@@ -181,6 +179,7 @@ from base.utils.htmx import HtmxPermissionRequiredMixin
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_profile import MOIS_DEBUT_ANNEE_ACADEMIQUE
 from osis_profile.models import EducationalExperience
 from osis_role.templatetags.osis_role import has_perm
 

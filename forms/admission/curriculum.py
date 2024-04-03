@@ -34,11 +34,7 @@ from django.forms import BaseFormSet
 from django.utils.dates import MONTHS_ALT
 from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pgettext_lazy
 
-from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from admission.forms import (
-    FORM_SET_PREFIX,
-    AdmissionModelCountryChoiceField,
-)
+from admission.forms import AdmissionModelCountryChoiceField
 from admission.mark_safe_lazy import mark_safe_lazy
 from admission.views.autocomplete.diploma_title import get_diploma_label_with_study_type
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
@@ -48,6 +44,8 @@ from base.forms.utils.fields import RadioBooleanField
 from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
+from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+from osis_profile.forms import FORM_SET_PREFIX
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_profile.models.enums.curriculum import (
     ActivityType,
