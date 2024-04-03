@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import os.path
 import uuid
 from collections import defaultdict
@@ -50,7 +51,7 @@ from admission.ddd.admission.formation_continue.commands import (
 from admission.ddd.admission.formation_generale.commands import (
     RecupererDocumentsPropositionQuery as RecupererDocumentsPropositionGeneraleQuery,
 )
-from admission.exceptions import DocumentPostProcessingException, InvalidMimeTypeException
+from admission.exceptions import DocumentPostProcessingException, InvalidMimeTypeException, MergeDocumentsException
 from admission.infrastructure.utils import get_document_from_identifier
 from infrastructure.messages_bus import message_bus_instance
 from osis_document.enums import PostProcessingType
@@ -110,24 +111,31 @@ def base_education_admission_document_merging(admission):
             )
 
     updated_fields_by_object = defaultdict(list)
+    document_exceptions = {}
 
     # Update the models whose some document fields have been merged
     with transaction.atomic():
         for identifier, result in results.items():
+            # An error occurred during the post processing
             if result.get('error'):
-                raise DocumentPostProcessingException(f"{identifier}: {result['error']}")
+                document_exceptions[identifier] = DocumentPostProcessingException(result['error'])
+                continue
 
             updated_document = get_document_from_identifier(admission, identifier)
 
+            # The related field has not been found
             if not updated_document:
-                raise EmplacementDocumentNonTrouveException
+                document_exceptions[identifier] = EmplacementDocumentNonTrouveException
+                continue
 
+            # The PDF type is not one of the mimetypes of the related field
             if PDF_MIME_TYPE not in updated_document.mimetypes:
-                raise InvalidMimeTypeException(
+                document_exceptions[identifier] = InvalidMimeTypeException(
                     field=identifier,
                     field_mimetypes=updated_document.mimetypes,
                     current_mimetype=PDF_MIME_TYPE,
                 )
+                continue
 
             model_object = updated_document.obj
             model_field = updated_document.field
@@ -154,6 +162,9 @@ def base_education_admission_document_merging(admission):
 
         for model_object, fields in updated_fields_by_object.items():
             model_object.save(update_fields=fields)
+
+    if document_exceptions:
+        raise MergeDocumentsException(document_exceptions)
 
 
 def general_education_admission_document_merging_from_task(task_uuid: str):
