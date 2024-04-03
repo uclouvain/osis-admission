@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -160,9 +160,9 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
 
         # Les emplacements des documents réclamés ont été modifiés
         for identifiant in [self.id_curriculum, self.id_document_libre]:
-            self.assertEqual(emplacements_documents[identifiant].dernier_acteur, self.proposition.matricule_candidat)
+            self.assertEqual(emplacements_documents[identifiant].dernier_acteur, '987654321')
             self.assertEqual(emplacements_documents[identifiant].a_echeance_le, datetime.date(2023, 1, 15))
-            self.assertEqual(emplacements_documents[identifiant].derniere_action_le, datetime.datetime(2023, 1, 5))
+            self.assertEqual(emplacements_documents[identifiant].derniere_action_le, datetime.datetime(2023, 1, 3))
             self.assertEqual(emplacements_documents[identifiant].reclame_le, datetime.datetime(2023, 1, 3))
             self.assertEqual(
                 emplacements_documents[identifiant].statut,
@@ -222,9 +222,9 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
 
         # Les emplacements des documents réclamés ont été modifiés
         # Le curriculum a été complété par le candidat
-        self.assertEqual(emplacements_documents[self.id_curriculum].dernier_acteur, proposition.matricule_candidat)
+        self.assertEqual(emplacements_documents[self.id_curriculum].dernier_acteur, '987654321')
         self.assertEqual(emplacements_documents[self.id_curriculum].a_echeance_le, datetime.date(2023, 1, 15))
-        self.assertEqual(emplacements_documents[self.id_curriculum].derniere_action_le, datetime.datetime(2023, 1, 5))
+        self.assertEqual(emplacements_documents[self.id_curriculum].derniere_action_le, datetime.datetime(2023, 1, 3))
         self.assertEqual(emplacements_documents[self.id_curriculum].reclame_le, datetime.datetime(2023, 1, 3))
         self.assertEqual(
             emplacements_documents[self.id_curriculum].statut,
@@ -236,11 +236,11 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
         self.assertEqual(emplacements_documents[self.id_curriculum].uuids_documents, [self.uuid_id1])
 
         # Le document libre n'a pas été complété par le candidat
-        self.assertEqual(emplacements_documents[self.id_document_libre].dernier_acteur, proposition.matricule_candidat)
+        self.assertEqual(emplacements_documents[self.id_document_libre].dernier_acteur, '987654321')
         self.assertEqual(emplacements_documents[self.id_document_libre].a_echeance_le, datetime.date(2023, 1, 15))
         self.assertEqual(
             emplacements_documents[self.id_document_libre].derniere_action_le,
-            datetime.datetime(2023, 1, 5),
+            datetime.datetime(2023, 1, 3),
         )
         self.assertEqual(emplacements_documents[self.id_document_libre].reclame_le, datetime.datetime(2023, 1, 3))
         self.assertEqual(emplacements_documents[self.id_document_libre].statut, StatutEmplacementDocument.A_RECLAMER)
@@ -361,9 +361,9 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
 
         # Les emplacements de documents réclamés ont été modifiés
         for identifiant in [self.id_curriculum, self.id_document_libre]:
-            self.assertEqual(emplacements_documents[identifiant].dernier_acteur, proposition.matricule_candidat)
+            self.assertEqual(emplacements_documents[identifiant].dernier_acteur, '987654321')
             self.assertEqual(emplacements_documents[identifiant].a_echeance_le, datetime.date(2023, 1, 15))
-            self.assertEqual(emplacements_documents[identifiant].derniere_action_le, datetime.datetime(2023, 1, 5))
+            self.assertEqual(emplacements_documents[identifiant].derniere_action_le, datetime.datetime(2023, 1, 3))
             self.assertEqual(emplacements_documents[identifiant].reclame_le, datetime.datetime(2023, 1, 3))
             self.assertEqual(
                 emplacements_documents[identifiant].statut,

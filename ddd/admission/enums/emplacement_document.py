@@ -77,13 +77,6 @@ class StatutEmplacementDocument(ChoiceEnum):
     NON_ANALYSE = _('Not analyzed')
     VALIDE = _('Validated')
     COMPLETE_APRES_RECLAMATION = _('Completed after the request')
-    RECLAMATION_ANNULEE = _('Request cancelled')
-
-
-STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER = {
-    StatutEmplacementDocument.A_RECLAMER.name,
-    StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
-}
 
 
 class StatutReclamationEmplacementDocument(ChoiceEnum):

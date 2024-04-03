@@ -87,7 +87,6 @@ class ProfilCandidatTestCase(TestCase):
                         communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                         annees=[
                             AnneeExperienceAcademiqueDTO(
-                                uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                                 annee=2020,
                                 resultat=Result.SUCCESS.name,
                                 credits_acquis=10,
@@ -119,7 +118,6 @@ class ProfilCandidatTestCase(TestCase):
                     communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                     annees=[
                         AnneeExperienceAcademiqueDTO(
-                            uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                             annee=2019,
                             resultat=Result.SUCCESS.name,
                             credits_acquis=10,
@@ -143,7 +141,6 @@ class ProfilCandidatTestCase(TestCase):
                     communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                     annees=[
                         AnneeExperienceAcademiqueDTO(
-                            uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                             annee=2021,
                             resultat=Result.SUCCESS.name,
                             credits_acquis=10,
@@ -167,7 +164,6 @@ class ProfilCandidatTestCase(TestCase):
                     communaute_institut=CommunityEnum.GERMAN_SPEAKING.name,
                     annees=[
                         AnneeExperienceAcademiqueDTO(
-                            uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                             annee=2023,
                             resultat=Result.SUCCESS.name,
                             credits_acquis=10,
@@ -191,7 +187,6 @@ class ProfilCandidatTestCase(TestCase):
                     communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                     annees=[
                         AnneeExperienceAcademiqueDTO(
-                            uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                             annee=2023,
                             resultat=Result.SUCCESS.name,
                             credits_acquis=10,
@@ -215,7 +210,6 @@ class ProfilCandidatTestCase(TestCase):
                     communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                     annees=[
                         AnneeExperienceAcademiqueDTO(
-                            uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                             annee=2021,
                             resultat=Result.SUCCESS.name,
                             credits_acquis=10,
@@ -239,7 +233,6 @@ class ProfilCandidatTestCase(TestCase):
                     communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                     annees=[
                         AnneeExperienceAcademiqueDTO(
-                            uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                             annee=2020,
                             resultat=Result.SUCCESS.name,
                             credits_acquis=10,

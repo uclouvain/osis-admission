@@ -341,34 +341,6 @@ class PredicatesTestCase(TestCase):
                 status in valid_statuses,
             )
 
-    def test_in_fac_document_request_status(self):
-        admission = GeneralEducationAdmissionFactory()
-
-        valid_statuses = {
-            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
-        }
-
-        for status in ChoixStatutPropositionGenerale.get_names():
-            admission.status = status
-            self.assertEqual(
-                general.in_fac_document_request_status(admission.candidate.user, admission),
-                status in valid_statuses,
-            )
-
-    def test_in_sic_document_request_status(self):
-        admission = GeneralEducationAdmissionFactory()
-
-        valid_statuses = {
-            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
-        }
-
-        for status in ChoixStatutPropositionGenerale.get_names():
-            admission.status = status
-            self.assertEqual(
-                general.in_sic_document_request_status(admission.candidate.user, admission),
-                status in valid_statuses,
-            )
-
     def test_in_fac_status_extended(self):
         admission = GeneralEducationAdmissionFactory()
 

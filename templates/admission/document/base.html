@@ -10,7 +10,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -42,12 +42,8 @@
     </div>
     <div id="document-details">
     </div>
-    {% url request.resolver_match.namespace|add:':cancel-document-request' uuid=view.kwargs.uuid as cancel_request_url %}
-    {% blocktranslate trimmed asvar cancel_request_message %}
-      This action will cancel the document request.
-    {% endblocktranslate %}
-    {% include 'admission/modal/confirm_modal.html' with confirm_id='cancel-request-modal' confirm_message=cancel_request_message confirm_url=cancel_request_url htmx_request=True %}
   </div>
+
 {% endblock %}
 
 {% block style %}

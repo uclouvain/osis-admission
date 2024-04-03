@@ -1034,7 +1034,6 @@ class SectionsAttachmentsTestCase(TestCase):
             traduction_releve_notes=['uuid-traduction-releve-notes'],
             annees=[
                 _AnneeExperienceAcademiqueDTO(
-                    uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                     annee=2023,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['uuid-releve-notes-1'],
@@ -1081,7 +1080,6 @@ class SectionsAttachmentsTestCase(TestCase):
             traduction_releve_notes=['uuid-traduction-releve-notes'],
             annees=[
                 _AnneeExperienceAcademiqueDTO(
-                    uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                     annee=2023,
                     resultat=Result.SUCCESS.name,
                     releve_notes=['uuid-releve-notes-1'],

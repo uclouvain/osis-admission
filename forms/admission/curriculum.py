@@ -34,18 +34,21 @@ from django.forms import BaseFormSet
 from django.utils.dates import MONTHS_ALT
 from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pgettext_lazy
 
+from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from admission.forms import (
+    autocomplete,
+    EMPTY_CHOICE,
+    AdmissionFileUploadField as FileUploadField,
+    RadioBooleanField,
+    CustomDateInput,
+    get_example_text,
     FORM_SET_PREFIX,
     AdmissionModelCountryChoiceField,
 )
+from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.mark_safe_lazy import mark_safe_lazy
 from admission.views.autocomplete.diploma_title import get_diploma_label_with_study_type
-from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
-from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
-from base.forms.utils.datefield import CustomDateInput
-from base.forms.utils.fields import RadioBooleanField
-from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.organization import Organization
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -116,7 +119,7 @@ class AdmissionCurriculumProfessionalExperienceForm(forms.ModelForm):
         label=_('Employer'),
         required=False,
     )
-    certificate = MaxOneFileUploadField(
+    certificate = FileUploadField(
         label=_('Certificate'),
         required=False,
     )
@@ -275,14 +278,14 @@ class ProgramModelField(forms.ModelChoiceField):
 
 
 class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, forms.ModelForm):
-    start = AcademicYearModelChoiceField(
+    start = AcademicYearField(
         label=_('Start'),
         widget=autocomplete.Select2(),
         past_only=True,
         to_field_name='year',
     )
 
-    end = AcademicYearModelChoiceField(
+    end = AcademicYearField(
         label=pgettext_lazy('admission', 'End'),
         widget=autocomplete.Select2(),
         past_only=True,
@@ -407,19 +410,19 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
         label=pgettext_lazy('admission', 'Grade'),
         required=False,
     )
-    graduate_degree = MaxOneFileUploadField(
+    graduate_degree = FileUploadField(
         label=_('Diploma'),
         required=False,
     )
-    graduate_degree_translation = MaxOneFileUploadField(
+    graduate_degree_translation = FileUploadField(
         label=_('Diploma translation'),
         required=False,
     )
-    transcript = MaxOneFileUploadField(
+    transcript = FileUploadField(
         label=_('Transcript'),
         required=False,
     )
-    transcript_translation = MaxOneFileUploadField(
+    transcript_translation = FileUploadField(
         label=_('Transcript translation'),
         required=False,
     )
@@ -456,7 +459,7 @@ class AdmissionCurriculumAcademicExperienceForm(ByContextAdmissionFormMixin, for
             },
         ),
     )
-    dissertation_summary = MaxOneFileUploadField(
+    dissertation_summary = FileUploadField(
         label=_('Dissertation summary'),
         required=False,
     )
@@ -675,12 +678,12 @@ class AdmissionCurriculumEducationalExperienceYearForm(ByContextAdmissionFormMix
         required=False,
         localize=True,
     )
-    transcript = MaxOneFileUploadField(
+    transcript = FileUploadField(
         label=_('Transcript'),
         max_files=1,
         required=False,
     )
-    transcript_translation = MaxOneFileUploadField(
+    transcript_translation = FileUploadField(
         label=_('Transcript translation'),
         max_files=1,
         required=False,

@@ -28,20 +28,21 @@ from django.conf import settings
 from django.core import validators
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import IMAGE_MIME_TYPES
+from admission.constants import FIELD_REQUIRED_MESSAGE, IMAGE_MIME_TYPES
 from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe, ChoixGenre
 from admission.forms import (
+    get_example_text,
+    EMPTY_CHOICE,
+    CustomDateInput,
+    AdmissionFileUploadField as FileUploadField,
+    RadioBooleanField,
     AdmissionModelCountryChoiceField,
     AdmissionModelForm,
     get_year_choices,
 )
+from admission.forms.doctorate.training.activity import AcademicYearField
 from admission.utils import force_title
-from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE
-from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
-from base.forms.utils.datefield import CustomDateInput
-from base.forms.utils.fields import RadioBooleanField
-from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from base.models.utils.utils import ChoiceEnum
@@ -147,13 +148,13 @@ class AdmissionPersonForm(AdmissionModelForm):
     )
 
     # Proof of identity
-    id_card = MaxOneFileUploadField(
+    id_card = FileUploadField(
         required=False,
         label=_('Identity card (both sides)'),
         max_files=2,
     )
 
-    passport = MaxOneFileUploadField(
+    passport = FileUploadField(
         required=False,
         label=_('Passport'),
         max_files=2,
@@ -216,7 +217,7 @@ class AdmissionPersonForm(AdmissionModelForm):
         label=_('Passport number'),
     )
 
-    id_photo = MaxOneFileUploadField(
+    id_photo = FileUploadField(
         required=False,
         label=_('Identification photo'),
         max_files=1,
@@ -227,7 +228,7 @@ class AdmissionPersonForm(AdmissionModelForm):
     )
 
     # Already registered
-    last_registration_year = AcademicYearModelChoiceField(
+    last_registration_year = AcademicYearField(
         required=False,
         label=_('What was the most recent year you were enrolled at UCLouvain?'),
         past_only=True,

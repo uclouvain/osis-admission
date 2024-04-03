@@ -28,7 +28,6 @@ from collections import OrderedDict
 from inspect import getfullargspec
 
 from django import forms
-from osis_document.contrib import FileUploadField
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
@@ -42,9 +41,9 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
 )
 from admission.forms import SelectOrOtherField
 from admission.forms.doctorate.training import activity as activity_forms
-from admission.forms.doctorate.training.activity import ConfigurableActivityTypeField
+from admission.forms.doctorate.training.activity import AcademicYearField, ConfigurableActivityTypeField
 from base.api.serializers.academic_year import RelatedAcademicYearField
-from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
+from osis_document.contrib import FileUploadField
 from reference.api.serializers.country import RelatedCountryField
 
 FORM_SERIALIZER_FIELD_MAPPING = {
@@ -64,7 +63,7 @@ FORM_SERIALIZER_FIELD_MAPPING = {
     forms.ModelChoiceField: serializers.Field,  # replaced correctly later
     forms.DecimalField: serializers.FloatField,
     FileUploadField: serializers.ListField,
-    AcademicYearModelChoiceField: RelatedAcademicYearField,
+    AcademicYearField: RelatedAcademicYearField,
 }
 
 

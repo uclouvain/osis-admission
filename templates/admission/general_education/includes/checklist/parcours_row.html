@@ -25,11 +25,6 @@
 <tr
     class="{% if experience|est_experience_academique %}bg-info{% elif experience|est_etudes_secondaires %}bg-warning{% if experience.alternative_secondaires and not experience.alternative_secondaires.examen_admission_premier_cycle %} hidden{% endif %}{% endif %}"
 >
-  {% if show_actions %}
-    <td style="display: flex; gap: 3px;">
-      {% checklist_experience_action_links experience=experience current_year=year prefix=prefix %}
-    </td>
-  {% endif %}
   {% if forloop.first %}<td rowspan="{{ year_experiences | length }}" class="{{ year_experiences|get_parcours_annee_background }}">{{ year | get_short_academic_year }}</td>{% endif %}
   {% if experience|est_experience_academique %}
     <td>
@@ -138,6 +133,11 @@
       {% elif experience.diplome_etranger %}
         <i class="fa fa-earth"></i> <em>{{ experience.diplome_etranger.pays_nom }}</em>
       {% endif %}
+    </td>
+  {% endif %}
+  {% if show_actions %}
+    <td>
+      {% checklist_experience_action_links experience=experience current_year=year %}
     </td>
   {% endif %}
 </tr>

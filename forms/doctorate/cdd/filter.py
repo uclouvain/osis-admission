@@ -51,11 +51,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.enums.type_bourse import TypeBourse
 from admission.forms import (
+    CustomDateInput,
+    EMPTY_CHOICE,
     get_academic_year_choices,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+    autocomplete,
 )
-from base.forms.utils import EMPTY_CHOICE, autocomplete
-from base.forms.utils.datefield import CustomDateInput
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType

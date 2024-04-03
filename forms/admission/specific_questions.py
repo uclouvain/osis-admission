@@ -27,21 +27,22 @@ from dal.forward import Const
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from admission.constants import FIELD_REQUIRED_MESSAGE
 from admission.contrib.models import DiplomaticPost
 from admission.forms import (
+    AdmissionFileUploadField,
+    autocomplete,
+    RadioBooleanField,
     get_diplomatic_post_initial_choices,
 )
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.mark_safe_lazy import mark_safe_lazy
-from base.forms.utils import FIELD_REQUIRED_MESSAGE, autocomplete
-from base.forms.utils.fields import RadioBooleanField
-from base.forms.utils.file_field import MaxOneFileUploadField
 
 
 class CommonSpecificQuestionsForm(ConfigurableFormMixin, forms.Form):
     configurable_form_field_name = 'reponses_questions_specifiques'
 
-    documents_additionnels = MaxOneFileUploadField(
+    documents_additionnels = AdmissionFileUploadField(
         label=_(
             'You can add any document you feel is relevant to your application '
             '(supporting documents, proof of language level, etc.).'
@@ -94,7 +95,7 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
         required=False,
     )
 
-    formulaire_modification_inscription = MaxOneFileUploadField(
+    formulaire_modification_inscription = AdmissionFileUploadField(
         label=_('Change of enrolment form'),
         max_files=1,
         required=False,
@@ -111,7 +112,7 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
         required=False,
     )
 
-    attestation_inscription_reguliere = MaxOneFileUploadField(
+    attestation_inscription_reguliere = AdmissionFileUploadField(
         label=_('Certificate of regular enrolment'),
         max_files=1,
         required=False,
