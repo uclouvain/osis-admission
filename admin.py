@@ -738,7 +738,9 @@ admin.site.register(Activity, ActivityAdmin)
 
 class AdmissionTaskAdmin(admin.ModelAdmin):
     list_display = ['admission', 'task_uuid', 'task_status', 'type']
+    list_filter = ['task__state', 'type']
     list_select_related = ['task', 'admission']
+    search_fields = ['admission__reference']
 
     @admin.display(description="Task uuid")
     def task_uuid(self, obj):
