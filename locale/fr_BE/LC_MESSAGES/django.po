@@ -5219,11 +5219,11 @@ msgstr "Numéro de passeport"
 msgid "Past experiences authentication"
 msgstr "Authentification parcours"
 
+msgid "Pay by training cheque"
+msgstr "Paye par chèque formation"
+
 msgid "Payed"
 msgstr "Payés"
-
-msgid "Payed by training cheque"
-msgstr "Payé par chèque formation"
 
 msgid "Payement spread"
 msgstr "Étalement des paiements"
