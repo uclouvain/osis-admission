@@ -1,32 +1,34 @@
 # ##############################################################################
 #
-#    OSIS stands for Open Student Information System. It's an application
-#    designed to manage the core business of higher education institutions,
-#    such as universities, faculties, institutes and professional schools.
-#    The core business involves the administration of students, teachers,
-#    courses, programs and so on.
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#    A copy of this license - GNU General Public License - is available
-#    at the root of the source code of this program.  If not,
-#    see http://www.gnu.org/licenses/.
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 import uuid
 from typing import Optional, List, Union
 
+from django.conf import settings
 from django.db import transaction
 from django.utils.dateparse import parse_datetime, parse_date
 
@@ -38,7 +40,6 @@ from admission.contrib.models import (
     ContinuingEducationAdmission,
 )
 from admission.contrib.models.base import BaseAdmission
-from admission.contrib.models.form_item import TRANSLATION_LANGUAGES
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.validator.exceptions import (
@@ -124,7 +125,10 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                         form_item = AdmissionFormItem(
                             internal_label=f'{admission.reference}.{uuid_value}',
                             type=TypeItemFormulaire.DOCUMENT.name,
-                            title={language: entity.libelle for language in TRANSLATION_LANGUAGES},
+                            title={
+                                settings.LANGUAGE_CODE_FR: entity.libelle_fr or entity.libelle,
+                                settings.LANGUAGE_CODE_EN: entity.libelle_en or entity.libelle,
+                            },
                             uuid=uuid_value,
                         )
                         form_item.save()
@@ -287,6 +291,8 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             statut=StatutEmplacementDocument[emplacement_document.status],
             justification_gestionnaire=emplacement_document.reason,
             libelle=emplacement_document.label,
+            libelle_fr=emplacement_document.label_fr,
+            libelle_en=emplacement_document.label_en,
             reclame_le=parse_datetime(emplacement_document.requested_at) if emplacement_document.requested_at else None,
             a_echeance_le=parse_date(emplacement_document.deadline_at) if emplacement_document.deadline_at else None,
             derniere_action_le=parse_datetime(emplacement_document.last_action_at)

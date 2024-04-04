@@ -28,8 +28,7 @@
 >
   {% csrf_token %}
   {% include 'admission/document/free_document_helper_inputs.html' with form=form without_checklist_tab_input=True %}
-  {% candidate_language form.candidate_language as candidate_language_tag %}
-  {% bootstrap_field form.file_name label=form.file_name.label|add:candidate_language_tag|safe %}
+  {% bootstrap_field form.file_name %}
   {% bootstrap_field form.file %}
   <button type="submit" class="btn btn-default">{% translate 'Save' context 'admission' %}</button>
 </form>

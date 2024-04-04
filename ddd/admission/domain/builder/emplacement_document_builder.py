@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import datetime
 
 from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
@@ -56,6 +57,8 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
         auteur: str,
         type_emplacement: str,
         libelle: str,
+        libelle_fr: str = '',
+        libelle_en: str = '',
         raison: str = '',
         statut_reclamation: str = '',
         onglet_checklist_associe: str = '',
@@ -67,6 +70,8 @@ class EmplacementDocumentBuilder(interface.RootEntityBuilder):
                 uuid_proposition=uuid_proposition,
             ),
             libelle=libelle,
+            libelle_fr=libelle_fr or libelle,
+            libelle_en=libelle_en or libelle,
             uuids_documents=[],
             dernier_acteur=auteur,
             type=TypeEmplacementDocument[type_emplacement],
