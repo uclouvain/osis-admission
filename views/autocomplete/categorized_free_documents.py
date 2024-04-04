@@ -26,6 +26,7 @@
 
 from dal import autocomplete
 from django.conf import settings
+from django.utils.functional import cached_property
 from django.utils.translation import get_language
 
 from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
@@ -40,11 +41,8 @@ class CategorizedFreeDocumentsAutocomplete(autocomplete.Select2QuerySetView):
     urlpatterns = 'categorized-free-documents'
 
     @classmethod
-    def get_short_label_field(cls, language):
-        return {
-            settings.LANGUAGE_CODE_FR: 'short_label_fr',
-            settings.LANGUAGE_CODE_EN: 'short_label_en',
-        }[language or settings.LANGUAGE_CODE]
+    def get_short_label_field(cls):
+        return 'short_label_fr'
 
     @classmethod
     def get_long_label_field(cls, language):
@@ -53,22 +51,26 @@ class CategorizedFreeDocumentsAutocomplete(autocomplete.Select2QuerySetView):
             settings.LANGUAGE_CODE_EN: 'long_label_en',
         }[language or settings.LANGUAGE_CODE]
 
+    @cached_property
+    def current_language(self):
+        return self.forwarded['language'] if self.forwarded.get('language') else get_language()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.current_language = get_language()
-        self.candidate_language = settings.LANGUAGE_CODE
-        self.model_field_name = self.get_short_label_field(self.current_language)
+        self.model_field_name = self.get_short_label_field()
         self.ordering = self.model_field_name
 
     def get_search_results(self, queryset, search_term):
-        return (
-            super()
-            .get_search_results(queryset, search_term)
-            .filter(checklist_tab=self.forwarded.get('checklist_tab') or '')
-        )
+        results = super().get_search_results(queryset, search_term)
+
+        # Filter by checklist tab if specified
+        if 'checklist_tab' in self.forwarded:
+            results = results.filter(checklist_tab=self.forwarded['checklist_tab'])
+
+        return results
 
     def get_results(self, context):
-        full_label_field_name = self.get_long_label_field(self.forwarded.get('language'))
+        full_label_field_name = self.get_long_label_field(self.current_language)
 
         return [
             {

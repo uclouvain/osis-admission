@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.contrib import messages
 from django.http import HttpResponse, Http404
 from django.utils.functional import cached_property
@@ -111,7 +112,7 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
                 auteur=self.request.user.person.global_id,
                 uuid_document=form.cleaned_data['file'][0],
                 type_emplacement=self.document_type,
-                libelle=form.cleaned_data['file_name'],
+                libelle=form.cleaned_data['file_name_fr'],
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
@@ -188,7 +189,8 @@ class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequire
                     if self.is_fac
                     else TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name
                 ),
-                libelle=form.cleaned_data['file_name'],
+                libelle_en=form.cleaned_data['file_name_en'],
+                libelle_fr=form.cleaned_data['file_name_fr'],
                 raison=form.cleaned_data.get('reason', ''),
                 uuid_document=form.cleaned_data['file'][0] if form.cleaned_data.get('file') else '',
                 statut_reclamation=form.cleaned_data.get('request_status', ''),

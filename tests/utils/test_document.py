@@ -155,6 +155,8 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.automatically_required, False)
         self.assertEqual(document.mimetypes, list(SUPPORTED_MIME_TYPES))
         self.assertEqual(document.label, 'Champ document')
+        self.assertEqual(document.label_fr, 'Champ document')
+        self.assertEqual(document.label_en, 'Document field')
         self.assertEqual(document.document_submitted_by, '0123456')
         self.assertEqual(document.related_checklist_tab, OngletsChecklist.parcours_anterieur.name)
 
