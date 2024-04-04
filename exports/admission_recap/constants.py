@@ -26,7 +26,6 @@
 from django.utils.translation import gettext_lazy as _
 
 from base.models.enums.education_group_types import TrainingType
-from osis_profile.models.enums.curriculum import ActivityType
 
 TRAINING_TYPES_WITH_EQUIVALENCE = {
     TrainingType.AGGREGATION.name,
@@ -40,17 +39,4 @@ FORMATTED_RELATIONSHIPS = {
     'CONJOINT': _('your partner'),
     'COHABITANT_LEGAL': _('your legal cohabitant'),
 }
-CURRICULUM_ACTIVITY_LABEL = {
-    ActivityType.LANGUAGE_TRAVEL.name: _(
-        'Certificate of participation in a language study abroad for the period concerned'
-    ),
-    ActivityType.INTERNSHIP.name: _('Internship certificate, with dates, justifying the period concerned'),
-    ActivityType.UNEMPLOYMENT.name: _(
-        'Unemployment certificate issued by the relevant body, justifying the period concerned'
-    ),
-    ActivityType.VOLUNTEERING.name: _('Certificate, with dates, justifying your volunteering activities'),
-    ActivityType.WORK.name: _('Proof of employment from the employer, with dates, justifying the period in question'),
-    ActivityType.OTHER.name: _(
-        'Certificate justifying your activity, mentioning this activity, for the period concerned'
-    ),
-}
+

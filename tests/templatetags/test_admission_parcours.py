@@ -23,11 +23,15 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.test.factory.profil import EtudesSecondairesDTOFactory, ExperienceNonAcademiqueDTOFactory, \
-    ExperienceAcademiqueDTOFactory, AnneeExperienceAcademiqueDTOFactory
-from admission.templatetags.admission_parcours import get_experience_last_year, get_experience_year, \
-    filter_experiences_trainings, filter_experiences_financability
+from admission.ddd.admission.test.factory.profil import (
+    EtudesSecondairesDTOFactory, ExperienceNonAcademiqueDTOFactory,
+    ExperienceAcademiqueDTOFactory, AnneeExperienceAcademiqueDTOFactory,
+)
 from admission.tests import TestCase
+from osis_profile.templatetags.parcours_externe import (
+    get_experience_last_year, get_experience_year,
+    filter_experiences_trainings, filter_experiences_financability,
+)
 
 
 class AdmissionParcoursFiltersTestCase(TestCase):
