@@ -25,6 +25,8 @@
 # ##############################################################################
 from django.shortcuts import resolve_url
 from django.test import override_settings
+from osis_signature.enums import SignatureState
+from osis_signature.models import StateHistory
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -34,17 +36,15 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
 )
-from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory
 from base.models.enums.entity_type import EntityType
+from base.tests import QueriesAssertionsMixin
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.tutor import TutorFactory
-from osis_signature.enums import SignatureState
-from osis_signature.models import StateHistory
 from reference.tests.factories.country import CountryFactory
 
 

@@ -27,13 +27,13 @@ from typing import List
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     FichierCurriculumNonRenseigneException,
     EquivalenceNonRenseigneeException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_profile import BE_ISO_CODE
 
 

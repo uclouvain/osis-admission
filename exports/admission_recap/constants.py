@@ -39,4 +39,3 @@ FORMATTED_RELATIONSHIPS = {
     'CONJOINT': _('your partner'),
     'COHABITANT_LEGAL': _('your legal cohabitant'),
 }
-

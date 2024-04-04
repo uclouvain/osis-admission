@@ -24,20 +24,15 @@
 #
 # ##############################################################################
 
-import datetime
 from functools import reduce
 from typing import List, Optional
 
 import attr
 from dateutil import relativedelta
-from django.utils.functional import cached_property
 
 from admission.ddd import NB_MOIS_MIN_VAE
-from base.models.enums.community import CommunityEnum
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_common.ddd import interface
-from osis_profile import MOIS_DEBUT_ANNEE_ACADEMIQUE
-from osis_profile.models.enums.curriculum import ActivityType
-from reference.models.enums.cycle import Cycle
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -55,118 +50,6 @@ class AnneeExperienceAcademiqueDTO(interface.DTO):
     credits_acquis_communaute_fr: Optional[float]
     allegement: str
     est_reorientation_102: Optional[bool]
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ExperienceAcademiqueDTO(interface.DTO):
-    uuid: str
-    pays: str
-    nom_pays: str
-    nom_institut: str
-    adresse_institut: str
-    code_institut: str
-    communaute_institut: str
-    type_institut: str
-    regime_linguistique: str
-    nom_regime_linguistique: str
-    type_releve_notes: str
-    releve_notes: List[str]
-    traduction_releve_notes: List[str]
-    annees: List[AnneeExperienceAcademiqueDTO]
-    a_obtenu_diplome: bool
-    diplome: List[str]
-    traduction_diplome: List[str]
-    rang_diplome: str
-    date_prevue_delivrance_diplome: Optional[datetime.date]
-    titre_memoire: str
-    note_memoire: str
-    resume_memoire: List[str]
-    grade_obtenu: str
-    systeme_evaluation: str
-    nom_formation: str
-    nom_formation_equivalente_communaute_fr: str
-    est_autre_formation: Optional[bool]
-    cycle_formation: str
-    type_enseignement: str
-    valorisee_par_admissions: Optional[List[str]] = None
-
-    def __str__(self):
-        return self.nom_formation
-
-    @cached_property
-    def est_formation_bachelier_fwb(self):
-        return (
-            self.cycle_formation == Cycle.FIRST_CYCLE.name
-            and self.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
-            and not self.a_obtenu_diplome
-        )
-
-    @cached_property
-    def est_formation_master_fwb(self):
-        return (
-            self.cycle_formation == Cycle.SECOND_CYCLE.name
-            and self.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
-            and not self.a_obtenu_diplome
-        )
-
-    @cached_property
-    def derniere_annee(self):
-        return max(self.annees, key=lambda annee: annee.annee).annee
-
-    @property
-    def titre_formate(self):
-        annee_minimale = min(self.annees, key=lambda annee: annee.annee)
-
-        return "{annee_minimale}-{annee_maximale} : {nom_formation}".format(
-            annee_minimale=annee_minimale.annee,
-            annee_maximale=self.derniere_annee + 1,
-            nom_formation=self.nom_formation_equivalente_communaute_fr or self.nom_formation,
-        )
-
-    @property
-    def titre_pdf_decision_sic(self):
-        return self.nom_formation
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ExperienceNonAcademiqueDTO(interface.DTO):
-    uuid: str
-    employeur: str
-    date_debut: datetime.date
-    date_fin: datetime.date
-    type: str
-    certificat: List[str]
-    fonction: str
-    secteur: str
-    autre_activite: str
-    valorisee_par_admissions: Optional[List[str]] = None
-
-    def __str__(self):
-        if self.type == ActivityType.OTHER.name:
-            return self.autre_activite
-        return str(ActivityType.get_value(self.type))
-
-    @property
-    def dates_formatees(self):
-        date_debut = self.date_debut.strftime('%m/%Y')
-        date_fin = self.date_fin.strftime('%m/%Y')
-        return f"{date_debut}-{date_fin}" if date_debut != date_fin else date_debut
-
-    @property
-    def titre_formate(self):
-        return f"{self.dates_formatees} : {self}"
-
-    @cached_property
-    def derniere_annee(self):
-        return self.date_fin.year if self.date_fin.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE else self.date_fin.year - 1
-
-    @property
-    def titre_pdf_decision_sic(self):
-        return (
-            f'{self.autre_activite} {self.dates_formatees}'
-            if self.type == ActivityType.OTHER.name
-            else self.dates_formatees
-        )
 
 
 @attr.dataclass(frozen=True, slots=True)
