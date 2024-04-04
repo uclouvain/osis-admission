@@ -54,10 +54,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos import EtudesSecondairesDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -101,6 +99,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -1148,7 +1147,7 @@ def authentication_css_class(authentication_status):
 def bg_class_by_checklist_experience(experience):
     return {
         ExperienceAcademiqueDTO: 'bg-info',
-        EtudesSecondairesDTO: 'bg-warning',
+        EtudesSecondairesAdmissionDTO: 'bg-warning',
     }.get(experience.__class__, '')
 
 
@@ -1201,7 +1200,7 @@ def experience_details_template(
         )
         context.update(get_non_educational_experience_context(experience))
 
-    elif experience.__class__ == EtudesSecondairesDTO:
+    elif experience.__class__ == EtudesSecondairesAdmissionDTO:
         context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
         context['etudes_secondaires'] = experience
         context['edit_link_button'] = (
@@ -1225,14 +1224,14 @@ def experience_details_template(
 @register.simple_tag(takes_context=True)
 def checklist_experience_action_links_context(
     context,
-    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
     current_year,
     prefix,
 ):
     base_namespace = context['view'].base_namespace
     proposition_uuid = context['view'].kwargs['uuid']
     proposition_uuid_str = str(proposition_uuid)
-    if experience.__class__ == EtudesSecondairesDTO:
+    if experience.__class__ == EtudesSecondairesAdmissionDTO:
         return {
             'prefix': prefix,
             'update_url': resolve_url(
@@ -1290,7 +1289,7 @@ def checklist_experience_action_links_context(
 )
 def checklist_experience_action_links(
     context,
-    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
     current_year,
     prefix,
 ):

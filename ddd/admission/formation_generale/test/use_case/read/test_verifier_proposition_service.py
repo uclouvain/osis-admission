@@ -50,7 +50,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     NombrePropositionsSoumisesDepasseException,
 )
-from admission.ddd.admission.dtos import EtudesSecondairesDTO
+from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
@@ -1044,7 +1044,7 @@ class TestVerifierPropositionService(TestCase):
         )
 
     def test_should_retourner_erreur_si_indication_a_diplome_etudes_secondaires_non_specifiee_pour_master(self):
-        self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             annee_diplome_etudes_secondaires=2020,
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -1052,7 +1052,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_indication_annee_diplome_etudes_secondaires_non_specifiee_pour_master(self):
-        self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -1060,7 +1060,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_etre_ok_si_indication_et_annee_diplome_etudes_secondaires_specifiees_pour_master(self):
-        self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
         )
@@ -1068,7 +1068,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(id_proposition, self.master_proposition.entity_id)
 
     def test_should_retourner_erreur_si_indication_a_diplome_etudes_secondaires_non_specifiee_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             annee_diplome_etudes_secondaires=2020,
             diplome_belge=DiplomeBelgeEtudesSecondairesDTO(diplome=['diplome.pdf']),
         )
@@ -1077,7 +1077,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_indication_annee_diplome_etudes_secondaires_non_specifiee_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             diplome_belge=DiplomeBelgeEtudesSecondairesDTO(diplome=['diplome.pdf']),
         )
@@ -1086,7 +1086,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_etudes_secondaires_et_diplome_non_specifie_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
         )
@@ -1095,7 +1095,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_etre_ok_si_etudes_secondaires_et_diplome_non_specifie_pour_bachelier_avec_valorisation(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             valorisees=True,
@@ -1105,7 +1105,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_etudes_secondaires_en_cours_et_diplome_non_specifie_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
             annee_diplome_etudes_secondaires=2020,
         )
@@ -1114,7 +1114,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
     def test_should_retourner_erreur_si_pas_etudes_secondaires_et_alternative_non_specifiee_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.NO.name,
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -1130,14 +1130,14 @@ class TestVerifierPropositionService(TestCase):
                 **self.params_defaut_experience_non_academique,
             )
         )
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.NO.name,
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_diplome_belge_etudes_secondaires_incomplet_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_belge=DiplomeBelgeEtudesSecondairesDTO(diplome=[]),
@@ -1147,7 +1147,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeBelgeException)
 
     def test_should_retourner_erreur_si_diplome_belge_etudes_secondaires_en_cours_incomplet_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_belge=DiplomeBelgeEtudesSecondairesDTO(),
@@ -1157,7 +1157,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeBelgeException)
 
     def test_should_etre_ok_si_diplome_belge_etudes_secondaires_en_cours_avec_diplome_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_belge=DiplomeBelgeEtudesSecondairesDTO(diplome=['diplome.pdf']),
@@ -1166,7 +1166,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_alternative_etudes_secondaires_incomplet_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.NO.name,
             alternative_secondaires=AlternativeSecondairesDTO(),
         )
@@ -1175,7 +1175,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourAlternativeException)
 
     def test_should_etre_ok_si_alternative_etudes_secondaires_complet_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.NO.name,
             alternative_secondaires=AlternativeSecondairesDTO(examen_admission_premier_cycle=['examen.pdf']),
         )
@@ -1191,14 +1191,14 @@ class TestVerifierPropositionService(TestCase):
                 **self.params_defaut_experience_non_academique,
             )
         )
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.NO.name, alternative_secondaires=AlternativeSecondairesDTO()
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
 
     def test_should_etre_ok_si_diplome_etranger_ue_europeen_complet_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1214,7 +1214,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_diplome_etranger_etudes_secondaires_incomplet_releve_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1230,7 +1230,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_retourner_erreur_si_diplome_etranger_etudes_secondaires_incomplet_diplome_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1246,7 +1246,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_etudes_secondaires_en_cours_avec_diplome_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1262,7 +1262,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_diplome_etranger_en_cours_incomplet_diplome_certif_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1278,7 +1278,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_complet_equivalence_si_possedee_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1296,7 +1296,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(proposition_id, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_diplome_etranger_incomplet_equivalence_si_possedee_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1314,7 +1314,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_complet_equivalence_si_demandee_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1332,7 +1332,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(proposition_id, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_diplome_etranger_incomplet_equivalence_inconnue_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1350,7 +1350,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_retourner_erreur_si_diplome_etranger_incomplet_equivalence_si_demandee_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1370,7 +1370,7 @@ class TestVerifierPropositionService(TestCase):
     def test_should_retourner_erreur_si_diplome_etranger_non_ue_incomplet_equivalence_si_demandee_pour_bachelier_med(
         self,
     ):
-        self.etudes_secondaires[self.bachelier_veto_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_veto_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1388,7 +1388,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_complet_equivalence_si_pas_demandee_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1405,7 +1405,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(proposition_id, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_diplome_etranger_non_ue_incomplet_equivalence_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1422,7 +1422,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_non_ue_complet_equivalence_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1439,7 +1439,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
 
     def test_should_etre_ok_si_diplome_etranger_non_ue_complet_sans_equivalence_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1455,7 +1455,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
 
     def test_should_retourner_erreur_si_diplome_etranger_non_ue_incomplet_diplome_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1471,7 +1471,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_retourner_erreur_si_diplome_etranger_incomplet_traduction_diplome_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1489,7 +1489,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_retourner_erreur_si_diplome_etranger_incomplet_traduction_releve_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(
@@ -1507,7 +1507,7 @@ class TestVerifierPropositionService(TestCase):
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesPourDiplomeEtrangerException)
 
     def test_should_etre_ok_si_diplome_etranger_complet_avec_traductions_pour_bachelier(self):
-        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesDTO(
+        self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.THIS_YEAR.name,
             annee_diplome_etudes_secondaires=2020,
             diplome_etranger=DiplomeEtrangerEtudesSecondairesDTO(

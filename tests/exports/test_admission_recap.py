@@ -59,14 +59,15 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
     DoctoratDTO,
-    ExperienceAcademiqueDTO,
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.dtos import (
+    AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesAdmissionDTO,
+    IdentificationDTO,
+)
 from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
@@ -135,7 +136,6 @@ from admission.exports.admission_recap.section import (
     get_authorization_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
-from admission.tests import QueriesAssertionsMixin, TestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -162,8 +162,10 @@ from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
+from base.tests import QueriesAssertionsMixin, TestCaseWithQueriesAssertions
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
@@ -190,7 +192,7 @@ class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
 
 
 @attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesDTO):
+class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
     pass
 
 
@@ -215,7 +217,7 @@ class _CurriculumDTO(UnfrozenDTO, CurriculumDTO):
 
 
 @attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesDTO):
+class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
     pass
 
 
@@ -281,7 +283,7 @@ class _GroupeDeSupervisionDTO(UnfrozenDTO, GroupeDeSupervisionDTO):
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
-class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
+class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMixin):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
@@ -899,7 +901,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class SectionsAttachmentsTestCase(TestCase):
+class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls):
         # Mock osis-document

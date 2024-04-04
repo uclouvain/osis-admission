@@ -35,7 +35,6 @@ from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
     ContexteFormation,
     StatutActivite,
 )
-from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.activity import (
     ActivityFactory,
@@ -48,6 +47,7 @@ from admission.tests.factories.activity import (
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.entity_type import EntityType
+from base.tests import QueriesAssertionsMixin
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 
