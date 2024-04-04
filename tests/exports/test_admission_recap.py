@@ -43,7 +43,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
+from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import AdmissionTask
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -118,7 +118,6 @@ from admission.ddd.admission.formation_generale.dtos import (
 from admission.exports.admission_recap.attachments import (
     Attachment,
 )
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.exports.admission_recap.section import (
     get_accounting_section,
     get_cotutelle_section,
@@ -155,6 +154,7 @@ from admission.tests.factories.person import (
     CompletePersonFactory,
 )
 from admission.tests.factories.roles import ProgramManagerRoleFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
@@ -172,7 +172,7 @@ from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
     Grade,
     Result,
-    TranscriptType,
+    TranscriptType, CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,

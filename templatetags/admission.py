@@ -47,7 +47,7 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
+from admission.constants import IMAGE_MIME_TYPES, ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -97,6 +97,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.utils import get_access_conditions_url
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
