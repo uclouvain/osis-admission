@@ -186,6 +186,7 @@ def format_training(training: FormationDTO):
     )
 
 
+# Move to base or reference (move url too)
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
         to_field_name = kwargs.get('to_field_name', '')

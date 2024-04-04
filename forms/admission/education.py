@@ -29,7 +29,6 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
-from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
 from admission.forms import (
     AdmissionModelCountryChoiceField,
 )
@@ -39,7 +38,7 @@ from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.academic_year import AcademicYear
 from base.models.enums.establishment_type import EstablishmentTypeEnum
-from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
 from base.models.organization import Organization
 from osis_profile.forms.etudes_secondaires import got_diploma_dynamic_choices
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma

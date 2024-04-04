@@ -179,8 +179,8 @@ from base.utils.htmx import HtmxPermissionRequiredMixin
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_profile import MOIS_DEBUT_ANNEE_ACADEMIQUE
 from osis_profile.models import EducationalExperience
+from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
 
 __all__ = [
@@ -1677,46 +1677,11 @@ class ChecklistView(
         return context
 
     def _get_experiences(self, resume: ResumePropositionDTO):
-        experiences = {}
-
-        for experience_academique in resume.curriculum.experiences_academiques:
-            for annee_academique in experience_academique.annees:
-                experiences.setdefault(annee_academique.annee, [])
-                if experience_academique.a_obtenu_diplome:
-                    experiences[annee_academique.annee].insert(0, experience_academique)
-                else:
-                    experiences[annee_academique.annee].append(experience_academique)
-
-        experiences_non_academiques = {}
-        for experience_non_academique in resume.curriculum.experiences_non_academiques:
-            date_courante = experience_non_academique.date_debut
-            while True:
-                annee = (
-                    date_courante.year if date_courante.month >= MOIS_DEBUT_ANNEE_ACADEMIQUE else date_courante.year - 1
-                )
-                if experience_non_academique not in experiences_non_academiques.get(annee, []):
-                    experiences_non_academiques.setdefault(annee, []).append(experience_non_academique)
-                if date_courante == experience_non_academique.date_fin:
-                    break
-                date_courante = min(
-                    date_courante.replace(year=date_courante.year + 1), experience_non_academique.date_fin
-                )
-        for annee, experiences_annee in experiences_non_academiques.items():
-            experiences_annee.sort(key=lambda x: x.date_fin, reverse=True)
-            experiences.setdefault(annee, []).extend(experiences_annee)
-
-        etudes_secondaires = resume.etudes_secondaires
-        if etudes_secondaires:
-            if etudes_secondaires.annee_diplome_etudes_secondaires:
-                experiences.setdefault(etudes_secondaires.annee_diplome_etudes_secondaires, []).append(
-                    etudes_secondaires
-                )
-            elif etudes_secondaires.alternative_secondaires:
-                experiences.setdefault(0, []).append(etudes_secondaires)
-
-        experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
-
-        return experiences
+        return groupe_curriculum_par_annee_decroissante(
+            experiences_academiques=resume.curriculum.experiences_academiques,
+            experiences_professionnelles=resume.curriculum.experiences_non_academiques,
+            etudes_secondaires=resume.etudes_secondaires
+        )
 
     def _get_financabilite(self):
         # TODO

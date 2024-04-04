@@ -42,7 +42,7 @@ from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 from rest_framework import status
 
-from admission.constants import PDF_MIME_TYPE, IMAGE_MIME_TYPES
+from admission.constants import IMAGE_MIME_TYPES
 from admission.contrib.models import GeneralEducationAdmission, AdmissionFormItemInstantiation, AdmissionFormItem
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
@@ -66,7 +66,7 @@ from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
-from base.forms.utils.file_field import MaxOneFileUploadField
+from base.forms.utils.file_field import MaxOneFileUploadField, PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory

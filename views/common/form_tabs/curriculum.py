@@ -47,16 +47,8 @@ from admission.contrib.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
 from admission.contrib.models.checklist import FreeAdditionalApprovalCondition
-from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
-from admission.forms.admission.curriculum import (
-    AdmissionCurriculumAcademicExperienceForm,
-    MINIMUM_CREDIT_NUMBER,
-    AdmissionCurriculumEducationalExperienceYearFormSet,
-    AdmissionCurriculumProfessionalExperienceForm,
-)
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
@@ -68,8 +60,17 @@ from osis_profile.forms import (
     FORM_SET_PREFIX, FOLLOWING_FORM_SET_PREFIX, OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX,
     OSIS_DOCUMENT_UPLOADER_CLASS,
 )
+from osis_profile.forms.experience_academique import (
+    MINIMUM_CREDIT_NUMBER, CurriculumAcademicExperienceForm,
+    CurriculumEducationalExperienceYearFormSet,
+)
+from osis_profile.forms.experience_non_academique import CurriculumProfessionalExperienceForm
 from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
-from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result
+from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result, CURRICULUM_ACTIVITY_LABEL
+from osis_profile.views.edit_experience_academique import (
+    SYSTEMES_EVALUATION_AVEC_CREDITS,
+    PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE,
+)
 from reference.models.enums.cycle import Cycle
 
 __all__ = [
@@ -186,7 +187,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
 
         current_academic_year = AcademicYear.objects.current()
 
-        base_form = AdmissionCurriculumAcademicExperienceForm(
+        base_form = CurriculumAcademicExperienceForm(
             current_context=self.current_context,
             data=self.request.POST or None,
             prefix='base_form',
@@ -195,7 +196,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
             end=end,
         )
 
-        year_formset = AdmissionCurriculumEducationalExperienceYearFormSet(
+        year_formset = CurriculumEducationalExperienceYearFormSet(
             self.request.POST or None,
             initial=all_educational_experience_years,
             prefix='year_formset',
@@ -229,7 +230,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         context_data['year_formset'] = year_formset
         context_data['linguistic_regimes_without_translation'] = list(REGIMES_LINGUISTIQUES_SANS_TRADUCTION)
         context_data['BE_ISO_CODE'] = BE_ISO_CODE
-        context_data['FIRST_YEAR_WITH_ECTS_BE'] = VerifierCurriculum.PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
+        context_data['FIRST_YEAR_WITH_ECTS_BE'] = PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
         context_data['FORM_SET_PREFIX'] = FORM_SET_PREFIX
         context_data['FOLLOWING_FORM_SET_PREFIX'] = FOLLOWING_FORM_SET_PREFIX
         context_data['OSIS_DOCUMENT_UPLOADER_CLASS'] = OSIS_DOCUMENT_UPLOADER_CLASS
@@ -349,7 +350,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         be_country = country and country.iso_code == BE_ISO_CODE
         linguistic_regime = base_form.cleaned_data.get('linguistic_regime')
         credits_are_required = (
-            base_form.cleaned_data.get('evaluation_type') in VerifierCurriculum.SYSTEMES_EVALUATION_AVEC_CREDITS
+            base_form.cleaned_data.get('evaluation_type') in SYSTEMES_EVALUATION_AVEC_CREDITS
         )
         transcript_is_required = base_form.cleaned_data.get('transcript_type') == TranscriptType.ONE_A_YEAR.name
         transcript_translation_is_required = (
@@ -403,7 +404,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
             # The evaluation system in Belgium depends on the years
             base_form.cleaned_data['evaluation_type'] = (
                 EvaluationSystem.ECTS_CREDITS.name
-                if int(last_enrolled_year.year) >= VerifierCurriculum.PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
+                if int(last_enrolled_year.year) >= PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
                 else EvaluationSystem.NO_CREDIT_SYSTEM.name
             )
 
@@ -423,7 +424,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
 
         # Credit fields
         if (
-            cleaned_data.get('academic_year') >= VerifierCurriculum.PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
+            cleaned_data.get('academic_year') >= PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
             if be_country
             else credits_are_required
         ):
@@ -530,7 +531,7 @@ class CurriculumNonEducationalExperienceFormView(AdmissionFormMixin, LoadDossier
     }
     template_name = 'admission/forms/curriculum_non_educational_experience.html'
     permission_required = 'admission.change_admission_curriculum'
-    form_class = AdmissionCurriculumProfessionalExperienceForm
+    form_class = CurriculumProfessionalExperienceForm
     extra_context = {
         'without_menu': True,
     }

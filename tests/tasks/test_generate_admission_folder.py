@@ -26,21 +26,21 @@
 from unittest import mock
 
 import freezegun
-from osis_async.models import AsyncTask
 from django.test import override_settings
+from osis_async.models import AsyncTask
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models import AdmissionTask, GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.tests import TestCase
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
+from base.tests import TestCaseWithQueriesAssertions
 from base.tests.factories.academic_year import AcademicYearFactory
 
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class GenerateAdmissionFolderTestCase(TestCase):
+class GenerateAdmissionFolderTestCase(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
