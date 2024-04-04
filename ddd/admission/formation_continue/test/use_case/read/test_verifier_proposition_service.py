@@ -95,7 +95,7 @@ class TestVerifierPropositionService(TestCase):
     def test_should_retourner_erreur_si_indication_a_diplome_etudes_secondaires_non_specifiee(self):
         with mock.patch.dict(
             self.etudes_secondaires,
-            {'0000000001': EtudesSecondairesAdmissionDTO(annee_diplome_etudes_secondaires=2020)}
+            {'0000000001': EtudesSecondairesAdmissionDTO(annee_diplome_etudes_secondaires=2020)},
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.verifier_commande)

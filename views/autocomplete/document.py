@@ -34,8 +34,9 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.templatetags.admission import CONTEXT_GENERAL
+from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from infrastructure.messages_bus import message_bus_instance
 
 __namespace__ = False
@@ -50,6 +51,7 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
     urlpatterns = 'document-types-swap'
     retrieve_documents_command = {
         CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,
+        CONTEXT_CONTINUING: continuing_education_commands.RecupererDocumentsPropositionQuery,
     }
 
     def get(self, request, *args, **kwargs):

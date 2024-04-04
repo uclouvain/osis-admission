@@ -55,8 +55,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos import CoordonneesDTO, IdentificationDTO
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -100,7 +99,6 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
@@ -1291,7 +1289,7 @@ def checklist_experience_action_links_context(
 )
 def checklist_experience_action_links(
     context,
-    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
     current_year,
     prefix,
 ):

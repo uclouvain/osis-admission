@@ -46,7 +46,6 @@ from admission.forms.admission.checklist import (
     CommentForm,
 )
 from admission.forms.admission.continuing_education.checklist import StudentReportForm
-from admission.views.common.detail_tabs.comments import COMMENT_TAG_FAC
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from osis_role.templatetags.osis_role import has_perm
@@ -75,19 +74,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         checklist_additional_icons = {}
-
-        # A SIC user has an additional icon for the decision of the faculty if a fac manager wrote a comment
-        if self.is_sic:
-            has_comment = (
-                CommentEntry.objects.filter(
-                    object_uuid=self.admission_uuid,
-                    tags__contains=['decision_facultaire', COMMENT_TAG_FAC],
-                )
-                .exclude(content='')
-                .exists()
-            )
-            if has_comment:
-                checklist_additional_icons['decision_facultaire'] = 'fa-regular fa-comment'
 
         context['checklist_additional_icons'] = checklist_additional_icons
         context['can_update_checklist_tab'] = self.can_update_checklist_tab

@@ -53,7 +53,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
-from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -76,6 +75,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
+from base.tests import QueriesAssertionsMixin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 

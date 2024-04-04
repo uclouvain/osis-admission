@@ -34,8 +34,9 @@ from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager as ProgramManagerAdmission
 from admission.auth.roles.sic_management import SicManagement
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as ContinueOngletsChecklist
 from admission.ddd.admission.formation_generale.commands import RecupererResumePropositionQuery
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as GeneralOngletsChecklist
 from admission.views.common.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
 from base.auth.roles.program_manager import ProgramManager
@@ -63,20 +64,20 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
     urlpatterns = 'comments'
     permission_required = 'admission.view_enrolment_application'
     template_name = "admission/details/comments.html"
-    extra_context = {
-        'checklist_tags': OngletsChecklist.choices_except(OngletsChecklist.experiences_parcours_anterieur),
-    }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context['ckeditor_config'] = json.dumps(CKEDITOR_CONFIGS['minimal'])
 
+        context['COMMENT_TAG_FAC'] = f'{COMMENT_TAG_FAC},{COMMENT_TAG_GLOBAL}'
+        context['COMMENT_TAG_SIC'] = f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}'
+
         if self.is_general:
-            context['COMMENT_TAG_FAC'] = f'{COMMENT_TAG_FAC},{COMMENT_TAG_GLOBAL}'
-            context['COMMENT_TAG_SIC'] = f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}'
             context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS
-            context['checklist_tabs'] = OngletsChecklist.choices_except(OngletsChecklist.experiences_parcours_anterieur)
+            context['checklist_tags'] = GeneralOngletsChecklist.choices_except(
+                GeneralOngletsChecklist.experiences_parcours_anterieur
+            )
 
             # Get the names of every experience
             proposition_resume: ResumePropositionDTO = message_bus_instance.invoke(
@@ -97,6 +98,9 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
                 ] = proposition_resume.etudes_secondaires.titre_formate
 
             context['experiences_names_by_uuid'] = experiences_names_by_uuid
+
+        elif self.is_continuing:
+            context['checklist_tags'] = ContinueOngletsChecklist.choices()
 
         return context
 

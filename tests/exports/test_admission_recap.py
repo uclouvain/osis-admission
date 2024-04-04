@@ -128,7 +128,6 @@ from admission.exports.admission_recap.section import (
     get_authorization_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
-from admission.tests import QueriesAssertionsMixin, TestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -155,6 +154,7 @@ from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
+from base.tests import QueriesAssertionsMixin, TestCaseWithQueriesAssertions
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
@@ -278,7 +278,7 @@ class _GroupeDeSupervisionDTO(UnfrozenDTO, GroupeDeSupervisionDTO):
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
-class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
+class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMixin):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
@@ -896,7 +896,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class SectionsAttachmentsTestCase(TestCase):
+class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls):
         # Mock osis-document
@@ -1248,7 +1248,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 type=TrainingType.CERTIFICATE_OF_SUCCESS.name,
                 code_domaine='CDFC',
@@ -1263,7 +1263,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 sigle_entite_gestion='FFC',
                 code='FC1',
@@ -1334,7 +1334,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 type=TrainingType.BACHELOR.name,
                 code_domaine='CDFG',
@@ -1349,7 +1349,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 sigle_entite_gestion='FFG',
                 code='FG1',

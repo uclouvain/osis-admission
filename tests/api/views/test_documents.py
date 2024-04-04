@@ -196,7 +196,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 language=settings.LANGUAGE_CODE_FR,
             ),
             training=Master120TrainingFactory(
-                enrollment_campus__email='abc@example.com',
+                enrollment_campus__sic_enrollment_email='abc@example.com',
             ),
             status=ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
         )

@@ -184,7 +184,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'edition': entity.edition.name if entity.edition else '',
                 'in_payement_order': entity.en_ordre_de_paiement,
                 'reduced_rights': entity.droits_reduits,
-                'payed_by_training_cheque': entity.paye_par_cheque_formation,
+                'pay_by_training_cheque': entity.paye_par_cheque_formation,
                 'cep': entity.cep,
                 'payement_spread': entity.etalement_des_paiments,
                 'training_spread': entity.etalement_de_la_formation,
@@ -259,7 +259,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             checklist_actuelle=checklist_actuelle and StatutsChecklistContinue.from_dict(checklist_actuelle),
             en_ordre_de_paiement=admission.in_payement_order,
             droits_reduits=admission.reduced_rights,
-            paye_par_cheque_formation=admission.payed_by_training_cheque,
+            paye_par_cheque_formation=admission.pay_by_training_cheque,
             cep=admission.cep,
             etalement_des_paiments=admission.payement_spread,
             etalement_de_la_formation=admission.training_spread,
@@ -310,7 +310,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     numero_rue=campus.street_number,
                     boite_postale=campus.postal_box,
                     localisation=campus.location,
-                    email=campus.email,
+                    email_inscription_sic=campus.sic_enrollment_email,
                 )
                 if campus is not None
                 else None,
@@ -331,7 +331,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     numero_rue=admission.training.enrollment_campus.street_number,
                     boite_postale=admission.training.enrollment_campus.postal_box,
                     localisation=admission.training.enrollment_campus.location,
-                    email=admission.training.enrollment_campus.email,
+                    email_inscription_sic=admission.training.enrollment_campus.sic_enrollment_email,
                 )
                 if admission.training.enrollment_campus is not None
                 else None,
@@ -384,7 +384,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             edition=admission.edition,
             en_ordre_de_paiement=admission.in_payement_order,
             droits_reduits=admission.reduced_rights,
-            paye_par_cheque_formation=admission.payed_by_training_cheque,
+            paye_par_cheque_formation=admission.pay_by_training_cheque,
             cep=admission.cep,
             etalement_des_paiments=admission.payement_spread,
             etalement_de_la_formation=admission.training_spread,
