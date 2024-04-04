@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import json
 from typing import List, Optional
 
@@ -137,6 +138,7 @@ class FreeDocumentHelperFormMixin(forms.Form):
 
         current_academic_year = AcademicYear.objects.current()
 
+        self.current_language = get_language()
         self.candidate_language = candidate_language
 
         self.fields['academic_year'].choices = get_year_choices(
@@ -146,14 +148,14 @@ class FreeDocumentHelperFormMixin(forms.Form):
             empty_label=_('To be determined'),
         )
 
-        self.fields['document_type'].widget.forward.append(forward.Const(self.candidate_language, 'language'))
+        self.fields['document_type'].widget.forward.append(forward.Const(self.current_language, 'language'))
 
     def clean_document_type(self):
         document_type: Optional[CategorizedFreeDocument] = self.cleaned_data.get('document_type')
 
         if document_type:
-            short_label_field_name = CategorizedFreeDocumentsAutocomplete.get_short_label_field(get_language())
-            long_label_field_name = CategorizedFreeDocumentsAutocomplete.get_long_label_field(self.candidate_language)
+            short_label_field_name = CategorizedFreeDocumentsAutocomplete.get_short_label_field()
+            long_label_field_name = CategorizedFreeDocumentsAutocomplete.get_long_label_field(self.current_language)
 
             self.fields['document_type'].widget.attrs['data-data'] = json.dumps(
                 [
@@ -182,6 +184,13 @@ class FreeDocumentHelperFormMixin(forms.Form):
             if document_type.with_academic_year and not academic_year:
                 self.add_error('academic_year', FIELD_REQUIRED_MESSAGE)
 
+            cleaned_data['file_name_en'] = document_type.long_label_en
+            cleaned_data['file_name_fr'] = document_type.long_label_fr
+
+        else:
+            cleaned_data['file_name_en'] = cleaned_data.get('file_name')
+            cleaned_data['file_name_fr'] = cleaned_data.get('file_name')
+
         return cleaned_data
 
 
@@ -194,7 +203,7 @@ class UploadManagerDocumentForm(FreeDocumentHelperFormMixin, UploadFreeDocumentF
         del self.fields['checklist_tab']
 
         self.fields['document_type'].widget.forward = [
-            forward.Const(self.candidate_language, 'language'),
+            forward.Const(settings.LANGUAGE_CODE_FR, 'language'),
             forward.Const('', 'checklist_tab'),
         ]
 
