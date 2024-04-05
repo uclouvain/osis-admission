@@ -1257,6 +1257,10 @@ msgstr ""
 msgid "Candidate"
 msgstr ""
 
+msgctxt "gender"
+msgid "Candidate"
+msgstr ""
+
 msgid "Candidate nationality"
 msgstr ""
 
