@@ -1382,6 +1382,10 @@ msgstr "Demande annulée"
 msgid "Candidate"
 msgstr "Candidat"
 
+msgctxt "gender"
+msgid "Candidate"
+msgstr "Candidat·e"
+
 msgid "Candidate nationality"
 msgstr "Nationalité du candidat"
 
