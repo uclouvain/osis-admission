@@ -104,11 +104,6 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
             else TypeEmplacementDocument.LIBRE_INTERNE_SIC.name
         )
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['candidate_language'] = self.admission.candidate.language
-        return kwargs
-
     def form_valid(self, form) -> HttpResponse:
         document_id = message_bus_instance.invoke(
             general_education_commands.InitialiserEmplacementDocumentLibreNonReclamableCommand(
@@ -120,12 +115,7 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
-        return super().form_valid(
-            self.form_class(
-                candidate_language=self.admission.candidate.language,
-                prefix=self.prefix,
-            )
-        )
+        return super().form_valid(self.form_class(prefix=self.prefix))
 
 
 class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
@@ -138,13 +128,8 @@ class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
         return {
             'data': {
                 'file_name': _('Analysis folder'),
-                'file_0': admission_pdf_recap(
-                    self.admission,
-                    get_language(),
-                    with_annotated_documents=True,
-                ),
+                'file_0': admission_pdf_recap(self.admission, get_language(), with_annotated_documents=True),
             },
-            'candidate_language': self.admission.candidate.language,
         }
 
 
@@ -227,11 +212,6 @@ class RequestFreeCandidateDocumentWithDefaultFileView(BaseRequestFreeCandidateDo
     urlpatterns = 'free-candidate-request-with-default-file'
     name = 'request-free-candidate-document-with-default-file'
     prefix = 'free-document-request-with-default-file-form'
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['candidate_language'] = self.admission.candidate.language
-        return kwargs
 
 
 class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, TemplateView):
