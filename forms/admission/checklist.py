@@ -64,7 +64,6 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutEmplacementDocument,
     TypeEmplacementDocument,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
