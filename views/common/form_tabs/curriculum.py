@@ -127,7 +127,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         return self.admission.candidate
 
     def get_success_url(self):
-        return reverse(
+        return self.next_url or reverse(
             self.base_namespace + ':update:curriculum:educational',
             kwargs={
                 'uuid': self.admission_uuid,
@@ -180,7 +180,7 @@ class CurriculumNonEducationalExperienceFormView(
             admission.save(update_fields=['checklist'])
 
     def get_success_url(self):
-        return reverse(
+        return self.next_url or reverse(
             self.base_namespace + ':update:curriculum:non_educational',
             kwargs={
                 'uuid': self.admission_uuid,
@@ -221,7 +221,7 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
                 else _('Cannot delete the experience because it is used in another context.')
             )
             messages.error(self.request, error_message)
-            return redirect(self.get_failure_url())
+            return redirect(self.next_url or self.get_failure_url())
 
         # Delete the information of the experience from the checklist
         admission: BaseAdmission = self.admission
@@ -245,13 +245,7 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
         return delete
 
     def get_success_url(self):
-        success_url = reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
-
-        redirect_to = self.request.POST.get('redirect_to')
-        if redirect_to:
-            success_url += redirect_to
-
-        return success_url
+        return self.next_url or reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
 
 
 class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceAcademiqueView):
@@ -398,13 +392,7 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
         return super().form_valid(form)
 
     def get_success_url(self):
-        success_url = reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
-
-        redirect_to = self.request.POST.get('redirect_to')
-        if redirect_to:
-            success_url += redirect_to
-
-        return success_url
+        return self.next_url or reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
 
 
 class CurriculumNonEducationalExperienceDuplicateView(CurriculumBaseExperienceDuplicateView):

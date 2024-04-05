@@ -88,7 +88,7 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
         return est_formation_medecine_ou_dentisterie(self.proposition.formation.code_domaine)
 
     def get_success_url(self):
-        return self.request.get_full_path()
+        return self.next_url or self.request.get_full_path()
 
     def update_current_admission_on_form_valid(self, form, admission):
         admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
