@@ -1137,8 +1137,9 @@ def bg_class_by_checklist_experience(experience):
     }.get(experience.__class__, '')
 
 
-@register.inclusion_tag('admission/includes/custom_base_template.html')
+@register.inclusion_tag('admission/includes/custom_base_template.html', takes_context=True)
 def experience_details_template(
+    context,
     resume_proposition: ResumePropositionDTO,
     experience,
     specific_questions: Dict[str, List[QuestionSpecifiqueDTO]] = None,
@@ -1147,12 +1148,14 @@ def experience_details_template(
 ):
     """
     Return the template used to render the experience details.
+    :param context: The template context
     :param resume_proposition: The proposition resume
     :param experience: The experience
     :param specific_questions: The specific questions related to the experience (only used for secondary studies)
     :return: The rendered template
     """
-    context = {
+    next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
+    res_context = {
         'is_general': resume_proposition.est_proposition_generale,
         'is_continuing': resume_proposition.est_proposition_continue,
         'is_doctorate': resume_proposition.est_proposition_doctorale,
@@ -1161,50 +1164,53 @@ def experience_details_template(
         'checklist_display': True,
     }
     if experience.__class__ == ExperienceAcademiqueDTO:
-        context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
-        context['title'] = _('Academic experience')
-        context['edit_link_button'] = (
+        res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
+        res_context['title'] = _('Academic experience')
+        res_context['edit_link_button'] = (
             reverse(
                 'admission:general-education:update:curriculum:educational',
                 args=[resume_proposition.proposition.uuid, experience.uuid],
             )
+            + next_url_suffix
             if with_edit_link_button
             else None
         )
-        context.update(get_educational_experience_context(resume_proposition, experience))
+        res_context.update(get_educational_experience_context(resume_proposition, experience))
 
     elif experience.__class__ == ExperienceNonAcademiqueDTO:
-        context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
-        context['title'] = _('Non-academic experience')
-        context['edit_link_button'] = (
+        res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
+        res_context['title'] = _('Non-academic experience')
+        res_context['edit_link_button'] = (
             reverse(
                 'admission:general-education:update:curriculum:non_educational',
                 args=[resume_proposition.proposition.uuid, experience.uuid],
             )
+            + next_url_suffix
             if with_edit_link_button
             else None
         )
-        context.update(get_non_educational_experience_context(experience))
+        res_context.update(get_non_educational_experience_context(experience))
 
     elif experience.__class__ == EtudesSecondairesDTO:
-        context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
-        context['etudes_secondaires'] = experience
-        context['edit_link_button'] = (
+        res_context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
+        res_context['etudes_secondaires'] = experience
+        res_context['edit_link_button'] = (
             reverse(
                 'admission:general-education:update:education',
                 args=[resume_proposition.proposition.uuid],
             )
+            + next_url_suffix
             if with_edit_link_button
             else None
         )
-        context.update(
+        res_context.update(
             get_secondary_studies_context(
                 resume_proposition,
                 specific_questions[Onglets.ETUDES_SECONDAIRES.name],
             )
         )
 
-    return context
+    return res_context
 
 
 @register.simple_tag(takes_context=True)
@@ -1213,7 +1219,9 @@ def checklist_experience_action_links_context(
     experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
     current_year,
     prefix,
+    parcours_tab_id='',
 ):
+    next_url_suffix = f'?next={context["request"].path}&next_hash_url={parcours_tab_id}'
     base_namespace = context['view'].base_namespace
     proposition_uuid = context['view'].kwargs['uuid']
     proposition_uuid_str = str(proposition_uuid)
@@ -1223,7 +1231,8 @@ def checklist_experience_action_links_context(
             'update_url': resolve_url(
                 f'{base_namespace}:update:education',
                 uuid=proposition_uuid_str,
-            ),
+            )
+            + next_url_suffix,
             'experience_uuid': str(experience.uuid),
         }
     elif proposition_uuid in experience.valorisee_par_admissions and experience.derniere_annee == current_year:
@@ -1234,7 +1243,8 @@ def checklist_experience_action_links_context(
                     f'{base_namespace}:update:curriculum:educational',
                     uuid=proposition_uuid_str,
                     experience_uuid=experience.uuid,
-                ),
+                )
+                + next_url_suffix,
                 'delete_url': resolve_url(
                     f'{base_namespace}:update:curriculum:educational_delete',
                     uuid=proposition_uuid_str,
@@ -1254,7 +1264,8 @@ def checklist_experience_action_links_context(
                     f'{base_namespace}:update:curriculum:non_educational',
                     uuid=proposition_uuid_str,
                     experience_uuid=experience.uuid,
-                ),
+                )
+                + next_url_suffix,
                 'delete_url': resolve_url(
                     f'{base_namespace}:update:curriculum:non_educational_delete',
                     uuid=proposition_uuid_str,
@@ -1278,8 +1289,9 @@ def checklist_experience_action_links(
     experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
     current_year,
     prefix,
+    parcours_tab_id,
 ):
-    return checklist_experience_action_links_context(context, experience, current_year, prefix)
+    return checklist_experience_action_links_context(context, experience, current_year, prefix, parcours_tab_id)
 
 
 @register.filter

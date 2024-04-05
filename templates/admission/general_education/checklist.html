@@ -510,7 +510,7 @@
           let currentTabSplit = currentTab.split('-');
           
           {# Manage the hash parameter #}
-          if (currentTabSplit.length > 1) {
+          if (currentTabSplit.length > 1 && 'parcours' === currentTabSplit[1]) {
               {# Split the hash to get the checklist tab from it #}
               currentTab = currentTabSplit[0]; {# Checklist tab #}
               {# Select the right parcours tab #}
@@ -972,11 +972,11 @@
               htmx.trigger('#' + this.id, 'modal-reload');
           });
 
-          {# Add the current parcours tabs id to the form data to allow a future redirection #}
-          $('.parcours-modals form').on('formdata', function(event) {
-              const formData = event.originalEvent.formData;
+          {# Add into the query params the current url and the current parcours tab id to allow a future redirection #}
+          $('.parcours-modals form').on('submit', function(event) {
               const activeTab = $(this).closest('.parcours-modals').siblings('.tab-pane.active');
-              formData.set('redirect_to', activeTab.length > 0 ? `#${activeTab.attr('id')}` : window.location.hash);
+              const nextURLHash = activeTab.length > 0 ? activeTab.attr('id') : window.location.hash.substring(1);
+              $(this).prop('action', `${$(this).prop('action')}?next={{ request.path }}&next_hash_url=${nextURLHash}`);
           });
 
       })(jQuery);

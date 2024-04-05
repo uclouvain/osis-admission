@@ -363,4 +363,4 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, FormV
             self.high_school_diploma['high_school_diploma_alternative'].delete()
 
     def get_success_url(self):
-        return self.request.get_full_path()
+        return self.next_url or self.request.get_full_path()

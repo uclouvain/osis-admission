@@ -27,7 +27,7 @@
 >
   {% if show_actions %}
     <td style="display: flex; gap: 3px;">
-      {% checklist_experience_action_links experience=experience current_year=year prefix=prefix %}
+      {% checklist_experience_action_links experience=experience current_year=year prefix=prefix parcours_tab_id=parcours_tab_id %}
     </td>
   {% endif %}
   {% if forloop.first %}<td rowspan="{{ year_experiences | length }}" class="{{ year_experiences|get_parcours_annee_background }}">{{ year | get_short_academic_year }}</td>{% endif %}
