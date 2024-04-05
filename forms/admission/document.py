@@ -129,7 +129,7 @@ class FreeDocumentHelperFormMixin(forms.Form):
         required=False,
     )
 
-    def __init__(self, candidate_language, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.tokens = {
@@ -139,7 +139,6 @@ class FreeDocumentHelperFormMixin(forms.Form):
         current_academic_year = AcademicYear.objects.current()
 
         self.current_language = get_language()
-        self.candidate_language = candidate_language
 
         self.fields['academic_year'].choices = get_year_choices(
             min_year=current_academic_year.year - 100,
@@ -224,7 +223,7 @@ class RequestFreeDocumentForm(FreeDocumentHelperFormMixin, forms.Form):
         choices=REQUEST_STATUS_CHOICES,
     )
 
-    def __init__(self, only_limited_request_choices, *args, **kwargs):
+    def __init__(self, only_limited_request_choices, candidate_language, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.fields['request_status'].choices = get_request_status_choices(only_limited_request_choices)
@@ -233,7 +232,7 @@ class RequestFreeDocumentForm(FreeDocumentHelperFormMixin, forms.Form):
             _(
                 'Communication to the candidate (refusal reason), in '
                 '<span class="label label-admission-primary">{language_code}]</span>'
-            ).format(language_code=formatted_language(self.candidate_language))
+            ).format(language_code=formatted_language(candidate_language))
         )
 
         if len(self.fields['request_status'].choices) == 2:
