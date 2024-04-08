@@ -166,10 +166,10 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             campus__nom='Charleroi',
         ),
         FormationFactory(
-            intitule='Certificate of participation in business',
+            intitule='Certificate in business',
             entity_id__sigle='CERTIF-BUS',
             entity_id__annee=2021,
-            type=TrainingType.CERTIFICATE_OF_PARTICIPATION.name,
+            type=TrainingType.CERTIFICATE,
             campus__nom='Charleroi',
         ),
     ]
