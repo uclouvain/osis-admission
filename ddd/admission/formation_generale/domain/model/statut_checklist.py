@@ -235,11 +235,6 @@ onglet_parcours_anterieur = ConfigurationOngletChecklist(
             statut=ChoixStatutChecklist.GEST_EN_COURS,
         ),
         ConfigurationStatutChecklist(
-            identifiant='A_COMPLETER_APRES_INSCRIPTION',
-            libelle=_('To be completed after application'),
-            statut=ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
-        ),
-        ConfigurationStatutChecklist(
             identifiant='INSUFFISANT',
             libelle=_('Insufficient'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
@@ -370,6 +365,11 @@ onglet_specificites_formation = ConfigurationOngletChecklist(
             identifiant='A_TRAITER',
             libelle=_('To be processed'),
             statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER_APRES_INSCRIPTION',
+            libelle=_('To be completed after application'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
         ),
         ConfigurationStatutChecklist(
             identifiant='INSUFFISANT',

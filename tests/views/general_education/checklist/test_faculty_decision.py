@@ -217,7 +217,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
             management_entity=cls.first_doctoral_commission,
             education_group_type__name=TrainingType.BACHELOR.name,
             academic_year=cls.academic_years[0],
-            enrollment_campus__email='mons@campus.be',
+            enrollment_campus__sic_enrollment_email='mons@campus.be',
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
@@ -230,7 +230,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             cycle_pursuit=PoursuiteDeCycle.NO.name,
-            determined_academic_year=self.academic_years[0]
+            determined_academic_year=self.academic_years[0],
         )
         self.default_checklist = copy.deepcopy(self.general_admission.checklist)
         self.url = resolve_url(

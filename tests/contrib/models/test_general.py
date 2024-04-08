@@ -32,18 +32,18 @@ from django.test import override_settings
 
 from admission.contrib.models import GeneralEducationAdmission
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
-from admission.tests import TestCase
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
 from base.models.enums.education_group_types import TrainingType
+from base.tests import TestCaseWithQueriesAssertions
 
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class TestGeneralEducationAdmissionDocuments(TestCase):
+class TestGeneralEducationAdmissionDocuments(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()

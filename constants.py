@@ -25,10 +25,10 @@
 # ##############################################################################
 import uuid
 
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 DEFAULT_PAGINATOR_SIZE = 500
-PDF_MIME_TYPE = 'application/pdf'
 JPEG_MIME_TYPE = 'image/jpeg'
 PNG_MIME_TYPE = 'image/png'
 IMAGE_MIME_TYPES = {JPEG_MIME_TYPE, PNG_MIME_TYPE}
