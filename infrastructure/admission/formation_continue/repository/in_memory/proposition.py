@@ -63,6 +63,7 @@ class PropositionInMemoryRepository(
         "0123456789": _Candidat("Jean", "Dupont", "France", True),
         "0000000001": _Candidat("Michel", "Durand", "Belgique", True),
         "candidat": _Candidat("Pierre", "Dupond", "Belgique", True),
+        "candidat_checklist": _Candidat("Pierre", "Dupond", "Belgique", True),
     }
     entities: List['Proposition'] = []
 
@@ -124,6 +125,18 @@ class PropositionInMemoryRepository(
                     '26de0c3d-3c06-4c93-8eb4-c8648f04f144': 'My response 4',
                     '26de0c3d-3c06-4c93-8eb4-c8648f04f145': 'My response 5',
                 },
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC2'),
+                matricule_candidat='candidat_checklist',
+                formation_id=FormationIdentityFactory(sigle="USCC2", annee=2020),
+                est_confirmee=True,
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC22'),
+                matricule_candidat='candidat_checklist',
+                formation_id=FormationIdentityFactory(sigle="USCC2", annee=2020),
+                est_acceptee=True,
             ),
         ]
 
@@ -201,4 +214,12 @@ class PropositionInMemoryRepository(
             a_reussi_l_epreuve_d_evaluation=proposition.a_reussi_l_epreuve_d_evaluation,
             diplome_produit=proposition.diplome_produit,
             intitule_du_tff=proposition.intitule_du_tff,
+            decision_dernier_mail_envoye_le=proposition.decision_dernier_mail_envoye_le,
+            decision_dernier_mail_envoye_par=proposition.decision_dernier_mail_envoye_par,
+            motif_de_mise_en_attente=proposition.motif_de_mise_en_attente,
+            motif_de_mise_en_attente_autre=proposition.motif_de_mise_en_attente_autre,
+            condition_d_approbation_par_la_faculte=proposition.condition_d_approbation_par_la_faculte,
+            motif_de_refus=proposition.motif_de_refus,
+            motif_de_refus_autre=proposition.motif_de_refus_autre,
+            motif_d_annulation=proposition.motif_d_annulation,
         )

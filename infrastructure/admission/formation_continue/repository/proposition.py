@@ -46,6 +46,9 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
     ChoixMoyensDecouverteFormation,
+    ChoixEdition,
+    ChoixMotifAttente,
+    ChoixMotifRefus,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
@@ -119,6 +122,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             academic_year__year=entity.formation_id.annee,
         )
         candidate = Person.objects.get(global_id=entity.matricule_candidat)
+        last_email_sent_by = (
+            Person.objects.get(global_id=entity.decision_dernier_mail_envoye_par)
+            if entity.decision_dernier_mail_envoye_par
+            else None
+        )
 
         adresse_facturation = (
             {
@@ -193,6 +201,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'assessment_test_succeeded': entity.a_reussi_l_epreuve_d_evaluation,
                 'certificate_provided': entity.diplome_produit,
                 'tff_label': entity.intitule_du_tff,
+                'last_email_sent_at': entity.decision_dernier_mail_envoye_le,
+                'last_email_sent_by': last_email_sent_by,
+                'on_hold_reason': entity.motif_de_mise_en_attente.name if entity.motif_de_mise_en_attente else '',
+                'on_hold_reason_other': entity.motif_de_mise_en_attente_autre,
+                'approval_condition_by_faculty': entity.condition_d_approbation_par_la_faculte,
+                'refusal_reason': entity.motif_de_refus.name if entity.motif_de_refus else '',
+                'refusal_reason_other': entity.motif_de_refus_autre,
+                'cancel_reason': entity.motif_d_annulation,
                 **adresse_facturation,
             },
         )
@@ -254,7 +270,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ChoixMoyensDecouverteFormation[way] for way in admission.ways_to_find_out_about_the_course
             ],
             marque_d_interet=admission.interested_mark,
-            edition=admission.edition,
+            edition=ChoixEdition[admission.edition] if admission.edition else None,
             checklist_initiale=checklist_initiale and StatutsChecklistContinue.from_dict(checklist_initiale),
             checklist_actuelle=checklist_actuelle and StatutsChecklistContinue.from_dict(checklist_actuelle),
             en_ordre_de_paiement=admission.in_payement_order,
@@ -268,6 +284,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             a_reussi_l_epreuve_d_evaluation=admission.assessment_test_succeeded,
             diplome_produit=admission.certificate_provided,
             intitule_du_tff=admission.tff_label,
+            decision_dernier_mail_envoye_le=admission.last_email_sent_at,
+            decision_dernier_mail_envoye_par=admission.last_email_sent_by.global_id
+            if admission.last_email_sent_by
+            else '',
+            motif_de_mise_en_attente=ChoixMotifAttente[admission.on_hold_reason] if admission.on_hold_reason else '',
+            motif_de_mise_en_attente_autre=admission.on_hold_reason_other,
+            condition_d_approbation_par_la_faculte=admission.approval_condition_by_faculty,
+            motif_de_refus=ChoixMotifRefus[admission.refusal_reason] if admission.refusal_reason else '',
+            motif_de_refus_autre=admission.refusal_reason_other,
+            motif_d_annulation=admission.cancel_reason,
         )
 
     @classmethod
@@ -393,4 +419,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             a_reussi_l_epreuve_d_evaluation=admission.assessment_test_succeeded,
             diplome_produit=admission.certificate_provided,
             intitule_du_tff=admission.tff_label,
+            decision_dernier_mail_envoye_le=admission.last_email_sent_at,
+            decision_dernier_mail_envoye_par=admission.last_email_sent_by.global_id
+            if admission.last_email_sent_by
+            else '',
+            motif_de_mise_en_attente=admission.on_hold_reason,
+            motif_de_mise_en_attente_autre=admission.on_hold_reason_other,
+            condition_d_approbation_par_la_faculte=admission.approval_condition_by_faculty,
+            motif_de_refus=admission.refusal_reason,
+            motif_de_refus_autre=admission.refusal_reason_other,
+            motif_d_annulation=admission.cancel_reason,
         )

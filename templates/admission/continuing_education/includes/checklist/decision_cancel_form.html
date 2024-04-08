@@ -1,0 +1,164 @@
+{% load admission i18n bootstrap3 waffle_tags %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<form
+    hx-post="{% url view.base_namespace|add:':decision-cancel' uuid=view.kwargs.uuid %}"
+    hx-target="this"
+    hx-swap="outerHTML"
+    style="overflow: auto;"
+    id="decision-cancel-form"
+>
+  <div class="modal-body" style="overflow:auto;">
+
+      {% if current.statut != initial.statut and current.extra.en_cours != 'taken_in_charge' %}
+      <div class="alert alert-danger">
+        {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'on_hold' %}
+          {% translate 'An holding mail has already been sent to the candidate.' %}
+        {% elif current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'fac_approval' %}
+          {% translate 'An approval mail has already been sent to the candidate.' %}
+        {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'denied' %}
+          {% translate 'A deny mail has already been sent to the candidate.' %}
+        {% elif current.statut == 'GEST_REUSSITE' %}
+          {% translate 'The application has been validated.' %}
+        {% endif %}
+        {% translate 'Are you sure you want to change the status?' %}
+      </div>
+      {% endif %}
+
+      <div class="form-group"><strong>{% trans "Contact language" %}</strong> <span class="label label-admission-primary">{{ admission.candidate.language|formatted_language }}</span></div>
+
+      {% bootstrap_form_errors decision_cancel_form %}
+
+      {% bootstrap_field decision_cancel_form.reason %}
+
+      <div id="decision-cancel-mail-container">
+        <a href="#" id="decision-cancel-reset-subject" class="btn btn-sm btn-primary reset-button"><i class="fa fa-rotate-right"></i> {% translate "Reset" %}</a>
+        {% bootstrap_field decision_cancel_form.subject %}
+
+        <a href="#" id="decision-cancel-reset-body" class="btn btn-sm btn-primary reset-button"><i class="fa fa-rotate-right"></i> {% translate 'Create message' %}</a>
+        {% bootstrap_field decision_cancel_form.body %}
+      </div>
+  </div>
+
+  <div class="modal-footer">
+    <button
+      id="decision-cancel-send-btn"
+      class="btn btn-success"
+      name="save"
+      disabled
+      data-toggle="popover"
+      data-placement="auto top"
+      data-trigger="hover"
+      data-container="body"
+      data-content="{% translate "You need to create the message before sending it." %}"
+    >
+      <i class="fa fa-envelope"></i>
+      {% translate 'Send' context 'admission' %}
+    </button>
+    <button
+        class="btn btn-default"
+        data-dismiss="modal"
+    >
+      {% translate 'Cancel' %}
+    </button>
+  </div>
+
+  {{ decision_cancel_form.initial.subject|json_script:"decision_cancel_form_subject" }}
+  {{ decision_cancel_form.initial.body|json_script:"decision_cancel_form_body" }}
+  {{ decision_cancel_form.media }}
+
+  <script>
+      $(document).ready(() => {
+        {# Reset / Set mail templates values #}
+        const defaultMessage = JSON.parse(document.getElementById('decision_cancel_form_body').textContent);
+        const defaultObject = JSON.parse(document.getElementById('decision_cancel_form_subject').textContent);
+        const $messageObjectInput = $('#id_decision-cancel-subject');
+        const $messageContentResetModal = $('#message-content-reset-confirm-modal');
+        const $messageObjectResetModal = $('#message-object-reset-confirm-modal');
+
+        $('#content-reset-confirm-button').click(function(event) {
+            if ($('#cke_id_decision-cancel-body').is(':hidden')) {
+                return;
+            }
+            event.preventDefault();
+
+            const motif = $('#id_decision-cancel-reason option:selected').text();
+            const value = defaultMessage.replace('__MOTIF__', motif);
+
+            CKEDITOR.instances['id_decision-cancel-body'].setData(value);
+            $('#id_decision-cancel-body').val(value);
+            $messageContentResetModal.modal('hide');
+        });
+
+        $('#object-reset-confirm-button').click(function(event) {
+            if ($messageObjectInput.is(':hidden')) {
+                return;
+            }
+            event.preventDefault();
+            $('#id_decision-cancel-subject').val(defaultObject);
+            $messageObjectResetModal.modal('hide');
+        });
+
+        $('#decision-cancel-reset-body').click(function(event){
+            event.preventDefault();
+            const $messageContentContainer = $('#cke_id_decision-cancel-body');
+
+            if ($messageContentContainer.is(':hidden')) {
+              $messageContentContainer.show();
+              $('#content-reset-confirm-button').click();
+              $('#decision-cancel-reset-body').html($('#decision-cancel-reset-subject').html());
+              $('#decision-cancel-send-btn').prop('disabled', false).popover('destroy');
+            } else {
+              $messageContentResetModal.modal('show');
+            }
+        });
+
+        $('#decision-cancel-reset-subject').click(function(event){
+            event.preventDefault();
+            $messageObjectResetModal.modal('show');
+        });
+
+        CKEDITOR.on('instanceReady', function(){
+            {% if not decision_cancel_form.is_bound %}
+              $('#cke_id_decision-cancel-body').hide();
+            {% endif %}
+        });
+
+        $('#decision-cancel-send-btn[data-toggle="popover"]').popover();
+        {# / #}
+
+        initializeCKEditor('id_decision-cancel-body');
+      });
+  </script>
+
+  {% if request.htmx %}
+    <script>
+      $(document).ready(function(){
+          $('#decision-cancel-form *[data-toggle=popover]').popover();
+      });
+    </script>
+  {% endif %}
+</form>

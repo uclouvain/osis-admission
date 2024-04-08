@@ -116,8 +116,8 @@ class CommentForm(forms.Form):
 
         super().__init__(*args, **kwargs)
 
-        form_for_sic = f'__{COMMENT_TAG_SIC}' in self.prefix
-        form_for_fac = f'__{COMMENT_TAG_FAC}' in self.prefix
+        form_for_sic = self.prefix.endswith(f'__{COMMENT_TAG_SIC}')
+        form_for_fac = self.prefix.endswith(f'__{COMMENT_TAG_FAC}')
 
         self.fields['comment'].widget.attrs['hx-post'] = form_url
 

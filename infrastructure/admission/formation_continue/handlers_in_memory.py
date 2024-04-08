@@ -30,6 +30,24 @@ from admission.ddd.admission.formation_continue.use_case.read.recuperer_resume_e
     recuperer_resume_et_emplacements_documents_non_libres_proposition,
 )
 from admission.ddd.admission.formation_continue.use_case.write import *
+from admission.ddd.admission.formation_continue.use_case.write.annuler_proposition_service import (
+    annuler_proposition,
+)
+from admission.ddd.admission.formation_continue.use_case.write.approuver_par_fac_service import (
+    approuver_par_fac,
+)
+from admission.ddd.admission.formation_continue.use_case.write.cloturer_proposition_service import (
+    cloturer_proposition,
+)
+from admission.ddd.admission.formation_continue.use_case.write.mettre_en_attente_service import (
+    mettre_en_attente,
+)
+from admission.ddd.admission.formation_continue.use_case.write.refuser_proposition_service import (
+    refuser_proposition,
+)
+from admission.ddd.admission.formation_continue.use_case.write.valider_proposition_service import (
+    valider_proposition,
+)
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
@@ -51,6 +69,7 @@ from admission.infrastructure.admission.domain.service.in_memory.titres_acces im
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.historique import HistoriqueInMemory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.notification import (
     NotificationInMemory,
 )
@@ -75,6 +94,8 @@ _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 _academic_year_repository = AcademicYearInMemoryRepository()
 _emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
 _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
+_historique = HistoriqueInMemory()
+_notification = NotificationInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -178,5 +199,40 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         personne_connue_translator=_personne_connue_ucl_translator,
         question_specifique_translator=_question_specific_translator,
+    ),
+    MettreEnAttenteCommand: lambda msg_bus, cmd: mettre_en_attente(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+        notification=_notification,
+    ),
+    ApprouverParFacCommand: lambda msg_bus, cmd: approuver_par_fac(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+        notification=_notification,
+    ),
+    RefuserPropositionCommand: lambda msg_bus, cmd: refuser_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+        notification=_notification,
+    ),
+    AnnulerPropositionCommand: lambda msg_bus, cmd: annuler_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+        notification=_notification,
+    ),
+    ValiderPropositionCommand: lambda msg_bus, cmd: valider_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+        notification=_notification,
+    ),
+    CloturerPropositionCommand: lambda msg_bus, cmd: cloturer_proposition(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
     ),
 }
