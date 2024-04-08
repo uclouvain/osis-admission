@@ -97,6 +97,8 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             intitule_formation=proposition.formation.intitule,
             type_formation=proposition.formation.type,
             lieu_formation=proposition.formation.campus.nom,
+            annee_formation=proposition.formation.annee,
+            annee_calculee=proposition.annee_calculee,
             nationalite_candidat='',
             nationalite_ue_candidat=None,
             vip=any(
@@ -131,6 +133,8 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             intitule_formation=proposition.doctorat.intitule,
             type_formation=proposition.doctorat.type,
             lieu_formation=proposition.doctorat.campus,
+            annee_formation=proposition.doctorat.annee,
+            annee_calculee=proposition.annee_calculee,
             nationalite_candidat=proposition.nationalite_candidat,
             nationalite_ue_candidat=None,
             vip=any([proposition.bourse_recherche]),
@@ -159,6 +163,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             intitule_formation=proposition.formation.intitule,
             type_formation=proposition.formation.type,
             lieu_formation=proposition.formation.campus.nom,
+            annee_formation=proposition.formation.annee,
             nationalite_candidat=proposition.pays_nationalite_candidat,
             nationalite_ue_candidat=proposition.pays_nationalite_ue_candidat,
             vip=False,
@@ -171,4 +176,5 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             date_confirmation=proposition.soumise_le,
             est_premiere_annee=None,
             poursuite_de_cycle='',
+            annee_calculee=proposition.annee_calculee,
         )

@@ -196,6 +196,10 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 date_confirmation=cls.admissions[0].submitted_at,
                 est_premiere_annee=False,
                 poursuite_de_cycle='',
+                annee_formation=cls.admissions[0].training.academic_year.year,
+                annee_calculee=cls.admissions[0].determined_academic_year.year
+                if cls.admissions[0].determined_academic_year
+                else None,
             ),
         ]
 

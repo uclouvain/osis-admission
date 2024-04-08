@@ -230,6 +230,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         editable_document = can_edit_document(document, self.is_fac, self.is_sic)
         context['editable_document'] = editable_document
         context['retypable_document'] = can_retype_document(document, document_identifier)
+        context['read_only_document'] = self.request.GET.get('read-only') == '1'
         context['document'] = document
 
         if document.uuids:

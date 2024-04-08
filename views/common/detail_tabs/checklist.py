@@ -26,6 +26,7 @@
 import datetime
 from typing import Dict, Set, Optional, List
 
+import attr
 from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
@@ -41,6 +42,8 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView, FormView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
+
+from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
@@ -75,7 +78,10 @@ from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     DocumentsEtudesSecondaires,
 )
-from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
+from admission.ddd.admission.enums.statut import (
+    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
+    STATUTS_TOUTE_PROPOSITION_SOUMISE,
+)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
@@ -122,8 +128,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
-    InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
+    InformationsDestinatairePasTrouvee,
+)
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
@@ -1417,17 +1424,28 @@ class ChecklistView(
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
-            context['autres_demandes'] = [
-                demande
-                for demande in message_bus_instance.invoke(
-                    ListerToutesDemandesQuery(
-                        annee_academique=self.admission.determined_academic_year.year,
-                        matricule_candidat=self.admission.candidate.global_id,
-                        etats=STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER,
-                    )
+            candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
+                ListerToutesDemandesQuery(
+                    matricule_candidat=self.admission.candidate.global_id,
+                    etats=STATUTS_TOUTE_PROPOSITION_SOUMISE,
+                    champ_tri='date_confirmation',
+                    tri_inverse=True,
                 )
-                if demande.uuid != self.admission_uuid
-            ]
+            )
+
+            submitted_for_the_current_year_admissions: List[DemandeRechercheDTO] = []
+            submitted_candidate_admissions_by_uuid: Dict[str, DemandeRechercheDTO] = {}
+
+            for admission in candidate_admissions:
+                if (
+                    admission.etat_demande in STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER
+                    and admission.annee_demande == self.admission.determined_academic_year.year
+                    and admission.uuid != self.admission_uuid
+                ):
+                    submitted_for_the_current_year_admissions.append(admission)
+                submitted_candidate_admissions_by_uuid[admission.uuid] = admission
+
+            context['autres_demandes'] = submitted_for_the_current_year_admissions
 
             # Initialize forms
             tab_names = list(self.extra_context['checklist_tabs'].keys())
@@ -1475,14 +1493,11 @@ class ChecklistView(
             documents_by_tab = self.checklist_documents_by_tab(specific_questions=specific_questions)
 
             context['documents'] = {
-                tab_name: sorted(
-                    [
-                        admission_document
-                        for admission_document in admission_documents
-                        if admission_document.identifiant.split('.')[-1] in tab_documents
-                    ],
-                    key=lambda doc: doc.libelle,
-                )
+                tab_name: [
+                    admission_document
+                    for admission_document in admission_documents
+                    if admission_document.identifiant.split('.')[-1] in tab_documents
+                ]
                 for tab_name, tab_documents in documents_by_tab.items()
             }
 
@@ -1544,6 +1559,8 @@ class ChecklistView(
             children_by_identifier = {
                 child['extra']['identifiant']: child for child in children if child.get('extra', {}).get('identifiant')
             }
+            last_valuated_admission_by_experience_uuid = {}
+            not_valuated_by_current_admission_experiences_uuids = set()
 
             for experience_uuid, current_experience in experiences_by_uuid.items():
                 tab_identifier = f'parcours_anterieur__{experience_uuid}'
@@ -1584,24 +1601,24 @@ class ChecklistView(
                     label=_('Comment about the authentication'),
                 )
 
+                # Get the last valuated admission for this experience
+                valuated_admissions = getattr(current_experience, 'valorisee_par_admissions', [])
+
+                if valuated_admissions and self.admission_uuid not in valuated_admissions:
+                    not_valuated_by_current_admission_experiences_uuids.add(experience_uuid)
+                    last_valuated_admission_by_experience_uuid[experience_uuid] = next(
+                        (admission for admission in candidate_admissions if admission.uuid in valuated_admissions),
+                        None,
+                    )
+
+            context['last_valuated_admission_by_experience_uuid'] = last_valuated_admission_by_experience_uuid
+
             # Remove the experiences that we had in the checklist that have been removed
             children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
 
-            # Add the documents related to cv experiences
-            for admission_document in admission_documents:
-                document_tab_identifier = admission_document.onglet.split('.')
-
-                if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
-                    tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
-
-                    if tab_identifier not in context['documents']:
-                        context['documents'][tab_identifier] = [admission_document]
-                    else:
-                        context['documents'][tab_identifier].append(admission_document)
-
+            # Order the experiences in chronological order
+            ordered_experiences = {}
             if children:
-                # Order the experiences in chronological order
-                ordered_experiences = {}
                 order = 0
 
                 for annee, experience_list in experiences.items():
@@ -1613,20 +1630,42 @@ class ChecklistView(
 
                 children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
 
-                # Some tabs also contain the documents of each experience
-                past_experiences_documents = []
-                for experience_uuid in ordered_experiences:
-                    current_uuid = f'parcours_anterieur__{experience_uuid}'
-                    if context['documents'].get(current_uuid):
-                        past_experiences_documents.append(
-                            [
-                                context['checklist_tabs'][current_uuid],  # Name of the experience
-                                context['documents'][current_uuid],  # List of documents of the experience
-                            ]
-                        )
+            prefixed_past_experiences_documents = []
+            documents_from_not_valuated_experiences = []
+            context['read_only_documents'] = documents_from_not_valuated_experiences
 
-                context['documents']['parcours_anterieur'].extend(past_experiences_documents)
-                context['documents']['financabilite'].extend(past_experiences_documents)
+            # Add the documents related to cv experiences
+            for admission_document in admission_documents:
+                document_tab_identifier = admission_document.onglet.split('.')
+
+                if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
+                    tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
+
+                    if document_tab_identifier[1] in not_valuated_by_current_admission_experiences_uuids:
+                        documents_from_not_valuated_experiences.append(admission_document.identifiant)
+
+                    if tab_identifier not in context['documents']:
+                        context['documents'][tab_identifier] = [admission_document]
+                    else:
+                        context['documents'][tab_identifier].append(admission_document)
+
+                    prefixed_past_experiences_documents.append(
+                        attr.evolve(
+                            admission_document,
+                            libelle='{experience_name} > {document_name}'.format(
+                                experience_name=context['checklist_tabs'].get(tab_identifier, ''),  # Experience name
+                                document_name=admission_document.libelle,  # Document name
+                            ),
+                        )
+                    )
+
+            # Sort the documents by label
+            for documents in context['documents'].values():
+                documents.sort(key=lambda doc: doc.libelle)
+
+            # Some tabs also contain the documents of each experience
+            context['documents']['parcours_anterieur'].extend(prefixed_past_experiences_documents)
+            context['documents']['financabilite'].extend(prefixed_past_experiences_documents)
 
             original_admission = self.admission
 

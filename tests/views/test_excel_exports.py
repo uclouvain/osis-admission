@@ -188,6 +188,10 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             date_confirmation=cls.admission.submitted_at,
             est_premiere_annee=False,
             poursuite_de_cycle=cls.admission.cycle_pursuit,
+            annee_formation=cls.admission.training.academic_year.year,
+            annee_calculee=cls.admission.determined_academic_year.year
+            if cls.admission.determined_academic_year
+            else None,
         )
 
         cls.default_params = {
