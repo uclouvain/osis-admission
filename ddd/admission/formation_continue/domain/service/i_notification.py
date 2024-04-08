@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from abc import abstractmethod
+from email.message import EmailMessage
 
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from osis_common.ddd import interface
@@ -35,4 +36,54 @@ class INotification(interface.DomainService):
     @classmethod
     @abstractmethod
     def confirmer_soumission(cls, proposition: Proposition) -> None:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def mettre_en_attente(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def approuver_par_fac(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def refuser_proposition(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def annuler_proposition(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def approuver_proposition(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
         raise NotImplementedError

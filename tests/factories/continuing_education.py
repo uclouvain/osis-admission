@@ -83,6 +83,7 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
     )
     reference = factory.LazyAttribute(generate_proposition_reference)
     registration_as = ChoixInscriptionATitre.PRIVE.name
+    determined_academic_year = factory.SubFactory(AcademicYearFactory, current=True)
     checklist = factory.Dict({'default': True})  # This default value is overriden in a post generation method
     motivations = 'My motivations'
     ways_to_find_out_about_the_course = [

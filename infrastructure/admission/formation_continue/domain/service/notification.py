@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from email.message import EmailMessage
 from typing import Dict
 
 from django.conf import settings
@@ -32,7 +33,9 @@ from osis_async.models import AsyncTask
 from osis_document.api.utils import get_remote_token
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
+from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
+from osis_notification.contrib.notification import EmailNotification
 
 from admission.auth.roles.program_manager import ProgramManager
 from admission.contrib.models import AdmissionTask, ContinuingEducationAdmission
@@ -42,8 +45,29 @@ from admission.ddd.admission.formation_continue.domain.service.i_notification im
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING
 from admission.utils import get_salutation_prefix
 
+from base.models.person import Person
+
 
 class Notification(INotification):
+    @classmethod
+    def _create_email_message_for_person(
+        cls,
+        person: Person,
+        objet_message: str,
+        corps_message: str,
+    ):
+        email_notification = EmailNotification(
+            recipient=person.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=person)
+
+        return candidate_email_message
+
     @classmethod
     def get_common_tokens(cls, admission: ContinuingEducationAdmission) -> Dict:
         """Return common tokens about a submission"""
@@ -128,3 +152,73 @@ class Notification(INotification):
             email_message['Cc'] = ','.join([program_manager.person.email for program_manager in program_managers])
 
         EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+    @classmethod
+    def mettre_en_attente(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+        return cls._create_email_message_for_person(
+            person=candidate,
+            objet_message=objet_message,
+            corps_message=corps_message,
+        )
+
+    @classmethod
+    def approuver_par_fac(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+        return cls._create_email_message_for_person(
+            person=candidate,
+            objet_message=objet_message,
+            corps_message=corps_message,
+        )
+
+    @classmethod
+    def refuser_proposition(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+        return cls._create_email_message_for_person(
+            person=candidate,
+            objet_message=objet_message,
+            corps_message=corps_message,
+        )
+
+    @classmethod
+    def annuler_proposition(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+        return cls._create_email_message_for_person(
+            person=candidate,
+            objet_message=objet_message,
+            corps_message=corps_message,
+        )
+
+    @classmethod
+    def approuver_proposition(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+        return cls._create_email_message_for_person(
+            person=candidate,
+            objet_message=objet_message,
+            corps_message=corps_message,
+        )

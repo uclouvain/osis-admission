@@ -1330,6 +1330,14 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             a_reussi_l_epreuve_d_evaluation=False,
             diplome_produit=False,
             intitule_du_tff="",
+            decision_dernier_mail_envoye_le=None,
+            decision_dernier_mail_envoye_par="",
+            motif_de_mise_en_attente="",
+            motif_de_mise_en_attente_autre="",
+            condition_d_approbation_par_la_faculte="",
+            motif_de_refus="",
+            motif_de_refus_autre="",
+            motif_d_annulation="",
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',
