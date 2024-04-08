@@ -42,7 +42,7 @@ class CampusDTO(interface.DTO):
     numero_rue: str
     boite_postale: str
     localisation: str
-    # email: str
+    email: str
 
     def __str__(self):
         return self.nom
