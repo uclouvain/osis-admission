@@ -93,7 +93,7 @@ def _get_status_from_digit_response(similarity_data):
     if settings.MOCK_DIGIT_SERVICE_CALL:
         return PersonMergeStatus.MATCH_FOUND.name
     if similarity_data:
-        if "status" in similarity_data.keys() and similarity_data["status"] == 500:
+        if type(similarity_data) != list and "status" in similarity_data.keys() and similarity_data["status"] == 500:
             return PersonMergeStatus.ERROR.name
         else:
             return PersonMergeStatus.MATCH_FOUND.name
