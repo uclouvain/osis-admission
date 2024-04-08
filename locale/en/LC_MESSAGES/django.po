@@ -302,6 +302,10 @@ msgstr ""
 msgid "Academic year"
 msgstr ""
 
+msgctxt "admission"
+msgid "Academic year"
+msgstr ""
+
 msgid "Academic year of the admission"
 msgstr ""
 
@@ -1398,6 +1402,10 @@ msgstr ""
 msgid "Checklist"
 msgstr ""
 
+msgctxt "admission"
+msgid "Checklist"
+msgstr ""
+
 msgid "Checklist filters"
 msgstr ""
 
@@ -2246,6 +2254,10 @@ msgid "Document not found."
 msgstr ""
 
 msgid "Document to be requested"
+msgstr ""
+
+msgctxt "admission"
+msgid "Document type"
 msgstr ""
 
 msgid "Documents"
@@ -3734,6 +3746,12 @@ msgstr ""
 msgid "Long"
 msgstr ""
 
+msgid "Long label in english"
+msgstr ""
+
+msgid "Long label in french"
+msgstr ""
+
 msgid "Long name"
 msgstr ""
 
@@ -5161,10 +5179,6 @@ msgstr ""
 msgid "Rank in diploma"
 msgstr ""
 
-msgctxt "admission"
-msgid "Reason"
-msgstr ""
-
 msgid "Reason for exceeding the deadline"
 msgstr ""
 
@@ -5744,6 +5758,12 @@ msgstr ""
 msgid "Short"
 msgstr ""
 
+msgid "Short label in english"
+msgstr ""
+
+msgid "Short label in french"
+msgstr ""
+
 msgid "Short name"
 msgstr ""
 
@@ -6195,6 +6215,9 @@ msgid "The document has been uploaded"
 msgstr ""
 
 msgid "The document is no longer designated as to be requested"
+msgstr ""
+
+msgid "The document must be related to the specified checklist tab"
 msgstr ""
 
 msgid "The documents have been requested to the candidate"
@@ -6662,6 +6685,9 @@ msgstr ""
 msgid "To be completed for the Enrolment Office (SIC)"
 msgstr ""
 
+msgid "To be determined"
+msgstr ""
+
 msgid "To be processed"
 msgstr ""
 
@@ -6871,6 +6897,9 @@ msgctxt "admission"
 msgid "Upload"
 msgstr ""
 
+msgid "Upload a UCLouvain document"
+msgstr ""
+
 msgid "Upload a document"
 msgstr ""
 
@@ -7030,6 +7059,9 @@ msgid ""
 msgstr ""
 
 msgid "Whole view"
+msgstr ""
+
+msgid "With academic year"
 msgstr ""
 
 msgid "Without free documents"

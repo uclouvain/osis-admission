@@ -1,4 +1,4 @@
-{% load i18n bootstrap3 admission %}
+{% load bootstrap3 %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -22,15 +22,19 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-<form
-    hx-post="{% url request.resolver_match.namespace|add:':free-candidate-request-with-default-file' uuid=view.kwargs.uuid %}"
-    method="post"
->
-  {% csrf_token %}
-  {% include 'admission/document/free_document_helper_inputs.html' with form=form %}
-  {% bootstrap_field form.file_name %}
-  {% bootstrap_field form.file %}
-  <button type="submit" class="btn btn-default">{% translate 'Save' context 'admission' %}</button>
-</form>
+<div class="row">
+  {% if not without_checklist_tab_input %}
+  <div class="col-md-4" id="{{ form.checklist_tab.id_for_label }}-container">
+    {% bootstrap_field form.checklist_tab %}
+  </div>
+  {% endif %}
+  <div class="col-md-8" id="{{ form.document_type.id_for_label }}-container">
+    {% bootstrap_field form.document_type %}
+  </div>
+</div>
 
-{% include 'admission/document/free_document_helper_script.html' with form=form %}
+<div class="row" id="{{ form.academic_year.id_for_label }}-container">
+  <div class="col-md-4 required_field">
+    {% bootstrap_field form.academic_year %}
+  </div>
+</div>
