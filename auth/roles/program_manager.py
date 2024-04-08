@@ -33,11 +33,7 @@ from admission.auth.predicates.common import (
     is_part_of_education_group,
     is_debug,
 )
-from admission.auth.predicates.general import (
-    in_fac_status,
-    is_submitted,
-    in_fac_document_request_status,
-)
+from admission.auth.predicates import general, continuing
 from base.models.education_group import EducationGroup
 from base.models.enums.education_group_types import TrainingType
 from continuing_education.models.continuing_education_training import CONTINUING_EDUCATION_TRAINING_TYPES
@@ -100,17 +96,20 @@ class ProgramManager(EducationGroupRoleModel):
             # Management
             'admission.add_internalnote': is_part_of_education_group,
             'admission.view_internalnote': is_part_of_education_group,
-            'admission.view_documents_management': is_part_of_education_group & is_submitted,
-            'admission.edit_documents': is_part_of_education_group & is_submitted,
-            'admission.change_documents_management': is_part_of_education_group & in_fac_status,
-            'admission.cancel_document_request': is_part_of_education_group & in_fac_document_request_status,
-            'admission.view_checklist': is_part_of_education_group & is_submitted,
-            'admission.checklist_change_faculty_decision': is_part_of_education_group & in_fac_status,
+            'admission.view_documents_management': is_part_of_education_group & general.is_submitted,
+            'admission.edit_documents': is_part_of_education_group & general.is_submitted,
+            'admission.change_documents_management': is_part_of_education_group & general.in_fac_status,
+            'admission.cancel_document_request': is_part_of_education_group & general.in_fac_document_request_status,
+            'admission.view_checklist': is_part_of_education_group & (general.is_submitted | continuing.is_submitted),
+            'admission.change_checklist': is_part_of_education_group
+            & continuing.is_continuing
+            & continuing.is_submitted,
+            'admission.checklist_change_faculty_decision': is_part_of_education_group & general.in_fac_status,
             'admission.checklist_faculty_decision_transfer_to_sic_with_decision': is_part_of_education_group
-            & in_fac_status,
+            & general.in_fac_status,
             'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_part_of_education_group
-            & in_fac_status,
-            'admission.checklist_select_access_title': is_part_of_education_group & in_fac_status,
+            & general.in_fac_status,
+            'admission.checklist_select_access_title': is_part_of_education_group & general.in_fac_status,
             'admission.checklist_change_fac_comment': is_part_of_education_group,
             'admission.view_debug_info': is_part_of_education_group & is_debug,
             # Exports

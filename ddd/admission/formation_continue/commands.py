@@ -175,3 +175,55 @@ class RetyperDocumentCommand(interface.CommandRequest):
     identifiant_source: str
     identifiant_cible: str
     auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class MettreEnAttenteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+    motif: str
+    autre_motif: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverParFacCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+    condition: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+    motif: str
+    autre_motif: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnnulerPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+    motif: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ValiderPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CloturerPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,8 +29,16 @@ import uuid
 import factory
 from factory.fuzzy import FuzzyText
 
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixInscriptionATitre
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixInscriptionATitre,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity, Proposition
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    StatutChecklist,
+    StatutsChecklistContinue,
+)
 from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
 
@@ -41,6 +49,26 @@ class _PropositionIdentityFactory(factory.Factory):
         abstract = False
 
     uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
+
+
+class StatutChecklistFactory(factory.Factory):
+    class Meta:
+        model = StatutChecklist
+        abstract = False
+
+    libelle = FuzzyText(length=10, chars=string.digits)
+    enfants = factory.List([])
+    statut = ChoixStatutChecklist.INITIAL_CANDIDAT
+    extra = factory.Dict({})
+
+
+class StatutsChecklistContinueFactory(factory.Factory):
+    class Meta:
+        model = StatutsChecklistContinue
+        abstract = False
+
+    fiche_etudiant = factory.SubFactory(StatutChecklistFactory)
+    decision = factory.SubFactory(StatutChecklistFactory)
 
 
 class PropositionFactory(factory.Factory):
@@ -55,3 +83,19 @@ class PropositionFactory(factory.Factory):
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')
     inscription_a_titre = ChoixInscriptionATitre.PRIVE
+
+    class Params:
+        est_confirmee = factory.Trait(
+            statut=ChoixStatutPropositionContinue.CONFIRMEE,
+            checklist_initiale=factory.SubFactory(StatutsChecklistContinueFactory),
+            checklist_actuelle=factory.SubFactory(StatutsChecklistContinueFactory),
+        )
+        est_acceptee = factory.Trait(
+            statut=ChoixStatutPropositionContinue.CONFIRMEE,
+            checklist_initiale=factory.SubFactory(StatutsChecklistContinueFactory),
+            checklist_actuelle=factory.SubFactory(
+                StatutsChecklistContinueFactory,
+                decision__statut=ChoixStatutChecklist.GEST_EN_COURS,
+                decision__extra={'en_cours': 'fac_approval'},
+            ),
+        )

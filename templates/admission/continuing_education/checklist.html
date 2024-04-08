@@ -61,6 +61,24 @@
         class="tab-content"
     >
         <div role="tabpanel" class="tab-pane in active" id="fiche_etudiant">
+        
+          {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'on_hold' %}
+            <div class="alert alert-info">
+              {% translate "On hold reason:" %} {% if original_admission.on_hold_reason == 'AUTRE' %}{{ original_admission.on_hold_reason_other }}{% else %}{{ original_admission.on_hold_reason|enum_display:'ChoixMotifAttente' }}{% endif %}
+            </div>
+          {% elif current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'fac_approval' %}
+            <div class="alert alert-info">
+              {% translate "Approval by faculty condition:" %} {{ original_admission.approval_condition_by_faculty }}
+            </div>
+          {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'denied' %}
+            <div class="alert alert-danger">
+              {% translate "Refusal reason:" %} {% if original_admission.refusal_reason == 'AUTRE' %}{{ original_admission.refusal_reason_other }}{% else %}{{ original_admission.refusal_reason|enum_display:'ChoixMotifRefus' }}{% endif %}
+            </div>
+          {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'canceled' %}
+            <div class="alert alert-info">
+              {% translate "Cancel reason:" %} {{ original_admission.cancel_reason }}
+            </div>
+          {% endif %}
 
           {% include "admission/continuing_education/includes/checklist/fiche_etudiant_form.html" %}
           {% bootstrap_form comment_forms.fiche_etudiant %}
@@ -68,28 +86,25 @@
           <div class="info-part">
           </div>
         </div>
+        
+        {% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision next_url=next_base_url|add:'decision' %}
+          {% include "admission/continuing_education/includes/checklist/decision_fac_approval_modal.html" %}
+          {% include "admission/continuing_education/includes/checklist/decision_hold_modal.html" %}
+          {% include "admission/continuing_education/includes/checklist/decision_deny_modal.html" %}
+          {% include "admission/continuing_education/includes/checklist/decision_cancel_modal.html" %}
+          {% include "admission/continuing_education/includes/checklist/decision_validation_modal.html" %}
+          {% include "admission/continuing_education/includes/checklist/decision_close_modal.html" %}
+          {% include 'admission/continuing_education/includes/checklist/decision_send_to_fac_modal.html' %}
+          {% include 'admission/continuing_education/includes/checklist/decision_to_be_processed_modal.html' %}
+          {% include 'admission/continuing_education/includes/checklist/decision_taken_in_charge_modal.html' %}
+        {% endwith %}
 
-      {% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision next_url=next_base_url|add:'decision' %}
-        <div role="tabpanel" class="tab-pane in active" id="decision">
-          <div class="form-group btn-group status-group" role="group">
-{#            {% translate initial.libelle as initial_state_label %}#}
-{#            {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' %}#}
-{#            {% checklist_state_button tab='decision' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}#}
-{#            {% checklist_state_button tab='decision' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' %}#}
-{#            {% checklist_state_button tab='decision' label=_("To be completed after application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}#}
-{#            {% translate "Validated" context "decision-checklist" as validated_label %}#}
-{#            {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' %}#}
-          </div>
+        {% include "admission/continuing_education/includes/checklist/decision.html" %}
 
-          <p><em>En attente de developpement</em></p>
-
-{#          {% bootstrap_form comment_forms.decision %}#}
-
-          <div class="info-part">
-          </div>
-        </div>
-      {% endwith %}
     </div>
+
+    {% include 'admission/document/message_content_reset_confirm_modal.html' %}
+    {% include 'admission/document/message_object_reset_confirm_modal.html' %}
 
     <div id="info-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
@@ -499,6 +514,12 @@
               htmxErrorsMessages.classList.add('show');
           });
 
+          // jQuery events are NOT native events. We have to trigger our own.
+          // It would works with bootstrap 5 which does not use jQuery anymore.
+          $('.htmx-modal-reload').on('show.bs.modal', function() {
+              htmx.trigger('#' + this.id, 'modal-reload');
+          });
+
       })(jQuery);
   </script>
 {% endblock script %}
@@ -736,6 +757,35 @@
 
     #checklist-menu .sub-item.bg-warning {
       background-color: #fcf8e3;
+    }
+    
+    .decision-modal .select2-selection--multiple .select2-selection__rendered {
+      word-wrap: break-word;
+      text-overflow: inherit;
+      white-space: normal;
+    }
+
+    .decision-modal .select2-selection--multiple .select2-selection__choice {
+      background-color: rgba(200, 200, 200, 0.1);
+      width: 100%;
+      display: flex;
+      padding: 5px;
+      align-items: center;
+    }
+
+    .decision-modal {
+      overflow: auto;
+    }
+
+    .decision-modal .modal-footer {
+      position: sticky;
+      bottom: 0;
+      background: white;
+    }
+
+    .reset-button {
+      float: right;
+      margin-top: -7px;
     }
     
     /* Allow to scroll the content above the header menu */

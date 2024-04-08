@@ -32,8 +32,12 @@ from base.models.utils.utils import ChoiceEnum
 class ChoixStatutPropositionContinue(ChoiceEnum):
     EN_BROUILLON = _('In draft form')
     CONFIRMEE = _('Application confirmed')
+    EN_ATTENTE = _('On hold')
+    INSCRIPTION_REFUSEE = _('Application denied')
     ANNULEE = _('Cancelled application')
     INSCRIPTION_AUTORISEE = _('Application accepted')
+    CLOTUREE = _('Closed')
+    ANNULEE_PAR_GESTIONNAIRE = _('Cancelled application by a manager')
 
 
 class ChoixInscriptionATitre(ChoiceEnum):
@@ -67,6 +71,10 @@ STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE = {
     ChoixStatutPropositionContinue.ANNULEE.name,
 }
 
+STATUTS_PROPOSITION_CONTINUE_SOUMISE = (
+    set(ChoixStatutPropositionContinue.get_names()) - STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
+)
+
 
 class ChoixStatutChecklist(ChoiceEnum):
     INITIAL_NON_CONCERNE = _("INITIAL_NON_CONCERNE")
@@ -76,6 +84,20 @@ class ChoixStatutChecklist(ChoiceEnum):
     GEST_BLOCAGE_ULTERIEUR = _("GEST_BLOCAGE_ULTERIEUR")
     GEST_REUSSITE = _("GEST_REUSSITE")
     SYST_REUSSITE = _("SYST_REUSSITE")
+
+
+class ChoixMotifRefus(ChoiceEnum):
+    PARCOURS_NON_ADAPTE = _("Your background is not suited to this course")
+    CONDITIONS = _("You do not meet the admission requirements")
+    FULL = _("The programme is already full")
+    EXPERIENCE = _("Your experience and reasons for undertaking this programme are insufficient")
+    AUTRE = _("Other")
+
+
+class ChoixMotifAttente(ChoiceEnum):
+    COMPLET = _("The programme is already full")
+    VERIFICATION = _("Your application is currently being reviewed by the course exam board")
+    AUTRE = _("Other")
 
 
 class ChoixEdition(ChoiceEnum):

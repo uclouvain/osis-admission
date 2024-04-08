@@ -163,7 +163,8 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeEtrangerEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
@@ -174,7 +175,8 @@ from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
     Grade,
     Result,
-    TranscriptType, CURRICULUM_ACTIVITY_LABEL,
+    TranscriptType,
+    CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
@@ -1313,6 +1315,14 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             a_reussi_l_epreuve_d_evaluation=False,
             diplome_produit=False,
             intitule_du_tff="",
+            decision_dernier_mail_envoye_le=None,
+            decision_dernier_mail_envoye_par="",
+            motif_de_mise_en_attente="",
+            motif_de_mise_en_attente_autre="",
+            condition_d_approbation_par_la_faculte="",
+            motif_de_refus="",
+            motif_de_refus_autre="",
+            motif_d_annulation="",
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',
