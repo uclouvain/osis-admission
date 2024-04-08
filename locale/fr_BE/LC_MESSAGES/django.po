@@ -920,6 +920,12 @@ msgstr ""
 "de travail que représente un cours. En fonction du pays, une année complète "
 "d’études équivaut à un nombre défini de crédit (exemple : 30 crédits)."
 
+msgid "Assessment test presented"
+msgstr "A présenté l'épreuve d'évaluation"
+
+msgid "Assessment test succeeded"
+msgstr "A réussi l'épreuve d'évaluation"
+
 msgid "Assimilated,Non-assimilated"
 msgstr "Assimilé(e),Non assimilé(e)"
 
@@ -1151,6 +1157,9 @@ msgstr "CDDs"
 
 msgid "CENT_VINGT_CREDITS_NON_ENCORE_ACQUIS"
 msgstr "120 crédits non encore acquis"
+
+msgid "CEP"
+msgstr "CEP"
 
 msgid "CERTIFICAT_60_CREDITS"
 msgstr "1065 € - Certificat 60 crédits"
@@ -1470,6 +1479,9 @@ msgstr "Attestation d'inscription régulière"
 
 msgid "Certificate of support from the CPAS"
 msgstr "Attestation de prise en charge par le CPAS"
+
+msgid "Certificate provided"
+msgstr "Diplôme produit"
 
 msgid "Certificate stating no debts to the institution"
 msgstr "Attestation stipulant l'absence de dettes vis-à-vis de l'établissement"
@@ -2208,6 +2220,9 @@ msgstr "Cher %(name)s,"
 msgid "Debug"
 msgstr "Debug"
 
+msgid "Decision"
+msgstr "Décision"
+
 msgid "Decision confirming the granting of subsidiary protection"
 msgstr "Décision confirmant l'octroi de la protection subsidiaire"
 
@@ -2596,6 +2611,9 @@ msgstr "Modifier l'activité de type <em>%(category)s</em>"
 msgid "Edit the communication of this conference"
 msgstr "Modifier la communication de cette conférence"
 
+msgid "Edition"
+msgstr "Édition"
+
 msgctxt "admission"
 msgid "Education"
 msgstr "Formation"
@@ -2820,6 +2838,9 @@ msgstr "Date (prévue) de délivrance du diplôme"
 
 msgid "Expected graduation date (signed diploma)"
 msgstr "Date (prévue) de délivrance du diplôme (document signé)"
+
+msgid "Experience knowledge valorisation"
+msgstr "Valorisation des acquis d'expérience"
 
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
@@ -3791,6 +3812,9 @@ msgstr ""
 "à l'adresse <a href=\"mailto:%(email)s\">%(email)s</a> le/les document.s "
 "repris ci-dessous :"
 
+msgid "In payement order"
+msgstr "En ordre de paiement"
+
 msgid "In person"
 msgstr "En présentiel"
 
@@ -3865,6 +3889,9 @@ msgstr ""
 
 msgid "Insufficient"
 msgstr "Insuffisant"
+
+msgid "Interested mark"
+msgstr "Marque d'intérêt"
 
 msgid "Internal comment"
 msgstr "Commentaire interne"
@@ -5210,8 +5237,14 @@ msgstr "Numéro de passeport"
 msgid "Past experiences authentication"
 msgstr "Authentification parcours"
 
+msgid "Pay by training cheque"
+msgstr "Paye par chèque formation"
+
 msgid "Payed"
 msgstr "Payés"
+
+msgid "Payement spread"
+msgstr "Étalement des paiements"
 
 msgid "Payment method"
 msgstr "Méthode de paiement"
@@ -5790,6 +5823,9 @@ msgstr "Recteur"
 msgctxt "X"
 msgid "Rector"
 msgstr "Recteur·trice"
+
+msgid "Reduced rights"
+msgstr "Droits réduits"
 
 msgid "Reduced tuition fee"
 msgstr "Réduction des droits d’inscription"
@@ -6495,6 +6531,9 @@ msgstr "État :"
 msgid "Street"
 msgstr "Rue"
 
+msgid "Student report"
+msgstr "Fiche de l'étudiant"
+
 msgid "Student signature for agreement"
 msgstr "Signature de l’étudiant·e pour accord"
 
@@ -6591,6 +6630,9 @@ msgstr "Système"
 
 msgid "System of education"
 msgstr "Système d'études"
+
+msgid "TFF label"
+msgstr "Intitulé du TFF"
 
 msgid "TO_BE_COMPLETED"
 msgstr "À compléter"
@@ -7484,6 +7526,9 @@ msgstr "Formation de la proposition"
 
 msgid "Training specificities"
 msgstr "Spécificités de la formation"
+
+msgid "Training spread"
+msgstr "Étalement de la formation"
 
 msgctxt "admission"
 msgid "Training title"

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Union
 
 from django.contrib import messages
 from django.http import HttpResponse, Http404
@@ -41,6 +42,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.forms.admission.document import (
     UploadFreeDocumentForm,
@@ -54,9 +56,11 @@ from admission.forms.admission.document import (
     UploadManagerDocumentForm,
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
-from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
+from osis_common.ddd import interface
 from osis_common.utils.htmx import HtmxMixin
 
 __namespace__ = 'document'
@@ -276,6 +280,10 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
+    commands = {
+        CONTEXT_GENERAL: None,
+        CONTEXT_CONTINUING: None,
+    }
     permission_required = 'admission.change_documents_management'
     name = 'document-action'
 
@@ -284,6 +292,13 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
         context['document_identifier'] = self.document_identifier
         context['document'] = self.document
         return context
+
+    @property
+    def command(self) -> Union[interface.QueryRequest, interface.CommandRequest]:
+        command = self.commands.get(self.current_context)
+        if command is None:
+            raise Http404
+        return command
 
     @property
     def document_identifier(self):
@@ -547,6 +562,10 @@ class RetypeDocumentView(DocumentFormView):
     urlpatterns = {'retype': 'retype/<str:identifier>'}
     template_name = 'admission/document/retype_form.html'
     htmx_template_name = 'admission/document/retype_form.html'
+    commands = {
+        CONTEXT_GENERAL: general_education_commands.RetyperDocumentCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.RetyperDocumentCommand,
+    }
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -561,7 +580,7 @@ class RetypeDocumentView(DocumentFormView):
 
     def form_valid(self, form):
         document_id = message_bus_instance.invoke(
-            general_education_commands.RetyperDocumentCommand(
+            self.command(
                 uuid_proposition=self.admission_uuid,
                 identifiant_source=self.document_identifier,
                 identifiant_cible=form.cleaned_data['identifier'],

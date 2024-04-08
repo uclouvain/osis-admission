@@ -32,13 +32,13 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.constants import PDF_MIME_TYPE
-from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
+from base.tests import QueriesAssertionsMixin
 
 
 @freezegun.freeze_time('2023-01-01')

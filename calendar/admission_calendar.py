@@ -36,7 +36,6 @@ from admission.ddd.admission.domain.service.i_annee_inscription_formation import
     IAnneeInscriptionFormationTranslator,
 )
 from admission.ddd.admission.domain.service.i_titres_acces import ConditionAccess, ITitresAcces
-from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
@@ -68,6 +67,8 @@ __all__ = [
     "est_formation_contingentee_et_non_resident",
     "PoolCalendar",
 ]
+
+from osis_profile import BE_ISO_CODE
 
 DIPLOMES_ACCES_BELGE = [
     ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_BELGE,

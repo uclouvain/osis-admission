@@ -34,7 +34,6 @@ from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import GeneralEducationAdmission
-from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -51,7 +50,7 @@ from admission.tests.factories.general_education import (
 )
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
-from admission.tests.views.common.detail_tabs.checklist.sic_decision.base import SicPatchMixin
+from admission.tests.views.general_education.checklist.sic_decision.base import SicPatchMixin
 from base.models.campus import Campus, LOUVAIN_LA_NEUVE_CAMPUS_NAME
 from base.models.enums.mandate_type import MandateTypes
 from base.models.enums.organization_type import MAIN
@@ -60,6 +59,7 @@ from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.mandatary import MandataryFactory
+from osis_profile import BE_ISO_CODE
 from reference.tests.factories.country import CountryFactory
 
 
@@ -86,7 +86,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
                 street="University street",
                 postal_box="1",
                 street_number="2",
-                email="louvain@test.be",
+                sic_enrollment_email="louvain@test.be",
                 uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
                 organization__type=MAIN,
             ),
@@ -103,7 +103,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
                 street="University road",
                 postal_box="3",
                 street_number="4",
-                email="saint_louis@test.be",
+                sic_enrollment_email="saint_louis@test.be",
                 uuid=ORDERED_CAMPUSES_UUIDS['BRUXELLES_SAINT_LOUIS_UUID'],
                 organization__type=MAIN,
             ),
@@ -120,7 +120,7 @@ class SicRefusalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
                 street="University place",
                 postal_box="5",
                 street_number="6",
-                email="mons@test.be",
+                sic_enrollment_email="mons@test.be",
                 uuid=ORDERED_CAMPUSES_UUIDS['MONS_UUID'],
                 organization__type=MAIN,
             ),

@@ -38,6 +38,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
     ChoixMoyensDecouverteFormation,
+    ChoixEdition,
 )
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
@@ -178,6 +179,75 @@ class ContinuingEducationAdmission(BaseAdmission):
         blank=True,
         default=list,
         verbose_name=_('How did the candidate find out about this course?'),
+    )
+
+    interested_mark = models.BooleanField(
+        verbose_name=_("Interested mark"),
+        null=True,
+    )
+
+    edition = models.CharField(
+        choices=ChoixEdition.choices(),
+        max_length=30,
+        verbose_name=_("Edition"),
+        default='',
+        blank=True,
+    )
+
+    in_payement_order = models.BooleanField(
+        verbose_name=_("In payement order"),
+        null=True,
+    )
+
+    reduced_rights = models.BooleanField(
+        verbose_name=_("Reduced rights"),
+        null=True,
+    )
+
+    pay_by_training_cheque = models.BooleanField(
+        verbose_name=_("Pay by training cheque"),
+        null=True,
+    )
+
+    cep = models.BooleanField(
+        verbose_name=_("CEP"),
+        null=True,
+    )
+
+    payement_spread = models.BooleanField(
+        verbose_name=_("Payement spread"),
+        null=True,
+    )
+
+    training_spread = models.BooleanField(
+        verbose_name=_("Training spread"),
+        null=True,
+    )
+
+    experience_knowledge_valorisation = models.BooleanField(
+        verbose_name=_("Experience knowledge valorisation"),
+        null=True,
+    )
+
+    assessment_test_presented = models.BooleanField(
+        verbose_name=_("Assessment test presented"),
+        null=True,
+    )
+
+    assessment_test_succeeded = models.BooleanField(
+        verbose_name=_("Assessment test succeeded"),
+        null=True,
+    )
+
+    certificate_provided = models.BooleanField(
+        verbose_name=_("Certificate provided"),
+        null=True,
+    )
+
+    tff_label = models.TextField(
+        verbose_name=_("TFF label"),
+        default='',
+        blank=True,
     )
 
     class Meta:

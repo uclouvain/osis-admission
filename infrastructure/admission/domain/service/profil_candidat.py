@@ -56,17 +56,15 @@ from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabi
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     AnneeExperienceAcademiqueDTO,
-    ExperienceAcademiqueDTO,
     CurriculumAExperiencesDTO,
-    ExperienceNonAcademiqueDTO,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
     AlternativeSecondairesDTO,
+    EtudesSecondairesAdmissionDTO,
 )
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
@@ -81,6 +79,8 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     EducationalExperienceYear,
     ProfessionalExperience,
@@ -226,7 +226,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         foreign_high_school_diploma = getattr(candidate, 'foreignhighschooldiploma', None)
         high_school_diploma_alternative = getattr(candidate, 'highschooldiplomaalternative', None)
 
-        return EtudesSecondairesDTO(
+        return EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=candidate.graduated_from_high_school,
             valorisees=valuated_secondary_studies,
             annee_diplome_etudes_secondaires=candidate.graduated_from_high_school_year.year
@@ -509,7 +509,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesDTO':
+    def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
         valuated_secondary_studies = cls.etudes_secondaires_valorisees(matricule)
 
         candidate: Person = Person.objects.select_related(

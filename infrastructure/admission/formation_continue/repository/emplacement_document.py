@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,16 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.functional import lazy
-from django.utils.safestring import mark_safe
+from admission.contrib.models import ContinuingEducationAdmission
+from admission.infrastructure.admission.repository.emplacement_document import BaseEmplacementDocumentRepository
 
 
-__all__ = ['mark_safe_lazy']
-
-
-def _mark_safe(value, **kwargs):
-    """Mark a string as safe and interpolate variables inside if provided."""
-    return mark_safe(value % (kwargs or {}))
-
-
-mark_safe_lazy = lazy(_mark_safe, str)
+class EmplacementDocumentRepository(BaseEmplacementDocumentRepository):
+    admission_model_class = ContinuingEducationAdmission

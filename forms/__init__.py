@@ -47,10 +47,6 @@ OTHER_EMPTY_CHOICE = (('', _('Other')),)
 MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
 EMPTY_CHOICE_AS_LIST = [list(EMPTY_CHOICE[0])]
-FORM_SET_PREFIX = '__prefix__'
-FOLLOWING_FORM_SET_PREFIX = '__prefix_1__'
-OSIS_DOCUMENT_UPLOADER_CLASS = 'document-uploader'
-OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX = '__{}__'.format(OSIS_DOCUMENT_UPLOADER_CLASS)
 
 DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
     'data-minimum-input-length': 3,
@@ -202,6 +198,7 @@ def format_training(training: FormationDTO):
     )
 
 
+# Move to base or reference (move url too)
 class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
     def __init__(self, *args, **kwargs):
         to_field_name = kwargs.get('to_field_name', '')

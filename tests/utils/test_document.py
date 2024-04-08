@@ -29,7 +29,7 @@ from unittest.mock import patch
 
 from django.test import override_settings
 
-from admission.constants import JPEG_MIME_TYPE, SUPPORTED_MIME_TYPES, PDF_MIME_TYPE
+from admission.constants import JPEG_MIME_TYPE, SUPPORTED_MIME_TYPES
 from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import (
@@ -40,7 +40,6 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.infrastructure.utils import get_document_from_identifier, CORRESPONDANCE_CHAMPS_COMPTABILITE
-from admission.tests import TestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -57,11 +56,13 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from admission.tests.factories.supervision import PromoterFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.tests import TestCaseWithQueriesAssertions
 from reference.tests.factories.language import FrenchLanguageFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class TestGetDocumentFromIdentifier(TestCase):
+class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
     def setUp(self) -> None:
         # Mock documents
         patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
