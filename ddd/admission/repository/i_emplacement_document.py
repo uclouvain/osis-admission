@@ -29,7 +29,6 @@ from typing import List, Optional, Dict
 
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from osis_common.ddd import interface
 

@@ -71,6 +71,7 @@ from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
 
 
+#TODO: Remove duplicate tests with osis_profile
 class CurriculumEducationalExperienceFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):

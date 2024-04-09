@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
 
 from dal_select2.views import Select2ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -35,8 +34,8 @@ from admission.ddd.admission.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
-from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
 from infrastructure.messages_bus import message_bus_instance
 

@@ -50,8 +50,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import ChoixS
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.test.factory.profil import (
     ExperienceAcademiqueDTOFactory,
-    ExperienceNonAcademiqueDTOFactory,
-    EtudesSecondairesDTOFactory,
+    ExperienceNonAcademiqueDTOFactory, EtudesSecondairesDTOFactory,
 )
 from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
 from admission.templatetags.admission import (
