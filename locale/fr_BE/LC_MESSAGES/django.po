@@ -742,11 +742,6 @@ msgstr "Personne de contact pour la composition du programme annuel :"
 msgid "Another admission has been submitted."
 msgstr "Une autre admission a déjà été soumise."
 
-msgid "Any other assessment system that is not based on a credit system."
-msgstr ""
-"Tout autre système d’évaluation qui ne se base pas sur l’évaluation par "
-"crédit."
-
 msgid "Application accepted"
 msgstr "Inscription autorisée"
 
@@ -910,15 +905,6 @@ msgstr ""
 "non-résident·es, les inscriptions pour l'année académique 2024-2025 sont à "
 "introduire via cette <a href=\"https://uclouvain.be/fr/etudier/inscriptions/"
 "demande-en-ligne\" target=\"_blank\">plateforme spécifique</a>."
-
-msgid ""
-"Assessment is also based on the credit system, which quantifies the workload "
-"involved in a class. Depending on the country, a full year of study is "
-"equivalent to a defined number of credits (e.g. 30 credits)."
-msgstr ""
-"Évaluation également basée sur le système de crédits qui quantifie la charge "
-"de travail que représente un cours. En fonction du pays, une année complète "
-"d’études équivaut à un nombre défini de crédit (exemple : 30 crédits)."
 
 msgid "Assessment test presented"
 msgstr "A présenté l'épreuve d'évaluation"
@@ -1437,13 +1423,6 @@ msgstr "Attestation"
 msgid "Certificate for children of staff"
 msgstr "Attestation enfant du personnel"
 
-msgid ""
-"Certificate justifying your activity, mentioning this activity, for the "
-"period concerned"
-msgstr ""
-"Attestation justifiant votre activité, mentionnant cette activité, pour la "
-"période concernée"
-
 msgid "Certificate of achievement"
 msgstr "Attestation de réussite"
 
@@ -1458,13 +1437,6 @@ msgstr "Certificat de connaissance des langues"
 
 msgid "Certificate of legal cohabitation"
 msgstr "Attestation de cohabitation légale"
-
-msgid ""
-"Certificate of participation in a language study abroad for the period "
-"concerned"
-msgstr ""
-"Attestation de participation à un séjour linguistique pour la période "
-"concernée"
 
 msgid "Certificate of participation in the presentation"
 msgstr "Attestation de participation à l'exposé"
@@ -1506,10 +1478,6 @@ msgstr[0] ""
 msgstr[1] ""
 "Attestations stipulant l'absence de dettes vis-à-vis des établissements "
 "fréquentés durant l'année académique %(academic_year)s : %(names)s."
-
-msgid "Certificate, with dates, justifying your volunteering activities"
-msgstr ""
-"Attestation, avec mention des dates, justifiant vos activités de volontariat"
 
 #, python-format
 msgid "Change <em>%(name)s</em> configuration"
@@ -2164,9 +2132,6 @@ msgstr "Date de naissance"
 msgid "Date of the confirmation paper (DD/MM/YYYY)"
 msgstr "Date de l'épreuve de confirmation (JJ/MM/AAAA)"
 
-msgid "Date on which you expect to graduate."
-msgstr "Date à laquelle vous pensez obtenir votre diplôme."
-
 msgid "Date the application is sent to the supervision group"
 msgstr "Date d’envoi de la demande au comité d’accompagnement"
 
@@ -2387,10 +2352,6 @@ msgstr "Résumé du mémoire"
 msgid "Dissertation title"
 msgstr "Titre du mémoire"
 
-msgctxt "admission"
-msgid "Dissertation title"
-msgstr "Titre du mémoire"
-
 msgid "Do not reorder values, and keep the same count"
 msgstr "Ne pas réordonner les valeurs, and garder le même nombre"
 
@@ -2566,19 +2527,6 @@ msgstr "ECTS ajoutés"
 msgid "ECTS credits"
 msgstr "Crédits ECTS"
 
-msgid ""
-"ECTS credits are a European unit of measurement that assesses the workload "
-"represented by a class within a course. A full year of study is generally "
-"equivalent to 60 credits. The ECTS system has been introduced in most "
-"European countries but is also increasingly used in other countries."
-msgstr ""
-"Les crédits ECTS représentent une unité de mesure <span class='text-"
-"decoration-underline'>européenne</span> qui évalue la charge de travail que "
-"représente un cours au sein d’un programme d’études. Une année complète "
-"d’études équivaut généralement à 60 crédits. Le système ECTS a été mis en "
-"place dans la plupart des pays européens mais est également utilisé de plus "
-"en plus dans d’autres pays."
-
 msgid "ECTS for participating"
 msgstr "ECTS pour la participation"
 
@@ -2729,9 +2677,6 @@ msgstr "Valeurs en anglais"
 
 msgid "Enroll in a course"
 msgstr "S'inscrire à un cours"
-
-msgid "Enrolled"
-msgstr "Inscrit"
 
 msgid "Enrollment authorization document link"
 msgstr "Lien du document d'autorisation d'inscription"
@@ -3920,10 +3865,6 @@ msgstr "Bourse internationale :"
 msgid "Internship Framework Agreement"
 msgstr "Convention cadre de stages"
 
-msgid "Internship certificate, with dates, justifying the period concerned"
-msgstr ""
-"Attestation de stage, avec mention des dates, justifiant la période concernée"
-
 msgid "Invalid date"
 msgstr "Date invalide"
 
@@ -4646,9 +4587,6 @@ msgstr "Modifié le"
 msgid "Mollie ID"
 msgstr "ID Mollie"
 
-msgid "Month"
-msgstr "Mois"
-
 msgid "Most recent year of enrolment"
 msgstr "Dernière année d'inscription"
 
@@ -4792,9 +4730,6 @@ msgstr "Pas de doctorat trouvé."
 msgid "No continuing enrolment"
 msgstr "Aucune inscription en formation continue n'a été trouvée"
 
-msgid "No credit system"
-msgstr "Pas de système de crédits"
-
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
 
@@ -4861,9 +4796,6 @@ msgstr "Noma"
 
 msgid "Non doctor reason"
 msgstr "Justification"
-
-msgid "Non-European credits"
-msgstr "Crédits non-européens"
 
 msgid "Non-academic experience"
 msgstr "Expérience non-académique"
@@ -5088,10 +5020,6 @@ msgstr "Autres prénoms"
 msgid "Other institute"
 msgstr "Autre institution"
 
-msgctxt "curriculum"
-msgid "Other institute"
-msgstr "Autre établissement"
-
 msgid "Other institute (if necessary)"
 msgstr "Autre institution (le cas échéant)"
 
@@ -5106,9 +5034,6 @@ msgstr "Autre bourse internationale"
 
 msgid "Other members of the supervisory panel"
 msgstr "Autres membres du comité d’accompagnement"
-
-msgid "Other programme"
-msgstr "Autre formation"
 
 msgctxt "admission"
 msgid "Other reasons"
@@ -5444,16 +5369,6 @@ msgstr ""
 "Veuillez sélectionner la première situation d’assimilation qui vous "
 "correspond"
 
-msgid ""
-"Please select the assessment system used by the institution where you "
-"studied. The assessment system is usually indicated <strong>on your "
-"transcripts or diploma supplements</strong>."
-msgstr ""
-"Veuillez sélectionner le système d'évaluation au sein de l'établissement "
-"dans lequel vous avez suivi vos études. Le système d'évaluation est "
-"généralement mentionné <strong>sur vos relevés de notes ou sur vos "
-"suppléments de diplôme</strong>."
-
 msgid "Please specify at least one identity number."
 msgstr "Merci de spécifier au-moins un numéro d'identité."
 
@@ -5587,13 +5502,6 @@ msgstr "Preuve d'acceptation ou de publication"
 
 msgid "Proof of acceptation by the committee"
 msgstr "Preuve d'acceptation par le comité de sélection"
-
-msgid ""
-"Proof of employment from the employer, with dates, justifying the period in "
-"question"
-msgstr ""
-"Attestation de travail émanant de l'employeur, avec mention des dates, "
-"justifiant la période concernée"
 
 msgid "Proof of equivalency request"
 msgstr "Preuve de la demande d'équivalence"
@@ -7049,19 +6957,6 @@ msgstr ""
 "Le nombre de crédits acquis de <strong>formation doctorale</strong> s'élève "
 "à %(credits_nb)s crédits."
 
-msgid "The number of credits earned must be greater than or equal to 0."
-msgstr "Le nombre de crédits acquis doit être supérieur ou égal à 0."
-
-msgid ""
-"The number of credits earned must be less than or equal to the number of "
-"credits registered."
-msgstr ""
-"Le nombre de crédits acquis doit être inférieur ou égal au nombre de crédits "
-"inscrits."
-
-msgid "The number of credits registered must be greater than 0."
-msgstr "Le nombre de crédits inscrits doit être supérieur à 0."
-
 msgid "The official enrolment authorisation signed by you."
 msgstr "La présente autorisation signée pour accord dans le cadre ci-dessous."
 
@@ -7362,7 +7257,8 @@ msgid ""
 msgstr ""
 "Cette expérience a été ajoutée par le·la candidat·e dans une autre demande, "
 "pour procéder à une modification, cliquez sur son <a "
-"href=\"%(admission_url)s\" target=\"_blank\">autre demande %(admission_reference)s</a>."
+"href=\"%(admission_url)s\" target=\"_blank\">autre demande "
+"%(admission_reference)s</a>."
 
 msgid "This field is required if the first name is missing."
 msgstr "Ce champ est obligatoire si le prénom est manquant."
@@ -7568,10 +7464,6 @@ msgstr "Acte de tutelle"
 msgid "Type"
 msgstr "Type"
 
-msgctxt "admission"
-msgid "Type"
-msgstr "Type"
-
 msgid "Type of communication"
 msgstr "Type de communication"
 
@@ -7625,13 +7517,6 @@ msgstr "Non disponible"
 
 msgid "Undecided"
 msgstr "Non décidé"
-
-msgid ""
-"Unemployment certificate issued by the relevant body, justifying the period "
-"concerned"
-msgstr ""
-"Attestation de chômage émise par l'organisme concerné, justifiant la période "
-"concernée"
 
 msgid "Unique business number"
 msgstr "Numéro unique d'entreprise"
@@ -8129,16 +8014,16 @@ msgstr[1] ""
 #, python-format
 msgid ""
 "You cannot submit this admission for a general education as you already have "
-"submitted one."
+"submitted one for the year %(annee_cible)s."
 msgid_plural ""
 "You cannot submit this admission for a general education as you already have "
-"submitted %(maximum_number)s of them."
+"submitted %(maximum_number)s of them for the year %(annee_cible)s."
 msgstr[0] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation générale car "
-"vous en avez déjà envoyé une."
+"vous en avez déjà envoyé une pour l'année %(annee_cible)s."
 msgstr[1] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation générale car "
-"vous en avez déjà envoyé %(maximum_number)s."
+"vous en avez déjà envoyé %(maximum_number)s pour l'année %(annee_cible)s."
 
 msgid ""
 "You do not specify if you are applying as resident or non-resident (as "
@@ -8352,12 +8237,6 @@ msgstr "Carte de crédit"
 
 msgid "dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
-
-msgid "e.g.: 5th out of 30"
-msgstr "ex: 5ème sur 30"
-
-msgid "e.g.: Librarian"
-msgstr "ex: Bibliothécaire"
 
 msgid "education group type"
 msgstr "type de formation"

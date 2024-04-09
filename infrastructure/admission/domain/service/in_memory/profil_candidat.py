@@ -40,7 +40,9 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.dtos import (
-    AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesAdmissionDTO,
+    AdressePersonnelleDTO,
+    CoordonneesDTO,
+    EtudesSecondairesAdmissionDTO,
     IdentificationDTO,
 )
 from admission.ddd.admission.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO

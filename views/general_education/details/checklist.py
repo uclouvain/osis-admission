@@ -1734,7 +1734,7 @@ class ChecklistView(
         return groupe_curriculum_par_annee_decroissante(
             experiences_academiques=resume.curriculum.experiences_academiques,
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
-            etudes_secondaires=resume.etudes_secondaires
+            etudes_secondaires=resume.etudes_secondaires,
         )
 
     def _get_financabilite(self):
