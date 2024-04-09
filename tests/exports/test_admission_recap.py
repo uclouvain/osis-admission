@@ -174,7 +174,8 @@ from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
     Grade,
     Result,
-    TranscriptType, CURRICULUM_ACTIVITY_LABEL,
+    TranscriptType,
+    CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,

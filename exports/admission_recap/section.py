@@ -296,8 +296,7 @@ def get_educational_experience_context(context: ResumePropositionDTO, educationa
         'is_foreign_experience': educational_experience.pays != BE_ISO_CODE,
         'is_belgian_experience': educational_experience.pays == BE_ISO_CODE,
         'translation_required': translation_required,
-        'evaluation_system_with_credits': educational_experience.systeme_evaluation
-        in SYSTEMES_EVALUATION_AVEC_CREDITS,
+        'evaluation_system_with_credits': educational_experience.systeme_evaluation in SYSTEMES_EVALUATION_AVEC_CREDITS,
     }
 
 

@@ -156,6 +156,5 @@ class SaveCommentView(AdmissionFormMixin, FormView):
                 'content': form.cleaned_data['comment'],
                 'author': self.request.user.person,
             },
-
         )
         return super().form_valid(CommentForm(comment=comment, **self.get_form_kwargs()))

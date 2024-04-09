@@ -49,6 +49,10 @@ STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE = STATUTS_PROPOSITION_AVANT_SOUMISSION
     ChoixStatutPropositionDoctorale.ANNULEE.name,
 }
 
+STATUTS_PROPOSITION_DOCTORALE_SOUMISE = (
+    set(ChoixStatutPropositionDoctorale.get_names()) - STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
+)
+
 
 class ChoixCommissionProximiteCDEouCLSM(ChoiceEnum):
     ECONOMY = _('ECONOMY')
