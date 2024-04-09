@@ -91,7 +91,6 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             'status': StatutEmplacementDocument.RECLAME.name,
             'type': TypeEmplacementDocument.NON_LIBRE.name,
             'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-            'related_checklist_tab': '',
         }
         cls.file_metadata = {
             'name': 'myfile.myext',

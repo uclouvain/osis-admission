@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -74,8 +74,7 @@ class TestSupprimerEmplacementDocument(TestCase):
                 uuid_proposition=self.uuid_proposition,
                 auteur='0123456789',
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
-                libelle_fr='Nom du document',
-                libelle_en='Name of the document',
+                libelle='Nom du document',
                 raison='La raison expliquant l\'intérêt de ce nouveau document.',
                 statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
             )
@@ -157,8 +156,7 @@ class TestSupprimerEmplacementDocument(TestCase):
                 uuid_proposition=self.uuid_proposition,
                 auteur='0123456789',
                 type_emplacement=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
-                libelle_fr='Nom du document',
-                libelle_en='Name of the document',
+                libelle='Nom du document',
                 raison='La raison expliquant l\'intérêt de ce nouveau document.',
                 statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
             )

@@ -50,12 +50,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     NombrePropositionsSoumisesDepasseException,
 )
-from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-)
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
     ChoixAssimilation1,
@@ -94,6 +89,11 @@ from admission.infrastructure.message_bus_in_memory import message_bus_in_memory
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.got_diploma import GotDiploma
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    DiplomeBelgeEtudesSecondairesDTO,
+    AlternativeSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+)
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (

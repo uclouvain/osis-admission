@@ -32,18 +32,13 @@ import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    AnneeExperienceAcademiqueDTO,
     ConditionsComptabiliteDTO,
-    CurriculumAExperiencesDTO,
-    CurriculumDTO,
     ConnaissanceLangueDTO,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.dtos import (
-    AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesAdmissionDTO,
-    IdentificationDTO,
-)
-from admission.ddd.admission.dtos.etudes_secondaires import DiplomeBelgeEtudesSecondairesDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.civil_state import CivilState
@@ -52,7 +47,13 @@ from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.teaching_type import TeachingTypeEnum
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    DiplomeBelgeEtudesSecondairesDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO, CurriculumAExperiencesDTO,
+)
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     Result,
@@ -946,7 +947,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         return cls.etudes_secondaires.get(matricule) or EtudesSecondairesAdmissionDTO()
 
     @classmethod
-    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumDTO':
+    def get_curriculum(cls, matricule: str, annee_courante: int, uuid_proposition: str) -> 'CurriculumAdmissionDTO':
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
 
@@ -1025,7 +1026,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             etudes_secondaires = cls.etudes_secondaires.get(matricule)
             annee_etudes_secondaires = etudes_secondaires and etudes_secondaires.annee_diplome_etudes_secondaires
 
-            return CurriculumDTO(
+            return CurriculumAdmissionDTO(
                 experiences_academiques=experiences_dtos,
                 annee_diplome_etudes_secondaires=annee_etudes_secondaires,
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,

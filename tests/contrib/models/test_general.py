@@ -57,7 +57,6 @@ class TestGeneralEducationAdmissionDocuments(TestCaseWithQueriesAssertions):
             'status': 'A_RECLAMER',
             'type': 'NON_LIBRE',
             'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-            'related_checklist_tab': '',
         }
         cls.manuel_required_params = {
             'automatically_required': False,
@@ -69,7 +68,6 @@ class TestGeneralEducationAdmissionDocuments(TestCaseWithQueriesAssertions):
             'status': 'A_RECLAMER',
             'type': 'NON_LIBRE',
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
-            'related_checklist_tab': '',
         }
 
     def setUp(self) -> None:
