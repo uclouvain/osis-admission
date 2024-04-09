@@ -37,12 +37,14 @@ from django.contrib.auth.models import User
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.utils.translation import gettext
+
+from admission.tests.factories.categorized_free_document import CategorizedFreeDocumentFactory
 from osis_document.contrib.forms import FileUploadField
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 from rest_framework import status
 
-from admission.constants import PDF_MIME_TYPE, IMAGE_MIME_TYPES
+from admission.constants import IMAGE_MIME_TYPES
 from admission.contrib.models import GeneralEducationAdmission, AdmissionFormItemInstantiation, AdmissionFormItem
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
@@ -56,7 +58,10 @@ from admission.ddd.admission.enums.emplacement_document import (
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    OngletsChecklist,
+)
 from admission.infrastructure.utils import MODEL_FIELD_BY_FREE_MANAGER_DOCUMENT_TYPE
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
@@ -66,7 +71,7 @@ from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
-from base.forms.utils.file_field import MaxOneFileUploadField
+from base.forms.utils.file_field import MaxOneFileUploadField, PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -169,20 +174,20 @@ class DocumentViewTestCase(TestCase):
         if document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
             default_base_url = 'admission:general-education:document:free-candidate-request'
             default_data = {
-                'author': user.person.global_id,
-                'file_name': 'My file name',
-                'reason': 'My reason',
-                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'free-document-request-form-author': user.person.global_id,
+                'free-document-request-form-file_name': 'My file name',
+                'free-document-request-form-reason': 'My reason',
+                'free-document-request-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             }
             if with_file:
-                default_data['file_0'] = ['file_0-token']
-                default_data['file_name'] += ' with default file'
+                default_data['free-document-request-form-file_0'] = ['file_0-token']
+                default_data['free-document-request-form-file_name'] += ' with default file'
         elif document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES:
             default_base_url = 'admission:general-education:document:free-internal-upload'
             default_data = {
-                'author': user.person.global_id,
-                'file_name': 'My file name',
-                'file_0': ['file_0-token'],
+                'upload-free-internal-document-form-author': user.person.global_id,
+                'upload-free-internal-document-form-file_name': 'My file name',
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
             }
         else:
             raise NotImplementedError
@@ -283,8 +288,8 @@ class DocumentViewTestCase(TestCase):
         response = self.client.post(
             url,
             data={
-                'file_0': ['file_0-token'],
-                'file_1': ['file_1-token'],
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
+                'upload-free-internal-document-form-file_1': ['file_1-token'],
             },
             **self.default_headers,
         )
@@ -295,12 +300,31 @@ class DocumentViewTestCase(TestCase):
             response.context['form'].errors.get('file', []),
         )
 
+        categorized_document = CategorizedFreeDocumentFactory(
+            checklist_tab='',
+            with_academic_year=True,
+        )
+        # Invalid categorized document because the academic year has not been selected
+        response = self.client.post(
+            url,
+            data={
+                'upload-free-internal-document-form-file_name': 'My file name',
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
+                'upload-free-internal-document-form-document_type': categorized_document.pk,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('academic_year', []))
+
         # Submit a valid form
         response = self.client.post(
             url,
             data={
-                'file_name': 'My file name',
-                'file_0': ['file_0-token'],
+                'upload-free-internal-document-form-file_name': 'My file name',
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
+                'upload-free-internal-document-form-document_type': categorized_document.pk,
+                'upload-free-internal-document-form-academic_year': '2018-2019',
             },
             **self.default_headers,
         )
@@ -323,7 +347,7 @@ class DocumentViewTestCase(TestCase):
             token='file_0-token',
             metadata={
                 'author': self.sic_manager_user.person.global_id,
-                'explicit_name': 'My file name',
+                'explicit_name': categorized_document.long_label_fr,
             },
         )
 
@@ -363,8 +387,8 @@ class DocumentViewTestCase(TestCase):
         response = self.client.post(
             url,
             data={
-                'file_0': ['file_0-token'],
-                'file_1': ['file_1-token'],
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
+                'upload-free-internal-document-form-file_1': ['file_1-token'],
             },
             **self.default_headers,
         )
@@ -379,8 +403,8 @@ class DocumentViewTestCase(TestCase):
         response = self.client.post(
             url,
             data={
-                'file_name': 'My file name',
-                'file_0': ['file_0-token'],
+                'upload-free-internal-document-form-file_name': 'My file name',
+                'upload-free-internal-document-form-file_0': ['file_0-token'],
             },
             **self.default_headers,
         )
@@ -475,6 +499,118 @@ class DocumentViewTestCase(TestCase):
 
     # The manager requests a free document that the candidate must upload
     @freezegun.freeze_time('2022-01-01')
+    def test_general_sic_manager_requests_a_free_document_with_predefined_configuration(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        # Submit an invalid form
+
+        # With no data
+        response = self.client.post(url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+
+        # With invalid chosen predefined file
+
+        categorized_document = CategorizedFreeDocumentFactory(
+            checklist_tab=OngletsChecklist.parcours_anterieur.name,
+            with_academic_year=True,
+        )
+        response = self.client.post(
+            url,
+            data={
+                'free-document-request-form-file_name': 'My file name',
+                'free-document-request-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'free-document-request-form-checklist_tab': OngletsChecklist.assimilation.name,
+                'free-document-request-form-document_type': categorized_document.pk,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Because the selected checklist tab and the selected document checklist tab must be the same
+        self.assertIn(
+            gettext('The document must be related to the specified checklist tab'),
+            response.context['form'].errors.get('checklist_tab', []),
+        )
+        # Because the academic year has not been selected while it is mandatory
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('academic_year', []))
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            data={
+                'free-document-request-form-file_name': 'My file name',
+                'free-document-request-form-reason': 'My reason',
+                'free-document-request-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'free-document-request-form-checklist_tab': OngletsChecklist.parcours_anterieur.name,
+                'free-document-request-form-academic_year': '2019-2020',
+                'free-document-request-form-document_type': categorized_document.pk,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Create a specific question linked to the admission
+        form_item_instantiation: AdmissionFormItemInstantiation = (
+            AdmissionFormItemInstantiation.objects.select_related('form_item', 'admission')
+            .filter(
+                admission=self.general_admission,
+            )
+            .first()
+        )
+        self.assertIsNotNone(form_item_instantiation)
+
+        self.assertEqual(form_item_instantiation.form_item.type, TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(
+            form_item_instantiation.form_item.title,
+            {
+                'en': categorized_document.long_label_en,
+                'fr-be': categorized_document.long_label_fr,
+            },
+        )
+
+        self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
+        self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
+        self.assertEqual(form_item_instantiation.required, False)
+        self.assertEqual(
+            form_item_instantiation.display_according_education,
+            CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+        )
+        self.assertEqual(form_item_instantiation.tab, Onglets.DOCUMENTS.name)
+
+        # Save information about the request into the admission
+        desired_result = {
+            f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
+                'last_actor': self.sic_manager_user.person.global_id,
+                'reason': 'My reason',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                'last_action_at': '2022-01-01T00:00:00',
+                'deadline_at': '',
+                'requested_at': '',
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'automatically_required': False,
+                'related_checklist_tab': OngletsChecklist.parcours_anterieur.name,
+            }
+        }
+        self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
+
+        # Check last modification data
+        self.assertEqual(form_item_instantiation.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(form_item_instantiation.admission.last_update_author, self.sic_manager_user.person)
+
+    @freezegun.freeze_time('2022-01-01')
     def test_general_sic_manager_requests_a_free_document(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -487,6 +623,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Submit an invalid form
+
+        # With no data
         response = self.client.post(url, data={}, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
@@ -496,9 +634,11 @@ class DocumentViewTestCase(TestCase):
         response = self.client.post(
             url,
             data={
-                'file_name': 'My file name',
-                'reason': 'My reason',
-                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'free-document-request-form-file_name': 'My file name',
+                'free-document-request-form-reason': 'My reason',
+                'free-document-request-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'free-document-request-form-checklist_tab': OngletsChecklist.parcours_anterieur.name,
+                'free-document-request-form-academic_year': '2019-2020',
             },
             **self.default_headers,
         )
@@ -545,6 +685,7 @@ class DocumentViewTestCase(TestCase):
                 'status': StatutEmplacementDocument.A_RECLAMER.name,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'automatically_required': False,
+                'related_checklist_tab': OngletsChecklist.parcours_anterieur.name,
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
@@ -566,6 +707,8 @@ class DocumentViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Submit an invalid form
+
+        # With no data
         response = self.client.post(url, data={}, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
@@ -575,8 +718,10 @@ class DocumentViewTestCase(TestCase):
         response = self.client.post(
             url,
             data={
-                'file_name': 'My file name',
-                'file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-file_name': 'My file name',
+                'free-document-request-with-default-file-form-file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-document_type': '',
+                'free-document-request-with-default-file-form-checklist_tab': OngletsChecklist.assimilation.name,
             },
             **self.default_headers,
         )
@@ -623,6 +768,125 @@ class DocumentViewTestCase(TestCase):
                 'status': StatutEmplacementDocument.VALIDE.name,
                 'automatically_required': False,
                 'request_status': '',
+                'related_checklist_tab': OngletsChecklist.assimilation.name,
+            }
+        }
+        self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
+
+        # Check that a default answer to the specific question has been specified
+        self.assertEqual(
+            len(
+                form_item_instantiation.admission.specific_question_answers.get(
+                    str(form_item_instantiation.form_item.uuid), []
+                ),
+            ),
+            1,
+        )
+
+        # Check last modification data
+        self.assertEqual(form_item_instantiation.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(form_item_instantiation.admission.last_update_author, self.sic_manager_user.person)
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_general_sic_manager_requests_a_free_document_with_a_default_file_and_a_predefined_configuration(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        url = resolve_url(
+            'admission:general-education:document:free-candidate-request-with-default-file',
+            uuid=self.general_admission.uuid,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        # Submit an invalid form
+
+        # With no data
+        response = self.client.post(url, data={}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+
+        # With invalid chosen predefined file
+        categorized_document = CategorizedFreeDocumentFactory(
+            checklist_tab=OngletsChecklist.parcours_anterieur.name,
+            with_academic_year=False,
+        )
+        response = self.client.post(
+            url,
+            data={
+                'free-document-request-with-default-file-form-file_name': 'My file name',
+                'free-document-request-with-default-file-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'free-document-request-with-default-file-form-checklist_tab': OngletsChecklist.assimilation.name,
+                'free-document-request-with-default-file-form-document_type': categorized_document.pk,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Because the selected checklist tab and the selected document checklist tab must be the same
+        self.assertIn(
+            gettext('The document must be related to the specified checklist tab'),
+            response.context['form'].errors.get('checklist_tab', []),
+        )
+        self.assertNotIn('academic_year', response.context['form'].errors)
+
+        # Submit a valid form
+        response = self.client.post(
+            url,
+            data={
+                'free-document-request-with-default-file-form-file_name': 'My file name',
+                'free-document-request-with-default-file-form-file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-document_type': categorized_document.pk,
+                'free-document-request-with-default-file-form-checklist_tab': OngletsChecklist.parcours_anterieur.name,
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Create a specific question linked to the admission
+        form_item_instantiation: AdmissionFormItemInstantiation = (
+            AdmissionFormItemInstantiation.objects.select_related('form_item', 'admission')
+            .filter(
+                admission=self.general_admission,
+            )
+            .first()
+        )
+        self.assertIsNotNone(form_item_instantiation)
+
+        self.assertEqual(form_item_instantiation.form_item.type, TypeItemFormulaire.DOCUMENT.name)
+        self.assertEqual(
+            form_item_instantiation.form_item.title,
+            {
+                'en': categorized_document.long_label_en,
+                'fr-be': categorized_document.long_label_fr,
+            },
+        )
+
+        self.assertEqual(form_item_instantiation.admission_id, self.general_admission.pk)
+        self.assertEqual(form_item_instantiation.academic_year_id, self.general_admission.determined_academic_year_id)
+        self.assertEqual(form_item_instantiation.required, False)
+        self.assertEqual(
+            form_item_instantiation.display_according_education,
+            CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name,
+        )
+        self.assertEqual(form_item_instantiation.tab, Onglets.DOCUMENTS.name)
+
+        # Save information about the request into the admission
+        desired_result = {
+            f'{IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name}.{form_item_instantiation.form_item.uuid}': {
+                'last_actor': self.sic_manager_user.person.global_id,
+                'reason': '',
+                'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                'last_action_at': '2022-01-01T00:00:00',
+                'deadline_at': '',
+                'requested_at': '',
+                'status': StatutEmplacementDocument.VALIDE.name,
+                'automatically_required': False,
+                'request_status': '',
+                'related_checklist_tab': OngletsChecklist.parcours_anterieur.name,
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
@@ -667,9 +931,9 @@ class DocumentViewTestCase(TestCase):
         response = self.client.post(
             url,
             data={
-                'file_name': 'My file name',
-                'reason': 'My reason',
-                'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'free-document-request-form-file_name': 'My file name',
+                'free-document-request-form-reason': 'My reason',
+                'free-document-request-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             },
             **self.default_headers,
         )
@@ -716,6 +980,7 @@ class DocumentViewTestCase(TestCase):
                 'status': StatutEmplacementDocument.A_RECLAMER.name,
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'related_checklist_tab': '',
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
@@ -740,9 +1005,9 @@ class DocumentViewTestCase(TestCase):
         response = self.client.post(
             url,
             data={
-                'file_name': 'My file name',
-                'reason': 'My reason',
-                'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+                'free-document-request-form-file_name': 'My file name',
+                'free-document-request-form-reason': 'My reason',
+                'free-document-request-form-request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
             },
             **self.default_headers,
         )
@@ -775,8 +1040,8 @@ class DocumentViewTestCase(TestCase):
         response = self.client.post(
             url,
             data={
-                'file_name': 'My file name',
-                'file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-file_name': 'My file name',
+                'free-document-request-with-default-file-form-file_0': ['file_0-token'],
             },
             **self.default_headers,
         )
@@ -823,6 +1088,7 @@ class DocumentViewTestCase(TestCase):
                 'status': StatutEmplacementDocument.VALIDE.name,
                 'request_status': '',
                 'automatically_required': False,
+                'related_checklist_tab': '',
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
@@ -950,6 +1216,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
@@ -1070,6 +1337,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
@@ -1153,6 +1421,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(
@@ -1210,6 +1479,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(
@@ -1266,6 +1536,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': True,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(
@@ -2754,6 +3025,7 @@ class DocumentViewTestCase(TestCase):
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'related_checklist_tab': '',
             },
         )
 
@@ -2818,6 +3090,7 @@ class DocumentViewTestCase(TestCase):
                 'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'related_checklist_tab': '',
             },
         )
 
@@ -2845,6 +3118,14 @@ class DocumentViewTestCase(TestCase):
         self.init_documents(for_fac=True)
 
         self.client.force_login(user=self.second_fac_manager_user)
+
+        fac_free_requestable_document_without_status = self._create_a_free_document(
+            self.fac_manager_user,
+            TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+        )
+        self.general_admission.refresh_from_db()
+        self.general_admission.requested_documents[fac_free_requestable_document_without_status]['request_status'] = ''
+        self.general_admission.save(update_fields=['requested_documents'])
 
         url = resolve_url('admission:general-education:documents', uuid=self.general_admission.uuid)
 
@@ -2881,6 +3162,10 @@ class DocumentViewTestCase(TestCase):
             'My file name',
         )
         self.assertEqual(second_field.initial, StatutReclamationEmplacementDocument.IMMEDIATEMENT.name)
+
+        # The third field should be missing as there is no request status
+        third_field = form.fields.get(fac_free_requestable_document_without_status)
+        self.assertIsNone(third_field)
 
         # Simulate that the field is not missing but still requested
         self.general_admission.refresh_from_db()
@@ -2982,6 +3267,7 @@ class DocumentViewTestCase(TestCase):
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'related_checklist_tab': '',
             },
         )
 
@@ -3046,6 +3332,7 @@ class DocumentViewTestCase(TestCase):
                 'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+                'related_checklist_tab': '',
             },
         )
 
@@ -3224,6 +3511,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
@@ -3358,6 +3646,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
@@ -3437,6 +3726,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(
@@ -3493,6 +3783,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(
@@ -3547,6 +3838,7 @@ class DocumentViewTestCase(TestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': True,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+            'related_checklist_tab': '',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(

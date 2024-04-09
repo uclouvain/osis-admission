@@ -29,7 +29,7 @@ from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
-from admission.ddd import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE
 from reference.tests.factories.city import ZipCodeFactory
 from reference.tests.factories.country import CountryFactory
 

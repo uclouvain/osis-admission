@@ -41,7 +41,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.doctorat.validation.dtos import DemandeRechercheDTO
-from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import (
     CandidateFactory,
@@ -52,6 +51,7 @@ from admission.tests.factories.roles import (
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
+from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.entity import EntityFactory

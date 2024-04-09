@@ -31,15 +31,21 @@ from typing import List
 import factory
 from attr import dataclass
 
-from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO, CurriculumDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    ExperienceAcademiqueDTO,
-    AnneeExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
+from admission.ddd.admission.dtos import (
+    AdressePersonnelleDTO,
+    CoordonneesDTO,
+    IdentificationDTO,
+    EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
 from base.models.enums.civil_state import CivilState
 from base.tests.factories.person import generate_global_id
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+    CurriculumDTO,
+)
 
 
 class IdentificationDTOFactory(factory.Factory):
@@ -109,7 +115,7 @@ class EtudesSecondairesDTOFactory(factory.Factory):
     uuid = factory.LazyFunction(lambda: str(uuid.uuid4()))
 
     class Meta:
-        model = EtudesSecondairesDTO
+        model = EtudesSecondairesAdmissionDTO
         abstract = False
 
 

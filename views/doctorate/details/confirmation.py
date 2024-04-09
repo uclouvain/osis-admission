@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ from admission.ddd.parcours_doctoral.domain.validator.exceptions import Doctorat
 from admission.ddd.parcours_doctoral.epreuve_confirmation.commands import RecupererEpreuvesConfirmationQuery
 from admission.ddd.parcours_doctoral.epreuve_confirmation.dtos import EpreuveConfirmationDTO
 from admission.mail_templates import ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from admission.views.common.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 
 __all__ = [

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@ from django.utils.functional import cached_property
 from django.views.generic import RedirectView
 
 from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_SOUMISE
-from admission.views.common.detail_tabs.checklist import ChecklistView
 from admission.views.common.detail_tabs.documents import DocumentView
 from admission.views.common.detail_tabs.person import AdmissionPersonDetailView
-from admission.views.doctorate.mixins import AdmissionViewMixin
+from admission.views.common.mixins import AdmissionViewMixin
+from admission.views.general_education.details.checklist import ChecklistView
 
 __all__ = ['AdmissionRedirectView']
 __namespace__ = False
@@ -47,7 +47,7 @@ class AdmissionRedirectView(AdmissionViewMixin, RedirectView):
     available_checklist_by_context = {
         'doctorate': False,
         'general-education': True,
-        'continuing-education': False,
+        'continuing-education': True,
     }
     available_documents_by_context = {
         'doctorate': False,

@@ -302,6 +302,10 @@ msgstr ""
 msgid "Academic year"
 msgstr ""
 
+msgctxt "admission"
+msgid "Academic year"
+msgstr ""
+
 msgid "Academic year of the admission"
 msgstr ""
 
@@ -815,6 +819,12 @@ msgid ""
 "equivalent to a defined number of credits (e.g. 30 credits)."
 msgstr ""
 
+msgid "Assessment test presented"
+msgstr ""
+
+msgid "Assessment test succeeded"
+msgstr ""
+
 msgid "Assimilated,Non-assimilated"
 msgstr ""
 
@@ -1038,6 +1048,9 @@ msgid "CDDs"
 msgstr ""
 
 msgid "CENT_VINGT_CREDITS_NON_ENCORE_ACQUIS"
+msgstr ""
+
+msgid "CEP"
 msgstr ""
 
 msgid "CERTIFICAT_60_CREDITS"
@@ -1345,6 +1358,9 @@ msgstr ""
 msgid "Certificate of support from the CPAS"
 msgstr ""
 
+msgid "Certificate provided"
+msgstr ""
+
 msgid "Certificate stating no debts to the institution"
 msgstr ""
 
@@ -1395,6 +1411,10 @@ msgstr ""
 msgid "Change the publication for this conference"
 msgstr ""
 
+msgid "Checklist"
+msgstr ""
+
+msgctxt "admission"
 msgid "Checklist"
 msgstr ""
 
@@ -2007,6 +2027,9 @@ msgstr ""
 msgid "Debug"
 msgstr ""
 
+msgid "Decision"
+msgstr ""
+
 msgid "Decision confirming the granting of subsidiary protection"
 msgstr ""
 
@@ -2248,6 +2271,10 @@ msgstr ""
 msgid "Document to be requested"
 msgstr ""
 
+msgctxt "admission"
+msgid "Document type"
+msgstr ""
+
 msgid "Documents"
 msgstr ""
 
@@ -2372,6 +2399,9 @@ msgid "Edit <em>%(category)s</em> activity."
 msgstr ""
 
 msgid "Edit the communication of this conference"
+msgstr ""
+
+msgid "Edition"
 msgstr ""
 
 msgctxt "admission"
@@ -2582,6 +2612,9 @@ msgid "Expected date of graduation"
 msgstr ""
 
 msgid "Expected graduation date (signed diploma)"
+msgstr ""
+
+msgid "Experience knowledge valorisation"
 msgstr ""
 
 msgid "Experience not found."
@@ -3394,6 +3427,9 @@ msgid ""
 "href=\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 
+msgid "In payement order"
+msgstr ""
+
 msgid "In person"
 msgstr ""
 
@@ -3461,6 +3497,9 @@ msgid "Institution should be set when PhD has been set to yes or partial"
 msgstr ""
 
 msgid "Insufficient"
+msgstr ""
+
+msgid "Interested mark"
 msgstr ""
 
 msgid "Internal comment"
@@ -3732,6 +3771,12 @@ msgid "Listening comprehension"
 msgstr ""
 
 msgid "Long"
+msgstr ""
+
+msgid "Long label in english"
+msgstr ""
+
+msgid "Long label in french"
 msgstr ""
 
 msgid "Long name"
@@ -4683,7 +4728,13 @@ msgstr ""
 msgid "Past experiences authentication"
 msgstr ""
 
+msgid "Pay by training cheque"
+msgstr ""
+
 msgid "Payed"
+msgstr ""
+
+msgid "Payement spread"
 msgstr ""
 
 msgid "Payment method"
@@ -5161,10 +5212,6 @@ msgstr ""
 msgid "Rank in diploma"
 msgstr ""
 
-msgctxt "admission"
-msgid "Reason"
-msgstr ""
-
 msgid "Reason for exceeding the deadline"
 msgstr ""
 
@@ -5207,6 +5254,9 @@ msgstr ""
 
 msgctxt "X"
 msgid "Rector"
+msgstr ""
+
+msgid "Reduced rights"
 msgstr ""
 
 msgid "Reduced tuition fee"
@@ -5744,6 +5794,12 @@ msgstr ""
 msgid "Short"
 msgstr ""
 
+msgid "Short label in english"
+msgstr ""
+
+msgid "Short label in french"
+msgstr ""
+
 msgid "Short name"
 msgstr ""
 
@@ -5877,6 +5933,9 @@ msgstr ""
 msgid "Street"
 msgstr ""
 
+msgid "Student report"
+msgstr ""
+
 msgid "Student signature for agreement"
 msgstr ""
 
@@ -5968,6 +6027,9 @@ msgid "System"
 msgstr ""
 
 msgid "System of education"
+msgstr ""
+
+msgid "TFF label"
 msgstr ""
 
 msgid "TO_BE_COMPLETED"
@@ -6195,6 +6257,9 @@ msgid "The document has been uploaded"
 msgstr ""
 
 msgid "The document is no longer designated as to be requested"
+msgstr ""
+
+msgid "The document must be related to the specified checklist tab"
 msgstr ""
 
 msgid "The documents have been requested to the candidate"
@@ -6655,6 +6720,9 @@ msgstr ""
 msgid "To be completed for the Enrolment Office (SIC)"
 msgstr ""
 
+msgid "To be determined"
+msgstr ""
+
 msgid "To be processed"
 msgstr ""
 
@@ -6718,6 +6786,9 @@ msgid "Training of the admission"
 msgstr ""
 
 msgid "Training specificities"
+msgstr ""
+
+msgid "Training spread"
 msgstr ""
 
 msgctxt "admission"
@@ -6862,6 +6933,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Upload"
+msgstr ""
+
+msgid "Upload a UCLouvain document"
 msgstr ""
 
 msgid "Upload a document"
@@ -7023,6 +7097,9 @@ msgid ""
 msgstr ""
 
 msgid "Whole view"
+msgstr ""
+
+msgid "With academic year"
 msgstr ""
 
 msgid "Without free documents"

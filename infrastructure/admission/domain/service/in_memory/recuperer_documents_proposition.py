@@ -25,10 +25,10 @@
 # ##############################################################################
 from typing import List
 
-from admission.constants import PDF_MIME_TYPE
 from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
+from base.forms.utils.file_field import PDF_MIME_TYPE
 
 
 class EmplacementsDocumentsPropositionInMemoryTranslator(IEmplacementsDocumentsPropositionTranslator):
