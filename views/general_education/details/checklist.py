@@ -1488,14 +1488,11 @@ class ChecklistView(
             documents_by_tab = self.checklist_documents_by_tab(specific_questions=specific_questions)
 
             context['documents'] = {
-                tab_name: sorted(
-                    [
-                        admission_document
-                        for admission_document in admission_documents
-                        if admission_document.identifiant.split('.')[-1] in tab_documents
-                    ],
-                    key=lambda doc: doc.libelle,
-                )
+                tab_name: [
+                    admission_document
+                    for admission_document in admission_documents
+                    if admission_document.identifiant.split('.')[-1] in tab_documents
+                ]
                 for tab_name, tab_documents in documents_by_tab.items()
             }
 
