@@ -85,7 +85,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 numero_rue=campus.street_number,
                 boite_postale=campus.postal_box,
                 localisation=campus.location,
-                email=campus.email,
+                email=campus.sic_enrollment_email,
             )
             if campus is not None
             else None,
@@ -156,7 +156,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                     rue=campus.street,
                     numero_rue=campus.street_number,
                     localisation=campus.location,
-                    email=campus.email,
+                    email=campus.sic_enrollment_email,
                 )
                 if campus is not None
                 else None,
