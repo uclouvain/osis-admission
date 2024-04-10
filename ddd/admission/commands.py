@@ -182,7 +182,7 @@ class RechercherParcoursAnterieurQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class SoumettreTicketPersonneCommand(interface.CommandRequest):
     global_id: str
-
+    annee: int
 
 @attr.dataclass(frozen=True, slots=True)
 class GetStatutTicketPersonneQuery(interface.QueryRequest):

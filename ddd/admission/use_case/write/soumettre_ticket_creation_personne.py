@@ -25,10 +25,17 @@
 # ##############################################################################
 from admission.ddd.admission.commands import SoumettreTicketPersonneCommand
 from admission.ddd.admission.repository.i_digit import IDigitRepository
+from ddd.logic.shared_kernel.signaletique_etudiant.domain.service.noma import NomaGenerateurService
+from ddd.logic.shared_kernel.signaletique_etudiant.repository.i_compteur_noma import ICompteurAnnuelPourNomaRepository
 
 
 def soumettre_ticket_creation_personne(
     cmd: 'SoumettreTicketPersonneCommand',
     digit_repository: 'IDigitRepository',
+    compteur_noma: 'ICompteurAnnuelPourNomaRepository',
 ) -> any:
-    return digit_repository.submit_person_ticket(global_id=cmd.global_id)
+    noma = NomaGenerateurService.generer_noma(
+        compteur=compteur_noma.get_compteur(annee=cmd.annee).compteur,
+        annee=cmd.annee
+    )
+    return digit_repository.submit_person_ticket(global_id=cmd.global_id, noma=noma)

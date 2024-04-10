@@ -41,6 +41,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django.views.generic import FormView
 
+from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import RechercherCompteExistantQuery, DefairePropositionFusionCommand, \
     SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
 from base.models.person import Person
@@ -55,13 +56,25 @@ class RequestDigitAccountCreationView(FormView):
 
     def post(self, request, *args, **kwargs):
         candidate = Person.objects.get(baseadmissions__uuid=kwargs['uuid'])
-        response = self.create_digit_person(candidate.global_id)
+        response = self.create_digit_person(
+            global_id=candidate.global_id,
+            year=self.base_admission.determined_academic_year.year
+        )
         return response
 
+    @property
+    def base_admission(self):
+        return BaseAdmission.objects.get(uuid=self.kwargs['uuid'])
+
     @staticmethod
-    def create_digit_person(global_id: str):
+    def create_digit_person(global_id: str, year: int):
         from infrastructure.messages_bus import message_bus_instance
-        return message_bus_instance.invoke(SoumettreTicketPersonneCommand(global_id=global_id))
+        return message_bus_instance.invoke(
+            SoumettreTicketPersonneCommand(
+                global_id=global_id,
+                annee=year
+            )
+        )
 
 
 @method_decorator(csrf_exempt, name='dispatch')

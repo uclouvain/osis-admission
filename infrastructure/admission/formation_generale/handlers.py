@@ -659,6 +659,7 @@ COMMAND_HANDLERS = {
     SoumettreTicketPersonneCommand: lambda msg_bus, cmd: soumettre_ticket_creation_personne(
         cmd,
         digit_repository=DigitRepository(),
+        compteur_noma=CompteurAnnuelPourNomaRepository(),
     ),
     GetStatutTicketPersonneQuery: lambda msg_bus, cmd: recuperer_statut_ticket_personne(
         cmd,
