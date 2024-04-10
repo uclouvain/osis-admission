@@ -6650,6 +6650,13 @@ msgstr ""
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
+#, python-format
+msgid ""
+"This experience has been added by the applicant in another application, to "
+"proceed to a modification, click on his/her <a href=\"%(admission_url)s\" "
+"target=\"_blank\">other application %(admission_reference)s</a>."
+msgstr ""
+
 msgid "This field is required if the first name is missing."
 msgstr ""
 

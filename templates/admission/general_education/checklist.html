@@ -307,11 +307,21 @@
           <div role="tabpanel" class="tab-pane single-past-experience-container" id="parcours_anterieur__{{ child.extra.identifiant }}">
             {% with experience=experiences_by_uuid|get_item:child.extra.identifiant %}
               {% if experience.valorisee_par_admissions != None and view.kwargs.uuid not in experience.valorisee_par_admissions %}
-                <p class="alert alert-warning">
-                  {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
-                </p>
+                {% with last_valuated_admission_by_experience_uuid|get_item:child.extra.identifiant as last_valuated_admission %}
+                  <p class="alert alert-warning">
+                    {% if last_valuated_admission %}
+                      {% admission_url last_valuated_admission.uuid last_valuated_admission.type_formation as admission_url %}
+                      {% blocktranslate trimmed with admission_reference=last_valuated_admission.numero_demande admission_url=admission_url %}
+                        This experience has been added by the applicant in another application, to proceed to a modification,
+                        click on his/her <a href="{{ admission_url }}" target="_blank">other application {{ admission_reference }}</a>.
+                      {% endblocktranslate %}
+                    {% else %}
+                      {% translate 'Please note that this experience was not part of the application when it was submitted.' %}
+                    {% endif %}
+                  </p>
+                  {% endwith %}
                 <div>
-                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False hide_files=False specific_questions=specific_questions_by_tab %}
+                  {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
                 {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant %}
@@ -432,37 +442,35 @@
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
             <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
-            <div class="flex-content" style="gap: 5px">
+            <form
+              method="GET"
+              {# By default, the document identifier is submitted through an url param, but since we submit #}
+              {# additional params, we use query params and a fake url param. #}
+              hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}"
+              hx-target="#document-details"
+              hx-swap="outerHTML"
+              class="flex-content"
+              style="gap: 5px"
+            >
               <button type="button" disabled="disabled" class="btn btn-default previous-option-button">
                 <i class="fa-solid fa-angle-left"></i>
               </button>
               <select
                   id="{{ tab }}-documents-select"
                   class="form-control"
-                  hx-target="#document-details"
-                  hx-swap="outerHTML"
                   style="flex: 1;"
-                  {# Normally, the identifier must be pass through an url param but trigger a request from an option #}
-                  {# doesn't work with Chrome so we trigger a request from the select and pass the identifier through a query param. #}
-                  hx-trigger="change"
-                  hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}"
                   name="identifier"
               >
                 <option disabled selected value>{% translate 'Select a document' %}</option>
                 {% for document in documents %}
-                  {% if document|is_list %}
-                    {% for sub_document in document.1 %}
-                      <option value="{{ sub_document.identifiant }}">{{ document.0 }} > {{ sub_document.libelle }}</option>
-                    {% endfor %}
-                  {% else %}
-                    <option value="{{ document.identifiant }}">{{ document.libelle }}</option>
-                  {% endif %}
+                  <option value="{{ document.identifiant }}">{{ document.libelle }}</option>
                 {% endfor %}
               </select>
+              <input name="read-only" type="hidden" value='0' />
               <button type="button" class="btn btn-default next-option-button">
                 <i class="fa-solid fa-angle-right"></i>
               </button>
-            </div>
+            </form>
           </div>
         {% endfor %}
         {% include 'admission/document/document_detail.html' %}
@@ -488,6 +496,7 @@
   {{ sic_decision_approval_form.media.js }}
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
   <script src="{% static 'admission/ckeditor.js' %}"></script>
+  {{ read_only_documents|json_script:"read-only-documents" }}
   <script>
       // Prevent to save the DOM in cache when using htmx requests
       htmx.config.refreshOnHistoryMiss = true;
@@ -508,7 +517,7 @@
 
           let currentTab = window.location.hash;
           let currentTabSplit = currentTab.split('-');
-          
+
           {# Manage the hash parameter #}
           if (currentTabSplit.length > 1) {
               {# Split the hash to get the checklist tab from it #}
@@ -552,31 +561,25 @@
               nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
           }
 
-
           function refreshDocuments() {
               const selectedTab = window.location.hash || defaultTab;
               const currentSelect = $(`${selectedTab}-documents-select`);
               $('.documents-tab').addClass('hidden').filter(`${selectedTab}-documents`).removeClass('hidden');
               currentSelect.prop("selectedIndex", currentSelect.find('option').length > 1 ? 1 : 0);
-              const htmxOverlay = $('#document-spinner');
-              htmxOverlay.addClass('htmx-request');
-              htmx.ajax(
-                  'GET',
-                  '{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}',
-                  {
-                      target: '#document-details',
-                      swap: 'outerHTML',
-                      values: {
-                          'identifier': currentSelect.val(),
-                      }
-                  },
-              ).finally(() => {
-                  if (currentSelect.length) {
-                      refreshDocumentsSelectButtons(currentSelect);
-                  }
-                  htmxOverlay.removeClass('htmx-request');
-              });
+              currentSelect[0].dispatchEvent(new Event('change'));
           }
+
+          const readOnlyDocumentsIdentifiers = JSON.parse(document.getElementById('read-only-documents').textContent);
+          // Manage the change of the document
+          $('select[name="identifier"]').on('change', function(){
+              const parentForm = $(this).parent('form');
+              // Specify if the document must be readonly
+              parentForm.find('input[name="read-only"]').val(readOnlyDocumentsIdentifiers.includes($(this).val()) ? '1' : '0');
+              // Submit the form to refresh the document view (htmx)
+              parentForm[0].requestSubmit();
+              // Manage the previous and next buttons
+              refreshDocumentsSelectButtons($(this));
+          });
 
           {# Change the selected document by using the left and right buttons #}
           $('.previous-option-button').on('click', function(){
@@ -597,10 +600,6 @@
                 newSelectedOption.prop('selected', 'selected');
                 documentSelect[0].dispatchEvent(new Event('change'));
               }
-          });
-
-          $('select[name="identifier"]').on('change', function(){
-              refreshDocumentsSelectButtons($(this));
           });
 
           $('.documents-tab').each(function(){
@@ -834,28 +833,18 @@
               $('.modal.in').modal('hide');
           });
 
-          {# When a form is submitted #}
-          const base_details_url = "{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='custom_identifier' %}";
+          {# When a document form is submitted #}
           documentContent.on('formValidation', function(event) {
 
               if (event.originalEvent.detail.is_valid) {
                   $('#document-content .modal').modal('hide');
                   $('#document-content .collapse').collapse('hide');
 
-                  {# Refresh the details of a document if the form has an impact on it #}
+                  {# Refresh the details of the document of the current tab if the form has an impact on it #}
                   if (event.originalEvent.detail.refresh_details) {
-                    const htmxOverlay = $('#document-spinner');
-                    htmxOverlay.addClass('htmx-request');
-                      htmx.ajax(
-                          'GET',
-                          base_details_url.replace('custom_identifier', event.originalEvent.detail.refresh_details),
-                          {
-                              target: '#document-details',
-                              swap: 'outerHTML',
-                          }
-                      ).finally(() => {
-                        htmxOverlay.removeClass('htmx-request');
-                      });
+                      const selectedTab = window.location.hash || defaultTab;
+                      const currentSelect = $(`${selectedTab}-documents-select`);
+                      currentSelect[0].dispatchEvent(new Event('change'));
                   }
               }
           })

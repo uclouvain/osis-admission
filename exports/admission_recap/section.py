@@ -579,23 +579,11 @@ def get_sections(
         # Only display the curriculum attachments
         pdf_sections.append(get_curriculum_section(context, {Onglets.CURRICULUM.name: []}, False))
 
-    # We keep all the experiences even the ones that are not valuated when the admission has not been submitted,
-    # otherwise we only keep the ones that have been valuated by the current admission
     for educational_experience in context.curriculum.experiences_academiques:
-        if (
-            context.proposition.est_non_soumise
-            or context.proposition.uuid in educational_experience.valorisee_par_admissions
-        ):
-            pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
+        pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
 
     for non_educational_experience in context.curriculum.experiences_non_academiques:
-        if (
-            context.proposition.est_non_soumise
-            or context.proposition.uuid in non_educational_experience.valorisee_par_admissions
-        ):
-            pdf_sections.append(
-                get_non_educational_experience_section(context, non_educational_experience, load_content)
-            )
+        pdf_sections.append(get_non_educational_experience_section(context, non_educational_experience, load_content))
 
     if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))
