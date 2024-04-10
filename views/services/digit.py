@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -40,17 +40,19 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 from django.views.generic import FormView
+from django.views.generic.edit import ProcessFormView
 
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.commands import RechercherCompteExistantQuery, DefairePropositionFusionCommand, \
     SoumettreTicketPersonneCommand, RefuserPropositionFusionCommand
 from base.models.person import Person
-from base.views.common import display_error_messages
+from base.models.person_creation_ticket import PersonTicketCreationStatus
+from base.views.common import display_error_messages, display_success_messages
 
 from django.utils.translation import gettext_lazy as _
 
 
-class RequestDigitAccountCreationView(FormView):
+class RequestDigitAccountCreationView(ProcessFormView):
 
     urlpatterns = {'request-digit-person-creation': 'request-digit-person-creation/<uuid:uuid>'}
 
@@ -60,7 +62,11 @@ class RequestDigitAccountCreationView(FormView):
             global_id=candidate.global_id,
             year=self.base_admission.determined_academic_year.year
         )
-        return response
+        if response['status'] == PersonTicketCreationStatus.CREATED:
+            display_success_messages(request, "Ticket de création de compte envoyé avec succès dans DigIT")
+        else:
+            display_error_messages(request, "Une erreur est survenue lors de l'envoi dans DigIT")
+        return redirect(request.META['HTTP_REFERER'])
 
     @property
     def base_admission(self):

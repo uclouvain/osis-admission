@@ -58,6 +58,8 @@ class DigitRepository(IDigitRepository):
                 request_id=ticket_response['requestId'], status=ticket_response['status']
             )
 
+        return ticket_response
+
     @classmethod
     def get_person_ticket_status(cls, global_id: str) -> Optional[StatutTicketPersonneDTO]:
         try:
