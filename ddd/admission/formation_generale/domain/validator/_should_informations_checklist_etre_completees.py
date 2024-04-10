@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List, Dict
+from typing import Optional, List
 
 import attr
 
@@ -40,7 +40,6 @@ from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
-    StatutEmplacementDocument,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
