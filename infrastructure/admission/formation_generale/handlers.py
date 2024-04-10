@@ -108,8 +108,9 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
 )
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
-from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import \
-    EmailDestinataireRepository
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
+    EmailDestinataireRepository,
+)
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
@@ -474,6 +475,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        formation_translator=FormationGeneraleTranslator(),
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
