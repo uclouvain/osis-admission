@@ -136,6 +136,21 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
             ChoixStatutChecklist.GEST_REUSSITE,
         )
 
+    def test_should_modifier_si_statut_cible_est_gestionnaire_reussite_et_conditions_non_respectees_certificat(self):
+        proposition_id = self.message_bus.invoke(
+            ModifierStatutChecklistParcoursAnterieurCommand(
+                uuid_proposition='uuid-CERTIFICATE-CONFIRMED',
+                statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                gestionnaire='0123456789',
+            )
+        )
+
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertEqual(
+            proposition.checklist_actuelle.parcours_anterieur.statut,
+            ChoixStatutChecklist.GEST_REUSSITE,
+        )
+
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(

@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List, Dict
+from typing import Optional, List
 
 import attr
 
@@ -36,10 +36,10 @@ from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
+from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
-    StatutEmplacementDocument,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -67,6 +67,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     DocumentAReclamerImmediatException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
+from base.models.enums.education_group_types import TrainingType
 from epc.models.enums.condition_acces import ConditionAcces
 
 
@@ -179,9 +180,14 @@ class ShouldPeutSpecifierInformationsDecisionFacultaire(BusinessValidator):
 class ShouldTitreAccesEtreSelectionne(BusinessValidator):
     statut: ChoixStatutChecklist
     titres_acces_selectionnes: List[TitreAccesSelectionnable]
+    type_formation: TrainingType
 
     def validate(self, *args, **kwargs):
-        if self.statut == ChoixStatutChecklist.GEST_REUSSITE and not self.titres_acces_selectionnes:
+        if (
+            self.statut == ChoixStatutChecklist.GEST_REUSSITE
+            and self.type_formation not in ITitresAcces.formations_sans_conditions_acces
+            and not self.titres_acces_selectionnes
+        ):
             raise TitreAccesEtreSelectionneException
 
 
@@ -190,10 +196,13 @@ class ShouldConditionAccesEtreSelectionne(BusinessValidator):
     statut: ChoixStatutChecklist
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
+    type_formation: TrainingType
 
     def validate(self, *args, **kwargs):
-        if self.statut == ChoixStatutChecklist.GEST_REUSSITE and not (
-            self.condition_acces and self.millesime_condition_acces
+        if (
+            self.statut == ChoixStatutChecklist.GEST_REUSSITE
+            and self.type_formation not in ITitresAcces.formations_sans_conditions_acces
+            and not (self.condition_acces and self.millesime_condition_acces)
         ):
             raise ConditionAccesEtreSelectionneException
 

@@ -42,14 +42,14 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_inscripti
     refuser_inscription_par_sic,
 )
 from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
+from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
+    specifier_besoin_de_derogation,
+)
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_regle_service import (
     specifier_financabilite_regle,
 )
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
-)
-from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
-    specifier_besoin_de_derogation,
 )
 from admission.ddd.admission.formation_generale.use_case.write.specifier_informations_acceptation_proposition_par_sic_service import (
     specifier_informations_acceptation_proposition_par_sic,
@@ -108,8 +108,9 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
 )
 from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
-from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import \
-    EmailDestinataireRepository
+from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
+    EmailDestinataireRepository,
+)
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
@@ -474,6 +475,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        formation_translator=FormationGeneraleTranslator(),
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,

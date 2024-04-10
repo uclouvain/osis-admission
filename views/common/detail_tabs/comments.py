@@ -34,9 +34,9 @@ from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager as ProgramManagerAdmission
 from admission.auth.roles.sic_management import SicManagement
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as ContinueOngletsChecklist
 from admission.ddd.admission.formation_generale.commands import RecupererResumePropositionQuery
 from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as GeneralOngletsChecklist
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as ContinueOngletsChecklist
 from admission.views.common.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
 from base.auth.roles.program_manager import ProgramManager
