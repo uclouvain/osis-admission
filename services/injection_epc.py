@@ -414,9 +414,9 @@ class InjectionEPC:
                 else ''
             ),
             'condition_acces': getattr(admission, 'admission_requirement', ''),
-            'double_diplome': double_diplome.short_name if double_diplome else '',
-            'type_demande_bourse': type_demande_bourse.short_name if type_demande_bourse else '',
-            'type_erasmus': type_erasmus.short_name if type_erasmus else '',
+            'double_diplome': str(double_diplome.uuid) if double_diplome else '',
+            'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else '',
+            'type_erasmus': str(type_erasmus.uuid) if type_erasmus else '',
             'complement_de_formation': AdmissionPrerequisiteCourses.objects.filter(admission_id=admission.id).exists(),
         }
 
