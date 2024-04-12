@@ -87,6 +87,7 @@ def admission_pdf_recap(
             load_content=True,
             hide_curriculum=True,
             with_additional_documents=False,
+            with_free_requestable_documents=True,
         )
 
         # Get a read token and metadata of all attachments

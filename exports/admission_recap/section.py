@@ -296,8 +296,7 @@ def get_educational_experience_context(context: ResumePropositionDTO, educationa
         'is_foreign_experience': educational_experience.pays != BE_ISO_CODE,
         'is_belgian_experience': educational_experience.pays == BE_ISO_CODE,
         'translation_required': translation_required,
-        'evaluation_system_with_credits': educational_experience.systeme_evaluation
-        in SYSTEMES_EVALUATION_AVEC_CREDITS,
+        'evaluation_system_with_credits': educational_experience.systeme_evaluation in SYSTEMES_EVALUATION_AVEC_CREDITS,
     }
 
 
@@ -605,7 +604,7 @@ def get_sections(
 
     if with_free_requestable_documents:
         # Section containing the additional requested documents
-        pdf_sections.append(get_requestable_free_document_section(context, specific_questions_by_tab, load_content))
+        pdf_sections.append(get_requestable_free_document_section(context, specific_questions_by_tab, False))
 
     if with_additional_documents:
         # Sections containing additional documents

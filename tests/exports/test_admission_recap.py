@@ -126,6 +126,7 @@ from admission.exports.admission_recap.section import (
     get_dynamic_questions_by_tab,
     get_training_choice_section,
     get_authorization_section,
+    get_requestable_free_document_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -174,7 +175,8 @@ from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
     Grade,
     Result,
-    TranscriptType, CURRICULUM_ACTIVITY_LABEL,
+    TranscriptType,
+    CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
@@ -962,6 +964,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 for question in tab_questions
             },
         )
+
+        for free_document in specific_questions[Onglets.DOCUMENTS.name]:
+            free_document.admission = cls.admission
+            free_document.save()
 
         all_specific_questions_dto: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
             RecupererQuestionsSpecifiquesQuery(uuid_proposition=cls.admission.uuid),
@@ -3287,6 +3293,22 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         )
 
         self.assertEqual(len(section.attachments), 2)
+
+    def test_requestable_free_documents_attachments(self):
+        section = get_requestable_free_document_section(
+            self.general_bachelor_context,
+            self.specific_questions,
+            False,
+        )
+
+        attachments = section.attachments
+        self.assertEqual(len(attachments), 1)
+
+        document_question = self.specific_questions.get(Onglets.DOCUMENTS.name)[1]
+        self.assertEqual(attachments[0].identifier, document_question.uuid)
+        self.assertEqual(attachments[0].label, document_question.label)
+        self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertFalse(attachments[0].required)
 
     def test_training_choice_attachments(self):
         section = get_training_choice_section(
