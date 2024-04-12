@@ -59,6 +59,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     ConfigurationStatutChecklist,
 )
+from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from osis_profile import BE_ISO_CODE
@@ -172,7 +173,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if site_inscription:
             qs = qs.filter(training__enrollment_campus__uuid=site_inscription)
         if entites:
-            qs = qs.filter(Q(sigle_entite_gestion__in=entites) | Q(training_management_faculty__in=entites))
+            related_entities = get_entities_with_descendants_ids(entites)
+            qs = qs.filter(training__management_entity_id__in=related_entities)
         if demandeur:
             qs = qs.filter_according_to_roles(demandeur)
         if types_formation:
