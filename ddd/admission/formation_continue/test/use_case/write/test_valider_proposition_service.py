@@ -30,11 +30,15 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    ApprouverPropositionTransitionStatutException,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class ValiderPropositionTestCase(SimpleTestCase):
@@ -55,3 +59,53 @@ class ValiderPropositionTestCase(SimpleTestCase):
         self.assertEqual(proposition_id, proposition.entity_id)
         self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE)
         self.assertEqual(proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_REUSSITE)
+
+    def test_should_renvoyer_erreur_si_statut_cloture(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_BLOCAGE
+        proposition.checklist_actuelle.decision.extra = {'blocage': 'closed'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+
+    def test_should_renvoyer_erreur_si_statut_valide(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_EN_COURS
+        proposition.checklist_actuelle.decision.extra = {'en_cours': 'taken_in_charge'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+
+    def test_should_renvoyer_erreur_si_statut_en_attente(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_EN_COURS
+        proposition.checklist_actuelle.decision.extra = {'en_cours': 'on_hold'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+
+    def test_should_renvoyer_erreur_si_statut_refuse(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_BLOCAGE
+        proposition.checklist_actuelle.decision.extra = {'blocage': 'denied'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)
+
+    def test_should_renvoyer_erreur_si_statut_annule(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_BLOCAGE
+        proposition.checklist_actuelle.decision.extra = {'blocage': 'canceled'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(ApprouverPropositionTransitionStatutException, context.exception.exceptions)

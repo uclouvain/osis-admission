@@ -31,11 +31,15 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixMotifAttente,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    MettreEnAttenteTransitionStatutException,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class MettreEnAttenteTestCase(SimpleTestCase):
@@ -52,7 +56,7 @@ class MettreEnAttenteTestCase(SimpleTestCase):
             autre_motif="",
         )
 
-    def test_should_annuler(self):
+    def test_should_mettre_en_attente(self):
         proposition_id = self.message_bus.invoke(self.cmd)
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition_id, proposition.entity_id)
@@ -61,3 +65,13 @@ class MettreEnAttenteTestCase(SimpleTestCase):
         self.assertDictEqual(proposition.checklist_actuelle.decision.extra, {'en_cours': "on_hold"})
         self.assertEqual(proposition.motif_de_mise_en_attente, ChoixMotifAttente.COMPLET)
         self.assertEqual(proposition.motif_de_mise_en_attente_autre, "")
+
+    def test_should_renvoyer_erreur_si_statut_cloture(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC2'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_BLOCAGE
+        proposition.checklist_actuelle.decision.extra = {'blocage': 'closed'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(MettreEnAttenteTransitionStatutException, context.exception.exceptions)
