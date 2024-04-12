@@ -30,11 +30,15 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    AnnulerPropositionTransitionStatutException,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class AnnulerPropositionTestCase(SimpleTestCase):
@@ -58,3 +62,13 @@ class AnnulerPropositionTestCase(SimpleTestCase):
         self.assertEqual(proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_BLOCAGE)
         self.assertDictEqual(proposition.checklist_actuelle.decision.extra, {'blocage': 'canceled'})
         self.assertEqual(proposition.motif_d_annulation, "foo")
+
+    def test_should_renvoyer_erreur_si_statut_cloture(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC2'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_BLOCAGE
+        proposition.checklist_actuelle.decision.extra = {'blocage': 'closed'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(AnnulerPropositionTransitionStatutException, context.exception.exceptions)

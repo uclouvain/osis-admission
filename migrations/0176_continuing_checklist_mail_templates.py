@@ -45,7 +45,7 @@ MAIL_FOOTER_FR = '''<p>Veuillez agréer l’expression de nos salutations distin
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0174_continuing_education_decision_fields'),
+        ('admission', '0175_continuing_education_decision_fields'),
     ]
 
     operations = [

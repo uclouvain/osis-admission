@@ -30,11 +30,15 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    ApprouverParFacTransitionStatutException,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class ApprouverParFacTestCase(SimpleTestCase):
@@ -58,3 +62,22 @@ class ApprouverParFacTestCase(SimpleTestCase):
         self.assertEqual(proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_EN_COURS)
         self.assertDictEqual(proposition.checklist_actuelle.decision.extra, {'en_cours': "fac_approval"})
         self.assertEqual(proposition.condition_d_approbation_par_la_faculte, "foo")
+
+    def test_should_renvoyer_erreur_si_statut_cloture(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC2'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_BLOCAGE
+        proposition.checklist_actuelle.decision.extra = {'blocage': 'closed'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(ApprouverParFacTransitionStatutException, context.exception.exceptions)
+
+    def test_should_renvoyer_erreur_si_statut_valide(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC2'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_REUSSITE
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(ApprouverParFacTransitionStatutException, context.exception.exceptions)
