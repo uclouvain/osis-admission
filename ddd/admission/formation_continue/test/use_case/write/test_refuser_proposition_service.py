@@ -31,11 +31,15 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixMotifRefus,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    RefuserPropositionTransitionStatutException,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
 class RefuserPropositionTestCase(SimpleTestCase):
@@ -61,3 +65,23 @@ class RefuserPropositionTestCase(SimpleTestCase):
         self.assertDictEqual(proposition.checklist_actuelle.decision.extra, {'blocage': 'denied'})
         self.assertEqual(proposition.motif_de_refus, ChoixMotifRefus.FULL)
         self.assertEqual(proposition.motif_de_refus_autre, "")
+
+    def test_should_renvoyer_erreur_si_statut_cloture(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC2'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_BLOCAGE
+        proposition.checklist_actuelle.decision.extra = {'blocage': 'closed'}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(RefuserPropositionTransitionStatutException, context.exception.exceptions)
+
+    def test_should_renvoyer_erreur_si_statut_valide(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC2'))
+        proposition.checklist_actuelle.decision.statut = ChoixStatutChecklist.GEST_REUSSITE
+        proposition.checklist_actuelle.decision.extra = {}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+            self.assertIn(RefuserPropositionTransitionStatutException, context.exception.exceptions)

@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('base', '0674_alter_academiccalendar_reference'),
-        ('admission', '0173_merge_20240408_1228'),
+        ('admission', '0174_alter_epcinjection_status'),
     ]
 
     operations = [
