@@ -404,7 +404,6 @@ class ApprouverParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidato
 @attr.dataclass(frozen=True, slots=True)
 class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutChecklist
-    type_formation: TrainingType
 
     titres_acces_selectionnes: List[TitreAccesSelectionnable]
 
@@ -419,13 +418,11 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
             ShouldTitreAccesEtreSelectionne(
                 statut=self.statut,
                 titres_acces_selectionnes=self.titres_acces_selectionnes,
-                type_formation=self.type_formation,
             ),
             ShouldConditionAccesEtreSelectionne(
                 statut=self.statut,
                 condition_acces=self.condition_acces,
                 millesime_condition_acces=self.millesime_condition_acces,
-                type_formation=self.type_formation,
             ),
         ]
 

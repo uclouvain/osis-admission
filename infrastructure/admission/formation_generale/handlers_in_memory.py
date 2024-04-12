@@ -535,7 +535,6 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
-        formation_translator=_formation_generale_translator,
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
