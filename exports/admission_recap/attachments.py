@@ -27,6 +27,7 @@ from io import BytesIO
 from typing import List, Optional, Dict
 
 import img2pdf
+from PIL.Image import DecompressionBombError
 from django.utils.translation import override
 from osis_document.api.utils import get_raw_content_remotely
 
@@ -109,7 +110,11 @@ class Attachment:
             if not raw_content:
                 return default_content
             if metadata.get('mimetype') in IMAGE_MIME_TYPES:
-                raw_content = img2pdf.convert(raw_content, rotation=img2pdf.Rotation.ifvalid)
+                try:
+                    raw_content = img2pdf.convert(raw_content, rotation=img2pdf.Rotation.ifvalid)
+                except (DecompressionBombError, ValueError, img2pdf.ImageOpenError):
+                    # If the image size is too big or the image cannot be opened, display the default content
+                    return default_content
             return BytesIO(raw_content)
         return default_content
 
