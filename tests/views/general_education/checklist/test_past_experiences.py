@@ -218,37 +218,6 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
 
-    def test_change_the_checklist_status_to_success_for_certificate(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        success_url = resolve_url(
-            self.url_name,
-            uuid=self.general_admission.uuid,
-            status=ChoixStatutChecklist.GEST_REUSSITE.name,
-        )
-
-        self.general_admission.training = self.certificate_training
-        self.general_admission.save(update_fields=['training'])
-
-        error_message_if_missing_data = gettext("Some errors have been encountered.")
-
-        response = self.client.post(success_url, **self.default_headers)
-
-        # Check response
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        messages = [m.message for m in response.context['messages']]
-        self.assertNotIn(error_message_if_missing_data, messages)
-        self.assertIn(gettext('Your data have been saved.'), messages)
-
-        # Check admission
-        self.general_admission.refresh_from_db()
-        self.assertEqual(
-            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
-            ChoixStatutChecklist.GEST_REUSSITE.name,
-        )
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.today())
-
 
 @freezegun.freeze_time('2023-01-01')
 class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
@@ -415,7 +384,17 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [],
         )
 
-        self.assertEqual(recuperer_conditions_acces_par_formation(TrainingType.CERTIFICATE.name), [])
+        self.assertEqual(
+            recuperer_conditions_acces_par_formation(TrainingType.CERTIFICATE.name),
+            [
+                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
+                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
+                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
+                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
+                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
+                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
+            ],
+        )
 
         self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.AGGREGATION.name),
