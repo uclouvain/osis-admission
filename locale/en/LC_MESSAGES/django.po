@@ -7249,10 +7249,10 @@ msgstr[1] ""
 #, python-format
 msgid ""
 "You cannot submit this admission for a general education as you already have "
-"submitted one."
+"submitted one for the year %(annee_cible)s."
 msgid_plural ""
 "You cannot submit this admission for a general education as you already have "
-"submitted %(maximum_number)s of them."
+"submitted %(maximum_number)s of them for the year %(annee_cible)s."
 msgstr[0] ""
 msgstr[1] ""
 

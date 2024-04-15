@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+
 from django.db.models import Count, Q
 
 from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
@@ -31,17 +32,21 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
 )
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_HORS_FRAIS_DOSSIER,
+)
 from base.models.person import Person
 
 
 class MaximumPropositionsAutorisees(IMaximumPropositionsAutorisees):
     @classmethod
-    def nb_propositions_envoyees_formation_generale(cls, matricule: str) -> int:
+    def nb_propositions_envoyees_formation_generale(cls, matricule: str, annee_cible: int) -> int:
         return GeneralEducationAdmission.objects.filter(
             candidate__global_id=matricule,
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE_HORS_FRAIS_DOSSIER,
+            determined_academic_year__year=annee_cible,
         ).count()
 
     @classmethod

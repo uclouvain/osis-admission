@@ -135,7 +135,8 @@ class VerifierProposition(interface.DomainService):
             ),
             partial(
                 maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_generale,
-                matricule=proposition_candidat.matricule_candidat,
+                proposition_candidat=proposition_candidat,
+                annee_soumise=annee_soumise,
             ),
         )
 

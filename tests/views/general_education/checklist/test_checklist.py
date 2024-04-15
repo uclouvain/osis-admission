@@ -35,7 +35,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import E
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    PoursuiteDeCycle, OngletsChecklist,
+    PoursuiteDeCycle,
+    OngletsChecklist,
 )
 from admission.tests.factories.curriculum import (
     EducationalExperienceYearFactory,
