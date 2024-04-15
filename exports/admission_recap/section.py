@@ -604,7 +604,7 @@ def get_sections(
 
     if with_free_requestable_documents:
         # Section containing the additional requested documents
-        pdf_sections.append(get_requestable_free_document_section(context, specific_questions_by_tab, load_content))
+        pdf_sections.append(get_requestable_free_document_section(context, specific_questions_by_tab, False))
 
     if with_additional_documents:
         # Sections containing additional documents
