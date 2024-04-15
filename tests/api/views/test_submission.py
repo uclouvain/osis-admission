@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import uuid
 from email import message_from_string
 from unittest.mock import patch, PropertyMock, MagicMock
 
@@ -45,7 +46,8 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
-from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets
+from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets, TypeSituationAssimilation
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -310,6 +312,43 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(email_object['To'], 'candidate2@test.be')
         self.assertNotIn('inscription tardive', notifications[0].payload)
         self.assertNotIn('payement des frais de dossier', notifications[0].payload)
+
+    def test_general_proposition_submission_ok_is_an_enrollment_or_an_admission(self):
+        current_admission = GeneralEducationAdmissionFactory(
+            training__academic_year__year=1980,
+            candidate__country_of_citizenship__european_union=True,
+            candidate__private_email='candidate2@test.be',
+            bachelor_with_access_conditions_met=True,
+        )
+
+        self.client.force_authenticate(user=current_admission.candidate.user)
+
+        current_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=current_admission.uuid)
+
+        # UE candidate and all titles from Belgium -> enrollment
+        response = self.client.post(current_url, self.data_ok)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        current_admission.refresh_from_db()
+        self.assertEqual(current_admission.type_demande, TypeDemande.INSCRIPTION.name)
+
+        current_admission.candidate.country_of_citizenship.european_union = False
+        current_admission.candidate.country_of_citizenship.save(update_fields=['european_union'])
+
+        # Not UE candidate with assimilation and all titles from Belgium -> admission
+        current_admission.accounting.assimilation_situation = (
+            TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name
+        )
+        current_admission.accounting.cpas_certificate = [uuid.uuid4()]
+        current_admission.accounting.save(update_fields=['assimilation_situation', 'cpas_certificate'])
+
+        current_admission.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
+        current_admission.save(update_fields=['status'])
+
+        response = self.client.post(current_url, self.data_ok)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        current_admission.refresh_from_db()
+        self.assertEqual(current_admission.type_demande, TypeDemande.ADMISSION.name)
 
     @freezegun.freeze_time("1980-10-22")
     def test_general_proposition_submission_with_late_enrollment(self):
