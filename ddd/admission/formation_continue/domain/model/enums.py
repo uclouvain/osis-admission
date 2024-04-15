@@ -67,6 +67,10 @@ STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE = {
     ChoixStatutPropositionContinue.ANNULEE.name,
 }
 
+STATUTS_PROPOSITION_CONTINUE_SOUMISE = (
+    set(ChoixStatutPropositionContinue.get_names()) - STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
+)
+
 
 class ChoixStatutChecklist(ChoiceEnum):
     INITIAL_NON_CONCERNE = _("INITIAL_NON_CONCERNE")

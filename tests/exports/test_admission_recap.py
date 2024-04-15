@@ -65,7 +65,9 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
 from admission.ddd.admission.dtos import (
-    AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesAdmissionDTO,
+    AdressePersonnelleDTO,
+    CoordonneesDTO,
+    EtudesSecondairesAdmissionDTO,
     IdentificationDTO,
 )
 from admission.ddd.admission.dtos.campus import CampusDTO
@@ -174,7 +176,8 @@ from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
     Grade,
     Result,
-    TranscriptType, CURRICULUM_ACTIVITY_LABEL,
+    TranscriptType,
+    CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,

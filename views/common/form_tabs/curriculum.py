@@ -57,11 +57,14 @@ from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.forms import (
-    FORM_SET_PREFIX, FOLLOWING_FORM_SET_PREFIX, OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX,
+    FORM_SET_PREFIX,
+    FOLLOWING_FORM_SET_PREFIX,
+    OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX,
     OSIS_DOCUMENT_UPLOADER_CLASS,
 )
 from osis_profile.forms.experience_academique import (
-    MINIMUM_CREDIT_NUMBER, CurriculumAcademicExperienceForm,
+    MINIMUM_CREDIT_NUMBER,
+    CurriculumAcademicExperienceForm,
     CurriculumEducationalExperienceYearFormSet,
 )
 from osis_profile.forms.experience_non_academique import CurriculumProfessionalExperienceForm
@@ -349,9 +352,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         last_enrolled_year = base_form.cleaned_data.get('end')
         be_country = country and country.iso_code == BE_ISO_CODE
         linguistic_regime = base_form.cleaned_data.get('linguistic_regime')
-        credits_are_required = (
-            base_form.cleaned_data.get('evaluation_type') in SYSTEMES_EVALUATION_AVEC_CREDITS
-        )
+        credits_are_required = base_form.cleaned_data.get('evaluation_type') in SYSTEMES_EVALUATION_AVEC_CREDITS
         transcript_is_required = base_form.cleaned_data.get('transcript_type') == TranscriptType.ONE_A_YEAR.name
         transcript_translation_is_required = (
             transcript_is_required

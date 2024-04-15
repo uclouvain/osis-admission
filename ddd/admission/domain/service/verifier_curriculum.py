@@ -77,9 +77,7 @@ class VerifierCurriculum(interface.DomainService):
                     not annee.releve_notes or traduction_necessaire and not annee.traduction_releve_notes
                 )
                 doit_renseigner_credits = (
-                    annee.annee >= PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
-                    if pays_belge
-                    else credits_necessaires_etranger
+                    annee.annee >= PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE if pays_belge else credits_necessaires_etranger
                 ) and (annee.resultat != Result.WAITING_RESULT.name or annee.annee < annee_courante)
                 if (
                     not annee.resultat
