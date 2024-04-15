@@ -449,7 +449,7 @@
               hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}"
               hx-target="#document-details"
               hx-swap="outerHTML"
-              class="flex-content"
+              class="flex-content-no-wrap"
               style="gap: 5px"
             >
               <button type="button" disabled="disabled" class="btn btn-default previous-option-button">
@@ -457,13 +457,11 @@
               </button>
               <select
                   id="{{ tab }}-documents-select"
-                  class="form-control"
-                  style="flex: 1;"
+                  class="form-control documents-select"
                   name="identifier"
               >
-                <option disabled selected value>{% translate 'Select a document' %}</option>
                 {% for document in documents %}
-                  <option value="{{ document.identifiant }}">{{ document.libelle }}</option>
+                  <option value="{{ document.identifiant }}" data-document-status="{{ document.statut }}">{{ document.libelle }}</option>
                 {% endfor %}
               </select>
               <input name="read-only" type="hidden" value='0' />
@@ -549,6 +547,29 @@
               }
           });
 
+          {# Manage the documents #}
+          function formatDocumentOption(option, optionClasses) {
+              const formattedOption = $(`<span class="${optionClasses}"></span>`);
+              formattedOption.text(option.text);
+              if (option.element && option.element.dataset.documentStatus === 'COMPLETE_APRES_RECLAMATION') {
+                  formattedOption.prepend('<span class="fa-solid fa-envelope document-icon"></span>');
+              }
+              return formattedOption;
+          }
+
+          function formatResultDocumentOption(option) {
+              return formatDocumentOption(option, 'flex-content-no-wrap');
+          }
+          function formatSelectedDocumentOption(option) {
+              return formatDocumentOption(option, 'selected-document-option');
+          }
+
+          $('.documents-select').select2({
+              templateResult: formatResultDocumentOption,
+              templateSelection: formatSelectedDocumentOption,
+              placeholder: '{% translate "No document" %}',
+          });
+
           function refreshDocumentsSelectButtons(jQuerySelect) {
               /*
               * Enable/disable the previous and next buttons depending on the number of options in the select.
@@ -557,21 +578,22 @@
               const nextOptionButton = jQuerySelect.siblings('.next-option-button');
               const documentSelectElement = jQuerySelect[0];
 
-              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 1);
+              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 0);
               nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
           }
 
-          function refreshDocuments() {
-              const selectedTab = window.location.hash || defaultTab;
+          function refreshDocuments(tabPanelId) {
+              const selectedTab = tabPanelId;
               const currentSelect = $(`${selectedTab}-documents-select`);
               $('.documents-tab').addClass('hidden').filter(`${selectedTab}-documents`).removeClass('hidden');
-              currentSelect.prop("selectedIndex", currentSelect.find('option').length > 1 ? 1 : 0);
-              currentSelect[0].dispatchEvent(new Event('change'));
+              currentSelect.prop("selectedIndex", 0);
+              currentSelect[0].dispatchEvent(new Event('select2:select'));
           }
 
           const readOnlyDocumentsIdentifiers = JSON.parse(document.getElementById('read-only-documents').textContent);
+
           // Manage the change of the document
-          $('select[name="identifier"]').on('change', function(){
+          $('select[name="identifier"]').on('select2:select', function(event){
               const parentForm = $(this).parent('form');
               // Specify if the document must be readonly
               parentForm.find('input[name="read-only"]').val(readOnlyDocumentsIdentifiers.includes($(this).val()) ? '1' : '0');
@@ -588,7 +610,7 @@
 
               if (newSelectedOption.length) {
                 newSelectedOption.prop('selected', 'selected');
-                documentSelect[0].dispatchEvent(new Event('change'));
+                documentSelect[0].dispatchEvent(new Event('select2:select'));
               }
           });
 
@@ -598,7 +620,7 @@
 
               if (newSelectedOption.length) {
                 newSelectedOption.prop('selected', 'selected');
-                documentSelect[0].dispatchEvent(new Event('change'));
+                documentSelect[0].dispatchEvent(new Event('select2:select'));
               }
           });
 
@@ -640,7 +662,7 @@
               // refresh comment height
               autogrow.call($(tabPaneId).find('textarea[name$="-comment"]')[0]);
 
-              refreshDocuments();
+              refreshDocuments(tabPaneId);
 
               // refresh info viewer (e.target = active && e.relatedTarget = previous)
               if (configurationCache.getItem('side-tab', 'documents') === 'info') {
@@ -844,7 +866,7 @@
                   if (event.originalEvent.detail.refresh_details) {
                       const selectedTab = window.location.hash || defaultTab;
                       const currentSelect = $(`${selectedTab}-documents-select`);
-                      currentSelect[0].dispatchEvent(new Event('change'));
+                      currentSelect[0].dispatchEvent(new Event('select2:select'));
                   }
               }
           })
@@ -1294,5 +1316,18 @@
     .panel-heading .btn.btn-heading-secondary {
       margin-right: 0.5em;
     }
+
+    .selected-document-option {
+      vertical-align: middle;
+    }
+
+    .selected-document-option .document-icon {
+      margin-right: 0.5em;
+    }
+
+    select.documents-select.select2-hidden-accessible + span {
+      min-width: 0 !important;
+    }
+
   </style>
 {% endblock style %}
