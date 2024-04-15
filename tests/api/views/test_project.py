@@ -64,7 +64,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
 from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
-from admission.tests import CheckActionLinksMixin, QueriesAssertionsMixin
+from admission.tests import CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -77,6 +77,7 @@ from admission.tests.factories.supervision import CaMemberFactory, PromoterFacto
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
+from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory

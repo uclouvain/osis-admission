@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from email.message import EmailMessage
 from typing import Optional, List
@@ -120,9 +121,12 @@ class AdmissionDocument:
     automatically_required: Optional[bool]
     mimetypes: List[str]
     label: str
+    label_fr: str
+    label_en: str
     document_submitted_by: str
     max_documents_number: Optional[int]
     request_status: str
+    related_checklist_tab: str
 
 
 def get_document_from_identifier(
@@ -151,6 +155,8 @@ def get_document_from_identifier(
     requested_document = admission.requested_documents.get(document_identifier, {})
     document_author: str = requested_document.get('last_actor', '')
     document_label: str = ''
+    document_label_fr: str = ''
+    document_label_en: str = ''
     document_submitted_by: str = ''
     metadata: dict = {}
     max_documents_number = None
@@ -204,6 +210,8 @@ def get_document_from_identifier(
             [],
         )
         document_label = specific_question.title.get(admission.candidate.language, '')
+        document_label_fr = specific_question.title.get(settings.LANGUAGE_CODE_FR, '')
+        document_label_en = specific_question.title.get(settings.LANGUAGE_CODE_EN, '')
         max_documents_number = specific_question.configuration.get(
             CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name,
         )
@@ -238,6 +246,8 @@ def get_document_from_identifier(
             metadata = get_remote_metadata(token=token) or {}
             document_author = metadata.get('author', '')
             document_label = metadata.get('explicit_name', '')
+            document_label_fr = document_label
+            document_label_en = document_label
             document_mimetypes = [metadata.get('mimetype')] or []
 
     elif base_identifier == IdentifiantBaseEmplacementDocument.SYSTEME.name:
@@ -390,9 +400,12 @@ def get_document_from_identifier(
             automatically_required=requested_document.get('automatically_required') or False,
             mimetypes=document_mimetypes or list(SUPPORTED_MIME_TYPES),
             label=document_label,
+            label_fr=document_label_fr,
+            label_en=document_label_en,
             document_submitted_by=document_submitted_by,
             max_documents_number=max_documents_number,
             request_status=requested_document.get('request_status') or '',
+            related_checklist_tab=requested_document.get('related_checklist_tab') or '',
         )
 
 

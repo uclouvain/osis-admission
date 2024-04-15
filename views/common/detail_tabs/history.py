@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ from admission.utils import (
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
 )
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from admission.views.common.mixins import LoadDossierViewMixin
 from osis_history.contrib.mixins import HistoryEntryListAPIMixin
 
 from osis_role.contrib.views import APIPermissionRequiredMixin

@@ -29,7 +29,7 @@ from unittest.mock import patch
 
 from django.test import override_settings
 
-from admission.constants import JPEG_MIME_TYPE, SUPPORTED_MIME_TYPES, PDF_MIME_TYPE
+from admission.constants import JPEG_MIME_TYPE, SUPPORTED_MIME_TYPES
 from admission.contrib.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.enums.emplacement_document import (
@@ -38,8 +38,8 @@ from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
     OngletsDemande,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.infrastructure.utils import get_document_from_identifier, CORRESPONDANCE_CHAMPS_COMPTABILITE
-from admission.tests import TestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -56,11 +56,13 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from admission.tests.factories.supervision import PromoterFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.tests import TestCaseWithQueriesAssertions
 from reference.tests.factories.language import FrenchLanguageFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class TestGetDocumentFromIdentifier(TestCase):
+class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
     def setUp(self) -> None:
         # Mock documents
         patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
@@ -121,6 +123,7 @@ class TestGetDocumentFromIdentifier(TestCase):
             'requested_at': '2020-01-01T00:00:00',
             'deadline_at': '2020-01-15',
             'automatically_required': False,
+            'related_checklist_tab': OngletsChecklist.parcours_anterieur.name,
         }
 
         self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
@@ -153,7 +156,10 @@ class TestGetDocumentFromIdentifier(TestCase):
         self.assertEqual(document.automatically_required, False)
         self.assertEqual(document.mimetypes, list(SUPPORTED_MIME_TYPES))
         self.assertEqual(document.label, 'Champ document')
+        self.assertEqual(document.label_fr, 'Champ document')
+        self.assertEqual(document.label_en, 'Document field')
         self.assertEqual(document.document_submitted_by, '0123456')
+        self.assertEqual(document.related_checklist_tab, OngletsChecklist.parcours_anterieur.name)
 
     def test_get_non_free_requestable_document_in_a_specific_question(self):
         base_identifier = Onglets.CURRICULUM.name

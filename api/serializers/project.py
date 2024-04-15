@@ -311,6 +311,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
     erreurs = None
     reponses_questions_specifiques = None
     elements_confirmation = None
+    documents_demandes = None
 
     class Meta:
         source = FormationContinuePropositionDTO
@@ -577,6 +578,7 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
     reponses_questions_specifiques = AnswerToSpecificQuestionField()
     erreurs = serializers.JSONField()
     elements_confirmation = None
+    documents_demandes = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

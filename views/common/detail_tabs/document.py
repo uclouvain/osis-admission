@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Union
+
 from django.contrib import messages
 from django.http import HttpResponse, Http404
 from django.utils.functional import cached_property
@@ -40,6 +42,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.forms.admission.document import (
     UploadFreeDocumentForm,
@@ -50,11 +53,14 @@ from admission.forms.admission.document import (
     RequestFreeDocumentWithDefaultFileForm,
     ChangeRequestDocumentForm,
     RetypeDocumentForm,
+    UploadManagerDocumentForm,
 )
 from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
-from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
+from osis_common.ddd import interface
 from osis_common.utils.htmx import HtmxMixin
 
 __namespace__ = 'document'
@@ -78,7 +84,7 @@ from osis_document.utils import get_file_url
 
 
 class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
-    form_class = UploadFreeDocumentForm
+    form_class = UploadManagerDocumentForm
     permission_required = 'admission.change_documents_management'
     template_name = 'admission/document/upload_free_document.html'
     htmx_template_name = 'admission/document/upload_free_document.html'
@@ -88,6 +94,7 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
     name = 'upload-free-document'
     urlpatterns = 'free-internal-upload'
     message_on_success = _('The document has been uploaded')
+    prefix = 'upload-free-internal-document-form'
 
     @property
     def document_type(self):
@@ -104,24 +111,25 @@ class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredM
                 auteur=self.request.user.person.global_id,
                 uuid_document=form.cleaned_data['file'][0],
                 type_emplacement=self.document_type,
-                libelle=form.cleaned_data['file_name'],
+                libelle=form.cleaned_data['file_name_fr'],
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
-        return super().form_valid(self.form_class())
+        return super().form_valid(self.form_class(prefix=self.prefix))
 
 
 class AnalysisFolderGenerationView(UploadFreeInternalDocumentView):
     name = 'analysis-folder-generation'
     urlpatterns = 'analysis-folder-generation'
     message_on_success = _('A new version of the analysis folder has been generated.')
+    prefix = None  # No prefix for the form as it is not rendered in the template
 
     def get_form_kwargs(self):
         return {
             'data': {
                 'file_name': _('Analysis folder'),
                 'file_0': admission_pdf_recap(self.admission, get_language(), with_annotated_documents=True),
-            }
+            },
         }
 
 
@@ -170,10 +178,12 @@ class BaseRequestFreeCandidateDocument(AdmissionFormMixin, HtmxPermissionRequire
                     if self.is_fac
                     else TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name
                 ),
-                libelle=form.cleaned_data['file_name'],
+                libelle_en=form.cleaned_data['file_name_en'],
+                libelle_fr=form.cleaned_data['file_name_fr'],
                 raison=form.cleaned_data.get('reason', ''),
                 uuid_document=form.cleaned_data['file'][0] if form.cleaned_data.get('file') else '',
                 statut_reclamation=form.cleaned_data.get('request_status', ''),
+                onglet_checklist_associe=form.cleaned_data.get('checklist_tab') or '',
             ),
         )
         self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
@@ -186,10 +196,12 @@ class RequestFreeCandidateDocumentView(BaseRequestFreeCandidateDocument):
     htmx_template_name = 'admission/document/request_free_document.html'
     urlpatterns = 'free-candidate-request'
     name = 'request-free-candidate-document'
+    prefix = 'free-document-request-form'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['only_limited_request_choices'] = self.is_fac
+        kwargs['candidate_language'] = self.admission.candidate.language
         return kwargs
 
 
@@ -199,6 +211,7 @@ class RequestFreeCandidateDocumentWithDefaultFileView(BaseRequestFreeCandidateDo
     htmx_template_name = 'admission/document/request_free_document_with_default_file.html'
     urlpatterns = 'free-candidate-request-with-default-file'
     name = 'request-free-candidate-document-with-default-file'
+    prefix = 'free-document-request-with-default-file-form'
 
 
 class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, TemplateView):
@@ -230,6 +243,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         editable_document = can_edit_document(document, self.is_fac, self.is_sic)
         context['editable_document'] = editable_document
         context['retypable_document'] = can_retype_document(document, document_identifier)
+        context['read_only_document'] = self.request.GET.get('read-only') == '1'
         context['document'] = document
 
         if document.uuids:
@@ -266,6 +280,10 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
     default_htmx_trigger_form_extra = {
         'refresh_list': True,
     }
+    commands = {
+        CONTEXT_GENERAL: None,
+        CONTEXT_CONTINUING: None,
+    }
     permission_required = 'admission.change_documents_management'
     name = 'document-action'
 
@@ -274,6 +292,13 @@ class DocumentFormView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixi
         context['document_identifier'] = self.document_identifier
         context['document'] = self.document
         return context
+
+    @property
+    def command(self) -> Union[interface.QueryRequest, interface.CommandRequest]:
+        command = self.commands.get(self.current_context)
+        if command is None:
+            raise Http404
+        return command
 
     @property
     def document_identifier(self):
@@ -537,6 +562,10 @@ class RetypeDocumentView(DocumentFormView):
     urlpatterns = {'retype': 'retype/<str:identifier>'}
     template_name = 'admission/document/retype_form.html'
     htmx_template_name = 'admission/document/retype_form.html'
+    commands = {
+        CONTEXT_GENERAL: general_education_commands.RetyperDocumentCommand,
+        CONTEXT_CONTINUING: continuing_education_commands.RetyperDocumentCommand,
+    }
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -551,7 +580,7 @@ class RetypeDocumentView(DocumentFormView):
 
     def form_valid(self, form):
         document_id = message_bus_instance.invoke(
-            general_education_commands.RetyperDocumentCommand(
+            self.command(
                 uuid_proposition=self.admission_uuid,
                 identifiant_source=self.document_identifier,
                 identifiant_cible=form.cleaned_data['identifier'],

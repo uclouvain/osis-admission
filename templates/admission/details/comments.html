@@ -42,8 +42,8 @@
      data-rich-text-config="{{ ckeditor_config }}"
      data-panel-class="panel panel-primary"
   ></div>
+  {% url base_namespace|add:':other-comments' view.kwargs.uuid as other_comments_url %}
   {% if view.is_general %}
-    {% url base_namespace|add:':other-comments' view.kwargs.uuid as other_comments_url %}
     {% for checklist_tag, checklist_title in checklist_tags %}
       {% if checklist_tag in CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS %}
         <div class="comment-thread panel panel-panel panel-info">
@@ -97,6 +97,15 @@
              data-panel-class="panel panel-info"
         ></div>
       {% endif %}
+    {% endfor %}
+  {% elif view.is_continuing %}
+    {% for checklist_tag, checklist_title in checklist_tags %}
+      <div class="comment-viewer"
+           data-url="{{ other_comments_url }}"
+           data-tags="{{ checklist_tag }}"
+           data-header-title="{{ checklist_title }}"
+           data-panel-class="panel panel-info"
+      ></div>
     {% endfor %}
   {% endif %}
   {% csrf_token %}

@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import uuid
 from email import message_from_string
 from unittest.mock import patch, PropertyMock, MagicMock
 
@@ -38,7 +39,6 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.validator.exceptions import (
@@ -46,7 +46,8 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
-from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets
+from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets, TypeSituationAssimilation
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -54,14 +55,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
-from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.faculty_decision import (
-    AdditionalApprovalConditionFactory,
     FreeAdditionalApprovalConditionFactory,
 )
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, TextAdmissionFormItemFactory
@@ -74,9 +73,12 @@ from admission.tests.factories.person import (
     IncompletePersonForIUFCFactory,
 )
 from admission.tests.factories.roles import ProgramManagerRoleFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
+from base.tests import QueriesAssertionsMixin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
@@ -312,6 +314,43 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertNotIn('inscription tardive', notifications[0].payload)
         self.assertNotIn('payement des frais de dossier', notifications[0].payload)
 
+    def test_general_proposition_submission_ok_is_an_enrollment_or_an_admission(self):
+        current_admission = GeneralEducationAdmissionFactory(
+            training__academic_year__year=1980,
+            candidate__country_of_citizenship__european_union=True,
+            candidate__private_email='candidate2@test.be',
+            bachelor_with_access_conditions_met=True,
+        )
+
+        self.client.force_authenticate(user=current_admission.candidate.user)
+
+        current_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=current_admission.uuid)
+
+        # UE candidate and all titles from Belgium -> enrollment
+        response = self.client.post(current_url, self.data_ok)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        current_admission.refresh_from_db()
+        self.assertEqual(current_admission.type_demande, TypeDemande.INSCRIPTION.name)
+
+        current_admission.candidate.country_of_citizenship.european_union = False
+        current_admission.candidate.country_of_citizenship.save(update_fields=['european_union'])
+
+        # Not UE candidate with assimilation and all titles from Belgium -> admission
+        current_admission.accounting.assimilation_situation = (
+            TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name
+        )
+        current_admission.accounting.cpas_certificate = [uuid.uuid4()]
+        current_admission.accounting.save(update_fields=['assimilation_situation', 'cpas_certificate'])
+
+        current_admission.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
+        current_admission.save(update_fields=['status'])
+
+        response = self.client.post(current_url, self.data_ok)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        current_admission.refresh_from_db()
+        self.assertEqual(current_admission.type_demande, TypeDemande.ADMISSION.name)
+
     @freezegun.freeze_time("1980-10-22")
     def test_general_proposition_submission_with_late_enrollment(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
@@ -379,19 +418,136 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_general_proposition_verification_too_much_submitted_propositions(self):
-        GeneralEducationAdmissionFactory(
-            candidate=self.candidate_ok,
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
-        )
-        GeneralEducationAdmissionFactory(
-            candidate=self.candidate_ok,
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
-        )
         self.client.force_authenticate(user=self.candidate_ok.user)
-        response = self.client.get(self.ok_url)
+
+        academic_year_1981 = AcademicYear.objects.get(year=1981)
+        academic_year_1982 = AcademicYear.objects.get(year=1982)
+
+        current_admission = GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            training__academic_year=academic_year_1981,
+            determined_academic_year=None,
+            # force type to have access conditions
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__acronym="FOOBAR",
+        )
+
+        current_admission_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=current_admission.uuid)
+
+        GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            determined_academic_year=academic_year_1981,
+        )
+        GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            determined_academic_year=academic_year_1981,
+        )
+
+        # Two admissions already submitted for the same year (based on the training year)
+        response = self.client.get(current_admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        ret = response.json()
-        self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, [e["status_code"] for e in ret['errors']])
+        errors_statuses = [e["status_code"] for e in response.json()['errors']]
+        self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
+
+        # Two admissions already submitted for the same year (based on the determined academic year)
+        current_admission.training.academic_year = academic_year_1982
+        current_admission.training.save(update_fields=['academic_year'])
+        current_admission.determined_academic_year = academic_year_1981
+        current_admission.save(update_fields=['determined_academic_year'])
+
+        response = self.client.get(current_admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        errors_statuses = [e["status_code"] for e in response.json()['errors']]
+        self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
+
+        # Two admissions already submitted but for a different year (based on the training year)
+        current_admission.determined_academic_year = None
+        current_admission.save(update_fields=['determined_academic_year'])
+
+        response = self.client.get(current_admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        errors_statuses = [e["status_code"] for e in response.json()['errors']]
+        self.assertNotIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
+
+        # Two admissions already submitted but for a different year (based on the determined academic year)
+        current_admission.determined_academic_year = academic_year_1982
+        current_admission.save(update_fields=['determined_academic_year'])
+
+        response = self.client.get(current_admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        errors_statuses = [e["status_code"] for e in response.json()['errors']]
+        self.assertNotIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
+
+    def test_general_proposition_submission_too_much_submitted_propositions(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+
+        data = self.data_ok.copy()
+        data['annee'] = 1981
+
+        academic_year_1981 = AcademicYear.objects.get(year=1981)
+        academic_year_1982 = AcademicYear.objects.get(year=1982)
+
+        current_admission = GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            training__academic_year=academic_year_1981,
+            determined_academic_year=None,
+            # force type to have access conditions
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__acronym="FOOBAR",
+        )
+
+        current_admission_url = resolve_url("admission_api_v1:submit-general-proposition", uuid=current_admission.uuid)
+
+        GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            determined_academic_year=academic_year_1981,
+        )
+        GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            determined_academic_year=academic_year_1981,
+        )
+
+        # Two admissions already submitted for the same year (based on the training year)
+        response = self.client.post(current_admission_url, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
+        self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
+
+        # Two admissions already submitted for the same year (based on the determined academic year)
+        current_admission.training.academic_year = academic_year_1982
+        current_admission.training.save(update_fields=['academic_year'])
+        current_admission.determined_academic_year = academic_year_1981
+        current_admission.save(update_fields=['determined_academic_year'])
+
+        response = self.client.post(current_admission_url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
+        self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
+
+        data['annee'] = 1982
+
+        # Two admissions already submitted but for a different year (based on the training year)
+        current_admission.determined_academic_year = None
+        current_admission.save(update_fields=['determined_academic_year'])
+
+        response = self.client.post(current_admission_url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
+        self.assertNotIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
+
+        # Two admissions already submitted but for a different year (based on the determined academic year)
+        current_admission.determined_academic_year = academic_year_1982
+        current_admission.save(update_fields=['determined_academic_year'])
+
+        response = self.client.post(current_admission_url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
+        self.assertNotIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
 
 
 @freezegun.freeze_time('2022-12-10')

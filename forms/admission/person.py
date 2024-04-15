@@ -29,7 +29,6 @@ from django.core import validators
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import IMAGE_MIME_TYPES
-from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe, ChoixGenre
 from admission.forms import (
     AdmissionModelCountryChoiceField,
@@ -45,6 +44,7 @@ from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
 from base.models.utils.utils import ChoiceEnum
+from osis_profile import BE_ISO_CODE
 from reference.models.country import Country
 
 

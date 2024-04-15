@@ -25,20 +25,15 @@
 # ##############################################################################
 from typing import Optional, List, Dict
 
-from django.utils import formats
 from django.utils.translation import gettext as _, override
 
 from admission.calendar.admission_calendar import (
     AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
 )
-from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, BE_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import Onglets, CHOIX_AFFILIATION_SPORT_SELON_SITE
@@ -65,12 +60,14 @@ from admission.exports.admission_recap.attachments import (
 from admission.exports.admission_recap.constants import (
     TRAINING_TYPES_WITH_EQUIVALENCE,
     FORMATTED_RELATIONSHIPS,
-    CURRICULUM_ACTIVITY_LABEL,
 )
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.education_group_types import TrainingType
-from osis_profile.models.enums.curriculum import ActivityType
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+from osis_profile.models.enums.curriculum import CURRICULUM_ACTIVITY_LABEL
+from osis_profile.views.edit_experience_academique import SYSTEMES_EVALUATION_AVEC_CREDITS
 
 
 class Section:
@@ -299,8 +296,7 @@ def get_educational_experience_context(context: ResumePropositionDTO, educationa
         'is_foreign_experience': educational_experience.pays != BE_ISO_CODE,
         'is_belgian_experience': educational_experience.pays == BE_ISO_CODE,
         'translation_required': translation_required,
-        'evaluation_system_with_credits': educational_experience.systeme_evaluation
-        in VerifierCurriculum.SYSTEMES_EVALUATION_AVEC_CREDITS,
+        'evaluation_system_with_credits': educational_experience.systeme_evaluation in SYSTEMES_EVALUATION_AVEC_CREDITS,
     }
 
 
@@ -582,23 +578,11 @@ def get_sections(
         # Only display the curriculum attachments
         pdf_sections.append(get_curriculum_section(context, {Onglets.CURRICULUM.name: []}, False))
 
-    # We keep all the experiences even the ones that are not valuated when the admission has not been submitted,
-    # otherwise we only keep the ones that have been valuated by the current admission
     for educational_experience in context.curriculum.experiences_academiques:
-        if (
-            context.proposition.est_non_soumise
-            or context.proposition.uuid in educational_experience.valorisee_par_admissions
-        ):
-            pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
+        pdf_sections.append(get_educational_experience_section(context, educational_experience, load_content))
 
     for non_educational_experience in context.curriculum.experiences_non_academiques:
-        if (
-            context.proposition.est_non_soumise
-            or context.proposition.uuid in non_educational_experience.valorisee_par_admissions
-        ):
-            pdf_sections.append(
-                get_non_educational_experience_section(context, non_educational_experience, load_content)
-            )
+        pdf_sections.append(get_non_educational_experience_section(context, non_educational_experience, load_content))
 
     if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))
@@ -620,7 +604,7 @@ def get_sections(
 
     if with_free_requestable_documents:
         # Section containing the additional requested documents
-        pdf_sections.append(get_requestable_free_document_section(context, specific_questions_by_tab, load_content))
+        pdf_sections.append(get_requestable_free_document_section(context, specific_questions_by_tab, False))
 
     if with_additional_documents:
         # Sections containing additional documents

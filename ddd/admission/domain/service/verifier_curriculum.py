@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,19 +25,18 @@
 # ##############################################################################
 from typing import List, Dict
 
-from admission.ddd import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
-from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result
+from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+from osis_profile.models.enums.curriculum import TranscriptType, Result
+from osis_profile.views.edit_experience_academique import (
+    SYSTEMES_EVALUATION_AVEC_CREDITS,
+    PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE,
+)
 
 
 class VerifierCurriculum(interface.DomainService):
     CHAMPS_REQUIS_SI_DIPLOME_OBTENU = ['diplome', 'grade_obtenu']
-    SYSTEMES_EVALUATION_AVEC_CREDITS = {
-        EvaluationSystem.ECTS_CREDITS.name,
-        EvaluationSystem.NON_EUROPEAN_CREDITS.name,
-    }
-    PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE = 2004
 
     @classmethod
     def recuperer_experiences_academiques_incompletes(
@@ -49,6 +48,10 @@ class VerifierCurriculum(interface.DomainService):
         experiences_incompletes = {}
 
         for experience in experiences:
+            # Les expériences qui viennent d'EPC sont considérées complètes qu'elles le soient ou non
+            if experience.epc_experience:
+                continue
+
             pays_belge = experience.pays == BE_ISO_CODE
             traduction_necessaire = (
                 not pays_belge and experience.regime_linguistique not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
@@ -72,15 +75,13 @@ class VerifierCurriculum(interface.DomainService):
                 experiences_incompletes[experience.uuid] = str(experience)
                 continue
 
-            credits_necessaires_etranger = experience.systeme_evaluation in cls.SYSTEMES_EVALUATION_AVEC_CREDITS
+            credits_necessaires_etranger = experience.systeme_evaluation in SYSTEMES_EVALUATION_AVEC_CREDITS
             for annee in experience.annees:
                 releve_annuel_manquant = not releve_global_necessaire and (
                     not annee.releve_notes or traduction_necessaire and not annee.traduction_releve_notes
                 )
                 doit_renseigner_credits = (
-                    annee.annee >= cls.PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
-                    if pays_belge
-                    else credits_necessaires_etranger
+                    annee.annee >= PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE if pays_belge else credits_necessaires_etranger
                 ) and (annee.resultat != Result.WAITING_RESULT.name or annee.annee < annee_courante)
                 if (
                     not annee.resultat

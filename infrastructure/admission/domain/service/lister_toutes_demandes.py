@@ -47,7 +47,6 @@ from django.utils.translation import get_language
 
 from admission.contrib.models import AdmissionViewer
 from admission.contrib.models.base import BaseAdmission
-from admission.ddd import BE_ISO_CODE
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
@@ -62,6 +61,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperienceYear
 from osis_profile.models.enums.curriculum import Result
 
@@ -141,6 +141,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             .select_related(
                 'candidate__country_of_citizenship',
                 'last_update_author',
+                'determined_academic_year',
                 'training__academic_year',
                 'training__enrollment_campus',
                 'training__education_group_type',
@@ -355,6 +356,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, 'title' if language_is_french else 'title_english'),
             type_formation=admission.training.education_group_type.name,
+            annee_formation=admission.training.academic_year.year,
             lieu_formation=admission.teaching_campus,  # From annotation
             nationalite_candidat=getattr(
                 admission.candidate.country_of_citizenship,
@@ -386,4 +388,5 @@ class ListerToutesDemandes(IListerToutesDemandes):
             date_confirmation=admission.submitted_at,
             est_premiere_annee=admission.est_premiere_annee,
             poursuite_de_cycle=admission.cycle_pursuit,
+            annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year else None,
         )
