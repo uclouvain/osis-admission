@@ -212,11 +212,15 @@
 
   {% if proposition.avec_complements_formation %}
     <p>{% trans "Additional course(s):" %}
+      {% if proposition.complements_formation %}
       <ul>
       {% for learning_unit in proposition.complements_formation %}
         <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'en' and learning_unit.full_title_en %}{{ learning_unit.full_title_en }}{% else %}{{ learning_unit.full_title }}{% endif %}{% if learning_unit.credits %} ({{ learning_unit.credits }} ECTS){% endif %}</li>
       {% endfor %}
       </ul>
+      {% else %}
+      {% translate 'Yes' %}
+      {% endif %}
     </p>
   {% endif %}
 
