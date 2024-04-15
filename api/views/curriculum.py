@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -278,7 +278,7 @@ class ExperienceViewSet(
         return response
 
     def _check_perms_update(self):
-        if self.experience.valuated_from_trainings:
+        if self.experience.valuated_from_trainings or self.experience.external_id:
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
     def update(self, request, *args, **kwargs):
@@ -289,7 +289,7 @@ class ExperienceViewSet(
         return response
 
     def destroy(self, request, *args, **kwargs):
-        if self.experience.valuated_from_trainings:
+        if self.experience.valuated_from_trainings or self.experience.external_id:
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
         response = super().destroy(request, *args, **kwargs)
@@ -338,9 +338,12 @@ class EducationalExperienceViewSet(PersonRelatedMixin, BaseEducationalExperience
 
     def _check_perms_update(self):
         # With doctorate
-        if any(
-            training_type in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
-            for training_type in self.experience.valuated_from_trainings
+        if (
+            any(
+                training_type in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
+                for training_type in self.experience.valuated_from_trainings
+            )
+            or self.experience.external_id
         ):
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
@@ -353,9 +356,12 @@ class GeneralEducationalExperienceViewSet(GeneralEducationPersonRelatedMixin, Ba
     permission_mapping = GENERAL_EDUCATION_PERMISSIONS_MAPPING
 
     def _check_perms_update(self):
-        if not all(
-            training_type in AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES
-            for training_type in self.experience.valuated_from_trainings
+        if (
+            not all(
+                training_type in AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES
+                for training_type in self.experience.valuated_from_trainings
+            )
+            or self.experience.external_id
         ):
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 

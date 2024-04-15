@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -1532,6 +1532,11 @@ class TestVerifierPropositionService(TestCase):
         self.experiences_academiques.append(self.experience_academiques_complete)
         proposition_id = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
         self.assertEqual(proposition_id, self.master_proposition.entity_id)
+
+    def test_should_verification_etre_ok_avec_experience_academique_epc_incomplete(self):
+        with mock.patch.multiple(self.experience_academiques_complete, identifiant_externe=[]):
+            proposition_id = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+            self.assertEqual(proposition_id, self.master_proposition.entity_id)
 
     def test_should_verification_renvoyer_erreur_si_releve_notes_global_non_renseigne(self):
         with mock.patch.multiple(self.experience_academiques_complete, releve_notes=[]):

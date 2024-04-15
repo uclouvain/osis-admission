@@ -200,6 +200,7 @@ class BaseCurriculumTestCase:
                     'end_date': '2021-01-01',
                     'type': ActivityType.WORK.name,
                     'valuated_from_trainings': [],
+                    'external_id': professional_experiences[0].external_id,
                 },
                 {
                     'uuid': str(professional_experiences[1].uuid),
@@ -208,6 +209,7 @@ class BaseCurriculumTestCase:
                     'end_date': '2020-09-01',
                     'type': ActivityType.WORK.name,
                     'valuated_from_trainings': [],
+                    'external_id': professional_experiences[1].external_id,
                 },
             ],
         )
@@ -224,6 +226,7 @@ class BaseCurriculumTestCase:
                     'valuated_from_trainings': [],
                     'country': self.country.iso_code,
                     'obtained_diploma': False,
+                    'external_id': None,
                 }
             ],
         )
@@ -360,7 +363,12 @@ class BaseCurriculumTestCase:
 
 
 class BaseIncompleteCurriculumExperiencesTestCase:
-    def _test_get_curriculum_with_incomplete_educational_experience(self, experience_args, experience_year_args):
+    def _test_get_curriculum_with_incomplete_educational_experience(
+        self,
+        experience_args,
+        experience_year_args,
+        desired_result=None,
+    ):
         self.client.force_authenticate(user=self.user)
 
         default_experience_args = {
@@ -388,7 +396,6 @@ class BaseIncompleteCurriculumExperiencesTestCase:
             **default_experience_year_args,
         )
 
-        # Transcript missing
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -401,7 +408,9 @@ class BaseIncompleteCurriculumExperiencesTestCase:
             json_response.get('incomplete_experiences'),
             {
                 str(experience_2018.uuid): [f"L'expérience académique '{program_name}' " f"est incomplète."],
-            },
+            }
+            if desired_result is None
+            else desired_result,
         )
 
     def test_get_curriculum_with_incomplete_educational_experience_transcript_missing(self):
@@ -508,6 +517,15 @@ class BaseIncompleteCurriculumExperiencesTestCase:
             },
         )
 
+    def test_get_curriculum_with_incomplete_epc_educational_experience(self):
+        self._test_get_curriculum_with_incomplete_educational_experience(
+            experience_args={
+                'external_id': 'EPC_1',
+            },
+            experience_year_args={},
+            desired_result={},
+        )
+
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class DoctorateCurriculumTestCase(BaseCurriculumTestCase, BaseIncompleteCurriculumExperiencesTestCase, APITestCase):
@@ -595,7 +613,9 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, BaseIncompleteCurricul
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1', OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class GeneralEducationCurriculumTestCase(
-    BaseCurriculumTestCase, BaseIncompleteCurriculumExperiencesTestCase, APITestCase
+    BaseCurriculumTestCase,
+    BaseIncompleteCurriculumExperiencesTestCase,
+    APITestCase,
 ):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -838,6 +858,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'sector': ActivitySector.PUBLIC.name,
                 'activity': 'Work - activity',
                 'valuated_from_trainings': [],
+                'external_id': None,
             },
         )
 
@@ -855,6 +876,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'role': 'Helper',
                 'sector': ActivitySector.PRIVATE.name,
                 'activity': 'Volunteering - activity',
+                'external_id': None,
             },
         )
 
@@ -876,6 +898,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'sector': ActivitySector.PRIVATE.name,
                 'activity': 'Volunteering - activity',
                 'valuated_from_trainings': [],
+                'external_id': None,
             },
         )
 
@@ -894,6 +917,7 @@ class ProfessionalExperienceTestCase(APITestCase):
         self.assertEqual(experience.role, 'Helper')
         self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
         self.assertEqual(experience.activity, 'Volunteering - activity')
+        self.assertEqual(experience.external_id, None)
 
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.modified_at, self.today_datetime)
@@ -1004,6 +1028,42 @@ class ProfessionalExperienceTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_put_epc_professional_experience_is_forbidden(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.professional_experience.external_id = 'EPC_1'
+        self.professional_experience.save(update_fields=['external_id'])
+
+        response = self.client.put(
+            self.admission_details_url,
+            data={
+                'start_date': '2020-01-01',
+                'end_date': '2021-01-01',
+                'type': ActivityType.WORK.name,
+                'sector': ActivitySector.PRIVATE.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_epc_professional_experience_is_forbidden_with_general_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.professional_experience.external_id = 'EPC_1'
+        self.professional_experience.save(update_fields=['external_id'])
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data={
+                'start_date': '2020-01-01',
+                'end_date': '2021-01-01',
+                'type': ActivityType.WORK.name,
+                'sector': ActivitySector.PRIVATE.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_delete_professional_experience(self):
         self.client.force_authenticate(user=self.user)
 
@@ -1052,6 +1112,26 @@ class ProfessionalExperienceTestCase(APITestCase):
         self.professional_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.delete(self.admission_details_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_epc_professional_experience_is_forbidden(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.professional_experience.external_id = 'EPC_1'
+        self.professional_experience.save(update_fields=['external_id'])
+
+        response = self.client.delete(self.admission_details_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_epc_professional_experience_is_forbidden_with_general_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.professional_experience.external_id = 'EPC_1'
+        self.professional_experience.save(update_fields=['external_id'])
+
+        response = self.client.delete(self.general_admission_details_url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -1500,6 +1580,32 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(educational_experience_years[1].registered_credit_number, 14)
         self.assertEqual(educational_experience_years[1].acquired_credit_number, 14)
 
+    def test_put_epc_educational_experience_is_forbidden(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.external_id = 'EPC_1'
+        self.educational_experience.save(update_fields=['external_id'])
+
+        response = self.client.put(
+            self.admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_put_epc_educational_experience_is_forbidden_with_general_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.external_id = 'EPC_1'
+        self.educational_experience.save(update_fields=['external_id'])
+
+        response = self.client.put(
+            self.general_admission_details_url,
+            data=self.educational_experience_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_put_educational_experience_with_general_education_admission(self):
         self.client.force_authenticate(user=self.user)
 
@@ -1714,5 +1820,25 @@ class EducationalExperienceTestCase(APITestCase):
         self.educational_experience.valuated_from_admission.set([self.admission])
 
         response = self.client.delete(self.admission_details_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_epc_educational_experience_is_forbidden(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.external_id = 'EPC_1'
+        self.educational_experience.save(update_fields=['external_id'])
+
+        response = self.client.delete(self.admission_details_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_epc_educational_experience_is_forbidden_with_general_admission(self):
+        self.client.force_authenticate(user=self.user)
+
+        self.educational_experience.external_id = 'EPC_1'
+        self.educational_experience.save(update_fields=['external_id'])
+
+        response = self.client.delete(self.general_admission_details_url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
