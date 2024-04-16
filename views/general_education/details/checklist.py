@@ -1611,18 +1611,6 @@ class ChecklistView(
             # Remove the experiences that we had in the checklist that have been removed
             children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
 
-            # Add the documents related to cv experiences
-            for admission_document in admission_documents:
-                document_tab_identifier = admission_document.onglet.split('.')
-
-                if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
-                    tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
-
-                    if tab_identifier not in context['documents']:
-                        context['documents'][tab_identifier] = [admission_document]
-                    else:
-                        context['documents'][tab_identifier].append(admission_document)
-
             ordered_experiences = {}
             if children:
                 # Order the experiences in chronological order
