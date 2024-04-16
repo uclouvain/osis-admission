@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
+from uuid import UUID
 
 from django.utils.functional import cached_property
 
@@ -51,6 +53,9 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
     update_admission_author = True
     permission_required = 'admission.change_admission_secondary_studies'
     foreign_form_class = AdmissionBachelorEducationForeignDiplomaForm
+
+    def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
+        pass
 
     @cached_property
     def is_bachelor(self):
