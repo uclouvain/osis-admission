@@ -29,6 +29,7 @@ import attr
 from django.utils.translation import gettext as _
 
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 from osis_common.ddd import interface
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 
@@ -79,32 +80,7 @@ class AlternativeSecondairesDTO(interface.DTO):
 
 
 @attr.dataclass(slots=True, frozen=True)
-class EtudesSecondairesDTO(interface.DTO):
-    diplome_belge: Optional[DiplomeBelgeEtudesSecondairesDTO] = None
-    diplome_etranger: Optional[DiplomeEtrangerEtudesSecondairesDTO] = None
-    alternative_secondaires: Optional[AlternativeSecondairesDTO] = None
-    diplome_etudes_secondaires: str = ''
-    annee_diplome_etudes_secondaires: Optional[int] = None
-    valorisees: Optional[bool] = False
-
-    @property
-    def experience(self):
-        if self.diplome_belge:
-            return self.diplome_belge
-        if self.diplome_etranger:
-            return self.diplome_etranger
-        if self.alternative_secondaires:
-            return self.alternative_secondaires
-
+class EtudesSecondairesAdmissionDTO(EtudesSecondairesDTO):
     @property
     def uuid(self):
         return OngletsDemande.ETUDES_SECONDAIRES.name
-
-    @property
-    def titre_formate(self):
-        titre = _('Secondary school or alternative')
-        return (
-            f"{self.annee_diplome_etudes_secondaires}-{self.annee_diplome_etudes_secondaires + 1} : {titre}"
-            if self.annee_diplome_etudes_secondaires
-            else titre
-        )

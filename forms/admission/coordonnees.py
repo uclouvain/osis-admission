@@ -28,7 +28,6 @@ from django import forms
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _, pgettext_lazy as __, pgettext_lazy
 
-from admission.ddd import BE_ISO_CODE
 from admission.forms import (
     AdmissionModelCountryChoiceField,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
@@ -37,6 +36,7 @@ from admission.forms import (
 from admission.utils import force_title
 from base.forms.utils import get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.models.person import Person
+from osis_profile import BE_ISO_CODE
 from reference.models.country import Country
 from reference.models.zipcode import ZipCode
 

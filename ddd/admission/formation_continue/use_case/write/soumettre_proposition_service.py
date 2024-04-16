@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_continue.domain.service.i_question_specifique import (
@@ -88,6 +89,9 @@ def soumettre_proposition(
 
     # THEN
     proposition.soumettre(formation_id, AcademicCalendarTypes[cmd.pool], cmd.elements_confirmation)
+    Checklist.initialiser(
+        proposition=proposition,
+    )
     proposition_repository.save(proposition)
 
     notification.confirmer_soumission(proposition)

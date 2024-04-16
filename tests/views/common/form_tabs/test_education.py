@@ -34,7 +34,6 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy
 from rest_framework import status
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
@@ -50,6 +49,7 @@ from admission.tests.factories.secondary_studies import (
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum

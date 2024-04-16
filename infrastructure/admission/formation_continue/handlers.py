@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,11 @@
 
 from admission.ddd.admission.formation_continue.commands import *
 from admission.ddd.admission.formation_continue.use_case.read import *
+from admission.ddd.admission.formation_continue.use_case.read.recuperer_resume_et_emplacements_document_non_libres_proposition_service import (
+    recuperer_resume_et_emplacements_documents_non_libres_proposition,
+)
 from admission.ddd.admission.formation_continue.use_case.write import *
+from admission.ddd.admission.formation_continue.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.use_case.read import recuperer_questions_specifiques_proposition
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -43,6 +47,9 @@ from admission.infrastructure.admission.formation_continue.domain.service.format
 from admission.infrastructure.admission.formation_continue.domain.service.notification import Notification
 from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
+)
+from admission.infrastructure.admission.formation_continue.repository.emplacement_document import (
+    EmplacementDocumentRepository,
 )
 from admission.infrastructure.admission.formation_continue.repository.proposition import PropositionRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
@@ -140,5 +147,20 @@ COMMAND_HANDLERS = {
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
+    ),
+    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery: lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_non_libres_proposition(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+        personne_connue_translator=PersonneConnueUclTranslator(),
+        question_specifique_translator=QuestionSpecifiqueTranslator(),
+    ),
+    RetyperDocumentCommand: (
+        lambda msg_bus, cmd: retyper_document(
+            cmd,
+            emplacement_document_repository=EmplacementDocumentRepository(),
+        )
     ),
 }

@@ -94,6 +94,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 )
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 

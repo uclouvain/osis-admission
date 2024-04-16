@@ -38,15 +38,16 @@ from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from osis_async.models import AsyncTask
 from osis_async.models.enums import TaskState
+from osis_export.models import Export
+from osis_export.models.enums.types import ExportTypes
 
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     OngletsChecklist,
 )
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
-from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
@@ -58,14 +59,13 @@ from admission.tests.factories.scholarship import (
 from admission.views.excel_exports import AdmissionListExcelExportView
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
+from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
-from osis_export.models import Export
-from osis_export.models.enums.types import ExportTypes
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
 
@@ -188,6 +188,10 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             date_confirmation=cls.admission.submitted_at,
             est_premiere_annee=False,
             poursuite_de_cycle=cls.admission.cycle_pursuit,
+            annee_formation=cls.admission.training.academic_year.year,
+            annee_calculee=cls.admission.determined_academic_year.year
+            if cls.admission.determined_academic_year
+            else None,
         )
 
         cls.default_params = {

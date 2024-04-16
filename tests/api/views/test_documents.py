@@ -34,11 +34,12 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext
+from osis_document.enums import PostProcessingType
 from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.constants import PDF_MIME_TYPE, SUPPORTED_MIME_TYPES, PNG_MIME_TYPE
+from admission.constants import SUPPORTED_MIME_TYPES, PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
@@ -67,10 +68,10 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.form_item import DocumentAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.person import PersonFactory
-from osis_document.enums import PostProcessingType
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -90,6 +91,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             'status': StatutEmplacementDocument.RECLAME.name,
             'type': TypeEmplacementDocument.NON_LIBRE.name,
             'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
+            'related_checklist_tab': '',
         }
         cls.file_metadata = {
             'name': 'myfile.myext',
@@ -195,7 +197,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
                 language=settings.LANGUAGE_CODE_FR,
             ),
             training=Master120TrainingFactory(
-                enrollment_campus__email='abc@example.com',
+                enrollment_campus__sic_enrollment_email='abc@example.com',
             ),
             status=ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
         )

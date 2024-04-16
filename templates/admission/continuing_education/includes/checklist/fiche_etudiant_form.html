@@ -1,0 +1,59 @@
+{% load i18n admission bootstrap3 %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<form
+  id="fiche_etudiant-form"
+  method="post"
+  hx-post="{% url view.base_namespace|add:':fiche-etudiant' uuid=view.kwargs.uuid %}"
+  hx-swap="outerHTML"
+  hx-trigger="change from:(#fiche_etudiant-form input, #fiche_etudiant-form select, #fiche_etudiant-form textarea) delay:2s"
+>
+  <dl>
+    <dt>Inscription au rôle</dt>
+    <dd><em>En attente de developpement</em></dd>
+  </dl>
+  {% bootstrap_field student_report_form.edition %}
+  <div class="row">
+    <div class="col-md-4">
+      {% bootstrap_field student_report_form.interested_mark %}
+      {% bootstrap_field student_report_form.in_payement_order %}
+      {% bootstrap_field student_report_form.reduced_rights %}
+      {% bootstrap_field student_report_form.pay_by_training_cheque %}
+    </div>
+    <div class="col-md-4">
+      {% bootstrap_field student_report_form.cep %}
+      {% bootstrap_field student_report_form.payement_spread %}
+      {% bootstrap_field student_report_form.training_spread %}
+      {% bootstrap_field student_report_form.experience_knowledge_valorisation %}
+    </div>
+    <div class="col-md-4">
+      {% bootstrap_field student_report_form.assessment_test_presented %}
+      {% bootstrap_field student_report_form.assessment_test_succeeded %}
+      {% bootstrap_field student_report_form.certificate_provided %}
+    </div>
+  </div>
+  {% bootstrap_field student_report_form.tff_label %}
+</form>

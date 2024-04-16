@@ -23,26 +23,37 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import json
-from typing import List
 
-from dal import autocomplete, forward
+import json
+from typing import List, Optional
+
+from dal import forward
 from django import forms
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 
+from admission.contrib.models.categorized_free_document import CategorizedFreeDocument, TOKEN_ACADEMIC_YEAR
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
+from admission.forms import (
+    OTHER_EMPTY_CHOICE,
+    autocomplete,
+    get_year_choices,
+)
 from admission.templatetags.admission import formatted_language, document_request_status_css_class
+from admission.views.autocomplete.categorized_free_documents import CategorizedFreeDocumentsAutocomplete
+from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.file_field import MaxOneFileUploadField
+from base.models.academic_year import AcademicYear
 
 
 class UploadDocumentFormMixin(forms.Form):
@@ -67,6 +78,7 @@ class UploadDocumentForm(UploadDocumentFormMixin):
 class UploadFreeDocumentForm(forms.Form):
     file_name = forms.CharField(
         label=pgettext_lazy('admission', 'Document name'),
+        widget=forms.Textarea(attrs={'rows': 2}),
     )
 
     file = MaxOneFileUploadField(
@@ -87,13 +99,119 @@ def get_request_status_choices(only_limited_request_choices):
     return LIMITED_REQUEST_STATUS_CHOICES if only_limited_request_choices else REQUEST_STATUS_CHOICES
 
 
-class RequestFreeDocumentForm(forms.Form):
+class FreeDocumentHelperFormMixin(forms.Form):
+    checklist_tab = forms.ChoiceField(
+        label=pgettext_lazy('admission', 'Checklist'),
+        choices=OTHER_EMPTY_CHOICE + OngletsChecklist.choices_except(OngletsChecklist.experiences_parcours_anterieur),
+        required=False,
+    )
+
+    document_type = forms.ModelChoiceField(
+        label=pgettext_lazy('admission', 'Document type'),
+        queryset=CategorizedFreeDocument.objects.all(),
+        empty_label=_('Other'),
+        required=False,
+        widget=autocomplete.ListSelect2(
+            url='admission:autocomplete:categorized-free-documents',
+            forward=[forward.Field('checklist_tab', 'checklist_tab')],
+            attrs={
+                'data-placeholder': _('Other'),
+                'data-allow-clear': 'true',
+            },
+        ),
+    )
+
+    academic_year = forms.ChoiceField(
+        label=pgettext_lazy('admission', 'Academic year'),
+        choices=OTHER_EMPTY_CHOICE,
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.tokens = {
+            'academic_year': TOKEN_ACADEMIC_YEAR,
+        }
+
+        current_academic_year = AcademicYear.objects.current()
+
+        self.current_language = get_language()
+
+        self.fields['academic_year'].choices = get_year_choices(
+            min_year=current_academic_year.year - 100,
+            max_year=current_academic_year.year,
+            full_format=True,
+            empty_label=_('To be determined'),
+        )
+
+        self.fields['document_type'].widget.forward.append(forward.Const(self.current_language, 'language'))
+
+    def clean_document_type(self):
+        document_type: Optional[CategorizedFreeDocument] = self.cleaned_data.get('document_type')
+
+        if document_type:
+            short_label_field_name = CategorizedFreeDocumentsAutocomplete.get_short_label_field()
+            long_label_field_name = CategorizedFreeDocumentsAutocomplete.get_long_label_field(self.current_language)
+
+            self.fields['document_type'].widget.attrs['data-data'] = json.dumps(
+                [
+                    {
+                        'id': document_type.pk,
+                        'text': getattr(document_type, short_label_field_name),
+                        'selected_text': getattr(document_type, short_label_field_name),
+                        'with_academic_year': document_type.with_academic_year,
+                        'full_text': getattr(document_type, long_label_field_name),
+                    }
+                ]
+            )
+
+        return document_type
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        checklist_tab = cleaned_data.get('checklist_tab')
+        document_type: Optional[CategorizedFreeDocument] = self.cleaned_data.get('document_type')
+        academic_year = cleaned_data.get('academic_year')
+
+        if document_type:
+            if checklist_tab and document_type.checklist_tab != checklist_tab:
+                self.add_error('checklist_tab', _('The document must be related to the specified checklist tab'))
+            if document_type.with_academic_year and not academic_year:
+                self.add_error('academic_year', FIELD_REQUIRED_MESSAGE)
+
+            cleaned_data['file_name_en'] = document_type.long_label_en
+            cleaned_data['file_name_fr'] = document_type.long_label_fr
+
+        else:
+            cleaned_data['file_name_en'] = cleaned_data.get('file_name')
+            cleaned_data['file_name_fr'] = cleaned_data.get('file_name')
+
+        return cleaned_data
+
+
+class UploadManagerDocumentForm(FreeDocumentHelperFormMixin, UploadFreeDocumentForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Remove the checklist tab field and pass a constant value ('') to the document type autocomplete view
+        # to return the document type that are not related to a checklist tab (UCLouvain documents).
+        del self.fields['checklist_tab']
+
+        self.fields['document_type'].widget.forward = [
+            forward.Const(settings.LANGUAGE_CODE_FR, 'language'),
+            forward.Const('', 'checklist_tab'),
+        ]
+
+
+class RequestFreeDocumentForm(FreeDocumentHelperFormMixin, forms.Form):
     file_name = forms.CharField(
         label=pgettext_lazy('admission', 'Document name'),
+        widget=forms.Textarea(attrs={'rows': 2}),
     )
 
     reason = forms.CharField(
-        label=pgettext_lazy('admission', 'Reason'),
         widget=forms.Textarea,
         required=False,
     )
@@ -103,10 +221,17 @@ class RequestFreeDocumentForm(forms.Form):
         choices=REQUEST_STATUS_CHOICES,
     )
 
-    def __init__(self, only_limited_request_choices, *args, **kwargs):
+    def __init__(self, only_limited_request_choices, candidate_language, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.fields['request_status'].choices = get_request_status_choices(only_limited_request_choices)
+
+        self.fields['reason'].label = mark_safe(
+            _(
+                'Communication to the candidate (refusal reason), in '
+                '<span class="label label-admission-primary">{language_code}]</span>'
+            ).format(language_code=formatted_language(candidate_language))
+        )
 
         if len(self.fields['request_status'].choices) == 2:
             # If there is only one not empty choice, hide the field and select the related value
@@ -114,7 +239,7 @@ class RequestFreeDocumentForm(forms.Form):
             self.fields['request_status'].widget = forms.HiddenInput()
 
 
-class RequestFreeDocumentWithDefaultFileForm(UploadFreeDocumentForm):
+class RequestFreeDocumentWithDefaultFileForm(FreeDocumentHelperFormMixin, UploadFreeDocumentForm):
     pass
 
 

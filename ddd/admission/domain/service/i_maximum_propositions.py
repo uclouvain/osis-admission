@@ -23,10 +23,13 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from typing import Optional
+
 from django.utils.translation import ngettext
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
 from admission.ddd.admission.domain.validator.exceptions import NombrePropositionsSoumisesDepasseException
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from osis_common.ddd import interface
 
 MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_DOCTORALE = 1
@@ -37,7 +40,7 @@ MAXIMUM_PROPOSITIONS_EN_COURS = 5
 
 class IMaximumPropositionsAutorisees(interface.DomainService):
     @classmethod
-    def nb_propositions_envoyees_formation_generale(cls, matricule: str) -> int:
+    def nb_propositions_envoyees_formation_generale(cls, matricule: str, annee_cible: int) -> int:
         raise NotImplementedError
 
     @classmethod
@@ -53,20 +56,27 @@ class IMaximumPropositionsAutorisees(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
-    def verifier_nombre_propositions_envoyees_formation_generale(cls, matricule: str) -> None:
+    def verifier_nombre_propositions_envoyees_formation_generale(
+        cls,
+        proposition_candidat: 'PropositionGenerale',
+        annee_soumise: int = None,
+    ) -> None:
+        annee_cible = annee_soumise or proposition_candidat.annee_calculee or proposition_candidat.formation_id.annee
         if (
-            cls.nb_propositions_envoyees_formation_generale(matricule)
+            cls.nb_propositions_envoyees_formation_generale(proposition_candidat.matricule_candidat, annee_cible)
             >= MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE
         ):
             raise NombrePropositionsSoumisesDepasseException(
                 ngettext(
-                    'You cannot submit this admission for a general education as you already have submitted one.',
+                    'You cannot submit this admission for a general education as you already have submitted one for '
+                    'the year %(annee_cible)s.',
                     'You cannot submit this admission for a general education as '
-                    'you already have submitted %(maximum_number)s of them.',
+                    'you already have submitted %(maximum_number)s of them for the year %(annee_cible)s.',
                     MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE,
                 )
                 % {
                     'maximum_number': MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE,
+                    'annee_cible': annee_cible,
                 }
             )
 

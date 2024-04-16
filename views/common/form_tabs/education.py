@@ -30,10 +30,8 @@ from django.db import transaction
 from django.utils.functional import cached_property
 from django.views.generic import FormView
 
-from admission.ddd import REGIMES_LINGUISTIQUES_SANS_TRADUCTION, PLUS_5_ISO_CODES
 from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
 from admission.ddd.admission.enums import Onglets
-from admission.ddd.admission.formation_generale.domain.model.enums import CHOIX_DIPLOME_OBTENU
 from admission.forms.admission.education import (
     BachelorAdmissionEducationBelgianDiplomaForm,
     BachelorAdmissionEducationForeignDiplomaForm,
@@ -41,9 +39,10 @@ from admission.forms.admission.education import (
     BaseAdmissionEducationForm,
 )
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
-from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
+from osis_profile import PLUS_5_ISO_CODES, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
