@@ -2164,6 +2164,9 @@ msgstr ""
 msgid "Display according education"
 msgstr ""
 
+msgid "Display problem"
+msgstr ""
+
 msgid "Dissertation mark"
 msgstr ""
 
@@ -6449,6 +6452,13 @@ msgstr ""
 "There can be no more supervisory panel members in the supervision group."
 
 msgid "There can be no more promoters in the supervision group."
+msgstr ""
+
+msgid ""
+"There has been a problem when merging the documents, this document contains "
+"several files and only the first one is displayed in the viewer. You can "
+"view the other files either in the candidate's replicated tabs or by "
+"switching to edit mode."
 msgstr ""
 
 msgid "There is no request for a new deadline."
