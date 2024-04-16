@@ -517,7 +517,7 @@
           let currentTabSplit = currentTab.split('-');
 
           {# Manage the hash parameter #}
-          if (currentTabSplit.length > 1) {
+          if (currentTabSplit.length > 1 && 'parcours' === currentTabSplit[1]) {
               {# Split the hash to get the checklist tab from it #}
               currentTab = currentTabSplit[0]; {# Checklist tab #}
               {# Select the right parcours tab #}
