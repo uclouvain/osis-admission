@@ -287,20 +287,23 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
 
         self.assertEqual(foreign_high_school_diploma.academic_graduation_year, self.academic_years[0])
 
-    def test_submit_valid_data_when_the_candidate_has_a_diploma_with_existing_alternative_diploma(self):
+    def test_submit_valid_data_when_the_candidate_has_a_diploma_with_existing_alternative_diploma_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
 
         high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
 
         response = self.client.post(
-            self.form_url,
+            f'{self.form_url}?next={admission_url}&next_hash_url=custom_hash',
             data={
                 'graduated_from_high_school': GotDiploma.YES.name,
                 'graduated_from_high_school_year': self.academic_years[0].year,
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
 
         # Check saved data
         self.general_admission.refresh_from_db()

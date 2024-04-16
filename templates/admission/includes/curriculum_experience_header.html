@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain
+  * Copyright (C) 2015-2024 Université catholique de Louvain
   (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
@@ -29,8 +29,12 @@
   <span>{{ title }}</span>
   <div>
     <a
-        class="prevent-quitting-link"
-        href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur{% if existing_experience %}__{{ view.kwargs.experience_uuid }}{% endif %}"
+      class="prevent-quitting-link"
+      {% if next_url %}
+      href="{{ next_url }}"
+      {% else %}
+      href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur{% if existing_experience %}__{{ view.kwargs.experience_uuid }}{% endif %}"
+      {% endif %}
     >
       <i class="fa fa-stream"></i>
       {% translate "Back to checklist" %}
@@ -39,7 +43,10 @@
       <a class="btn btn-danger" data-toggle="modal" data-target="#confirmation-modal">
         <span class="fa fa-solid fa-trash"></span>
       </a>
-      {% include 'admission/modal/confirm_modal.html' with confirm_title=_('Deletion of an experience') confirm_url=delete_url %}
+      {% if request.GET %}
+        {% concat delete_url '?' request.GET.urlencode as delete_url_with_params %}
+      {% endif %}
+      {% include 'admission/modal/confirm_modal.html' with confirm_title=_('Deletion of an experience') confirm_url=delete_url_with_params|default:delete_url %}
     {% endif %}
   </div>
 </div>

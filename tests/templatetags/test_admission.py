@@ -540,6 +540,9 @@ class DisplayTagTestCase(TestCase):
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
         )
         template_params = experience_details_template(
+            context={
+                'request': Mock(path='mypath'),
+            },
             resume_proposition=MagicMock(
                 est_proposition_generale=True,
                 est_proposition_continue=False,
@@ -558,8 +561,10 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['title'], _('Academic experience'))
         self.assertEqual(
             template_params['edit_link_button'],
-            '/admissions/general-education/{}/update/curriculum/educational/{}'.format(
+            '/admissions/general-education/{}/update/curriculum/educational/{}?next=mypath&next_hash_url='
+            'parcours_anterieur__{}'.format(
                 proposition_uuid,
+                experience.uuid,
                 experience.uuid,
             ),
         )
@@ -573,6 +578,9 @@ class DisplayTagTestCase(TestCase):
         proposition_uuid = uuid.uuid4()
         experience = ExperienceNonAcademiqueDTOFactory()
         template_params = experience_details_template(
+            context={
+                'request': Mock(path='mypath'),
+            },
             resume_proposition=MagicMock(
                 est_proposition_generale=True,
                 est_proposition_continue=False,
@@ -591,8 +599,10 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['title'], _('Non-academic experience'))
         self.assertEqual(
             template_params['edit_link_button'],
-            '/admissions/general-education/{}/update/curriculum/non_educational/{}'.format(
+            '/admissions/general-education/{}/update/curriculum/non_educational/{}?next=mypath&next_hash_url='
+            'parcours_anterieur__{}'.format(
                 proposition_uuid,
+                experience.uuid,
                 experience.uuid,
             ),
         )
@@ -604,6 +614,9 @@ class DisplayTagTestCase(TestCase):
         experience = EtudesSecondairesDTOFactory()
         specific_questions = {Onglets.ETUDES_SECONDAIRES.name: [QuestionSpecifiqueDTOFactory()]}
         template_params = experience_details_template(
+            context={
+                'request': Mock(path='mypath'),
+            },
             resume_proposition=MagicMock(
                 est_proposition_generale=True,
                 est_proposition_continue=False,
@@ -619,7 +632,10 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['custom_base_template'], 'admission/exports/recap/includes/education.html')
         self.assertEqual(
             template_params['edit_link_button'],
-            '/admissions/general-education/{}/update/education'.format(proposition_uuid),
+            '/admissions/general-education/{}/update/education?next=mypath&next_hash_url=parcours_anterieur__{}'.format(
+                proposition_uuid,
+                experience.uuid,
+            ),
         )
         self.assertEqual(template_params['specific_questions'], specific_questions[Onglets.ETUDES_SECONDAIRES.name])
 
