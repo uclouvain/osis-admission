@@ -25,7 +25,8 @@
 # ##############################################################################
 
 import uuid
-from typing import Union
+from typing import Union, List
+from uuid import UUID
 
 from django.contrib import messages
 from django.db.models import ProtectedError, QuerySet
@@ -101,6 +102,9 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     update_requested_documents = True
     update_admission_author = True
 
+    def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
+        pass
+
     @property
     def educational_experience_filter_uuid(self):
         return {'uuid': self.experience_id}
@@ -154,6 +158,9 @@ class CurriculumNonEducationalExperienceFormView(
     }
     update_requested_documents = True
     update_admission_author = True
+
+    def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
+        pass
 
     @property
     def person(self):
@@ -250,6 +257,9 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
 class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceAcademiqueView):
     urlpatterns = {'educational_delete': 'educational/<uuid:experience_uuid>/delete'}
 
+    def traitement_specifique(self, experiences_supprimees: List[UUID]):
+        pass
+
     def get_failure_url(self):
         return reverse(
             self.base_namespace + ':update:curriculum:educational',
@@ -262,6 +272,9 @@ class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, Delete
 
 class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceNonAcademiqueView):
     urlpatterns = {'non_educational_delete': 'non_educational/<uuid:experience_uuid>/delete'}
+
+    def traitement_specifique(self, experiences_supprimees: List[UUID]):
+        pass
 
     def get_failure_url(self):
         return reverse(
