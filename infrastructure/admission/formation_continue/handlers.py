@@ -64,6 +64,7 @@ from admission.infrastructure.admission.domain.service.profil_candidat import Pr
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
 from admission.infrastructure.admission.formation_continue.domain.service.historique import Historique
+from admission.infrastructure.admission.formation_continue.domain.service.lister_demandes import ListerDemandesService
 from admission.infrastructure.admission.formation_continue.domain.service.notification import Notification
 from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
@@ -220,5 +221,9 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),
+    ),
+    ListerDemandesQuery: lambda msg_bus, cmd: lister_demandes(
+        cmd,
+        lister_demandes_service=ListerDemandesService(),
     ),
 }

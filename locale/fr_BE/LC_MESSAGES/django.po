@@ -640,6 +640,10 @@ msgstr ""
 msgid "All"
 msgstr "Tous"
 
+msgctxt "feminine"
+msgid "All"
+msgstr "Toutes"
+
 msgctxt "filters"
 msgid "All"
 msgstr "Tous"
@@ -2604,6 +2608,9 @@ msgstr "EN"
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr "AUTORISATION D’INSCRIPTION<br>à l’année académique %(academic_year)s"
 
+msgid "EPC status"
+msgstr "Statut EPC"
+
 msgid "EU,NEU"
 msgstr "UE,HUE"
 
@@ -2634,9 +2641,14 @@ msgctxt "admission"
 msgid "Email"
 msgstr "Email"
 
+<<<<<<< HEAD
 msgctxt "ways_hear_about_training"
 msgid "Email"
 msgstr "Emailing"
+=======
+msgid "Email address"
+msgstr "Courriel"
+>>>>>>> 33ce9ea1 ([OS-526] List the continuing education admissions)
 
 msgid "Email content"
 msgstr "Contenu du mail"
@@ -2954,12 +2966,17 @@ msgstr "Equivalence de grade académique FWB"
 msgid "FWB equivalent course"
 msgstr "Formation FWB équivalente"
 
+<<<<<<< HEAD
 msgid "Fac approval"
 msgstr "Accord fac"
 
 msgctxt "ways_hear_about_training"
 msgid "Facebook"
 msgstr "Sur Facebook"
+=======
+msgid "Faculty"
+msgstr "Faculté"
+>>>>>>> 33ce9ea1 ([OS-526] List the continuing education admissions)
 
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"
@@ -3971,9 +3988,12 @@ msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
+<<<<<<< HEAD
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr "Il n'est pas possible de passer du statut \"validé\" à ce statut."
 
+=======
+>>>>>>> 33ce9ea1 ([OS-526] List the continuing education admissions)
 msgid "JURY_APPROUVE_ADRE"
 msgstr "JURY_APPROUVE_ADRE"
 
@@ -4046,6 +4066,9 @@ msgstr "Dernière modification"
 
 msgid "Last modification (author)"
 msgstr "Dernière modif. (auteur)"
+
+msgid "Last name"
+msgstr "Nom"
 
 msgid "Last name / First name / Email"
 msgstr "Nom / Prénom / E-mail"
@@ -4735,6 +4758,9 @@ msgstr "Sans objet"
 msgid "NO"
 msgstr "Non"
 
+msgid "NOMA"
+msgstr "NOMA"
+
 msgid "NON_CONCERNE"
 msgstr "Non concerné(e)"
 
@@ -4809,9 +4835,6 @@ msgstr "Aucune étude en français"
 
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
-
-msgid "No continuing enrolment"
-msgstr "Aucune inscription en formation continue n'a été trouvée"
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
@@ -5203,6 +5226,9 @@ msgstr "Page"
 msgid "Page size"
 msgstr "Taille de la page"
 
+msgid "Paid"
+msgstr "Payé"
+
 msgid "Parcours"
 msgstr "Parcours"
 
@@ -5547,6 +5573,9 @@ msgstr "Privé"
 
 msgid "Processing by Fac"
 msgstr "Traitement en Fac"
+
+msgid "Produce xls"
+msgstr "Produire un fichier xls"
 
 msgid "Professional"
 msgstr "Professionnel"
@@ -5915,6 +5944,9 @@ msgstr "Attestation d’immatriculation"
 
 msgid "Registration fees"
 msgstr "Droits d'inscription"
+
+msgid "Registration required"
+msgstr "Inscription au rôle requise"
 
 msgid "Related experience"
 msgstr "Expérience associée"
@@ -6526,6 +6558,9 @@ msgstr "État d’avancement de la formation doctorale"
 
 msgid "Status:"
 msgstr "État :"
+
+msgid "Statut"
+msgstr "Statut"
 
 msgid "Street"
 msgstr "Rue"
@@ -8493,6 +8528,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes,no,"
+msgstr "oui,non,"
 
 msgid "your father"
 msgstr "votre père"

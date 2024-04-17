@@ -26,9 +26,6 @@
 
 from admission.ddd.admission.formation_continue.commands import *
 from admission.ddd.admission.formation_continue.use_case.read import *
-from admission.ddd.admission.formation_continue.use_case.read.recuperer_resume_et_emplacements_document_non_libres_proposition_service import (
-    recuperer_resume_et_emplacements_documents_non_libres_proposition,
-)
 from admission.ddd.admission.formation_continue.use_case.write import *
 from admission.ddd.admission.formation_continue.use_case.write.annuler_proposition_service import (
     annuler_proposition,
@@ -73,6 +70,9 @@ from admission.infrastructure.admission.formation_continue.domain.service.in_mem
     FormationContinueInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.historique import HistoriqueInMemory
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.lister_demandes import (
+    ListerDemandesInMemory,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.notification import (
     NotificationInMemory,
 )
@@ -100,6 +100,7 @@ _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
 _historique = HistoriqueInMemory()
 _historique_global = HistoriqueGlobalInMemory()
 _notification = NotificationInMemory()
+_lister_demandes_service = ListerDemandesInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -198,14 +199,20 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         personne_connue_translator=_personne_connue_ucl_translator,
     ),
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery: lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_non_libres_proposition(
+    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery: (
+        lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_non_libres_proposition(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
+            question_specifique_translator=_question_specific_translator,
+        )
+    ),
+    ListerDemandesQuery: lambda msg_bus, cmd: lister_demandes(
         cmd,
-        proposition_repository=_proposition_repository,
-        profil_candidat_translator=_profil_candidat_translator,
-        emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
-        academic_year_repository=_academic_year_repository,
-        personne_connue_translator=_personne_connue_ucl_translator,
-        question_specifique_translator=_question_specific_translator,
+        lister_demandes_service=_lister_demandes_service,
     ),
     MettreEnAttenteCommand: lambda msg_bus, cmd: mettre_en_attente(
         cmd,

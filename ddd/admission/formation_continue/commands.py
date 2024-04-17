@@ -29,6 +29,7 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission import commands
+from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
 
@@ -180,6 +181,7 @@ class RetyperDocumentCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+<<<<<<< HEAD
 class MettreEnAttenteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
@@ -229,3 +231,16 @@ class ValiderPropositionCommand(interface.CommandRequest):
 class CloturerPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
+
+class ListerDemandesQuery(SortedQueryRequest):
+    annee_academique: Optional[int] = None
+    edition: Optional[str] = ''
+    numero: Optional[int] = None
+    matricule_candidat: Optional[str] = ''
+    etats: Optional[List[str]] = None
+    facultes: Optional[List[str]] = None
+    types_formation: Optional[List[str]] = None
+    sigles_formations: Optional[List[str]] = None
+    inscription_requise: Optional[bool] = None
+    paye: Optional[bool] = None
+    demandeur: Optional[str] = ''

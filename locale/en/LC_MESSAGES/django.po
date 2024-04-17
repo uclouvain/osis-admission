@@ -569,6 +569,10 @@ msgstr ""
 msgid "All"
 msgstr ""
 
+msgctxt "feminine"
+msgid "All"
+msgstr ""
+
 msgctxt "filters"
 msgid "All"
 msgstr ""
@@ -2417,6 +2421,9 @@ msgstr ""
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr ""
 
+msgid "EPC status"
+msgstr ""
+
 msgid "EU,NEU"
 msgstr ""
 
@@ -2449,6 +2456,9 @@ msgstr ""
 
 msgctxt "ways_hear_about_training"
 msgid "Email"
+msgstr ""
+
+msgid "Email address"
 msgstr ""
 
 msgid "Email content"
@@ -2752,6 +2762,9 @@ msgstr ""
 
 msgctxt "ways_hear_about_training"
 msgid "Facebook"
+msgstr ""
+
+msgid "Faculty"
 msgstr ""
 
 msgid "Faculty comment about the collaborative program"
@@ -3694,6 +3707,9 @@ msgstr ""
 msgid "Last modification (author)"
 msgstr ""
 
+msgid "Last name"
+msgstr ""
+
 msgid "Last name / First name / Email"
 msgstr ""
 
@@ -4282,6 +4298,9 @@ msgstr ""
 msgid "NO"
 msgstr "No"
 
+msgid "NOMA"
+msgstr ""
+
 msgid "NON_CONCERNE"
 msgstr "Not concerned"
 
@@ -4353,9 +4372,6 @@ msgid "No French studies"
 msgstr ""
 
 msgid "No PhD found."
-msgstr ""
-
-msgid "No continuing enrolment"
 msgstr ""
 
 msgid "No defense reason"
@@ -4732,6 +4748,9 @@ msgstr ""
 msgid "Page size"
 msgstr ""
 
+msgid "Paid"
+msgstr ""
+
 msgid "Parcours"
 msgstr ""
 
@@ -5037,6 +5056,9 @@ msgid "Private"
 msgstr ""
 
 msgid "Processing by Fac"
+msgstr ""
+
+msgid "Produce xls"
 msgstr ""
 
 msgid "Professional"
@@ -5388,6 +5410,9 @@ msgid "Registration certificate"
 msgstr ""
 
 msgid "Registration fees"
+msgstr ""
+
+msgid "Registration required"
 msgstr ""
 
 msgid "Related experience"
@@ -5975,6 +6000,9 @@ msgid "Status of the doctoral training"
 msgstr ""
 
 msgid "Status:"
+msgstr ""
+
+msgid "Statut"
 msgstr ""
 
 msgid "Street"
@@ -7692,6 +7720,9 @@ msgid "ucl"
 msgstr "UCLouvain"
 
 msgid "use"
+msgstr ""
+
+msgid "yes,no,"
 msgstr ""
 
 msgid "your father"

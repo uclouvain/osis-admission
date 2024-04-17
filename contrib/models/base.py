@@ -32,7 +32,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models, IntegrityError
-from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count
+from django.db.models import OuterRef, Subquery, Q, F, Value, CharField, When, Case, BooleanField, Count, IntegerField
 from django.db.models.fields.json import KeyTextTransform, KeyTransform
 from django.db.models.functions import Concat, Coalesce, NullIf, Mod, Replace
 from django.db.models.signals import post_save
@@ -196,6 +196,23 @@ class BaseAdmissionQuerySet(models.QuerySet):
             | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE),
         )
 
+    def annotate_ordered_enum(self, field_name, ordering_field_name, enum_class):
+        """
+        Annotate the queryset with an equivalent numeric version of an enum field.
+        :param field_name: The name of the enum field
+        :param ordering_field_name: The name of the output field
+        :param enum_class: The enum class
+        :return: The annotated queryset
+        """
+        return self.annotate(
+            **{
+                ordering_field_name: Case(
+                    *(When(**{field_name: member.name}, then=i) for i, member in enumerate(enum_class)),
+                    output_field=IntegerField(),
+                )
+            },
+        )
+
     def annotate_several_admissions_in_progress(self):
         return self.alias(
             admissions_in_progress_nb=Subquery(
@@ -237,9 +254,10 @@ class BaseAdmissionQuerySet(models.QuerySet):
             )
         )
 
-    def filter_according_to_roles(self, demandeur_uuid):
+    def filter_according_to_roles(self, demandeur_uuid, permission='admission.view_enrolment_application'):
         demandeur_user = User.objects.filter(person__uuid=demandeur_uuid).first()
-        roles = _get_relevant_roles(demandeur_user, 'admission.view_enrolment_application')
+
+        roles = _get_relevant_roles(demandeur_user, permission)
 
         # Filter managed entities
         entities_conditions = Q()
@@ -488,9 +506,13 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
-    def __str__(self):
+    @property
+    def reference_str(self):
         reference = '{:08}'.format(self.reference)
         return f'{reference[:4]}.{reference[4:]}'
+
+    def __str__(self):
+        return self.reference_str
 
     def get_admission_context(self):
         from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
