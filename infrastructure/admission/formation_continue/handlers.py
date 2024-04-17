@@ -44,6 +44,7 @@ from admission.infrastructure.admission.domain.service.maximum_propositions impo
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_continue.domain.service.formation import FormationContinueTranslator
+from admission.infrastructure.admission.formation_continue.domain.service.lister_demandes import ListerDemandesService
 from admission.infrastructure.admission.formation_continue.domain.service.notification import Notification
 from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
@@ -162,5 +163,9 @@ COMMAND_HANDLERS = {
             cmd,
             emplacement_document_repository=EmplacementDocumentRepository(),
         )
+    ),
+    ListerDemandesQuery: lambda msg_bus, cmd: lister_demandes(
+        cmd,
+        lister_demandes_service=ListerDemandesService(),
     ),
 }

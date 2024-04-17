@@ -23,18 +23,42 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.validation.commands import FiltrerDemandesQuery
-from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
-from admission.views.list import BaseAdmissionList
+import datetime
+from typing import Optional, List
 
-__all__ = [
-    "DoctorateAdmissionList",
-]
+import attr
+
+from osis_common.ddd import interface
 
 
-class DoctorateAdmissionList(BaseAdmissionList):
-    template_name = 'admission/doctorate/cdd/list.html'
-    htmx_template_name = 'admission/doctorate/cdd/list_block.html'
-    permission_required = 'admission.view_doctorate_enrolment_applications'
-    filtering_query_class = FiltrerDemandesQuery
-    form_class = DoctorateListFilterForm
+@attr.dataclass(frozen=True, slots=True)
+class DemandeRechercheDTO(interface.DTO):
+    uuid: str
+    numero_demande: str
+    nom_candidat: str
+    prenom_candidat: str
+    noma_candidat: Optional[str]
+    courriel_candidat: str
+    sigle_formation: str
+    code_formation: str
+    intitule_formation: str
+    inscription_au_role_obligatoire: Optional[bool]
+    edition: str
+    sigle_faculte: str
+    paye: Optional[bool]
+    etat_demande: str
+    etat_epc: str
+    date_confirmation: Optional[datetime.datetime]
+    derniere_modification_le: datetime.datetime
+    derniere_modification_par: str
+
+    @property
+    def formation(self) -> str:
+        return f'{self.sigle_formation} - {self.intitule_formation}'
+
+    @property
+    def candidat(self) -> str:
+        nom_complet_candidat = f'{self.nom_candidat}, {self.prenom_candidat}'
+        if self.noma_candidat:
+            nom_complet_candidat += f' ({self.noma_candidat})'
+        return nom_complet_candidat

@@ -26,6 +26,7 @@
 
 import ast
 import datetime
+from typing import List
 from unittest import mock
 
 import freezegun
@@ -44,11 +45,15 @@ from osis_export.models.enums.types import ExportTypes
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
+from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     OngletsChecklist,
 )
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
 from admission.tests.factories.scholarship import (
@@ -56,7 +61,7 @@ from admission.tests.factories.scholarship import (
     DoubleDegreeScholarshipFactory,
     ErasmusMundusScholarshipFactory,
 )
-from admission.views.excel_exports import AdmissionListExcelExportView
+from admission.views.excel_exports import AdmissionListExcelExportView, ContinuingAdmissionListExcelExportView
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
@@ -66,6 +71,7 @@ from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
+from infrastructure.messages_bus import message_bus_instance
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
 
@@ -201,7 +207,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         }
 
         # Targeted url
-        cls.url = reverse('admission:admission-list-excel-export')
+        cls.url = reverse('admission:excel-exports:all-admissions-list')
         cls.list_url = reverse('admission:all-list')
 
     def test_export_user_without_person(self):
@@ -426,3 +432,301 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
                 }
             ),
         )
+
+
+@freezegun.freeze_time('2023-01-03')
+@override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
+class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.factory = RequestFactory()
+
+        # Users
+        cls.user = User.objects.create_user(
+            username='john_doe',
+            password='top_secret',
+        )
+
+        cls.sic_management_user = SicManagementRoleFactory().person.user
+        cls.other_sic_manager = SicManagementRoleFactory().person
+
+        # Academic years
+        academic_years = AcademicYearFactory.produce(base_year=2023, number_past=2, number_future=2)
+
+        # Entities
+        faculty_entity = EntityFactory()
+        EntityVersionFactory(
+            entity=faculty_entity,
+            acronym='ABCDEF',
+            entity_type=EntityType.FACULTY.name,
+        )
+
+        cls.first_entity = EntityFactory()
+        EntityVersionFactory(
+            entity=cls.first_entity,
+            acronym='GHIJK',
+            entity_type=EntityType.SCHOOL.name,
+            parent=faculty_entity,
+        )
+
+        # Admissions
+        candidate = PersonFactory(
+            first_name="John",
+            last_name="Doe",
+            email='john.doe@example.be',
+        )
+        cls.admission = ContinuingEducationAdmissionFactory(
+            candidate=candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+            training__management_entity=cls.first_entity,
+            training__acronym="ZEBU0",
+            training__education_group_type__name=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
+            submitted_at=datetime.datetime(2023, 1, 1),
+            training__academic_year=academic_years[1],
+            determined_academic_year=academic_years[2],
+            edition=ChoixEdition.DEUX.name,
+            in_payement_order=True,
+            modified_at=datetime.datetime(2023, 1, 3),
+            last_update_author=candidate,
+        )
+
+        cls.student = StudentFactory(
+            person=candidate,
+            registration_id='01234567',
+        )
+
+        cls.default_params = {
+            'annee_academique': 2022,
+            'taille_page': 10,
+            'demandeur': str(cls.sic_management_user.person.uuid),
+        }
+
+        # Targeted url
+        cls.url = reverse('admission:excel-exports:continuing-admissions-list')
+        cls.list_url = reverse('admission:continuing-education:list')
+
+    def test_export_user_without_person(self):
+        self.client.force_login(user=self.user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_export_candidate_user(self):
+        self.client.force_login(user=self.admission.candidate.user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_export_sic_management_user(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self.client.get(self.url)
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        response = self.client.get(
+            self.url,
+            **{"HTTP_HX-Request": 'true'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_export_with_sic_management_user_without_filters_doesnt_plan_the_export(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self.client.get(self.url)
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNone(task)
+
+        export = Export.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNone(export)
+
+    def test_export_with_sic_management_user_with_filters_plans_the_export(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self.client.get(self.url, data=self.default_params)
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+        self.assertEqual(task.name, _('Admission applications export'))
+        self.assertEqual(task.description, _('Excel export of admission applications'))
+        self.assertEqual(task.state, TaskState.PENDING.name)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+        self.assertEqual(
+            export.called_from_class,
+            'admission.views.excel_exports.ContinuingAdmissionListExcelExportView',
+        )
+        self.assertEqual(export.file_name, 'export-des-demandes-dadmission')
+        self.assertEqual(export.type, ExportTypes.EXCEL.name)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('demandeur'), self.default_params.get('demandeur'))
+
+    def test_export_with_sic_management_user_with_filters_and_asc_ordering(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # With asc ordering
+        response = self.client.get(self.url, data={**self.default_params, 'o': 'numero_demande'})
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('demandeur'), self.default_params.get('demandeur'))
+        self.assertEqual(filters.get('tri_inverse'), False)
+        self.assertEqual(filters.get('champ_tri'), 'numero_demande')
+
+    def test_export_with_sic_management_user_with_filters_and_desc_ordering(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        # With asc ordering
+        response = self.client.get(self.url, data={**self.default_params, 'o': '-numero_demande'})
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
+
+        task = AsyncTask.objects.filter(person=self.sic_management_user.person).first()
+        self.assertIsNotNone(task)
+
+        export = Export.objects.filter(job_uuid=task.uuid).first()
+        self.assertIsNotNone(export)
+
+        filters = ast.literal_eval(export.filters)
+        self.assertEqual(filters.get('annee_academique'), self.default_params.get('annee_academique'))
+        self.assertEqual(filters.get('demandeur'), self.default_params.get('demandeur'))
+        self.assertEqual(filters.get('tri_inverse'), True)
+        self.assertEqual(filters.get('champ_tri'), 'numero_demande')
+
+    def test_export_content(self):
+        view = ContinuingAdmissionListExcelExportView()
+        header = view.get_header()
+
+        results: List[DemandeContinueRechercheDTO] = message_bus_instance.invoke(
+            ListerDemandesQuery(numero=self.admission.reference)
+        )
+
+        self.assertEqual(len(results), 1)
+
+        result = results[0]
+
+        row_data = view.get_row_data(result)
+
+        self.assertEqual(len(header), len(row_data))
+
+        self.assertEqual(row_data[0], result.numero_demande)
+        self.assertEqual(row_data[1], result.nom_candidat)
+        self.assertEqual(row_data[2], result.prenom_candidat)
+        self.assertEqual(row_data[3], result.noma_candidat)
+        self.assertEqual(row_data[4], result.courriel_candidat)
+        self.assertEqual(row_data[5], f'{result.sigle_formation} - {result.intitule_formation}')
+        self.assertEqual(row_data[6], '2')
+        self.assertEqual(row_data[7], result.sigle_faculte)
+        self.assertEqual(row_data[8], 'oui')
+        self.assertEqual(row_data[9], ChoixStatutPropositionContinue.CONFIRMEE.value)
+        self.assertEqual(row_data[10], '')
+        self.assertEqual(row_data[11], '2023/01/01, 00:00:00')
+        self.assertEqual(row_data[12], '2023/01/03, 00:00:00')
+        self.assertEqual(row_data[13], 'Candidat')
+
+        # Check the export when some specific fields are empty or have a specific value
+        self.admission.edition = ''
+        self.admission.in_payement_order = False
+        self.admission.submitted_at = None
+        self.admission.save()
+
+        results: List[DemandeContinueRechercheDTO] = message_bus_instance.invoke(
+            ListerDemandesQuery(numero=self.admission.reference)
+        )
+
+        self.assertEqual(len(results), 1)
+
+        result = results[0]
+
+        row_data = view.get_row_data(result)
+
+        self.assertEqual(row_data[6], '')
+        self.assertEqual(row_data[8], 'non')
+        self.assertEqual(row_data[11], '')
+
+    def test_export_configuration(self):
+        candidate = PersonFactory()
+        campus = CampusFactory()
+        filters = str(
+            {
+                'annee_academique': 2022,
+                'edition': [ChoixEdition.DEUX.name, ChoixEdition.TROIS.name],
+                'numero': self.admission.reference,
+                'matricule_candidat': self.admission.candidate.global_id,
+                'etats': [ChoixStatutPropositionContinue.EN_BROUILLON.name],
+                'facultes': 'ENT',
+                'types_formation': [
+                    TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.name,
+                    TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.name,
+                ],
+                'sigles_formations': [self.admission.training.acronym],
+                'inscription_requise': True,
+                'paye': False,
+                'demandeur': str(self.sic_management_user.person.uuid),
+            }
+        )
+
+        view = ContinuingAdmissionListExcelExportView()
+        workbook = Workbook()
+        worksheet: Worksheet = workbook.create_sheet()
+
+        view.customize_parameters_worksheet(
+            worksheet=worksheet,
+            person=self.sic_management_user.person,
+            filters=filters,
+        )
+
+        names, values = list(worksheet.iter_cols(values_only=True))
+        self.assertEqual(len(names), 13)
+        self.assertEqual(len(values), 13)
+
+        # Check the names of the parameters
+        self.assertEqual(names[0], _('Creation date'))
+        self.assertEqual(names[1], pgettext('masculine', 'Created by'))
+        self.assertEqual(names[2], _('Description'))
+        self.assertEqual(names[3], _('Year'))
+        self.assertEqual(names[4], _('Edition'))
+        self.assertEqual(names[5], _('Application numero'))
+        self.assertEqual(names[6], _('Last name / First name / Email / NOMA'))
+        self.assertEqual(names[7], _('Statut'))
+        self.assertEqual(names[8], _('Faculty'))
+        self.assertEqual(names[9], _('Course type'))
+        self.assertEqual(names[10], pgettext('admission', 'Course'))
+        self.assertEqual(names[11], _('Registration required'))
+        self.assertEqual(names[12], _('Paid'))
+
+        # Check the values of the parameters
+        self.assertEqual(values[0], '3 Janvier 2023')
+        self.assertEqual(values[1], self.sic_management_user.person.full_name)
+        self.assertEqual(values[2], _('Export') + ' - Admissions')
+        self.assertEqual(values[3], '2022')
+        self.assertEqual(values[4], "['2', '3']")
+        self.assertEqual(values[5], str(self.admission.reference))
+        self.assertEqual(values[6], self.admission.candidate.full_name)
+        self.assertEqual(values[7], f"['{ChoixStatutPropositionContinue.EN_BROUILLON.value}']")
+        self.assertEqual(values[8], 'ENT')
+        self.assertEqual(
+            values[9],
+            f"['{TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.value}', '{TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.value}']",
+        )
+        self.assertEqual(values[10], f"['{self.admission.training.acronym}']")
+        self.assertEqual(values[11], 'oui')
+        self.assertEqual(values[12], 'non')
