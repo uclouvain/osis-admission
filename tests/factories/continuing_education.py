@@ -42,6 +42,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
+from base.tests.factories.specific_iufc_informations import SpecificIUFCInformationsFactory
 from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
 
@@ -60,6 +61,12 @@ class ContinuingEducationTrainingFactory(EducationGroupYearFactory):
             offer=self,
             version_name='',
             root_group__academic_year__year=self.academic_year.year,
+        )
+
+    @factory.post_generation
+    def create_iufc_specific_information(self, create, extracted, **kwargs):
+        SpecificIUFCInformationsFactory(
+            training=self,
         )
 
 

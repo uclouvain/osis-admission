@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,33 +24,19 @@
 #
 # ##############################################################################
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.utils.functional import cached_property
-from django.views.generic import ListView
+from unittest import TestCase
 
-from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery
-from admission.forms.admission.filter import ContinuingAdmissionsFilterForm
-from admission.views import ListPaginator
-from admission.views.list import BaseAdmissionList
-from osis_common.utils.htmx import HtmxMixin
-
-__all__ = [
-    "ContinuingAdmissionList",
-]
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class ContinuingAdmissionList(BaseAdmissionList):
-    raise_exception = True
-    template_name = 'admission/continuing_education/list.html'
-    htmx_template_name = 'admission/continuing_education/list_block.html'
-    permission_required = 'admission.view_continuing_enrolment_applications'
-    filtering_query_class = ListerDemandesQuery
-    form_class = ContinuingAdmissionsFilterForm
-    urlpatterns = {'list': 'list'}
-    paginator_class = ListPaginator
+class TestListerDemandes(TestCase):
+    def setUp(self) -> None:
+        self.cmd = ListerDemandesQuery(matricule_candidat='0123456789')
+        self.message_bus = message_bus_in_memory_instance
 
-    def additional_command_kwargs(self):
-        return {
-            'demandeur': self.request.user.person.uuid,
-        }
+    def test_should_rechercher_par_matricule(self):
+        propositions = self.message_bus.invoke(self.cmd)
+        self.assertEqual(len(propositions), 3)
+        for proposition in propositions:
+            self.assertEqual(proposition.noma_candidat, '0123456789')

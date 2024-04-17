@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,15 +23,33 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .determiner_annee_academique_et_pot_service import determiner_annee_academique_et_pot
-from .lister_demandes_service import lister_demandes
-from .lister_propositions_candidat_service import lister_propositions_candidat
-from .rechercher_formations_service import rechercher_formations
-from .recuperer_documents_proposition_service import recuperer_documents_proposition
-from .recuperer_elements_confirmation_service import recuperer_elements_confirmation
-from .recuperer_proposition_service import recuperer_proposition
-from .recuperer_resume_proposition_service import recuperer_resume_proposition
-from .recuperer_resume_et_emplacements_document_non_libres_proposition_service import (
-    recuperer_resume_et_emplacements_documents_non_libres_proposition,
-)
-from .verifier_proposition_service import verifier_proposition
+from abc import abstractmethod
+from typing import Optional, List, Dict
+
+from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
+from admission.views import PaginatedList
+from osis_common.ddd import interface
+
+
+class IListerDemandesService(interface.DomainService):
+    @classmethod
+    @abstractmethod
+    def lister(
+        cls,
+        annee_academique: Optional[int] = None,
+        edition: Optional[str] = '',
+        numero: Optional[int] = None,
+        matricule_candidat: Optional[str] = '',
+        etats: Optional[List[str]] = None,
+        facultes: Optional[List[str]] = None,
+        types_formation: Optional[List[str]] = None,
+        sigles_formations: Optional[List] = None,
+        inscription_requise: Optional[bool] = None,
+        paye: Optional[bool] = None,
+        demandeur: Optional[str] = '',
+        tri_inverse: bool = False,
+        champ_tri: Optional[str] = None,
+        page: Optional[int] = None,
+        taille_page: Optional[int] = None,
+    ) -> PaginatedList[DemandeRechercheDTO]:
+        raise NotImplementedError
