@@ -228,16 +228,16 @@ class InjectionEPC:
             'nom': candidat.last_name,
             'prenom': candidat.first_name,
             'prenom_suivant': candidat.middle_name,
-            'date_de_naissance': candidat.birth_date.strftime("%d/%m/%Y") if candidat.birth_date else '',
+            'date_de_naissance': candidat.birth_date.strftime("%d/%m/%Y") if candidat.birth_date else None,
             'lieu_de_naissance': candidat.birth_place,
-            'pays_de_naissance': candidat.birth_country.iso_code if candidat.birth_country else '',
-            'annee_de_naissance': candidat.birth_year or '',
+            'pays_de_naissance': candidat.birth_country.iso_code,
+            'annee_de_naissance': candidat.birth_year or None,
             'sexe': candidat.sex,
             'etat_civil': candidat.civil_state,
             'numero_gsm': candidat.phone_mobile,
             'numero_registre_national': candidat.national_number,
-            'commune_domicile': adresse_domicile.place if adresse_domicile else '',
-            'pays_domicile': adresse_domicile.country.iso_code if adresse_domicile else '',
+            'commune_domicile': adresse_domicile.place,
+            'pays_domicile': adresse_domicile.country.iso_code,
             'num_carte_identite': candidat.id_card_number,
             'num_passeport': candidat.passport_number,
             'documents': documents
@@ -342,13 +342,13 @@ class InjectionEPC:
             type_etude = diplome_belge.educational_type if diplome_belge else diplome_etranger.foreign_diploma_type
             return {
                 'osis_uuid': str(diplome.uuid) if diplome else '',
-                'type_etude': TYPE_DIPLOME_MAP.get(type_etude, ''),
+                'type_etude': TYPE_DIPLOME_MAP.get(type_etude),
                 'annee_fin': diplome.academic_graduation_year.year if diplome else '',
-                'code_ecole': diplome_belge.institute.code if diplome_belge and diplome_belge.institute else '',
+                'code_ecole': diplome_belge.institute.code if diplome_belge and diplome_belge.institute else None,
                 'nom_ecole': (
                     diplome_belge.other_institute_name
                     if diplome_belge and diplome_belge.other_institute_name
-                    else ''
+                    else None
                 ),
                 'documents': documents
             }
@@ -392,7 +392,7 @@ class InjectionEPC:
         etablissement = experience_educative.institute  # type: Organization
         etudes = experience_educative.program  # type: DiplomaTitle
         pays_etablissement = experience_educative.country.iso_code
-        communaute = etablissement.community if pays_etablissement == BELGIQUE_ISO_CODE else ''
+        communaute = etablissement.community if pays_etablissement == BELGIQUE_ISO_CODE else None
         documents = (
             cls._recuperer_documents(experience_educative) + cls._recuperer_documents(experience_educative_annualisee)
         )
@@ -401,14 +401,14 @@ class InjectionEPC:
             'osis_uuid': str(experience_educative_annualisee.uuid),
             'annee_debut': experience_educative_annualisee.academic_year.year,
             'annee_fin': experience_educative_annualisee.academic_year.year + 1,
-            'communaute_linguistique': COMMUNAUTE_MAP.get(communaute, ''),
+            'communaute_linguistique': COMMUNAUTE_MAP.get(communaute),
             'resultat': RESULTAT_MAP.get(experience_educative_annualisee.result),
             'diplome': experience_educative.obtained_diploma,
             'intitule_etudes': experience_educative.education_name,
             'etablissement': experience_educative.institute_name,
             'adresse_etablissement': experience_educative.institute_address,
-            'credits_inscrits': experience_educative_annualisee.registered_credit_number or '',
-            'credits_acquis': experience_educative_annualisee.acquired_credit_number or '',
+            'credits_inscrits': experience_educative_annualisee.registered_credit_number,
+            'credits_acquis': experience_educative_annualisee.acquired_credit_number,
             'pays': pays_etablissement,
             'documents': documents
         }
@@ -433,8 +433,8 @@ class InjectionEPC:
             **donnees_annuelles,
             'code_etude': etudes.code_etude if etudes else CODE_ETUDE_SNU_INCONNU,
             'type_etude': 'SNU_BELGE' if pays_etablissement == BELGIQUE_ISO_CODE else 'SNU_ETRG',
-            'code_ecole': etablissement.code if etablissement else '',
-            'type_enseignement': etablissement.teaching_type if etablissement else ''
+            'code_ecole': etablissement.code if etablissement else None,
+            'type_enseignement': etablissement.teaching_type if etablissement else None
         }
 
     @classmethod
@@ -470,7 +470,7 @@ class InjectionEPC:
         assimilation_checklist = admission.checklist.get('current', {}).get('assimilation', {})
         return {
             'annee_academique': admission.training.academic_year.year,
-            'nationalite': candidat.country_of_citizenship.iso_code if candidat.country_of_citizenship else '',
+            'nationalite': candidat.country_of_citizenship.iso_code,
             'type_demande': admission.type_demande,
             'carte_sport_lln_woluwe': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.LOUVAIN_WOLUWE.name] + SPORT_TOUT_CAMPUS
@@ -522,7 +522,7 @@ class InjectionEPC:
                 TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE.name
                 if comptabilite else False
             ),
-            'date_assimilation': assimilation_checklist.get('extra', {}).get('date_debut', '')
+            'date_assimilation': assimilation_checklist.get('extra', {}).get('date_debut', None)
         }
 
     @staticmethod
@@ -538,12 +538,12 @@ class InjectionEPC:
             'promoteur': (
                 groupe_de_supervision.actors.get(supervisionactor__type=ActorType.PROMOTER.name).person.global_id
                 if groupe_de_supervision
-                else ''
+                else None
             ),
-            'condition_acces': getattr(admission, 'admission_requirement', ''),
-            'double_diplome': str(double_diplome.uuid) if double_diplome else '',
-            'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else '',
-            'type_erasmus': str(type_erasmus.uuid) if type_erasmus else '',
+            'condition_acces': getattr(admission, 'admission_requirement', None),
+            'double_diplome': str(double_diplome.uuid) if double_diplome else None,
+            'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else None,
+            'type_erasmus': str(type_erasmus.uuid) if type_erasmus else None,
             'complement_de_formation': AdmissionPrerequisiteCourses.objects.filter(admission_id=admission.id).exists(),
         }
 
@@ -551,10 +551,10 @@ class InjectionEPC:
     def _get_donnees_comptables(admission: BaseAdmission) -> Dict:
         return {
             'annee_academique': admission.training.academic_year.year,
-            'droits_majores': getattr(admission, 'tuition_fees_dispensation', ''),
+            'droits_majores': getattr(admission, 'tuition_fees_dispensation', None),
             'montant_doits_majores': (
                 str(getattr(admission, "tuition_fees_amount_other", "")) or
-                DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission, "tuition_fees_amount", ""))
+                DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission, "tuition_fees_amount"))
             )
         }
 
