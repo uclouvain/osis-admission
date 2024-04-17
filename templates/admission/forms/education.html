@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,12 @@
     <div class="panel-heading flex-content-no-wrap">
       <div class="panel-title">{% translate "Modification of the secondary studies" %}</div>
       <a
-          class="prevent-quitting-link"
-          href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur__ETUDES_SECONDAIRES"
+        class="prevent-quitting-link"
+        {% if next_url %}
+        href="{{ next_url }}"
+        {% else %}
+        href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur__ETUDES_SECONDAIRES"
+        {% endif %}
       >
         <i class="fa fa-stream"></i>
         {% translate "Back to checklist" %}

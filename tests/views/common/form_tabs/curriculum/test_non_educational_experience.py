@@ -323,11 +323,14 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             self.general_admission.requested_documents,
         )
 
-    def test_submit_valid_form_for_other_activity(self):
+    def test_submit_valid_form_for_other_activity_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
         response = self.client.post(
-            self.form_url,
+            f'{self.form_url}?next={admission_url}&next_hash_url=custom_hash',
             {
                 'start_date_month': 2,
                 'start_date_year': 2019,
@@ -341,7 +344,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
 
         self.experience.refresh_from_db()
 
@@ -481,6 +484,15 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
+    def test_delete_experience_from_curriculum_and_redirect(self):
+        self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
+        response = self.client.delete(f'{self.delete_url}?next={admission_url}&next_hash_url=custom_hash')
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
     def test_delete_unknown_experience_returns_404(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -612,6 +624,15 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         self.client.force_login(self.sic_manager_user)
         response = self.client.post(self.duplicate_url)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_duplicate_experience_from_curriculum_and_redirect(self):
+        self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
+        response = self.client.post(f'{self.duplicate_url}?next={admission_url}&next_hash_url=custom_hash')
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
 
     def test_duplicate_unknown_experience_returns_404(self):
         self.client.force_login(self.sic_manager_user)
