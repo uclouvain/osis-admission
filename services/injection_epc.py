@@ -92,7 +92,7 @@ GRADE_MAP = {
     Grade.SATISFACTION.name: 'S',
     Grade.DISTINCTION.name: 'D',
     Grade.GREAT_DISTINCTION.name: 'GD',
-    Grade.GREATER_DISTINCTION.name: 'PGR',
+    Grade.GREATER_DISTINCTION.name: 'PGD',
     Grade.SUCCESS_WITHOUT_DISTINCTION.name: 'R',
     '': 'N'
 }
