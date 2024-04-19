@@ -667,7 +667,18 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def etudes_secondaires_valorisees(cls, matricule: str) -> bool:
-        return BaseAdmission.objects.filter(valuated_secondary_studies_person__global_id=matricule).exists()
+        # Check if the secondary studies have been valuated by the submission of an admission or by EPC
+        return (
+            Person.objects.filter(
+                global_id=matricule,
+            )
+            .filter(
+                Q(baseadmissions__valuated_secondary_studies_person_id=F('pk'))
+                | Q(belgianhighschooldiploma__external_id__isnull=False)
+                | Q(foreignhighschooldiploma__external_id__isnull=False)
+            )
+            .exists()
+        )
 
     @classmethod
     def est_potentiel_vae(cls, matricule: str) -> bool:
