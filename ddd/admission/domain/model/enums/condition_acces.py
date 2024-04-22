@@ -89,6 +89,15 @@ CHOIX_POUR_DOCTORAT = [
     ConditionAcces.PARCOURS,
 ]
 
+CHOIX_POUR_CERTIFICAT = [
+    ConditionAcces.BAC,
+    ConditionAcces.MASTER,
+    ConditionAcces.VALORISATION_180_ECTS,
+    ConditionAcces.VAE,
+    ConditionAcces.PARCOURS,
+    ConditionAcces.UNI_SNU_AUTRE,
+]
+
 CHOIX_PAR_FORMATION: Dict[str, List[ConditionAcces]] = {
     TrainingType.BACHELOR.name: CHOIX_POUR_BACHELIER,
     TrainingType.MASTER_MC.name: CHOIX_POUR_MASTER_DE_SPECIALISATION,
@@ -98,7 +107,7 @@ CHOIX_PAR_FORMATION: Dict[str, List[ConditionAcces]] = {
     TrainingType.MASTER_MS_180_240.name: CHOIX_POUR_MASTER,
     TrainingType.MASTER_M1.name: CHOIX_POUR_MASTER,
     TrainingType.RESEARCH_CERTIFICATE.name: {},
-    TrainingType.CERTIFICATE.name: {},
+    TrainingType.CERTIFICATE.name: CHOIX_POUR_CERTIFICAT,
     TrainingType.AGGREGATION.name: CHOIX_POUR_AGGREGATION,
     TrainingType.CAPAES.name: CHOIX_POUR_CAPAES,
     TrainingType.PHD.name: CHOIX_POUR_DOCTORAT,

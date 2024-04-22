@@ -30,9 +30,10 @@ from unittest.mock import patch
 from django.conf import settings
 from django.test import override_settings
 from osis_async.models import AsyncTask
+from osis_document.enums import PostProcessingType
 from rest_framework.test import APITestCase
 
-from admission.constants import PDF_MIME_TYPE, PNG_MIME_TYPE
+from admission.constants import PNG_MIME_TYPE
 from admission.contrib.models import AdmissionTask
 from admission.ddd.admission.enums import (
     CleConfigurationItemFormulaire,
@@ -41,7 +42,7 @@ from admission.ddd.admission.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.exceptions import InvalidMimeTypeException, DocumentPostProcessingException
+from admission.exceptions import InvalidMimeTypeException, DocumentPostProcessingException, MergeDocumentsException
 from admission.tasks.merge_admission_documents import general_education_admission_document_merging_from_task
 from admission.tests.factories.curriculum import (
     EducationalExperienceYearFactory,
@@ -53,9 +54,9 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.form_item import DocumentAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
-from osis_document.enums import PostProcessingType
 from osis_profile.models.enums.curriculum import TranscriptType
 
 
@@ -280,7 +281,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         self.admission.candidate.save()
         self.metadata_by_token['token-passport']['mimetype'] = PNG_MIME_TYPE
 
-        with self.assertRaises(DocumentPostProcessingException):
+        with self.assertRaises(MergeDocumentsException) as context_manager:
             self.launch_post_processing_patcher.side_effect = lambda **kwargs: {
                 'error': 'An error occurred',
             }
@@ -302,6 +303,11 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
 
             self.admission.candidate.refresh_from_db()
             self.assertEqual(self.admission.candidate.passport, [self.uuid_documents_by_token['token-passport']])
+
+            self.assertEqual(
+                str(context_manager.exception),
+                'An error occurred while processing the documents:\nIDENTIFICATION.PASSEPORT: An error occurred.',
+            )
 
     def test_when_several_pdf_files_must_be_merged(self):
         uuids = [
@@ -410,7 +416,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
 
         self.metadata_by_token['non_free_specific_question_file_token']['mimetype'] = PNG_MIME_TYPE
 
-        with self.assertRaises(InvalidMimeTypeException):
+        with self.assertRaises(MergeDocumentsException) as context_manager:
             general_education_admission_document_merging_from_task(
                 task_uuid=self.admission_task.task.uuid,
             )
@@ -429,6 +435,12 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
 
             self.admission.refresh_from_db()
             self.assertEqual(self.admission.specific_question_answers, {})
+            document_identifier = f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}'
+            self.assertEqual(
+                str(context_manager.exception),
+                f'An error occurred while processing the documents:'
+                f'\n{document_identifier}: {PDF_MIME_TYPE} is not a valid mimetype for the field "{document_identifier}" ({PNG_MIME_TYPE})',
+            )
 
     def test_only_cv_experiences_valuated_by_admission_must_be_processed(self):
         other_admission = GeneralEducationAdmissionFactory(

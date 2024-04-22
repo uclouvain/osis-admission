@@ -69,7 +69,7 @@
               <span class="flex-content-no-wrap align-items-baseline">
                 {% if document.dernier_acteur %}
                   {% if document.dernier_acteur.matricule == admission.matricule_candidat %}
-                    {% translate 'Candidate' %}
+                    {% translate 'Candidate' context 'gender' %}
                   {% else %}
                     {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
                   {% endif %}
@@ -116,7 +116,7 @@
     >
       <i class="fa-solid fa-plus"></i>
       {% translate 'List a missing document' %}
-      <i class="fa-solid fa-paperclip"></i>
+      <i class="fa-solid fa-link-slash"></i>
     </button>
 
     <div>

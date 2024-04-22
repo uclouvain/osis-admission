@@ -26,6 +26,8 @@
 from django.test import TestCase
 
 from admission.utils import takewhile_return_attribute_values
+from base.tests.factories.academic_year import AcademicYearFactory
+from base.utils.utils import format_academic_year
 
 
 class UtilsTestCase(TestCase):

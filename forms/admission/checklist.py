@@ -64,9 +64,7 @@ from admission.ddd.admission.domain.model.enums.equivalence import (
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums import TypeSituationAssimilation
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutEmplacementDocument,
     TypeEmplacementDocument,
-    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -89,6 +87,7 @@ from admission.views.autocomplete.learning_unit_years import LearningUnitYearAut
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
+from base.forms.utils.autocomplete import Select2MultipleWithTagWhenNoResultWidget
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.forms.utils.datefield import CustomDateInput
 from base.models.academic_year import AcademicYear
@@ -427,7 +426,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
-        widget=autocomplete.Select2MultipleWithTagWhenNoResultWidget(
+        widget=Select2MultipleWithTagWhenNoResultWidget(
             url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-token-separators': '[{}]'.format(SEPARATOR),
@@ -755,7 +754,7 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
         self.documents = {}
 
         for document in documents:
-            if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER:
+            if document.est_a_reclamer:
                 if document.document_uuids:
                     label = '<span class="fa-solid fa-paperclip"></span> '
                 else:
@@ -784,7 +783,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
-        widget=autocomplete.Select2MultipleWithTagWhenNoResultWidget(
+        widget=Select2MultipleWithTagWhenNoResultWidget(
             url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-token-separators': '[{}]'.format(SEPARATOR),

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 import uuid
 from email.message import EmailMessage
 from typing import Optional, List
@@ -30,7 +31,7 @@ from uuid import UUID
 
 import attr
 from django.conf import settings
-from django.db.models import Model
+from django.db.models import Model, Q, Func
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
@@ -47,6 +48,8 @@ from admission.ddd.admission.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     StatutEmplacementDocument,
 )
+from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
+from base.models.enums.entity_type import PEDAGOGICAL_ENTITY_TYPES
 from osis_profile.models import EducationalExperienceYear
 
 FORMATTED_EMAIL_FOR_HISTORY = """{sender_label} : {sender}
@@ -120,9 +123,12 @@ class AdmissionDocument:
     automatically_required: Optional[bool]
     mimetypes: List[str]
     label: str
+    label_fr: str
+    label_en: str
     document_submitted_by: str
     max_documents_number: Optional[int]
     request_status: str
+    related_checklist_tab: str
 
 
 def get_document_from_identifier(
@@ -151,6 +157,8 @@ def get_document_from_identifier(
     requested_document = admission.requested_documents.get(document_identifier, {})
     document_author: str = requested_document.get('last_actor', '')
     document_label: str = ''
+    document_label_fr: str = ''
+    document_label_en: str = ''
     document_submitted_by: str = ''
     metadata: dict = {}
     max_documents_number = None
@@ -204,6 +212,8 @@ def get_document_from_identifier(
             [],
         )
         document_label = specific_question.title.get(admission.candidate.language, '')
+        document_label_fr = specific_question.title.get(settings.LANGUAGE_CODE_FR, '')
+        document_label_en = specific_question.title.get(settings.LANGUAGE_CODE_EN, '')
         max_documents_number = specific_question.configuration.get(
             CleConfigurationItemFormulaire.NOMBRE_MAX_DOCUMENTS.name,
         )
@@ -238,6 +248,8 @@ def get_document_from_identifier(
             metadata = get_remote_metadata(token=token) or {}
             document_author = metadata.get('author', '')
             document_label = metadata.get('explicit_name', '')
+            document_label_fr = document_label
+            document_label_en = document_label
             document_mimetypes = [metadata.get('mimetype')] or []
 
     elif base_identifier == IdentifiantBaseEmplacementDocument.SYSTEME.name:
@@ -390,9 +402,12 @@ def get_document_from_identifier(
             automatically_required=requested_document.get('automatically_required') or False,
             mimetypes=document_mimetypes or list(SUPPORTED_MIME_TYPES),
             label=document_label,
+            label_fr=document_label_fr,
+            label_en=document_label_en,
             document_submitted_by=document_submitted_by,
             max_documents_number=max_documents_number,
             request_status=requested_document.get('request_status') or '',
+            related_checklist_tab=requested_document.get('related_checklist_tab') or '',
         )
 
 
@@ -527,3 +542,20 @@ CORRESPONDANCE_CHAMPS_SYSTEME = {
     'ATTESTATION_ACCORD_ANNEXE_SIC': 'sic_annexe_approval_certificate',
     'ATTESTATION_REFUS_SIC': 'sic_refusal_certificate',
 }
+
+
+def get_entities_with_descendants_ids(entities_acronyms):
+    """
+    From a list of pedagogical entities acronyms, get a set of ids of the entities and their descendants.
+    :param entities_acronyms: A list of acronyms of pedagogical entities
+    :return: A set of entities ids
+    """
+    if entities_acronyms:
+        cte = (
+            EntityVersion.objects.filter(acronym__in=entities_acronyms)
+            .filter(Q(entity_type__in=PEDAGOGICAL_ENTITY_TYPES) | Q(acronym__in=PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS))
+            .with_parents()
+        )
+        qs = cte.queryset().with_cte(cte).annotate(level=Func('parents', function='cardinality'))
+        return set(qs.values_list('entity_id', flat=True))
+    return set()

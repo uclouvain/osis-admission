@@ -34,7 +34,6 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy
 from rest_framework import status
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import ENTITY_CDE
 from admission.ddd.admission.enums import Onglets
@@ -50,6 +49,7 @@ from admission.tests.factories.secondary_studies import (
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
@@ -287,20 +287,23 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
 
         self.assertEqual(foreign_high_school_diploma.academic_graduation_year, self.academic_years[0])
 
-    def test_submit_valid_data_when_the_candidate_has_a_diploma_with_existing_alternative_diploma(self):
+    def test_submit_valid_data_when_the_candidate_has_a_diploma_with_existing_alternative_diploma_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
 
         high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
 
         response = self.client.post(
-            self.form_url,
+            f'{self.form_url}?next={admission_url}&next_hash_url=custom_hash',
             data={
                 'graduated_from_high_school': GotDiploma.YES.name,
                 'graduated_from_high_school_year': self.academic_years[0].year,
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
 
         # Check saved data
         self.general_admission.refresh_from_db()

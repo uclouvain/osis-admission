@@ -36,6 +36,7 @@ from django.urls import reverse
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     PoursuiteDeCycle,
@@ -45,8 +46,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
-from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -58,6 +57,7 @@ from admission.tests.factories.roles import (
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
+from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
@@ -196,6 +196,10 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 date_confirmation=cls.admissions[0].submitted_at,
                 est_premiere_annee=False,
                 poursuite_de_cycle='',
+                annee_formation=cls.admissions[0].training.academic_year.year,
+                annee_calculee=cls.admissions[0].determined_academic_year.year
+                if cls.admissions[0].determined_academic_year
+                else None,
             ),
         ]
 
@@ -371,12 +375,12 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.client.force_login(user=self.sic_management_user)
 
         # With school
-        response = self._do_request(entites='ABCDEF', allowed_sql_surplus=1)
+        response = self._do_request(entites='ABCDEF', allowed_sql_surplus=2)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
 
         # With faculty
-        response = self._do_request(entites='GHIJK', allowed_sql_surplus=1)
+        response = self._do_request(entites='GHIJK', allowed_sql_surplus=2)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
 

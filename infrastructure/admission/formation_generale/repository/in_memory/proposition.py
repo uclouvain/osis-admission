@@ -208,6 +208,13 @@ class PropositionInMemoryRepository(
                 curriculum=['file1.pdf'],
                 est_confirmee=True,
             ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-CERTIFICATE-CONFIRMED'),
+                matricule_candidat='0000000002',
+                formation_id=FormationIdentityFactory(sigle="CERTIF-BUS", annee=2021),
+                curriculum=['file1.pdf'],
+                est_confirmee=True,
+            ),
         ]
 
     @classmethod

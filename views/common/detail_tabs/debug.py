@@ -34,7 +34,7 @@ from admission.ddd.admission.doctorat.preparation.commands import DeterminerAnne
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.commands import DeterminerAnneeAcademiqueEtPotQuery as ContinuingCmd
 from admission.ddd.admission.formation_generale.commands import DeterminerAnneeAcademiqueEtPotQuery as GeneralCmd
-from admission.views.doctorate.mixins import LoadDossierViewMixin
+from admission.views.common.mixins import LoadDossierViewMixin
 from osis_common.ddd.interface import BusinessException
 
 __all__ = ['DebugView']

@@ -135,7 +135,8 @@ class VerifierProposition(interface.DomainService):
             ),
             partial(
                 maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_generale,
-                matricule=proposition_candidat.matricule_candidat,
+                proposition_candidat=proposition_candidat,
+                annee_soumise=annee_soumise,
             ),
         )
 
@@ -147,11 +148,11 @@ class VerifierProposition(interface.DomainService):
         calendrier_inscription: 'ICalendrierInscription',
         profil_candidat_translator: 'IProfilCandidatTranslator',
     ) -> 'TypeDemande':
-        # (Nationalité UE+5 OU assimilé)
+        # (Nationalité UE+5)
         #   ET (tous les diplômes belges (y compris secondaires si déclaré dans le détail)) = inscription
         est_ue_plus_5 = calendrier_inscription.est_ue_plus_5(
             profil_candidat_translator.get_identification(proposition.matricule_candidat),
-            proposition.comptabilite.type_situation_assimilation,
+            situation_assimilation=None,  # ne pas prendre en compte le critère d'assimilation
         )
         diplomes_tous_belge = set(titres.get_valid_conditions()) <= set(DIPLOMES_ACCES_BELGE)
         return TypeDemande.INSCRIPTION if est_ue_plus_5 and diplomes_tous_belge else TypeDemande.ADMISSION

@@ -92,8 +92,8 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.models.student import Student
-from ddd.logic.learning_unit.dtos import PartimSearchDTO
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
+from ddd.logic.learning_unit.dtos import PartimSearchDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import ApplicationService
 
@@ -576,7 +576,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     numero_rue=campus.street_number,
                     boite_postale=campus.postal_box,
                     localisation=campus.location,
-                    email=campus.sic_enrollment_email,
+                    email_inscription_sic=campus.sic_enrollment_email,
                 )
                 if campus
                 else None,
@@ -597,7 +597,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     numero_rue=admission.training.enrollment_campus.street_number,
                     boite_postale=admission.training.enrollment_campus.postal_box,
                     localisation=admission.training.enrollment_campus.location,
-                    email=admission.training.enrollment_campus.sic_enrollment_email,
+                    email_inscription_sic=admission.training.enrollment_campus.sic_enrollment_email,
                 )
                 if admission.training.enrollment_campus
                 else None,

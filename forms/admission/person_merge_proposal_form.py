@@ -40,7 +40,8 @@ class PersonMergeProposalForm(AdmissionPersonForm):
         # some adjustments to initial form
         self.fields['middle_name'].help_text = None
         self.fields['country_of_citizenship'].required = True
-        self.fields['identification_type'].required = False
+        self.fields['identification_type'].required = True
+        self.fields['identification_type'].label = _("Select which identification applies:")
 
     class Meta:
         model = Person
@@ -58,6 +59,7 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'id_card_number',
             'passport_number',
             'id_card_expiry_date',
+            'passport_expiry_date',
             'identification_type',
         ]
         exclude = [
@@ -68,7 +70,6 @@ class PersonMergeProposalForm(AdmissionPersonForm):
             'id_photo',
             'id_card',
             'passport',
-            'passport_expiry_date',
             'last_registration_year',
             'has_national_number',
             'unknown_birth_date',

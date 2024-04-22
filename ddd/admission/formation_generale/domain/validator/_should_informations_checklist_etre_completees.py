@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List, Dict
+from typing import Optional, List
 
 import attr
 
@@ -39,7 +39,6 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
-    StatutEmplacementDocument,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -181,7 +180,10 @@ class ShouldTitreAccesEtreSelectionne(BusinessValidator):
     titres_acces_selectionnes: List[TitreAccesSelectionnable]
 
     def validate(self, *args, **kwargs):
-        if self.statut == ChoixStatutChecklist.GEST_REUSSITE and not self.titres_acces_selectionnes:
+        if (
+            self.statut == ChoixStatutChecklist.GEST_REUSSITE
+            and not self.titres_acces_selectionnes
+        ):
             raise TitreAccesEtreSelectionneException
 
 
@@ -192,8 +194,9 @@ class ShouldConditionAccesEtreSelectionne(BusinessValidator):
     millesime_condition_acces: Optional[int]
 
     def validate(self, *args, **kwargs):
-        if self.statut == ChoixStatutChecklist.GEST_REUSSITE and not (
-            self.condition_acces and self.millesime_condition_acces
+        if (
+            self.statut == ChoixStatutChecklist.GEST_REUSSITE
+            and not (self.condition_acces and self.millesime_condition_acces)
         ):
             raise ConditionAccesEtreSelectionneException
 

@@ -67,7 +67,7 @@
               <span class="flex-content-no-wrap align-items-baseline">
                 {% if document.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER %}
                   {% if document.dernier_acteur.matricule == admission.matricule_candidat %}
-                    {% translate 'Candidate' %}
+                    {% translate 'Candidate' context 'gender' %}
                   {% else %}
                     {{ document.dernier_acteur.prenom }} {{ document.dernier_acteur.nom }}
                   {% endif %}
@@ -76,7 +76,7 @@
                   <i class="fa-solid fa-envelope" title="{% translate 'Requested' context 'document' %}"></i>
                 {% else %}
                   {% if not document.document_soumis_par or document.document_soumis_par.matricule == admission.matricule_candidat %}
-                    {% translate 'Candidate' %}
+                    {% translate 'Candidate' context 'gender' %}
                   {% else %}
                     {{ document.document_soumis_par.prenom }} {{ document.document_soumis_par.nom }}
                   {% endif %}

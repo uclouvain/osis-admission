@@ -39,9 +39,9 @@ from django.utils import translation
 from django.utils.translation import gettext as _, pgettext
 from django.views import View
 
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE
+from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
 from admission.contrib.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
-from admission.ddd import BE_ISO_CODE, FR_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
@@ -50,11 +50,9 @@ from admission.ddd.admission.formation_continue.domain.model.enums import ChoixS
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.test.factory.profil import (
     ExperienceAcademiqueDTOFactory,
-    ExperienceNonAcademiqueDTOFactory,
-    EtudesSecondairesDTOFactory,
+    ExperienceNonAcademiqueDTOFactory, EtudesSecondairesDTOFactory,
 )
 from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.templatetags.admission import (
     TAB_TREES,
     Tab,
@@ -90,11 +88,13 @@ from admission.templatetags.admission import (
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
-from osis_profile.models.enums.curriculum import EvaluationSystem
+from osis_profile import BE_ISO_CODE
+from osis_profile.models.enums.curriculum import EvaluationSystem, CURRICULUM_ACTIVITY_LABEL
 from reference.tests.factories.country import CountryFactory
 
 
@@ -539,6 +539,9 @@ class DisplayTagTestCase(TestCase):
             systeme_evaluation=EvaluationSystem.ECTS_CREDITS.name,
         )
         template_params = experience_details_template(
+            context={
+                'request': Mock(path='mypath'),
+            },
             resume_proposition=MagicMock(
                 est_proposition_generale=True,
                 est_proposition_continue=False,
@@ -557,8 +560,10 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['title'], _('Academic experience'))
         self.assertEqual(
             template_params['edit_link_button'],
-            '/admissions/general-education/{}/update/curriculum/educational/{}'.format(
+            '/admissions/general-education/{}/update/curriculum/educational/{}?next=mypath&next_hash_url='
+            'parcours_anterieur__{}'.format(
                 proposition_uuid,
+                experience.uuid,
                 experience.uuid,
             ),
         )
@@ -572,6 +577,9 @@ class DisplayTagTestCase(TestCase):
         proposition_uuid = uuid.uuid4()
         experience = ExperienceNonAcademiqueDTOFactory()
         template_params = experience_details_template(
+            context={
+                'request': Mock(path='mypath'),
+            },
             resume_proposition=MagicMock(
                 est_proposition_generale=True,
                 est_proposition_continue=False,
@@ -590,8 +598,10 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['title'], _('Non-academic experience'))
         self.assertEqual(
             template_params['edit_link_button'],
-            '/admissions/general-education/{}/update/curriculum/non_educational/{}'.format(
+            '/admissions/general-education/{}/update/curriculum/non_educational/{}?next=mypath&next_hash_url='
+            'parcours_anterieur__{}'.format(
                 proposition_uuid,
+                experience.uuid,
                 experience.uuid,
             ),
         )
@@ -603,6 +613,9 @@ class DisplayTagTestCase(TestCase):
         experience = EtudesSecondairesDTOFactory()
         specific_questions = {Onglets.ETUDES_SECONDAIRES.name: [QuestionSpecifiqueDTOFactory()]}
         template_params = experience_details_template(
+            context={
+                'request': Mock(path='mypath'),
+            },
             resume_proposition=MagicMock(
                 est_proposition_generale=True,
                 est_proposition_continue=False,
@@ -618,7 +631,10 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(template_params['custom_base_template'], 'admission/exports/recap/includes/education.html')
         self.assertEqual(
             template_params['edit_link_button'],
-            '/admissions/general-education/{}/update/education'.format(proposition_uuid),
+            '/admissions/general-education/{}/update/education?next=mypath&next_hash_url=parcours_anterieur__{}'.format(
+                proposition_uuid,
+                experience.uuid,
+            ),
         )
         self.assertEqual(template_params['specific_questions'], specific_questions[Onglets.ETUDES_SECONDAIRES.name])
 

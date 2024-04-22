@@ -37,7 +37,6 @@ from osis_mail_template.models import MailTemplate
 from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     EMPLACEMENTS_FAC,
     EMPLACEMENTS_SIC,
@@ -63,7 +62,7 @@ from admission.utils import (
     get_portal_admission_url,
     get_salutation_prefix,
 )
-from admission.views.doctorate.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.entity_version import EntityVersion
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year

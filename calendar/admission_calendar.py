@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,14 +35,13 @@ from admission.ddd.admission.domain.service.i_annee_inscription_formation import
     Date,
     IAnneeInscriptionFormationTranslator,
 )
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ConditionAccess, ITitresAcces
-from admission.ddd.admission.domain.validator._should_identification_candidat_etre_completee import BE_ISO_CODE
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import IProfilCandidatTranslator
 from base.business.academic_calendar import AcademicEventSessionCalendarHelper
 from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
@@ -68,6 +67,8 @@ __all__ = [
     "est_formation_contingentee_et_non_resident",
     "PoolCalendar",
 ]
+
+from osis_profile import BE_ISO_CODE
 
 DIPLOMES_ACCES_BELGE = [
     ConditionAccess.DIPLOMATION_POTENTIEL_MASTER_BELGE,
