@@ -47,18 +47,17 @@ from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.sic_management import SicManagement
-from admission.constants import IMAGE_MIME_TYPES, PDF_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
+from admission.constants import IMAGE_MIME_TYPES, ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos import EtudesSecondairesDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -67,6 +66,9 @@ from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSe
 from admission.ddd.admission.enums import TypeItemFormulaire, Onglets
 from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_CONTINUE,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,
@@ -75,7 +77,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import INDEX_ONGLETS_CHECKLIST
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_GENERALE,
+)
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO, PropositionDTO
 from admission.ddd.admission.repository.i_proposition import formater_reference
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import (
@@ -94,9 +98,11 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 )
 from admission.utils import get_access_conditions_url
 from base.models.enums.civil_state import CivilState
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -373,6 +379,9 @@ TAB_TREES = {
         ],
     },
     CONTEXT_CONTINUING: {
+        Tab('checklist', _('Checklist'), 'list-check'): [
+            Tab('checklist', _('Checklist'), 'list-check'),
+        ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
@@ -484,8 +493,8 @@ def get_current_context(admission: Union[DoctorateAdmission, GeneralEducationAdm
         return CONTEXT_CONTINUING
 
 
-@register.inclusion_tag('admission/includes/doctorate_subtabs_bar.html', takes_context=True)
-def doctorate_subtabs_bar(context):
+@register.inclusion_tag('admission/includes/subtabs_bar.html', takes_context=True)
+def subtabs_bar(context):
     return current_subtabs(context)
 
 
@@ -927,9 +936,15 @@ def country_name_from_iso_code(iso_code: str):
 
 
 @register.filter
-def get_ordered_checklist_items(checklist_items: dict):
+def get_ordered_checklist_items_general_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST[tab[0]])
+    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]])
+
+
+@register.filter
+def get_ordered_checklist_items_continuing_education(checklist_items: dict):
+    """Return the ordered checklist items."""
+    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]])
 
 
 @register.filter
@@ -1214,12 +1229,13 @@ def authentication_css_class(authentication_status):
 def bg_class_by_checklist_experience(experience):
     return {
         ExperienceAcademiqueDTO: 'bg-info',
-        EtudesSecondairesDTO: 'bg-warning',
+        EtudesSecondairesAdmissionDTO: 'bg-warning',
     }.get(experience.__class__, '')
 
 
-@register.inclusion_tag('admission/includes/custom_base_template.html')
+@register.inclusion_tag('admission/includes/custom_base_template.html', takes_context=True)
 def experience_details_template(
+    context,
     resume_proposition: ResumePropositionDTO,
     experience,
     specific_questions: Dict[str, List[QuestionSpecifiqueDTO]] = None,
@@ -1228,12 +1244,14 @@ def experience_details_template(
 ):
     """
     Return the template used to render the experience details.
+    :param context: The template context
     :param resume_proposition: The proposition resume
     :param experience: The experience
     :param specific_questions: The specific questions related to the experience (only used for secondary studies)
     :return: The rendered template
     """
-    context = {
+    next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
+    res_context = {
         'is_general': resume_proposition.est_proposition_generale,
         'is_continuing': resume_proposition.est_proposition_continue,
         'is_doctorate': resume_proposition.est_proposition_doctorale,
@@ -1242,69 +1260,75 @@ def experience_details_template(
         'checklist_display': True,
     }
     if experience.__class__ == ExperienceAcademiqueDTO:
-        context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
-        context['title'] = _('Academic experience')
-        context['edit_link_button'] = (
+        res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
+        res_context['title'] = _('Academic experience')
+        res_context['edit_link_button'] = (
             reverse(
                 'admission:general-education:update:curriculum:educational',
                 args=[resume_proposition.proposition.uuid, experience.uuid],
             )
+            + next_url_suffix
             if with_edit_link_button
             else None
         )
-        context.update(get_educational_experience_context(resume_proposition, experience))
+        res_context.update(get_educational_experience_context(resume_proposition, experience))
 
     elif experience.__class__ == ExperienceNonAcademiqueDTO:
-        context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
-        context['title'] = _('Non-academic experience')
-        context['edit_link_button'] = (
+        res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_professional_experience.html'
+        res_context['title'] = _('Non-academic experience')
+        res_context['edit_link_button'] = (
             reverse(
                 'admission:general-education:update:curriculum:non_educational',
                 args=[resume_proposition.proposition.uuid, experience.uuid],
             )
+            + next_url_suffix
             if with_edit_link_button
             else None
         )
-        context.update(get_non_educational_experience_context(experience))
+        res_context.update(get_non_educational_experience_context(experience))
 
-    elif experience.__class__ == EtudesSecondairesDTO:
-        context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
-        context['etudes_secondaires'] = experience
-        context['edit_link_button'] = (
+    elif experience.__class__ == EtudesSecondairesAdmissionDTO:
+        res_context['custom_base_template'] = 'admission/exports/recap/includes/education.html'
+        res_context['etudes_secondaires'] = experience
+        res_context['edit_link_button'] = (
             reverse(
                 'admission:general-education:update:education',
                 args=[resume_proposition.proposition.uuid],
             )
+            + next_url_suffix
             if with_edit_link_button
             else None
         )
-        context.update(
+        res_context.update(
             get_secondary_studies_context(
                 resume_proposition,
                 specific_questions[Onglets.ETUDES_SECONDAIRES.name],
             )
         )
 
-    return context
+    return res_context
 
 
 @register.simple_tag(takes_context=True)
 def checklist_experience_action_links_context(
     context,
-    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
     current_year,
     prefix,
+    parcours_tab_id='',
 ):
+    next_url_suffix = f'?next={context["request"].path}&next_hash_url={parcours_tab_id}'
     base_namespace = context['view'].base_namespace
     proposition_uuid = context['view'].kwargs['uuid']
     proposition_uuid_str = str(proposition_uuid)
-    if experience.__class__ == EtudesSecondairesDTO:
+    if experience.__class__ == EtudesSecondairesAdmissionDTO:
         return {
             'prefix': prefix,
             'update_url': resolve_url(
                 f'{base_namespace}:update:education',
                 uuid=proposition_uuid_str,
-            ),
+            )
+            + next_url_suffix,
             'experience_uuid': str(experience.uuid),
         }
     elif (experience.valorisee_par_admissions and
@@ -1316,7 +1340,8 @@ def checklist_experience_action_links_context(
                     f'{base_namespace}:update:curriculum:educational',
                     uuid=proposition_uuid_str,
                     experience_uuid=experience.uuid,
-                ),
+                )
+                + next_url_suffix,
                 'delete_url': resolve_url(
                     f'{base_namespace}:update:curriculum:educational_delete',
                     uuid=proposition_uuid_str,
@@ -1336,7 +1361,8 @@ def checklist_experience_action_links_context(
                     f'{base_namespace}:update:curriculum:non_educational',
                     uuid=proposition_uuid_str,
                     experience_uuid=experience.uuid,
-                ),
+                )
+                + next_url_suffix,
                 'delete_url': resolve_url(
                     f'{base_namespace}:update:curriculum:non_educational_delete',
                     uuid=proposition_uuid_str,
@@ -1357,11 +1383,12 @@ def checklist_experience_action_links_context(
 )
 def checklist_experience_action_links(
     context,
-    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesDTO],
+    experience: Union[ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO, EtudesSecondairesAdmissionDTO],
     current_year,
     prefix,
+    parcours_tab_id,
 ):
-    return checklist_experience_action_links_context(context, experience, current_year, prefix)
+    return checklist_experience_action_links_context(context, experience, current_year, prefix, parcours_tab_id)
 
 
 @register.filter

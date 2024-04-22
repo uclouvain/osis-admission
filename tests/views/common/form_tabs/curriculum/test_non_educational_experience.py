@@ -35,7 +35,6 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.constants import PDF_MIME_TYPE
 from admission.contrib.models.base import (
     AdmissionProfessionalValuatedExperiences,
 )
@@ -54,6 +53,7 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -62,6 +62,7 @@ from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
 from reference.tests.factories.country import CountryFactory
 
 
+#TODO: Remove duplicate tests with osis_profile
 @freezegun.freeze_time('2023-01-01')
 class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
     @classmethod
@@ -322,11 +323,14 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             self.general_admission.requested_documents,
         )
 
-    def test_submit_valid_form_for_other_activity(self):
+    def test_submit_valid_form_for_other_activity_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
         response = self.client.post(
-            self.form_url,
+            f'{self.form_url}?next={admission_url}&next_hash_url=custom_hash',
             {
                 'start_date_month': 2,
                 'start_date_year': 2019,
@@ -340,7 +344,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
 
         self.experience.refresh_from_db()
 
@@ -480,6 +484,15 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
+    def test_delete_experience_from_curriculum_and_redirect(self):
+        self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
+        response = self.client.delete(f'{self.delete_url}?next={admission_url}&next_hash_url=custom_hash')
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
     def test_delete_unknown_experience_returns_404(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -611,6 +624,15 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         self.client.force_login(self.sic_manager_user)
         response = self.client.post(self.duplicate_url)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_duplicate_experience_from_curriculum_and_redirect(self):
+        self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
+        response = self.client.post(f'{self.duplicate_url}?next={admission_url}&next_hash_url=custom_hash')
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
 
     def test_duplicate_unknown_experience_returns_404(self):
         self.client.force_login(self.sic_manager_user)

@@ -69,8 +69,8 @@ class ProfessionalExperienceSerializer(serializers.ModelSerializer):
         model = ProfessionalExperience
         exclude = [
             'id',
-            'external_id',
         ]
+        read_only_fields = ['external_id']
 
     @staticmethod
     def get_valuated_from_trainings(value):
@@ -90,7 +90,9 @@ class LiteProfessionalExperienceSerializer(ProfessionalExperienceSerializer):
             'end_date',
             'type',
             'valuated_from_trainings',
+            'external_id',
         ]
+        read_only_fields = ['external_id']
 
 
 class EducationalExperienceYearSerializer(serializers.ModelSerializer):
@@ -155,9 +157,9 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
         depth = 1
         exclude = [
             'id',
-            'external_id',
             'fwb_equivalent_program',
         ]
+        read_only_fields = ['external_id']
 
     @staticmethod
     def get_valuated_from_trainings(value):
@@ -252,7 +254,9 @@ class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
             'valuated_from_trainings',
             'country',
             'obtained_diploma',
+            'external_id',
         ]
+        read_only_fields = ['external_id']
 
 
 class DoctoratCompleterCurriculumCommandSerializer(DTOSerializer):

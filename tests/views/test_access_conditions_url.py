@@ -28,9 +28,9 @@ import freezegun
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from admission.tests import QueriesAssertionsMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
+from base.tests import QueriesAssertionsMixin
 
 
 @freezegun.freeze_time('2023-01-01')

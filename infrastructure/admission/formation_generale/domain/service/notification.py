@@ -50,10 +50,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
-    InformationsDestinatairePasTrouvee
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
-    IEmailDestinataireRepository
+from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
+    InformationsDestinatairePasTrouvee,
+)
+from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+    IEmailDestinataireRepository,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
@@ -257,7 +259,9 @@ class Notification(INotification):
                 }[current_language],
             )
             common_tokens['training_acronym'] = admission.training.acronym
-            common_tokens['training_enrollment_campus_email'] = admission.training.enrollment_campus.sic_enrollment_email
+            common_tokens[
+                'training_enrollment_campus_email'
+            ] = admission.training.enrollment_campus.sic_enrollment_email
 
             email_message = generate_email(
                 ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
@@ -346,7 +350,8 @@ class Notification(INotification):
             'training_campus': proposition.formation.campus,
             'requested_submitted_documents': html_list_by_status[StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION],
             'requested_not_submitted_documents': html_list_by_status[StatutEmplacementDocument.A_RECLAMER],
-            'enrolment_service_email': admission.training.enrollment_campus.sic_enrollment_email or MAIL_INSCRIPTION_DEFAUT,
+            'enrolment_service_email': admission.training.enrollment_campus.sic_enrollment_email
+            or MAIL_INSCRIPTION_DEFAUT,
             'training_year': format_academic_year(proposition.annee_calculee),
             'admission_link_front': get_portal_admission_url('general-education', proposition.uuid),
             'admission_link_back': get_backoffice_admission_url('general-education', proposition.uuid),

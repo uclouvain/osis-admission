@@ -468,3 +468,7 @@ a.no-link {
   text-decoration: none !important;
   color: white;
 }
+
+.fit-content {
+  width: fit-content;
+}

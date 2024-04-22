@@ -27,6 +27,7 @@ from io import BytesIO
 from typing import List, Optional, Dict
 
 import img2pdf
+from PIL.Image import DecompressionBombError
 from django.utils.translation import override
 from osis_document.api.utils import get_raw_content_remotely
 
@@ -35,11 +36,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import ExperienceAcademiqueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.domain.validator._should_comptabilite_etre_completee import recuperer_champs_requis_dto
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -59,13 +58,13 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    CHOIX_DIPLOME_OBTENU,
     ChoixStatutPropositionGenerale,
 )
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.got_diploma import CHOIX_DIPLOME_OBTENU
 from base.utils.utils import format_academic_year
-from osis_profile.models.enums.curriculum import TranscriptType
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from osis_profile.models.enums.curriculum import TranscriptType, CURRICULUM_ACTIVITY_LABEL
 from osis_profile.models.enums.education import ForeignDiplomaTypes, Equivalence
 
 
@@ -111,7 +110,11 @@ class Attachment:
             if not raw_content:
                 return default_content
             if metadata.get('mimetype') in IMAGE_MIME_TYPES:
-                raw_content = img2pdf.convert(raw_content, rotation=img2pdf.Rotation.ifvalid)
+                try:
+                    raw_content = img2pdf.convert(raw_content, rotation=img2pdf.Rotation.ifvalid)
+                except (DecompressionBombError, ValueError, img2pdf.ImageOpenError):
+                    # If the image size is too big or the image cannot be opened, display the default content
+                    return default_content
             return BytesIO(raw_content)
         return default_content
 

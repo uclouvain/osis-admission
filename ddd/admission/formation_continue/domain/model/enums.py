@@ -66,3 +66,31 @@ STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE = {
     ChoixStatutPropositionContinue.EN_BROUILLON.name,
     ChoixStatutPropositionContinue.ANNULEE.name,
 }
+
+STATUTS_PROPOSITION_CONTINUE_SOUMISE = (
+    set(ChoixStatutPropositionContinue.get_names()) - STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
+)
+
+
+class ChoixStatutChecklist(ChoiceEnum):
+    INITIAL_NON_CONCERNE = _("INITIAL_NON_CONCERNE")
+    INITIAL_CANDIDAT = _("INITIAL_CANDIDAT")
+    GEST_EN_COURS = _("GEST_EN_COURS")
+    GEST_BLOCAGE = _("GEST_BLOCAGE")
+    GEST_BLOCAGE_ULTERIEUR = _("GEST_BLOCAGE_ULTERIEUR")
+    GEST_REUSSITE = _("GEST_REUSSITE")
+    SYST_REUSSITE = _("SYST_REUSSITE")
+
+
+class ChoixEdition(ChoiceEnum):
+    UN = "1"
+    DEUX = "2"
+    TROIS = "3"
+    QUATRE = "4"
+    CINQ = "5"
+    SIX = "6"
+
+
+class OngletsChecklist(ChoiceEnum):
+    fiche_etudiant = _("Student report")
+    decision = _("Decision")

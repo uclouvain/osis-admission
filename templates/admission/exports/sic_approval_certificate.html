@@ -212,11 +212,15 @@
 
   {% if proposition.avec_complements_formation %}
     <p>{% trans "Additional course(s):" %}
+      {% if proposition.complements_formation %}
       <ul>
       {% for learning_unit in proposition.complements_formation %}
         <li>{{ learning_unit.code }} {% if LANGUAGE_CODE == 'en' and learning_unit.full_title_en %}{{ learning_unit.full_title_en }}{% else %}{{ learning_unit.full_title }}{% endif %}{% if learning_unit.credits %} ({{ learning_unit.credits }} ECTS){% endif %}</li>
       {% endfor %}
       </ul>
+      {% else %}
+      {% translate 'Yes' %}
+      {% endif %}
     </p>
   {% endif %}
 
@@ -230,7 +234,7 @@
         In order to proceed with your enrolment at the university, please go to the Enrolment Office (see address below) between 1 June and 30 September {{ year }} with the following documents:
       {% endblocktrans %}
     {% else %}
-      {% blocktrans with year=proposition.formation.annee email=proposition.formation.campus_inscription.email trimmed %}
+      {% blocktrans with year=proposition.formation.annee email=proposition.formation.campus_inscription.email_inscription_sic trimmed %}
         In order to proceed with your enrolment at the university, please send the document(s) listed below between 1 June and 30 September {{ year }} to <a href="mailto:{{ email }}">{{ email }}</a>:
       {% endblocktrans %}
     {% endif %}

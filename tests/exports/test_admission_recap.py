@@ -43,37 +43,29 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import PDF_MIME_TYPE, JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
+from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
 from admission.contrib.models import AdmissionTask
-from admission.contrib.models.base import AdmissionEducationalValuatedExperiences
-from admission.ddd import FR_ISO_CODE, BE_ISO_CODE
+from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeFinancement,
     ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    AnneeExperienceAcademiqueDTO,
     ConnaissanceLangueDTO,
     CotutelleDTO,
-    CurriculumDTO,
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
     DoctoratDTO,
-    ExperienceAcademiqueDTO,
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
-from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesDTO, IdentificationDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    AlternativeSecondairesDTO,
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-)
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -101,7 +93,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
-    OngletsDemande,
     DocumentsSuiteAutorisation,
 )
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -109,6 +100,7 @@ from admission.ddd.admission.formation_continue.commands import RecupererQuestio
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixStatutPropositionContinue,
+    ChoixEdition,
 )
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionFormationContinueDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -119,7 +111,6 @@ from admission.ddd.admission.formation_generale.dtos import (
 from admission.exports.admission_recap.attachments import (
     Attachment,
 )
-from admission.exports.admission_recap.constants import CURRICULUM_ACTIVITY_LABEL
 from admission.exports.admission_recap.section import (
     get_accounting_section,
     get_cotutelle_section,
@@ -135,9 +126,9 @@ from admission.exports.admission_recap.section import (
     get_dynamic_questions_by_tab,
     get_training_choice_section,
     get_authorization_section,
+    get_requestable_free_document_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
-from admission.tests import QueriesAssertionsMixin, TestCase
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -156,6 +147,7 @@ from admission.tests.factories.person import (
     CompletePersonFactory,
 )
 from admission.tests.factories.roles import ProgramManagerRoleFactory
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
@@ -163,9 +155,20 @@ from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
+from base.tests import QueriesAssertionsMixin, TestCaseWithQueriesAssertions
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     ActivitySector,
     ActivityType,
@@ -173,6 +176,7 @@ from osis_profile.models.enums.curriculum import (
     Grade,
     Result,
     TranscriptType,
+    CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
@@ -190,7 +194,7 @@ class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
 
 
 @attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesDTO):
+class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
     pass
 
 
@@ -210,12 +214,7 @@ class _AdressePersonnelleDTO(UnfrozenDTO, AdressePersonnelleDTO):
 
 
 @attr.dataclass
-class _CurriculumDTO(UnfrozenDTO, CurriculumDTO):
-    pass
-
-
-@attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesDTO):
+class _CurriculumDTO(UnfrozenDTO, CurriculumAdmissionDTO):
     pass
 
 
@@ -281,7 +280,7 @@ class _GroupeDeSupervisionDTO(UnfrozenDTO, GroupeDeSupervisionDTO):
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
-class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
+class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMixin):
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
@@ -899,7 +898,7 @@ class AdmissionRecapTestCase(TestCase, QueriesAssertionsMixin):
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
-class SectionsAttachmentsTestCase(TestCase):
+class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls):
         # Mock osis-document
@@ -965,6 +964,10 @@ class SectionsAttachmentsTestCase(TestCase):
                 for question in tab_questions
             },
         )
+
+        for free_document in specific_questions[Onglets.DOCUMENTS.name]:
+            free_document.admission = cls.admission
+            free_document.save()
 
         all_specific_questions_dto: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
             RecupererQuestionsSpecifiquesQuery(uuid_proposition=cls.admission.uuid),
@@ -1251,7 +1254,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 type=TrainingType.CERTIFICATE_OF_SUCCESS.name,
                 code_domaine='CDFC',
@@ -1266,7 +1269,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 sigle_entite_gestion='FFC',
                 code='FC1',
@@ -1302,6 +1305,20 @@ class SectionsAttachmentsTestCase(TestCase):
             documents_additionnels=[],
             motivations='My motivation',
             moyens_decouverte_formation=[],
+            documents_demandes={},
+            marque_d_interet=False,
+            edition=ChoixEdition.UN.name,
+            en_ordre_de_paiement=False,
+            droits_reduits=False,
+            paye_par_cheque_formation=False,
+            cep=False,
+            etalement_des_paiments=False,
+            etalement_de_la_formation=False,
+            valorisation_des_acquis_d_experience=False,
+            a_presente_l_epreuve_d_evaluation=False,
+            a_reussi_l_epreuve_d_evaluation=False,
+            diplome_produit=False,
+            intitule_du_tff="",
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',
@@ -1323,7 +1340,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 type=TrainingType.BACHELOR.name,
                 code_domaine='CDFG',
@@ -1338,7 +1355,7 @@ class SectionsAttachmentsTestCase(TestCase):
                     numero_rue='',
                     boite_postale='',
                     localisation='',
-                    email='',
+                    email_inscription_sic='',
                 ),
                 sigle_entite_gestion='FFG',
                 code='FG1',
@@ -3276,6 +3293,22 @@ class SectionsAttachmentsTestCase(TestCase):
         )
 
         self.assertEqual(len(section.attachments), 2)
+
+    def test_requestable_free_documents_attachments(self):
+        section = get_requestable_free_document_section(
+            self.general_bachelor_context,
+            self.specific_questions,
+            False,
+        )
+
+        attachments = section.attachments
+        self.assertEqual(len(attachments), 1)
+
+        document_question = self.specific_questions.get(Onglets.DOCUMENTS.name)[1]
+        self.assertEqual(attachments[0].identifier, document_question.uuid)
+        self.assertEqual(attachments[0].label, document_question.label)
+        self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertFalse(attachments[0].required)
 
     def test_training_choice_attachments(self):
         section = get_training_choice_section(

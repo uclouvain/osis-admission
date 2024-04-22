@@ -29,9 +29,8 @@ from django.views.generic import FormView
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_generale.commands import ModifierChoixFormationParGestionnaireCommand
 from admission.forms.admission.training_choice import TrainingChoiceForm
-from admission.views.doctorate.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
-
 
 __all__ = ['AdmissionTrainingChoiceFormView']
 

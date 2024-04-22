@@ -66,6 +66,7 @@ from admission.contrib.models import (
     DiplomaticPost,
 )
 from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models.categorized_free_document import CategorizedFreeDocument
 from admission.contrib.models.cdd_config import CddConfiguration
 from admission.contrib.models.checklist import (
     RefusalReasonCategory,
@@ -517,6 +518,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
         'type_demande',
         'created_at',
     )
+    readonly_fields = ['uuid']
     actions = [
         'injecter_dans_epc',
     ]
@@ -737,7 +739,9 @@ admin.site.register(Activity, ActivityAdmin)
 
 class AdmissionTaskAdmin(admin.ModelAdmin):
     list_display = ['admission', 'task_uuid', 'task_status', 'type']
+    list_filter = ['task__state', 'type']
     list_select_related = ['task', 'admission']
+    search_fields = ['admission__reference']
 
     @admin.display(description="Task uuid")
     def task_uuid(self, obj):
@@ -913,6 +917,23 @@ class WorkingListAdmin(OrderedModelAdmin):
         }
 
 
+class CategorizedFreeDocumentAdmin(admin.ModelAdmin):
+    model = CategorizedFreeDocument
+    list_display = [
+        'short_label_fr',
+        'checklist_tab',
+    ]
+    list_filter = [
+        ("checklist_tab", admin.EmptyFieldListFilter),
+        "checklist_tab",
+    ]
+    search_fields = [
+        'short_label_en',
+        'short_label_fr',
+    ]
+
+
+admin.site.register(CategorizedFreeDocument, CategorizedFreeDocumentAdmin)
 admin.site.register(WorkingList, WorkingListAdmin)
 admin.site.register(Promoter, FrontOfficeRoleModelAdmin)
 admin.site.register(CommitteeMember, FrontOfficeRoleModelAdmin)

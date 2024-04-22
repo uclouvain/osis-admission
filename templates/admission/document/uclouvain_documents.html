@@ -55,7 +55,11 @@
               </td>
               <td class="min-width">
                 {% if document.document_soumis_par %}
-                  {{ document.document_soumis_par.prenom }} {{ document.document_soumis_par.nom }}
+                  {% if document.document_soumis_par.matricule == admission.matricule_candidat %}
+                    {% translate 'Candidate' context 'gender' %}
+                  {% else %}
+                    {{ document.document_soumis_par.prenom }} {{ document.document_soumis_par.nom }}
+                  {% endif %}
                 {% else %}
                   {{ document.document_soumis_par|default:_('System') }}
                 {% endif %}
@@ -87,8 +91,8 @@
         {% endif %}
     >
       <i class="fa-solid fa-upload"></i>
-      {% translate 'Upload a document' %}
-      <i class="fa-solid fa-paperclip"></i>
+      {% translate 'Upload a UCLouvain document' %}
+      <i class="fa-solid fa-school"></i>
     </button>
 
     <div>
