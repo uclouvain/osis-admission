@@ -761,6 +761,14 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertIn(f'{self.admission_ok.candidate.first_name } {self.admission_ok.candidate.last_name}', content)
         self.assertIn('http://dummyurl/file/foobar', content)
 
+        # Check the history entries
+        history_entry: HistoryEntry = HistoryEntry.objects.filter(
+            object_uuid=self.admission_ok.uuid,
+            tags__contains=['proposition', 'status-changed'],
+        ).last()
+        self.assertIsNotNone(history_entry)
+        self.assertEqual(history_entry.message_fr, 'La proposition a été soumise.')
+
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()
         professional_experience = ProfessionalExperience.objects.filter(person=self.second_candidate_ok).first()

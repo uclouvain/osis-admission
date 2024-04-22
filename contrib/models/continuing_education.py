@@ -313,6 +313,9 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
             .annotate_training_management_entity()
             .annotate_training_management_faculty()
             .annotate_with_reference()
+            .annotate_with_student_registration_id()
+            .annotate_with_status_update_date()
+            .annotate_several_admissions_in_progress()
         )
 
 

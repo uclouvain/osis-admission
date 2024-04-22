@@ -56,6 +56,11 @@ class PropositionDTO(interface.DTO):
     nom_candidat: str
     pays_nationalite_candidat: str
     pays_nationalite_ue_candidat: Optional[bool]
+    nom_pays_nationalite_candidat: str
+    noma_candidat: str
+    adresse_email_candidat: str
+    date_changement_statut: Optional[datetime.datetime]
+    candidat_a_plusieurs_demandes: bool
 
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
 

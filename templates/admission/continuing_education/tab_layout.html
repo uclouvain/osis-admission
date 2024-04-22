@@ -1,4 +1,5 @@
 {% extends "admission/tab_layout.html" %}
+{% load academic_year_display %}
 {% load bootstrap3 i18n static admission enums %}
 
 {% comment "License" %}
@@ -37,37 +38,191 @@
     </a>
   </li>
   <li class="active">
-    {{ admission.training.title }} ({{ admission.reference }})
+    {{ admission.formation.intitule }} ({{ admission.reference }})
   </li>
 {% endblock %}
 
 {% block page-header %}
-  <div class="page-header flex-content">
-    <h2>
-      {{ admission.training.title }} ({{ admission.reference }})
-    </h2>
-    <a
-        href="{% url 'admission:all-list' %}"
-        class="text-primary"
-    >
-      <span class="fa fa-stream"></span>
-      {% trans "Back to the list" %}
-    </a>
-  </div>
 {% endblock %}
 
 {% block panel-heading %}
-  <div>
-    {% trans "Candidate:" %} {{ admission.candidate.first_name }} {{ admission.candidate.last_name }}
+  {% display admission.nom_candidat ',' admission.prenom_candidat as full_candidate_name %}
+  <div class="min-width">
+    {% get_image_file_url admission.photo_identite_candidat as id_photo_url %}
+    <img
+        {% if id_photo_url %}
+          src="{{ id_photo_url }}"
+        {% else %}
+          src="{% static 'img/men_unknown.png' %}"
+        {% endif %}
+          alt="{% translate 'Identification photo of the candidate' %}"
+          class="img-thumbnail"
+    />
   </div>
   <div>
-    {% trans "Status:" %}
-    {{ admission.status|enum_display:'ChoixStatutPropositionContinue' }}
+    <span>
+      {% if admission.noma_candidat %}
+        <a href="{% url 'consulter_dossier_etudiant' admission.noma_candidat %}" target="_blank">
+          {{ admission.noma_candidat }}
+        </a>
+      {% else %}
+        {% translate 'Unknown noma' %}
+      {% endif %}
+    </span> -
+    <span class="bold-text">{{ full_candidate_name }}</span>
+    {% if admission.pays_nationalite_candidat %}
+      <span>
+        ({{ admission.nom_pays_nationalite_candidat }}, {{ admission.pays_nationalite_ue_candidat|yesno:_('EU,NEU') }})
+      </span>
+    {% endif %}
+    <br>
+    <address style="display: inline">
+      <a href="mailto:{{ admission.adresse_email_candidat }}?subject={{ admission.reference }}">
+        <i class="fa-solid fa-envelope"></i>
+      </a>
+      {{ admission.adresse_email_candidat }}
+    </address>
+    <span class="label label-admission-primary">{{ admission.langue_contact_candidat|formatted_language }}</span>
+    <br>
+    {% url 'admission:practical-information-url' admission.formation.type admission.formation.sigle|urlencode:'' admission.formation.code as access_conditions_url %}
+    <span>
+        <a href="{{ access_conditions_url }}" target="_blank">{{ admission.formation.sigle }}</a> -
+        {{ admission.formation.intitule }} ({{ admission.formation.campus }})
+        <span class="label label-default">{{ admission.formation.annee|display_as_academic_year }}</span>
+    </span>
+    <br>
+    <span class="copy-to-clipboard">
+      {% url "admission:continuing-education" admission.uuid as admission_url %}
+      <a href="{{ request.scheme }}://{{ request.get_host }}{{ admission_url }}" class="copy-to-clipboard-element bold-text">{{ admission.reference }}</a>
+      <button
+        class="copy-button"
+        data-html="true"
+      >
+        <i class="far fa-copy"></i>
+      </button>
+    </span>
   </div>
-  {% if admission.submitted_at %}
-    <div>
-      {% trans "Submission date:" %}
-      {{ admission.submitted_at|date:'d/m/Y H:i' }}
-    </div>
-  {% endif %}
+  <div class="min-width">
+    {% include 'admission/continuing_education/includes/admission_status.html' %}
+    {% if admission.soumise_le %}
+      <br>
+      <span>
+        {% translate 'Submission date:' %} {{ admission.soumise_le|date:'d/m/Y' }}
+      </span>
+    {% endif %}
+    <br>
+  </div>
+  <div id="admission-badges" class="min-width">
+    {% if admission.candidat_a_plusieurs_demandes %}
+      <span
+        class="label label-admission-primary"
+        data-lazy-popover-url="{% url base_namespace|add:':other-admissions-list' uuid=view.kwargs.uuid %}"
+        data-title="{% translate 'Other application(s)' %}"
+        tabindex="0"
+        role="button"
+      >
+        {% translate 'Several applications' %}
+      </span>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block script %}
+  {{ block.super }}
+  <script src="{% static 'js/clipboard.js' %}"></script>
+
+  <script>
+      $(function () {
+          writeTextToClipboard('.copy-to-clipboard');
+      });
+  </script>
+{% endblock %}
+
+{% block style %}
+  {{ block.super }}
+  <style>
+    #admission-panel-header {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 1em;
+      flex: 1;
+    }
+
+    #admission-panel-header img {
+      width: 100px;
+      height: 100px;
+      border-radius: 10%;
+      object-fit: cover;
+    }
+
+    #admission-panel-header img.flag-icon {
+      width: 1em;
+      height: 1em;
+    }
+
+    #admission-badges {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #admission-panel-header > * > * {
+      margin-bottom: 3px;
+    }
+
+    #admission-badges > span {
+      width: min-content;
+    }
+
+    #admission-panel-header > div.min-width {
+      min-width: max-content;
+    }
+
+    #admission-panel-header > div:not(:first-child) {
+      margin-right: auto;
+    }
+
+    #admission-panel-header-container {
+      gap: 1em;
+    }
+
+    .copy-button {
+      border: none;
+      background: none;
+    }
+
+    @media only screen and (max-width : 992px) {
+      #admission-panel-header-container {
+        flex-direction: column;
+      }
+
+      #admission-panel-header {
+        flex-direction: column;
+      }
+
+      #admission-panel-header {
+        text-align: center;
+      }
+
+      #admission-badges {
+        align-items: center;
+      }
+
+      #admission-panel-header > div {
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 1em;
+      }
+
+      #admission-panel-header > div:last-child {
+        border-bottom: none;
+      }
+
+      #admission-panel-header > div:not(:first-child) {
+        margin-right: initial;
+      }
+
+      #admission-panel-header > div.min-width {
+        width: 100%;
+      }
+    }
+  </style>
 {% endblock %}

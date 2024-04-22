@@ -40,6 +40,7 @@ from admission.infrastructure.admission.domain.service.in_memory.calendrier_insc
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
+from admission.infrastructure.admission.domain.service.in_memory.historique import HistoriqueInMemory
 from admission.infrastructure.admission.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
@@ -75,6 +76,7 @@ _maximum_propositions_autorisees = MaximumPropositionsAutoriseesInMemory()
 _academic_year_repository = AcademicYearInMemoryRepository()
 _emplacements_documents_demande_translator = EmplacementsDocumentsPropositionInMemoryTranslator()
 _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
+_historique = HistoriqueInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -105,6 +107,7 @@ COMMAND_HANDLERS = {
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
         proposition_repository=_proposition_repository,
+        historique=_historique,
     ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
@@ -127,6 +130,7 @@ COMMAND_HANDLERS = {
         notification=NotificationInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
         questions_specifiques_translator=_question_specific_translator,
+        historique=_historique,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
