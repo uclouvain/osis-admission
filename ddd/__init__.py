@@ -25,6 +25,7 @@
 # ##############################################################################
 from decimal import Decimal
 
+
 FR_ISO_CODE = "FR"
 EN_ISO_CODE = "EN"
 CODE_BACHELIER_VETERINAIRE = 'VETE1BA'

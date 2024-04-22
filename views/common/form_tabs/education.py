@@ -34,6 +34,15 @@ from admission.forms.admission.education import AdmissionBachelorEducationForeig
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
+from osis_profile import REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from osis_profile.models.enums.education import (
+    BelgianCommunitiesOfEducation,
+    HighSchoolDiplomaTypes,
+    Equivalence,
+    ForeignDiplomaTypes,
+)
 
 __all__ = [
     'AdmissionEducationFormView',

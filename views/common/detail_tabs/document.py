@@ -43,6 +43,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.forms.admission.document import (
     UploadFreeDocumentForm,
@@ -245,6 +246,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['retypable_document'] = can_retype_document(document, document_identifier)
         context['read_only_document'] = self.request.GET.get('read-only') == '1'
         context['document'] = document
+        context['several_files'] = len(document.uuids) > 1
 
         if document.uuids:
             context['document_uuid'] = document.uuids[0]

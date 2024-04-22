@@ -77,9 +77,9 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO, CurriculumAExperiencesDTO,
+    AnneeExperienceAcademiqueDTO, CurriculumAExperiencesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     EducationalExperienceYear,

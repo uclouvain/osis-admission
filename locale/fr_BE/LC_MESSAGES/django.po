@@ -2347,6 +2347,9 @@ msgstr "Dispensé"
 msgid "Display according education"
 msgstr "Affichage selon la formation"
 
+msgid "Display problem"
+msgstr "Problème d'affichage"
+
 msgid "Dissertation mark"
 msgstr "Note du mémoire"
 
@@ -7112,6 +7115,17 @@ msgstr ""
 msgid "There can be no more promoters in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de promoteurs dans le groupe de supervision."
+
+msgid ""
+"There has been a problem when merging the documents, this document contains "
+"several files and only the first one is displayed in the viewer. You can "
+"view the other files either in the candidate's replicated tabs or by "
+"switching to edit mode."
+msgstr ""
+"Il y a eu un problème de fusion de documents, ce document contient plusieurs "
+"fichiers et seul le premier est affiché dans la visionneuse. Vous pouvez "
+"consulter les autres fichiers soit dans les onglets répliqués du candidat "
+"soit en vous mettant en mode modification."
 
 msgid "There is no request for a new deadline."
 msgstr "Il n'y a pas de demande de nouvelle échéance."

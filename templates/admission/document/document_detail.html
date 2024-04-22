@@ -29,7 +29,22 @@
   <div id="document-spinner">
     <span class="fa fa-spinner"></span>
   </div>
-  {# Viewer for received or internal documents or default content if there is no document #}
+  {% if several_files %}
+    {% blocktranslate trimmed asvar display_problem_message %}
+      There has been a problem when merging the documents, this document contains several files and only the first one
+      is displayed in the viewer. You can view the other files either in the candidate's replicated tabs or by
+      switching to edit mode.
+    {% endblocktranslate %}
+    <div class="fit-content" style="margin-bottom: 5px;">
+      <span
+        tabindex="0"
+        class="popover-buttons fa-regular fa-eye-slash fit-content"
+        data-content="<p>{{ display_problem_message }}</p>"
+        data-container="body"
+        role="button"
+      ></span> {% translate 'Display problem' %}
+    </div>
+  {% endif %}
   {% if not document_identifier %}
     <p id="empty-document-details">
       {% translate 'To visualize and edit a document, please select it in the list opposite.' %}
