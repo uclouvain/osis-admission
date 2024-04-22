@@ -53,7 +53,8 @@ from osis_mail_template.models import MailTemplate
 from admission.contrib.models.online_payment import PaymentStatus, PaymentMethod
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
 from admission.ddd import MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.commands import ListerToutesDemandesQuery, GetStatutTicketPersonneQuery, \
+    RechercherParcoursAnterieurQuery
 from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -183,6 +184,7 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -1713,6 +1715,11 @@ class ChecklistView(
             )
             context['can_choose_access_title'] = can_change_access_title
 
+            matr = self.proposition_fusion.matricule if self.proposition_fusion else self.proposition.matricule_candidat
+            context['digit_ticket'] = message_bus_instance.invoke(
+                GetStatutTicketPersonneQuery(global_id=matr)
+            )
+
         return context
 
     def _get_experiences(self, resume: ResumePropositionDTO):
@@ -1736,8 +1743,31 @@ class ChecklistView(
         for experience_non_academique in resume.curriculum.experiences_non_academiques:
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
         experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
-        return experiences
 
+        if self.proposition_fusion:
+            curex_a_fusionner = (self.proposition_fusion.educational_curex_uuids +
+                                 self.proposition_fusion.professional_curex_uuids)
+            if curex_a_fusionner:
+                curex_existant = message_bus_instance.invoke(
+                    RechercherParcoursAnterieurQuery(
+                        global_id=self.proposition_fusion.matricule,
+                        uuid_proposition=self.admission_uuid,
+                    )
+                )
+                experiences = {
+                    annee: [exp for exp in exp_list if str(exp.uuid) in curex_a_fusionner]
+                    for annee, exp_list in experiences.items()
+                }
+                if curex_existant:
+                    # add existing curex by years
+                    for exp in (curex_existant.experiences_academiques + curex_existant.experiences_non_academiques):
+                        years_range = [anExp.annee for anExp in exp.annees] \
+                            if type(exp) == ExperienceAcademiqueDTO else range(exp.date_debut.year, exp.date_fin.year)
+                        for annee in years_range:
+                            experiences.setdefault(annee, []).append(exp)
+                    experiences = {annee: experiences[annee] for annee in sorted(experiences.keys(), reverse=True)}
+
+        return experiences
 
 class ApplicationFeesView(
     AdmissionFormMixin,
