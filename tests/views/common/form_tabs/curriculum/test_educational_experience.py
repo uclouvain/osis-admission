@@ -71,6 +71,7 @@ from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
 
 
+#TODO: Remove duplicate tests with osis_profile
 class CurriculumEducationalExperienceFormViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -1531,11 +1532,14 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
             self.general_admission.requested_documents,
         )
 
-    def test_post_form_with_created_and_deleted_years(self):
+    def test_post_form_with_created_and_deleted_years_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
         response = self.client.post(
-            self.form_url,
+            f'{self.form_url}?next={admission_url}&next_hash_url=custom_hash',
             data={
                 'base_form-start': 2004,
                 'base_form-end': 2004,
@@ -1555,7 +1559,7 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
 
         # Check the updated experience
         self.experience.refresh_from_db()
@@ -1632,6 +1636,109 @@ class CurriculumEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(years[0].result, Result.SUCCESS.name)
         self.assertEqual(years[0].acquired_credit_number, 10)
         self.assertEqual(years[0].registered_credit_number, 10)
+
+        # Check that the experience has been valuated
+        self.assertTrue(
+            AdmissionEducationalValuatedExperiences.objects.filter(
+                baseadmission_id=self.general_admission.uuid,
+                educationalexperience_id=new_experience.uuid,
+            ).exists()
+        )
+
+        # Check that the checklist has been updated
+        self.general_admission.refresh_from_db()
+
+        last_experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][-1]
+
+        self.assertEqual(
+            last_experience_checklist['extra']['identifiant'],
+            str(new_experience.uuid),
+        )
+
+        self.assertEqual(
+            last_experience_checklist,
+            {
+                'libelle': 'To be processed',
+                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+                'extra': {
+                    'identifiant': str(new_experience.uuid),
+                    'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
+                },
+                'enfants': [],
+            },
+        )
+
+    def test_post_form_with_created_experience_with_blank_years(self):
+        self.client.force_login(self.sic_manager_user)
+
+        self.assertFalse(
+            EducationalExperience.objects.filter(
+                person=self.general_admission.candidate,
+                institute=self.second_institute,
+            ).exists()
+        )
+
+        response = self.client.post(
+            self.create_url,
+            data={
+                'base_form-start': 2004,
+                'base_form-end': 2006,
+                'base_form-country': 'BE',
+                'base_form-institute': self.second_institute.pk,
+                'base_form-evaluation_type': EvaluationSystem.ECTS_CREDITS.name,
+                'base_form-transcript_type': TranscriptType.ONE_FOR_ALL_YEARS.name,
+                'base_form-program': self.second_cycle_diploma.pk,
+                'base_form-obtained_diploma': False,
+                'year_formset-TOTAL_FORMS': 3,
+                'year_formset-INITIAL_FORMS': 3,
+                'year_formset-2004-academic_year': 2004,
+                'year_formset-2004-is_enrolled': True,
+                'year_formset-2004-result': Result.SUCCESS.name,
+                'year_formset-2004-acquired_credit_number': 10,
+                'year_formset-2004-registered_credit_number': 10,
+                'year_formset-2005-academic_year': 2005,
+                'year_formset-2005-is_enrolled': False,
+                'year_formset-2005-result': '',
+                'year_formset-2005-acquired_credit_number': '',
+                'year_formset-2005-registered_credit_number': '',
+                'year_formset-2006-academic_year': 2006,
+                'year_formset-2006-is_enrolled': True,
+                'year_formset-2006-result': Result.SUCCESS.name,
+                'year_formset-2006-acquired_credit_number': 20,
+                'year_formset-2006-registered_credit_number': 20,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        new_experience = EducationalExperience.objects.filter(
+            person=self.general_admission.candidate,
+            institute=self.second_institute,
+        ).first()
+
+        self.assertIsNotNone(new_experience)
+
+        # Check the created experience
+        self.assertEqual(new_experience.institute, self.second_institute)
+        self.assertEqual(new_experience.program, self.second_cycle_diploma)
+        self.assertEqual(new_experience.evaluation_type, EvaluationSystem.ECTS_CREDITS.name)
+        self.assertEqual(new_experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
+        self.assertEqual(new_experience.obtained_diploma, False)
+
+        # Check the years
+        years = new_experience.educationalexperienceyear_set.all().order_by('academic_year__year')
+
+        self.assertEqual(len(years), 2)
+
+        self.assertEqual(years[0].academic_year.year, 2004)
+        self.assertEqual(years[0].result, Result.SUCCESS.name)
+        self.assertEqual(years[0].acquired_credit_number, 10)
+        self.assertEqual(years[0].registered_credit_number, 10)
+
+        self.assertEqual(years[1].academic_year.year, 2006)
+        self.assertEqual(years[1].result, Result.SUCCESS.name)
+        self.assertEqual(years[1].acquired_credit_number, 20)
+        self.assertEqual(years[1].registered_credit_number, 20)
 
         # Check that the experience has been valuated
         self.assertTrue(
@@ -1767,6 +1874,15 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         response = self.client.delete(self.delete_url)
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_delete_experience_from_curriculum_and_redirect(self):
+        self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
+        response = self.client.delete(f'{self.delete_url}?next={admission_url}&next_hash_url=custom_hash')
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
 
     def test_delete_unknown_experience_returns_404(self):
         self.client.force_login(self.sic_manager_user)
@@ -2189,6 +2305,15 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         self.client.force_login(self.sic_manager_user)
         response = self.client.post(self.duplicate_url)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_duplicate_experience_from_curriculum_and_redirect(self):
+        self.client.force_login(self.sic_manager_user)
+
+        admission_url = resolve_url('admission')
+        expected_url = f'{admission_url}#custom_hash'
+
+        response = self.client.post(f'{self.duplicate_url}?next={admission_url}&next_hash_url=custom_hash')
+        self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
 
     def test_duplicate_unknown_experience_returns_404(self):
         self.client.force_login(self.sic_manager_user)

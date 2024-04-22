@@ -28,6 +28,7 @@ from io import BytesIO
 from typing import Union, Optional
 
 from django.utils.translation import override
+from osis_document.utils import save_raw_content_remotely
 from pikepdf import Pdf, OutlineItem, PdfError
 
 from admission.contrib.models import (
@@ -44,7 +45,6 @@ from admission.exports.admission_recap.section import (
     get_sections,
 )
 from infrastructure.messages_bus import message_bus_instance
-from osis_document.utils import save_raw_content_remotely
 
 
 def admission_pdf_recap(
@@ -87,6 +87,7 @@ def admission_pdf_recap(
             load_content=True,
             hide_curriculum=True,
             with_additional_documents=False,
+            with_free_requestable_documents=True,
         )
 
         # Get a read token and metadata of all attachments

@@ -37,36 +37,14 @@
 
 <div id="{{ prefix }}-parcours" class="tab-content parcours">
   {# Vue complète #}
-  <div role="tabpanel" class="table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ prefix }}-parcours-complete">
-    <table class="table">
-      <thead>
-        <tr>
-          {% if show_actions %}
-            <th>{% trans "Actions" %}</th>
-          {% endif %}
-          <th>{% trans "Years" %}</th>
-          <th>{# Diplomant #}</th>
-          <th>{% trans "Experiences" %}</th>
-          <th>{% trans "Access title" %}</th>
-          <th>{% trans "Registered credits" %}</th>
-          <th>{% trans "Credits earned" %}</th>
-          <th>{% trans "Reduction" %}</th>
-          <th>{% trans "Course change" %}</th>
-          <th>{% trans "Institute" context "admission" %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for year, year_experiences in experiences.items %}
-          {% for experience in year_experiences %}
-            {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
-          {% endfor %}
-        {% endfor %}
-      </tbody>
-    </table>
+  {% concat prefix '-parcours-complete' as complete_parcours_id %}
+  <div role="tabpanel" class="table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ complete_parcours_id }}">
+    {% include 'osis_profile/parcours_externe_complet.html' with show_titre_acces=True show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=complete_parcours_id %}
   </div>
 
   {# Vue formations académiques #}
-  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ prefix }}-parcours-formations">
+  {% concat prefix '-parcours-formations' as formations_prefix_id %}
+  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ formations_prefix_id }}">
     <table class="table">
       <thead>
         <tr>
@@ -88,7 +66,7 @@
         {% with experiences_formations=experiences|filter_experiences_trainings %}
           {% for year, year_experiences in experiences_formations.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
+              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=formations_prefix_id %}
             {% empty %}
               {% ifchanged %}
               <tr class="bg-primary">
@@ -103,7 +81,8 @@
   </div>
 
   {# Vue finançabilité #}
-  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ prefix }}-parcours-financabilite">
+  {% concat prefix '-parcours-financabilite' as financabilite_prefix_id %}
+  <div role="tabpanel" class="table-responsive tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ financabilite_prefix_id }}">
     <table class="table">
       <thead>
         <tr>
@@ -125,7 +104,7 @@
         {% with experiences_financabilite=experiences|filter_experiences_financability %}
           {% for year, year_experiences in experiences_financabilite.items %}
             {% for experience in year_experiences %}
-              {% include "admission/general_education/includes/checklist/parcours_row.html" with show_actions=show_actions %}
+              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=financabilite_prefix_id %}
             {% endfor %}
           {% endfor %}
         {% endwith %}
@@ -134,16 +113,17 @@
   </div>
 
   {% if show_actions %}
+    {% concat '?next=' request.path '&next_hash_url=' prefix as next_url_suffix %}
     <a
         class="btn btn-primary"
-        href="{% url view.base_namespace|add:':update:curriculum:educational_create' view.kwargs.uuid %}"
+        href="{% url view.base_namespace|add:':update:curriculum:educational_create' view.kwargs.uuid %}{{ next_url_suffix }}"
     >
       <i class="fa-solid fa-plus"></i>
       {% translate 'Academic course' %}
     </a>
     <a
         class="btn btn-primary"
-        href="{% url view.base_namespace|add:':update:curriculum:non_educational_create' view.kwargs.uuid %}"
+        href="{% url view.base_namespace|add:':update:curriculum:non_educational_create' view.kwargs.uuid %}{{ next_url_suffix }}"
     >
       <i class="fa-solid fa-plus"></i>
       {% translate 'Non-academic experience' %}

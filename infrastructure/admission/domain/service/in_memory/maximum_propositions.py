@@ -43,7 +43,7 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
 
 class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
     @classmethod
-    def nb_propositions_envoyees_formation_generale(cls, matricule: str) -> int:
+    def nb_propositions_envoyees_formation_generale(cls, matricule: str, annee_cible: int) -> int:
         propositions_candidat = PropositionGeneraleInMemoryRepository.search(matricule_candidat=matricule)
         return sum(
             proposition.statut.name == ChoixStatutPropositionGenerale.CONFIRMEE.name

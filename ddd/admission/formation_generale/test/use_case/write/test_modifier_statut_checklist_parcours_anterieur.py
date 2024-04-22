@@ -136,6 +136,20 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
             ChoixStatutChecklist.GEST_REUSSITE,
         )
 
+    def test_should_renvoyer_erreur_si_statut_cible_est_gestionnaire_reussite_et_incomplet_pour_certificat(self):
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            proposition_id = self.message_bus.invoke(
+                ModifierStatutChecklistParcoursAnterieurCommand(
+                    uuid_proposition='uuid-CERTIFICATE-CONFIRMED',
+                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                    gestionnaire='0123456789',
+                )
+            )
+
+            self.assertHasInstance(context.exception.exceptions, ConditionAccesEtreSelectionneException)
+            self.assertHasInstance(context.exception.exceptions, TitreAccesEtreSelectionneException)
+
+
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(

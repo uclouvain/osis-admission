@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -48,6 +48,10 @@ class VerifierCurriculum(interface.DomainService):
         experiences_incompletes = {}
 
         for experience in experiences:
+            # Les expériences qui viennent d'EPC sont considérées complètes qu'elles le soient ou non
+            if experience.epc_experience:
+                continue
+
             pays_belge = experience.pays == BE_ISO_CODE
             traduction_necessaire = (
                 not pays_belge and experience.regime_linguistique not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION
@@ -77,9 +81,7 @@ class VerifierCurriculum(interface.DomainService):
                     not annee.releve_notes or traduction_necessaire and not annee.traduction_releve_notes
                 )
                 doit_renseigner_credits = (
-                    annee.annee >= PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE
-                    if pays_belge
-                    else credits_necessaires_etranger
+                    annee.annee >= PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE if pays_belge else credits_necessaires_etranger
                 ) and (annee.resultat != Result.WAITING_RESULT.name or annee.annee < annee_courante)
                 if (
                     not annee.resultat

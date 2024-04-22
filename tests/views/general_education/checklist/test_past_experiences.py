@@ -97,6 +97,13 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         cls.training = GeneralEducationTrainingFactory(
             management_entity=cls.commission,
             academic_year=cls.academic_years[0],
+            education_group_type__name=TrainingType.BACHELOR.name,
+        )
+
+        cls.certificate_training = GeneralEducationTrainingFactory(
+            management_entity=cls.commission,
+            academic_year=cls.academic_years[0],
+            education_group_type__name=TrainingType.CERTIFICATE.name,
         )
 
         cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
@@ -377,7 +384,17 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
             [],
         )
 
-        self.assertEqual(recuperer_conditions_acces_par_formation(TrainingType.CERTIFICATE.name), [])
+        self.assertEqual(
+            recuperer_conditions_acces_par_formation(TrainingType.CERTIFICATE.name),
+            [
+                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
+                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
+                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
+                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
+                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
+                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
+            ],
+        )
 
         self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.AGGREGATION.name),

@@ -52,10 +52,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    AnneeExperienceAcademiqueDTO,
     ConnaissanceLangueDTO,
     CotutelleDTO,
-    CurriculumDTO,
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
     DoctoratDTO,
@@ -64,16 +62,10 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     PromoteurDTO,
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
-from admission.ddd.admission.dtos import (
-    AdressePersonnelleDTO, CoordonneesDTO, EtudesSecondairesAdmissionDTO,
-    IdentificationDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    AlternativeSecondairesDTO,
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-)
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -134,6 +126,7 @@ from admission.exports.admission_recap.section import (
     get_dynamic_questions_by_tab,
     get_training_choice_section,
     get_authorization_section,
+    get_requestable_free_document_section,
 )
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -165,7 +158,15 @@ from base.models.person import Person
 from base.tests import QueriesAssertionsMixin, TestCaseWithQueriesAssertions
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
@@ -174,7 +175,8 @@ from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
     Grade,
     Result,
-    TranscriptType, CURRICULUM_ACTIVITY_LABEL,
+    TranscriptType,
+    CURRICULUM_ACTIVITY_LABEL,
 )
 from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
@@ -212,12 +214,7 @@ class _AdressePersonnelleDTO(UnfrozenDTO, AdressePersonnelleDTO):
 
 
 @attr.dataclass
-class _CurriculumDTO(UnfrozenDTO, CurriculumDTO):
-    pass
-
-
-@attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
+class _CurriculumDTO(UnfrozenDTO, CurriculumAdmissionDTO):
     pass
 
 
@@ -967,6 +964,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 for question in tab_questions
             },
         )
+
+        for free_document in specific_questions[Onglets.DOCUMENTS.name]:
+            free_document.admission = cls.admission
+            free_document.save()
 
         all_specific_questions_dto: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
             RecupererQuestionsSpecifiquesQuery(uuid_proposition=cls.admission.uuid),
@@ -3292,6 +3293,22 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         )
 
         self.assertEqual(len(section.attachments), 2)
+
+    def test_requestable_free_documents_attachments(self):
+        section = get_requestable_free_document_section(
+            self.general_bachelor_context,
+            self.specific_questions,
+            False,
+        )
+
+        attachments = section.attachments
+        self.assertEqual(len(attachments), 1)
+
+        document_question = self.specific_questions.get(Onglets.DOCUMENTS.name)[1]
+        self.assertEqual(attachments[0].identifier, document_question.uuid)
+        self.assertEqual(attachments[0].label, document_question.label)
+        self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertFalse(attachments[0].required)
 
     def test_training_choice_attachments(self):
         section = get_training_choice_section(
