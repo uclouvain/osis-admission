@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List
+
+from typing import List, Dict
 
 from django.utils.translation import gettext_lazy as _
 
@@ -42,3 +43,17 @@ class InvalidMimeTypeException(Exception):
         super().__init__(
             _(f'{current_mimetype} is not a valid mimetype for the field "{field}" ({field_mimetypes_as_str})')
         )
+
+
+class MergeDocumentsException(Exception):
+    def __init__(self, exceptions: Dict[str, Exception]):
+        message = (
+            'An error occurred while processing the documents:'
+            if len(exceptions) == 1
+            else 'Errors occurred while processing the documents:'
+        )
+
+        for id_document, exception in exceptions.items():
+            message += f'\n{id_document}: {exception}.'
+
+        super().__init__(message)
