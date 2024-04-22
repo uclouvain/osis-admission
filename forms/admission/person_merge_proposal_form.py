@@ -26,7 +26,7 @@
 from django.forms import HiddenInput
 from django.utils.translation import gettext as _
 
-from admission.forms.admission.person import AdmissionPersonForm
+from admission.forms.admission.person import AdmissionPersonForm, IdentificationType
 from base.models.person import Person
 
 
@@ -41,7 +41,6 @@ class PersonMergeProposalForm(AdmissionPersonForm):
         self.fields['middle_name'].help_text = None
         self.fields['country_of_citizenship'].required = True
         self.fields['identification_type'].required = False
-        self.fields['identification_type'].widget = HiddenInput()
 
     class Meta:
         model = Person
