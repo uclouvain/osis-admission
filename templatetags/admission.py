@@ -54,7 +54,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import ExperienceNonAcademiqueDTO
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO, CoordonneesDTO, IdentificationDTO
@@ -1138,6 +1137,7 @@ def map_fields_items(digit_fields):
         "id_card_number": "",
         "passport_number": "",
         "id_card_expiry_date": "",
+        "passport_expiry_date": "",
     }
 
     mapped_fields = {}

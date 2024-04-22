@@ -7556,3 +7556,6 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr ""
+
+msgid "Select which identification applies:"
+msgstr ""

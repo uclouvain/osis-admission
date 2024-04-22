@@ -1011,7 +1011,7 @@ msgid "Authors"
 msgstr "Auteurs et autrices"
 
 msgid "Available information"
-msgstr "Informations complémentaires"
+msgstr "Informations disponibles"
 
 msgid "Awaiting approval"
 msgstr "En révision"
@@ -8440,3 +8440,6 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
+
+msgid "Select which identification applies:"
+msgstr "Choisissez le moyen d'identification retenu:"
