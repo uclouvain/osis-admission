@@ -36,7 +36,6 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCurriculum,
     StatutReclamationEmplacementDocument,
     DocumentsIdentification,
-    StatutEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,

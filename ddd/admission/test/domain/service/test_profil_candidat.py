@@ -28,12 +28,11 @@ import datetime
 from unittest import TestCase
 
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.doctorat.preparation.dtos import AnneeExperienceAcademiqueDTO
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from base.models.enums.community import CommunityEnum
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO
 from osis_profile.models.enums.curriculum import TranscriptType, Result, Grade, EvaluationSystem
 
 

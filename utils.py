@@ -49,15 +49,10 @@ from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmi
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import CurriculumDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
-)
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.mail_templates import (
@@ -73,6 +68,9 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    DiplomeBelgeEtudesSecondairesDTO, DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO,
+)
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
@@ -315,7 +313,7 @@ def get_access_conditions_url(training_type, training_acronym, partial_training_
 
 def get_access_titles_names(
     access_titles: Dict[str, TitreAccesSelectionnableDTO],
-    curriculum_dto: CurriculumDTO,
+    curriculum_dto: CurriculumAdmissionDTO,
     etudes_secondaires_dto: EtudesSecondairesAdmissionDTO,
 ) -> List[str]:
     """

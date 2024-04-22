@@ -37,7 +37,6 @@ from admission.infrastructure.admission.domain.service.profil_candidat import Pr
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
 
-
 __all__ = [
     'SpecificQuestionsDetailView',
 ]

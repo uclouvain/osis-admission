@@ -1,5 +1,4 @@
-{% extends base_template %}
-{% load bootstrap3 i18n static admission %}
+{% load i18n admission %}
 
 {% comment "License" %}
     * OSIS stands for Open Student Information System. It's an application
@@ -26,37 +25,14 @@
     * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block actions-group %}
-{% endblock %}
-
-{% block tab_content %}
-  <div class="panel panel-default">
-    <div class="panel-heading flex-content-no-wrap">
-      <div class="panel-title">{% translate "Modification of the secondary studies" %}</div>
-      <a
-        class="prevent-quitting-link"
-        {% if next_url %}
-        href="{{ next_url }}"
-        {% else %}
-        href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur__ETUDES_SECONDAIRES"
-        {% endif %}
-      >
-        <i class="fa fa-stream"></i>
-        {% translate "Back to checklist" %}
-      </a>
-
-        </div>
-        {% include 'osis_profile/forms/base_edit_etudes_secondaires.html' %}
-    </div>
-{% endblock %}
-
-{% block script %}
-    {{ block.super }}
-    {{ main_form.media }}
-    <script src="{% static 'osis_profile/js/etudes_secondaires.js' %}"></script>
-{% endblock %}
-
-{% block style %}
-    {{ block.super }}
-    <link rel="stylesheet" href="{% static 'osis_profile/css/etudes_secondaires.css' %}">
-{% endblock %}
+<a
+      class="prevent-quitting-link"
+      {% if next_url %}
+      href="{{ next_url }}"
+      {% else %}
+      href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur{% if existing_experience %}__{{ view.kwargs.experience_uuid }}{% endif %}"
+      {% endif %}
+>
+    <i class="fa fa-stream"></i>
+    {% translate "Back to checklist" %}
+</a>

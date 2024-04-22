@@ -25,6 +25,7 @@
 # ##############################################################################
 
 from django.views.generic import TemplateView
+from osis_history.contrib.mixins import HistoryEntryListAPIMixin
 from rules.contrib.views import LoginRequiredMixin
 
 from admission.templatetags.admission import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
@@ -34,8 +35,6 @@ from admission.utils import (
     get_cached_general_education_admission_perm_obj,
 )
 from admission.views.common.mixins import LoadDossierViewMixin
-from osis_history.contrib.mixins import HistoryEntryListAPIMixin
-
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 __all__ = [

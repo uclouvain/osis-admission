@@ -25,7 +25,6 @@
 ##############################################################################
 from .comptabilite import ComptabiliteDTO, ConditionsComptabiliteDTO
 from .connaissance_langue import ConnaissanceLangueDTO
-from .curriculum import CurriculumDTO, CurriculumAExperiencesDTO, AnneeExperienceAcademiqueDTO
 from .doctorat import DoctoratDTO
 from .groupe_supervision import (
     AvisDTO,
@@ -46,15 +45,12 @@ from .superieur import (
 )
 
 __all__ = [
-    "AnneeExperienceAcademiqueDTO",
     "AvisDTO",
     "AutreOccupationDTO",
     "ConnaissanceLangueDTO",
     "ConditionsComptabiliteDTO",
     "ComptabiliteDTO",
     "CotutelleDTO",
-    "CurriculumAExperiencesDTO",
-    "CurriculumDTO",
     "DetailSignatureMembreCADTO",
     "DetailSignaturePromoteurDTO",
     "DoctoratDTO",

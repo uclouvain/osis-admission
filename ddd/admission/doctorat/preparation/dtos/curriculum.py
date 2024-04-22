@@ -25,45 +25,15 @@
 # ##############################################################################
 
 from functools import reduce
-from typing import List, Optional
 
 import attr
-from dateutil import relativedelta
 
 from admission.ddd import NB_MOIS_MIN_VAE
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from osis_common.ddd import interface
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import CurriculumDTO
 
 
 @attr.dataclass(frozen=True, slots=True)
-class AnneeExperienceAcademiqueDTO(interface.DTO):
-    uuid: str
-    annee: int
-    resultat: str
-    releve_notes: List[str]
-    traduction_releve_notes: List[str]
-    credits_inscrits: Optional[float]
-    credits_acquis: Optional[float]
-    avec_bloc_1: Optional[bool]
-    avec_complement: Optional[bool]
-    credits_inscrits_communaute_fr: Optional[float]
-    credits_acquis_communaute_fr: Optional[float]
-    allegement: str
-    est_reorientation_102: Optional[bool]
-
-
-@attr.dataclass(frozen=True, slots=True)
-class CurriculumDTO(interface.DTO):
-    experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
-    experiences_academiques: List[ExperienceAcademiqueDTO]
-    annee_derniere_inscription_ucl: Optional[int]
-    annee_diplome_etudes_secondaires: Optional[int]
-    annee_minimum_a_remplir: Optional[int]
-
-    def _compte_nombre_mois(self, nb_total_mois, experience):
-        delta = relativedelta.relativedelta(experience.date_fin, experience.date_debut)
-        return nb_total_mois + (12 * delta.years + delta.months) + 1
-
+class CurriculumAdmissionDTO(CurriculumDTO):
     @property
     def candidat_est_potentiel_vae(self) -> bool:
         """
@@ -77,9 +47,3 @@ class CurriculumDTO(interface.DTO):
             )
             >= NB_MOIS_MIN_VAE
         )
-
-
-@attr.dataclass(frozen=True, slots=True)
-class CurriculumAExperiencesDTO(interface.DTO):
-    a_experience_academique: bool
-    a_experience_non_academique: bool

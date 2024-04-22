@@ -1,6 +1,4 @@
-{% extends base_template %}
-{% load bootstrap3 i18n static admission %}
-
+{% load admission parcours_externe i18n enums static %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -25,27 +23,6 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block actions-group %}
-{% endblock %}
-
-{% block tab_content %}
-   {% include 'osis_profile/forms/base_edit_experience_academique.html' %}
-{% endblock %}
-
-{% block extra_content %}
-  <table id="empty_form" class="hidden">
-    {{ empty_form|safe }}
-  </table>
-{% endblock %}
-
-{% block style %}
-    {{ block.super }}
-  <link href="{% static "css/toggle-switch.css" %}" rel="stylesheet" />
-  <link href="{% static "osis_profile/css/experience_academique.css" %}" rel="stylesheet" />
-{% endblock style %}
-
-{% block script %}
-    {{ block.super }}
-    {{ form.media.js }}
-    <script src="{% static 'osis_profile/js/experience_academique.js' %}"></script>
-{% endblock script %}
+<td style="display: flex; gap: 3px;">
+  {% checklist_experience_action_links experience=experience current_year=year prefix=prefix parcours_tab_id=parcours_tab_id %}
+</td>
