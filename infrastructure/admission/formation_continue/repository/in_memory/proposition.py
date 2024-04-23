@@ -52,6 +52,8 @@ class _Candidat:
     nom: str
     nationalite: str
     nationalite_ue: bool
+    noma_candidat: str = ''
+    adresse_email_candidat: str = ''
 
 
 class PropositionInMemoryRepository(
@@ -60,9 +62,9 @@ class PropositionInMemoryRepository(
     IPropositionRepository,
 ):
     candidats = {
-        "0123456789": _Candidat("Jean", "Dupont", "France", True),
-        "0000000001": _Candidat("Michel", "Durand", "Belgique", True),
-        "candidat": _Candidat("Pierre", "Dupond", "Belgique", True),
+        "0123456789": _Candidat("Jean", "Dupont", "France", True, '476284', 'jdupont@example.be'),
+        "0000000001": _Candidat("Michel", "Durand", "Belgique", True, '154893', 'mdurand@example.be'),
+        "candidat": _Candidat("Pierre", "Dupond", "Belgique", True, '545805', 'pdupond@example.be'),
     }
     entities: List['Proposition'] = []
 
@@ -152,6 +154,9 @@ class PropositionInMemoryRepository(
             nom_candidat=candidat.nom,
             pays_nationalite_candidat=candidat.nationalite,
             pays_nationalite_ue_candidat=candidat.nationalite_ue,
+            nom_pays_nationalite_candidat=candidat.nationalite,
+            noma_candidat=candidat.noma_candidat,
+            adresse_email_candidat=candidat.adresse_email_candidat,
             statut=proposition.statut.name,
             creee_le=proposition.creee_le,
             modifiee_le=proposition.modifiee_le,
@@ -201,4 +206,6 @@ class PropositionInMemoryRepository(
             a_reussi_l_epreuve_d_evaluation=proposition.a_reussi_l_epreuve_d_evaluation,
             diplome_produit=proposition.diplome_produit,
             intitule_du_tff=proposition.intitule_du_tff,
+            date_changement_statut=None,
+            candidat_a_plusieurs_demandes=False,
         )

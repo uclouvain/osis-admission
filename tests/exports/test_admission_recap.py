@@ -164,7 +164,8 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeEtrangerEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
@@ -1289,6 +1290,11 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             nom_candidat='Doe',
             pays_nationalite_candidat='BE',
             pays_nationalite_ue_candidat=True,
+            nom_pays_nationalite_candidat='Belgique',
+            noma_candidat='548267',
+            adresse_email_candidat='john.doe@example.be',
+            date_changement_statut=datetime.datetime(2023, 1, 1),
+            candidat_a_plusieurs_demandes=False,
             reponses_questions_specifiques=cls.admission.specific_question_answers,
             curriculum=['uuid-curriculum'],
             equivalence_diplome=['uuid-equivalence-diplome'],
