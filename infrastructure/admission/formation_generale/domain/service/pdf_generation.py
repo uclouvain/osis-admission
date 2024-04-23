@@ -346,14 +346,20 @@ class PDFGeneration(IPDFGeneration):
                 ):
                     # For the curriculum experiences, we would like to get the name of the experience
                     documents_names.append(
-                        '{document_label} : {cv_xp_label}'.format(
+                        '{document_label} : {cv_xp_label}. {document_communication}'.format(
                             document_label=document.libelle_langue_candidat,
                             cv_xp_label=experiences_curriculum_par_uuid[document_identifier[1]].titre_pdf_decision_sic,
+                            document_communication=document.justification_gestionnaire,
                         )
                     )
 
                 else:
-                    documents_names.append(document.libelle_langue_candidat)
+                    documents_names.append(
+                        '{document_label}. {document_communication}'.format(
+                            document_label=document.libelle_langue_candidat,
+                            document_communication=document.justification_gestionnaire,
+                        )
+                    )
 
         token = admission_generate_pdf(
             admission=None,
