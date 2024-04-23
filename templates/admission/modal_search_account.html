@@ -34,7 +34,8 @@
                 <select id="match" class="form-control" name="match">
                     {% for match in matches %}
                       <option value="{{ forloop.counter0 }}">
-                        {{ match.person.lastName }}, {{ match.person.firstName }} - <span class="badge panel-default-badge-success">{{ match.similarityRate }}</span>
+                        <div>{{ match.person.lastName }}, {{ match.person.firstName }} - {{ match.person.gender }}</div>
+                        <div>- {{ match.person.birthDate }} - {{ match.person.nationalRegister }}</div>
                       </option>
                     {% endfor %}
                 </select>
@@ -89,11 +90,18 @@
 </div>
 
 <script>
+
+    function formatState (state) {
+        const split = state.text.split(' - ');
+        return $('<table style="width: 100%"><tbody><tr><td style="width: 25%;"> ' + split[0] + '</td><td style="width: 25%;"> ' + split[1] + '<td style="width: 25%;"> ' + split[2] + '</td><td style="width: 25%;"> ' + split[3] + '</td></tr></tbody></table>');
+    }
+
     $('.modal').on('shown.bs.modal', function() {
 
         $('#match').select2({
             minimumResultsForSearch: -1,
             dropdownCssClass: 'match-select',
+            templateResult: formatState,
         }).on('change', (e) => {
             const selectedMatchId = $('#match').select2('data')[0].id;
             $('.match-data-panel').hide();
@@ -105,6 +113,10 @@
             const selectedMatriculeVal = $(`#match-${selectedMatchId}`).data('matricule');
             $('#selectedMatricule').val(selectedMatriculeVal);
             document.dispatchEvent(new CustomEvent("selectMergePerson"));
+        }).one('select2:open', (e) => {
+            $(".match-select .select2-results").prepend(
+                $('<li style="padding: 6px; list-style: none; overflow-y: scroll;"><table style="width: 100%"><thead><tr><th style="width: 25%">Nom, Prénom</th><th style="width: 25%">Genre</th><th style="width: 25%">Date de naissance<th style="width: 25%">NISS</tr></thead></table></li>')
+            )
         });
 
         $('.fusion-data #national_number').mask('00.00.00-000.00');
