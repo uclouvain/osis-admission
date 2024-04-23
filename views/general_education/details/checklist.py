@@ -1720,6 +1720,9 @@ class ChecklistView(
                 GetStatutTicketPersonneQuery(global_id=matr)
             )
 
+            if self.proposition_fusion:
+                context['proposition_fusion'] = self.proposition_fusion
+
         return context
 
     def _get_experiences(self, resume: ResumePropositionDTO):
