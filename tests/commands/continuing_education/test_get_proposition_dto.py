@@ -54,6 +54,7 @@ from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.student import StudentFactory
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile import BE_ISO_CODE
 from reference.tests.factories.country import CountryFactory
 
 
@@ -89,6 +90,7 @@ class GetPropositionDTOTestCase(TestCase):
             candidate__private_email='john.doe@example.com',
             training__credits=180,
             candidate__country_of_citizenship=self.country,
+            candidate__language=BE_ISO_CODE,
             determined_academic_year=self.academic_years['2023'],
             determined_pool=AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION.name,
             submitted_at=datetime.datetime(2023, 2, 2),
@@ -231,6 +233,7 @@ class GetPropositionDTOTestCase(TestCase):
         )
         self.assertEqual(result.nom_pays_nationalite_candidat, self.admission.candidate.country_of_citizenship.name)
         self.assertEqual(result.noma_candidat, self.student.registration_id)
+        self.assertEqual(result.langue_contact_candidat, self.admission.candidate.language)
         self.assertEqual(result.adresse_email_candidat, self.admission.candidate.private_email)
         self.assertEqual(result.date_changement_statut, self.history_entry.created)
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)

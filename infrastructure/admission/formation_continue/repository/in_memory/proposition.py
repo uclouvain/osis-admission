@@ -54,6 +54,7 @@ class _Candidat:
     nationalite_ue: bool
     noma_candidat: str = ''
     adresse_email_candidat: str = ''
+    langue_contact_candidat: str = ''
 
 
 class PropositionInMemoryRepository(
@@ -149,6 +150,7 @@ class PropositionInMemoryRepository(
                 sigle_entite_gestion=formation.sigle_entite_gestion,
                 annee=proposition.formation_id.annee,
             ),
+            langue_contact_candidat=candidat.langue_contact_candidat,
             matricule_candidat=proposition.matricule_candidat,
             prenom_candidat=candidat.prenom,
             nom_candidat=candidat.nom,
