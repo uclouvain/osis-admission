@@ -25,9 +25,8 @@
 # ##############################################################################
 import json
 import uuid
-from typing import Dict, List, Union
+from typing import Dict, List
 
-import osis_document.contrib.fields
 import pika
 from django.conf import settings
 from django.db.models import QuerySet, Case, When, Value, Exists, OuterRef
@@ -43,14 +42,12 @@ from admission.contrib.models.epc_injection import EPCInjectionStatus
 from admission.contrib.models.general_education import AdmissionPrerequisiteCourses
 from admission.ddd.admission.enums import ChoixAffiliationSport, TypeSituationAssimilation
 from admission.ddd.admission.formation_generale.domain.model.enums import DROITS_INSCRIPTION_MONTANT_VALEURS
-from base.models.enums.community import CommunityEnum
-from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.sap_client_creation_source import SAPClientCreationSource
-from base.models.organization import Organization
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from osis_common.queue.queue_sender import send_message, logger
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
     ForeignHighSchoolDiploma,
@@ -59,43 +56,8 @@ from osis_profile.models import (
     ProfessionalExperience,
     HighSchoolDiplomaAlternative,
 )
-from osis_profile.models.enums.curriculum import Result, Grade
-from osis_profile.models.enums.education import EducationalType, ForeignDiplomaTypes
-from reference.models.diploma_title import DiplomaTitle
+from osis_profile.services.injection_epc import InjectionEPCCurriculum, TYPE_DIPLOME_MAP
 
-CODE_ETUDE_UNIV_INCONNU = '0000'
-CODE_ETUDE_SNU_INCONNU = '99'
-BELGIQUE_ISO_CODE = 'BE'
-TYPE_DIPLOME_MAP = {
-    EducationalType.TEACHING_OF_GENERAL_EDUCATION.name: 'FORMATION_GENERAL',
-    EducationalType.TRANSITION_METHOD.name: 'TECHNIQUE_TRANSITION',
-    EducationalType.ARTISTIC_TRANSITION.name: 'TECHNIQUE_TRANSITION',
-    EducationalType.QUALIFICATION_METHOD.name: 'TECHNIQUE_QUALIFICATION',
-    EducationalType.ARTISTIC_QUALIFICATION.name: 'TECHNIQUE_QUALIFICATION',
-    EducationalType.PROFESSIONAL_EDUCATION.name: 'PROFESSIONNEL',
-    ForeignDiplomaTypes.NATIONAL_BACHELOR.name: 'BACCALAUREAT_NATIONAL',
-    ForeignDiplomaTypes.EUROPEAN_BACHELOR.name: 'BACCALAUREAT_EUROPEEN',
-    ForeignDiplomaTypes.INTERNATIONAL_BACCALAUREATE.name: 'BACCALAUREAT_INTERNATIONAL'
-}
-COMMUNAUTE_MAP = {
-    CommunityEnum.FLEMISH_SPEAKING.name: 'FLAMANDE',
-    CommunityEnum.GERMAN_SPEAKING.name: 'GERMANOPHONE',
-    CommunityEnum.FRENCH_SPEAKING.name: 'WALLONIE_BRUXELLES',
-}
-RESULTAT_MAP = {
-    Result.WAITING_RESULT.name: 'EN_ATTENTE_DE_RESULTAT',
-    Result.SUCCESS.name: 'REUSSITE_COMPLETE',
-    Result.SUCCESS_WITH_RESIDUAL_CREDITS.name: 'REUSSITE_PARTIELLE',
-    Result.FAILURE.name: 'ECHEC'
-}
-GRADE_MAP = {
-    Grade.SATISFACTION.name: 'S',
-    Grade.DISTINCTION.name: 'D',
-    Grade.GREAT_DISTINCTION.name: 'GD',
-    Grade.GREATER_DISTINCTION.name: 'PGD',
-    Grade.SUCCESS_WITHOUT_DISTINCTION.name: 'R',
-    '': 'N'
-}
 SPORT_TOUT_CAMPUS = [
     ChoixAffiliationSport.MONS_UCL.name,
     ChoixAffiliationSport.TOURNAI_UCL.name,
@@ -181,13 +143,13 @@ DOCUMENT_MAPPING = {
 }
 
 
-class InjectionEPC:
+class InjectionEPCAdmission:
     def injecter(self, admission: BaseAdmission):
         logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
         donnees = self.recuperer_donnees(admission=admission)
         EPCInjection.objects.get_or_create(
             admission=admission,
-            defaults={'payload': donnees}
+            defaults={'payload': donnees, 'statut': EPCInjectionStatus.PENDING.name}
         )
         logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
         logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
@@ -215,13 +177,13 @@ class InjectionEPC:
             'inscription_offre': cls._get_inscription_offre(admission=admission),
             'donnees_comptables': cls._get_donnees_comptables(admission=admission),
             'adresses': cls._get_adresses(adresses=adresses),
-            'documents': cls._recuperer_documents(admission),
+            'documents': InjectionEPCCurriculum._recuperer_documents(admission),
             'documents_manquants': cls._recuperer_documents_manquants(admission=admission)
         }
 
     @classmethod
     def _get_signaletique(cls, candidat: Person, adresse_domicile: PersonAddress) -> Dict:
-        documents = cls._recuperer_documents(candidat)
+        documents = InjectionEPCCurriculum._recuperer_documents(candidat)
         etudiant = candidat.student_set.first()
         return {
             'noma': etudiant.registration_id if etudiant else '',
@@ -242,19 +204,6 @@ class InjectionEPC:
             'num_passeport': candidat.passport_number,
             'documents': documents
         }
-
-    @staticmethod
-    def _recuperer_documents(db_object) -> List[Dict[str, Union[List[str], str]]]:
-        documents = []
-        for field in db_object._meta.fields:
-            if isinstance(field, osis_document.contrib.fields.FileField):
-                files = getattr(db_object, field.name, None)
-                if files:
-                    documents.append({
-                        'documents': [str(file) for file in files],
-                        'type': f"{field.name}_YEAR" if isinstance(db_object, EducationalExperienceYear) else field.name
-                    })
-        return documents
 
     @classmethod
     def _recuperer_documents_manquants(cls, admission: 'BaseAdmission'):
@@ -307,7 +256,7 @@ class InjectionEPC:
     @classmethod
     def _get_comptabilite(cls, candidat: Person, comptabilite: Accounting) -> Dict:
         if comptabilite:
-            documents = cls._recuperer_documents(comptabilite)
+            documents = InjectionEPCCurriculum._recuperer_documents(comptabilite)
             client_sap = candidat.sapclient_set.annotate(
                 priorite=Case(
                     When(creation_source=SAPClientCreationSource.OSIS.name), then=Value(1),
@@ -333,8 +282,8 @@ class InjectionEPC:
         diplome_pertinent = admission.valuated_secondary_studies_person
         if (diplome_pertinent and (diplome_belge or diplome_etranger)) or alternative or connaissances_en_langues:
             diplome = diplome_belge or diplome_etranger
-            documents = (cls._recuperer_documents(diplome) if diplome else []) + (
-                cls._recuperer_documents(alternative) if alternative else []
+            documents = (InjectionEPCCurriculum._recuperer_documents(diplome) if diplome else []) + (
+                InjectionEPCCurriculum._recuperer_documents(alternative) if alternative else []
             ) + [{
                 'documents': [str(file) for langue in connaissances_en_langues for file in langue.certificate],
                 'type':'LANGUAGE_CERTIFICATE',
@@ -350,6 +299,7 @@ class InjectionEPC:
                     if diplome_belge and diplome_belge.other_institute_name
                     else None
                 ),
+                'code_pays': diplome_etranger.country.iso_code if diplome_etranger else BE_ISO_CODE,
                 'documents': documents
             }
         return {}
@@ -382,60 +332,10 @@ class InjectionEPC:
             )  # type: QuerySet[EducationalExperienceYear]
 
             for experience_educative_annualisee in experiences_educatives_annualisees:
-                data_annuelle = cls.__build_data_annuelle(experience_educative, experience_educative_annualisee)
+                data_annuelle = InjectionEPCCurriculum._build_data_annuelle(experience_educative, experience_educative_annualisee)
                 experiences.append(data_annuelle)
 
         return experiences
-
-    @classmethod
-    def __build_data_annuelle(cls, experience_educative, experience_educative_annualisee) -> Dict:
-        etablissement = experience_educative.institute  # type: Organization
-        etudes = experience_educative.program  # type: DiplomaTitle
-        pays_etablissement = experience_educative.country.iso_code
-        communaute = etablissement.community if pays_etablissement == BELGIQUE_ISO_CODE else None
-        documents = (
-            cls._recuperer_documents(experience_educative) + cls._recuperer_documents(experience_educative_annualisee)
-        )
-
-        donnees_annuelles = {
-            'osis_uuid': str(experience_educative_annualisee.uuid),
-            'annee_debut': experience_educative_annualisee.academic_year.year,
-            'annee_fin': experience_educative_annualisee.academic_year.year + 1,
-            'communaute_linguistique': COMMUNAUTE_MAP.get(communaute),
-            'resultat': RESULTAT_MAP.get(experience_educative_annualisee.result),
-            'diplome': experience_educative.obtained_diploma,
-            'intitule_etudes': experience_educative.education_name,
-            'etablissement': experience_educative.institute_name,
-            'adresse_etablissement': experience_educative.institute_address,
-            'credits_inscrits': experience_educative_annualisee.registered_credit_number,
-            'credits_acquis': experience_educative_annualisee.acquired_credit_number,
-            'pays': pays_etablissement,
-            'documents': documents
-        }
-        if etablissement and etablissement.establishment_type == EstablishmentTypeEnum.UNIVERSITY.name:
-            external_id_parts = etablissement.external_id.split('_')[1:] if etablissement else []
-            code_pays, code_uni, universite_id = '', '', ''
-            if len(external_id_parts) > 1:
-                code_pays, code_uni = external_id_parts[1:]
-            elif len(external_id_parts) == 1:
-                universite_id = external_id_parts[0]
-            return {
-                **donnees_annuelles,
-                'code_etude': etudes.code_etude if etudes else CODE_ETUDE_UNIV_INCONNU,
-                'type_etude': 'UNIV_BELGE' if pays_etablissement == BELGIQUE_ISO_CODE else 'UNIV_ETRG',
-                'code_uni': code_uni,
-                'code_pays': code_pays,
-                'universite_id': universite_id,
-                'grade': GRADE_MAP.get(experience_educative.obtained_grade),
-
-            }
-        return {
-            **donnees_annuelles,
-            'code_etude': etudes.code_etude if etudes else CODE_ETUDE_SNU_INCONNU,
-            'type_etude': 'SNU_BELGE' if pays_etablissement == BELGIQUE_ISO_CODE else 'SNU_ETRG',
-            'code_ecole': etablissement.code if etablissement else None,
-            'type_enseignement': etablissement.teaching_type if etablissement else None
-        }
 
     @classmethod
     def _get_curriculum_autres_activites(cls, candidat: Person, admission: BaseAdmission) -> List[Dict]:
@@ -458,7 +358,7 @@ class InjectionEPC:
                 'fin': experience_pro.end_date.strftime("%d/%m/%Y"),
                 'intitule_autre_activite': experience_pro.activity,
                 'etablissement_autre': experience_pro.institute_name,
-                'documents': cls._recuperer_documents(experience_pro),
+                'documents': InjectionEPCCurriculum._recuperer_documents(experience_pro),
             }
             for experience_pro in experiences_professionnelles
         ]
@@ -554,7 +454,7 @@ class InjectionEPC:
             'droits_majores': getattr(admission, 'tuition_fees_dispensation', None),
             'montant_doits_majores': (
                 str(getattr(admission, "tuition_fees_amount_other", "")) or
-                DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission, "tuition_fees_amount"))
+                DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission, "tuition_fees_amount", None))
             )
         }
 

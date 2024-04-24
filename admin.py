@@ -83,7 +83,7 @@ from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import ORGANISATION_ONGLETS_CHECKLIST
 from admission.ddd.parcours_doctoral.formation.domain.model.enums import CategorieActivite, ContexteFormation
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
-from admission.services.injection_epc import InjectionEPC
+from admission.services.injection_epc import InjectionEPCAdmission
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
@@ -526,7 +526,7 @@ class BaseAdmissionAdmin(admin.ModelAdmin):
     def injecter_dans_epc(self, request, queryset):
         for demande in queryset:
             # Check injection state when it exists
-            InjectionEPC().injecter(demande)
+            InjectionEPCAdmission().injecter(demande)
 
     def has_add_permission(self, request):
         return False
