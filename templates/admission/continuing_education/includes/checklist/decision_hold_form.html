@@ -88,6 +88,7 @@
 
   {{ decision_hold_form.initial.subject|json_script:"decision_hold_form_subject" }}
   {{ decision_hold_form.initial.body|json_script:"decision_hold_form_body" }}
+  {{ decision_hold_form.translated_reasons|json_script:"decision_hold_translated_reasons" }}
   {{ decision_hold_form.media }}
 
   <script>
@@ -95,6 +96,7 @@
         {# Reset / Set mail templates values #}
         const defaultMessage = JSON.parse(document.getElementById('decision_hold_form_body').textContent);
         const defaultObject = JSON.parse(document.getElementById('decision_hold_form_subject').textContent);
+        const translated_reasons = JSON.parse(document.getElementById('decision_hold_translated_reasons').textContent);
         const $messageObjectInput = $('#id_decision-hold-subject');
         const $messageContentResetModal = $('#message-content-reset-confirm-modal');
         const $messageObjectResetModal = $('#message-object-reset-confirm-modal');
@@ -109,7 +111,7 @@
             if (motif === 'AUTRE') {
                 motif = $('#id_decision-hold-other_reason').val().replaceAll('\n', '<br>');
             } else {
-                motif = $('#id_decision-hold-reason option:selected').text();
+                motif = translated_reasons[motif];
             }
             const value = defaultMessage.replace('__MOTIF__', motif);
 

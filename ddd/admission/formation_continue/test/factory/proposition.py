@@ -83,6 +83,7 @@ class PropositionFactory(factory.Factory):
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')
     inscription_a_titre = ChoixInscriptionATitre.PRIVE
+    auteur_derniere_modification = FuzzyText(length=10, chars=string.digits)
 
     class Params:
         est_confirmee = factory.Trait(

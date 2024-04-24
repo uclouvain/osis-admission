@@ -76,6 +76,7 @@ class Proposition(interface.RootEntity):
     annee_calculee: Optional[int] = None
     pot_calcule: Optional[AcademicCalendarTypes] = None
     statut: ChoixStatutPropositionContinue = ChoixStatutPropositionContinue.EN_BROUILLON
+    auteur_derniere_modification: str = ''
 
     creee_le: Optional[datetime.datetime] = None
     modifiee_le: Optional[datetime.datetime] = None
@@ -141,9 +142,11 @@ class Proposition(interface.RootEntity):
         self.moyens_decouverte_formation = [
             ChoixMoyensDecouverteFormation[moyen] for moyen in moyens_decouverte_formation
         ]
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionContinue.ANNULEE
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def soumettre(
         self,
@@ -157,6 +160,7 @@ class Proposition(interface.RootEntity):
         self.pot_calcule = pool
         self.elements_confirmation = elements_confirmation
         self.soumise_le = now()
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def completer_curriculum(
         self,
@@ -167,6 +171,7 @@ class Proposition(interface.RootEntity):
         self.curriculum = curriculum
         self.equivalence_diplome = equivalence_diplome
         self.reponses_questions_specifiques = reponses_questions_specifiques
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def completer_informations_complementaires(
         self,
@@ -211,6 +216,7 @@ class Proposition(interface.RootEntity):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.copie_titre_sejour = copie_titre_sejour
         self.documents_additionnels = documents_additionnels
+        self.auteur_derniere_modification = self.matricule_candidat
 
     def verifier_informations_complementaires(self):
         """Vérification de la validité des informations complémentaires."""
@@ -236,6 +242,7 @@ class Proposition(interface.RootEntity):
         self.decision_dernier_mail_envoye_par = gestionnaire
         self.motif_de_mise_en_attente = ChoixMotifAttente[motif]
         self.motif_de_mise_en_attente_autre = autre_motif
+        self.auteur_derniere_modification = gestionnaire
 
     def approuver_par_fac(
         self,
@@ -254,6 +261,8 @@ class Proposition(interface.RootEntity):
         self.decision_dernier_mail_envoye_le = now()
         self.decision_dernier_mail_envoye_par = gestionnaire
         self.condition_d_approbation_par_la_faculte = condition
+        self.statut = ChoixStatutPropositionContinue.CONFIRMEE
+        self.auteur_derniere_modification = gestionnaire
 
     def refuser_proposition(
         self,
@@ -275,6 +284,7 @@ class Proposition(interface.RootEntity):
         self.decision_dernier_mail_envoye_par = gestionnaire
         self.motif_de_refus = ChoixMotifRefus[motif]
         self.motif_de_refus_autre = autre_motif
+        self.auteur_derniere_modification = gestionnaire
 
     def annuler_proposition(
         self,
@@ -294,6 +304,7 @@ class Proposition(interface.RootEntity):
         self.decision_dernier_mail_envoye_le = now()
         self.decision_dernier_mail_envoye_par = gestionnaire
         self.motif_d_annulation = motif
+        self.auteur_derniere_modification = gestionnaire
 
     def approuver_proposition(
         self,
@@ -310,9 +321,11 @@ class Proposition(interface.RootEntity):
         )
         self.decision_dernier_mail_envoye_le = now()
         self.decision_dernier_mail_envoye_par = gestionnaire
+        self.auteur_derniere_modification = gestionnaire
 
     def cloturer_proposition(
         self,
+        gestionnaire: str,
     ):
         CloturerPropositionValidatorList(
             checklist_statut=self.checklist_actuelle.decision,
@@ -324,3 +337,4 @@ class Proposition(interface.RootEntity):
             libelle=__('Validated'),
             extra={'blocage': "closed"},
         )
+        self.auteur_derniere_modification = gestionnaire

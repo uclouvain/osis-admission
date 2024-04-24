@@ -255,6 +255,7 @@ class ContinuingEducationAdmission(BaseAdmission):
     last_email_sent_at = models.DateTimeField(
         verbose_name=_("Last email sent the"),
         null=True,
+        blank=True,
     )
 
     last_email_sent_by = models.ForeignKey(

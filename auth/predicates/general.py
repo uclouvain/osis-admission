@@ -164,3 +164,11 @@ def in_sic_status_or_application_fees(self, user: User, obj: GeneralEducationAdm
 )
 def can_send_to_fac_faculty_decision(self, user: User, obj: GeneralEducationAdmission):
     return obj.status in STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("This action is limited to a specific admission context."))
+def is_general(self, user: User, obj: GeneralEducationAdmission):
+    from admission.templatetags.admission import CONTEXT_GENERAL
+
+    return obj.get_admission_context() == CONTEXT_GENERAL

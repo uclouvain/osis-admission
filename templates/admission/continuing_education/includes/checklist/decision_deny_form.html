@@ -88,6 +88,7 @@
 
   {{ decision_deny_form.initial.subject|json_script:"decision_deny_form_subject" }}
   {{ decision_deny_form.initial.body|json_script:"decision_deny_form_body" }}
+  {{ decision_deny_form.translated_reasons|json_script:"decision_deny_translated_reasons" }}
   {{ decision_deny_form.media }}
 
   <script>
@@ -95,6 +96,7 @@
         {# Reset / Set mail templates values #}
         const defaultMessage = JSON.parse(document.getElementById('decision_deny_form_body').textContent);
         const defaultObject = JSON.parse(document.getElementById('decision_deny_form_subject').textContent);
+        const translated_reasons = JSON.parse(document.getElementById('decision_deny_translated_reasons').textContent);
         const $messageObjectInput = $('#id_decision-deny-subject');
         const $messageContentResetModal = $('#message-content-reset-confirm-modal');
         const $messageObjectResetModal = $('#message-object-reset-confirm-modal');
@@ -109,7 +111,7 @@
             if (motif === 'AUTRE') {
                 motif = $('#id_decision-deny-other_reason').val().replaceAll('\n', '<br>');
             } else {
-                motif = $('#id_decision-deny-reason option:selected').text();
+                motif = translated_reasons[motif];
             }
             const value = defaultMessage.replace('__MOTIF__', motif);
 

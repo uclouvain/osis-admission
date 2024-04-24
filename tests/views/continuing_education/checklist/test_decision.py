@@ -125,6 +125,8 @@ class ChecklistViewTestCase(TestCase):
         patched.side_effect = lambda tokens: {token: self.file_metadata for token in tokens}
         self.addCleanup(patcher.stop)
 
+        self.continuing_admission.last_update_author = None
+
     #### IUFC MANAGER
 
     def test_get_hold_iufc(self):
@@ -173,6 +175,7 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.EN_ATTENTE.name)
         self.assertEqual(self.continuing_admission.on_hold_reason, ChoixMotifAttente.COMPLET.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
     def test_get_fac_approval_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -216,6 +219,7 @@ class ChecklistViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_EN_COURS.name,
         )
         self.assertEqual(self.continuing_admission.approval_condition_by_faculty, 'foobar')
+        self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
     def test_get_deny_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -263,6 +267,7 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.INSCRIPTION_REFUSEE.name)
         self.assertEqual(self.continuing_admission.refusal_reason, ChoixMotifRefus.FULL.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
     def test_get_cancel_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -310,6 +315,7 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name)
         self.assertEqual(self.continuing_admission.cancel_reason, 'foobar')
+        self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
     def test_get_validation_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -358,6 +364,7 @@ class ChecklistViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
     def test_get_close_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -398,6 +405,7 @@ class ChecklistViewTestCase(TestCase):
             {'blocage': 'closed'},
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CLOTUREE.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
     def test_get_to_be_processed_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -435,6 +443,7 @@ class ChecklistViewTestCase(TestCase):
             ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
     def test_get_taken_in_charge_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -476,6 +485,7 @@ class ChecklistViewTestCase(TestCase):
             {'en_cours': 'taken_in_charge'},
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
     def test_get_send_to_fac_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -559,6 +569,7 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.EN_ATTENTE.name)
         self.assertEqual(self.continuing_admission.on_hold_reason, ChoixMotifAttente.COMPLET.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
     def test_get_fac_approval_fac(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -602,6 +613,7 @@ class ChecklistViewTestCase(TestCase):
             ChoixStatutChecklist.GEST_EN_COURS.name,
         )
         self.assertEqual(self.continuing_admission.approval_condition_by_faculty, 'foobar')
+        self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
     def test_get_deny_fac(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -649,6 +661,7 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.INSCRIPTION_REFUSEE.name)
         self.assertEqual(self.continuing_admission.refusal_reason, ChoixMotifRefus.FULL.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
     def test_get_cancel_fac(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -696,6 +709,7 @@ class ChecklistViewTestCase(TestCase):
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.ANNULEE_PAR_GESTIONNAIRE.name)
         self.assertEqual(self.continuing_admission.cancel_reason, 'foobar')
+        self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
     def test_get_validation_fac(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -772,6 +786,7 @@ class ChecklistViewTestCase(TestCase):
             {'blocage': 'closed'},
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CLOTUREE.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
     def test_get_to_be_processed_fac(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -809,6 +824,7 @@ class ChecklistViewTestCase(TestCase):
             ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
     def test_get_taken_in_charge_fac(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -850,6 +866,7 @@ class ChecklistViewTestCase(TestCase):
             {'en_cours': 'taken_in_charge'},
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CONFIRMEE.name)
+        self.assertEqual(self.continuing_admission.last_update_author, self.fac_manager_user.person)
 
     def test_get_send_to_fac_fac(self):
         self.client.force_login(user=self.fac_manager_user)
