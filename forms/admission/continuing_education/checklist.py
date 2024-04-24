@@ -30,6 +30,7 @@ from django.conf import settings
 from django.utils.translation import (
     gettext_lazy as _,
     get_language,
+    override,
 )
 
 from admission.contrib.models import ContinuingEducationAdmission
@@ -165,6 +166,12 @@ class DecisionDenyForm(forms.Form):
             'js/dependsOn.min.js',
         ]
 
+    def __init__(self, candidate_language, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        with override(candidate_language):
+            self.translated_reasons = {choice[0]: str(choice[1]) for choice in self.fields['reason'].choices}
+
     def clean(self):
         cleaned_data = super().clean()
         if cleaned_data['reason'] == ChoixMotifRefus.AUTRE.name and not cleaned_data.get('other_reason'):
@@ -186,7 +193,7 @@ class DecisionHoldForm(forms.Form):
     )
 
     other_reason = forms.CharField(
-        label=_('Other refusal reason'),
+        label=_('Other holding reason'),
         required=False,
         widget=forms.Textarea(attrs={'rows': 2}),
     )
@@ -214,6 +221,12 @@ class DecisionHoldForm(forms.Form):
             'js/dependsOn.min.js',
         ]
 
+    def __init__(self, candidate_language, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        with override(candidate_language):
+            self.translated_reasons = {choice[0]: str(choice[1]) for choice in self.fields['reason'].choices}
+
     def clean(self):
         cleaned_data = super().clean()
         if cleaned_data['reason'] == ChoixMotifAttente.AUTRE.name and not cleaned_data.get('other_reason'):
@@ -229,7 +242,7 @@ class DecisionHoldForm(forms.Form):
 
 class DecisionCancelForm(forms.Form):
     reason = forms.CharField(
-        label=_('Refusal reason'),
+        label=_('Reason for cancellation'),
         widget=forms.Textarea(attrs={'rows': 2}),
         required=True,
     )

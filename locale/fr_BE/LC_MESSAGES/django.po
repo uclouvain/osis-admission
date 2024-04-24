@@ -2704,8 +2704,17 @@ msgstr "E-mail envoyé au candidat lorsque SIC refuse une proposition."
 
 msgid ""
 "Email sent to the candidate when the faculty approve the application with "
+"conditions."
+msgstr ""
+"E-mail envoyé au candidat lorsque la faculté approuve une proposition avec "
+"conditions."
+
+msgid ""
+"Email sent to the candidate when the faculty approve the application without "
 "condition."
-msgstr "E-mail envoyé au candidat lorsque la faculté approuve une proposition."
+msgstr ""
+"E-mail envoyé au candidat lorsque la faculté approuve une proposition sans "
+"conditions."
 
 msgid ""
 "Email sent to the checkers to inform them to check the background "
@@ -5097,6 +5106,9 @@ msgstr "Autres documents relatifs à la cotutelle"
 msgid "Other given names"
 msgstr "Autres prénoms"
 
+msgid "Other holding reason"
+msgstr "Autre motif de mise en attente"
+
 msgid "Other institute"
 msgstr "Autre institution"
 
@@ -5758,6 +5770,9 @@ msgstr "Boutons radios"
 
 msgid "Rank in diploma"
 msgstr "Rang dans le diplôme"
+
+msgid "Reason for cancellation"
+msgstr "Motif d'annulation"
 
 msgid "Reason for exceeding the deadline"
 msgstr "Motif du dépassement de l’échéance"
@@ -6814,12 +6829,6 @@ msgstr "Le candidat doit se présenter en SIC"
 msgid "The certificate of achievement is being generated."
 msgstr "L'attestation de réussite est en cours de génération."
 
-#, python-format
-msgid ""
-"The close mail has been sent to the candidate the %(date)s by %(sender)s."
-msgstr ""
-"Le mail de clôture a été envoyé au candidat le %(date)s par %(sender)s."
-
 msgid ""
 "The closing of the application has important consequences (canceling the "
 "requested documents, status reset, etc). Do you confirm the closing?"
@@ -7290,6 +7299,9 @@ msgstr "Données relatives à la thèse"
 
 msgid "This account number has been verified"
 msgstr "Ce numéro a été vérifié"
+
+msgid "This action is limited to a specific admission context."
+msgstr "Cette action est limitée à un contexte d'admission particulier."
 
 msgid "This action will cancel the document request."
 msgstr "Cette action va annuler la réclamation des documents en cours."
@@ -8063,10 +8075,10 @@ msgstr ""
 
 msgid ""
 "You can not cancel this application, it is in the \"Validated\" state. "
-"Please contact Noemie Pecher (noemie.pecher@uclouvain.be)."
+"Please contact Noemie Pecher."
 msgstr ""
 "Vous ne pouvez pas annuler cette demande, elle est en statut \"Validé\". "
-"Veuillez contacter Noémie Pécher (noemie.pecher@uclouvain.be)."
+"Veuillez contacter Noémie Pécher."
 
 msgid ""
 "You can not transition to the \"Approved\" status from the \"Validated\" or "

@@ -60,8 +60,8 @@
         id="tabs-content"
         class="tab-content"
     >
-        <div role="tabpanel" class="tab-pane in active" id="fiche_etudiant">
-        
+        {% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision next_url=next_base_url|add:'decision' %}
+        <div role="tabpanel" class="tab-pane" id="fiche_etudiant">
           {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'on_hold' %}
             <div class="alert alert-info">
               {% translate "On hold reason:" %} {% if original_admission.on_hold_reason == 'AUTRE' %}{{ original_admission.on_hold_reason_other }}{% else %}{{ original_admission.on_hold_reason|enum_display:'ChoixMotifAttente' }}{% endif %}
@@ -87,7 +87,6 @@
           </div>
         </div>
         
-        {% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision next_url=next_base_url|add:'decision' %}
           {% include "admission/continuing_education/includes/checklist/decision_fac_approval_modal.html" %}
           {% include "admission/continuing_education/includes/checklist/decision_hold_modal.html" %}
           {% include "admission/continuing_education/includes/checklist/decision_deny_modal.html" %}
@@ -114,24 +113,28 @@
 
     <div id="document-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
-      <div id="document-content">
+      <div id="document-content" hx-indicator="#document-spinner">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
             <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
-            <div class="flex-content" style="gap: 5px">
+            <form
+              method="GET"
+              {# By default, the document identifier is submitted through an url param, but trigger a request from #}
+              {# an option doesn't work with Chrome so we trigger a request from the form and use query params and a #}
+              {# fake url param. #}
+              hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}"
+              hx-target="#document-details"
+              hx-swap="outerHTML"
+              class="flex-content"
+              style="gap: 5px"
+            >
               <button type="button" disabled="disabled" class="btn btn-default previous-option-button">
                 <i class="fa-solid fa-angle-left"></i>
               </button>
               <select
                   id="{{ tab }}-documents-select"
                   class="form-control"
-                  hx-target="#document-details"
-                  hx-swap="outerHTML"
                   style="flex: 1;"
-                  {# Normally, the identifier must be pass through an url param but trigger a request from an option #}
-                  {# doesn't work with Chrome so we trigger a request from the select and pass the identifier through a query param. #}
-                  hx-trigger="change"
-                  hx-get="{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}"
                   name="identifier"
               >
                 <option disabled selected value>{% translate 'Select a document' %}</option>
@@ -146,7 +149,7 @@
               <button type="button" class="btn btn-default next-option-button">
                 <i class="fa-solid fa-angle-right"></i>
               </button>
-            </div>
+            </form>
           </div>
         {% endfor %}
         {% include 'admission/document/document_detail.html' %}
@@ -160,13 +163,13 @@
   {{ block.super }}
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
   <script src="{% static 'admission/ckeditor.js' %}"></script>
-  <script>
+    <script>
       // Prevent to save the DOM in cache when using htmx requests
       htmx.config.refreshOnHistoryMiss = true;
       htmx.config.historyCacheSize = 0;
 
       (function ($) {
-          const defaultTab = window.location.hash || '#fiche_etudiant';
+          const defaultTab = window.location.hash || '#decision';
           const checklistMenu = $('#checklist-menu');
           const buttonClassByState = {
               INITIAL_NON_CONCERNE: 'fas fa-xmark text-muted',
@@ -201,28 +204,22 @@
               nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
           }
 
-
           function refreshDocuments() {
               const selectedTab = window.location.hash || defaultTab;
               const currentSelect = $(`${selectedTab}-documents-select`);
               $('.documents-tab').addClass('hidden').filter(`${selectedTab}-documents`).removeClass('hidden');
               currentSelect.prop("selectedIndex", currentSelect.find('option').length > 1 ? 1 : 0);
-              htmx.ajax(
-                  'GET',
-                  '{% url base_namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='sub-identifier' %}',
-                  {
-                      target: '#document-details',
-                      swap: 'outerHTML',
-                      values: {
-                          'identifier': currentSelect.val(),
-                      }
-                  },
-              ).finally(() => {
-                  if (currentSelect.length) {
-                      refreshDocumentsSelectButtons(currentSelect);
-                  }
-              });
+              currentSelect[0].dispatchEvent(new Event('change'));
           }
+
+          // Manage the change of the document
+          $('select[name="identifier"]').on('change', function(){
+              const parentForm = $(this).parent('form');
+              // Submit the form to refresh the document view (htmx)
+              parentForm[0].requestSubmit();
+              // Manage the previous and next buttons
+              refreshDocumentsSelectButtons($(this));
+          });
 
           {# Change the selected document by using the left and right buttons #}
           $('.previous-option-button').on('click', function(){
@@ -243,10 +240,6 @@
                 newSelectedOption.prop('selected', 'selected');
                 documentSelect[0].dispatchEvent(new Event('change'));
               }
-          });
-
-          $('select[name="identifier"]').on('change', function(){
-              refreshDocumentsSelectButtons($(this));
           });
 
           $('.documents-tab').each(function(){
@@ -475,7 +468,6 @@
           });
 
           {# When a form is submitted #}
-          const base_details_url = "{% url request.resolver_match.namespace|add:':document:detail' uuid=view.kwargs.uuid identifier='custom_identifier' %}";
           documentContent.on('formValidation', function(event) {
 
               if (event.originalEvent.detail.is_valid) {
@@ -484,14 +476,9 @@
 
                   {# Refresh the details of a document if the form has an impact on it #}
                   if (event.originalEvent.detail.refresh_details) {
-                      htmx.ajax(
-                          'GET',
-                          base_details_url.replace('custom_identifier', event.originalEvent.detail.refresh_details),
-                          {
-                              target: '#document-details',
-                              swap: 'outerHTML',
-                          }
-                      )
+                      const selectedTab = window.location.hash || defaultTab;
+                      const currentSelect = $(`${selectedTab}-documents-select`);
+                      currentSelect[0].dispatchEvent(new Event('change'));
                   }
               }
           })

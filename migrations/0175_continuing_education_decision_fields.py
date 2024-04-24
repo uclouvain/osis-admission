@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='continuingeducationadmission',
             name='last_email_sent_at',
-            field=models.DateTimeField(null=True, verbose_name='Last email sent the'),
+            field=models.DateTimeField(blank=True, null=True, verbose_name='Last email sent the'),
         ),
         migrations.AddField(
             model_name='continuingeducationadmission',

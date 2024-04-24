@@ -86,6 +86,7 @@ class PropositionFactory(factory.Factory):
     inscription_a_titre = ChoixInscriptionATitre.PRIVE
     motivations = 'My motivations'
     moyens_decouverte_formation = [ChoixMoyensDecouverteFormation.BOUCHE_A_OREILLE]
+    auteur_derniere_modification = FuzzyText(length=10, chars=string.digits)
 
     class Params:
         est_confirmee = factory.Trait(

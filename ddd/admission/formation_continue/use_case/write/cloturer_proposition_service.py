@@ -41,7 +41,7 @@ def cloturer_proposition(
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
 
     # WHEN
-    proposition.cloturer_proposition()
+    proposition.cloturer_proposition(cmd.gestionnaire)
 
     # THEN
     proposition_repository.save(proposition)

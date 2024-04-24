@@ -41,7 +41,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.forms.admission.checklist import (
     CommentForm,
 )
-from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
+from admission.views.common.detail_tabs.comments import (
+    COMMENT_TAG_SIC,
+    COMMENT_TAG_FAC,
+    COMMENT_TAG_IUFC_FOR_FAC,
+    COMMENT_TAG_FAC_FOR_IUFC,
+)
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 
 __all__ = [
@@ -121,15 +126,23 @@ class SaveCommentView(AdmissionFormMixin, FormView):
     form_class = CommentForm
     template_name = 'admission/forms/default_form.html'
 
+    permission_by_custom_tag = {
+        COMMENT_TAG_FAC: 'admission.checklist_change_fac_comment',
+        COMMENT_TAG_SIC: 'admission.checklist_change_sic_comment',
+        COMMENT_TAG_IUFC_FOR_FAC: 'admission.continuing_checklist_change_iufc_comment',
+        COMMENT_TAG_FAC_FOR_IUFC: 'admission.continuing_checklist_change_fac_comment',
+        'authentication': 'admission.checklist_change_past_experiences',
+    }
+
+    @cached_property
+    def tags(self):
+        return self.kwargs['tab'].split('__')
+
     def get_permission_required(self):
-        if f'__{COMMENT_TAG_FAC}' in self.kwargs['tab']:
-            self.permission_required = 'admission.checklist_change_fac_comment'
-        elif f'__{COMMENT_TAG_SIC}' in self.kwargs['tab']:
-            self.permission_required = 'admission.checklist_change_sic_comment'
-        elif '__authentication' in self.kwargs['tab']:
-            self.permission_required = 'admission.checklist_change_past_experiences'
-        else:
-            self.permission_required = 'admission.checklist_change_comment'
+        self.permission_required = next(
+            (self.permission_by_custom_tag[tag] for tag in self.tags if tag in self.permission_by_custom_tag),
+            'admission.checklist_change_comment',
+        )
         return super().get_permission_required()
 
     @cached_property
@@ -151,7 +164,7 @@ class SaveCommentView(AdmissionFormMixin, FormView):
     def form_valid(self, form):
         comment, _ = CommentEntry.objects.update_or_create(
             object_uuid=self.admission_uuid,
-            tags=self.kwargs['tab'].split('__'),
+            tags=self.tags,
             defaults={
                 'content': form.cleaned_data['comment'],
                 'author': self.request.user.person,

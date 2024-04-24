@@ -15,12 +15,10 @@ from admission.mail_templates.checklist.continuing_education import (
 
 
 MAIL_HEADER_EN = '''<p>Dear {candidate_first_name} {candidate_last_name},</p>
-<br>
 '''
 
 MAIL_FOOTER_EN = '''<p>Thank you for your interest in UCLouvain.
 If you have any questions, please contact your course administrator(s): {managers_emails}</p>
-<br>
 
 <p>Your application file can be accessed at the following address: {application_link}</p>
 
@@ -28,13 +26,11 @@ If you have any questions, please contact your course administrator(s): {manager
 '''
 
 MAIL_HEADER_FR = '''<p>{greetings} {candidate_first_name} {candidate_last_name},</p>
-<br>
 '''
 
 MAIL_FOOTER_FR = '''<p>Veuillez agréer l’expression de nos salutations distinguées.</p>
 
 <p>Pour toute question, veuillez contacter le(s) gestionnaire(s) de votre formation : {managers_emails}.</p>
-<br>
 
 <p>Votre dossier est accessible via l'adresse suivante : {application_link}</p>
 

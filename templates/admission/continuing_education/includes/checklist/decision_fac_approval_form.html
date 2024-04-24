@@ -54,7 +54,7 @@
 
       {% bootstrap_field decision_fac_approval_form.accepter_la_demande %}
 
-      {% bootstrap_field decision_fac_approval_form.condition_acceptation %}
+      {% bootstrap_field decision_fac_approval_form.condition_acceptation form_group_class='form-group required_field' %}
 
       <div id="decision-fac-approval-mail-container">
         <a href="#" id="decision-fac-approval-reset-subject" class="btn btn-sm btn-primary reset-button"><i class="fa fa-rotate-right"></i> {% translate "Reset" %}</a>
@@ -112,7 +112,7 @@
             let value;
             const conditionAcceptation = $('#id_decision-fac-approval-condition_acceptation').val().replaceAll('\n', '<br>');
 
-            if (!!conditionAcceptation) {
+            if ($('input[name="decision-fac-approval-accepter_la_demande"]:checked').val() === 'AVEC_CONDITION') {
               value = defaultMessageWithCondition.replace('__CONDITION__', conditionAcceptation);
             } else {
               value = defaultMessageWithoutCondition;

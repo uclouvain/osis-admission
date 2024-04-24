@@ -25,7 +25,7 @@
 {% endcomment %}
 
 {% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision next_url=next_base_url|add:'decision' %}
-<div role="tabpanel" class="tab-pane in active" id="decision" hx-swap-oob="true">
+<div role="tabpanel" class="tab-pane" id="decision" hx-swap-oob="true">
   {% has_perm 'admission.change_checklist_iufc' as is_iufc %}
 
   {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'fac_approval' %}
@@ -50,7 +50,7 @@
     {% translate 'Only the "to be processed" status is available from the "closed" status.' as closed_disabled_str %}
     {% translate 'It is not possible to go from the "validated" status to this status.' as validation_other_disabled_str %}
     {% translate "Validated" context "decision-checklist" as validated_label %}
-    {% translate 'You can not cancel this application, it is in the "Validated" state. Please contact Noemie Pecher (noemie.pecher@uclouvain.be).' as cancel_while_validated_label %}
+    {% translate 'You can not cancel this application, it is in the "Validated" state. Please contact Noemie Pecher.' as cancel_while_validated_label %}
 
     {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'on_hold' %}
       {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
@@ -148,22 +148,13 @@
     <div class="alert alert-info">{% blocktranslate with date=original_admission.last_email_sent_at|date:'d/m/Y H:i' sender=original_admission.last_email_sent_by %}The deny mail has been sent to the candidate the {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
   {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'canceled' %}
     <div class="alert alert-info">{% blocktranslate with date=original_admission.last_email_sent_at|date:'d/m/Y H:i' sender=original_admission.last_email_sent_by %}The cancel mail has been sent to the candidate the {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
-  {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'closed' %}
-    <div class="alert alert-info">{% blocktranslate with date=original_admission.last_email_sent_at|date:'d/m/Y H:i' sender=original_admission.last_email_sent_by %}The close mail has been sent to the candidate the {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
   {% elif current.statut == 'GEST_REUSSITE' %}
     <div class="alert alert-info">{% blocktranslate with date=original_admission.last_email_sent_at|date:'d/m/Y H:i' sender=original_admission.last_email_sent_by %}The validation mail has been sent to the candidate the {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
   {% endif %}
 
   {% if is_iufc %}
     {% bootstrap_form comment_forms.decision__IUFC_for_FAC %}
-    <dl>
-      <dt>{{ comment_forms.decision__FAC_for_IUFC.fields.comment.label }}</dt>
-      <dd>
-        <div class="form-group">
-          <textarea class="form-control" disabled>{{ comment_forms.decision__FAC_for_IUFC.fields.comment.initial|default_if_none:"" }}</textarea>
-        </div>
-      </dd>
-    </dl>
+    {% bootstrap_form comment_forms.decision__FAC_for_IUFC %}
   {% else %}
     <dl>
       <dt>{{ comment_forms.decision__IUFC_for_FAC.fields.comment.label }}</dt>

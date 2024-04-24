@@ -195,7 +195,10 @@ class DoctorateAdmissionAdmin(AdmissionAdminMixin):
 
 
 class ContinuingEducationAdmissionAdmin(AdmissionAdminMixin):
-    autocomplete_fields = ['training']
+    autocomplete_fields = [
+        'training',
+        'last_email_sent_by',
+    ]
 
     @staticmethod
     def view_on_site(obj):
