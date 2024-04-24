@@ -7538,6 +7538,9 @@ msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr "En attente"
 
+msgid "Waiting for development"
+msgstr "En attente de développement"
+
 msgid "Waiting for signature"
 msgstr "En attente de signature"
 
@@ -8033,7 +8036,7 @@ msgid ""
 "Your export request has been planned, you will receive a notification as "
 "soon as it is available."
 msgstr ""
-"Votre demande d’export a été planifié, vous recevrez une notification dès "
+"Votre demande d’export a été planifiée, vous recevrez une notification dès "
 "qu’il sera disponible."
 
 msgid "Your note has been added."

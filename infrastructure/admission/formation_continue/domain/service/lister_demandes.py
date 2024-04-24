@@ -32,7 +32,6 @@ from django.db.models import (
     Q,
     Value,
     When,
-    IntegerField,
 )
 from django.db.models.fields import CharField
 from django.db.models.functions import Concat
@@ -42,6 +41,7 @@ from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
 from admission.ddd.admission.formation_continue.domain.service.i_lister_demandes import IListerDemandesService
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
+from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.views import PaginatedList
 
 
@@ -115,6 +115,10 @@ class ListerDemandesService(IListerDemandesService):
 
         if paye is not None:
             qs = qs.filter(in_payement_order=paye)
+
+        if facultes:
+            related_entities = get_entities_with_descendants_ids(facultes)
+            qs = qs.filter(training__management_entity_id__in=related_entities)
 
         if demandeur:
             qs = qs.filter_according_to_roles(demandeur, permission='admission.view_continuing_enrolment_applications')

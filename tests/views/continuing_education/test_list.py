@@ -106,12 +106,14 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             acronym='GHIJK',
             entity_type=EntityType.SCHOOL.name,
             parent=faculty_entity,
+            end_date=datetime.date(2024, 1, 1),
         ).entity
 
         cls.second_faculty = EntityVersionFactory(
             acronym='AAAAA',
             entity_type=EntityType.FACULTY.name,
-            parent=faculty_entity,
+            parent=root_entity,
+            end_date=datetime.date(2024, 1, 1),
         ).entity
 
         # Admissions
@@ -439,12 +441,12 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.client.force_login(user=self.sic_management_user)
 
         # With faculty
-        response = self._do_request(entites='ABCDEF', allowed_sql_surplus=1)
+        response = self._do_request(entites='ABCDEF', allowed_sql_surplus=3)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 2)
 
         # With school
-        response = self._do_request(entites='GHIJK', allowed_sql_surplus=1)
+        response = self._do_request(entites='GHIJK', allowed_sql_surplus=3)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 2)
 
