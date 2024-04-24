@@ -149,7 +149,7 @@ class InjectionEPCAdmission:
         donnees = self.recuperer_donnees(admission=admission)
         EPCInjection.objects.get_or_create(
             admission=admission,
-            defaults={'payload': donnees, 'statut': EPCInjectionStatus.PENDING.name}
+            defaults={'payload': donnees, 'status': EPCInjectionStatus.PENDING.name}
         )
         logger.info(f"[INJECTION EPC] Donnees recuperees : {json.dumps(donnees, indent=4)} - Envoi dans la queue")
         logger.info(f"[INJECTION EPC] Envoi dans la queue ...")
