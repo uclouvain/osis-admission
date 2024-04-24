@@ -2641,14 +2641,12 @@ msgctxt "admission"
 msgid "Email"
 msgstr "Email"
 
-<<<<<<< HEAD
 msgctxt "ways_hear_about_training"
 msgid "Email"
 msgstr "Emailing"
-=======
+
 msgid "Email address"
 msgstr "Courriel"
->>>>>>> 33ce9ea1 ([OS-526] List the continuing education admissions)
 
 msgid "Email content"
 msgstr "Contenu du mail"
@@ -2966,17 +2964,15 @@ msgstr "Equivalence de grade académique FWB"
 msgid "FWB equivalent course"
 msgstr "Formation FWB équivalente"
 
-<<<<<<< HEAD
 msgid "Fac approval"
 msgstr "Accord fac"
 
 msgctxt "ways_hear_about_training"
 msgid "Facebook"
 msgstr "Sur Facebook"
-=======
+
 msgid "Faculty"
 msgstr "Faculté"
->>>>>>> 33ce9ea1 ([OS-526] List the continuing education admissions)
 
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"
@@ -3988,12 +3984,9 @@ msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
-<<<<<<< HEAD
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr "Il n'est pas possible de passer du statut \"validé\" à ce statut."
 
-=======
->>>>>>> 33ce9ea1 ([OS-526] List the continuing education admissions)
 msgid "JURY_APPROUVE_ADRE"
 msgstr "JURY_APPROUVE_ADRE"
 
@@ -7826,6 +7819,9 @@ msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr "En attente"
 
+msgid "Waiting for development"
+msgstr "En attente de développement"
+
 msgid "Waiting for signature"
 msgstr "En attente de signature"
 
@@ -8394,7 +8390,7 @@ msgid ""
 "Your export request has been planned, you will receive a notification as "
 "soon as it is available."
 msgstr ""
-"Votre demande d’export a été planifié, vous recevrez une notification dès "
+"Votre demande d’export a été planifiée, vous recevrez une notification dès "
 "qu’il sera disponible."
 
 msgid "Your note has been added."

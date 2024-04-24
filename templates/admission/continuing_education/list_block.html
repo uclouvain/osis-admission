@@ -76,7 +76,7 @@
       <i title="{% translate 'Registration required' %}" class="fa-solid fa-lock"></i>
     {% endif %}
   </td>
-  <td>{{ admission.edition }}</td>
+  <td>{{ admission.edition|enum_display:'ChoixEdition' }}</td>
   <td>{{ admission.sigle_faculte }}</td>
   <td>
     {% if admission.paye %}
@@ -84,7 +84,7 @@
     {% endif %}
   </td>
   <td>{{ admission.etat_demande|enum_display:'ChoixStatutPropositionContinue' }}</td>
-  <td>{{ admission.etat_epc }}</td>
+  <td>{{ admission.etat_epc }} {% translate 'Waiting for development' %}</td>
   <td>{{ admission.date_confirmation|date:'d/m/Y H:i' }}</td>
   <td>{{ admission.derniere_modification_le|date:'d/m/Y H:i' }}</td>
   <td>{{ admission.derniere_modification_par }}</td>

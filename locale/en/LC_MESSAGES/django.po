@@ -7119,8 +7119,11 @@ msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr ""
 
+msgid "Waiting for development"
+msgstr ""
+
 msgid "Waiting for signature"
-msgstr "En attente de signature"
+msgstr ""
 
 msgid "Wallonie Bruxelles International (WBI)"
 msgstr ""

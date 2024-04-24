@@ -181,7 +181,6 @@ class RetyperDocumentCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-<<<<<<< HEAD
 class MettreEnAttenteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
@@ -232,6 +231,8 @@ class CloturerPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
 
+
+@attr.dataclass(frozen=True, slots=True)
 class ListerDemandesQuery(SortedQueryRequest):
     annee_academique: Optional[int] = None
     edition: Optional[str] = ''
