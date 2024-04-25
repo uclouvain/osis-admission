@@ -98,6 +98,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
             'mimetype': PDF_MIME_TYPE,
             'explicit_name': 'Mon nom de fichier',
             'upload_uuid': uuid.uuid4(),
+            'size': 1,
         }
 
         cls.uuid_documents_by_token = {
@@ -142,7 +143,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
         patcher = patch(
             "osis_document.api.utils.get_remote_metadata",
-            return_value={"name": "myfile.myext", "mimetype": "application/pdf"},
+            return_value={"name": "myfile.myext", "mimetype": "application/pdf", "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)

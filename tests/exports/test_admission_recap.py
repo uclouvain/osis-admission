@@ -164,7 +164,8 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeEtrangerEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    AnneeExperienceAcademiqueDTO, ExperienceAcademiqueDTO,
+    AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
@@ -318,6 +319,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             return_value={
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             },
         )
         patcher.start()
@@ -343,6 +345,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             token: {
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
+                'size': 1,
             }
             for token in tokens
         }
@@ -906,7 +909,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         cls.get_remote_token_patcher.start()
 
         cls.get_remote_metadata_patcher = mock.patch(
-            "osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile"}
+            "osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile", "size": 1}
         )
         cls.get_remote_metadata_patcher.start()
 

@@ -133,7 +133,7 @@ class SpecificQuestionsFormViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
             'osis_document.api.utils.get_remote_metadata',
-            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE},
+            return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)

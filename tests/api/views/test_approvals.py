@@ -257,7 +257,7 @@ class ApproveByPdfApiTestCase(ApprovalMixin, APITestCase):
     @patch('osis_document.api.utils.confirm_remote_upload')
     @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
     def test_approve_proposition_api_by_pdf(self, confirm_multiple_upload, confirm_remote_upload, get_remote_metadata):
-        get_remote_metadata.return_value = {"name": "test.pdf"}
+        get_remote_metadata.return_value = {"name": "test.pdf", "size": 1}
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
         confirm_multiple_upload.side_effect = (
             lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []

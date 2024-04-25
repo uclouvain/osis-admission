@@ -123,6 +123,7 @@ class DocumentViewTestCase(TestCase):
             'mimetype': PDF_MIME_TYPE,
             'explicit_name': 'My file name',
             'author': self.sic_manager_user.person.global_id,
+            'size': 1,
         }
 
         patcher = patch('admission.templatetags.admission.get_remote_metadata', return_value=self.file_metadata)
