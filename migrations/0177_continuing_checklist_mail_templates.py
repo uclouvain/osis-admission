@@ -41,7 +41,7 @@ MAIL_FOOTER_FR = '''<p>Veuillez agréer l’expression de nos salutations distin
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0175_continuing_education_decision_fields'),
+        ('admission', '0176_continuing_education_decision_fields'),
     ]
 
     operations = [
@@ -164,7 +164,7 @@ class Migration(migrations.Migration):
                 '''
                 + MAIL_FOOTER_EN,
                 'fr-be': MAIL_HEADER_FR
-                + '''En réponse à votre demande d’admission au programme 
+                + '''<p>En réponse à votre demande d’admission au programme
                     {training_acronym} - {training_title}, nous avons le plaisir de vous informer que celle-ci a été validée.</p>
                 '''
                 + MAIL_FOOTER_FR,

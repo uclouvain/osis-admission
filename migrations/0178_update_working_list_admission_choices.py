@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0176_continuing_checklist_mail_templates'),
+        ('admission', '0177_continuing_checklist_mail_templates'),
     ]
 
     operations = [

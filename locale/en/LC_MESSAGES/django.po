@@ -2747,11 +2747,11 @@ msgstr ""
 msgid "FWB equivalent course"
 msgstr ""
 
-msgctxt "ways_hear_about_training"
-msgid "Facebook"
+msgid "Fac approval"
 msgstr ""
 
-msgid "Fac approval"
+msgctxt "ways_hear_about_training"
+msgid "Facebook"
 msgstr ""
 
 msgid "Faculty comment about the collaborative program"
@@ -7037,6 +7037,9 @@ msgstr ""
 msgid "VIP candidate"
 msgstr ""
 
+msgid "Validate"
+msgstr ""
+
 msgid "Validate selected courses"
 msgstr ""
 
@@ -7049,9 +7052,6 @@ msgstr ""
 
 msgctxt "decision-checklist"
 msgid "Validated"
-msgstr ""
-
-msgid "Validation reason"
 msgstr ""
 
 msgid "Valuated diplomas or experiences:"

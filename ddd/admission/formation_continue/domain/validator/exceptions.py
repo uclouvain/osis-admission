@@ -79,6 +79,8 @@ class FormationEstFermeeException(BusinessException):
         message = _('Your application cannot be submitted because the %(acronym)s course is closed.') % {
             "acronym": sigle_formation,
         }
+        super().__init__(message, **kwargs)
+
 
 class MettreEnAttenteTransitionStatutException(BusinessException):
     status_code = "FORMATION-CONTINUE-7"

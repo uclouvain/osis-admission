@@ -2954,12 +2954,12 @@ msgstr "Equivalence de grade académique FWB"
 msgid "FWB equivalent course"
 msgstr "Formation FWB équivalente"
 
+msgid "Fac approval"
+msgstr "Accord fac"
+
 msgctxt "ways_hear_about_training"
 msgid "Facebook"
 msgstr "Sur Facebook"
-
-msgid "Fac approval"
-msgstr "Accord fac"
 
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"
@@ -7737,6 +7737,9 @@ msgstr "VIP"
 msgid "VIP candidate"
 msgstr "Candidat VIP"
 
+msgid "Validate"
+msgstr "Valider"
+
 msgid "Validate selected courses"
 msgstr "Valider les cours sélectionnées"
 
@@ -7750,9 +7753,6 @@ msgstr "Validée"
 msgctxt "decision-checklist"
 msgid "Validated"
 msgstr "Validée"
-
-msgid "Validation reason"
-msgstr "Motif de validation"
 
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"
