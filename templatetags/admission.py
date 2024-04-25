@@ -383,11 +383,12 @@ TAB_TREES = {
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),
         ],
-        Tab('management', pgettext('tab', 'Management'), 'gear'): [
-            Tab('debug', _('Debug'), 'bug'),
-        ],
         Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
             Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        ],
+        Tab('history', pgettext('tab', 'History'), 'history'): [
+            Tab('history-all', _('All history')),
+            Tab('history', _('Status changes')),
         ],
     },
 }
