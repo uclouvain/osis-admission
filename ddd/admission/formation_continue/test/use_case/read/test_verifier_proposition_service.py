@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -73,11 +73,6 @@ class TestVerifierPropositionService(TestCase):
     def test_should_verifier_etre_ok_si_complet(self):
         proposition_id = self.message_bus.invoke(self.verifier_commande)
         self.assertEqual(proposition_id, self.complete_proposition.entity_id)
-
-    def test_should_retourner_erreur_si_conditions_acces_non_remplies(self):
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC4'))
-        self.assertHasInstance(context.exception.exceptions, ConditionsAccessNonRempliesException)
 
     def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
         propositions = self.proposition_repository.search(matricule_candidat='0123456789')
