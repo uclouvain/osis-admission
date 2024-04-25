@@ -101,7 +101,10 @@ class SearchDigitAccountView(FormView):
             global_id=candidate.global_id,
             last_name=candidate.last_name,
             first_name=candidate.first_name,
-            birth_date=str(candidate.birth_date)
+            other_first_name=candidate.middle_name,
+            birth_date=str(candidate.birth_date),
+            sex=candidate.sex,
+            niss=candidate.national_number,
         )
 
         request.session['search_context'] = {'matches': matches}
@@ -123,12 +126,26 @@ class SearchDigitAccountView(FormView):
         return has_missing_fields
 
 
-def search_digit_account(global_id: str, last_name: str, first_name: str, birth_date: str):
+def search_digit_account(
+        global_id: str,
+        last_name: str,
+        first_name: str,
+        other_first_name: str,
+        birth_date: str,
+        sex: str,
+        niss: str,
+):
     from infrastructure.messages_bus import message_bus_instance
 
     return message_bus_instance.invoke(
         RechercherCompteExistantQuery(
-            matricule=global_id, nom=last_name, prenom=first_name, date_naissance=birth_date
+            matricule=global_id,
+            nom=last_name,
+            prenom=first_name,
+            date_naissance=birth_date,
+            autres_prenoms=other_first_name,
+            niss=niss,
+            genre=sex,
         )
     )
 

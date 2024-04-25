@@ -76,6 +76,7 @@ def soumettre_proposition(
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+
     annee_courante = (
         GetCurrentAcademicYear()
         .get_starting_academic_year(
@@ -102,6 +103,8 @@ def soumettre_proposition(
         profil_candidat_translator,
     )
     pool = AcademicCalendarTypes[cmd.pool]
+
+    identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
 
     # WHEN
     VerifierProposition.verifier(
@@ -161,9 +164,12 @@ def soumettre_proposition(
     message_bus_instance.invoke(
         RechercherCompteExistantQuery(
             matricule=proposition.matricule_candidat,
-            nom=proposition.profil_soumis_candidat.nom,
-            prenom=proposition.profil_soumis_candidat.prenom,
-            date_naissance="",
+            nom=identification.nom,
+            prenom=identification.prenom,
+            autres_prenoms=identification.autres_prenoms,
+            date_naissance=str(identification.date_naissance),
+            genre=identification.genre,
+            niss=identification.numero_registre_national_belge,
         )
     )
 

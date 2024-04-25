@@ -115,7 +115,7 @@
             document.dispatchEvent(new CustomEvent("selectMergePerson"));
         }).one('select2:open', (e) => {
             $(".match-select .select2-results").prepend(
-                $('<li style="padding: 6px; list-style: none; overflow-y: scroll;"><table style="width: 100%"><thead><tr><th style="width: 25%">Nom, Prénom</th><th style="width: 25%">Genre</th><th style="width: 25%">Date de naissance<th style="width: 25%">NISS</tr></thead></table></li>')
+                $('<li style="padding: 6px; list-style: none;"><table style="width: 100%"><thead><tr><th style="width: 25%">Nom, Prénom</th><th style="width: 25%">Genre</th><th style="width: 25%">Date de naissance<th style="width: 25%">NISS</tr></thead></table></li>')
             )
         });
 

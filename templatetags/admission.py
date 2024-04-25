@@ -1146,9 +1146,11 @@ def map_fields_items(digit_fields):
 
     mapped_fields['birth_date'] = datetime.datetime.strptime(mapped_fields['birth_date'], "%Y-%m-%d")
     mapped_fields['gender'] = "H" if mapped_fields['gender'] == "M" else "F"
-    mapped_fields['country_of_citizenship__name'] = Country.objects.get(
-        iso_code=mapped_fields['country_of_citizenship__name']
-    ).name
+
+    if mapped_fields['country_of_citizenship__name']:
+        mapped_fields['country_of_citizenship__name'] = Country.objects.get(
+            iso_code=mapped_fields['country_of_citizenship__name']
+        ).name
 
     return mapped_fields.items()
 
@@ -1163,7 +1165,7 @@ def input_field_data(label, value, editable=True, mask=None, select_key=None):
     if label == 'civil_state' and value is not None:
         select_key = value
         value = CivilState.get_value(select_key)
-    if 'country_of_citizenship' in label:
+    if 'country_of_citizenship' in label and value:
         select_key = Country.objects.get(name=value).id
     return {
         'label': label,

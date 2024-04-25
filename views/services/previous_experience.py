@@ -65,7 +65,7 @@ class SearchPreviousExperienceView(HtmxMixin, TemplateView):
         return message_bus_instance.invoke(
             RechercherParcoursAnterieurQuery(
                 global_id=self.request.GET.get('matricule'),
-                uuid_proposition=self.request.GET.get('admission_uuid')
+                uuid_proposition=self.kwargs['admission_uuid'],
             )
         )
 

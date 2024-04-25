@@ -32,5 +32,14 @@ class IDigitService(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def rechercher_compte_existant(cls, matricule: str, nom: str, prenom: str, date_naissance: str,) -> str:
+    def rechercher_compte_existant(
+            cls,
+            matricule: str,
+            nom: str,
+            prenom: str,
+            autres_prenoms: str,
+            genre: str,
+            date_naissance: str,
+            niss: str
+    ) -> str:
         raise NotImplementedError

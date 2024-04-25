@@ -811,7 +811,7 @@ class CddConfiguratorAdmin(HijackRoleModelAdmin):
 class FrontOfficeRoleModelAdmin(RoleModelAdmin):
     list_display = ('person', 'global_id', 'view_on_portal', 'retrieve_from_digit')
 
-    @admin.display(description=_('Identifier - test'))
+    @admin.display(description=_('Identifier'))
     def global_id(self, obj):
         return obj.person.global_id
 

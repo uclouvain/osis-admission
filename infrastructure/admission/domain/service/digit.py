@@ -26,6 +26,7 @@
 import datetime
 import json
 import logging
+import re
 
 import requests
 from django.conf import settings
@@ -40,7 +41,16 @@ logger = logging.getLogger(settings.DEFAULT_LOGGER)
 
 class DigitService(IDigitService):
     @classmethod
-    def rechercher_compte_existant(cls, matricule: str, nom: str, prenom: str, date_naissance: str,) -> str:
+    def rechercher_compte_existant(
+            cls,
+            matricule: str,
+            nom: str,
+            prenom: str,
+            autres_prenoms: str,
+            genre: str,
+            date_naissance: str,
+            niss: str
+    ) -> str:
         original_person = Person.objects.get(global_id=matricule)
 
         person_merge_proposal, created = PersonMergeProposal.objects.get_or_create(
@@ -50,11 +60,18 @@ class DigitService(IDigitService):
             },
         )
 
-        if created:
-            logger.info(
-                f"DIGIT search existing person: "
-                f'{json.dumps({"lastname": nom, "firstname": prenom, "birthDate": date_naissance})}'
-            )
+        if niss:
+            # keep only digits in niss
+            niss = re.sub(r'\D', '', niss)
+
+        data = {
+            "lastname": nom, "firstname": prenom, "birthDate": date_naissance,
+            "sex": genre, "nationalRegister": niss, "otherFirstName": autres_prenoms,
+        }
+        logger.info(
+            f"DIGIT search existing person: "
+            f'{json.dumps(data)}'
+        )
 
         if MOCK_DIGIT_SERVICE_CALL:
             similarity_data = _mock_search_digit_account_return_response()
@@ -64,11 +81,7 @@ class DigitService(IDigitService):
                     'Content-Type': 'application/json',
                     'Authorization': settings.ESB_AUTHORIZATION,
                 },
-                data=json.dumps({
-                    "lastname": nom,
-                    "firstname": prenom,
-                    "birthDate": date_naissance,
-                }),
+                data=json.dumps(data),
                 url=f"{settings.ESB_API_URL}/{settings.DIGIT_ACCOUNT_SEARCH_URL}"
             )
             similarity_data = response.json()

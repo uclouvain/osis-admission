@@ -136,7 +136,10 @@ class RechercherCompteExistantQuery(interface.QueryRequest):
     matricule: str
     nom: str
     prenom: str
+    autres_prenoms: Optional[str]
     date_naissance: str
+    genre: str
+    niss: Optional[str]
 
 
 @attr.dataclass(frozen=True, slots=True)
