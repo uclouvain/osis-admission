@@ -164,7 +164,7 @@ class Migration(migrations.Migration):
                 '''
                 + MAIL_FOOTER_EN,
                 'fr-be': MAIL_HEADER_FR
-                + '''En réponse à votre demande d’admission au programme 
+                + '''<p>En réponse à votre demande d’admission au programme
                     {training_acronym} - {training_title}, nous avons le plaisir de vous informer que celle-ci a été validée.</p>
                 '''
                 + MAIL_FOOTER_FR,

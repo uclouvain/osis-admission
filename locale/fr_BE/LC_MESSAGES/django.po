@@ -7690,6 +7690,9 @@ msgstr "VIP"
 msgid "VIP candidate"
 msgstr "Candidat VIP"
 
+msgid "Validate"
+msgstr "Valider"
+
 msgid "Validate selected courses"
 msgstr "Valider les cours sélectionnées"
 
@@ -7703,9 +7706,6 @@ msgstr "Validée"
 msgctxt "decision-checklist"
 msgid "Validated"
 msgstr "Validée"
-
-msgid "Validation reason"
-msgstr "Motif de validation"
 
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"

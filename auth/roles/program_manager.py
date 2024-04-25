@@ -34,9 +34,10 @@ from admission.auth.predicates.common import (
     is_debug,
 )
 from admission.auth.predicates import general, continuing
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
 from base.models.education_group import EducationGroup
-from base.models.enums.education_group_types import TrainingType
-from continuing_education.models.continuing_education_training import CONTINUING_EDUCATION_TRAINING_TYPES
 from education_group.contrib.models import EducationGroupRoleModel
 
 
@@ -69,9 +70,11 @@ class ProgramManager(EducationGroupRoleModel):
         ruleset = {
             # Listings
             'admission.view_enrolment_applications': rules.always_allow,
-            'admission.view_doctorate_enrolment_applications': has_education_group_of_types(TrainingType.PHD.name),
+            'admission.view_doctorate_enrolment_applications': has_education_group_of_types(
+                *AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES,
+            ),
             'admission.view_continuing_enrolment_applications': has_education_group_of_types(
-                *CONTINUING_EDUCATION_TRAINING_TYPES
+                *AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES,
             ),
             # Access a single application
             'admission.view_enrolment_application': is_part_of_education_group,
