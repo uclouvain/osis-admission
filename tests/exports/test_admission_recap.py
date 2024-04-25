@@ -1292,6 +1292,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             pays_nationalite_ue_candidat=True,
             nom_pays_nationalite_candidat='Belgique',
             noma_candidat='548267',
+            langue_contact_candidat='FR',
             adresse_email_candidat='john.doe@example.be',
             date_changement_statut=datetime.datetime(2023, 1, 1),
             candidat_a_plusieurs_demandes=False,

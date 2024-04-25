@@ -297,6 +297,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             uuid=admission.uuid,
             statut=admission.status,
             date_changement_statut=admission.status_updated_at,  # from annotation
+            langue_contact_candidat=admission.candidate.language,
             creee_le=admission.created_at,
             modifiee_le=admission.modified_at,
             soumise_le=admission.submitted_at,
