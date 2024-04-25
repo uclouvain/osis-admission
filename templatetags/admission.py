@@ -382,6 +382,9 @@ TAB_TREES = {
         Tab('checklist', _('Checklist'), 'list-check'): [
             Tab('checklist', _('Checklist'), 'list-check'),
         ],
+        Tab('documents', _('Documents'), 'folder-open'): [
+            Tab('documents', _('Documents'), 'folder-open'),
+        ],
         Tab('person', _('Personal data'), 'user'): [
             Tab('person', _('Identification'), 'user'),
             Tab('coordonnees', _('Contact details'), 'user'),

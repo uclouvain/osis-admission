@@ -384,7 +384,10 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
                 'update_specific_question',
                 'destroy_proposition',
             ],
-            forbidden_actions=[],
+            forbidden_actions=[
+                'retrieve_documents',
+                'update_documents',
+            ],
         )
 
     def test_get_proposition_without_specific_information_about_training(self):

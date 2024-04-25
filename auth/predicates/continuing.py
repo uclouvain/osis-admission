@@ -28,10 +28,13 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from rules import predicate
 
+from admission.auth.predicates import not_in_continuing_statuses_predicate_message
 from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     STATUTS_PROPOSITION_CONTINUE_SOUMISE,
+    STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_GESTIONNAIRE,
+    STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT,
 )
 from osis_role.errors import predicate_failed_msg
 
@@ -41,7 +44,7 @@ from osis_role.errors import predicate_failed_msg
 def is_continuing(self, user: User, obj: ContinuingEducationAdmission):
     from admission.templatetags.admission import CONTEXT_CONTINUING
 
-    return obj.get_admission_context() == CONTEXT_CONTINUING
+    return obj.admission_context == CONTEXT_CONTINUING
 
 
 @predicate(bind=True)
@@ -54,3 +57,47 @@ def in_progress(self, user: User, obj: ContinuingEducationAdmission):
 @predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
 def is_submitted(self, user: User, obj: ContinuingEducationAdmission):
     return obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_('The proposition must not be cancelled to realize this action.'))
+def not_cancelled(self, user: User, obj: ContinuingEducationAdmission):
+    return obj.status != ChoixStatutPropositionContinue.ANNULEE.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_continuing_statuses_predicate_message({ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name})
+)
+def in_document_request_status(self, user: User, obj: ContinuingEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_continuing_statuses_predicate_message(STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_GESTIONNAIRE),
+)
+def in_manager_status(self, user: User, obj: ContinuingEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_GESTIONNAIRE
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_continuing_statuses_predicate_message(
+        {
+            ChoixStatutPropositionContinue.CONFIRMEE.name,
+            ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name,
+        }
+    )
+)
+def can_request_documents(self, user: User, obj: ContinuingEducationAdmission):
+    return obj.status in {
+        ChoixStatutPropositionContinue.CONFIRMEE.name,
+        ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name,
+    }
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("You must be invited to complete this admission."))
+def is_invited_to_complete(self, user: User, obj: ContinuingEducationAdmission):
+    return obj.status in STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT

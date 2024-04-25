@@ -24,12 +24,24 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
-from typing import Dict
+from typing import Dict, List
 
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
+
+from admission.ddd import MAIL_INSCRIPTION_DEFAUT
+from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO
+from admission.infrastructure.utils import get_requested_documents_html_lists
+from admission.mail_templates import (
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING,
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING,
+)
+from base.utils.utils import format_academic_year
 from osis_document.api.utils import get_remote_token
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
@@ -43,7 +55,7 @@ from admission.contrib.models.base import BaseAdmission
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING
-from admission.utils import get_salutation_prefix
+from admission.utils import get_salutation_prefix, get_portal_admission_url, get_backoffice_admission_url
 
 from base.models.person import Person
 
@@ -63,10 +75,10 @@ class Notification(INotification):
             plain_text_content=transform_html_to_text(corps_message),
         )
 
-        candidate_email_message = EmailNotificationHandler.build(email_notification)
-        EmailNotificationHandler.create(candidate_email_message, person=person)
+        email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(email_message, person=person)
 
-        return candidate_email_message
+        return email_message
 
     @classmethod
     def get_common_tokens(cls, admission: ContinuingEducationAdmission) -> Dict:
@@ -221,4 +233,76 @@ class Notification(INotification):
             person=candidate,
             objet_message=objet_message,
             corps_message=corps_message,
+        )
+
+    @classmethod
+    def envoyer_message_libre_au_candidat(
+        cls,
+        proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+        return cls._create_email_message_for_person(
+            person=candidate,
+            objet_message=objet_message,
+            corps_message=corps_message,
+        )
+
+    @classmethod
+    def confirmer_reception_documents_envoyes_par_candidat(
+        cls,
+        proposition: PropositionDTO,
+        liste_documents_reclames: List[EmplacementDocument],
+        liste_documents_dto: List[EmplacementDocumentDTO],
+    ):
+        admission: BaseAdmission = BaseAdmission.objects.select_related(
+            'candidate',
+            'training__enrollment_campus',
+        ).get(uuid=proposition.uuid)
+
+        html_list_by_status = get_requested_documents_html_lists(liste_documents_reclames, liste_documents_dto)
+
+        tokens = {
+            'admission_reference': proposition.reference,
+            'candidate_first_name': proposition.prenom_candidat,
+            'candidate_last_name': proposition.nom_candidat,
+            'salutation': get_salutation_prefix(person=admission.candidate),
+            'training_title': admission.training.title
+            if admission.candidate.language == settings.LANGUAGE_CODE_FR
+            else admission.training.title_english,
+            'training_acronym': proposition.formation.sigle,
+            'training_campus': proposition.formation.campus,
+            'requested_submitted_documents': html_list_by_status[StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION],
+            'requested_not_submitted_documents': html_list_by_status[StatutEmplacementDocument.A_RECLAMER],
+            'enrolment_service_email': admission.training.enrollment_campus.sic_enrollment_email
+            or MAIL_INSCRIPTION_DEFAUT,
+            'training_year': format_academic_year(proposition.annee_calculee),
+            'admission_link_front': get_portal_admission_url('continuing-education', proposition.uuid),
+            'admission_link_back': get_backoffice_admission_url('continuing-education', proposition.uuid),
+        }
+
+        email_message = generate_email(
+            ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING
+            if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
+            else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING,
+            admission.candidate.language,
+            tokens,
+            recipients=[admission.candidate.private_email],
+        )
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+        # Create the async task to create the folder analysis containing the submitted documents
+        task = AsyncTask.objects.create(
+            name=_('Folder analysis of the proposition %(reference)s') % {'reference': admission.reference},
+            description=_(
+                'Create the folder analysis of the proposition containing the requested documents that the '
+                'candidate submitted.',
+            ),
+            person=admission.candidate,
+        )
+        AdmissionTask.objects.create(
+            task=task,
+            admission=admission,
+            type=AdmissionTask.TaskType.CONTINUING_FOLDER.name,
         )

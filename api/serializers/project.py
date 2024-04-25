@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional, Dict
 
 from rest_framework import serializers
 
@@ -47,6 +48,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratDTO, PropositionDTO as DoctoratPropositionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO as FormationContinuePropositionDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO as FormationGeneralePropositionDTO
@@ -207,7 +209,40 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer
         ]
 
 
-class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+class PropositionStatusMixin(serializers.Serializer):
+    statut = serializers.SerializerMethodField()
+
+    STATUS_TO_PORTAL_STATUS = {}
+
+    def get_statut(self, obj):
+        return self.STATUS_TO_PORTAL_STATUS.get(obj.statut, obj.statut)
+
+
+class GeneralEducationPropositionStatusMixin(PropositionStatusMixin):
+    STATUS_TO_PORTAL_STATUS = {
+        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name: STATUT_A_COMPLETER,
+        ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name: STATUT_A_COMPLETER,
+        ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+    }
+
+
+class ContinuingEducationPropositionStatusMixin(PropositionStatusMixin):
+    STATUS_TO_PORTAL_STATUS = {
+        ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name: STATUT_A_COMPLETER,
+        ChoixStatutPropositionContinue.EN_ATTENTE.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+        ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
+    }
+
+
+class GeneralEducationPropositionSearchDTOSerializer(
+    IncludedFieldsMixin,
+    GeneralEducationPropositionStatusMixin,
+    DTOSerializer,
+):
     links = ActionLinksField(
         actions={
             action: GENERAL_EDUCATION_ACTION_LINKS[action]
@@ -242,8 +277,6 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
 
     formation = FormationGeneraleDTOSerializer()
 
-    statut = serializers.SerializerMethodField()
-
     # This is to prevent schema from breaking on JSONField
     erreurs = None
     reponses_questions_specifiques = None
@@ -267,20 +300,12 @@ class GeneralEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSer
             'pdf_recapitulatif',
         ]
 
-    def get_statut(self, obj):
-        STATUT_TO_PORTAL_STATUT = {
-            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name: STATUT_A_COMPLETER,
-            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name: STATUT_A_COMPLETER,
-            ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-            ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-            ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-            ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name: STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS,
-        }
-        return STATUT_TO_PORTAL_STATUT.get(obj.statut, obj.statut)
 
-
-class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+class ContinuingEducationPropositionSearchDTOSerializer(
+    IncludedFieldsMixin,
+    ContinuingEducationPropositionStatusMixin,
+    DTOSerializer,
+):
     links = ActionLinksField(
         actions={
             action: CONTINUING_EDUCATION_ACTION_LINKS[action]
@@ -302,6 +327,8 @@ class ContinuingEducationPropositionSearchDTOSerializer(IncludedFieldsMixin, DTO
                 'submit_proposition',
                 # Proposition
                 'destroy_proposition',
+                'retrieve_documents',
+                'update_documents',
             ]
         }
     )
@@ -473,7 +500,11 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
         }
 
 
-class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+class GeneralEducationPropositionDTOSerializer(
+    IncludedFieldsMixin,
+    GeneralEducationPropositionStatusMixin,
+    DTOSerializer,
+):
     links = ActionLinksField(
         actions={
             action: GENERAL_EDUCATION_ACTION_LINKS[action]
@@ -548,7 +579,11 @@ class GeneralEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerialize
         ]
 
 
-class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerializer):
+class ContinuingEducationPropositionDTOSerializer(
+    IncludedFieldsMixin,
+    ContinuingEducationPropositionStatusMixin,
+    DTOSerializer,
+):
     links = ActionLinksField(
         actions={
             action: CONTINUING_EDUCATION_ACTION_LINKS[action]
@@ -570,6 +605,8 @@ class ContinuingEducationPropositionDTOSerializer(IncludedFieldsMixin, DTOSerial
                 # Proposition
                 'destroy_proposition',
                 'submit_proposition',
+                'retrieve_documents',
+                'update_documents',
             ]
         }
     )

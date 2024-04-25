@@ -823,7 +823,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(16):
+        with self.assertNumQueriesLessThan(14):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -848,7 +848,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(17):
+        with self.assertNumQueriesLessThan(15):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -1279,6 +1279,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             ),
             reference='0123',
             annee_calculee=2023,
+            langue_contact_candidat=settings.LANGUAGE_CODE_FR,
+            documents_libres_fac_uclouvain=[],
+            documents_libres_sic_uclouvain=[],
             pot_calcule=None,
             date_fin_pot=None,
             creee_le=datetime.datetime(2023, 1, 1),
@@ -1293,7 +1296,6 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             pays_nationalite_ue_candidat=True,
             nom_pays_nationalite_candidat='Belgique',
             noma_candidat='548267',
-            langue_contact_candidat='FR',
             adresse_email_candidat='john.doe@example.be',
             date_changement_statut=datetime.datetime(2023, 1, 1),
             candidat_a_plusieurs_demandes=False,

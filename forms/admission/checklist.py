@@ -45,6 +45,8 @@ from django.utils.translation import (
     gettext,
     override,
 )
+
+from admission.templatetags.admission import CONTEXT_GENERAL
 from osis_document.utils import is_uuid
 
 from admission.contrib.models import GeneralEducationAdmission
@@ -769,6 +771,7 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
                     request_status=document.statut_reclamation,
                     proposition_uuid=instance.uuid,
                     only_limited_request_choices=False,
+                    context=CONTEXT_GENERAL,
                 )
 
                 self.fields[document.identifiant] = document_field

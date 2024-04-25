@@ -345,9 +345,9 @@ def initialize_categorized_free_documents(apps, schema_editor):
             long_label_en="Internal communication",
         ),
         CategorizedFreeDocument(
-            short_label_fr="Formulaire de désisncription",
+            short_label_fr="Formulaire de désinscription",
             with_academic_year=False,
-            long_label_fr="Formulaire de désisncription",
+            long_label_fr="Formulaire de désinscription",
             long_label_en="Withdrawal form",
         ),
         CategorizedFreeDocument(

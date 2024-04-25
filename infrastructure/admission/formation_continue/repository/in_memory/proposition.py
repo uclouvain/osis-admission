@@ -29,6 +29,11 @@ from typing import List, Optional
 import factory
 
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
+from admission.ddd.admission.enums.emplacement_document import (
+    TypeEmplacementDocument,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
@@ -67,6 +72,12 @@ class PropositionInMemoryRepository(
         "0000000001": _Candidat("Michel", "Durand", "Belgique", True, '154893', 'mdurand@example.be'),
         "candidat": _Candidat("Pierre", "Dupond", "Belgique", True, '545805', 'pdupond@example.be'),
         "candidat_checklist": _Candidat("Pierre", "Dupond", "Belgique", True, '545805', 'pdupond@example.be'),
+    }
+    documents_libres_sic_uclouvain = {
+        'uuid-CERTIFICATE-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f142'],
+    }
+    documents_libres_fac_uclouvain = {
+        'uuid-CERTIFICATE-SCI': ['24de0c3d-3c06-4c93-8eb4-c8648f04f143'],
     }
     entities: List['Proposition'] = []
 
@@ -107,6 +118,31 @@ class PropositionInMemoryRepository(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC4'),
                 matricule_candidat='0123456789',
                 formation_id=FormationIdentityFactory(sigle="USCC4", annee=2020),
+                documents_demandes={
+                    'CURRICULUM.CURRICULUM': {
+                        'last_actor': '00321234',
+                        'reason': 'Le document est à mettre à jour.',
+                        'type': TypeEmplacementDocument.NON_LIBRE.name,
+                        'last_action_at': '2023-01-02T00:00:00',
+                        'status': StatutEmplacementDocument.RECLAME.name,
+                        'requested_at': '2023-01-02T00:00:00',
+                        'deadline_at': '2023-01-19',
+                        'automatically_required': False,
+                        'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
+                    },
+                    'LIBRE_CANDIDAT.26de0c3d-3c06-4c93-8eb4-c8648f04f146': {
+                        'last_actor': '00987890',
+                        'reason': 'Ce nouveau document pourrait être intéressant.',
+                        'type': TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC.name,
+                        'last_action_at': '2023-01-03T00:00:00',
+                        'status': StatutEmplacementDocument.RECLAME.name,
+                        'requested_at': '2023-01-03T00:00:00',
+                        'deadline_at': '2023-01-19',
+                        'automatically_required': False,
+                        'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
+                    },
+                },
+                curriculum=['file1.pdf'],
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC3'),
@@ -217,7 +253,7 @@ class PropositionInMemoryRepository(
             ),
             elements_confirmation=proposition.elements_confirmation,
             pdf_recapitulatif=[],
-            documents_additionnels=[],
+            documents_additionnels=proposition.documents_additionnels,
             motivations=proposition.motivations,
             moyens_decouverte_formation=[way.name for way in proposition.moyens_decouverte_formation],
             aide_a_la_formation=infos_specifiques_iufc.aide_a_la_formation if infos_specifiques_iufc else None,
@@ -225,7 +261,9 @@ class PropositionInMemoryRepository(
             if infos_specifiques_iufc
             else None,
             etat_formation=infos_specifiques_iufc.etat.name if infos_specifiques_iufc else '',
-            documents_demandes={},
+            documents_demandes=proposition.documents_demandes,
+            documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
+            documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
             marque_d_interet=proposition.marque_d_interet,
             edition=proposition.edition,
             en_ordre_de_paiement=proposition.en_ordre_de_paiement,

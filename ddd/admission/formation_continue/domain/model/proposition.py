@@ -99,6 +99,7 @@ class Proposition(interface.RootEntity):
     type_adresse_facturation: Optional[ChoixTypeAdresseFacturation] = None
     adresse_facturation: Optional[Adresse] = None
 
+    documents_demandes: Dict = attr.Factory(dict)
     documents_additionnels: List[str] = attr.Factory(list)
 
     motivations: Optional[str] = ''
@@ -350,3 +351,15 @@ class Proposition(interface.RootEntity):
             extra={'blocage': "closed"},
         )
         self.auteur_derniere_modification = gestionnaire
+
+    def reclamer_documents(self, auteur_modification):
+        self.statut = ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC
+        self.auteur_derniere_modification = auteur_modification
+
+    def annuler_reclamation_documents(self, auteur_modification: str):
+        self.statut = ChoixStatutPropositionContinue.CONFIRMEE
+        self.auteur_derniere_modification = auteur_modification
+
+    def completer_documents_par_candidat(self):
+        self.statut = ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC
+        self.auteur_derniere_modification = self.matricule_candidat

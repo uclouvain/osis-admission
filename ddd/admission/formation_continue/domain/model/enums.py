@@ -35,6 +35,8 @@ class ChoixStatutPropositionContinue(ChoiceEnum):
     EN_ATTENTE = _('On hold')
     INSCRIPTION_REFUSEE = _('Application denied')
     ANNULEE = _('Cancelled application')
+    A_COMPLETER_POUR_FAC = _('To be completed for Fac')
+    COMPLETEE_POUR_FAC = _('Completed for Fac')
     INSCRIPTION_AUTORISEE = _('Application accepted')
     CLOTUREE = _('Closed')
     ANNULEE_PAR_GESTIONNAIRE = _('Cancelled application by a manager')
@@ -73,6 +75,14 @@ STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE = {
 
 STATUTS_PROPOSITION_CONTINUE_SOUMISE = (
     set(ChoixStatutPropositionContinue.get_names()) - STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
+)
+
+STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT = {
+    ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name,
+}
+
+STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_GESTIONNAIRE = (
+    STATUTS_PROPOSITION_CONTINUE_SOUMISE - STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT
 )
 
 

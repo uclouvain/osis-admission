@@ -27,10 +27,6 @@ from typing import List
 
 import attr
 
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-    ChoixStatutChecklist,
-)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import StatutChecklist
 from admission.ddd.admission.formation_continue.domain.validator import (
     ShouldRenseignerExperiencesCurriculum,
