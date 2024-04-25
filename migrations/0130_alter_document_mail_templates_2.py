@@ -8,7 +8,6 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE,
     ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE,
     ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING,
-    ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING,
 )
 from osis_mail_template import MailTemplateMigration
 
@@ -274,11 +273,6 @@ class Migration(migrations.Migration):
             ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE,
             FAC_OBJECT_TEMPLATE,
             FAC_CONTENT_TEMPLATE,
-        ),
-        MailTemplateMigration(
-            ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING,
-            SIC_OBJECT_TEMPLATE,
-            SIC_CONTENT_TEMPLATE,
         ),
         MailTemplateMigration(
             ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING,

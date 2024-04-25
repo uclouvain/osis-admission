@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,10 +33,11 @@ __all__ = [
     'ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_GENERAL',
     'ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_DOCTORATE',
     'ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE',
-    'ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING',
     'ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING',
     'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL',
     'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL',
+    'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING',
+    'ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING',
 ]
 
 
@@ -142,23 +143,13 @@ templates.register(
     tokens=DOCUMENT_TOKENS,
 )
 
-ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING = 'osis-admission-request-sic-documents-continuing'
-templates.register(
-    ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_CONTINUING,
-    description=_(
-        'Mail sent to the candidate to inform him that some SIC documents are missing or invalid '
-        'in his application for continuing education'
-    ),
-    tag=CONTINUING_ADMISSION_TAG,
-    tokens=DOCUMENT_TOKENS,
-)
 
 ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING = 'osis-admission-request-fac-documents-continuing'
 templates.register(
     ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING,
     description=_(
         'Mail sent to the candidate to inform him that some FAC documents are missing or invalid '
-        'in his application for general education'
+        'in his application for continuing education'
     ),
     tag=CONTINUING_ADMISSION_TAG,
     tokens=DOCUMENT_TOKENS,
@@ -228,5 +219,31 @@ templates.register(
         'Mail sent to the candidate to inform him that all requested documents have been received for general education'
     ),
     tag=GENERAL_ADMISSION_TAG,
+    tokens=DOCUMENTS_CONFIRM_TOKENS,
+)
+
+ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING = (
+    'osis-admission-submission-confirm-with-submitted-and-not-submitted-continuing'
+)
+templates.register(
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING,
+    description=_(
+        'Mail sent to the candidate to inform him that some requested documents have been received '
+        'and some are still missing for continuing education'
+    ),
+    tag=CONTINUING_ADMISSION_TAG,
+    tokens=DOCUMENTS_CONFIRM_TOKENS,
+)
+
+ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING = (
+    'osis-admission-submission-confirm-with-submitted-continuing'
+)
+templates.register(
+    ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING,
+    description=_(
+        'Mail sent to the candidate to inform him that all requested documents have been received for continuing '
+        'education'
+    ),
+    tag=CONTINUING_ADMISSION_TAG,
     tokens=DOCUMENTS_CONFIRM_TOKENS,
 )

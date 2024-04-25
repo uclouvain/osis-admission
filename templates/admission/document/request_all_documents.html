@@ -152,7 +152,9 @@
                           htmlDocumentsList += `<li>${selectedDocument['candidate_language_tab_label']}<ul>`;
                           previousTab = selectedDocument['tab'];
                       }
-                      htmlDocumentsList += `<li>${selectedDocument['label']}. ${selectedDocument['reason']}</li>`;
+                      let currentDocumentLabel = selectedDocument['label'];
+                      if (!currentDocumentLabel.endsWith('.')) currentDocumentLabel += '.';
+                      htmlDocumentsList += `<li>${currentDocumentLabel} ${selectedDocument['reason']}</li>`;
                   }
               })
 

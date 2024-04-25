@@ -279,7 +279,10 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'submit_proposition',
                 'destroy_proposition',
             ],
-            forbidden_actions=[],
+            forbidden_actions=[
+                'retrieve_documents',
+                'update_documents',
+            ],
         )
 
     def test_list_propositions_candidate_for_doctorate_education(self):

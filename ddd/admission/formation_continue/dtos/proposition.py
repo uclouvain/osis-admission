@@ -86,6 +86,8 @@ class PropositionDTO(interface.DTO):
     moyens_decouverte_formation: List[str]
 
     documents_demandes: Dict
+    documents_libres_fac_uclouvain: List[str]
+    documents_libres_sic_uclouvain: List[str]
 
     marque_d_interet: Optional[bool]
     aide_a_la_formation: Optional[bool]
