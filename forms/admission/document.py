@@ -176,13 +176,20 @@ class FreeDocumentHelperFormMixin(forms.Form):
         academic_year = cleaned_data.get('academic_year')
 
         if document_type:
-            if checklist_tab and document_type.checklist_tab != checklist_tab:
-                self.add_error('checklist_tab', _('The document must be related to the specified checklist tab'))
-            if document_type.with_academic_year and not academic_year:
-                self.add_error('academic_year', FIELD_REQUIRED_MESSAGE)
-
             cleaned_data['file_name_en'] = document_type.long_label_en
             cleaned_data['file_name_fr'] = document_type.long_label_fr
+
+            if checklist_tab and document_type.checklist_tab != checklist_tab:
+                self.add_error('checklist_tab', _('The document must be related to the specified checklist tab'))
+            if document_type.with_academic_year:
+                if not academic_year:
+                    self.add_error('academic_year', FIELD_REQUIRED_MESSAGE)
+                else:
+                    for label_field in ['file_name_en', 'file_name_fr']:
+                        cleaned_data[label_field] = cleaned_data[label_field].replace(
+                            self.tokens['academic_year'],
+                            academic_year,
+                        )
 
         else:
             cleaned_data['file_name_en'] = cleaned_data.get('file_name')
