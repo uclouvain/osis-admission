@@ -73,7 +73,7 @@ ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION = (
 templates.register(
     ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION,
     description=_(
-        'Email sent to the candidate when the faculty approve the application with condition.',
+        'Email sent to the candidate when the faculty approve the application with conditions.',
     ),
     tag=CONTINUING_ADMISSION_TAG,
     tokens=CHECKLIST_TOKENS
@@ -92,7 +92,7 @@ ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITHOUT_CONDITION = (
 templates.register(
     ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITHOUT_CONDITION,
     description=_(
-        'Email sent to the candidate when the faculty approve the application with condition.',
+        'Email sent to the candidate when the faculty approve the application without condition.',
     ),
     tag=CONTINUING_ADMISSION_TAG,
     tokens=CHECKLIST_TOKENS,

@@ -121,11 +121,32 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             acronym=entity.formation_id.sigle,
             academic_year__year=entity.formation_id.annee,
         )
-        candidate = Person.objects.get(global_id=entity.matricule_candidat)
+
+        persons = {
+            person.global_id: person
+            for person in Person.objects.filter(
+                global_id__in=[
+                    matricule
+                    for matricule in [
+                        entity.matricule_candidat,
+                        entity.auteur_derniere_modification,
+                        entity.decision_dernier_mail_envoye_par,
+                    ]
+                    if matricule
+                ]
+            )
+        }
+
+        candidate = persons[entity.matricule_candidat]
+
         last_email_sent_by = (
-            Person.objects.get(global_id=entity.decision_dernier_mail_envoye_par)
-            if entity.decision_dernier_mail_envoye_par
+            persons[entity.decision_dernier_mail_envoye_par]
+            if entity.decision_dernier_mail_envoye_par in persons
             else None
+        )
+
+        last_update_author = (
+            persons[entity.auteur_derniere_modification] if entity.auteur_derniere_modification in persons else None
         )
 
         adresse_facturation = (
@@ -209,6 +230,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'refusal_reason': entity.motif_de_refus.name if entity.motif_de_refus else '',
                 'refusal_reason_other': entity.motif_de_refus_autre,
                 'cancel_reason': entity.motif_d_annulation,
+                'last_update_author': last_update_author,
                 **adresse_facturation,
             },
         )
@@ -236,6 +258,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
             ),
+            auteur_derniere_modification=admission.last_update_author,
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
             reponses_questions_specifiques=admission.specific_question_answers,

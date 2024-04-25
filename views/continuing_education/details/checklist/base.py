@@ -47,6 +47,7 @@ from admission.ddd.admission.formation_continue.commands import (
     RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
     RecupererQuestionsSpecifiquesQuery,
 )
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms.admission.checklist import (
     CommentForm,
@@ -84,10 +85,7 @@ __all__ = [
 
 class CheckListDefaultContextMixin(LoadDossierViewMixin):
     extra_context = {
-        'checklist_tabs': {
-            'decision': _("Decision"),
-            'fiche_etudiant': _("Student report"),
-        },
+        'checklist_tabs': {checklist_tab.name: checklist_tab.value for checklist_tab in OngletsChecklist},
         'hide_files': True,
     }
 
@@ -193,6 +191,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             body = ''
 
         return DecisionDenyForm(
+            candidate_language=self.admission.candidate.language,
             data=self.request.POST
             if self.request.method == 'POST' and 'decision-deny-subject' in self.request.POST
             else None,
@@ -221,6 +220,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             body = ''
 
         return DecisionHoldForm(
+            candidate_language=self.admission.candidate.language,
             data=self.request.POST
             if self.request.method == 'POST' and 'decision-hold-subject' in self.request.POST
             else None,
@@ -354,7 +354,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
         comments = {
             ('__'.join(c.tags)): c
-            for c in CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__overlap=tab_names)
+            for c in CommentEntry.objects.filter(
+                object_uuid=self.admission_uuid,
+                tags__overlap=OngletsChecklist.get_names(),
+            )
         }
 
         context['comment_forms'] = {

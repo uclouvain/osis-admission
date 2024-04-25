@@ -2501,6 +2501,11 @@ msgstr ""
 
 msgid ""
 "Email sent to the candidate when the faculty approve the application with "
+"conditions."
+msgstr ""
+
+msgid ""
+"Email sent to the candidate when the faculty approve the application without "
 "condition."
 msgstr ""
 
@@ -4593,6 +4598,9 @@ msgstr ""
 msgid "Other given names"
 msgstr ""
 
+msgid "Other holding reason"
+msgstr ""
+
 msgid "Other institute"
 msgstr ""
 
@@ -5195,6 +5203,9 @@ msgid "Radio buttons"
 msgstr ""
 
 msgid "Rank in diploma"
+msgstr ""
+
+msgid "Reason for cancellation"
 msgstr ""
 
 msgid "Reason for exceeding the deadline"
@@ -6184,11 +6195,6 @@ msgstr ""
 msgid "The certificate of achievement is being generated."
 msgstr ""
 
-#, python-format
-msgid ""
-"The close mail has been sent to the candidate the %(date)s by %(sender)s."
-msgstr ""
-
 msgid ""
 "The closing of the application has important consequences (canceling the "
 "requested documents, status reset, etc). Do you confirm the closing?"
@@ -6599,6 +6605,9 @@ msgid "Thesis-related data"
 msgstr ""
 
 msgid "This account number has been verified"
+msgstr ""
+
+msgid "This action is limited to a specific admission context."
 msgstr ""
 
 msgid "This action will cancel the document request."
@@ -7309,10 +7318,10 @@ msgstr ""
 
 msgid ""
 "You can not cancel this application, it is in the \"Validated\" state. "
-"Please contact Noemie Pecher (noemie.pecher@uclouvain.be)."
+"Please contact Noemie Pecher."
 msgstr ""
 "You can not cancel this application, it is in the \"Validated\" state. "
-"Please contact Noémie Pécher (noemie.pecher@uclouvain.be)."
+"Please contact Noémie Pécher."
 
 msgid ""
 "You can not transition to the \"Approved\" status from the \"Validated\" or "

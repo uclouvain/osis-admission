@@ -55,8 +55,6 @@ from admission.forms.admission.continuing_education.checklist import (
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.continuing_education.details.checklist.base import CheckListDefaultContextMixin
-from base.auth.roles.entity_manager import EntityManager
-from base.models.enums.entity_type import FACULTY
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
