@@ -1734,6 +1734,10 @@ msgstr "Formation continue"
 msgid "Continuing education admission"
 msgstr "Admission en formation continue"
 
+msgctxt "ways_hear_about_training"
+msgid "Continuing education website"
+msgstr "Par le site de la formation continue"
+
 msgid "Continuing enrolment applications"
 msgstr "Demandes d'inscription en formation continue"
 
@@ -2564,6 +2568,10 @@ msgctxt "admission"
 msgid "Email"
 msgstr "Email"
 
+msgctxt "ways_hear_about_training"
+msgid "Email"
+msgstr "Emailing"
+
 msgid "Email content"
 msgstr "Contenu du mail"
 
@@ -2843,6 +2851,10 @@ msgstr "Equivalence de grade académique FWB"
 msgid "FWB equivalent course"
 msgstr "Formation FWB équivalente"
 
+msgctxt "ways_hear_about_training"
+msgid "Facebook"
+msgstr "Sur Facebook"
+
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"
 
@@ -3051,6 +3063,10 @@ msgstr "La formation n'est pas disponible pour cette année."
 msgid "Former UCLouvain student"
 msgstr "Ancien·ne étudiant·e UCLouvain"
 
+msgctxt "ways_hear_about_training"
+msgid "Former students"
+msgstr "Par des anciens étudiants"
+
 msgid "Fraudster"
 msgstr "Fraudeur"
 
@@ -3098,6 +3114,10 @@ msgstr "Valeur en français"
 
 msgid "French values"
 msgstr "Valeurs en français"
+
+msgctxt "ways_hear_about_training"
+msgid "Friends"
+msgstr "Par des amis"
 
 msgid "From"
 msgstr "De"
@@ -3269,7 +3289,7 @@ msgstr "Composition de ménage, ou copie de votre acte de naissance"
 msgid "How did the candidate find out about this course?"
 msgstr "Comment le candidat a connu l'existence de cette formation ?"
 
-msgid "How did you find out about this course?"
+msgid "How did you hear about this course?"
 msgstr "Comment avez-vous connu l'existence de cette formation ?"
 
 msgid "I am a long-term resident in the European Union outside Belgium"
@@ -3692,6 +3712,10 @@ msgstr "En ordre de paiement"
 msgid "In person"
 msgstr "En présentiel"
 
+msgctxt "ways_hear_about_training"
+msgid "In the press"
+msgstr "Dans la presse"
+
 msgid "Include"
 msgstr "Inclure"
 
@@ -3990,6 +4014,10 @@ msgstr ""
 "Lien vers la page de décision facultaire dans la checklist de l'admission "
 "(back-office)"
 
+msgctxt "ways_hear_about_training"
+msgid "Linkedin"
+msgstr "Sur LinkedIn"
+
 msgid "List"
 msgstr "Liste"
 
@@ -4064,6 +4092,10 @@ msgstr "MEMBRE"
 
 msgid "MIME file types"
 msgstr "Types de fichier MIME"
+
+msgctxt "ways_hear_about_training"
+msgid "MOOCs"
+msgstr "Par les Moocs"
 
 msgid "Madam"
 msgstr "Madame"
@@ -4352,6 +4384,9 @@ msgid ""
 msgstr ""
 "Les champs requis dans l'onglet 'Informations complémentaires > Visa' sont "
 "manquants."
+
+msgid "Mandatory fields are missing in the 'Course choice' tab."
+msgstr "Les champs requis dans l'onglet 'Choix de formation' sont manquants."
 
 msgid "Mandatory fields are missing in the cotutelle."
 msgstr "Les champs requis de la cotutelle sont manquants."
@@ -4817,9 +4852,6 @@ msgstr ""
 "etudier/inscriptions/bienvenue-aux-etudiants-internationaux-et-aux-"
 "etudiantes-internationales.html\" target=\"_blank\"> visa</a>."
 
-msgid "On the press"
-msgstr "Dans la presse"
-
 msgid "One choice per line, leave the \"Other\" value out"
 msgstr "Un choix, par ligne, ne pas renseigner la valeur \"Autre\""
 
@@ -4881,6 +4913,10 @@ msgid "Other"
 msgstr "Autre"
 
 msgctxt "admission gender"
+msgid "Other"
+msgstr "Autre"
+
+msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr "Autre"
 
@@ -5082,6 +5118,10 @@ msgstr "Données personnelles"
 msgctxt "admission"
 msgid "Personal email"
 msgstr "E-mail privé"
+
+msgctxt "ways_hear_about_training"
+msgid "Personalised mail"
+msgstr "Par courrier personnalisé"
 
 msgid "Personalized"
 msgstr "Personnalisée"
@@ -7355,6 +7395,10 @@ msgstr ""
 "de bachelier et toute obtention d'un grade académique avec la mention "
 "éventuelle."
 
+msgctxt "ways_hear_about_training"
+msgid "UCLouvain website"
+msgstr "Par le site web de l'UCLouvain"
+
 msgid "UE"
 msgstr "UE"
 
@@ -7463,36 +7507,6 @@ msgstr "Diplômes ou expériences valorisées :"
 msgid "Values"
 msgstr "Valeurs"
 
-msgid "Via Facebook"
-msgstr "Sur Facebook"
-
-msgid "Via LinkedIn"
-msgstr "Sur LinkedIn"
-
-msgid "Via MOOCs"
-msgstr "Par les Moocs"
-
-msgid "Via a personalized letter"
-msgstr "Par courrier personnalisé"
-
-msgid "Via an emailing"
-msgstr "Par un emailing"
-
-msgid "Via former students"
-msgstr "Par des anciens étudiants"
-
-msgid "Via friends"
-msgstr "Par des amis"
-
-msgid "Via the website of UCLouvain"
-msgstr "Par le site web de l'UCLouvain"
-
-msgid "Via the website of the continuing education"
-msgstr "Par le site de la formation continue"
-
-msgid "Via word of mouth"
-msgstr "Par le bouche à oreille"
-
 msgid "Viewed at"
 msgstr "Vue le"
 
@@ -7596,6 +7610,10 @@ msgstr "Avec une année académique"
 
 msgid "Without free documents"
 msgstr "Sans les documents libres"
+
+msgctxt "ways_hear_about_training"
+msgid "Word of mouth"
+msgstr "Par le bouche à oreille"
 
 msgid "Work contract"
 msgstr "Type de contrat de travail"

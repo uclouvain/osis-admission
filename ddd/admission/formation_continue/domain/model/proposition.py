@@ -42,8 +42,10 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import StatutsChecklistContinue
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_action import (
     InformationsComplementairesValidatorList,
+    ChoixFormationValidatorList,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
 from osis_common.ddd import interface
 
 
@@ -190,3 +192,11 @@ class Proposition(interface.RootEntity):
     def verifier_informations_complementaires(self):
         """Vérification de la validité des informations complémentaires."""
         InformationsComplementairesValidatorList(self.inscription_a_titre).validate()
+
+    def verifier_choix_de_formation(self, informations_specifiques_formation: Optional[InformationsSpecifiquesDTO]):
+        """Vérification de la validité des informations saisies dans l'onglet du choix de formation."""
+        ChoixFormationValidatorList(
+            motivations=self.motivations,
+            moyens_decouverte_formation=self.moyens_decouverte_formation,
+            informations_specifiques_formation=informations_specifiques_formation,
+        ).validate()

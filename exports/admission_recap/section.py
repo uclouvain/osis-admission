@@ -245,7 +245,9 @@ def get_curriculum_section(
             TrainingType.CAPAES.name,
         ]
         and all_foreign_diploma,
-        'display_curriculum': formation.type != TrainingType.BACHELOR.name,
+        'display_curriculum': context.proposition.inscription_au_role_obligatoire is True
+        if context.est_proposition_continue
+        else formation.type != TrainingType.BACHELOR.name,
         'require_curriculum': formation.type != TrainingType.BACHELOR.name
         and (context.est_proposition_doctorale or context.est_proposition_generale),
         'specific_questions': specific_questions_by_tab[Onglets.CURRICULUM.name],
