@@ -34,6 +34,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_continue.domain.validator import (
     ShouldRenseignerInformationsAdditionnelles,
     ShouldRenseignerChoixDeFormation,
+    ShouldFormationEtreOuverte,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
@@ -68,6 +69,9 @@ class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldRenseignerChoixDeFormation(
                 motivations=self.motivations,
                 moyens_decouverte_formation=self.moyens_decouverte_formation,
+                informations_specifiques_formation=self.informations_specifiques_formation,
+            ),
+            ShouldFormationEtreOuverte(
                 informations_specifiques_formation=self.informations_specifiques_formation,
             ),
         ]

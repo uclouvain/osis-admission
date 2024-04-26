@@ -28,7 +28,8 @@ from django.http import Http404
 from rest_framework.generics import RetrieveAPIView
 
 from admission.api import serializers
-from admission.api.schema import AuthorizationAwareSchema
+from admission.api.schema import BetterChoicesSchema
+from admission.auth.roles.program_manager import ProgramManager
 from ddd.logic.formation_catalogue.formation_continue.commands import RecupererInformationsSpecifiquesQuery
 from ddd.logic.formation_catalogue.formation_continue.domain.validator.exceptions import (
     InformationsSpecifiquesNonTrouveesException,
@@ -38,19 +39,30 @@ from infrastructure.messages_bus import message_bus_instance
 
 class RetrieveContinuingEducationSpecificInformationView(RetrieveAPIView):
     name = 'retrieve-continuing-education-specific-information'
-    schema = AuthorizationAwareSchema()
+    schema = BetterChoicesSchema()
     filter_backends = []
     serializer_class = serializers.InformationsSpecifiquesFormationContinueDTOSerializer
 
-    def get_object(self):
-        sigle = self.kwargs['sigle']
-        annee = self.kwargs['annee']
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
 
+        context['manager_emails'] = (
+            ProgramManager.objects.filter(
+                education_group__educationgroupyear__acronym=self.kwargs['sigle'],
+                education_group__educationgroupyear__academic_year__year=self.kwargs['annee'],
+            ).values_list('person__email', flat=True)
+            if self.kwargs.get('sigle') and self.kwargs.get('annee')
+            else []
+        )
+
+        return context
+
+    def get_object(self):
         try:
             return message_bus_instance.invoke(
                 RecupererInformationsSpecifiquesQuery(
-                    sigle_formation=sigle,
-                    annee=annee,
+                    sigle_formation=self.kwargs['sigle'],
+                    annee=self.kwargs['annee'],
                 )
             )
         except InformationsSpecifiquesNonTrouveesException:

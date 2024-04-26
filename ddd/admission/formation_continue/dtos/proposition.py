@@ -96,6 +96,8 @@ class PropositionDTO(interface.DTO):
     diplome_produit: Optional[bool]
     intitule_du_tff: Optional[str]
 
+    marque_d_interet: Optional[bool]
+
     @property
     def est_non_soumise(self):
         return self.statut in STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE

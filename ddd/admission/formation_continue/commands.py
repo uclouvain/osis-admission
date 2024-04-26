@@ -45,6 +45,7 @@ class InitierPropositionCommand(interface.CommandRequest):
     matricule_candidat: str
     motivations: str
     moyens_decouverte_formation: List[str]
+    marque_d_interet: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -72,6 +73,7 @@ class ModifierChoixFormationCommand(interface.CommandRequest):
     motivations: str
     moyens_decouverte_formation: List[str]
 
+    marque_d_interet: Optional[bool] = None
     reponses_questions_specifiques: Dict = attr.Factory(dict)
 
 
