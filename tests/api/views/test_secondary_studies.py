@@ -314,6 +314,37 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         admission = BaseAdmission.objects.get(uuid=self.general_admission_uuid)
         self.assertEqual(admission.specific_question_answers, updated_data['specific_question_answers'])
 
+    def test_diploma_update_is_partially_working_if_already_valuated_by_epc(self):
+        self.create_belgian_diploma_with_general_admission(self.diploma_data)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+        self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
+        admission = BaseAdmission.objects.get(uuid=self.general_admission_uuid)
+        self.assertEqual(admission.specific_question_answers, self.diploma_data['specific_question_answers'])
+        self.assertEqual(admission.modified_at, datetime.datetime.now())
+        self.assertEqual(admission.last_update_author, self.candidate_user.person)
+        # Valuate the secondary studies
+        diploma.external_id = 'EPC-1'
+        diploma.save(update_fields=['external_id'])
+
+        # Want to update the diploma and the specific question answers -> only update the specific question answers
+        updated_data = {
+            "graduated_from_high_school": GotDiploma.THIS_YEAR.name,
+            "belgian_diploma": {
+                "institute": self.high_school.uuid,
+                "academic_graduation_year": self.academic_year.year,
+                "educational_type": EducationalType.TRANSITION_METHOD.name,
+            },
+            "specific_question_answers": {
+                "fe254203-17c7-47d6-95e4-3c5c532da551": "My answer 2 !",
+            },
+        }
+        self.create_belgian_diploma_with_general_admission(updated_data)
+        diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
+        self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
+        self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
+        admission = BaseAdmission.objects.get(uuid=self.general_admission_uuid)
+        self.assertEqual(admission.specific_question_answers, updated_data['specific_question_answers'])
+
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 @freezegun.freeze_time('2020-11-01')
