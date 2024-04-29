@@ -63,11 +63,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.dtos import (
-    AdressePersonnelleDTO,
-    CoordonneesDTO,
-    IdentificationDTO,
-)
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -164,8 +160,9 @@ from base.tests import QueriesAssertionsMixin, TestCaseWithQueriesAssertions
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
@@ -220,11 +217,6 @@ class _AdressePersonnelleDTO(UnfrozenDTO, AdressePersonnelleDTO):
 
 @attr.dataclass
 class _CurriculumDTO(UnfrozenDTO, CurriculumAdmissionDTO):
-    pass
-
-
-@attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
     pass
 
 

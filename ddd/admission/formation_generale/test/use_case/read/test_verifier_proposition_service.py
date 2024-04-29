@@ -50,7 +50,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     NombrePropositionsSoumisesDepasseException,
 )
-from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.enums import (
     TypeSituationAssimilation,
     ChoixAssimilation1,
