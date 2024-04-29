@@ -90,6 +90,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         formation_translator=_formation_continue_translator,
         maximum_propositions_service=_maximum_propositions_autorisees,
+        historique=_historique,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
