@@ -23,37 +23,34 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from rest_framework import serializers
 
-from typing import List, Dict
+from base.utils.serializers import DTOSerializer
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
 
-from django.utils.translation import gettext_lazy as _
-
-
-class MergePDFException(Exception):
-    pass
-
-
-class DocumentPostProcessingException(Exception):
-    pass
+__all__ = [
+    'InformationsSpecifiquesFormationContinueDTOSerializer',
+]
 
 
-class InvalidMimeTypeException(Exception):
-    def __init__(self, field, field_mimetypes: List[str], current_mimetype: str):
-        field_mimetypes_as_str = ', '.join(field_mimetypes)
-        super().__init__(
-            _(f'{current_mimetype} is not a valid mimetype for the field "{field}" ({field_mimetypes_as_str})')
-        )
+class InformationsSpecifiquesFormationContinueDTOSerializer(DTOSerializer):
+    etat = serializers.SerializerMethodField()
+    emails_gestionnaires = serializers.SerializerMethodField()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-class MergeDocumentsException(Exception):
-    def __init__(self, exceptions: Dict[str, Exception]):
-        message = (
-            'An error occurred while processing the documents:'
-            if len(exceptions) == 1
-            else 'Errors occurred while processing the documents:'
-        )
+        # Define custom schemas as the default schema type of a SerializerMethodField is string
+        self.fields['emails_gestionnaires'].field_schema = {
+            'type': 'array',
+            'items': {'type': 'string'},
+        }
 
-        for id_document, exception in exceptions.items():
-            message += f'\n{id_document}: {exception}.'
+    def get_etat(self, obj):
+        return obj.etat.name if obj.etat else ''
 
-        super().__init__(message)
+    def get_emails_gestionnaires(self, obj):
+        return self.context['manager_emails']
+
+    class Meta:
+        source = InformationsSpecifiquesDTO

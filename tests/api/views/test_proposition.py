@@ -43,6 +43,7 @@ from admission.tests.factories.continuing_education import ContinuingEducationAd
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.entity_type import EntityType
+from base.models.specific_iufc_informations import SpecificIUFCInformations
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from osis_profile import BE_ISO_CODE
@@ -256,6 +257,11 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             training__management_entity=cls.commission.entity,
             training__credits=180,
         )
+        cls.admission_without_specific_iufc_info = ContinuingEducationAdmissionFactory(
+            training__management_entity=cls.commission.entity,
+            training__credits=180,
+        )
+        cls.admission_without_specific_iufc_info.training.specificiufcinformations.delete()
         cls.admission_with_billing_address = ContinuingEducationAdmissionFactory(
             residence_permit=[uuid.uuid4()],
             registration_as=ChoixInscriptionATitre.PROFESSIONNEL.name,
@@ -288,8 +294,13 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         cls.no_role_user = PersonFactory().user
 
         cls.url = resolve_url("admission_api_v1:continuing_propositions", uuid=str(cls.admission.uuid))
+        cls.url_admission_without_specific_iufc_info = resolve_url(
+            "admission_api_v1:continuing_propositions",
+            uuid=str(cls.admission_without_specific_iufc_info.uuid),
+        )
         cls.url_admission_with_address = resolve_url(
-            "admission_api_v1:continuing_propositions", uuid=str(cls.admission_with_billing_address.uuid)
+            "admission_api_v1:continuing_propositions",
+            uuid=str(cls.admission_with_billing_address.uuid),
         )
 
     def test_get_proposition(self):
@@ -339,6 +350,21 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         self.assertEqual(json_response.get('adresse_mail_professionnelle'), self.admission.professional_email)
         self.assertEqual(json_response.get('type_adresse_facturation'), self.admission.billing_address_type)
         self.assertIsNone(json_response.get('adresse_facturation'))
+        self.assertEqual(json_response.get('motivations'), self.admission.motivations)
+        self.assertEqual(
+            json_response.get('moyens_decouverte_formation'),
+            self.admission.ways_to_find_out_about_the_course,
+        )
+        self.assertEqual(json_response.get('marque_d_interet'), self.admission.interested_mark)
+
+        # Custom information about the training
+        specific_information: SpecificIUFCInformations = self.admission.training.specificiufcinformations
+        self.assertEqual(json_response.get('aide_a_la_formation'), specific_information.training_assistance)
+        self.assertEqual(
+            json_response.get('inscription_au_role_obligatoire'),
+            specific_information.registration_required,
+        )
+        self.assertEqual(json_response.get('etat_formation'), specific_information.state)
 
         self.assertActionLinks(
             links=json_response['links'],
@@ -360,6 +386,20 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             ],
             forbidden_actions=[],
         )
+
+    def test_get_proposition_without_specific_information_about_training(self):
+        self.client.force_authenticate(user=self.admission_without_specific_iufc_info.candidate.user)
+
+        response = self.client.get(self.url_admission_without_specific_iufc_info, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        json_response = response.json()
+
+        # Custom information about the training
+        self.assertEqual(json_response.get('aide_a_la_formation'), None)
+        self.assertEqual(json_response.get('inscription_au_role_obligatoire'), None)
+        self.assertEqual(json_response.get('etat_formation'), '')
 
     def test_get_proposition_with_custom_address(self):
         self.client.force_authenticate(user=self.admission_with_billing_address.candidate.user)

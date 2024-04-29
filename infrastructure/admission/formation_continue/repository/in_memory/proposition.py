@@ -105,6 +105,16 @@ class PropositionInMemoryRepository(
                 formation_id=FormationIdentityFactory(sigle="USCC4", annee=2020),
             ),
             PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC3'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="USCC3", annee=2020),
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC32'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="USCC3", annee=2022),
+            ),
+            PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC42'),
                 matricule_candidat='0123456789',
                 formation_id=FormationIdentityFactory(sigle="USCC4", annee=2020),
@@ -137,6 +147,9 @@ class PropositionInMemoryRepository(
         formation = FormationContinueInMemoryTranslator.get_dto(
             proposition.formation_id.sigle,
             proposition.formation_id.annee,
+        )
+        infos_specifiques_iufc = FormationContinueInMemoryTranslator.get_informations_specifiques_dto(
+            entity_id=proposition.formation_id,
         )
 
         return PropositionDTO(
@@ -187,6 +200,11 @@ class PropositionInMemoryRepository(
             documents_additionnels=[],
             motivations=proposition.motivations,
             moyens_decouverte_formation=[way.name for way in proposition.moyens_decouverte_formation],
+            aide_a_la_formation=infos_specifiques_iufc.aide_a_la_formation if infos_specifiques_iufc else None,
+            inscription_au_role_obligatoire=infos_specifiques_iufc.inscription_au_role_obligatoire
+            if infos_specifiques_iufc
+            else None,
+            etat_formation=infos_specifiques_iufc.etat.name if infos_specifiques_iufc else '',
             documents_demandes={},
             marque_d_interet=proposition.marque_d_interet,
             edition=proposition.edition,

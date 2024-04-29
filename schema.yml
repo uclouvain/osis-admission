@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Admission API
-  version: 1.0.95
+  version: 1.0.97
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -4374,6 +4374,43 @@ paths:
           $ref: '#/components/responses/NotFound'
       tags:
       - propositions
+  /continuing-education/{sigle}/{annee}:
+    get:
+      operationId: retrieveInformationsSpecifiquesFormationContinueDTO
+      description: ''
+      parameters:
+      - name: sigle
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - name: annee
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformationsSpecifiquesFormationContinueDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      tags:
+      - continuing-education
   /autocomplete/sector:
     get:
       operationId: listSectorDTOs
@@ -10356,6 +10393,17 @@ components:
           type: array
           items:
             type: string
+        aide_a_la_formation:
+          type: boolean
+          nullable: true
+        inscription_au_role_obligatoire:
+          type: boolean
+          nullable: true
+        etat_formation:
+          type: string
+        marque_d_interet:
+          type: boolean
+          nullable: true
       required:
       - uuid
       - reference
@@ -10374,6 +10422,31 @@ components:
       - documents_additionnels
       - motivations
       - moyens_decouverte_formation
+      - etat_formation
+    InformationsSpecifiquesFormationContinueDTO:
+      type: object
+      properties:
+        sigle_formation:
+          type: string
+        annee:
+          type: integer
+        aide_a_la_formation:
+          type: boolean
+        inscription_au_role_obligatoire:
+          type: boolean
+        etat:
+          type: string
+          readOnly: true
+        emails_gestionnaires:
+          type: array
+          items:
+            type: string
+          readOnly: true
+      required:
+      - sigle_formation
+      - annee
+      - aide_a_la_formation
+      - inscription_au_role_obligatoire
     SectorDTO:
       type: object
       properties:
@@ -10862,6 +10935,9 @@ components:
           type: array
           items:
             type: string
+        marque_d_interet:
+          type: boolean
+          nullable: true
       required:
       - sigle_formation
       - annee_formation
@@ -11668,6 +11744,9 @@ components:
           type: array
           items:
             type: string
+        marque_d_interet:
+          type: boolean
+          nullable: true
         reponses_questions_specifiques:
           type: object
       required:

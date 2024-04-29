@@ -54,6 +54,7 @@ class TestInitierPropositionService(SimpleTestCase):
                 ChoixMoyensDecouverteFormation.COURRIER_PERSONNALISE.name,
                 ChoixMoyensDecouverteFormation.AUTRE.name,
             ],
+            marque_d_interet=False,
         )
 
     def test_should_initier(self):
@@ -72,6 +73,7 @@ class TestInitierPropositionService(SimpleTestCase):
                 ChoixMoyensDecouverteFormation.AUTRE,
             ],
         )
+        self.assertEqual(proposition.marque_d_interet, False)
 
     def test_should_empecher_si_pas_formation_continue(self):
         pas_formation_continue = 'DROI1BA'

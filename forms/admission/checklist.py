@@ -1066,6 +1066,7 @@ class SicDecisionRefusalForm(FacDecisionRefusalForm):
 
 class SicDecisionDerogationForm(forms.Form):
     dispensation_needed = forms.ChoiceField(
+        label=_('Dispensation needed'),
         choices=BesoinDeDerogation.choices(),
         widget=forms.RadioSelect(
             attrs={

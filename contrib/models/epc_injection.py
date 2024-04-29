@@ -32,6 +32,7 @@ from base.models.utils.utils import ChoiceEnum
 class EPCInjectionStatus(ChoiceEnum):
     OK = "OK"
     ERROR = "ERROR"
+    PENDING = "PENDING"
 
 
 class EPCInjection(models.Model):
@@ -40,6 +41,6 @@ class EPCInjection(models.Model):
         on_delete=models.CASCADE,
         related_name='epc_injection',
     )
-    status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=5)
+    status = models.CharField(choices=EPCInjectionStatus.choices(), null=False, blank=True, default='', max_length=7)
     payload = models.JSONField(default=dict, blank=True)
     epc_responses = models.JSONField(default=list, blank=True)
