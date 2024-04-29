@@ -33,7 +33,6 @@ from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
-    ChoixEdition,
 )
 from osis_common.ddd import interface
 

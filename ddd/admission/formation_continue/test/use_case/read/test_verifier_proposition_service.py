@@ -35,7 +35,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
 )
-from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity

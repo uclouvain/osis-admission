@@ -29,6 +29,7 @@ from contextlib import suppress
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
 from admission.contrib.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
@@ -43,7 +44,6 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
 from osis_common.ddd.interface import BusinessException
-from osis_document.contrib import FileField
 
 
 class ContinuingEducationAdmission(BaseAdmission):

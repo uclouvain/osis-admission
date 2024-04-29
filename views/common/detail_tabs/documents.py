@@ -37,7 +37,6 @@ from osis_mail_template.models import MailTemplate
 from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutEmplacementDocument,
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     EMPLACEMENTS_FAC,
     EMPLACEMENTS_SIC,

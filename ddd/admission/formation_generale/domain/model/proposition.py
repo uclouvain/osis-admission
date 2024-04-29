@@ -38,7 +38,6 @@ from admission.ddd.admission.domain.model.condition_complementaire_approbation i
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,

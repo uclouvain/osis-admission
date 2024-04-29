@@ -31,7 +31,7 @@ from uuid import UUID
 
 import attr
 from django.conf import settings
-from django.db.models import Model
+from django.db.models import Model, Q, Func
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
@@ -48,6 +48,8 @@ from admission.ddd.admission.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     StatutEmplacementDocument,
 )
+from base.models.entity_version import EntityVersion, PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS
+from base.models.enums.entity_type import PEDAGOGICAL_ENTITY_TYPES
 from osis_profile.models import EducationalExperienceYear
 
 FORMATTED_EMAIL_FOR_HISTORY = """{sender_label} : {sender}
@@ -540,3 +542,20 @@ CORRESPONDANCE_CHAMPS_SYSTEME = {
     'ATTESTATION_ACCORD_ANNEXE_SIC': 'sic_annexe_approval_certificate',
     'ATTESTATION_REFUS_SIC': 'sic_refusal_certificate',
 }
+
+
+def get_entities_with_descendants_ids(entities_acronyms):
+    """
+    From a list of pedagogical entities acronyms, get a set of ids of the entities and their descendants.
+    :param entities_acronyms: A list of acronyms of pedagogical entities
+    :return: A set of entities ids
+    """
+    if entities_acronyms:
+        cte = (
+            EntityVersion.objects.filter(acronym__in=entities_acronyms)
+            .filter(Q(entity_type__in=PEDAGOGICAL_ENTITY_TYPES) | Q(acronym__in=PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS))
+            .with_parents()
+        )
+        qs = cte.queryset().with_cte(cte).annotate(level=Func('parents', function='cardinality'))
+        return set(qs.values_list('entity_id', flat=True))
+    return set()

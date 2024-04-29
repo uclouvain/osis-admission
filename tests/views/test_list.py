@@ -375,12 +375,12 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.client.force_login(user=self.sic_management_user)
 
         # With school
-        response = self._do_request(entites='ABCDEF', allowed_sql_surplus=1)
+        response = self._do_request(entites='ABCDEF', allowed_sql_surplus=2)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
 
         # With faculty
-        response = self._do_request(entites='GHIJK', allowed_sql_surplus=1)
+        response = self._do_request(entites='GHIJK', allowed_sql_surplus=2)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
 

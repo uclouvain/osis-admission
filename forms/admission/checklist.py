@@ -87,6 +87,7 @@ from admission.views.autocomplete.learning_unit_years import LearningUnitYearAut
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
 from base.forms.utils import EMPTY_CHOICE, get_example_text, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
+from base.forms.utils.autocomplete import Select2MultipleWithTagWhenNoResultWidget
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.forms.utils.datefield import CustomDateInput
 from base.models.academic_year import AcademicYear
@@ -425,7 +426,7 @@ class FacDecisionApprovalForm(forms.ModelForm):
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
-        widget=autocomplete.Select2MultipleWithTagWhenNoResultWidget(
+        widget=Select2MultipleWithTagWhenNoResultWidget(
             url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-token-separators': '[{}]'.format(SEPARATOR),
@@ -782,7 +783,7 @@ class SicDecisionApprovalForm(forms.ModelForm):
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
-        widget=autocomplete.Select2MultipleWithTagWhenNoResultWidget(
+        widget=Select2MultipleWithTagWhenNoResultWidget(
             url='admission:autocomplete:learning-unit-years',
             attrs={
                 'data-token-separators': '[{}]'.format(SEPARATOR),
@@ -1065,6 +1066,7 @@ class SicDecisionRefusalForm(FacDecisionRefusalForm):
 
 class SicDecisionDerogationForm(forms.Form):
     dispensation_needed = forms.ChoiceField(
+        label=_('Dispensation needed'),
         choices=BesoinDeDerogation.choices(),
         widget=forms.RadioSelect(
             attrs={

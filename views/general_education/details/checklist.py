@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import attr
 import datetime
 from typing import Dict, Set, Optional, List
 
@@ -173,10 +174,11 @@ from admission.utils import (
     get_portal_admission_url,
     get_access_titles_names,
     get_salutation_prefix,
+    format_academic_year,
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_SIC, COMMENT_TAG_FAC
-from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
@@ -1611,6 +1613,7 @@ class ChecklistView(
             # Remove the experiences that we had in the checklist that have been removed
             children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
 
+            # Order the experiences in chronological order
             ordered_experiences = {}
             if children:
                 # Order the experiences in chronological order

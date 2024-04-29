@@ -52,10 +52,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    AnneeExperienceAcademiqueDTO,
     ConnaissanceLangueDTO,
     CotutelleDTO,
-    CurriculumDTO,
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
     DoctoratDTO,
@@ -64,18 +62,14 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     PromoteurDTO,
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.dtos import (
     AdressePersonnelleDTO,
     CoordonneesDTO,
-    EtudesSecondairesAdmissionDTO,
     IdentificationDTO,
 )
 from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
-    AlternativeSecondairesDTO,
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-)
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
@@ -168,7 +162,14 @@ from base.models.person import Person
 from base.tests import QueriesAssertionsMixin, TestCaseWithQueriesAssertions
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO,
+    AnneeExperienceAcademiqueDTO,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import (
@@ -216,7 +217,7 @@ class _AdressePersonnelleDTO(UnfrozenDTO, AdressePersonnelleDTO):
 
 
 @attr.dataclass
-class _CurriculumDTO(UnfrozenDTO, CurriculumDTO):
+class _CurriculumDTO(UnfrozenDTO, CurriculumAdmissionDTO):
     pass
 
 

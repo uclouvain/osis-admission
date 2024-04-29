@@ -29,7 +29,6 @@ from django.views.generic import TemplateView
 from admission.ddd.admission.enums import Onglets
 from admission.views.common.mixins import LoadDossierViewMixin
 
-
 __all__ = ['AdmissionTrainingChoiceDetailView']
 
 

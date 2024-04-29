@@ -74,6 +74,7 @@ from admission.utils import (
     get_portal_admission_url,
     get_backoffice_admission_url,
     get_salutation_prefix,
+    get_portal_admission_list_url,
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
@@ -103,6 +104,7 @@ class Notification(INotification):
                 context='general-education',
                 admission_uuid=proposition.entity_id.uuid,
             ),
+            'admissions_link_front': get_portal_admission_list_url(),
         }
 
     @classmethod

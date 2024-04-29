@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 import datetime
 import uuid
 from typing import List
@@ -32,6 +31,7 @@ import factory
 from attr import dataclass
 
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.dtos import (
     AdressePersonnelleDTO,
     CoordonneesDTO,
@@ -44,7 +44,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
-    CurriculumDTO,
 )
 
 
@@ -190,7 +189,7 @@ class ExperienceNonAcademiqueDTOFactory(factory.Factory):
 
 class CurriculumDTOFactory(factory.Factory):
     class Meta:
-        model = CurriculumDTO
+        model = CurriculumAdmissionDTO
         abstract = False
 
     experiences_non_academiques: List[ExperienceNonAcademiqueDTOFactory] = []
