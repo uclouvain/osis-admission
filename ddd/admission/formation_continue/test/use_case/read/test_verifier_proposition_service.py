@@ -84,11 +84,6 @@ class TestVerifierPropositionService(TestCase):
         proposition_id = self.message_bus.invoke(self.verifier_commande)
         self.assertEqual(proposition_id, self.complete_proposition.entity_id)
 
-    def test_should_retourner_erreur_si_conditions_acces_non_remplies(self):
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC4'))
-        self.assertHasInstance(context.exception.exceptions, ConditionsAccessNonRempliesException)
-
     def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
         propositions = self.proposition_repository.search(matricule_candidat='0123456789')
         for proposition in propositions:

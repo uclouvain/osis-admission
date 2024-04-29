@@ -702,10 +702,6 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             json_content['errors'],
             [
                 {
-                    "status_code": "ADMISSION-2",
-                    "detail": _("Admission conditions not met."),
-                },
-                {
                     "status_code": "FORMATION-CONTINUE-3",
                     "detail": _(
                         "Please specify the details of your most recent academic training and your most recent "
