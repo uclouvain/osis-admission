@@ -44,7 +44,7 @@ from admission.ddd.admission.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from osis_profile import MOIS_DEBUT_ANNEE_ACADEMIQUE, BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, MOIS_DEBUT_ANNEE_ACADEMIQUE
 from osis_profile.models.enums.curriculum import Result
 
 

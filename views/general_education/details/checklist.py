@@ -27,6 +27,7 @@ import attr
 import datetime
 from typing import Dict, Set, Optional, List
 
+import attr
 from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import Form
@@ -183,6 +184,7 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -1614,6 +1616,7 @@ class ChecklistView(
             # Order the experiences in chronological order
             ordered_experiences = {}
             if children:
+                # Order the experiences in chronological order
                 order = 0
 
                 for annee, experience_list in experiences.items():
