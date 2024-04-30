@@ -48,18 +48,18 @@ class ChoixTypeAdresseFacturation(ChoiceEnum):
 
 
 class ChoixMoyensDecouverteFormation(ChoiceEnum):
-    SITE_WEB_UCLOUVAIN = _("Via the website of UCLouvain")
-    SITE_FORMATION_CONTINUE = _("Via the website of the continuing education")
-    PRESSE = _("On the press")
-    FACEBOOK = _("Via Facebook")
-    LINKEDIN = _("Via LinkedIn")
-    COURRIER_PERSONNALISE = _("Via a personalized letter")
-    EMAILING = _("Via an emailing")
-    BOUCHE_A_OREILLE = _("Via word of mouth")
-    AMIS = _("Via friends")
-    ANCIENS_ETUDIANTS = _("Via former students")
-    MOOCS = _("Via MOOCs")
-    AUTRE = _("Other")
+    SITE_WEB_UCLOUVAIN = pgettext_lazy("ways_hear_about_training", "UCLouvain website")
+    SITE_FORMATION_CONTINUE = pgettext_lazy("ways_hear_about_training", "Continuing education website")
+    PRESSE = pgettext_lazy("ways_hear_about_training", "In the press")
+    FACEBOOK = pgettext_lazy("ways_hear_about_training", "Facebook")
+    LINKEDIN = pgettext_lazy("ways_hear_about_training", "Linkedin")
+    COURRIER_PERSONNALISE = pgettext_lazy("ways_hear_about_training", "Personalised mail")
+    EMAILING = pgettext_lazy("ways_hear_about_training", "Email")
+    BOUCHE_A_OREILLE = pgettext_lazy("ways_hear_about_training", "Word of mouth")
+    AMIS = pgettext_lazy("ways_hear_about_training", "Friends")
+    ANCIENS_ETUDIANTS = pgettext_lazy("ways_hear_about_training", "Former students")
+    MOOCS = pgettext_lazy("ways_hear_about_training", "MOOCs")
+    AUTRE = pgettext_lazy("ways_hear_about_training", "Other")
 
 
 STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE = {

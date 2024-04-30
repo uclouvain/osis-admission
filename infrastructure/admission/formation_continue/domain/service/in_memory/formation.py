@@ -25,6 +25,8 @@
 ##############################################################################
 from typing import List, Optional
 
+import factory
+
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -32,6 +34,83 @@ from admission.ddd.admission.formation_continue.domain.service.i_formation impor
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.test.factory.formation import FormationFactory
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.state_iufc import StateIUFC
+from ddd.logic.formation_catalogue.formation_continue.domain.model.informations_specifiques import (
+    InformationsSpecifiques,
+    FormationContinueIdentite,
+)
+from ddd.logic.formation_catalogue.formation_continue.domain.validator.exceptions import (
+    InformationsSpecifiquesNonTrouveesException,
+)
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
+from infrastructure.formation_catalogue.formation_continue.repository.in_memory.informations_specifiques import (
+    InformationsSpecifiquesInMemoryRepository,
+)
+
+
+class InformationsSpecifiquesFactory(factory.Factory):
+    class Meta:
+        model = InformationsSpecifiques
+
+    aide_a_la_formation = True
+    inscription_au_role_obligatoire = False
+    etat = StateIUFC.OPEN
+
+
+class FormationContinueInformationsSpecifiquesInMemoryRepositoryFactory(InformationsSpecifiquesInMemoryRepository):
+    _informations_specifiques = [
+        InformationsSpecifiquesFactory(
+            entity_id=FormationContinueIdentite(
+                sigle_formation='USCC1',
+                annee=2022,
+            ),
+        ),
+        InformationsSpecifiquesFactory(
+            entity_id=FormationContinueIdentite(
+                sigle_formation='USCC1',
+                annee=2020,
+            ),
+        ),
+        InformationsSpecifiquesFactory(
+            entity_id=FormationContinueIdentite(
+                sigle_formation='USCC2',
+                annee=2022,
+            ),
+        ),
+        InformationsSpecifiquesFactory(
+            entity_id=FormationContinueIdentite(
+                sigle_formation='USCC3',
+                annee=2022,
+            ),
+            etat=StateIUFC.CLOSED,
+        ),
+        InformationsSpecifiquesFactory(
+            entity_id=FormationContinueIdentite(
+                sigle_formation='USCC4',
+                annee=2022,
+            ),
+            inscription_au_role_obligatoire=True,
+        ),
+        InformationsSpecifiquesFactory(
+            entity_id=FormationContinueIdentite(
+                sigle_formation='USCC5',
+                annee=2022,
+            ),
+        ),
+        InformationsSpecifiquesFactory(
+            entity_id=FormationContinueIdentite(
+                sigle_formation='ESP3DP-MASTER',
+                annee=2022,
+            ),
+        ),
+        InformationsSpecifiquesFactory(
+            entity_id=FormationContinueIdentite(
+                sigle_formation='USCC4',
+                annee=2020,
+            ),
+            inscription_au_role_obligatoire=True,
+        ),
+    ]
 
 
 class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
@@ -67,6 +146,15 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             intitule='Formation USCC3',
             entity_id__sigle='USCC3',
             entity_id__annee=2022,
+            type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
+            campus__nom='Charleroi',
+            campus_inscription__nom='Charleroi',
+            sigle_entite_gestion='FC1',
+        ),
+        FormationFactory(
+            intitule='Formation USCC3',
+            entity_id__sigle='USCC3',
+            entity_id__annee=2020,
             type=TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,
             campus__nom='Charleroi',
             campus_inscription__nom='Charleroi',
@@ -109,6 +197,8 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             sigle_entite_gestion='FC1',
         ),
     ]
+
+    iufc_specific_informations_trainings_repository = FormationContinueInformationsSpecifiquesInMemoryRepositoryFactory
 
     @classmethod
     def _build_dto(cls, entity: FormationFactory) -> 'FormationDTO':
@@ -182,3 +272,15 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             and training.entity_id.annee == annee
             and training.type_formation == TypeFormation.FORMATION_CONTINUE
         )
+
+    @classmethod
+    def get_informations_specifiques_dto(cls, entity_id: FormationIdentity) -> Optional[InformationsSpecifiquesDTO]:
+        try:
+            return cls.iufc_specific_informations_trainings_repository.get_dto(
+                entity_id=FormationContinueIdentite(
+                    sigle_formation=entity_id.sigle,
+                    annee=entity_id.annee,
+                )
+            )
+        except InformationsSpecifiquesNonTrouveesException:
+            pass

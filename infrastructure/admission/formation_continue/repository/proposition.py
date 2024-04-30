@@ -379,6 +379,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_additionnels=admission.additional_documents,
             motivations=admission.motivations,
             moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,
+            aide_a_la_formation=admission.training.specificiufcinformations.training_assistance
+            if getattr(admission.training, 'specificiufcinformations', None)
+            else None,
+            inscription_au_role_obligatoire=admission.training.specificiufcinformations.registration_required
+            if getattr(admission.training, 'specificiufcinformations', None)
+            else None,
+            etat_formation=admission.training.specificiufcinformations.state
+            if getattr(admission.training, 'specificiufcinformations', None)
+            else '',
             documents_demandes=admission.requested_documents,
             marque_d_interet=admission.interested_mark,
             edition=admission.edition,

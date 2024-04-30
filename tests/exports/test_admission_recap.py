@@ -63,11 +63,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.dtos import (
-    AdressePersonnelleDTO,
-    CoordonneesDTO,
-    IdentificationDTO,
-)
+from admission.ddd.admission.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
@@ -157,18 +153,21 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.state_iufc import StateIUFC
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
 from base.tests import QueriesAssertionsMixin, TestCaseWithQueriesAssertions
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO,
     AnneeExperienceAcademiqueDTO,
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
@@ -218,11 +217,6 @@ class _AdressePersonnelleDTO(UnfrozenDTO, AdressePersonnelleDTO):
 
 @attr.dataclass
 class _CurriculumDTO(UnfrozenDTO, CurriculumAdmissionDTO):
-    pass
-
-
-@attr.dataclass
-class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
     pass
 
 
@@ -1315,6 +1309,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             moyens_decouverte_formation=[],
             documents_demandes={},
             marque_d_interet=False,
+            aide_a_la_formation=False,
+            inscription_au_role_obligatoire=True,
+            etat_formation=StateIUFC.OPEN.name,
             edition=ChoixEdition.UN.name,
             en_ordre_de_paiement=False,
             droits_reduits=False,
@@ -2327,6 +2324,31 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[1].required)
+
+    def test_curriculum_attachments_for_continuing_proposition_with_short_training(self):
+        with mock.patch.multiple(
+            self.continuing_context.proposition,
+            inscription_au_role_obligatoire=False,
+        ):
+            section = get_curriculum_section(self.continuing_context, self.empty_questions, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 0)
+
+    def test_curriculum_attachments_for_continuing_proposition_with_long_training(self):
+        with mock.patch.multiple(
+            self.continuing_context.proposition,
+            inscription_au_role_obligatoire=True,
+        ):
+            section = get_curriculum_section(self.continuing_context, self.empty_questions, False)
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'CURRICULUM')
+            self.assertEqual(attachments[0].label, DocumentsCurriculum['CURRICULUM'])
+            self.assertEqual(attachments[0].uuids, self.continuing_context.proposition.curriculum)
+            self.assertFalse(attachments[0].required)
 
     # Curriculum attachments
     def test_curriculum_attachments_for_continuing_proposition_without_equivalence(self):
