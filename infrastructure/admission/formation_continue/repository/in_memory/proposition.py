@@ -52,6 +52,9 @@ class _Candidat:
     nom: str
     nationalite: str
     nationalite_ue: bool
+    noma_candidat: str = ''
+    adresse_email_candidat: str = ''
+    langue_contact_candidat: str = ''
 
 
 class PropositionInMemoryRepository(
@@ -60,9 +63,9 @@ class PropositionInMemoryRepository(
     IPropositionRepository,
 ):
     candidats = {
-        "0123456789": _Candidat("Jean", "Dupont", "France", True),
-        "0000000001": _Candidat("Michel", "Durand", "Belgique", True),
-        "candidat": _Candidat("Pierre", "Dupond", "Belgique", True),
+        "0123456789": _Candidat("Jean", "Dupont", "France", True, '476284', 'jdupont@example.be'),
+        "0000000001": _Candidat("Michel", "Durand", "Belgique", True, '154893', 'mdurand@example.be'),
+        "candidat": _Candidat("Pierre", "Dupond", "Belgique", True, '545805', 'pdupond@example.be'),
     }
     entities: List['Proposition'] = []
 
@@ -105,6 +108,16 @@ class PropositionInMemoryRepository(
                 formation_id=FormationIdentityFactory(sigle="USCC4", annee=2020),
             ),
             PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC3'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="USCC3", annee=2020),
+            ),
+            PropositionFactory(
+                entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC32'),
+                matricule_candidat='0000000001',
+                formation_id=FormationIdentityFactory(sigle="USCC3", annee=2022),
+            ),
+            PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-USCC42'),
                 matricule_candidat='0123456789',
                 formation_id=FormationIdentityFactory(sigle="USCC4", annee=2020),
@@ -138,6 +151,9 @@ class PropositionInMemoryRepository(
             proposition.formation_id.sigle,
             proposition.formation_id.annee,
         )
+        infos_specifiques_iufc = FormationContinueInMemoryTranslator.get_informations_specifiques_dto(
+            entity_id=proposition.formation_id,
+        )
 
         return PropositionDTO(
             uuid=proposition.entity_id.uuid,
@@ -147,11 +163,15 @@ class PropositionInMemoryRepository(
                 sigle_entite_gestion=formation.sigle_entite_gestion,
                 annee=proposition.formation_id.annee,
             ),
+            langue_contact_candidat=candidat.langue_contact_candidat,
             matricule_candidat=proposition.matricule_candidat,
             prenom_candidat=candidat.prenom,
             nom_candidat=candidat.nom,
             pays_nationalite_candidat=candidat.nationalite,
             pays_nationalite_ue_candidat=candidat.nationalite_ue,
+            nom_pays_nationalite_candidat=candidat.nationalite,
+            noma_candidat=candidat.noma_candidat,
+            adresse_email_candidat=candidat.adresse_email_candidat,
             statut=proposition.statut.name,
             creee_le=proposition.creee_le,
             modifiee_le=proposition.modifiee_le,
@@ -187,6 +207,11 @@ class PropositionInMemoryRepository(
             documents_additionnels=[],
             motivations=proposition.motivations,
             moyens_decouverte_formation=[way.name for way in proposition.moyens_decouverte_formation],
+            aide_a_la_formation=infos_specifiques_iufc.aide_a_la_formation if infos_specifiques_iufc else None,
+            inscription_au_role_obligatoire=infos_specifiques_iufc.inscription_au_role_obligatoire
+            if infos_specifiques_iufc
+            else None,
+            etat_formation=infos_specifiques_iufc.etat.name if infos_specifiques_iufc else '',
             documents_demandes={},
             marque_d_interet=proposition.marque_d_interet,
             edition=proposition.edition,
@@ -201,4 +226,6 @@ class PropositionInMemoryRepository(
             a_reussi_l_epreuve_d_evaluation=proposition.a_reussi_l_epreuve_d_evaluation,
             diplome_produit=proposition.diplome_produit,
             intitule_du_tff=proposition.intitule_du_tff,
+            date_changement_statut=None,
+            candidat_a_plusieurs_demandes=False,
         )

@@ -201,7 +201,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
     @classmethod
     def get_dto(cls, entity_id: 'PropositionIdentity') -> 'PropositionDTO':
-        return cls._load_dto(ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=entity_id.uuid))
+        try:
+            return cls._load_dto(ContinuingEducationAdmissionProxy.objects.for_dto().get(uuid=entity_id.uuid))
+        except ContinuingEducationAdmissionProxy.DoesNotExist:
+            raise PropositionNonTrouveeException
 
     @classmethod
     def _load(cls, admission: 'ContinuingEducationAdmission') -> 'Proposition':
@@ -283,20 +286,30 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             .first()
         )
 
+        if language_is_french:
+            training_title_field = 'title'
+            country_name_field = 'name'
+        else:
+            training_title_field = 'title_english'
+            country_name_field = 'name_en'
+
         return PropositionDTO(
             uuid=admission.uuid,
             statut=admission.status,
+            date_changement_statut=admission.status_updated_at,  # from annotation
+            langue_contact_candidat=admission.candidate.language,
             creee_le=admission.created_at,
             modifiee_le=admission.modified_at,
             soumise_le=admission.submitted_at,
             erreurs=admission.detailed_status or [],
             date_fin_pot=admission.pool_end_date,  # from annotation
+            candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
             formation=FormationDTO(
                 sigle=admission.training.acronym,
                 code=admission.training.partial_acronym,
                 annee=admission.training.academic_year.year,
                 date_debut=admission.training.academic_year.start_date,
-                intitule=admission.training.title if language_is_french else admission.training.title_english,
+                intitule=getattr(admission.training, training_title_field),
                 intitule_fr=admission.training.title,
                 intitule_en=admission.training.title_english,
                 campus=CampusDTO(
@@ -305,7 +318,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     code_postal=campus.postal_code,
                     ville=campus.city,
                     pays_iso_code=campus.country.iso_code if campus.country else '',
-                    nom_pays=campus.country.name if campus.country else '',
+                    nom_pays=getattr(campus.country, country_name_field) if campus.country else '',
                     rue=campus.street,
                     numero_rue=campus.street_number,
                     boite_postale=campus.postal_box,
@@ -324,7 +337,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     pays_iso_code=admission.training.enrollment_campus.country.iso_code
                     if admission.training.enrollment_campus.country
                     else '',
-                    nom_pays=admission.training.enrollment_campus.country.name
+                    nom_pays=getattr(admission.training.enrollment_campus.country, country_name_field)
                     if admission.training.enrollment_campus.country
                     else '',
                     rue=admission.training.enrollment_campus.street,
@@ -348,8 +361,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             pays_nationalite_candidat=admission.candidate.country_of_citizenship.iso_code
             if admission.candidate.country_of_citizenship
             else '',
+            nom_pays_nationalite_candidat=getattr(admission.candidate.country_of_citizenship, country_name_field)
+            if admission.candidate.country_of_citizenship
+            else '',
             pays_nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
+            noma_candidat=admission.student_registration_id[0]
+            if admission.student_registration_id
+            else '',  # from annotation
+            adresse_email_candidat=admission.candidate.private_email,
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
@@ -366,7 +386,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 code_postal=admission.billing_address_postal_code,
                 ville=admission.billing_address_city,
                 pays=admission.billing_address_country.iso_code if admission.billing_address_country else '',
-                nom_pays=getattr(admission.billing_address_country, 'name' if language_is_french else 'name_en')
+                nom_pays=getattr(admission.billing_address_country, country_name_field)
                 if admission.billing_address_country
                 else '',
                 destinataire=admission.billing_address_recipient,
@@ -379,6 +399,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             documents_additionnels=admission.additional_documents,
             motivations=admission.motivations,
             moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,
+            aide_a_la_formation=admission.training.specificiufcinformations.training_assistance
+            if getattr(admission.training, 'specificiufcinformations', None)
+            else None,
+            inscription_au_role_obligatoire=admission.training.specificiufcinformations.registration_required
+            if getattr(admission.training, 'specificiufcinformations', None)
+            else None,
+            etat_formation=admission.training.specificiufcinformations.state
+            if getattr(admission.training, 'specificiufcinformations', None)
+            else '',
             documents_demandes=admission.requested_documents,
             marque_d_interet=admission.interested_mark,
             edition=admission.edition,

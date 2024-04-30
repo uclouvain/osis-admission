@@ -78,6 +78,7 @@ from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.state_iufc import StateIUFC
 from base.tests import QueriesAssertionsMixin
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 
@@ -701,10 +702,6 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             json_content['errors'],
             [
                 {
-                    "status_code": "ADMISSION-2",
-                    "detail": _("Admission conditions not met."),
-                },
-                {
                     "status_code": "FORMATION-CONTINUE-3",
                     "detail": _(
                         "Please specify the details of your most recent academic training and your most recent "
@@ -724,6 +721,36 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['errors'], [])
+
+    def test_continuing_proposition_with_closed_training(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+
+        admission = ContinuingEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            with_access_conditions_met=True,
+        )
+        admission.training.specificiufcinformations.state = StateIUFC.CLOSED.name
+        admission.training.specificiufcinformations.save()
+
+        admission_url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=admission.uuid)
+
+        expected_error = {
+            "status_code": "FORMATION-CONTINUE-6",
+            "detail": _("Your application cannot be submitted because the %(acronym)s course is closed.")
+            % {"acronym": admission.training.acronym},
+        }
+
+        # Verification
+        response = self.client.get(admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        json_content = response.json()
+        self.assertEqual(json_content.get('errors', []), [expected_error])
+
+        # Submission
+        response = self.client.post(admission_url, self.submitted_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        json_content = response.json()
+        self.assertEqual(json_content.get('non_field_errors', []), [expected_error])
 
     def test_continuing_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
@@ -760,6 +787,14 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         content = email_object.as_string()
         self.assertIn(f'{self.admission_ok.candidate.first_name } {self.admission_ok.candidate.last_name}', content)
         self.assertIn('http://dummyurl/file/foobar', content)
+
+        # Check the history entries
+        history_entry: HistoryEntry = HistoryEntry.objects.filter(
+            object_uuid=self.admission_ok.uuid,
+            tags__contains=['proposition', 'status-changed'],
+        ).last()
+        self.assertIsNotNone(history_entry)
+        self.assertEqual(history_entry.message_fr, 'La proposition a été soumise.')
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()

@@ -104,16 +104,8 @@ class ITitresAcces(interface.DomainService):
             ConditionAccess.DIPLOMATION_POTENTIEL_DOCTORAT_BELGE,
             ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
         ],
-        (TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,): [
-            ConditionAccess.DIPLOMATION_ACADEMIQUE_BELGE,
-            ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
-            ConditionAccess.POTENTIEL_ACCES_VAE,
-        ],
-        (TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,): [
-            ConditionAccess.DIPLOMATION_ACADEMIQUE_BELGE,
-            ConditionAccess.DIPLOMATION_ACADEMIQUE_ETRANGER,
-            ConditionAccess.POTENTIEL_ACCES_VAE,
-        ],
+        (TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,): [],
+        (TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE,): [],
         (
             TrainingType.CERTIFICATE_OF_PARTICIPATION,
             TrainingType.CERTIFICATE_OF_SUCCESS,

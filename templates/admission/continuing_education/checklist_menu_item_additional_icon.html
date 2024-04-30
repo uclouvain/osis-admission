@@ -5,12 +5,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-<<<<<<<< HEAD:templates/admission/continuing_education/checklist_menu_item_additional_icon.html
   * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
-========
-  * Copyright (C) 2015-2024 Université catholique de Louvain
-  (http://www.uclouvain.be)
->>>>>>>> 97ee0370aff9e60c704a00139884fc4c5a29318a:templates/admission/includes/curriculum_experience_header.html
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -27,36 +22,11 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<<<<<<<< HEAD:templates/admission/continuing_education/checklist_menu_item_additional_icon.html
 <i
     hx-swap-oob="outerHTML"
     id="checklist-menu-item-additional-icon-{{ item_name }}"
     {% if additional_icon %}
     class="{{ additional_icon }}"
-========
-<div id="curriculum-header" class="panel-heading flex-content-no-wrap">
-  <span>{{ title }}</span>
-  <div>
-    <a
-      class="prevent-quitting-link"
-      {% if next_url %}
-      href="{{ next_url }}"
-      {% else %}
-      href="{% url base_namespace|add:':checklist' view.kwargs.uuid %}#parcours_anterieur{% if existing_experience %}__{{ view.kwargs.experience_uuid }}{% endif %}"
-      {% endif %}
-    >
-      <i class="fa fa-stream"></i>
-      {% translate "Back to checklist" %}
-    </a>
-    {% if existing_experience and delete_url %}
-      <a class="btn btn-danger" data-toggle="modal" data-target="#confirmation-modal">
-        <span class="fa fa-solid fa-trash"></span>
-      </a>
-      {% if request.GET %}
-        {% concat delete_url '?' request.GET.urlencode as delete_url_with_params %}
-      {% endif %}
-      {% include 'admission/modal/confirm_modal.html' with confirm_title=_('Deletion of an experience') confirm_url=delete_url_with_params|default:delete_url %}
->>>>>>>> 97ee0370aff9e60c704a00139884fc4c5a29318a:templates/admission/includes/curriculum_experience_header.html
     {% endif %}
 >
 </i>

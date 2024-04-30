@@ -56,6 +56,12 @@ class PropositionDTO(interface.DTO):
     nom_candidat: str
     pays_nationalite_candidat: str
     pays_nationalite_ue_candidat: Optional[bool]
+    nom_pays_nationalite_candidat: str
+    noma_candidat: str
+    adresse_email_candidat: str
+    date_changement_statut: Optional[datetime.datetime]
+    candidat_a_plusieurs_demandes: bool
+    langue_contact_candidat: str
 
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
 
@@ -80,6 +86,9 @@ class PropositionDTO(interface.DTO):
     documents_demandes: Dict
 
     marque_d_interet: Optional[bool]
+    aide_a_la_formation: Optional[bool]
+    inscription_au_role_obligatoire: Optional[bool]
+    etat_formation: str
     edition: Optional[str]
     en_ordre_de_paiement: Optional[bool]
     droits_reduits: Optional[bool]
@@ -92,6 +101,8 @@ class PropositionDTO(interface.DTO):
     a_reussi_l_epreuve_d_evaluation: Optional[bool]
     diplome_produit: Optional[bool]
     intitule_du_tff: Optional[str]
+
+    marque_d_interet: Optional[bool]
 
     @property
     def est_non_soumise(self):

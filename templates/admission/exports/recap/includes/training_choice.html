@@ -55,8 +55,16 @@
 {% endif %}
 
 {% if is_continuing %}
+  {% if proposition.etat_formation == 'CLOSED' %}
+    {% field_data _('I am interested in this course even if it is closed') proposition.marque_d_interet %}
+  {% endif %}
+
   {% field_data _('Motivations') proposition.motivations %}
-  {% field_data _('How did you find out about this course?') proposition.moyens_decouverte_formation|multiple_enum_display:'ChoixMoyensDecouverteFormation' %}
+
+  {% if proposition.inscription_au_role_obligatoire == True %}
+    {% field_data _('How did you hear about this course?') proposition.moyens_decouverte_formation|multiple_enum_display:'ChoixMoyensDecouverteFormation' %}
+  {% endif %}
+
 {% endif %}
 
 {% need_to_display_specific_questions specific_questions hide_files as specific_questions_to_display %}

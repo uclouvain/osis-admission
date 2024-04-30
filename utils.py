@@ -52,7 +52,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
 from admission.mail_templates import (
@@ -69,9 +69,14 @@ from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO, DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+    AlternativeSecondairesDTO,
 )
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 
@@ -275,7 +280,7 @@ def access_title_country(selectable_access_titles: Iterable[TitreAccesSelectionn
     return country
 
 
-def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
+def get_training_url(training_type, training_acronym, partial_training_acronym, suffix):
     # Circular import otherwise
     from infrastructure.messages_bus import message_bus_instance
 
@@ -308,7 +313,15 @@ def get_access_conditions_url(training_type, training_acronym, partial_training_
                 )
             )
 
-        return f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
+        return f"https://uclouvain.be/prog-{year}-{sigle}-{suffix}"
+
+
+def get_practical_information_url(training_type, training_acronym, partial_training_acronym):
+    return get_training_url(training_type, training_acronym, partial_training_acronym, 'infos_pratiques')
+
+
+def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
+    return get_training_url(training_type, training_acronym, partial_training_acronym, 'cond_adm')
 
 
 def get_access_titles_names(

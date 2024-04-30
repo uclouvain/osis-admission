@@ -296,6 +296,7 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
                 "candidate__country_of_citizenship",
                 "training__academic_year",
                 "training__education_group_type",
+                "training__specificiufcinformations",
                 "determined_academic_year",
             )
             .annotate_pool_end_date()
@@ -313,6 +314,9 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
             .annotate_training_management_entity()
             .annotate_training_management_faculty()
             .annotate_with_reference()
+            .annotate_with_student_registration_id()
+            .annotate_with_status_update_date()
+            .annotate_several_admissions_in_progress()
         )
 
 

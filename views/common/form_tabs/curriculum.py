@@ -47,27 +47,12 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.utils import copy_documents
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
-from base.models.academic_year import AcademicYear
-from base.models.enums.community import CommunityEnum
-from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from osis_profile.forms import (
-    FORM_SET_PREFIX,
-    FOLLOWING_FORM_SET_PREFIX,
-    OSIS_DOCUMENT_UPLOADER_CLASS_PREFIX,
-    OSIS_DOCUMENT_UPLOADER_CLASS,
-)
-from osis_profile.forms.experience_academique import (
-    MINIMUM_CREDIT_NUMBER,
-)
-from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
-from osis_profile.models.enums.curriculum import TranscriptType, EvaluationSystem, Result
+from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
 from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
 from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView
 from osis_profile.views.edit_experience_non_academique import EditExperienceNonAcademiqueView
 from osis_profile.views.parcours_externe_mixins import DeleteEducationalExperienceMixin
-from reference.models.enums.cycle import Cycle
 
 __all__ = [
     'CurriculumEducationalExperienceFormView',
@@ -261,6 +246,7 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
 
     def get_success_url(self):
         return self.next_url or reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
+
 
 class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, DeleteExperienceAcademiqueView):
     urlpatterns = {'educational_delete': 'educational/<uuid:experience_uuid>/delete'}

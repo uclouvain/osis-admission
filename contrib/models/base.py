@@ -27,7 +27,7 @@ import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.postgres.aggregates import StringAgg
+from django.contrib.postgres.aggregates import StringAgg, ArrayAgg
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
@@ -40,7 +40,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
-from osis_document.contrib import FileField
+from osis_history.models import HistoryEntry
 
 from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from admission.contrib.models.form_item import ConfigurableModelFormItemField
@@ -70,6 +70,7 @@ from base.models.enums.entity_type import EntityType
 from base.models.person import Person
 from base.utils.cte import CTESubquery
 from education_group.contrib.models import EducationGroupRoleModel
+from osis_document.contrib import FileField
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from program_management.models.education_group_version import EducationGroupVersion
@@ -129,6 +130,14 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 .order_by('-start_date')
                 .values("acronym")[:1]
             )
+        )
+
+    def annotate_with_student_registration_id(self):
+        return self.annotate(
+            student_registration_id=ArrayAgg(
+                'candidate__student__registration_id',
+                filter=Q(candidate__student__isnull=False),
+            ),
         )
 
     def annotate_training_management_faculty(self):
@@ -216,6 +225,16 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 default=Value(False),
                 output_field=BooleanField(),
             ),
+        )
+
+    def annotate_with_status_update_date(self):
+        return self.annotate(
+            status_updated_at=Subquery(
+                HistoryEntry.objects.filter(
+                    object_uuid=OuterRef('uuid'),
+                    tags__contains=['proposition', 'status-changed'],
+                ).values('created')[:1]
+            )
         )
 
     def filter_according_to_roles(self, demandeur_uuid):
