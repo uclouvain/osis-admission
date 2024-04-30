@@ -66,7 +66,7 @@
         {% with experiences_formations=experiences|filter_experiences_trainings %}
           {% for year, year_experiences in experiences_formations.items %}
             {% for experience in year_experiences %}
-              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=formations_prefix_id %}
+              {% include "osis_profile/ligne_parcours_externe.html" with show_titre_acces=True show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=formations_prefix_id %}
             {% empty %}
               {% ifchanged %}
               <tr class="bg-primary">
@@ -104,7 +104,7 @@
         {% with experiences_financabilite=experiences|filter_experiences_financability %}
           {% for year, year_experiences in experiences_financabilite.items %}
             {% for experience in year_experiences %}
-              {% include "osis_profile/ligne_parcours_externe.html" with show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=financabilite_prefix_id %}
+              {% include "osis_profile/ligne_parcours_externe.html" with show_titre_acces=True show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=financabilite_prefix_id %}
             {% endfor %}
           {% endfor %}
         {% endwith %}
