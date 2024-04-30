@@ -100,12 +100,27 @@
     {% endfor %}
   {% elif view.is_continuing %}
     {% for checklist_tag, checklist_title in checklist_tags %}
-      <div class="comment-viewer"
-           data-url="{{ other_comments_url }}"
-           data-tags="{{ checklist_tag }}"
-           data-header-title="{{ checklist_title }}"
-           data-panel-class="panel panel-info"
-      ></div>
+      {% if checklist_tag == 'decision' %}
+        <div class="comment-viewer"
+             data-url="{{ other_comments_url }}"
+             data-tags="decision,IUFC_for_FAC"
+             data-header-title="{{ checklist_title }} - {% translate 'IUFC comment for the Faculty' %}"
+             data-panel-class="panel panel-info"
+        ></div>
+        <div class="comment-viewer"
+             data-url="{{ other_comments_url }}"
+             data-tags="decision,FAC_for_IUFC"
+             data-header-title="{{ checklist_title }} - {% translate 'Faculty comment for IUFC' %}"
+             data-panel-class="panel panel-info"
+        ></div>
+      {% else %}
+        <div class="comment-viewer"
+             data-url="{{ other_comments_url }}"
+             data-tags="{{ checklist_tag }}"
+             data-header-title="{{ checklist_title }}"
+             data-panel-class="panel panel-info"
+        ></div>
+      {% endif %}
     {% endfor %}
   {% endif %}
   {% csrf_token %}

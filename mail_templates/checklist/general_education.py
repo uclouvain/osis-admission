@@ -26,16 +26,7 @@
 from django.utils.translation import gettext_lazy as _
 from osis_mail_template import Token, templates
 
-from .tokens import GENERAL_ADMISSION_TAG, admission_common_tokens
-
-__all__ = [
-    'ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL',
-    'ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL',
-    'ADMISSION_EMAIL_SIC_REFUSAL',
-    'ADMISSION_EMAIL_SIC_APPROVAL',
-    'ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS',
-    'ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE',
-]
+from admission.mail_templates.tokens import GENERAL_ADMISSION_TAG, admission_common_tokens
 
 
 CHECKLIST_TOKENS = admission_common_tokens + [

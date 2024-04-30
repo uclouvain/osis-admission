@@ -60,8 +60,8 @@ class StatutChecklist(interface.ValueObject):
 
 @attr.dataclass
 class StatutsChecklistContinue:
-    fiche_etudiant: StatutChecklist
     decision: StatutChecklist
+    fiche_etudiant: StatutChecklist
 
     @classmethod
     def from_dict(cls, checklist_en_tant_que_dict: Dict[str, Dict[str, any]]):

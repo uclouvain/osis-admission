@@ -52,6 +52,8 @@ DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
     'data-minimum-input-length': 3,
 }
 
+CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT = 'span(*)[*]{*};ul(*)[*]{*}'
+
 
 class SelectOrOtherWidget(forms.MultiWidget):
     """Form widget to handle a configurable (from CDDConfiguration) list of choices, or other"""

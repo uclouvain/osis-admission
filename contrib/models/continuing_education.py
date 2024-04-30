@@ -40,6 +40,8 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixTypeAdresseFacturation,
     ChoixMoyensDecouverteFormation,
     ChoixEdition,
+    ChoixMotifAttente,
+    ChoixMotifRefus,
 )
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
@@ -246,6 +248,57 @@ class ContinuingEducationAdmission(BaseAdmission):
 
     tff_label = models.TextField(
         verbose_name=_("TFF label"),
+        default='',
+        blank=True,
+    )
+
+    last_email_sent_at = models.DateTimeField(
+        verbose_name=_("Last email sent the"),
+        null=True,
+        blank=True,
+    )
+
+    last_email_sent_by = models.ForeignKey(
+        to="base.Person",
+        verbose_name=_("Last email sent by"),
+        on_delete=models.SET_NULL,
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+
+    on_hold_reason = models.TextField(
+        verbose_name=_("On hold reason"),
+        choices=ChoixMotifAttente.choices(),
+        blank=True,
+    )
+
+    on_hold_reason_other = models.TextField(
+        verbose_name=_("On hold other reason"),
+        default='',
+        blank=True,
+    )
+
+    approval_condition_by_faculty = models.TextField(
+        verbose_name=_("Approval condition by faculty"),
+        default='',
+        blank=True,
+    )
+
+    refusal_reason = models.TextField(
+        verbose_name=_("Refusal reason"),
+        choices=ChoixMotifRefus.choices(),
+        blank=True,
+    )
+
+    refusal_reason_other = models.TextField(
+        verbose_name=_("Refusal reason other"),
+        default='',
+        blank=True,
+    )
+
+    cancel_reason = models.TextField(
+        verbose_name=_("Cancel reason"),
         default='',
         blank=True,
     )
