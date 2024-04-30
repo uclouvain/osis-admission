@@ -69,7 +69,9 @@ from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO, DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+    AlternativeSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
@@ -278,7 +280,7 @@ def access_title_country(selectable_access_titles: Iterable[TitreAccesSelectionn
     return country
 
 
-def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
+def get_training_url(training_type, training_acronym, partial_training_acronym, suffix):
     # Circular import otherwise
     from infrastructure.messages_bus import message_bus_instance
 
@@ -311,7 +313,15 @@ def get_access_conditions_url(training_type, training_acronym, partial_training_
                 )
             )
 
-        return f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
+        return f"https://uclouvain.be/prog-{year}-{sigle}-{suffix}"
+
+
+def get_practical_information_url(training_type, training_acronym, partial_training_acronym):
+    return get_training_url(training_type, training_acronym, partial_training_acronym, 'infos_pratiques')
+
+
+def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
+    return get_training_url(training_type, training_acronym, partial_training_acronym, 'cond_adm')
 
 
 def get_access_titles_names(

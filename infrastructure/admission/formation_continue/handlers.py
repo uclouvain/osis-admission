@@ -40,6 +40,7 @@ from admission.infrastructure.admission.domain.service.elements_confirmation imp
 from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
+from admission.infrastructure.admission.domain.service.historique import Historique
 from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
@@ -66,6 +67,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         formation_translator=FormationContinueTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        historique=Historique(),
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -83,6 +85,7 @@ COMMAND_HANDLERS = {
     SupprimerPropositionCommand: lambda msg_bus, cmd: supprimer_proposition(
         cmd,
         proposition_repository=PropositionRepository(),
+        historique=Historique(),
     ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
@@ -105,6 +108,7 @@ COMMAND_HANDLERS = {
         notification=Notification(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        historique=Historique(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

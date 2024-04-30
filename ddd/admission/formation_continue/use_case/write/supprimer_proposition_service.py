@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_continue.repository.i_proposition import 
 def supprimer_proposition(
     cmd: 'SupprimerPropositionCommand',
     proposition_repository: 'IPropositionRepository',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -45,5 +46,6 @@ def supprimer_proposition(
 
     # THEN
     proposition_repository.save(proposition)
+    historique.historiser_suppression(proposition)
 
     return proposition_id
