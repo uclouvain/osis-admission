@@ -31,10 +31,12 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.general_education import GeneralEducationTrainingFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
+from base.tests.factories.academic_year import AcademicYearFactory
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -46,17 +48,51 @@ class PracticalInformationURLTestCase(QueriesAssertionsMixin, TestCase):
 
         cls.sic_management_user = SicManagementRoleFactory().person.user
 
-        today_date = datetime.date.today()
+        cls.academic_years = AcademicYearFactory.produce(2023, number_past=2, number_future=2)
 
-        cls.academic_calendar = AcademicCalendarFactory(
-            reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
-            data_year__start_date=today_date,
-            data_year__end_date=today_date + timedelta(10),
-            data_year__year=today_date.year,
-        )
+        cls.access_condition_url_academic_calendars = [
+            AcademicCalendarFactory(
+                data_year=academic_year,
+                reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
+                start_date=academic_year.start_date - datetime.timedelta(days=365),
+                end_date=academic_year.end_date - datetime.timedelta(days=365),
+            )
+            for academic_year in cls.academic_years
+        ]
+
+        cls.continuing_academic_calendars = [
+            AcademicCalendarFactory(
+                data_year=academic_year,
+                reference=AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
+            )
+            for academic_year in cls.academic_years
+        ]
 
         # Targeted url
         cls.practical_information_url = 'admission:practical-information-url'
+
+    def test_access_conditions_url_with_a_general_training(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        training = GeneralEducationTrainingFactory()
+
+        response = self.client.get(
+            reverse(
+                self.practical_information_url,
+                kwargs={
+                    'training_type': training.education_group_type.name,
+                    'training_acronym': training.acronym,
+                    'partial_training_acronym': training.partial_acronym,
+                },
+            ),
+        )
+
+        self.assertRedirects(
+            response=response,
+            expected_url=f'https://uclouvain.be/prog-2023-{training.acronym}-infos_pratiques',
+            status_code=302,
+            fetch_redirect_response=False,
+        )
 
     def test_practical_information_url_with_a_continuing_education_admission(self):
         self.client.force_login(user=self.sic_management_user)
@@ -76,7 +112,7 @@ class PracticalInformationURLTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertRedirects(
             response=response,
-            expected_url=f'https://uclouvain.be/prog-2023-{acronym}-infos_pratiques',
+            expected_url=f'https://uclouvain.be/prog-2022-{acronym}-infos_pratiques',
             status_code=302,
             fetch_redirect_response=False,
         )
