@@ -29,6 +29,7 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission import commands
+from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
 
@@ -177,3 +178,70 @@ class RetyperDocumentCommand(interface.CommandRequest):
     identifiant_source: str
     identifiant_cible: str
     auteur: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class MettreEnAttenteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+    motif: str
+    autre_motif: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ApprouverParFacCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+    condition: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+    motif: str
+    autre_motif: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class AnnulerPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+    motif: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ValiderPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CloturerPropositionCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ListerDemandesQuery(SortedQueryRequest):
+    annee_academique: Optional[int] = None
+    edition: Optional[str] = ''
+    numero: Optional[int] = None
+    matricule_candidat: Optional[str] = ''
+    etats: Optional[List[str]] = None
+    facultes: Optional[List[str]] = None
+    types_formation: Optional[List[str]] = None
+    sigles_formations: Optional[List[str]] = None
+    inscription_requise: Optional[bool] = None
+    paye: Optional[bool] = None
+    demandeur: Optional[str] = ''

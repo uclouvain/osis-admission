@@ -80,3 +80,43 @@ class FormationEstFermeeException(BusinessException):
             "acronym": sigle_formation,
         }
         super().__init__(message, **kwargs)
+
+
+class MettreEnAttenteTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-7"
+
+    def __init__(self, **kwargs):
+        message = _('You can not transition to the "Hold on" status from the "Closed" status.')
+        super().__init__(message, **kwargs)
+
+
+class ApprouverParFacTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-8"
+
+    def __init__(self, **kwargs):
+        message = _('You can not transition to the "Approved" status from the "Validated" or "Closed" status.')
+        super().__init__(message, **kwargs)
+
+
+class RefuserPropositionTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-9"
+
+    def __init__(self, **kwargs):
+        message = _('You can not transition to the "Denied" status from the "Validated" or "Closed" status.')
+        super().__init__(message, **kwargs)
+
+
+class AnnulerPropositionTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-10"
+
+    def __init__(self, **kwargs):
+        message = _('You can not transition to the "Canceled" status from the "Closed" status.')
+        super().__init__(message, **kwargs)
+
+
+class ApprouverPropositionTransitionStatutException(BusinessException):
+    status_code = "FORMATION-CONTINUE-11"
+
+    def __init__(self, **kwargs):
+        message = _('You can only transition to the "Validated" status from the "Approved" status.')
+        super().__init__(message, **kwargs)
