@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,33 +24,31 @@
 #
 # ##############################################################################
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.utils.functional import cached_property
-from django.views.generic import ListView
+from typing import List
 
-from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery
-from admission.forms.admission.filter import ContinuingAdmissionsFilterForm
-from admission.views import ListPaginator
-from admission.views.list import BaseAdmissionList
-from osis_common.utils.htmx import HtmxMixin
-
-__all__ = [
-    "ContinuingAdmissionList",
-]
+from admission.ddd.admission.formation_continue.domain.service.i_lister_demandes import IListerDemandesService
+from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
 
 
-class ContinuingAdmissionList(BaseAdmissionList):
-    raise_exception = True
-    template_name = 'admission/continuing_education/list.html'
-    htmx_template_name = 'admission/continuing_education/list_block.html'
-    permission_required = 'admission.view_continuing_enrolment_applications'
-    filtering_query_class = ListerDemandesQuery
-    form_class = ContinuingAdmissionsFilterForm
-    urlpatterns = {'list': 'list'}
-    paginator_class = ListPaginator
-
-    def additional_command_kwargs(self):
-        return {
-            'demandeur': self.request.user.person.uuid,
-        }
+def lister_demandes(
+    cmd: 'ListerDemandesQuery',
+    lister_demandes_service: 'IListerDemandesService',
+) -> 'List[DemandeRechercheDTO]':
+    return lister_demandes_service.lister(
+        annee_academique=cmd.annee_academique,
+        edition=cmd.edition,
+        numero=cmd.numero,
+        matricule_candidat=cmd.matricule_candidat,
+        etats=cmd.etats,
+        facultes=cmd.facultes,
+        types_formation=cmd.types_formation,
+        sigles_formations=cmd.sigles_formations,
+        inscription_requise=cmd.inscription_requise,
+        paye=cmd.paye,
+        demandeur=cmd.demandeur,
+        champ_tri=cmd.champ_tri,
+        tri_inverse=cmd.tri_inverse,
+        page=cmd.page,
+        taille_page=cmd.taille_page,
+    )

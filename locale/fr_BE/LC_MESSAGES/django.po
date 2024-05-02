@@ -640,6 +640,10 @@ msgstr ""
 msgid "All"
 msgstr "Tous"
 
+msgctxt "feminine"
+msgid "All"
+msgstr "Toutes"
+
 msgctxt "filters"
 msgid "All"
 msgstr "Tous"
@@ -2604,6 +2608,9 @@ msgstr "EN"
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr "AUTORISATION D’INSCRIPTION<br>à l’année académique %(academic_year)s"
 
+msgid "EPC status"
+msgstr "Statut EPC"
+
 msgid "EU,NEU"
 msgstr "UE,HUE"
 
@@ -2637,6 +2644,9 @@ msgstr "Email"
 msgctxt "ways_hear_about_training"
 msgid "Email"
 msgstr "Emailing"
+
+msgid "Email address"
+msgstr "Courriel"
 
 msgid "Email content"
 msgstr "Contenu du mail"
@@ -2960,6 +2970,9 @@ msgstr "Accord fac"
 msgctxt "ways_hear_about_training"
 msgid "Facebook"
 msgstr "Sur Facebook"
+
+msgid "Faculty"
+msgstr "Faculté"
 
 msgid "Faculty comment about the collaborative program"
 msgstr "Commentaire facultaire concernant le programme conjoint"
@@ -4047,6 +4060,9 @@ msgstr "Dernière modification"
 msgid "Last modification (author)"
 msgstr "Dernière modif. (auteur)"
 
+msgid "Last name"
+msgstr "Nom"
+
 msgid "Last name / First name / Email"
 msgstr "Nom / Prénom / E-mail"
 
@@ -4735,6 +4751,9 @@ msgstr "Sans objet"
 msgid "NO"
 msgstr "Non"
 
+msgid "NOMA"
+msgstr "NOMA"
+
 msgid "NON_CONCERNE"
 msgstr "Non concerné(e)"
 
@@ -4809,9 +4828,6 @@ msgstr "Aucune étude en français"
 
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
-
-msgid "No continuing enrolment"
-msgstr "Aucune inscription en formation continue n'a été trouvée"
 
 msgid "No defense reason"
 msgstr "Raison de non-soutenance"
@@ -5203,6 +5219,9 @@ msgstr "Page"
 msgid "Page size"
 msgstr "Taille de la page"
 
+msgid "Paid"
+msgstr "Payé"
+
 msgid "Parcours"
 msgstr "Parcours"
 
@@ -5547,6 +5566,9 @@ msgstr "Privé"
 
 msgid "Processing by Fac"
 msgstr "Traitement en Fac"
+
+msgid "Produce xls"
+msgstr "Produire un fichier xls"
 
 msgid "Professional"
 msgstr "Professionnel"
@@ -5915,6 +5937,9 @@ msgstr "Attestation d’immatriculation"
 
 msgid "Registration fees"
 msgstr "Droits d'inscription"
+
+msgid "Registration required"
+msgstr "Inscription au rôle requise"
 
 msgid "Related experience"
 msgstr "Expérience associée"
@@ -6526,6 +6551,9 @@ msgstr "État d’avancement de la formation doctorale"
 
 msgid "Status:"
 msgstr "État :"
+
+msgid "Statut"
+msgstr "Statut"
 
 msgid "Street"
 msgstr "Rue"
@@ -7791,6 +7819,9 @@ msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr "En attente"
 
+msgid "Waiting for development"
+msgstr "En attente de développement"
+
 msgid "Waiting for signature"
 msgstr "En attente de signature"
 
@@ -8359,7 +8390,7 @@ msgid ""
 "Your export request has been planned, you will receive a notification as "
 "soon as it is available."
 msgstr ""
-"Votre demande d’export a été planifié, vous recevrez une notification dès "
+"Votre demande d’export a été planifiée, vous recevrez une notification dès "
 "qu’il sera disponible."
 
 msgid "Your note has been added."
@@ -8493,6 +8524,9 @@ msgstr "UCLouvain"
 
 msgid "use"
 msgstr "utilisation"
+
+msgid "yes,no,"
+msgstr "oui,non,"
 
 msgid "your father"
 msgstr "votre père"
