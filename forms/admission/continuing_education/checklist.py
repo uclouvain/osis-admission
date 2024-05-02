@@ -23,9 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
+
 from django import forms
+from django.conf import settings
+from django.utils.translation import (
+    gettext_lazy as _,
+    get_language,
+    override,
+)
 
 from admission.contrib.models import ContinuingEducationAdmission
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixMotifRefus, ChoixMotifAttente
+from admission.forms import CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT
+from base.models.utils.utils import ChoiceEnum
 
 
 class StudentReportForm(forms.ModelForm):
@@ -60,3 +71,251 @@ class StudentReportForm(forms.ModelForm):
             'certificate_provided': forms.CheckboxInput(),
             'tff_label': forms.TextInput(),
         }
+
+
+class DecisionFacApprovalChoices(ChoiceEnum):
+    AVEC_CONDITION = _('With condition')
+    SANS_CONDITION = _('Without condition')
+
+
+class DecisionFacApprovalForm(forms.Form):
+    accepter_la_demande = forms.ChoiceField(
+        choices=DecisionFacApprovalChoices.choices(),
+        required=True,
+        initial=DecisionFacApprovalChoices.SANS_CONDITION.name,
+        widget=forms.RadioSelect(),
+    )
+
+    condition_acceptation = forms.CharField(
+        label=_('Acceptation condition'),
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 2}),
+    )
+
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(
+            attrs={
+                'data-config': json.dumps(
+                    {
+                        **settings.CKEDITOR_CONFIGS['link_only'],
+                        'extraAllowedContent': CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT,
+                        'language': get_language(),
+                    }
+                )
+            }
+        ),
+    )
+
+    class Media:
+        js = [
+            'js/dependsOn.min.js',
+        ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data[
+            'accepter_la_demande'
+        ] == DecisionFacApprovalChoices.AVEC_CONDITION.name and not cleaned_data.get('condition_acceptation'):
+            self.add_error(
+                'condition_acceptation',
+                forms.ValidationError(
+                    self.fields['condition_acceptation'].error_messages['required'],
+                    code='required',
+                ),
+            )
+        return cleaned_data
+
+
+class DecisionDenyForm(forms.Form):
+    reason = forms.ChoiceField(
+        label=_('Refusal reason'),
+        choices=ChoixMotifRefus.choices(),
+        required=True,
+    )
+
+    other_reason = forms.CharField(
+        label=_('Other refusal reason'),
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 2}),
+    )
+
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(
+            attrs={
+                'data-config': json.dumps(
+                    {
+                        **settings.CKEDITOR_CONFIGS['link_only'],
+                        'extraAllowedContent': CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT,
+                        'language': get_language(),
+                    }
+                )
+            }
+        ),
+    )
+
+    class Media:
+        js = [
+            'js/dependsOn.min.js',
+        ]
+
+    def __init__(self, candidate_language, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        with override(candidate_language):
+            self.translated_reasons = {choice[0]: str(choice[1]) for choice in self.fields['reason'].choices}
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data['reason'] == ChoixMotifRefus.AUTRE.name and not cleaned_data.get('other_reason'):
+            self.add_error(
+                'other_reason',
+                forms.ValidationError(
+                    self.fields['other_reason'].error_messages['required'],
+                    code='required',
+                ),
+            )
+        return cleaned_data
+
+
+class DecisionHoldForm(forms.Form):
+    reason = forms.ChoiceField(
+        label=_('Holding reason'),
+        choices=ChoixMotifAttente.choices(),
+        required=True,
+    )
+
+    other_reason = forms.CharField(
+        label=_('Other holding reason'),
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 2}),
+    )
+
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(
+            attrs={
+                'data-config': json.dumps(
+                    {
+                        **settings.CKEDITOR_CONFIGS['link_only'],
+                        'extraAllowedContent': CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT,
+                        'language': get_language(),
+                    }
+                )
+            }
+        ),
+    )
+
+    class Media:
+        js = [
+            'js/dependsOn.min.js',
+        ]
+
+    def __init__(self, candidate_language, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        with override(candidate_language):
+            self.translated_reasons = {choice[0]: str(choice[1]) for choice in self.fields['reason'].choices}
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data['reason'] == ChoixMotifAttente.AUTRE.name and not cleaned_data.get('other_reason'):
+            self.add_error(
+                'other_reason',
+                forms.ValidationError(
+                    self.fields['other_reason'].error_messages['required'],
+                    code='required',
+                ),
+            )
+        return cleaned_data
+
+
+class DecisionCancelForm(forms.Form):
+    reason = forms.CharField(
+        label=_('Reason for cancellation'),
+        widget=forms.Textarea(attrs={'rows': 2}),
+        required=True,
+    )
+
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(
+            attrs={
+                'data-config': json.dumps(
+                    {
+                        **settings.CKEDITOR_CONFIGS['link_only'],
+                        'extraAllowedContent': CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT,
+                        'language': get_language(),
+                    }
+                )
+            }
+        ),
+    )
+
+    class Media:
+        js = [
+            'js/dependsOn.min.js',
+        ]
+
+
+class DecisionValidationForm(forms.Form):
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(
+            attrs={
+                'data-config': json.dumps(
+                    {
+                        **settings.CKEDITOR_CONFIGS['link_only'],
+                        'extraAllowedContent': CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT,
+                        'language': get_language(),
+                    }
+                )
+            }
+        ),
+    )
+
+
+class CloseForm(forms.Form):
+    pass
+
+
+class SendToFacForm(forms.Form):
+    comment = forms.CharField(
+        label=_('Comment'),
+        widget=forms.Textarea(attrs={'rows': 3}),
+        required=True,
+    )
+
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the faculty'),
+        widget=forms.Textarea(
+            attrs={
+                'data-config': json.dumps(
+                    {
+                        **settings.CKEDITOR_CONFIGS['link_only'],
+                        'extraAllowedContent': CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT,
+                        'language': get_language(),
+                    }
+                )
+            }
+        ),
+    )

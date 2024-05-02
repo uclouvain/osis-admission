@@ -290,6 +290,13 @@ class ContinuingEducationAdmissionTrainingChoiceInitializationApiTestCase(APITes
         )
         self.assertEqual(admission.interested_mark, True)
 
+        history_entry: HistoryEntry = HistoryEntry.objects.filter(
+            object_uuid=admission.uuid,
+            tags__contains=['proposition', 'status-changed'],
+        ).last()
+        self.assertIsNotNone(history_entry)
+        self.assertEqual(history_entry.message_fr, 'La proposition a été initiée.')
+
     def test_training_choice_initialization_using_api_candidate_with_wrong_training(self):
         self.client.force_authenticate(user=self.candidate.user)
         data = {**self.create_data, 'sigle_formation': 'UNKNOWN'}

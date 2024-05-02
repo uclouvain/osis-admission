@@ -52,6 +52,8 @@ DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
     'data-minimum-input-length': 3,
 }
 
+CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT = 'span(*)[*]{*};ul(*)[*]{*}'
+
 
 class SelectOrOtherWidget(forms.MultiWidget):
     """Form widget to handle a configurable (from CDDConfiguration) list of choices, or other"""
@@ -313,3 +315,16 @@ def disable_unavailable_forms(forms_by_access: Dict[forms.Form, bool]):
         if not is_available:
             for field in form.fields:
                 form.fields[field].disabled = True
+
+
+class NullBooleanSelectField(forms.NullBooleanField):
+    def __init__(self, empty_label='', *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.widget = forms.Select(
+            choices=(
+                ('', empty_label),
+                ('true', _('Yes')),
+                ('false', _('No')),
+            )
+        )

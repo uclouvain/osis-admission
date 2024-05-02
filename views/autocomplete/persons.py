@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # ##############################################################################
 from dal import autocomplete
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, Exists, OuterRef
+from django.db.models import Q, Exists, OuterRef, F
 
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.candidate import Candidate
@@ -59,22 +59,23 @@ class CandidatesAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetVi
     def get_queryset(self):
         q = self.request.GET.get('q', '')
 
-        qs = (
-            Person.objects.filter(
-                Q(first_name__icontains=q)
-                | Q(last_name__icontains=q)
-                | Q(email__icontains=q)
-                | Q(student__registration_id__icontains=q)
+        return (
+            Candidate.objects.filter(
+                Q(person__first_name__icontains=q)
+                | Q(person__last_name__icontains=q)
+                | Q(person__email__icontains=q)
+                | Q(person__private_email__icontains=q)
+                | Q(person__student__registration_id__icontains=q)
             )
-            .filter(Exists(Candidate.objects.filter(person=OuterRef('pk'))))  # Has admissions
-            .order_by('last_name', 'first_name')
+            .order_by('person__last_name', 'person__first_name')
             .values(
-                'first_name',
-                'last_name',
-                'global_id',
+                first_name=F('person__first_name'),
+                last_name=F('person__last_name'),
+                global_id=F('person__global_id'),
             )
+            if q
+            else []
         )
-        return qs if q else []
 
 
 class PromotersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):

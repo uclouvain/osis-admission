@@ -283,6 +283,10 @@ fieldset.custom-fieldset > legend {
   white-space: nowrap;
 }
 
+.no-wrap {
+  white-space: nowrap;
+}
+
 .auto-width {
   width: auto;
 }

@@ -494,6 +494,14 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
         admission = ContinuingEducationAdmission.objects.get(pk=admission.pk)
         self.assertEqual(admission.status, ChoixStatutPropositionContinue.ANNULEE.name)
 
+        # Check that an entry has been created in the history
+        history_entry: HistoryEntry = HistoryEntry.objects.filter(
+            object_uuid=admission.uuid,
+            tags__contains=['proposition', 'status-changed'],
+        ).last()
+        self.assertIsNotNone(history_entry)
+        self.assertEqual(history_entry.message_fr, 'La proposition a été annulée.')
+
     def test_delete_proposition_other_candidate_is_forbidden(self):
         self.client.force_authenticate(user=self.other_candidate.user)
         response = self.client.delete(self.url, format="json")

@@ -55,6 +55,9 @@ from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitre
 from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.parcours_doctoral.domain.model.enums import ChoixStatutDoctorat
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
+)
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONFIRMATION_PAPER_INFO_STUDENT,
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
@@ -69,7 +72,9 @@ from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
-    DiplomeBelgeEtudesSecondairesDTO, DiplomeEtrangerEtudesSecondairesDTO, AlternativeSecondairesDTO,
+    DiplomeBelgeEtudesSecondairesDTO,
+    DiplomeEtrangerEtudesSecondairesDTO,
+    AlternativeSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
@@ -278,9 +283,10 @@ def access_title_country(selectable_access_titles: Iterable[TitreAccesSelectionn
     return country
 
 
-def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
+def get_training_url(training_type, training_acronym, partial_training_acronym, suffix):
     # Circular import otherwise
     from infrastructure.messages_bus import message_bus_instance
+    from admission.templatetags.admission import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 
     if training_type == TrainingType.PHD.name:
         return (
@@ -289,11 +295,19 @@ def get_access_conditions_url(training_type, training_acronym, partial_training_
             else "https://uclouvain.be/fr/etudier/inscriptions/conditions-doctorats.html"
         )
     else:
+        admission_context = ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE.get(training_type)
+
+        academic_calendar_type = {
+            CONTEXT_GENERAL: AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL,
+            CONTEXT_CONTINUING: AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT,
+            CONTEXT_DOCTORATE: AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT,
+        }.get(admission_context) or AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL
+
         # Get the last year being published
         today = timezone.now().today()
         year = (
             AcademicCalendar.objects.filter(
-                reference=AcademicCalendarTypes.ADMISSION_ACCESS_CONDITIONS_URL.name,
+                reference=academic_calendar_type.name,
                 start_date__lte=today,
             )
             .order_by('-start_date')
@@ -311,7 +325,15 @@ def get_access_conditions_url(training_type, training_acronym, partial_training_
                 )
             )
 
-        return f"https://uclouvain.be/prog-{year}-{sigle}-cond_adm"
+        return f"https://uclouvain.be/prog-{year}-{sigle}-{suffix}"
+
+
+def get_practical_information_url(training_type, training_acronym, partial_training_acronym):
+    return get_training_url(training_type, training_acronym, partial_training_acronym, 'infos_pratiques')
+
+
+def get_access_conditions_url(training_type, training_acronym, partial_training_acronym):
+    return get_training_url(training_type, training_acronym, partial_training_acronym, 'cond_adm')
 
 
 def get_access_titles_names(

@@ -25,11 +25,21 @@
 # ##############################################################################
 from typing import List, Dict
 
-from dal_select2.views import Select2ListView
+from dal_select2.views import Select2ListView, Select2QuerySetView
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q, F, Value, Case, When
+from django.db.models.functions import Coalesce, Concat
+from django.utils.functional import cached_property
+from django.utils.translation import get_language
 
 from admission.ddd.admission.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.shared_kernel.role.commands import RechercherFormationsGereesQuery
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
+from base.models.education_group_year import EducationGroupYear
+from education_group.contrib.models import EducationGroupRoleModel
 from infrastructure.messages_bus import message_bus_instance
 
 __namespace__ = False
@@ -37,7 +47,12 @@ __namespace__ = False
 
 __all__ = [
     'ManagedEducationTrainingsAutocomplete',
+    'ContinuingManagedEducationTrainingsAutocomplete',
 ]
+
+from osis_role.contrib.models import EntityRoleModel
+
+from osis_role.contrib.permissions import _get_relevant_roles
 
 
 class ManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView):
@@ -75,3 +90,57 @@ class ManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView)
             )
 
         return formatted_results
+
+
+class ContinuingManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select2QuerySetView):
+    urlpatterns = 'continuing-managed-education-trainings'
+    model_field_name = 'formatted_title'
+
+    @classmethod
+    def get_base_queryset(cls, user, acronyms=None):
+        # Filter on the type of training (continuing education)
+        qs = EducationGroupYear.objects.filter(
+            education_group_type__name__in=AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES,
+        )
+
+        if acronyms:
+            qs = qs.filter(acronym__in=acronyms)
+
+        # Filter on the permissions of the user
+        relevant_roles = _get_relevant_roles(user, 'admission.view_continuing_enrolment_applications')
+        role_conditions = Q()
+        for role in relevant_roles:
+            if issubclass(role, EntityRoleModel):
+                role_conditions |= Q(
+                    management_entity_id__in=role.objects.filter(person=user.person).get_entities_ids()
+                )
+            elif issubclass(role, EducationGroupRoleModel):
+                role_conditions |= Q(
+                    education_group_id__in=role.objects.filter(person=user.person).get_education_groups_affected()
+                )
+        qs = (
+            qs.filter(role_conditions)
+            .distinct('acronym')
+            .annotate(
+                formatted_title=Concat(
+                    F('acronym'),
+                    Value(' - '),
+                    F('title')
+                    if get_language() == settings.LANGUAGE_CODE_FR
+                    else Case(When(title_english='', then=F('title')), default=F('title_english')),
+                ),
+            )
+            .only('acronym')
+            .order_by('acronym')
+        )
+        return qs
+
+    @cached_property
+    def queryset(self):
+        return self.get_base_queryset(user=self.request.user)
+
+    def get_result_label(self, result):
+        return result.formatted_title
+
+    def get_result_value(self, result):
+        return result.acronym

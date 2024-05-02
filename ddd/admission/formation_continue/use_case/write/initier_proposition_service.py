@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 ##############################################################################
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.formation_continue.commands import InitierPropositionCommand
 from admission.ddd.admission.formation_continue.domain.builder.proposition_builder import PropositionBuilder
@@ -37,6 +38,7 @@ def initier_proposition(
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationContinueTranslator',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
     # GIVEN
     formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
@@ -52,5 +54,6 @@ def initier_proposition(
 
     # THEN
     proposition_repository.save(proposition)
+    historique.historiser_initiation(proposition)
 
     return proposition.entity_id
