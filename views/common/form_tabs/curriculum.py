@@ -135,15 +135,17 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
             },
         )
 
+    def delete_url(self):
+        return resolve_url(
+            f'{self.base_namespace}:update:curriculum:educational_delete',
+            uuid=self.proposition.uuid,
+            experience_uuid=self.experience_id,
+        )
+
     def get_context_data(self, **kwargs):
         return {
             **super().get_context_data(**kwargs),
             'prevent_quitting_template': 'admission/includes/prevent_quitting_button.html',
-            'delete_url': resolve_url(
-                f'{self.base_namespace}:update:curriculum:educational_delete',
-                uuid=self.proposition.uuid,
-                experience_uuid=self.experience_id,
-            )
         }
 
 
@@ -193,15 +195,17 @@ class CurriculumNonEducationalExperienceFormView(
             },
         )
 
+    def delete_url(self):
+        return resolve_url(
+            f'{self.base_namespace}:update:curriculum:non_educational_delete',
+            uuid=self.proposition.uuid,
+            experience_uuid=self.experience_id,
+        )
+
     def get_context_data(self, **kwargs):
         return {
             **super().get_context_data(**kwargs),
             'prevent_quitting_template': 'admission/includes/prevent_quitting_button.html',
-            'delete_url': resolve_url(
-                f'{self.base_namespace}:update:curriculum:non_educational_delete',
-                uuid=self.proposition.uuid,
-                experience_uuid=self.experience_id,
-            )
         }
 
 
