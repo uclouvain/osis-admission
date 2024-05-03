@@ -33,6 +33,7 @@ from django.utils import translation
 from admission.tests.factories.continuing_education import ContinuingEducationTrainingFactory
 from admission.tests.factories.general_education import GeneralEducationTrainingFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory, CentralManagerRoleFactory
+from base.models.enums.state_iufc import StateIUFC
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.user import UserFactory
@@ -250,6 +251,8 @@ class ContinuingManagedEducationTrainingsAutocompleteTestCase(TestCase):
                     'id': training.acronym,
                     'selected_text': f'{training.acronym} - {training.title}',
                     'text': f'{training.acronym} - {training.title}',
+                    'state': StateIUFC.OPEN.name,
+                    'registration_required': True,
                 }
             ],
         )
@@ -284,6 +287,8 @@ class ContinuingManagedEducationTrainingsAutocompleteTestCase(TestCase):
                     'id': training.acronym,
                     'selected_text': f'{training.acronym} - {training.title_english}',
                     'text': f'{training.acronym} - {training.title_english}',
+                    'state': StateIUFC.OPEN.name,
+                    'registration_required': True,
                 }
             ],
         )
@@ -307,6 +312,8 @@ class ContinuingManagedEducationTrainingsAutocompleteTestCase(TestCase):
                     'id': training.acronym,
                     'selected_text': f'{training.acronym} - {training.title}',
                     'text': f'{training.acronym} - {training.title}',
+                    'state': StateIUFC.OPEN.name,
+                    'registration_required': True,
                 }
             ],
         )

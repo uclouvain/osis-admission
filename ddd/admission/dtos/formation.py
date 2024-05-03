@@ -49,7 +49,11 @@ class FormationDTO(interface.DTO):
     credits: Optional[int]
 
     def __str__(self):
-        return f'{self.sigle} - {self.intitule} ({self.campus})'
+        return f'{self.sigle} - {self.intitule or self.intitule_fr} ({self.campus})'
+
+    @property
+    def nom_complet(self):
+        return f'{self.sigle} - {self.intitule or self.intitule_fr}'
 
 
 @attr.dataclass(frozen=True, slots=True)
