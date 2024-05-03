@@ -370,6 +370,7 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
             .annotate_with_student_registration_id()
             .annotate_with_status_update_date()
             .annotate_several_admissions_in_progress()
+            .annotate_submitted_profile_countries_names()
         )
 
 

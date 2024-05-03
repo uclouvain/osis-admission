@@ -34,9 +34,11 @@ from admission.auth.roles.candidate import Candidate
 from admission.contrib.models import ContinuingEducationAdmissionProxy
 from admission.contrib.models.continuing_education import ContinuingEducationAdmission
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -98,9 +100,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         try:
             return cls._load(
-                ContinuingEducationAdmissionProxy.objects.select_related('billing_address_country').get(
-                    uuid=entity_id.uuid
-                )
+                ContinuingEducationAdmissionProxy.objects.select_related(
+                    'billing_address_country',
+                    'last_update_author',
+                ).get(uuid=entity_id.uuid)
             )
         except ContinuingEducationAdmission.DoesNotExist:
             raise PropositionNonTrouveeException
@@ -209,6 +212,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     and attrs.asdict(entity.checklist_actuelle, value_serializer=cls._serialize)
                     or {},
                 },
+                'submitted_profile': entity.profil_soumis_candidat.to_dict() if entity.profil_soumis_candidat else {},
                 'interested_mark': entity.marque_d_interet,
                 'edition': entity.edition.name if entity.edition else '',
                 'in_payement_order': entity.en_ordre_de_paiement,
@@ -261,7 +265,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle=admission.training.acronym,
                 annee=admission.training.academic_year.year,
             ),
-            auteur_derniere_modification=admission.last_update_author,
+            profil_soumis_candidat=ProfilCandidat.from_dict(admission.submitted_profile),
+            auteur_derniere_modification=admission.last_update_author.global_id if admission.last_update_author else '',
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             pot_calcule=admission.determined_pool and AcademicCalendarTypes[admission.determined_pool],
             reponses_questions_specifiques=admission.specific_question_answers,
@@ -353,6 +358,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             erreurs=admission.detailed_status or [],
             date_fin_pot=admission.pool_end_date,  # from annotation
             candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
+            profil_soumis_candidat=ProfilCandidatDTO.from_dict(
+                dict_profile=admission.submitted_profile,
+                nom_pays_nationalite=admission.submitted_profile_country_of_citizenship_name,  # from annotation
+                nom_pays_adresse=admission.submitted_profile_country_name,  # from annotation
+            ),
             formation=FormationDTO(
                 sigle=admission.training.acronym,
                 code=admission.training.partial_acronym,
@@ -415,9 +425,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             else '',
             pays_nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
-            noma_candidat=admission.student_registration_id[0]
-            if admission.student_registration_id
-            else '',  # from annotation
+            noma_candidat=admission.student_registration_id or '',  # from annotation
             adresse_email_candidat=admission.candidate.private_email,
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,

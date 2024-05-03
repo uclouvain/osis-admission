@@ -40,7 +40,11 @@ from admission.forms.admission.coordonnees import AdmissionAddressForm, Admissio
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
+from admission.tests.factories.roles import (
+    CentralManagerRoleFactory,
+    SicManagementRoleFactory,
+    ProgramManagerRoleFactory,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -82,6 +86,10 @@ class CoordonneesFormTestCase(TestCase):
             uuid=cls.general_admission.uuid,
         )
 
+        cls.general_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.general_admission.training.education_group,
+        ).person.user
+
         cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
@@ -94,6 +102,10 @@ class CoordonneesFormTestCase(TestCase):
             'admission:continuing-education:update:coordonnees',
             uuid=cls.continuing_admission.uuid,
         )
+
+        cls.continuing_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.continuing_admission.training.education_group,
+        ).person.user
 
         cls.doctorate_admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training__management_entity=first_doctoral_commission,
@@ -324,6 +336,16 @@ class CoordonneesFormTestCase(TestCase):
                 'street_number': '123',
             },
         )
+
+    def test_general_coordinates_form_on_get_program_manager(self):
+        self.client.force_login(user=self.general_manager_user)
+        response = self.client.get(self.general_url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_general_coordinates_form_on_post_program_manager(self):
+        self.client.force_login(user=self.general_manager_user)
+        response = self.client.post(self.general_url, data={})
+        self.assertEqual(response.status_code, 403)
 
     def test_general_coordinates_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -671,6 +693,12 @@ class CoordonneesFormTestCase(TestCase):
 
     def test_continuing_coordinates_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(self.continuing_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_continuing_coordinates_form_on_get_program_manager(self):
+        self.client.force_login(user=self.continuing_manager_user)
 
         response = self.client.get(self.continuing_url)
         self.assertEqual(response.status_code, 200)

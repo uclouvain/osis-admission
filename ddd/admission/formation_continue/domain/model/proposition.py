@@ -31,6 +31,7 @@ import attr
 from django.utils.timezone import now
 from django.utils.translation import gettext_noop as __
 
+from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -107,6 +108,8 @@ class Proposition(interface.RootEntity):
     checklist_initiale: Optional[StatutsChecklistContinue] = None
     checklist_actuelle: Optional[StatutsChecklistContinue] = None
 
+    profil_soumis_candidat: Optional[ProfilCandidat] = None
+
     marque_d_interet: Optional[bool] = None
     edition: Optional[ChoixEdition] = None
     en_ordre_de_paiement: Optional[bool] = None
@@ -157,6 +160,7 @@ class Proposition(interface.RootEntity):
         formation_id: FormationIdentity,
         pool: 'AcademicCalendarTypes',
         elements_confirmation: Dict[str, str],
+        profil_candidat_soumis: ProfilCandidat,
     ):
         self.statut = ChoixStatutPropositionContinue.CONFIRMEE
         self.annee_calculee = formation_id.annee
@@ -165,6 +169,7 @@ class Proposition(interface.RootEntity):
         self.elements_confirmation = elements_confirmation
         self.soumise_le = now()
         self.auteur_derniere_modification = self.matricule_candidat
+        self.profil_soumis_candidat = profil_candidat_soumis
 
     def completer_curriculum(
         self,
