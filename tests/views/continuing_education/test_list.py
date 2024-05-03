@@ -24,8 +24,7 @@
 #
 # ##############################################################################
 import datetime
-import uuid
-from typing import List, Union
+from typing import List
 
 import freezegun
 from django.contrib.auth.models import User
@@ -33,24 +32,10 @@ from django.core.cache import cache
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.contrib.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.contrib.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    PoursuiteDeCycle,
-    ChoixStatutChecklist,
-    DecisionFacultaireEnum,
-    BesoinDeDerogation,
-    OngletsChecklist,
-)
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.infrastructure.admission.formation_continue.domain.service.lister_demandes import ListerDemandesService
-from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
     ProgramManagerRoleFactory,
@@ -68,15 +53,13 @@ from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
 from education_group.auth.scope import Scope
-from program_management.models.education_group_version import EducationGroupVersion
-from reference.tests.factories.country import CountryFactory
 
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES = 21
+    NB_MAX_QUERIES = 22
 
     @classmethod
     def setUpTestData(cls):
@@ -173,10 +156,10 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         cls.admissions[1].training.specificiufcinformations.registration_required = False
         cls.admissions[1].training.specificiufcinformations.save(update_fields=['registration_required'])
 
-        cls.student = StudentFactory(
-            person=cls.admissions[0].candidate,
-            registration_id='01234567',
-        )
+        cls.students = [
+            StudentFactory(person=admission.candidate, registration_id=f'0123456{index}')
+            for index, admission in enumerate(cls.admissions)
+        ]
 
         cls.academic_calendar_2023 = AcademicCalendarFactory(
             reference=AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT.name,
@@ -361,7 +344,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(object_list[0].numero_demande, current_admission.formatted_reference)
         self.assertEqual(object_list[0].nom_candidat, current_admission.candidate.last_name)
         self.assertEqual(object_list[0].prenom_candidat, current_admission.candidate.first_name)
-        self.assertEqual(object_list[0].noma_candidat, current_admission.candidate.last_registration_id)
+        self.assertEqual(object_list[0].noma_candidat, self.students[0].registration_id)
         self.assertEqual(object_list[0].courriel_candidat, current_admission.candidate.email)
         self.assertEqual(object_list[0].sigle_formation, current_admission.training.acronym)
         self.assertEqual(object_list[0].code_formation, current_admission.training.partial_acronym)

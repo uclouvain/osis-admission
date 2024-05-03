@@ -83,6 +83,7 @@ class ListerDemandesService(IListerDemandesService):
                 'training__academic_year',
                 'training__specificiufcinformations',
             )
+            .prefetch_related('candidate__student_set')
         )
 
         # Filter the queryset
@@ -191,7 +192,9 @@ class ListerDemandesService(IListerDemandesService):
             numero_demande=admission.formatted_reference,  # From annotation
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
-            noma_candidat=admission.candidate.last_registration_id,
+            noma_candidat=admission.candidate.student_set.first().registration_id
+            if admission.candidate.student_set.exists()
+            else '',
             courriel_candidat=admission.candidate.email,
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
