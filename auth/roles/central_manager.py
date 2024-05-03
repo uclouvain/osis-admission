@@ -34,7 +34,7 @@ from admission.auth.predicates.common import (
     is_debug,
     is_entity_manager,
 )
-from admission.auth.predicates import general, continuing
+from admission.auth.predicates import general, continuing, doctorate
 from education_group.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
 
@@ -70,9 +70,11 @@ class CentralManager(EntityRoleModel):
             'admission.view_doctorateadmission': is_entity_manager,
             'admission.appose_sic_notice': is_entity_manager,
             'admission.view_admission_person': is_entity_manager,
-            'admission.change_admission_person': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_person': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.is_doctorate),
             'admission.view_admission_coordinates': is_entity_manager,
-            'admission.change_admission_coordinates': is_entity_manager & general.in_sic_status,
+            'admission.change_admission_coordinates': is_entity_manager
+            & (general.in_sic_status | continuing.in_manager_status | doctorate.is_doctorate),
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager & general.in_sic_status,
             'admission.view_admission_languages': is_entity_manager,
