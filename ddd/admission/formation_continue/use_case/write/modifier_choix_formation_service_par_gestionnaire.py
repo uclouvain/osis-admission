@@ -25,7 +25,7 @@
 # ##############################################################################
 
 from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
-from admission.ddd.admission.formation_continue.commands import ModifierChoixFormationCommand
+from admission.ddd.admission.formation_continue.commands import ModifierChoixFormationParGestionnaireCommand
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -34,8 +34,8 @@ from admission.ddd.admission.formation_continue.domain.service.i_formation impor
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 
 
-def modifier_choix_formation(
-    cmd: 'ModifierChoixFormationCommand',
+def modifier_choix_formation_par_gestionnaire(
+    cmd: 'ModifierChoixFormationParGestionnaireCommand',
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationContinueTranslator',
 ) -> 'PropositionIdentity':
@@ -45,12 +45,13 @@ def modifier_choix_formation(
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
 
     # WHEN
-    proposition.modifier_choix_formation_par_candidat(
+    proposition.modifier_choix_formation_par_gestionnaire(
         formation_id=formation.entity_id,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
         motivations=cmd.motivations,
         moyens_decouverte_formation=cmd.moyens_decouverte_formation,
         marque_d_interet=cmd.marque_d_interet,
+        gestionnaire=cmd.gestionnaire,
     )
 
     # THEN

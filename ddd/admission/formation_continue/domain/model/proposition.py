@@ -134,13 +134,14 @@ class Proposition(interface.RootEntity):
     motif_de_refus_autre: Optional[str] = ''
     motif_d_annulation: Optional[str] = ''
 
-    def modifier_choix_formation(
+    def _modifier_choix_formation(
         self,
         formation_id: FormationIdentity,
         reponses_questions_specifiques: Dict,
         motivations: str,
         moyens_decouverte_formation: List[str],
         marque_d_interet: Optional[bool],
+        auteur: str,
     ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -149,7 +150,43 @@ class Proposition(interface.RootEntity):
             ChoixMoyensDecouverteFormation[moyen] for moyen in moyens_decouverte_formation
         ]
         self.marque_d_interet = marque_d_interet
-        self.auteur_derniere_modification = self.matricule_candidat
+        self.auteur_derniere_modification = auteur
+
+    def modifier_choix_formation_par_candidat(
+        self,
+        formation_id: FormationIdentity,
+        reponses_questions_specifiques: Dict,
+        motivations: str,
+        moyens_decouverte_formation: List[str],
+        marque_d_interet: Optional[bool],
+    ):
+        self._modifier_choix_formation(
+            formation_id=formation_id,
+            reponses_questions_specifiques=reponses_questions_specifiques,
+            motivations=motivations,
+            moyens_decouverte_formation=moyens_decouverte_formation,
+            marque_d_interet=marque_d_interet,
+            auteur=self.matricule_candidat,
+        )
+
+    def modifier_choix_formation_par_gestionnaire(
+        self,
+        formation_id: FormationIdentity,
+        reponses_questions_specifiques: Dict,
+        motivations: str,
+        moyens_decouverte_formation: List[str],
+        marque_d_interet: Optional[bool],
+        gestionnaire: str,
+    ):
+        self._modifier_choix_formation(
+            formation_id=formation_id,
+            reponses_questions_specifiques=reponses_questions_specifiques,
+            motivations=motivations,
+            moyens_decouverte_formation=moyens_decouverte_formation,
+            marque_d_interet=marque_d_interet,
+            auteur=gestionnaire,
+        )
+        self.annee_calculee = formation_id.annee
 
     def supprimer(self):
         self.statut = ChoixStatutPropositionContinue.ANNULEE

@@ -39,6 +39,12 @@ class RechercherFormationContinueQuery(interface.QueryRequest):
     campus: Optional[str] = ''
 
 
+@attr.dataclass(frozen=True, slots=True, auto_attribs=True)
+class RecupererFormationContinueQuery(interface.QueryRequest):
+    sigle: str
+    annee: int
+
+
 @attr.dataclass(frozen=True, slots=True)
 class InitierPropositionCommand(interface.CommandRequest):
     sigle_formation: str
@@ -245,3 +251,15 @@ class ListerDemandesQuery(SortedQueryRequest):
     inscription_requise: Optional[bool] = None
     paye: Optional[bool] = None
     demandeur: Optional[str] = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierChoixFormationParGestionnaireCommand:
+    uuid_proposition: str
+    gestionnaire: str
+    sigle_formation: str
+    annee_formation: int
+    reponses_questions_specifiques: Dict
+    motivations: str
+    moyens_decouverte_formation: List[str]
+    marque_d_interet: Optional[bool]

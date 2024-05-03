@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load bootstrap3 i18n static admission waffle_tags %}
+{% load bootstrap3 i18n static admission waffle_tags enums %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@
   {% panel _('Choose your course') %}
     {% field_data _('Course name') admission.formation.intitule %}
     {% field_data _('Campus') admission.formation.campus %}
+    {% if view.is_continuing %}
+      {% field_data _('Academic year') admission.annee_demande|get_academic_year %}
+    {% endif %}
     {% switch 'debug' %}
       {% field_data _('Academic year') admission.formation.annee|get_academic_year css_class='debug-content' %}
     {% endswitch %}
@@ -47,6 +50,19 @@
         {% field_data _('Erasmus Mundus') admission.bourse_erasmus_mundus.nom_long|default:short_name %}
       {% endwith %}
     {% endpanel %}
+  {% endif %}
+
+  {% if view.is_continuing %}
+    {% if admission.etat_formation == 'CLOSED' %}
+      {% field_data _('I am interested in this course even if it is closed') admission.marque_d_interet %}
+    {% endif %}
+
+    {% field_data _('Motivations') admission.motivations %}
+
+    {% if admission.inscription_au_role_obligatoire == True %}
+      {% field_data _('How did you hear about this course?') admission.moyens_decouverte_formation|multiple_enum_display:'ChoixMoyensDecouverteFormation' %}
+    {% endif %}
+
   {% endif %}
 
   {% multiple_field_data specific_questions %}

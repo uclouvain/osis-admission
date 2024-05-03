@@ -7202,6 +7202,9 @@ msgstr "Les documents réclamés immédiatement ne sont pas complétés."
 msgid "The resulting calculated academic year or pool is not consistent."
 msgstr "L'année académique et le pot déterminés ne concordent pas."
 
+msgid "The selected training has not been found for this year."
+msgstr "La formation sélectionnée n'a pas été trouvée pour cette année."
+
 #, python-format
 msgid "The selection type must be one of the following values: %(values)s."
 msgstr ""
@@ -7400,6 +7403,14 @@ msgid ""
 msgstr ""
 "Ce choix définira la langue de communication tout au long de votre parcours "
 "d'admission."
+
+msgid ""
+"This course is closed. The candidate can express its interest by ticking the "
+"box below or by contacting a course administrator."
+msgstr ""
+"Cette formation est fermée. Le candidat peut marquer son intérêt pour celle-"
+"ci en cochant la case ci-dessous ou en contactant un·e gestionnaire de la "
+"formation."
 
 msgid ""
 "This document does not represent a commitment of financial support from "
@@ -8021,6 +8032,9 @@ msgstr "Années"
 
 msgid "Yes"
 msgstr "Oui"
+
+msgid "Yes, I am interested in this course"
+msgstr "Oui, je marque mon intérêt pour cette formation"
 
 msgid "Yes, an account number in IBAN format"
 msgstr "Oui, un numéro de compte au format IBAN"
