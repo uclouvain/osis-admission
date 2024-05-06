@@ -1,26 +1,26 @@
 # ##############################################################################
 #
-#  OSIS stands for Open Student Information System. It's an application
-#  designed to manage the core business of higher education institutions,
-#  such as universities, faculties, institutes and professional schools.
-#  The core business involves the administration of students, teachers,
-#  courses, programs and so on.
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
 #
-#  A copy of this license - GNU General Public License - is available
-#  at the root of the source code of this program.  If not,
-#  see http://www.gnu.org/licenses/.
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
 
@@ -48,7 +48,7 @@ from django.db.models import (
 from django.db.models.functions import ExtractYear, ExtractMonth, Concat
 from django.utils.translation import get_language
 
-from admission.contrib.models.base import BaseAdmission
+from admission.contrib.models import EPCInjection
 from admission.contrib.models.functions import ArrayLength
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from admission.ddd import NB_MOIS_MIN_VAE
@@ -89,6 +89,7 @@ from osis_profile.models import (
 from osis_profile.models.education import LanguageKnowledge
 
 
+# TODO: a mettre dans infra/shared_kernel/profil
 class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def has_default_language(cls) -> bool:
@@ -226,6 +227,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         foreign_high_school_diploma = getattr(candidate, 'foreignhighschooldiploma', None)
         high_school_diploma_alternative = getattr(candidate, 'highschooldiplomaalternative', None)
 
+        potential_diploma = belgian_high_school_diploma or foreign_high_school_diploma
         return EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=candidate.graduated_from_high_school,
             valorisees=valuated_secondary_studies,
@@ -279,6 +281,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             )
             if high_school_diploma_alternative
             else None,
+            identifiant_externe=potential_diploma.external_id if potential_diploma else None,
+            injectee=(
+                EPCInjection.objects.filter(admission__candidate_id=candidate.id).exists()
+                if valuated_secondary_studies
+                else False
+            )
         )
 
     @classmethod
@@ -298,6 +306,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 autre_activite=experience.activity,
                 uuid=experience.uuid,
                 valorisee_par_admissions=getattr(experience, 'valuated_from_admissions', None),
+                injectee=(
+                    EPCInjection.objects.filter(
+                        admission__uuid__in=getattr(experience, 'valuated_from_admissions', [])
+                    ).exists()
+                ),
                 identifiant_externe=experience.external_id,
             )
             for experience in experiences_non_academiques
@@ -447,6 +460,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     systeme_evaluation=experience_year.educational_experience.evaluation_type,
                     type_enseignement=experience_year.educational_experience.study_system,
                     valorisee_par_admissions=getattr(experience_year, 'valuated_from_admissions', None),
+                    injectee=(
+                        EPCInjection.objects.filter(
+                            admission__uuid__in=getattr(experience_year, 'valuated_from_admissions', [])
+                        ).exists()
+                    ),
                     identifiant_externe=experience_year.educational_experience.external_id,
                     **institute,
                     **linguistic_regime,
